@@ -1,0 +1,12 @@
+{
+  "name": "Kanji 5",
+  "short_name": "Kanji 5",
+  "description": "۵ کانجی مهم ژاپنی در روز با FSRS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f7",
+  "theme_color": "#111827",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

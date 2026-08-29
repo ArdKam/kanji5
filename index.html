@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="۵ کانجی مهم ژاپنی در روز با مرور فاصله‌دار تطبیقی FSRS" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>Kanji 5 — پنج کانجی در روز</title>
+  <style>
+    :root{
+      --bg:#f4f5f7; --panel:#ffffff; --ink:#111827; --muted:#6b7280;
+      --line:#e5e7eb; --accent:#111827; --accent2:#eef2ff;
+      --good:#166534; --bad:#991b1b; --warn:#92400e;
+      --shadow:0 12px 35px rgba(0,0,0,.08); --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button{font:inherit}
+    .wrap{max-width:980px;margin:0 auto;padding:22px}
+    header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:20px}
+    .brand h1{font-size:27px;margin:0 0 4px;font-weight:850}
+    .brand p{margin:0;color:var(--muted)}
+    .iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 12px;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+    .stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+    .stat .n{font-size:28px;font-weight:800}
+    .stat .l{color:var(--muted);font-size:13px;margin-top:4px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+    #loading{min-height:420px;display:flex;align-items:center;justify-content:center;text-align:center}
+    .spinner{width:30px;height:30px;border:3px solid #e5e7eb;border-top-color:#111827;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .kanji{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:150px;line-height:1;text-align:center;margin:4px 0 14px}
+    .hint{text-align:center;color:var(--muted);margin-bottom:22px}
+    .reveal{width:100%;border:0;background:var(--accent);color:#fff;padding:14px 18px;border-radius:15px;cursor:pointer;font-weight:800}
+    .answer{display:none}
+    .answer.show{display:block}
+    .answerbox{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}
+    .meaning{font-size:21px;font-weight:750;text-align:center}
+    .readings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    .readbox{background:#f9fafb;border:1px solid var(--line);border-radius:16px;padding:12px}
+    .readbox .t{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .readbox .v{font-size:19px;direction:ltr;text-align:center}
+    .examples{margin-top:14px}
+    .examples h3{font-size:14px;color:var(--muted);margin:0 0 8px}
+    .examples .words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+    .word{background:#f9fafb;border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+    .word span{direction:ltr;display:inline-block}
+    .meta{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}
+    .chip{background:#f3f4f6;border-radius:999px;padding:6px 10px;font-size:12px;color:#4b5563}
+    .ratings{display:none;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:20px}
+    .ratings.show{display:grid}
+    .rate{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 8px;cursor:pointer;font-weight:800}
+    .rate small{display:block;color:var(--muted);font-weight:600;margin-top:3px;direction:ltr}
+    .rate.again{border-color:#fecaca}.rate.hard{border-color:#fde68a}.rate.good{border-color:#bbf7d0}.rate.easy{border-color:#bfdbfe}
+    .progress{height:8px;background:#eef0f2;border-radius:99px;overflow:hidden;margin:0 0 16px}
+    .progress > div{height:100%;background:#111827;border-radius:99px;transition:width .25s}
+    .empty{padding:55px 20px;text-align:center}
+    .empty h2{margin:0 0 8px}
+    .empty p{color:var(--muted);margin:0 0 18px}
+    .primary{border:0;background:#111827;color:#fff;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:800}
+    .secondary{border:1px solid var(--line);background:#fff;color:#111827;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:750}
+    .footer{margin:14px 3px 0;color:#8a8f98;font-size:11px;line-height:1.6}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;z-index:20}
+    .toast.show{opacity:1}
+    dialog{border:0;border-radius:22px;padding:0;width:min(560px,calc(100% - 28px));box-shadow:0 30px 90px rgba(0,0,0,.25)}
+    dialog::backdrop{background:rgba(0,0,0,.45)}
+    .modal{padding:22px}
+    .modal h2{margin-top:0}
+    .setting{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);padding:13px 14px;border-radius:15px;margin:9px 0}
+    input[type=number]{width:85px;border:1px solid var(--line);border-radius:10px;padding:8px}
+    @media (max-width:700px){
+      .wrap{padding:14px}
+      .grid{grid-template-columns:repeat(3,1fr);gap:8px}
+      .stat{padding:12px}.stat .n{font-size:22px}.stat .l{font-size:11px}
+      .panel{padding:18px}
+      .kanji{font-size:115px}
+      .readings{grid-template-columns:1fr}
+      .ratings{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>Kanji 5</h1>
+        <p>هر روز فقط ۵ کانجی؛ مرورها را الگوریتم تنظیم می‌کند.</p>
+      </div>
+      <button class="iconbtn" id="settingsBtn" aria-label="تنظیمات">⚙️</button>
+    </header>
+
+    <section id="loading" class="panel">
+      <div>
+        <div class="spinner"></div>
+        <div>در حال آماده‌سازی ۲۰۰۰ کانجی...</div>
+        <div id="loadStatus" style="color:#6b7280;font-size:13px;margin-top:7px">دریافت دادهٔ Jōyō و رتبهٔ فراوانی</div>
+      </div>
+    </section>
+
+    <main id="app" hidden>
+      <div class="grid">
+        <div class="stat"><div class="n" id="dueCount">0</div><div class="l">مرورهای امروز</div></div>
+        <div class="stat"><div class="n" id="newCount">0</div><div class="l">کانجی جدید امروز</div></div>
+        <div class="stat"><div class="n" id="masteredCount">0</div><div class="l">یادگرفته‌شده</div></div>
+      </div>
+      <div class="progress"><div id="bar" style="width:0%"></div></div>
+
+      <section class="panel" id="studyPanel">
+        <div id="study"></div>
+      </section>
+      <div class="footer">
+        دادهٔ کانجی: Jōyō 2136 بر پایهٔ KANJIDIC2؛ این نسخه ۲۰۰۰ مورد اول را بر اساس رتبهٔ newspaper frequency انتخاب می‌کند.
+        مرور فاصله‌دار: FSRS. اطلاعات یادگیری شما در همین مرورگر ذخیره می‌شود.
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <dialog id="settingsDialog">
+    <div class="modal">
+      <h2>تنظیمات</h2>
+      <div class="setting"><span>کانجی جدید در روز</span><input id="dailyNew" type="number" min="1" max="30" step="1"></div>
+      <div class="setting"><span>هدف حفظ فعال</span><span>90%</span></div>
+      <div class="setting"><span>حداکثر بازهٔ مرور</span><span>36500 روز</span></div>
+      <div class="setting"><span>پاک کردن تمام پیشرفت</span><button class="secondary" id="resetBtn">Reset</button></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+        <button class="secondary" id="closeSettings">بستن</button>
+        <button class="primary" id="saveSettings">ذخیره</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module">
+    import { createEmptyCard, fsrs, Rating } from "https://esm.sh/ts-fsrs@6.0.0-beta.7";
+
+    const DATA_URL = "https://raw.githubusercontent.com/jkindrix/japanese-language-data/main/data/core/kanji-joyo.json";
+    const WORDS_URL = ch => "https://kanjiapi.dev/v1/words/" + encodeURIComponent(ch);
+
+    const STORAGE = "kanji5-v1";
+    const DEFAULTS = { dailyNew: 5, retention: 0.90, maxInterval: 36500 };
+    let state = {
+      settings: {...DEFAULTS},
+      deck: [],
+      cards: {},
+      reviews: [],
+      today: "",
+      todayNew: 0,
+      queue: [],
+      current: null,
+      revealed: false,
+      examples: {}
+    };
+
+    let scheduler;
+
+    const $ = id => document.getElementById(id);
+    const todayKey = () => new Intl.DateTimeFormat("en-CA", {year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+
+    function toast(msg){
+      const el=$("toast"); el.textContent=msg; el.classList.add("show");
+      setTimeout(()=>el.classList.remove("show"),2200);
+    }
+
+    function save(){
+      localStorage.setItem(STORAGE, JSON.stringify(state));
+    }
+
+    function loadSaved(){
+      try{
+        const raw=localStorage.getItem(STORAGE);
+        if(raw){
+          const x=JSON.parse(raw);
+          state={...state,...x,settings:{...DEFAULTS,...(x.settings||{})}};
+          if(state.today!==todayKey()){state.today=todayKey();state.todayNew=0;}
+        } else {
+          state.today=todayKey();
+        }
+      }catch(e){
+        console.warn(e);
+        state.today=todayKey();
+      }
+    }
+
+    function reviveCard(card){
+      if(!card) return null;
+      for(const k of ["due","last_review"]){
+        if(card[k]) card[k]=new Date(card[k]);
+      }
+      return card;
+    }
+
+    function hydrateCards(){
+      for(const id of Object.keys(state.cards)) state.cards[id].card = reviveCard(state.cards[id].card);
+    }
+
+    function initScheduler(){
+      scheduler = fsrs({
+        request_retention: state.settings.retention,
+        maximum_interval: state.settings.maxInterval,
+        enable_fuzz: true,
+        enable_short_term: true,
+        learning_steps: ["1m","10m"],
+        relearning_steps: ["10m"]
+      });
+    }
+
+    async function loadDeck(){
+      $("loadStatus").textContent="در حال دریافت فهرست Jōyō...";
+      const res=await fetch(DATA_URL, {cache:"force-cache"});
+      if(!res.ok) throw new Error("Could not load kanji dataset");
+      const data=await res.json();
+      const all=data.kanji || [];
+      const ranked=all.filter(x=>x.frequency != null).sort((a,b)=>a.frequency-b.frequency);
+      // Exactly 2000 high-frequency Jōyō kanji.
+      state.deck=ranked.slice(0,2000).map((x,i)=>({
+        id:x.character,
+        character:x.character,
+        meaning:(x.meanings?.en||[]).slice(0,3),
+        on:(x.readings?.on||[]).slice(0,4),
+        kun:(x.readings?.kun||[]).slice(0,4),
+        strokes:x.stroke_count,
+        grade:x.grade,
+        jlpt:x.jlpt_waller || null,
+        frequency:x.frequency,
+        order:i+1
+      }));
+      localStorage.setItem("kanji5-deck", JSON.stringify(state.deck));
+    }
+
+    function loadDeckFromCache(){
+      try{
+        const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");
+        if(Array.isArray(x)&&x.length===2000) {state.deck=x; return true;}
+      }catch(_){}
+      return false;
+    }
+
+    function ensureCard(item){
+      if(!state.cards[item.id]){
+        state.cards[item.id]={card:createEmptyCard(), reviews:0, lapses:0, learnedAt:null};
+      }
+      return state.cards[item.id];
+    }
+
+    function dueNow(card){
+      return card && card.due && new Date(card.due) <= new Date();
+    }
+
+    function buildQueue(){
+      const due=state.deck
+        .filter(k=>state.cards[k.id]?.card && dueNow(state.cards[k.id].card))
+        .map(k=>k.id);
+      // Shuffle due cards to reduce fixed-order bias while retaining all due reviews.
+      for(let i=due.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[due[i],due[j]]=[due[j],due[i]];}
+      const newCards=[];
+      if(state.todayNew < state.settings.dailyNew){
+        for(const item of state.deck){
+          if(!state.cards[item.id]){
+            newCards.push(item.id);
+            if(newCards.length >= state.settings.dailyNew-state.todayNew) break;
+          }
+        }
+      }
+      state.queue=[...due,...newCards];
+      return state.queue;
+    }
+
+    function formatInterval(card){
+      const mins=Math.max(0, Math.round((new Date(card.due)-Date.now())/60000));
+      if(mins < 60) return `${Math.max(1,mins)}m`;
+      const h=mins/60;
+      if(h<24) return `${Math.round(h)}h`;
+      return `${Math.round(h/24)}d`;
+    }
+
+    function formatMeta(k){
+      const chips=[];
+      if(k.frequency) chips.push(`頻度 #${k.frequency}`);
+      if(k.grade) chips.push(`Jōyō grade ${k.grade}`);
+      if(k.jlpt) chips.push(k.jlpt);
+      chips.push(`${k.strokes} strokes`);
+      return chips.map(x=>`<span class="chip">${x}</span>`).join("");
+    }
+
+    async function fetchExamples(k){
+      if(state.examples[k.id]) return;
+      try{
+        const res=await fetch(WORDS_URL(k.character),{cache:"force-cache"});
+        if(!res.ok) return;
+        const data=await res.json();
+        const seen=new Set(), out=[];
+        for(const e of data){
+          for(const v of (e.variants||[])){
+            const term=v.written;
+            if(term && term.includes(k.character) && !seen.has(term)){
+              seen.add(term);
+              const reading=v.pronounced;
+              if(reading) out.push({word:term, reading});
+              if(out.length>=4) break;
+            }
+          }
+          if(out.length>=4) break;
+        }
+        state.examples[k.id]=out;
+        save();
+      }catch(_){}
+    }
+
+    function renderEmpty(){
+      const allLearned=state.deck.every(k=>state.cards[k.id]?.card);
+      const remaining=state.deck.filter(k=>!state.cards[k.id]).length;
+      $("study").innerHTML=`
+        <div class="empty">
+          <div style="font-size:58px">✓</div>
+          <h2>${remaining ? "برای امروز تمام شد." : "دورهٔ ۲۰۰۰ کانجی تمام شد!"}</h2>
+          <p>${remaining ? "مرورهای انجام‌شده ذخیره شدند؛ فردا ۵ کانجی جدید اضافه می‌شود." : "می‌توانی مرورهایت را ادامه بدهی یا دوره را از تنظیمات بازنشانی کنی."}</p>
+          ${!remaining ? '<button class="secondary" id="resetInline">شروع دوباره</button>' : ""}
+        </div>`;
+      $("resetInline")?.addEventListener("click", resetAll);
+    }
+
+    function renderCard(){
+      const id=state.current;
+      if(!id){renderEmpty();updateStats();return;}
+      const item=state.deck.find(x=>x.id===id);
+      const rec=state.cards[item.id];
+      const card=rec?.card;
+      if(card) reviveCard(card);
+      const preview = card ? scheduler.repeat(card,new Date()) : null;
+      const getPreview=(r)=>{
+        try { return formatInterval(preview[r].card); } catch(_){ return "—"; }
+      };
+
+      $("study").innerHTML=`
+        <div class="kanji">${item.character}</div>
+        <div class="hint">اول خودت معنی یا خوانش را حدس بزن.</div>
+        <button class="reveal" id="revealBtn">نمایش پاسخ</button>
+        <div class="answer ${state.revealed?'show':''}" id="answerBox">
+          <div class="answerbox">
+            <div class="meaning">${item.meaning.join(" · ") || "—"}</div>
+            <div class="readings">
+              <div class="readbox"><div class="t">On'yomi</div><div class="v">${item.on.join(" ・ ") || "—"}</div></div>
+              <div class="readbox"><div class="t">Kun'yomi</div><div class="v">${item.kun.join(" ・ ") || "—"}</div></div>
+            </div>
+            <div class="examples" id="examples"></div>
+            <div class="meta">${formatMeta(item)}</div>
+          </div>
+          <div class="ratings ${state.revealed?'show':''}" id="ratings">
+            <button class="rate again" data-r="Again">Again<small>${getPreview(Rating.Again)}</small></button>
+            <button class="rate hard" data-r="Hard">Hard<small>${getPreview(Rating.Hard)}</small></button>
+            <button class="rate good" data-r="Good">Good<small>${getPreview(Rating.Good)}</small></button>
+            <button class="rate easy" data-r="Easy">Easy<small>${getPreview(Rating.Easy)}</small></button>
+          </div>
+        </div>
+      `;
+      $("revealBtn").addEventListener("click",()=>{state.revealed=true; renderCard(); fetchExamples(item).then(renderExamples);});
+      document.querySelectorAll(".rate").forEach(b=>b.addEventListener("click",()=>review(b.dataset.r)));
+      renderExamples();
+      if(state.revealed) fetchExamples(item).then(renderExamples);
+    }
+
+    function renderExamples(){
+      const el=$("examples");
+      if(!el || !state.current) return;
+      const ex=state.examples[state.current]||[];
+      if(!ex.length) {el.innerHTML="";return;}
+      el.innerHTML=`<h3>نمونه‌های واژگانی</h3><div class="words">${ex.map(x=>`<div class="word"><span>${x.word}</span> <small style="color:#6b7280;direction:ltr;display:inline-block">${x.reading}</small></div>`).join("")}</div>`;
+    }
+
+    function next(){
+      if(state.queue.length===0){state.current=null;state.revealed=false;renderEmpty();updateStats();return;}
+      state.current=state.queue[0];
+      state.revealed=false;
+      renderCard();
+      updateStats();
+    }
+
+    function review(which){
+      const id=state.current;
+      if(!id) return;
+      const wasNew = !state.cards[id];
+      const rec=ensureCard(state.deck.find(x=>x.id===id));
+      const now=new Date();
+      const rating=Rating[which];
+      const result=scheduler.next(rec.card,now,rating);
+      const beforeState=rec.card.state;
+      rec.card=result.card;
+      rec.reviews=(rec.reviews||0)+1;
+      if(which==="Again") rec.lapses=(rec.lapses||0)+1;
+      if(beforeState===0 && rec.learnedAt===null) rec.learnedAt=now.toISOString();
+      if(rec.lapses>=8) rec.leech=true;
+      state.reviews.push({id,at:now.toISOString(),rating:which,due:rec.card.due,scheduledDays:rec.card.scheduled_days||0});
+      if(wasNew) state.todayNew++;
+      // The card is no longer in the current queue slot.
+      state.queue.shift();
+      save();
+      toast(which==="Again" ? "برمی‌گردد برای مرور نزدیک." : "ثبت شد.");
+      next();
+    }
+
+    function updateStats(){
+      const now=new Date();
+      const due=state.deck.filter(k=>state.cards[k.id]?.card && dueNow(reviveCard(state.cards[k.id].card))).length;
+      const mastered=state.deck.filter(k=>{
+        const c=state.cards[k.id]?.card;
+        return c && c.state===2 && (c.scheduled_days||0)>=21;
+      }).length;
+      const studied=state.deck.filter(k=>state.cards[k.id]).length;
+      $("dueCount").textContent=due;
+      $("newCount").textContent=Math.min(state.todayNew,state.settings.dailyNew);
+      $("masteredCount").textContent=mastered;
+      $("bar").style.width=`${Math.round(studied/state.deck.length*100)}%`;
+    }
+
+    function resetAll(){
+      if(!confirm("تمام پیشرفت‌ها پاک شود؟")) return;
+      localStorage.removeItem(STORAGE);
+      state={settings:{...DEFAULTS},deck:state.deck,cards:{},reviews:[],today:todayKey(),todayNew:0,queue:[],current:null,revealed:false,examples:{}};
+      initScheduler(); buildQueue(); next(); updateStats(); toast("پیشرفت پاک شد.");
+    }
+
+    $("settingsBtn").addEventListener("click",()=>{
+      $("dailyNew").value=state.settings.dailyNew;
+      $("settingsDialog").showModal();
+    });
+    $("closeSettings").addEventListener("click",()=>$("settingsDialog").close());
+    $("saveSettings").addEventListener("click",()=>{
+      state.settings.dailyNew=Math.min(30,Math.max(1,Number($("dailyNew").value)||5));
+      initScheduler(); save(); $("settingsDialog").close(); buildQueue(); next();
+    });
+    $("resetBtn").addEventListener("click",resetAll);
+
+    async function start(){
+      loadSaved();
+      hydrateCards();
+      const cached=loadDeckFromCache();
+      try{
+        if(!cached) await loadDeck();
+        initScheduler();
+        $("loading").hidden=true;
+        $("app").hidden=false;
+        buildQueue();
+        next();
+        updateStats();
+      }catch(e){
+        console.error(e);
+        $("loadStatus").innerHTML=`بارگذاری داده ممکن نشد.<br><br><button class="primary" id="retry">تلاش دوباره</button>`;
+        $("retry").addEventListener("click",()=>location.reload());
+      }
+    }
+    start();
+  </script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script></body>
+</html>
