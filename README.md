@@ -12,7 +12,6 @@
 - نمایش On'yomi / Kun'yomi، معنی، تعداد stroke و رتبهٔ فراوانی
 - بارگذاری تنبل نمونه‌های واژگانی از kanjiapi.dev
 - قابلیت نصب به‌صورت PWA
- قرار بده.
 
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
