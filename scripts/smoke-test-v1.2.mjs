@@ -25,7 +25,7 @@ const checks=[
 ["startup guard build step",startupPatch.includes("clearRuntimeCaches")&&startupPatch.includes("getRegistrations")&&startupPatch.includes("caches.keys")&&startupPatch.includes("v12StartupRetry")],
 ["FSRS bounded startup",runtimePatch.includes("FSRS_LOAD_TIMEOUT")&&runtimePatch.includes("import(FSRS_URL)")],
 ["example translation retry",runtimeFix.includes("entry.meanings")&&runtimeFix.includes("flatMap(m => m.glosses || [])")&&runtimeFix.includes("data-v12-translations")&&runtimeFix.includes("retryCount < 4")],
-["romaji reading support",enhancer.includes("function kanaToRomaji(value)")&&enhancer.includes("function normalizeRomaji(value)")&&enhancer.includes("canonicalRomaji")&&enhancer.includes("kana or romaji")],
+["romaji reading support",enhancer.includes("function kanaToRomaji(value)")&&enhancer.includes("function normalizeRomaji(value)")&&enhancer.includes("canonicalRomaji")&&enhancer.includes("ROMAJI_VARIANTS")],
 ["runtime fixes injected",index.includes('<script src="./v1.2-runtime-fixes.js"></script>')],
 ["runtime fixes cached",shell.includes("./v1.2-runtime-fixes.js")],
 ["individual reading audio",index.includes("reading-list")&&index.includes("data-speak=\"${r}\"")],
