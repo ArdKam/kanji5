@@ -8,6 +8,7 @@ on:
       - 'kanji-joyo.json'
       - 'scripts/build-kanji-data.mjs'
       - 'scripts/apply-v1.2.mjs'
+      - 'scripts/smoke-test-v1.2.mjs'
       - 'v1.2-enhancements.js'
       - 'sw.js'
       - '.github/workflows/build-v1.2.yml'
@@ -37,6 +38,8 @@ jobs:
       - name: Validate service worker versions
         run: |
           node -e "const fs=require('fs'); const s=fs.readFileSync('sw.js','utf8'); if(!s.includes('kanji5-shell-v7') || !s.includes('kanji5-data-v5')) throw new Error('Service worker cache versions are not updated'); if(s.includes('./kanji-data.json\"]')) throw new Error('kanji-data.json must not be in shell precache'); console.log('Validated separate shell/data caches');"
+      - name: Smoke test release flow
+        run: node scripts/smoke-test-v1.2.mjs
       - name: Commit generated build
         run: |
           git config user.name 'github-actions[bot]'
