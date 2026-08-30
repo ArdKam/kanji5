@@ -27,7 +27,9 @@
   }
 
   function saveKnowledge(value) {
-    try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value)); } catch (_) {}
+    try {
+      localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value));
+    } catch (_) {}
   }
 
   function getStats(character, mode) {
@@ -144,6 +146,38 @@
     setTimeout(() => $("#v12RecallInput")?.focus(), 0);
   }
 
+  async function submitRecall() {
+    const input = $("#v12RecallInput");
+    const value = input?.value || "";
+    if (!normalize(value)) {
+      input?.focus();
+      return;
+    }
+
+    await loadDeckIndex();
+    const correct = checkRecall(activeCharacter, activePrompt, value);
+    recordAttempt(activeCharacter, activePrompt, correct);
+
+    try {
+      localStorage.setItem(`${V12}-last-attempt`, JSON.stringify({
+        character: activeCharacter,
+        mode: activePrompt,
+        attemptedAt: new Date().toISOString(),
+        hadAttempt: true,
+        correct
+      }));
+    } catch (_) {}
+
+    const gate = input?.closest(".v12-recall-gate");
+    if (!originalRevealButton || !gate) return;
+
+    gate.replaceWith(originalRevealButton);
+    allowNativeReveal = true;
+    originalRevealButton.click();
+    allowNativeReveal = false;
+    originalRevealButton = null;
+  }
+
   function addStageButton(container, text, onClick) {
     const button = document.createElement("button");
     button.className = "secondary";
@@ -184,6 +218,12 @@
     });
   }
 
+  function showOfflineHint() {
+    const examples = document.getElementById("examples");
+    if (!examples || examples.innerHTML.trim()) return;
+    examples.innerHTML = '<div style="color:var(--muted);font-size:13px;margin-top:10px">واژه‌های نمونه در حالت آفلاین در دسترس نیستند؛ می‌توانی مرور را ادامه بدهی.</div>';
+  }
+
   document.addEventListener("click", async event => {
     const target = event.target;
 
@@ -196,44 +236,19 @@
 
     if (target?.id === "v12SubmitRecall") {
       event.preventDefault();
-      const input = $("#v12RecallInput");
-      const value = input?.value || "";
-      if (!normalize(value)) {
-        input?.focus();
-        return;
-      }
-
-      await loadDeckIndex();
-      const correct = checkRecall(activeCharacter, activePrompt, value);
-      recordAttempt(activeCharacter, activePrompt, correct);
-
-      try {
-        localStorage.setItem(`${V12}-last-attempt`, JSON.stringify({
-          character: activeCharacter,
-          mode: activePrompt,
-          attemptedAt: new Date().toISOString(),
-          hadAttempt: true,
-          correct
-        }));
-      } catch (_) {}
-
-      const gate = target.closest(".v12-recall-gate");
-      if (!originalRevealButton || !gate) return;
-
-      gate.replaceWith(originalRevealButton);
-      allowNativeReveal = true;
-      originalRevealButton.click();
-      allowNativeReveal = false;
-      originalRevealButton = null;
+      await submitRecall();
     }
   }, true);
 
   document.addEventListener("keydown", event => {
-    if (event.target?.id === "v12RecallInput" && event.ctrlKey && event.key === "Enter") {
+    if (event.target?.id === "v12RecallInput" && (event.ctrlKey || event.metaKey) && event.key === "Enter") {
       event.preventDefault();
-      $("#v12SubmitRecall")?.click();
+      event.stopImmediatePropagation();
+      void submitRecall();
     }
-  });
+  }, true);
+
+  window.addEventListener("offline", showOfflineHint);
 
   const observer = new MutationObserver(() => {
     const answerBox = $("#answerBox");
