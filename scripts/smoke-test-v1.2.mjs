@@ -4,6 +4,7 @@ const sw=fs.readFileSync("sw.js","utf8");
 const enhancer=fs.readFileSync("v1.2-enhancements.js","utf8");
 const bootstrap=fs.readFileSync("scripts/apply-v1.2.mjs","utf8");
 const runtimeFix=fs.readFileSync("v1.2-runtime-fixes.js","utf8");
+const runtimePatch=fs.readFileSync("scripts/apply-runtime-fixes.mjs","utf8");
 const shell=sw.match(/const SHELL = ([^;]+);/)?.[1]||"";
 const checks=[
 ["runtime dataset URL",index.includes('const DATA_URL="./kanji-data.json";')],
@@ -11,16 +12,18 @@ const checks=[
 ["v1.2 enhancement script",index.includes('<script src="./v1.2-enhancements.js"></script>')],
 ["dataset cache version",index.includes('DATA_VERSION = "v1.2-dataset-2136"')],
 ["separate data cache",sw.includes('const DATA_CACHE = "kanji5-data-v5";')&&!shell.includes("kanji-data.json")],
-["shell cache version",sw.includes('const CACHE = "kanji5-shell-v7";')],
+["shell cache version",sw.includes('const CACHE = "kanji5-shell-v8";')],
 ["adaptive prompt",enhancer.includes("function choosePrompt(character)")],
 ["meaning/reading tracking",enhancer.includes('getStats(character, "meaning")')&&enhancer.includes('getStats(character, "reading")')],
 ["attempt recording",enhancer.includes("function recordAttempt(character, mode, correct)")],
 ["dataset cache invalidation",bootstrap.includes('kanji5-deck-version')&&bootstrap.includes('v1.2-dataset-2136')],
 ["no legacy 2000 end-message",!index.includes("دورهٔ ۲۰۰۰ کانجی تمام شد")],
 ["mobile study-first layout",index.includes('id="v1.2-mobile-fix"')&&index.includes('#studyPanel{order:1')],
-["startup failure recovery",runtimeFix.includes("STARTUP_TIMEOUT")&&runtimeFix.includes("v12RuntimeRetry")],
+["startup failure recovery source",runtimeFix.includes("STARTUP_TIMEOUT")&&runtimeFix.includes("v12RuntimeRetry")],
+["FSRS bounded startup",runtimePatch.includes("FSRS_LOAD_TIMEOUT")&&runtimePatch.includes("import(FSRS_URL)")],
 ["example translation recovery",runtimeFix.includes("e.meanings")&&runtimeFix.includes("example-meaning")],
 ["runtime fixes injected",index.includes('<script src="./v1.2-runtime-fixes.js"></script>')],
+["runtime fixes cached",shell.includes("./v1.2-runtime-fixes.js")],
 ["individual reading audio",index.includes("reading-list")&&index.includes("data-speak=\"${r}\"")]
 ];
 const failed=checks.filter(([,ok])=>!ok);
