@@ -11,9 +11,13 @@ on:
       - 'scripts/apply-v1.2.mjs'
       - 'scripts/apply-runtime-fixes.mjs'
       - 'scripts/apply-startup-guard.mjs'
+      - 'scripts/apply-supabase-sync.mjs'
       - 'scripts/smoke-test-v1.2.mjs'
       - 'v1.2-enhancements.js'
       - 'v1.2-runtime-fixes.js'
+      - 'supabase-config.js'
+      - 'supabase-sync.js'
+      - 'supabase-schema.sql'
       - 'sw.js'
       - 'manifest.webmanifest'
       - 'icon.svg'
@@ -39,18 +43,23 @@ jobs:
         run: node scripts/apply-runtime-fixes.mjs
       - name: Apply pre-module startup guard
         run: node scripts/apply-startup-guard.mjs
+      - name: Apply Supabase auth and sync
+        run: node scripts/apply-supabase-sync.mjs
       - name: Validate runtime dataset
         run: |
           node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset'); console.log('Validated 2,136 Jōyō kanji');"
       - name: Validate v1.2 injection
         run: |
-          node -e "const fs=require('fs'); const h=fs.readFileSync('index.html','utf8'); if(!h.includes('<script src=\"./v1.2-enhancements.js\"></script>')) throw new Error('v1.2 enhancement script is not included'); if(!h.includes('kanji5-deck-version')) throw new Error('dataset cache version bootstrap is missing'); if(!h.includes('<script src=\"./v1.2-runtime-fixes.js\"></script>')) throw new Error('runtime fixes script is not included'); if(!h.includes('id=\"v1.2-startup-guard\"')) throw new Error('startup guard is not injected'); if(h.indexOf('id=\"v1.2-startup-guard\"') > h.indexOf('<script type=\"module\">')) throw new Error('startup guard must precede module execution'); console.log('Validated v1.2 injection and startup guard');"
+          node -e "const fs=require('fs'); const h=fs.readFileSync('index.html','utf8'); if(!h.includes('<script src=\"./v1.2-enhancements.js\"></script>')) throw new Error('v1.2 enhancement script is not included'); if(!h.includes('kanji5-deck-version')) throw new Error('dataset cache version bootstrap is missing'); if(!h.includes('<script src=\"./v1.2-runtime-fixes.js\"></script>')) throw new Error('runtime fixes script is not included'); if(!h.includes('id=\"v1.2-startup-guard\"')) throw new Error('startup guard is not injected'); if(h.indexOf('id=\"v1.2-startup-guard\"') > h.indexOf('<script type=\"module\">')) throw new Error('startup guard must precede module execution'); if(!h.includes('<script src=\"./supabase-config.js\"></script>')) throw new Error('Supabase config is not included'); if(!h.includes('<script type=\"module\" src=\"./supabase-sync.js\"></script>')) throw new Error('Supabase sync is not included'); console.log('Validated v1.2 injection and startup guard');"
       - name: Validate service worker
         run: |
-          node -e "const fs=require('fs'); const s=fs.readFileSync('sw.js','utf8'); if(!s.includes('kanji5-shell-v9') || !s.includes('kanji5-data-v5')) throw new Error('Service worker cache versions are not updated'); if(s.includes('./kanji-data.json\"]')) throw new Error('kanji-data.json must not be in shell precache'); if(!s.includes('./v1.2-runtime-fixes.js')) throw new Error('runtime fixes must be in shell precache'); if(!s.includes('./icon.svg')) throw new Error('icon must be in shell precache'); console.log('Validated service worker and icon cache');"
+          node -e "const fs=require('fs'); const s=fs.readFileSync('sw.js','utf8'); if(!s.includes('kanji5-shell-v9') || !s.includes('kanji5-data-v5')) throw new Error('Service worker cache versions are not updated'); if(s.includes('./kanji-data.json\"]')) throw new Error('kanji-data.json must not be in shell precache'); if(!s.includes('./v1.2-runtime-fixes.js')) throw new Error('runtime fixes must be in shell precache'); if(!s.includes('./icon.svg')) throw new Error('icon must be in shell precache'); if(!s.includes('./supabase-config.js')) throw new Error('Supabase config must be in shell precache'); if(!s.includes('./supabase-sync.js')) throw new Error('Supabase sync must be in shell precache'); console.log('Validated service worker and icon cache');"
       - name: Validate PWA icon
         run: |
           node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8')); if(!fs.existsSync('icon.svg')) throw new Error('icon.svg missing'); if(!Array.isArray(m.icons) || !m.icons.some(x=>x.src==='icon.svg')) throw new Error('manifest icon missing'); console.log('Validated PWA icon');"
+      - name: Validate Supabase integration
+        run: |
+          node -e "const fs=require('fs'); const s=fs.readFileSync('supabase-sync.js','utf8'); const m=fs.readFileSync('supabase-schema.sql','utf8'); if(!s.includes('signInWithOAuth') || !s.includes('provider: \"google\"')) throw new Error('Google auth is missing'); if(!s.includes('signInWithPassword') || !s.includes('signUp')) throw new Error('Email auth is missing'); if(!s.includes('user_learning_state')) throw new Error('Learning-state sync is missing'); if(!m.includes('enable row level security') || !m.includes('auth.uid()')) throw new Error('RLS is missing'); console.log('Validated Supabase auth, sync, and RLS');"
       - name: Smoke test release flow
         run: node scripts/smoke-test-v1.2.mjs
       - name: Commit generated build
