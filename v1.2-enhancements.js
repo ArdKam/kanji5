@@ -27,7 +27,7 @@
   }
 
   function saveKnowledge(value) {
-    localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value));
+    try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value)); } catch (_) {}
   }
 
   function getStats(character, mode) {
@@ -136,6 +136,7 @@
         <div style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:10px">${prompt}</div>
         <textarea id="v12RecallInput" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="پاسخ خودت را اینجا بنویس..." style="width:100%;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;box-sizing:border-box"></textarea>
         <button id="v12SubmitRecall" class="primary" style="margin-top:9px;width:100%">ثبت تلاش و نمایش پاسخ</button>
+        <div style="color:var(--muted);font-size:11px;text-align:center;margin-top:7px">برای ثبت با صفحه‌کلید: Ctrl+Enter</div>
       </div>`;
 
     originalRevealButton?.replaceWith(gate);
@@ -167,18 +168,19 @@
     if (readings) readings.style.display = "none";
     if (examples) examples.style.display = "none";
     if (meta) meta.style.display = "none";
-    ratings.style.display = "none";
+    ratings.style.display = "grid";
 
     const readingsButton = addStageButton(answerBox, "نمایش خوانش‌ها", () => {
       if (readings) readings.style.display = "grid";
       readingsButton.remove();
 
-      const examplesButton = addStageButton(answerBox, "نمایش واژه‌های نمونه و آماده‌شدن برای امتیازدهی", () => {
-        if (examples) examples.style.display = "block";
-        if (meta) meta.style.display = "flex";
-        ratings.style.display = "grid";
-        examplesButton.remove();
-      });
+      if (examples) {
+        const examplesButton = addStageButton(answerBox, "نمایش واژه‌های نمونه (اختیاری)", () => {
+          examples.style.display = "block";
+          if (meta) meta.style.display = "flex";
+          examplesButton.remove();
+        });
+      }
     });
   }
 
@@ -225,6 +227,13 @@
       originalRevealButton = null;
     }
   }, true);
+
+  document.addEventListener("keydown", event => {
+    if (event.target?.id === "v12RecallInput" && event.ctrlKey && event.key === "Enter") {
+      event.preventDefault();
+      $("#v12SubmitRecall")?.click();
+    }
+  });
 
   const observer = new MutationObserver(() => {
     const answerBox = $("#answerBox");
