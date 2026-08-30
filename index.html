@@ -46,8 +46,38 @@
     }
   } catch (_) {}
 })();
+</script><script id="v1.2-startup-guard">
+(() => {
+  let shown = false;
+  function showFallback() {
+    if (shown) return;
+    const loading = document.getElementById("loading");
+    const app = document.getElementById("app");
+    if (!loading || loading.hidden || !app || !app.hidden) return;
+    shown = true;
+    loading.innerHTML = '<div><div style="font-size:42px">⚠️</div><div style="font-weight:800;margin:10px 0">بارگذاری برنامه طول کشید.</div><div style="color:#6b7280;font-size:13px;line-height:1.8">اتصال اینترنت یا کتابخانهٔ مرور را بررسی کن.</div><button class="primary" id="v12StartupRetry" style="margin-top:14px">تلاش دوباره</button></div>';
+    document.getElementById("v12StartupRetry")?.addEventListener("click", () => location.reload());
+  }
+
+  const observer = new MutationObserver(() => {
+    const loading = document.getElementById("loading");
+    const app = document.getElementById("app");
+    if (loading?.hidden || !app?.hidden) observer.disconnect();
+  });
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["hidden"]
+  });
+
+  window.addEventListener("error", () => setTimeout(showFallback, 0), true);
+  window.addEventListener("unhandledrejection", () => setTimeout(showFallback, 0), true);
+  setTimeout(showFallback, 7000);
+})();
 </script><script type="module">
-const { createEmptyCard, fsrs, Rating } = await import("https://esm.sh/ts-fsrs@6.0.0-beta.7");
+let createEmptyCard, fsrs, Rating;
+const FSRS_URL="https://esm.sh/ts-fsrs@5.4.1?bundle";
 const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
 const STORAGE="kanji5-v1";
@@ -90,7 +120,7 @@ function resetAll(){if(!confirm("تمام پیشرفت‌ها پاک شود؟"))
 $("settingsBtn").addEventListener("click",()=>{$("dailyNew").value=state.settings.dailyNew;$("dailyGoal").value=state.settings.dailyGoal;$("leechThreshold").value=state.settings.leechThreshold;$("settingsDialog").showModal()});$("closeSettings").addEventListener("click",()=>$("settingsDialog").close());$("saveSettings").addEventListener("click",()=>{state.settings.dailyNew=Math.min(30,Math.max(1,Number($("dailyNew").value)||5));state.settings.dailyGoal=Math.min(500,Math.max(1,Number($("dailyGoal").value)||20));state.settings.leechThreshold=Math.min(30,Math.max(2,Number($("leechThreshold").value)||8));initScheduler();save();$("settingsDialog").close();buildQueue();next();updateStats()});$("resetBtn").addEventListener("click",resetAll);
 function renderStats(){const total=state.reviews.length,correct=state.reviews.filter(r=>r.rating!=="Again").length,accuracy=total?Math.round(correct/total*100):0,leechCount=Object.values(state.cards).filter(c=>c.leech).length,studied=state.deck.filter(k=>state.cards[k.id]).length,stateNames=["جدید (New)","یادگیری (Learning)","مرور (Review)","بازآموزی (Relearning)"],stateCounts=[0,0,0,0];for(const c of Object.values(state.cards)){const s=c.card?.state;if(s!=null&&stateCounts[s]!=null)stateCounts[s]++}const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(d),label=new Intl.DateTimeFormat("fa-IR",{weekday:"short"}).format(d),count=state.reviews.filter(r=>r.at.slice(0,10)===key).length;days.push({label,count})}const maxDay=Math.max(1,...days.map(d=>d.count));$("statsBody").innerHTML=`<div class="statsgrid"><div class="box"><div class="n">${total}</div><div class="l">کل مرورها</div></div><div class="box"><div class="n">${accuracy}%</div><div class="l">دقت (غیر از Again)</div></div><div class="box"><div class="n">${studied}/${state.deck.length}</div><div class="l">کانجی مطالعه‌شده</div></div><div class="box"><div class="n">${state.streak.longest||0}🔥</div><div class="l">طولانی‌ترین رشته</div></div><div class="box"><div class="n">${leechCount}</div><div class="l">Leech (کانجی دشوار)</div></div><div class="box"><div class="n">${state.streak.current||0}</div><div class="l">رشتهٔ فعلی (روز)</div></div></div><h3 style="font-size:14px;color:var(--muted);margin:14px 0 4px">مرورهای ۷ روز اخیر</h3><div class="bars">${days.map(d=>`<div class="col"><div class="fill" style="height:${Math.round(d.count/maxDay*80)+2}px"></div><div class="lbl">${d.label}<br>${d.count}</div></div>`).join("")}</div><h3 style="font-size:14px;color:var(--muted);margin:14px 0 4px">وضعیت کارت‌ها</h3><div class="statesrow">${stateNames.map((n,i)=>`<span class="chip">${n}: ${stateCounts[i]}</span>`).join("")}</div>`}
 $("statsBtn").addEventListener("click",()=>{renderStats();$("statsDialog").showModal()});$("closeStats").addEventListener("click",()=>$("statsDialog").close());document.addEventListener("keydown",e=>{if(document.querySelector("dialog[open]")||!state.current)return;if(!state.revealed&&(e.code==="Space"||e.key==="Enter")){e.preventDefault();$("revealBtn")?.click();return}if(state.revealed){const map={"1":"Again","2":"Hard","3":"Good","4":"Easy"};if(map[e.key])document.querySelector(`.rate[data-r="${map[e.key]}"]`)?.click()}});
-async function start(){loadSaved();hydrateCards();const cached=loadDeckFromCache();try{if(!cached)await loadDeck();initScheduler();$("loading").hidden=true;$("app").hidden=false;buildQueue();next();updateStats()}catch(e){console.error(e);$("loadStatus").innerHTML=`بارگذاری داده ممکن نشد.<br><br><button class="primary" id="retry">تلاش دوباره</button>`;$("retry").addEventListener("click",()=>location.reload())}}start();
+async function start(){try{const mod=await Promise.race([import(FSRS_URL),new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);({createEmptyCard,fsrs,Rating}=mod);}catch(e){console.error(e);$("loading").innerHTML="<div><div style=\"font-size:42px\">⚠️</div><div style=\"font-weight:800;margin:10px 0\">موتور مرور بارگذاری نشد.</div><div style=\"color:#6b7280;font-size:13px;line-height:1.8\">اتصال به کتابخانه مرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><button class=\"primary\" id=\"v12FsrsRetry\" style=\"margin-top:14px\">تلاش دوباره</button></div>";$("v12FsrsRetry").addEventListener("click",()=>location.reload());return;}loadSaved();hydrateCards();const cached=loadDeckFromCache();try{if(!cached)await loadDeck();initScheduler();$("loading").hidden=true;$("app").hidden=false;buildQueue();next();updateStats()}catch(e){console.error(e);$("loadStatus").innerHTML=`بارگذاری داده ممکن نشد.<br><br><button class="primary" id="retry">تلاش دوباره</button>`;$("retry").addEventListener("click",()=>location.reload())}}start();
 </script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script><script src="./v1.2-enhancements.js"></script><script id="v1.2-recall-result-fix">
 (() => {
   const KEY = "kanji5-v1.2-last-attempt";
