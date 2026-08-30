@@ -6,6 +6,9 @@ const bootstrap=fs.readFileSync("scripts/apply-v1.2.mjs","utf8");
 const runtimeFix=fs.readFileSync("v1.2-runtime-fixes.js","utf8");
 const runtimePatch=fs.readFileSync("scripts/apply-runtime-fixes.mjs","utf8");
 const startupPatch=fs.readFileSync("scripts/apply-startup-guard.mjs","utf8");
+const supabase=fs.readFileSync("supabase-sync.js","utf8");
+const supabaseSchema=fs.readFileSync("supabase-schema.sql","utf8");
+const supabaseConfig=fs.readFileSync("supabase-config.js","utf8");
 const manifest=JSON.parse(fs.readFileSync("manifest.webmanifest","utf8"));
 const shell=sw.match(/const SHELL = ([^;]+);/)?.[1]||"";
 const checks=[
@@ -14,7 +17,7 @@ const checks=[
 ["v1.2 enhancement script",index.includes('<script src="./v1.2-enhancements.js"></script>')],
 ["dataset cache version",index.includes('DATA_VERSION = "v1.2-dataset-2136"')],
 ["separate data cache",sw.includes('const DATA_CACHE = "kanji5-data-v5";')&&!shell.includes("kanji-data.json")],
-["shell cache version",sw.includes('const CACHE = "kanji5-shell-v9";')],
+["shell cache version",sw.includes('const CACHE = "kanji5-shell-v10";')],
 ["adaptive prompt",enhancer.includes("function choosePrompt(character)")],
 ["meaning/reading tracking",enhancer.includes('getStats(character, "meaning")')&&enhancer.includes('getStats(character, "reading")')],
 ["attempt recording",enhancer.includes("function recordAttempt(character, mode, correct)")],
@@ -26,6 +29,13 @@ const checks=[
 ["FSRS bounded startup",runtimePatch.includes("FSRS_LOAD_TIMEOUT")&&runtimePatch.includes("import(FSRS_URL)")],
 ["example translation retry",runtimeFix.includes("entry.meanings")&&runtimeFix.includes("flatMap(m => m.glosses || [])")&&runtimeFix.includes("data-v12-translations")&&runtimeFix.includes("retryCount < 4")],
 ["romaji reading support",enhancer.includes("function kanaToRomaji(value)")&&enhancer.includes("function normalizeRomaji(value)")&&enhancer.includes("canonicalRomaji")&&enhancer.includes("ROMAJI_VARIANTS")],
+["Supabase Google auth",supabase.includes("signInWithOAuth")&&supabase.includes('provider: "google"')],
+["Supabase email auth",supabase.includes("signInWithPassword")&&supabase.includes("signUp")],
+["Supabase bidirectional sync",supabase.includes("pullAndMerge")&&supabase.includes("push")&&supabase.includes("POLL_MS")],
+["Supabase RLS",supabaseSchema.includes("enable row level security")&&supabaseSchema.includes("auth.uid()")],
+["Supabase config present",supabaseConfig.includes("KANJI5_SUPABASE")&&supabaseConfig.includes("anonKey")],
+["Supabase scripts injected",index.includes('<script src="./supabase-config.js"></script>')&&index.includes('<script type="module" src="./supabase-sync.js"></script>')],
+["Supabase scripts cached",shell.includes("./supabase-config.js")&&shell.includes("./supabase-sync.js")],
 ["runtime fixes injected",index.includes('<script src="./v1.2-runtime-fixes.js"></script>')],
 ["runtime fixes cached",shell.includes("./v1.2-runtime-fixes.js")],
 ["individual reading audio",index.includes("reading-list")&&index.includes("data-speak=\"${r}\"")],
