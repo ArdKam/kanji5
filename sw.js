@@ -1,48 +1,86 @@
-const CACHE = "kanji5-shell-v5";
-const DATA_CACHE = "kanji5-data-v3";
-const APP = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./kanji-data.json"];
+const CACHE = "kanji5-shell-v6";
+const DATA_CACHE = "kanji5-data-v4";
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
+const DATA_URL = new URL("./kanji-data.json", self.location.href).href;
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(APP)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(cache => cache.addAll(SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.filter(key => key.startsWith("kanji5-") && key !== CACHE && key !== DATA_CACHE).map(key => caches.delete(key))
+      keys
+        .filter(key =>
+          key.startsWith("kanji5-") &&
+          key !== CACHE &&
+          key !== DATA_CACHE
+        )
+        .map(key => caches.delete(key))
     )).then(() => self.clients.claim())
   );
 });
 
+async function networkFirst(request, cacheName, fallbackRequest = request) {
+  const cache = await caches.open(cacheName);
+
+  try {
+    const response = await fetch(request);
+
+    if (response.ok) {
+      await cache.put(request, response.clone());
+    }
+
+    return response;
+  } catch {
+    return (await cache.match(fallbackRequest)) || Response.error();
+  }
+}
+
 self.addEventListener("fetch", event => {
   const request = event.request;
+
+  if (request.method !== "GET") return;
+
   const url = new URL(request.url);
 
+  // HTML navigation: network first, cached fallback offline
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE).then(cache => cache.put(request, copy));
-        return response;
-      }).catch(() => caches.match(request).then(response => response || caches.match("./index.html")))
+      networkFirst(request, CACHE, "./index.html")
     );
     return;
   }
 
-  if (url.origin === self.location.origin) {
+  if (url.origin !== self.location.origin) return;
+
+  // Kanji dataset gets its own cache
+  if (url.href === DATA_URL) {
     event.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(response => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE).then(cache => cache.put(request, copy));
-          }
-          return response;
-        });
-      })
+      networkFirst(request, DATA_CACHE, request)
     );
+    return;
   }
+
+  // Other same-origin static assets: cache first
+  event.respondWith(
+    caches.match(request).then(cached => {
+      if (cached) return cached;
+
+      return fetch(request).then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache =>
+            cache.put(request, copy)
+          );
+        }
+
+        return response;
+      });
+    })
+  );
 });
