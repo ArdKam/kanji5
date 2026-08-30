@@ -19,7 +19,19 @@
 <main id="app" hidden><div class="grid"><div class="stat"><div class="n" id="dueCount">0</div><div class="l">مرورهای امروز</div></div><div class="stat"><div class="n" id="newCount">0</div><div class="l">کانجی جدید امروز</div></div><div class="stat"><div class="n" id="masteredCount">0</div><div class="l">یادگرفته‌شده</div></div><div class="stat streak"><div class="n" id="streakCount">0🔥</div><div class="l">روز پیاپی</div></div></div><div class="progress"><div id="bar" style="width:0%"></div></div><div class="goalrow"><span id="goalLabel">هدف روزانه: ۰/۲۰</span><span id="goalDone" style="display:none">🎉 تکمیل شد</span></div><div class="progress goal"><div id="goalBar" style="width:0%"></div></div><section class="panel" id="studyPanel"><div id="study"></div></section><div class="footer">دادهٔ کانجی: Jōyō 2136 بر پایهٔ KANJIDIC2؛ این نسخه شامل هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency است. مرور فاصله‌دار: FSRS. اطلاعات یادگیری شما در همین مرورگر ذخیره می‌شود.</div></main></div>
 <div id="toast" class="toast"></div><dialog id="settingsDialog"><div class="modal"><h2>تنظیمات</h2><div class="setting"><span>کانجی جدید در روز</span><input id="dailyNew" type="number" min="1" max="30" step="1"></div><div class="setting"><span>هدف تعداد مرور روزانه</span><input id="dailyGoal" type="number" min="1" max="500" step="1"></div><div class="setting"><span>آستانهٔ Leech (تعداد خطا)</span><input id="leechThreshold" type="number" min="2" max="30" step="1"></div><div class="setting"><span>هدف حفظ فعال</span><span>90%</span></div><div class="setting"><span>حداکثر بازهٔ مرور</span><span>36500 روز</span></div><div class="setting"><span>پاک کردن تمام پیشرفت</span><button class="secondary" id="resetBtn">Reset</button></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeSettings">بستن</button><button class="primary" id="saveSettings">ذخیره</button></div></div></dialog>
 <dialog id="statsDialog"><div class="modal"><h2>آمار</h2><div id="statsBody"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeStats">بستن</button></div></div></dialog>
-<script type="module">
+<script>
+(() => {
+  const DATA_VERSION = "v1.2-dataset-2136";
+  const DECK_KEY = "kanji5-deck";
+  const VERSION_KEY = "kanji5-deck-version";
+  try {
+    if (localStorage.getItem(VERSION_KEY) !== DATA_VERSION) {
+      localStorage.removeItem(DECK_KEY);
+      localStorage.setItem(VERSION_KEY, DATA_VERSION);
+    }
+  } catch (_) {}
+})();
+</script><script type="module">
 import { createEmptyCard, fsrs, Rating } from "https://esm.sh/ts-fsrs@6.0.0-beta.7";
 const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
