@@ -36,6 +36,30 @@ const MOBILE_FIX = `<style id="v1.2-mobile-fix">
 .v12-recall-result.bad{background:#fee2e2;color:#991b1b}
 .v12-recall-result.unknown{background:#f3f4f6;color:#4b5563}
 </style>`;
+const RECALL_RESULT_FIX = `<script id="v1.2-recall-result-fix">
+(() => {
+  const KEY = "kanji5-v1.2-last-attempt";
+  const esc = value => String(value ?? "").replace(/[&<>\"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch] || ch));
+  let shown = null;
+  const paint = () => {
+    const kanji = document.querySelector(".kanji")?.textContent?.trim();
+    if (!kanji) return;
+    let attempt;
+    try { attempt = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (_) { return; }
+    if (!attempt || attempt.character !== kanji || !attempt.hadAttempt) return;
+    if (shown === `${kanji}:${attempt.attemptedAt}`) return;
+    const box = document.getElementById("answerBox");
+    if (!box || !box.classList.contains("show")) return;
+    const result = document.createElement("div");
+    result.className = `v12-recall-result ${attempt.correct === true ? "good" : attempt.correct === false ? "bad" : "unknown"}`;
+    result.textContent = attempt.correct === true ? "✅ پاسخ درست بود" : attempt.correct === false ? "❌ پاسخ درست نبود" : "ℹ️ تلاش ثبت شد؛ پاسخ خودکار قابل بررسی نبود";
+    box.querySelector(".answerbox")?.prepend(result);
+    shown = `${kanji}:${attempt.attemptedAt}`;
+  };
+  new MutationObserver(paint).observe(document.body,{childList:true,subtree:true});
+  setInterval(paint,500);
+})();
+</script>`;
 
 let html = await fs.readFile(FILE, "utf8");
 const must = (condition, label) => { if (!condition) throw new Error(`Could not find ${label}`); };
@@ -54,13 +78,16 @@ if (!BOOTSTRAP_PATTERN.test(html)) {
 }
 
 if (!html.includes('id="v1.2-mobile-fix"')) html = html.replace("</head>", `${MOBILE_FIX}</head>`);
+if (!html.includes('id="v1.2-recall-result-fix"')) html = html.replace("</body>", `${RECALL_RESULT_FIX}</body>`);
 
 if (html.includes('import { createEmptyCard, fsrs, Rating } from "https://esm.sh/ts-fsrs@6.0.0-beta.7";')) {
   html = html.replace('import { createEmptyCard, fsrs, Rating } from "https://esm.sh/ts-fsrs@6.0.0-beta.7";', 'let createEmptyCard, fsrs, Rating;');
 }
 if (!html.includes('const FSRS_URL=')) html = html.replace('const DATA_URL="./kanji-data.json";', 'const DATA_URL="./kanji-data.json";\nconst FSRS_URL="https://esm.sh/ts-fsrs@5.4.1?bundle";');
 
-html = html.replace(/async function start\(\)\{[\s\S]*?\n\}\s*<\/script>\s*<script>if\("serviceWorker"in navigator\)/,
+const startPattern = /async function start\(\)\{[\s\S]*?\n\}\s*<\/script>\s*<script>if\("serviceWorker"in navigator\)/;
+must(startPattern.test(html), "startup function");
+html = html.replace(startPattern,
 `async function start(){
   try{
     const mod=await Promise.race([
@@ -87,21 +114,22 @@ html = html.replace(/async function start\(\)\{[\s\S]*?\n\}\s*<\/script>\s*<scri
 }
 </script><script>if("serviceWorker"in navigator)`);
 
-html = html.replace(/async function fetchExamples\(k\)\{[\s\S]*?\n\}function renderEmpty/,
+const examplesPattern = /async function fetchExamples\(k\)\{[\s\S]*?\}function renderEmpty/;
+must(examplesPattern.test(html), "fetchExamples function");
+html = html.replace(examplesPattern,
 `async function fetchExamples(k){if(state.examples[k.id])return;try{const res=await fetch(WORDS_URL(k.character),{cache:"force-cache"});if(!res.ok)throw new Error("examples request failed");const data=await res.json();const seen=new Set(),out=[];for(const e of data){const meaning=(e.meanings||[]).flatMap(m=>m.glosses||[]).slice(0,2).join("; ");for(const v of(e.variants||[])){const term=v.written;if(term&&term.includes(k.character)&&!seen.has(term)){seen.add(term);const reading=v.pronounced;if(reading)out.push({word:term,reading,meaning});if(out.length>=4)break}}if(out.length>=4)break}state.examples[k.id]=out;save()}catch(_){state.examples[k.id]=[];save()}}function renderEmpty`);
 
-html = html.replace(
-  '<div class="v">${item.on.join(" ・ ")||"—"}</div>',
-  '<div class="v reading-list">${item.on.length?item.on.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div>'
-);
-html = html.replace(
-  '<div class="v">${item.kun.join(" ・ ")||"—"}</div>',
-  '<div class="v reading-list">${item.kun.length?item.kun.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div>'
-);
+const onNeedle = '<div class="v">${item.on.join(" ・ ")||"—"}</div>';
+const onMarkup = '<div class="v reading-list">${item.on.length?item.on.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div>';
+if (html.includes(onNeedle)) html = html.replace(onNeedle, onMarkup);
+const kunNeedle = '<div class="v">${item.kun.join(" ・ ")||"—"}</div>';
+const kunMarkup = '<div class="v reading-list">${item.kun.length?item.kun.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div>';
+if (html.includes(kunNeedle)) html = html.replace(kunNeedle, kunMarkup);
 
-html = html.replace(/function renderExamples\(\)\{[\s\S]*?\n\}/,
-`function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\\"":"&quot;","'":"&#39;"}[c]||c))}function escapeAttr(value){return escapeHtml(value)}function renderExamples(){const el=$("examples");if(!el||!state.current)return;const ex=state.examples[state.current]||[];if(!ex.length){el.innerHTML='<div style="color:#8a8f98;font-size:12px;text-align:center;margin-top:10px">نمونه‌های واژگانی فعلاً در دسترس نیستند.</div>';return}el.innerHTML='<h3>نمونه‌های واژگانی</h3><div class="words">'+ex.map(x=>'<div class="word"><div><span>'+escapeHtml(x.word)+'</span> <small style="color:#6b7280;direction:ltr;display:inline-block">'+escapeHtml(x.reading||"")+'</small>'+(x.meaning?'<small class="example-meaning">'+escapeHtml(x.meaning)+'</small>':'')+'</div><button class="audiobtn" data-speak="'+escapeAttr(x.reading||x.word)+'" aria-label="تلفظ واژه">🔊</button></div>').join("")+'</div>';el.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)))}
-`);
+const renderPattern = /function renderExamples\(\)\{[\s\S]*?\}\$\("settingsBtn"\)/;
+must(renderPattern.test(html), "renderExamples function");
+html = html.replace(renderPattern,
+`function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\\"":"&quot;","'":"&#39;"}[c]||c))}function renderExamples(){const el=$("examples");if(!el||!state.current)return;const ex=state.examples[state.current]||[];if(!ex.length){el.innerHTML='<div style="color:#8a8f98;font-size:12px;text-align:center;margin-top:10px">نمونه‌های واژگانی فعلاً در دسترس نیستند؛ می‌توانی مرور را ادامه بدهی.</div>';return}el.innerHTML='<h3>نمونه‌های واژگانی</h3><div class="words">'+ex.map(x=>'<div class="word"><div><span>'+escapeHtml(x.word)+'</span> <small style="color:#6b7280;direction:ltr;display:inline-block">'+escapeHtml(x.reading||"")+'</small>'+(x.meaning?'<small class="example-meaning">'+escapeHtml(x.meaning)+'</small>':'')+'</div><button class="audiobtn" data-speak="'+escapeHtml(x.reading||x.word)+'" aria-label="تلفظ واژه">🔊</button></div>').join("")+'</div>';el.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)))}$("settingsBtn")`);
 
 html = html.replace(/دورهٔ ۲۰۰۰ کانجی تمام شد/g, "دورهٔ ۲۱۳۶ کانجی تمام شد");
 
