@@ -15,13 +15,13 @@
 </head>
 <body>
 <div class="wrap"><header><div class="brand"><h1>Kanji 5</h1><p>هر روز فقط ۵ کانجی؛ مرورها را الگوریتم تنظیم می‌کند.</p></div><div style="display:flex;gap:8px"><button class="iconbtn" id="statsBtn" aria-label="آمار">📊</button><button class="iconbtn" id="settingsBtn" aria-label="تنظیمات">⚙️</button></div></header>
-<section id="loading" class="panel"><div><div class="spinner"></div><div>در حال آماده‌سازی ۲۰۰۰ کانجی...</div><div id="loadStatus" style="color:#6b7280;font-size:13px;margin-top:7px">دریافت دادهٔ Jōyō و رتبهٔ فراوانی</div></div></section>
-<main id="app" hidden><div class="grid"><div class="stat"><div class="n" id="dueCount">0</div><div class="l">مرورهای امروز</div></div><div class="stat"><div class="n" id="newCount">0</div><div class="l">کانجی جدید امروز</div></div><div class="stat"><div class="n" id="masteredCount">0</div><div class="l">یادگرفته‌شده</div></div><div class="stat streak"><div class="n" id="streakCount">0🔥</div><div class="l">روز پیاپی</div></div></div><div class="progress"><div id="bar" style="width:0%"></div></div><div class="goalrow"><span id="goalLabel">هدف روزانه: ۰/۲۰</span><span id="goalDone" style="display:none">🎉 تکمیل شد</span></div><div class="progress goal"><div id="goalBar" style="width:0%"></div></div><section class="panel" id="studyPanel"><div id="study"></div></section><div class="footer">دادهٔ کانجی: Jōyō 2136 بر پایهٔ KANJIDIC2؛ این نسخه ۲۰۰۰ مورد اول را بر اساس رتبهٔ newspaper frequency انتخاب می‌کند. مرور فاصله‌دار: FSRS. اطلاعات یادگیری شما در همین مرورگر ذخیره می‌شود.</div></main></div>
+<section id="loading" class="panel"><div><div class="spinner"></div><div>در حال آماده‌سازی ۲۱۳۶ کانجی...</div><div id="loadStatus" style="color:#6b7280;font-size:13px;margin-top:7px">دریافت دادهٔ Jōyō و رتبهٔ فراوانی</div></div></section>
+<main id="app" hidden><div class="grid"><div class="stat"><div class="n" id="dueCount">0</div><div class="l">مرورهای امروز</div></div><div class="stat"><div class="n" id="newCount">0</div><div class="l">کانجی جدید امروز</div></div><div class="stat"><div class="n" id="masteredCount">0</div><div class="l">یادگرفته‌شده</div></div><div class="stat streak"><div class="n" id="streakCount">0🔥</div><div class="l">روز پیاپی</div></div></div><div class="progress"><div id="bar" style="width:0%"></div></div><div class="goalrow"><span id="goalLabel">هدف روزانه: ۰/۲۰</span><span id="goalDone" style="display:none">🎉 تکمیل شد</span></div><div class="progress goal"><div id="goalBar" style="width:0%"></div></div><section class="panel" id="studyPanel"><div id="study"></div></section><div class="footer">دادهٔ کانجی: Jōyō 2136 بر پایهٔ KANJIDIC2؛ این نسخه شامل هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency است. مرور فاصله‌دار: FSRS. اطلاعات یادگیری شما در همین مرورگر ذخیره می‌شود.</div></main></div>
 <div id="toast" class="toast"></div><dialog id="settingsDialog"><div class="modal"><h2>تنظیمات</h2><div class="setting"><span>کانجی جدید در روز</span><input id="dailyNew" type="number" min="1" max="30" step="1"></div><div class="setting"><span>هدف تعداد مرور روزانه</span><input id="dailyGoal" type="number" min="1" max="500" step="1"></div><div class="setting"><span>آستانهٔ Leech (تعداد خطا)</span><input id="leechThreshold" type="number" min="2" max="30" step="1"></div><div class="setting"><span>هدف حفظ فعال</span><span>90%</span></div><div class="setting"><span>حداکثر بازهٔ مرور</span><span>36500 روز</span></div><div class="setting"><span>پاک کردن تمام پیشرفت</span><button class="secondary" id="resetBtn">Reset</button></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeSettings">بستن</button><button class="primary" id="saveSettings">ذخیره</button></div></div></dialog>
 <dialog id="statsDialog"><div class="modal"><h2>آمار</h2><div id="statsBody"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeStats">بستن</button></div></div></dialog>
 <script type="module">
 import { createEmptyCard, fsrs, Rating } from "https://esm.sh/ts-fsrs@6.0.0-beta.7";
-const DATA_URL="./kanji-joyo.json";
+const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
 const STORAGE="kanji5-v1";
 const DEFAULTS={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
@@ -40,12 +40,12 @@ async function loadDeck(){
   if(!res.ok)throw new Error("Could not load local kanji dataset");
   const data=await res.json();
   const all=Array.isArray(data)?data:(data.kanji||[]);
-  const ranked=all.filter(x=>x.frequency!=null).sort((a,b)=>a.frequency-b.frequency);
-  if(ranked.length<2000)throw new Error("Kanji dataset contains fewer than 2000 frequency-ranked entries");
-  state.deck=ranked.slice(0,2000).map((x,i)=>({id:x.character,character:x.character,meaning:(x.meanings?.en||[]).slice(0,3),on:(x.readings?.on||[]).slice(0,4),kun:(x.readings?.kun||[]).slice(0,4),strokes:x.stroke_count,grade:x.grade,jlpt:x.jlpt_waller||null,frequency:x.frequency,order:i+1}));
+
+  if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);
+  state.deck=all;
   localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));
 }
-function loadDeckFromCache(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2000){state.deck=x;return true}}catch(_){}return false}
+function loadDeckFromCache(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2136){state.deck=x;return true}}catch(_){}return false}
 function ensureCard(item){if(!state.cards[item.id])state.cards[item.id]={card:createEmptyCard(),reviews:0,lapses:0,learnedAt:null};return state.cards[item.id]}
 function dueNow(card){return card&&card.due&&new Date(card.due)<=new Date()}
 function buildQueue(){const due=state.deck.filter(k=>state.cards[k.id]?.card&&dueNow(state.cards[k.id].card)).map(k=>k.id);for(let i=due.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[due[i],due[j]]=[due[j],due[i]]}const newCards=[];if(state.todayNew<state.settings.dailyNew)for(const item of state.deck)if(!state.cards[item.id]){newCards.push(item.id);if(newCards.length>=state.settings.dailyNew-state.todayNew)break}state.queue=[...due,...newCards];return state.queue}
