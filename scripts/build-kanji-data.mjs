@@ -4,7 +4,6 @@ const SOURCE = "kanji-joyo.json";
 const OUT = "kanji-data.json";
 
 const source = JSON.parse(await fs.readFile(SOURCE, "utf8"));
-
 const ranked = (source.kanji || [])
   .filter(x => x.frequency != null)
   .sort((a, b) => a.frequency - b.frequency)
@@ -26,7 +25,7 @@ if (ranked.length !== 2000) throw new Error(`Expected 2000 kanji, got ${ranked.l
 
 await fs.writeFile(OUT, JSON.stringify({
   version: 1,
-  count: ranked.length,
+  count: 2000,
   source: "KANJIDIC2 via jkindrix/japanese-language-data",
   selection: "Top 2000 Jōyō kanji by newspaper frequency rank",
   kanji: ranked
