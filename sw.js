@@ -1,6 +1,6 @@
-const CACHE = "kanji5-shell-v9";
+const CACHE = "kanji5-shell-v10";
 const DATA_CACHE = "kanji5-data-v5";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.2-enhancements.js", "./v1.2-runtime-fixes.js"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.2-enhancements.js", "./v1.2-runtime-fixes.js", "./supabase-config.js", "./supabase-sync.js"];
 const DATA_URL = new URL("./kanji-data.json", self.location.href).href;
 
 self.addEventListener("install", event => {
