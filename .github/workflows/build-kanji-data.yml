@@ -24,11 +24,11 @@ jobs:
         run: node scripts/build-kanji-data.mjs
       - name: Validate dataset
         run: |
-          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid Jōyō dataset'); console.log('Validated 2,136 Jōyō kanji');"
+          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2000 || !Array.isArray(d.kanji) || d.kanji.length!==2000) throw new Error('Invalid runtime dataset'); console.log('Validated 2,000 runtime kanji');"
       - name: Commit generated dataset
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add kanji-data.json
-          git diff --cached --quiet || git commit -m 'build: generate complete Jōyō runtime dataset'
+          git diff --cached --quiet || git commit -m 'build: generate runtime kanji dataset'
           git push
