@@ -31,5 +31,7 @@ if (!BOOTSTRAP_PATTERN.test(html)) {
   html = html.replace(moduleMarker, `${BOOTSTRAP}${moduleMarker}`);
 }
 
+html = html.replace(/دورهٔ ۲۰۰۰ کانجی تمام شد/g, "دورهٔ ۲۱۳۶ کانجی تمام شد");
+
 await fs.writeFile(FILE, html, "utf8");
 console.log(`Applied v1.2 educational build to ${FILE}.`);
