@@ -3,6 +3,7 @@ const index=fs.readFileSync("index.html","utf8");
 const sw=fs.readFileSync("sw.js","utf8");
 const enhancer=fs.readFileSync("v1.2-enhancements.js","utf8");
 const bootstrap=fs.readFileSync("scripts/apply-v1.2.mjs","utf8");
+const runtimeFix=fs.readFileSync("v1.2-runtime-fixes.js","utf8");
 const shell=sw.match(/const SHELL = ([^;]+);/)?.[1]||"";
 const checks=[
 ["runtime dataset URL",index.includes('const DATA_URL="./kanji-data.json";')],
@@ -17,8 +18,9 @@ const checks=[
 ["dataset cache invalidation",bootstrap.includes('kanji5-deck-version')&&bootstrap.includes('v1.2-dataset-2136')],
 ["no legacy 2000 end-message",!index.includes("دورهٔ ۲۰۰۰ کانجی تمام شد")],
 ["mobile study-first layout",index.includes('id="v1.2-mobile-fix"')&&index.includes('#studyPanel{order:1')],
-["startup failure recovery",bootstrap.includes('v1.2-loading-watchdog')&&bootstrap.includes('id="v12Retry"')],
-["example translations",bootstrap.includes('meanings=(e.meanings||[])')&&bootstrap.includes('class="example-meaning"')],
+["startup failure recovery",runtimeFix.includes("STARTUP_TIMEOUT")&&runtimeFix.includes("v12RuntimeRetry")],
+["example translation recovery",runtimeFix.includes("e.meanings")&&runtimeFix.includes("example-meaning")],
+["runtime fixes injected",index.includes('<script src="./v1.2-runtime-fixes.js"></script>')],
 ["individual reading audio",index.includes("reading-list")&&index.includes("data-speak=\"${r}\"")]
 ];
 const failed=checks.filter(([,ok])=>!ok);
