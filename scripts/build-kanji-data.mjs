@@ -14,8 +14,8 @@ if (allKanji.length !== COUNT) {
 const ranked = allKanji
   .slice()
   .sort((a, b) => {
-    const af = Number.isFinite(Number(a.frequency)) ? Number(a.frequency) : Infinity;
-    const bf = Number.isFinite(Number(b.frequency)) ? Number(b.frequency) : Infinity;
+    const af = a.frequency == null ? Infinity : Number(a.frequency);
+    const bf = b.frequency == null ? Infinity : Number(b.frequency);
     return af - bf;
   })
   .map((x, i) => ({
