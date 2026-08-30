@@ -16,20 +16,91 @@
     .replace(/[\s\u3000]+/g, "")
     .replace(/[。、・,.;:!?！？\-ー]/g, "");
 
+  const ROMAJI_VARIANTS = [
+    ["shi", "し"], ["chi", "ち"], ["tsu", "つ"], ["fu", "ふ"], ["ji", "じ"], ["dzu", "づ"],
+    ["sha", "しゃ"], ["shu", "しゅ"], ["sho", "しょ"], ["cha", "ちゃ"], ["chu", "ちゅ"], ["cho", "ちょ"],
+    ["ja", "じゃ"], ["ju", "じゅ"], ["jo", "じょ"],
+    ["kya", "きゃ"], ["kyu", "きゅ"], ["kyo", "きょ"], ["gya", "ぎゃ"], ["gyu", "ぎゅ"], ["gyo", "ぎょ"],
+    ["nya", "にゃ"], ["nyu", "にゅ"], ["nyo", "にょ"], ["hya", "ひゃ"], ["hyu", "ひゅ"], ["hyo", "ひょ"],
+    ["mya", "みゃ"], ["myu", "みゅ"], ["myo", "みょ"], ["rya", "りゃ"], ["ryu", "りゅ"], ["ryo", "りょ"],
+    ["bya", "びゃ"], ["byu", "びゅ"], ["byo", "びょ"], ["pya", "ぴゃ"], ["pyu", "ぴゅ"], ["pyo", "ぴょ"],
+    ["ja", "ぢゃ"], ["ju", "ぢゅ"], ["jo", "ぢょ"],
+    ["a", "あ"], ["i", "い"], ["u", "う"], ["e", "え"], ["o", "お"],
+    ["ka", "か"], ["ki", "き"], ["ku", "く"], ["ke", "け"], ["ko", "こ"],
+    ["sa", "さ"], ["su", "す"], ["se", "せ"], ["so", "そ"],
+    ["ta", "た"], ["te", "て"], ["to", "と"],
+    ["na", "な"], ["ni", "に"], ["nu", "ぬ"], ["ne", "ね"], ["no", "の"],
+    ["ha", "は"], ["hi", "ひ"], ["he", "へ"], ["ho", "ほ"],
+    ["ma", "ま"], ["mi", "み"], ["mu", "む"], ["me", "め"], ["mo", "も"],
+    ["ya", "や"], ["yu", "ゆ"], ["yo", "よ"], ["ra", "ら"], ["ri", "り"], ["ru", "る"], ["re", "れ"], ["ro", "ろ"],
+    ["wa", "わ"], ["wo", "を"], ["n", "ん"],
+    ["ga", "が"], ["gi", "ぎ"], ["gu", "ぐ"], ["ge", "げ"], ["go", "ご"],
+    ["za", "ざ"], ["zu", "ず"], ["ze", "ぜ"], ["zo", "ぞ"],
+    ["da", "だ"], ["de", "で"], ["do", "ど"], ["ba", "ば"], ["bi", "び"], ["bu", "ぶ"], ["be", "べ"], ["bo", "ぼ"],
+    ["pa", "ぱ"], ["pi", "ぴ"], ["pu", "ぷ"], ["pe", "ぺ"], ["po", "ぽ"],
+    ["va", "ゔぁ"], ["vi", "ゔぃ"], ["ve", "ゔぇ"], ["vo", "ゔぉ"], ["vu", "ゔ"],
+    ["di", "ぢ"], ["du", "づ"], ["ti", "ち"], ["tu", "つ"], ["si", "し"], ["hu", "ふ"], ["zi", "じ"], ["wi", "うぃ"], ["we", "うぇ"]
+  ];
+
+  const HIRA_TO_ROMAJI = new Map([
+    ["あ","a"],["い","i"],["う","u"],["え","e"],["お","o"],["か","ka"],["き","ki"],["く","ku"],["け","ke"],["こ","ko"],
+    ["さ","sa"],["し","shi"],["す","su"],["せ","se"],["そ","so"],["た","ta"],["ち","chi"],["つ","tsu"],["て","te"],["と","to"],
+    ["な","na"],["に","ni"],["ぬ","nu"],["ね","ne"],["の","no"],["は","ha"],["ひ","hi"],["ふ","fu"],["へ","he"],["ほ","ho"],
+    ["ま","ma"],["み","mi"],["む","mu"],["め","me"],["も","mo"],["や","ya"],["ゆ","yu"],["よ","yo"],["ら","ra"],["り","ri"],["る","ru"],["れ","re"],["ろ","ro"],
+    ["わ","wa"],["を","o"],["ん","n"],["が","ga"],["ぎ","gi"],["ぐ","gu"],["げ","ge"],["ご","go"],["ざ","za"],["じ","ji"],["ず","zu"],["ぜ","ze"],["ぞ","zo"],
+    ["だ","da"],["ぢ","ji"],["づ","zu"],["で","de"],["ど","do"],["ば","ba"],["び","bi"],["ぶ","bu"],["べ","be"],["ぼ","bo"],
+    ["ぱ","pa"],["ぴ","pi"],["ぷ","pu"],["ぺ","pe"],["ぽ","po"],["ゔ","vu"],
+    ["きゃ","kya"],["きゅ","kyu"],["きょ","kyo"],["しゃ","sha"],["しゅ","shu"],["しょ","sho"],["ちゃ","cha"],["ちゅ","chu"],["ちょ","cho"],
+    ["にゃ","nya"],["にゅ","nyu"],["にょ","nyo"],["ひゃ","hya"],["ひゅ","hyu"],["ひょ","hyo"],["みゃ","mya"],["みゅ","myu"],["みょ","myo"],
+    ["りゃ","rya"],["りゅ","ryu"],["りょ","ryo"],["ぎゃ","gya"],["ぎゅ","gyu"],["ぎょ","gyo"],["じゃ","ja"],["じゅ","ju"],["じょ","jo"],
+    ["びゃ","bya"],["びゅ","byu"],["びょ","byo"],["ぴゃ","pya"],["ぴゅ","pyu"],["ぴょ","pyo"]
+  ]);
+
+  function kanaToRomaji(value) {
+    const input = String(value || "")
+      .normalize("NFKC")
+      .replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
+      .replace(/ー/g, "");
+    let out = "";
+    for (let i = 0; i < input.length;) {
+      if (input[i] === "っ") {
+        const pair = input.slice(i + 1, i + 3);
+        const tri = input.slice(i + 1, i + 4);
+        const next = HIRA_TO_ROMAJI.get(tri) || HIRA_TO_ROMAJI.get(pair) || HIRA_TO_ROMAJI.get(input[i + 1]) || "";
+        out += next && /^[bcdfghjklmnpqrstvwxyz]/.test(next) ? next[0] : "";
+        i += 1;
+        continue;
+      }
+      const tri = input.slice(i, i + 3);
+      const pair = input.slice(i, i + 2);
+      if (HIRA_TO_ROMAJI.has(tri)) { out += HIRA_TO_ROMAJI.get(tri); i += 3; continue; }
+      if (HIRA_TO_ROMAJI.has(pair)) { out += HIRA_TO_ROMAJI.get(pair); i += 2; continue; }
+      out += HIRA_TO_ROMAJI.get(input[i]) || input[i];
+      i += 1;
+    }
+    return out;
+  }
+
+  function normalizeRomaji(value) {
+    let s = normalize(value).replace(/[^a-z]/g, "");
+    const variants = [
+      [/shi/g,"shi"],[/si/g,"shi"],[/chi/g,"chi"],[/ti/g,"chi"],[/tsu/g,"tsu"],[/tu/g,"tsu"],[/fu/g,"fu"],[/hu/g,"fu"],
+      [/ji/g,"ji"],[/zi/g,"ji"],[/dzu/g,"zu"],[/du/g,"zu"],[/di/g,"ji"],[/wo/g,"o"]
+    ];
+    for (const [re, replacement] of variants) s = s.replace(re, replacement);
+    return s;
+  }
+
   function loadKnowledge() {
     try {
       const raw = localStorage.getItem(KNOWLEDGE_KEY);
       const value = raw ? JSON.parse(raw) : {};
       return value && typeof value === "object" ? value : {};
-    } catch (_) {
-      return {};
-    }
+    } catch (_) { return {}; }
   }
 
   function saveKnowledge(value) {
-    try {
-      localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value));
-    } catch (_) {}
+    try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value)); } catch (_) {}
   }
 
   function getStats(character, mode) {
@@ -45,27 +116,18 @@
   function choosePrompt(character) {
     const meaning = getStats(character, "meaning");
     const reading = getStats(character, "reading");
-
-    if (!meaning.attempts && !reading.attempts) {
-      return Math.random() < 0.5 ? "meaning" : "reading";
-    }
+    if (!meaning.attempts && !reading.attempts) return Math.random() < 0.5 ? "meaning" : "reading";
     if (!meaning.attempts) return "meaning";
     if (!reading.attempts) return "reading";
-
     const meaningScore = score(character, "meaning");
     const readingScore = score(character, "reading");
-
-    if (Math.abs(meaningScore - readingScore) >= 0.10) {
-      return meaningScore < readingScore ? "meaning" : "reading";
-    }
-
+    if (Math.abs(meaningScore - readingScore) >= 0.10) return meaningScore < readingScore ? "meaning" : "reading";
     return loadKnowledge()[character]?.lastPrompt === "meaning" ? "reading" : "meaning";
   }
 
   async function loadDeckIndex() {
     if (deckIndex) return deckIndex;
     if (deckLoadPromise) return deckLoadPromise;
-
     deckLoadPromise = (async () => {
       try {
         const raw = localStorage.getItem("kanji5-deck");
@@ -74,18 +136,14 @@
           deckIndex = new Map(cached.map(item => [item.character, item]));
           return deckIndex;
         }
-
         const response = await fetch("./kanji-data.json", { cache: "force-cache" });
         if (!response.ok) throw new Error("dataset load failed");
         const data = await response.json();
         const items = Array.isArray(data) ? data : data.kanji || [];
         deckIndex = new Map(items.map(item => [item.character, item]));
-      } catch (_) {
-        deckIndex = new Map();
-      }
+      } catch (_) { deckIndex = new Map(); }
       return deckIndex;
     })();
-
     return deckLoadPromise;
   }
 
@@ -94,7 +152,6 @@
     if (!item) return null;
     const answer = normalize(value);
     if (!answer) return false;
-
     if (mode === "meaning") {
       return (item.meaning || []).some(meaning => {
         const canonical = normalize(meaning);
@@ -102,9 +159,12 @@
       });
     }
 
+    const answerKana = answer;
+    const answerRomaji = normalizeRomaji(answer);
     return [...(item.on || []), ...(item.kun || [])].some(reading => {
-      const canonical = normalize(reading);
-      return canonical && answer === canonical;
+      const canonicalKana = normalize(reading);
+      const canonicalRomaji = normalizeRomaji(kanaToRomaji(canonicalKana));
+      return answerKana === canonicalKana || (answerRomaji && answerRomaji === canonicalRomaji);
     });
   }
 
@@ -125,11 +185,9 @@
     activeCharacter = $(".kanji")?.textContent?.trim() || "";
     activePrompt = choosePrompt(activeCharacter);
     originalRevealButton = document.getElementById("revealBtn");
-
     const prompt = activePrompt === "meaning"
       ? "معنی این کانجی چیست؟ سعی کن حداقل یک معنی را از حافظه بنویسی."
-      : "حداقل یک خوانش رایج این کانجی را به kana از حافظه بنویس.";
-
+      : "حداقل یک خوانش رایج این کانجی را از حافظه بنویس؛ kana یا romaji هر دو قابل قبول‌اند.";
     const gate = document.createElement("div");
     gate.className = "v12-recall-gate";
     gate.innerHTML = `
@@ -140,7 +198,6 @@
         <button id="v12SubmitRecall" class="primary" style="margin-top:9px;width:100%">ثبت تلاش و نمایش پاسخ</button>
         <div style="color:var(--muted);font-size:11px;text-align:center;margin-top:7px">برای ثبت با صفحه‌کلید: Ctrl+Enter</div>
       </div>`;
-
     originalRevealButton?.replaceWith(gate);
     void loadDeckIndex();
     setTimeout(() => $("#v12RecallInput")?.focus(), 0);
@@ -149,28 +206,15 @@
   async function submitRecall() {
     const input = $("#v12RecallInput");
     const value = input?.value || "";
-    if (!normalize(value)) {
-      input?.focus();
-      return;
-    }
-
+    if (!normalize(value)) { input?.focus(); return; }
     await loadDeckIndex();
     const correct = checkRecall(activeCharacter, activePrompt, value);
     recordAttempt(activeCharacter, activePrompt, correct);
-
     try {
-      localStorage.setItem(`${V12}-last-attempt`, JSON.stringify({
-        character: activeCharacter,
-        mode: activePrompt,
-        attemptedAt: new Date().toISOString(),
-        hadAttempt: true,
-        correct
-      }));
+      localStorage.setItem(`${V12}-last-attempt`, JSON.stringify({ character: activeCharacter, mode: activePrompt, attemptedAt: new Date().toISOString(), hadAttempt: true, correct }));
     } catch (_) {}
-
     const gate = input?.closest(".v12-recall-gate");
     if (!originalRevealButton || !gate) return;
-
     gate.replaceWith(originalRevealButton);
     allowNativeReveal = true;
     originalRevealButton.click();
@@ -193,21 +237,17 @@
     const answerBox = $("#answerBox");
     const ratings = $("#ratings");
     if (!answerBox || !ratings || answerBox.dataset.v12Enhanced === "1") return;
-
     answerBox.dataset.v12Enhanced = "1";
     const readings = answerBox.querySelector(".readings");
     const examples = answerBox.querySelector(".examples");
     const meta = answerBox.querySelector(".meta");
-
     if (readings) readings.style.display = "none";
     if (examples) examples.style.display = "none";
     if (meta) meta.style.display = "none";
     ratings.style.display = "grid";
-
     const readingsButton = addStageButton(answerBox, "نمایش خوانش‌ها", () => {
       if (readings) readings.style.display = "grid";
       readingsButton.remove();
-
       if (examples) {
         const examplesButton = addStageButton(answerBox, "نمایش واژه‌های نمونه (اختیاری)", () => {
           examples.style.display = "block";
@@ -226,37 +266,22 @@
 
   document.addEventListener("click", async event => {
     const target = event.target;
-
     if (target?.id === "revealBtn" && !allowNativeReveal) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      makeRecallGate();
-      return;
+      event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return;
     }
-
-    if (target?.id === "v12SubmitRecall") {
-      event.preventDefault();
-      await submitRecall();
-    }
+    if (target?.id === "v12SubmitRecall") { event.preventDefault(); await submitRecall(); }
   }, true);
 
   document.addEventListener("keydown", event => {
     if (event.target?.id === "v12RecallInput" && (event.ctrlKey || event.metaKey) && event.key === "Enter") {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      void submitRecall();
+      event.preventDefault(); event.stopImmediatePropagation(); void submitRecall();
     }
   }, true);
 
   window.addEventListener("offline", showOfflineHint);
-
   const observer = new MutationObserver(() => {
     const answerBox = $("#answerBox");
     if (answerBox?.classList.contains("show")) setupProgressiveReveal();
   });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
