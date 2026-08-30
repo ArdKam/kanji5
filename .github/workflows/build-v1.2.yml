@@ -7,9 +7,12 @@ on:
       - 'index.html'
       - 'kanji-joyo.json'
       - 'scripts/build-kanji-data.mjs'
+      - 'scripts/apply-kanji-data.mjs'
       - 'scripts/apply-v1.2.mjs'
+      - 'scripts/apply-runtime-fixes.mjs'
       - 'scripts/smoke-test-v1.2.mjs'
       - 'v1.2-enhancements.js'
+      - 'v1.2-runtime-fixes.js'
       - 'sw.js'
       - '.github/workflows/build-v1.2.yml'
   workflow_dispatch:
@@ -29,12 +32,14 @@ jobs:
         run: node scripts/build-kanji-data.mjs
       - name: Apply v1.2 learning flow
         run: node scripts/apply-v1.2.mjs
+      - name: Apply runtime fallback fixes
+        run: node scripts/apply-runtime-fixes.mjs
       - name: Validate runtime dataset
         run: |
           node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset'); console.log('Validated 2,136 Jōyō kanji');"
       - name: Validate v1.2 script is included
         run: |
-          node -e "const fs=require('fs'); const h=fs.readFileSync('index.html','utf8'); if(!h.includes('<script src=\"./v1.2-enhancements.js\"></script>')) throw new Error('v1.2 enhancement script is not included'); if(!h.includes('kanji5-deck-version')) throw new Error('dataset cache version bootstrap is missing'); console.log('Validated v1.2 injection and cache versioning');"
+          node -e "const fs=require('fs'); const h=fs.readFileSync('index.html','utf8'); if(!h.includes('<script src=\"./v1.2-enhancements.js\"></script>')) throw new Error('v1.2 enhancement script is not included'); if(!h.includes('kanji5-deck-version')) throw new Error('dataset cache version bootstrap is missing'); if(!h.includes('<script src=\"./v1.2-runtime-fixes.js\"></script>')) throw new Error('runtime fixes script is not included'); console.log('Validated v1.2 injection, cache versioning, and runtime fixes');"
       - name: Validate service worker versions
         run: |
           node -e "const fs=require('fs'); const s=fs.readFileSync('sw.js','utf8'); if(!s.includes('kanji5-shell-v7') || !s.includes('kanji5-data-v5')) throw new Error('Service worker cache versions are not updated'); if(s.includes('./kanji-data.json\"]')) throw new Error('kanji-data.json must not be in shell precache'); console.log('Validated separate shell/data caches');"
@@ -45,4 +50,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html kanji-data.json
-          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.2): apply educational learning flow [skip ci]'; git push; fi
+          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.2): apply release fixes [skip ci]'; git push; fi
