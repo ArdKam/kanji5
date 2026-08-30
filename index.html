@@ -53,14 +53,15 @@
     try {
       if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(r => r.unregister()));
+        await Promise.all(registrations.map(registration => registration.unregister()));
       }
       if ("caches" in window) {
         const keys = await caches.keys();
-        await Promise.all(keys.filter(k => k.startsWith("kanji5-")).map(k => caches.delete(k)));
+        await Promise.all(keys.filter(key => key.startsWith("kanji5-")).map(key => caches.delete(key)));
       }
     } catch (_) {}
   }
+
   function showFallback() {
     if (shown) return;
     const loading = document.getElementById("loading");
@@ -75,6 +76,7 @@
       location.reload();
     }, { once: true });
   }
+
   const observer = new MutationObserver(() => {
     const loading = document.getElementById("loading");
     const app = document.getElementById("app");
