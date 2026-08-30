@@ -1,6 +1,6 @@
-const CACHE = "kanji5-shell-v7";
+const CACHE = "kanji5-shell-v8";
 const DATA_CACHE = "kanji5-data-v5";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.2-enhancements.js"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.2-enhancements.js", "./v1.2-runtime-fixes.js"];
 const DATA_URL = new URL("./kanji-data.json", self.location.href).href;
 
 self.addEventListener("install", event => {
@@ -35,7 +35,6 @@ async function networkFirst(request, cacheName, fallbackRequest = request) {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
-
   const url = new URL(request.url);
 
   if (request.mode === "navigate") {
