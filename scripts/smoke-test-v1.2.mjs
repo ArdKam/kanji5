@@ -17,8 +17,8 @@ const checks=[
 ["dataset cache invalidation",bootstrap.includes('kanji5-deck-version')&&bootstrap.includes('v1.2-dataset-2136')],
 ["no legacy 2000 end-message",!index.includes("دورهٔ ۲۰۰۰ کانجی تمام شد")],
 ["mobile study-first layout",index.includes('id="v1.2-mobile-fix"')&&index.includes('#studyPanel{order:1')],
-["startup failure recovery",index.includes('id="v1.2-loading-watchdog"')&&index.includes("v12Retry")],
-["example translations",bootstrap.includes("e.meanings")&&bootstrap.includes("example-meaning")],
+["startup failure recovery",bootstrap.includes('v1.2-loading-watchdog')&&bootstrap.includes('id="v12Retry"')],
+["example translations",bootstrap.includes('meanings=(e.meanings||[])')&&bootstrap.includes('class="example-meaning"')],
 ["individual reading audio",index.includes("reading-list")&&index.includes("data-speak=\"${r}\"")]
 ];
 const failed=checks.filter(([,ok])=>!ok);
