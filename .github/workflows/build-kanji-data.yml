@@ -22,13 +22,32 @@ jobs:
           node-version: 20
       - name: Generate runtime dataset
         run: node scripts/build-kanji-data.mjs
+      - name: Switch app to optimized runtime dataset
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'index.html';
+          let s = fs.readFileSync(path, 'utf8');
+          const replacements = [
+            ['const DATA_URL="./kanji-joyo.json";', 'const DATA_URL="./kanji-data.json";'],
+            ['در حال آماده‌سازی ۲۰۰۰ کانجی...', 'در حال آماده‌سازی ۲۱۳۶ کانجی...'],
+            ['این نسخه ۲۰۰۰ مورد اول را بر اساس رتبهٔ newspaper frequency انتخاب می‌کند.', 'این نسخه شامل هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency است.'],
+            ['''  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);\n  const ranked=all.filter(x=>x.frequency!=null).sort((a,b)=>a.frequency-b.frequency);\n  if(ranked.length<2000)throw new Error("Kanji dataset contains fewer than 2000 frequency-ranked entries");\n  state.deck=ranked.slice(0,2000).map((x,i)=>({id:x.character,character:x.character,meaning:(x.meanings?.en||[]).slice(0,3),on:(x.readings?.on||[]).slice(0,4),kun:(x.readings?.kun||[]).slice(0,4),strokes:x.stroke_count,grade:x.grade,jlpt:x.jlpt_waller||null,frequency:x.frequency,order:i+1}));''', '''  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);\n  if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);\n  state.deck=all;'''],
+            ['Array.isArray(x)&&x.length===2000', 'Array.isArray(x)&&x.length===2136']
+          ];
+          for (const [from, to] of replacements) {
+            if (!s.includes(from)) throw new Error(`Expected text not found: ${from.slice(0,80)}`);
+            s = s.replace(from, to);
+          }
+          fs.writeFileSync(path, s);
+          NODE
       - name: Validate dataset
         run: |
-          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2000 || !Array.isArray(d.kanji) || d.kanji.length!==2000) throw new Error('Invalid runtime dataset'); console.log('Validated 2,000 runtime kanji');"
-      - name: Commit generated dataset
+          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid Jōyō runtime dataset'); console.log('Validated 2,136 Jōyō kanji');"
+      - name: Commit generated dataset and runtime changes
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add kanji-data.json
-          git diff --cached --quiet || git commit -m 'build: generate runtime kanji dataset'
+          git add kanji-data.json index.html
+          git diff --cached --quiet || git commit -m 'build: generate optimized 2136-kanji runtime dataset'
           git push
