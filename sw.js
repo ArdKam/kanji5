@@ -4,21 +4,15 @@ const APP = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./ka
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(APP))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache => cache.addAll(APP)).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key.startsWith("kanji5-") && key !== CACHE && key !== DATA_CACHE)
-          .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key.startsWith("kanji5-") && key !== CACHE && key !== DATA_CACHE).map(key => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
 });
 
@@ -28,13 +22,11 @@ self.addEventListener("fetch", event => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE).then(cache => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request).then(response => response || caches.match("./index.html")))
+      fetch(request).then(response => {
+        const copy = response.clone();
+        caches.open(CACHE).then(cache => cache.put(request, copy));
+        return response;
+      }).catch(() => caches.match(request).then(response => response || caches.match("./index.html")))
     );
     return;
   }
