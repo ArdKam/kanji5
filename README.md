@@ -18,3 +18,12 @@
 - KANJIDIC2/EDRDG license: CC BY-SA 4.0
 - FSRS: ts-fsrs (MIT)
 - Example words: kanjiapi.dev / EDRDG-based data
+
+## نسخهٔ ۱.۱
+- 🔊 تلفظ کانجی، On'yomi/Kun'yomi و واژه‌های نمونه با Web Speech API
+- 📊 آمار: کل مرورها، دقت، مرورهای ۷ روز اخیر، وضعیت کارت‌ها
+- 🔥 رشتهٔ روزانه (streak) با رکورد طولانی‌ترین رشته
+- هدف تعداد مرور روزانه، قابل تنظیم، با نوار پیشرفت جدا
+- تشخیص Leech (کانجی‌های پرخطا) با آستانهٔ قابل تنظیم و نشان روی کارت
+- میان‌برهای صفحه‌کلید: Space برای نمایش پاسخ، ۱–۴ برای Again/Hard/Good/Easy
+
