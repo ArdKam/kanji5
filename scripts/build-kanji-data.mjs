@@ -5,10 +5,19 @@ const OUT = "kanji-data.json";
 const COUNT = 2136;
 
 const source = JSON.parse(await fs.readFile(SOURCE, "utf8"));
-const ranked = (source.kanji || [])
-  .filter(x => x.frequency != null)
-  .sort((a, b) => a.frequency - b.frequency)
-  .slice(0, COUNT)
+const allKanji = source.kanji || [];
+
+if (allKanji.length !== COUNT) {
+  throw new Error(`Expected ${COUNT} Jōyō kanji, got ${allKanji.length}`);
+}
+
+const ranked = allKanji
+  .slice()
+  .sort((a, b) => {
+    const af = Number.isFinite(Number(a.frequency)) ? Number(a.frequency) : Infinity;
+    const bf = Number.isFinite(Number(b.frequency)) ? Number(b.frequency) : Infinity;
+    return af - bf;
+  })
   .map((x, i) => ({
     id: x.character,
     character: x.character,
