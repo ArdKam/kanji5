@@ -16,50 +16,10 @@ const BOOTSTRAP = `<script>
 })();
 </script>`;
 const MOBILE_FIX = `<style id="v1.2-mobile-fix">
-@media(max-width:700px){
-  #app{display:flex;flex-direction:column}
-  #studyPanel{order:1;margin-top:0}
-  #app>.grid{order:2}
-  #app>.progress:not(.goal){order:3}
-  #app>.goalrow{order:4}
-  #app>.progress.goal{order:5}
-  #app>.footer{order:6}
-  #studyPanel .kanji{margin-top:0}
-  .reading-list{display:flex;flex-direction:column;gap:6px;align-items:center}
-}
-.reading-list{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
-.reading-entry{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 7px}
-.reading-entry .audiobtn{padding:2px 6px;font-size:11px;border-radius:7px}
-.example-meaning{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:2px;direction:ltr;text-align:left}
-.v12-recall-result{border-radius:12px;padding:10px;margin-top:9px;font-weight:800;text-align:center}
-.v12-recall-result.good{background:#dcfce7;color:#166534}
-.v12-recall-result.bad{background:#fee2e2;color:#991b1b}
-.v12-recall-result.unknown{background:#f3f4f6;color:#4b5563}
+@media(max-width:700px){#app{display:flex;flex-direction:column}#studyPanel{order:1;margin-top:0}#app>.grid{order:2}#app>.progress:not(.goal){order:3}#app>.goalrow{order:4}#app>.progress.goal{order:5}#app>.footer{order:6}#studyPanel .kanji{margin-top:0}.reading-list{display:flex;flex-direction:column;gap:6px;align-items:center}}
+.reading-list{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}.reading-entry{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 7px}.reading-entry .audiobtn{padding:2px 6px;font-size:11px;border-radius:7px}.example-meaning{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:2px;direction:ltr;text-align:left}.v12-recall-result{border-radius:12px;padding:10px;margin-top:9px;font-weight:800;text-align:center}.v12-recall-result.good{background:#dcfce7;color:#166534}.v12-recall-result.bad{background:#fee2e2;color:#991b1b}.v12-recall-result.unknown{background:#f3f4f6;color:#4b5563}
 </style>`;
-const RECALL_RESULT_FIX = `<script id="v1.2-recall-result-fix">
-(() => {
-  const KEY = "kanji5-v1.2-last-attempt";
-  const esc = value => String(value ?? "").replace(/[&<>\"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch] || ch));
-  let shown = null;
-  const paint = () => {
-    const kanji = document.querySelector(".kanji")?.textContent?.trim();
-    if (!kanji) return;
-    let attempt;
-    try { attempt = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (_) { return; }
-    if (!attempt || attempt.character !== kanji || !attempt.hadAttempt) return;
-    if (shown === `${kanji}:${attempt.attemptedAt}`) return;
-    const box = document.getElementById("answerBox");
-    if (!box || !box.classList.contains("show")) return;
-    const result = document.createElement("div");
-    result.className = `v12-recall-result ${attempt.correct === true ? "good" : attempt.correct === false ? "bad" : "unknown"}`;
-    result.textContent = attempt.correct === true ? "✅ پاسخ درست بود" : attempt.correct === false ? "❌ پاسخ درست نبود" : "ℹ️ تلاش ثبت شد؛ پاسخ خودکار قابل بررسی نبود";
-    box.querySelector(".answerbox")?.prepend(result);
-    shown = `${kanji}:${attempt.attemptedAt}`;
-  };
-  new MutationObserver(paint).observe(document.body,{childList:true,subtree:true});
-  setInterval(paint,500);
-})();
-</script>`;
+const RECALL_RESULT_FIX = '<script id="v1.2-recall-result-fix">\n(() => {\n  const KEY = "kanji5-v1.2-last-attempt";\n  let shown = null;\n  const paint = () => {\n    const kanji = document.querySelector(".kanji")?.textContent?.trim();\n    if (!kanji) return;\n    let attempt;\n    try { attempt = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (_) { return; }\n    if (!attempt || attempt.character !== kanji || !attempt.hadAttempt) return;\n    const stamp = kanji + ":" + attempt.attemptedAt;\n    if (shown === stamp) return;\n    const box = document.getElementById("answerBox");\n    const target = box?.querySelector(".answerbox");\n    if (!box || !box.classList.contains("show") || !target) return;\n    const result = document.createElement("div");\n    result.className = "v12-recall-result " + (attempt.correct === true ? "good" : attempt.correct === false ? "bad" : "unknown");\n    result.textContent = attempt.correct === true ? "✅ پاسخ درست بود" : attempt.correct === false ? "❌ پاسخ درست نبود — حالا پاسخ صحیح را ببین" : "ℹ️ تلاش ثبت شد؛ پاسخ خودکار قابل بررسی نبود";\n    target.prepend(result);\n    shown = stamp;\n  };\n  new MutationObserver(paint).observe(document.body, {childList:true, subtree:true});\n  setInterval(paint, 500);\n})();\n</script>';
 
 let html = await fs.readFile(FILE, "utf8");
 const must = (condition, label) => { if (!condition) throw new Error(`Could not find ${label}`); };
@@ -90,10 +50,7 @@ must(startPattern.test(html), "startup function");
 html = html.replace(startPattern,
 `async function start(){
   try{
-    const mod=await Promise.race([
-      import(FSRS_URL),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))
-    ]);
+    const mod=await Promise.race([import(FSRS_URL),new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);
     ({createEmptyCard,fsrs,Rating}=mod);
   }catch(e){
     console.error(e);
