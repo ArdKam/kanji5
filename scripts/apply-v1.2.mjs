@@ -45,7 +45,7 @@ if (html.includes('import { createEmptyCard, fsrs, Rating } from "https://esm.sh
 }
 if (!html.includes('const FSRS_URL=')) html = html.replace('const DATA_URL="./kanji-data.json";', 'const DATA_URL="./kanji-data.json";\nconst FSRS_URL="https://esm.sh/ts-fsrs@5.4.1?bundle";');
 
-const startPattern = /async function start\(\)\{[\s\S]*?\n\}\s*<\/script>\s*<script>if\("serviceWorker"in navigator\)/;
+const startPattern = /async function start\(\)\{[\s\S]*?\}<\/script>\s*<script>if\("serviceWorker"in navigator\)/;
 must(startPattern.test(html), "startup function");
 html = html.replace(startPattern,
 `async function start(){
@@ -69,7 +69,7 @@ html = html.replace(startPattern,
     $("retry").addEventListener("click",()=>location.reload());
   }
 }
-</script><script>if("serviceWorker"in navigator)`);
+</script><script>if("serviceWorker"in navigator`);
 
 const examplesPattern = /async function fetchExamples\(k\)\{[\s\S]*?\}function renderEmpty/;
 must(examplesPattern.test(html), "fetchExamples function");
