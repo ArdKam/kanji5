@@ -28,17 +28,13 @@ jobs:
           const fs = require('fs');
           const path = 'index.html';
           let s = fs.readFileSync(path, 'utf8');
-          const replacements = [
-            ['const DATA_URL="./kanji-joyo.json";', 'const DATA_URL="./kanji-data.json";'],
-            ['در حال آماده‌سازی ۲۰۰۰ کانجی...', 'در حال آماده‌سازی ۲۱۳۶ کانجی...'],
-            ['این نسخه ۲۰۰۰ مورد اول را بر اساس رتبهٔ newspaper frequency انتخاب می‌کند.', 'این نسخه شامل هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency است.'],
-            ['''  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);\n  const ranked=all.filter(x=>x.frequency!=null).sort((a,b)=>a.frequency-b.frequency);\n  if(ranked.length<2000)throw new Error("Kanji dataset contains fewer than 2000 frequency-ranked entries");\n  state.deck=ranked.slice(0,2000).map((x,i)=>({id:x.character,character:x.character,meaning:(x.meanings?.en||[]).slice(0,3),on:(x.readings?.on||[]).slice(0,4),kun:(x.readings?.kun||[]).slice(0,4),strokes:x.stroke_count,grade:x.grade,jlpt:x.jlpt_waller||null,frequency:x.frequency,order:i+1}));''', '''  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);\n  if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);\n  state.deck=all;'''],
-            ['Array.isArray(x)&&x.length===2000', 'Array.isArray(x)&&x.length===2136']
-          ];
-          for (const [from, to] of replacements) {
-            if (!s.includes(from)) throw new Error(`Expected text not found: ${from.slice(0,80)}`);
-            s = s.replace(from, to);
-          }
+          s = s.replace('const DATA_URL="./kanji-joyo.json";', 'const DATA_URL="./kanji-data.json";');
+          s = s.replace('در حال آماده‌سازی ۲۰۰۰ کانجی...', 'در حال آماده‌سازی ۲۱۳۶ کانجی...');
+          s = s.replace('این نسخه ۲۰۰۰ مورد اول را بر اساس رتبهٔ newspaper frequency انتخاب می‌کند.', 'این نسخه شامل هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency است.');
+          s = s.replace('  const ranked=all.filter(x=>x.frequency!=null).sort((a,b)=>a.frequency-b.frequency);', '');
+          s = s.replace('  if(ranked.length<2000)throw new Error("Kanji dataset contains fewer than 2000 frequency-ranked entries");', '  if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);');
+          s = s.replace('  state.deck=ranked.slice(0,2000).map((x,i)=>({id:x.character,character:x.character,meaning:(x.meanings?.en||[]).slice(0,3),on:(x.readings?.on||[]).slice(0,4),kun:(x.readings?.kun||[]).slice(0,4),strokes:x.stroke_count,grade:x.grade,jlpt:x.jlpt_waller||null,frequency:x.frequency,order:i+1}));', '  state.deck=all;');
+          s = s.replace('Array.isArray(x)&&x.length===2000', 'Array.isArray(x)&&x.length===2136');
           fs.writeFileSync(path, s);
           NODE
       - name: Validate dataset
