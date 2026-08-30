@@ -3,6 +3,7 @@
   const $ = (sel, root = document) => root.querySelector(sel);
 
   let activePrompt = null;
+  let originalRevealButton = null;
   let allowNativeReveal = false;
 
   const normalize = value => String(value || "")
@@ -15,9 +16,10 @@
     return Math.random() < 0.5 ? "meaning" : "reading";
   }
 
-  function makeRecallGate(item) {
+  function makeRecallGate() {
     const mode = choosePrompt();
     activePrompt = mode;
+    originalRevealButton = document.getElementById("revealBtn");
 
     const prompt = mode === "meaning"
       ? "معنی این کانجی چیست؟ سعی کن حداقل یک معنی را از حافظه بنویسی."
@@ -33,8 +35,7 @@
         <button id="v12SubmitRecall" class="primary" style="margin-top:9px;width:100%">ثبت تلاش و نمایش پاسخ</button>
       </div>`;
 
-    const reveal = document.getElementById("revealBtn");
-    if (reveal?.parentNode) reveal.replaceWith(gate);
+    originalRevealButton?.replaceWith(gate);
     setTimeout(() => document.getElementById("v12RecallInput")?.focus(), 0);
   }
 
@@ -64,17 +65,20 @@
     if (meta) meta.style.display = "none";
     ratings.style.display = "none";
 
-    addStageButton(answerBox, "نمایش خوانش‌ها", () => {
+    const readingsButton = addStageButton(answerBox, "نمایش خوانش‌ها", () => {
       if (readings) readings.style.display = "grid";
-      const btn = event?.currentTarget;
-      if (btn) btn.remove();
-      addStageButton(answerBox, "نمایش واژه‌های نمونه و آماده‌شدن برای امتیازدهی", () => {
-        if (examples) examples.style.display = "block";
-        if (meta) meta.style.display = "flex";
-        ratings.style.display = "grid";
-        const next = event?.currentTarget;
-        if (next) next.remove();
-      });
+      readingsButton.remove();
+
+      const examplesButton = addStageButton(
+        answerBox,
+        "نمایش واژه‌های نمونه و آماده‌شدن برای امتیازدهی",
+        () => {
+          if (examples) examples.style.display = "block";
+          if (meta) meta.style.display = "flex";
+          ratings.style.display = "grid";
+          examplesButton.remove();
+        }
+      );
     });
   }
 
@@ -84,8 +88,7 @@
     if (target?.id === "revealBtn" && !allowNativeReveal) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      const kanji = $(".kanji")?.textContent?.trim() || "";
-      makeRecallGate({ character: kanji });
+      makeRecallGate();
       return;
     }
 
@@ -99,20 +102,18 @@
 
       localStorage.setItem(`${V12}-last-attempt`, JSON.stringify({
         mode: activePrompt,
-        attemptedAt: new Date().toISOString()
+        attemptedAt: new Date().toISOString(),
+        hadAttempt: true
       }));
 
+      const gate = target.closest(".v12-recall-gate");
+      if (!originalRevealButton || !gate) return;
+
+      gate.replaceWith(originalRevealButton);
       allowNativeReveal = true;
-      const originalGate = target.closest(".v12-recall-gate");
-      originalGate?.replaceWith(Object.assign(document.createElement("button"), {
-        id: "revealBtn",
-        className: "reveal",
-        textContent: "نمایش پاسخ"
-      }));
-      const reveal = document.getElementById("revealBtn");
-      reveal?.click();
+      originalRevealButton.click();
       allowNativeReveal = false;
-      return;
+      originalRevealButton = null;
     }
   }, true);
 
@@ -121,7 +122,7 @@
     if (answerBox?.classList.contains("show")) setupProgressiveReveal();
   });
 
-  observer.observe(document.getElementById("study") || document.body, {
+  observer.observe(document.body, {
     childList: true,
     subtree: true
   });
