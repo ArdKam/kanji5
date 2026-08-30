@@ -1,10 +1,6 @@
-const CACHE = "kanji5-shell-v3";
-const DATA_CACHE = "kanji5-data-v1";
-const APP = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
-const DATA_HOSTS = new Set([
-  "raw.githubusercontent.com",
-  "kanjiapi.dev"
-]);
+const CACHE = "kanji5-shell-v4";
+const DATA_CACHE = "kanji5-data-v2";
+const APP = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./kanji-joyo.json"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -45,33 +41,31 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Same-origin static assets: serve cache immediately, then refresh them.
+  // Local static assets, including the bundled Kanji dataset.
+  // Cache-first avoids another network request for the large dataset.
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(request).then(cached => {
-        const network = fetch(request).then(response => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
           if (response.ok) {
             const copy = response.clone();
             caches.open(CACHE).then(cache => cache.put(request, copy));
           }
           return response;
-        }).catch(() => cached);
-        return cached || network;
+        });
       })
     );
     return;
   }
 
-  // Cache the large Kanji dataset and example-word responses for offline use.
-  // Network-first keeps data reasonably fresh while falling back to cache offline.
-  if (DATA_HOSTS.has(url.hostname)) {
+  // Example-word responses remain network-first and are cached for offline use.
+  if (url.hostname === "kanjiapi.dev") {
     event.respondWith(
       caches.open(DATA_CACHE).then(cache =>
         fetch(request)
           .then(response => {
-            if (response.ok) {
-              cache.put(request, response.clone());
-            }
+            if (response.ok) cache.put(request, response.clone());
             return response;
           })
           .catch(() => cache.match(request))
