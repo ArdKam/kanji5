@@ -17,8 +17,8 @@ const checks=[
 ["dataset cache invalidation",bootstrap.includes('kanji5-deck-version')&&bootstrap.includes('v1.2-dataset-2136')],
 ["no legacy 2000 end-message",!index.includes("دورهٔ ۲۰۰۰ کانجی تمام شد")],
 ["mobile study-first layout",index.includes('id="v1.2-mobile-fix"')&&index.includes('#studyPanel{order:1')],
-["FSRS startup guard",index.includes('const FSRS_URL="https://esm.sh/ts-fsrs@5.4.1?bundle"')&&index.includes("FSRS_LOAD_TIMEOUT")],
-["example translations",index.includes("e.meanings")&&index.includes("example-meaning")],
+["startup failure recovery",index.includes('id="v1.2-loading-watchdog"')&&index.includes("v12Retry")],
+["example translations",bootstrap.includes("e.meanings")&&bootstrap.includes("example-meaning")],
 ["individual reading audio",index.includes("reading-list")&&index.includes("data-speak=\"${r}\"")]
 ];
 const failed=checks.filter(([,ok])=>!ok);
