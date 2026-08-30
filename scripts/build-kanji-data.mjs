@@ -2,12 +2,13 @@ import fs from "node:fs/promises";
 
 const SOURCE = "kanji-joyo.json";
 const OUT = "kanji-data.json";
+const COUNT = 2136;
 
 const source = JSON.parse(await fs.readFile(SOURCE, "utf8"));
 const ranked = (source.kanji || [])
   .filter(x => x.frequency != null)
   .sort((a, b) => a.frequency - b.frequency)
-  .slice(0, 2000)
+  .slice(0, COUNT)
   .map((x, i) => ({
     id: x.character,
     character: x.character,
@@ -21,13 +22,13 @@ const ranked = (source.kanji || [])
     order: i + 1
   }));
 
-if (ranked.length !== 2000) throw new Error(`Expected 2000 kanji, got ${ranked.length}`);
+if (ranked.length !== COUNT) throw new Error(`Expected ${COUNT} kanji, got ${ranked.length}`);
 
 await fs.writeFile(OUT, JSON.stringify({
   version: 1,
-  count: 2000,
+  count: COUNT,
   source: "KANJIDIC2 via jkindrix/japanese-language-data",
-  selection: "Top 2000 Jōyō kanji by newspaper frequency rank",
+  selection: "All 2,136 Jōyō kanji by newspaper frequency rank",
   kanji: ranked
 }), "utf8");
 
