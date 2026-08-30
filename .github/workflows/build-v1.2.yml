@@ -1,0 +1,42 @@
+name: Build Kanji 5 v1.2
+
+on:
+  push:
+    branches: [feature/v1.2]
+    paths:
+      - 'index.html'
+      - 'kanji-joyo.json'
+      - 'scripts/build-kanji-data.mjs'
+      - 'scripts/apply-v1.2.mjs'
+      - 'v1.2-enhancements.js'
+      - '.github/workflows/build-v1.2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generate runtime dataset
+        run: node scripts/build-kanji-data.mjs
+      - name: Apply v1.2 learning flow
+        run: node scripts/apply-v1.2.mjs
+      - name: Validate runtime dataset
+        run: |
+          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset'); console.log('Validated 2,136 Jōyō kanji');"
+      - name: Validate v1.2 script is included
+        run: |
+          node -e "const fs=require('fs'); const h=fs.readFileSync('index.html','utf8'); if(!h.includes('<script src=\"./v1.2-enhancements.js\"></script>')) throw new Error('v1.2 enhancement script is not included'); console.log('Validated v1.2 script injection');"
+      - name: Commit generated build
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html kanji-data.json
+          git diff --cached --quiet || git commit -m 'build(v1.2): apply educational learning flow'
+          git push
