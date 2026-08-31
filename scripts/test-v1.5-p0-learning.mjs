@@ -21,6 +21,8 @@ assert(prod.includes('data-v15-production="${esc(c.character)}"'),'Production ch
 assert(prod.includes("input.value=b.dataset.v15Production||''"),'Production choice selection is not submitted to the backing field');
 assert(prod.includes("input.dataset.v15Replaced='1'"),'Production replacement is not marked idempotently');
 assert(prod.includes("input.dataset.v15Replaced==='1'||input.closest('.v14-edu-wrap')?.querySelector('.v15-production-grid')"),'Production replacement is not guarded against duplicate grids');
+assert(prod.includes("const core=()=>window.__KANJI5_EDU_CORE__"),'Production MCQ must resolve education core lazily after load');
+assert(!prod.includes('const CORE=window.__KANJI5_EDU_CORE__'),'Production MCQ must not capture an unavailable education core at script load');
 assert(!prod.includes('باید کانجی را بنوی'),'Production MCQ runtime still asks the user to type Kanji');
 assert(!prod.includes('کانجی را بنوی'),'Production MCQ runtime still contains a typing prompt');
 assert(ui.includes("edu.mode==='production'")&&ui.includes('#v14EduProductionInput'),'Original production path remains available as the controlled backing field');
