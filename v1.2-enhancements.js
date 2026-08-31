@@ -147,17 +147,19 @@
     return deckLoadPromise;
   }
 
+  function gradeMeaningCanonical(value, meanings) {
+    const core = window.__KANJI5_EDU_CORE__;
+    if (core?.gradeMeaning) return Boolean(core.gradeMeaning(value, meanings).correct);
+    const answer = normalize(value);
+    return Array.isArray(meanings) && meanings.some(meaning => answer === normalize(meaning));
+  }
+
   function checkRecall(character, mode, value) {
     const item = deckIndex?.get(character);
     if (!item) return null;
     const answer = normalize(value);
     if (!answer) return false;
-    if (mode === "meaning") {
-      return (item.meaning || []).some(meaning => {
-        const canonical = normalize(meaning);
-        return canonical && (answer === canonical || answer.includes(canonical) || canonical.includes(answer));
-      });
-    }
+    if (mode === "meaning") return gradeMeaningCanonical(value, item.meaning || []);
 
     const answerKana = answer;
     const answerRomaji = normalizeRomaji(answer);
