@@ -51,16 +51,20 @@ jobs:
           node --check vendor/ts-fsrs-5.4.1.mjs
           node --check v1.3-p0.js
           node --check v1.3-p1.js
+          node --check v1.3-smart-distractors.js
           node --check v1.3-perf.js
           node --check v1.3-storage-bridge.js
           node --check v1.3-settings.js
           node --check sw.js
+      - name: Validate smart distractors
+        run: |
+          node -e "const fs=require('fs'); const s=fs.readFileSync('v1.3-smart-distractors.js','utf8'); if(!s.includes('distractors')) throw new Error('Personal distractor history missing'); if(!s.includes('sharedReading') || !s.includes('meaningScore') || !s.includes('strokeScore')) throw new Error('Smart distractor scoring missing'); if(!s.includes('mastery(')) throw new Error('Difficulty calibration missing');"
       - name: Smoke test v1.3
         run: node scripts/smoke-test-v1.3.mjs
       - name: Commit generated build
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html sw.js v1.3-p1.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
+          git add index.html sw.js v1.3-p1.js v1.3-smart-distractors.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
           git add -u
-          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): wire static runtime and validate release [skip ci]'; git push origin feature/v1.3; fi
+          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): ship smart education distractors [skip ci]'; git push origin feature/v1.3; fi
