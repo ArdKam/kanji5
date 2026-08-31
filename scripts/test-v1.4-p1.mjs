@@ -42,6 +42,19 @@ assert(core.scoreEducationItem(items[1],knowledge['校'],available,{now})>core.s
 const empty=core.ensureEntry({},'学',true)['学'];assert(empty.exposedAt&&empty.stage==='exposed','Exposure state initialization failed');
 const recorded=core.recordKnowledge({'学':empty},'学','production',false,'校')['学'];
 assert(recorded.production.attempts===1&&recorded.distractors['校']===1,'Knowledge recording failed');
+const distractorTarget={character:'学',on:['ガク'],kun:['まなぶ'],meaning:['study','learning'],strokes:8,grade:1,frequency:100};
+const distractorCandidates=[
+  {character:'校',on:['コウ'],meaning:['school'],strokes:10,grade:1,frequency:110},
+  {character:'楽',on:['ガク'],meaning:['comfort'],strokes:13,grade:1,frequency:120},
+  {character:'習',on:['シュウ'],meaning:['learn'],strokes:11,grade:1,frequency:90},
+  {character:'語',on:['ゴ'],meaning:['language'],strokes:14,grade:2,frequency:800}
+];
+assert(typeof core.scoreDistractor==='function'&&typeof core.chooseDistractors==='function','Smart distractor API missing');
+assert(core.scoreDistractor(distractorTarget,distractorCandidates[1],{})>core.scoreDistractor(distractorTarget,distractorCandidates[0],{}),'Shared reading distractor did not receive higher score');
+const picked=core.chooseDistractors(distractorTarget,distractorCandidates,{習:2},2);
+assert(picked.length===2&&picked.some(x=>x.character==='習'),'Prior wrong distractor history did not influence ranking');
+assert(!picked.some(x=>x.character==='学'),'Target Kanji leaked into distractor list');
+assert(picked.every(x=>x.character!=='語'||core.scoreDistractor(distractorTarget,x,{習:2})>=0),'Invalid distractor score encountered');
 assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'Migration missing');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses canonical education core');
 assert(ui.includes('fetchContextSentences')&&ui.includes('api.tatoeba.org/v1/sentences'),'Context sentence API wiring missing');
@@ -50,6 +63,7 @@ assert(ui.includes('edu.sentence.english'),'Context exercise is missing English 
 assert(ui.includes('v14EduProductionInput'),'Typed production UI missing');
 assert(ui.includes('context')&&ui.includes('vocabulary'),'Vocabulary/context missing');
 assert(ui.includes('تمرین بعدی'),'Next exercise flow missing');
+assert(ui.includes('CORE.chooseDistractors'),'UI does not use canonical smart distractors');
 const selectIndex=ui.indexOf('const item=CORE.selectEducationItem');
 const modeIndex=ui.indexOf('let mode=CORE.chooseBestExercise(item,stats,modes');
 const wordFetchIndex=ui.indexOf('fetchWords(item.character)');
