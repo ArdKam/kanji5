@@ -32,22 +32,17 @@ ui=ui.replace(/async function startEducation\(\)\{[\s\S]*?\nfunction record\(mod
   "function record(mode,result,wrong=''){"
 ].join('\n'));
 
-ui=ui.replace(
-  "const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=`<div class=\"v14-edu-word\" style=\"font-size:24px;line-height:1.8;letter-spacing:0\">${blanked}</div><div class=\"v14-edu-meaning\">${edu.sentence.english||'—'}</div>${renderChoices(chooseChoices(item))}`",
-  "const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=`<div class=\"v14-edu-word\" style=\"font-size:24px;line-height:1.8;letter-spacing:0\">${escapeHTML(blanked)}</div><div class=\"v14-edu-meaning\">${escapeHTML(edu.sentence.english||'—')}</div>${renderChoices(chooseChoices(item))}`"
-);
+ui=ui.replace(/>\$\{blanked\}<\/div>/, '>${escapeHTML(blanked)}</div>');
+ui=ui.replace(/>\$\{edu\.sentence\.english\|\|'—'\}<\/div>/, ">\${escapeHTML(edu.sentence.english||'—')}</div>");
+ui=ui.replace(/>\$\{edu\.word\.word\.replaceAll\(item\.character,'＿'\)\}<\/div>/, '>${escapeHTML(edu.word.word.replaceAll(item.character,\'＿\'))}</div>');
+ui=ui.replace(/>\$\{edu\.word\.reading\}<\/div>/, '>\${escapeHTML(edu.word.reading)}</div>');
+ui=ui.replace('return `${edu.sentence.text} · ${edu.sentence.english||\'\'}`;', 'return `${escapeHTML(edu.sentence.text)} · ${escapeHTML(edu.sentence.english||\'\')}`;');
+ui=ui.replace('return edu.word?`${edu.word.word} · ${edu.word.reading}`:edu.item.character;', 'return edu.word?`${escapeHTML(edu.word.word)} · ${escapeHTML(edu.word.reading)}`:escapeHTML(edu.item.character);');
 
-ui=ui.replace(
-  "else if(edu.mode==='vocabulary'&&edu.word){prompt='کانجی گمشدهٔ واژه را انتخاب کن.';body=`<div class=\"v14-edu-word\">${edu.word.word.replaceAll(item.character,'＿')}</div><div class=\"v14-edu-reading\">${edu.word.reading}</div>${renderChoices(chooseChoices(item))}`}",
-  "else if(edu.mode==='vocabulary'&&edu.word){prompt='کانجی گمشدهٔ واژه را انتخاب کن.';body=`<div class=\"v14-edu-word\">${escapeHTML(edu.word.word.replaceAll(item.character,'＿'))}</div><div class=\"v14-edu-reading\">${escapeHTML(edu.word.reading)}</div>${renderChoices(chooseChoices(item))}`}"
-);
-
-const oldAction='p.innerHTML=`<div class="v14-edu-wrap"><div class="v14-edu-title">🧠 تمرین آموزشی</div><div class="v14-edu-meta">${stageLabel(CORE.getStage(readKnowledge()[item.character]))} · ${edu.mode}</div><div class="v14-edu-prompt">${prompt}</div>${body}<div class="v14-edu-actions"><button type="button" class="primary" id="v14EduSubmit">بررسی پاسخ</button><button type="button" class="secondary" id="v14EduDontKnow">نمی‌دانم</button></div></div>`';
-const newAction='const checkButton=(edu.mode===\'vocabulary\'||edu.mode===\'context\')?\'\':`<button type="button" class="primary" id="v14EduSubmit">بررسی پاسخ</button>`;p.innerHTML=`<div class="v14-edu-wrap"><div class="v14-edu-title">🧠 تمرین آموزشی</div><div class="v14-edu-meta">${stageLabel(CORE.getStage(readKnowledge()[item.character]))} · ${edu.mode}</div><div class="v14-edu-prompt">${escapeHTML(prompt)}</div>${body}<div class="v14-edu-actions">${checkButton}<button type="button" class="secondary" id="v14EduDontKnow">نمی‌دانم</button></div></div>`';
-if(ui.includes(oldAction))ui=ui.replace(oldAction,newAction);
-
-ui=ui.replace("return `${edu.sentence.text} · ${edu.sentence.english||''}`;","return `${escapeHTML(edu.sentence.text)} · ${escapeHTML(edu.sentence.english||'')}`;");
-ui=ui.replace("return edu.word?`${edu.word.word} · ${edu.word.reading}`:edu.item.character;","return edu.word?`${escapeHTML(edu.word.word)} · ${escapeHTML(edu.word.reading)}`:escapeHTML(edu.item.character);");
+const focus='setTimeout(()=>$(\'#v14EduInput\')?.focus()||$(\'#v14EduProductionInput\')?.focus(),0)';
+if(ui.includes(focus) && !ui.includes("if(edu.mode==='vocabulary'||edu.mode==='context')$('#v14EduSubmit')?.remove();")){
+  ui=ui.replace(focus, "if(edu.mode==='vocabulary'||edu.mode==='context')$('#v14EduSubmit')?.remove();"+focus);
+}
 
 const indexPath='index.html';
 let index=fs.readFileSync(indexPath,'utf8');
