@@ -1,3 +1,4 @@
+# v1.5 stabilization gate: validates the current branch state without destructive patching.
 name: Build Kanji 5 v1.4
 
 on:
