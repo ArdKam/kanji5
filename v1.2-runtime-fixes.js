@@ -6,23 +6,6 @@
   let retryTimer = null;
   let retryCount = 0;
 
-  function compactLoadingPanel() {
-    const style = document.createElement("style");
-    style.id = "v13-compact-loading";
-    style.textContent = `
-      #loading { min-height: 28px !important; height: 28px; padding: 4px 10px !important; border-radius: 10px; box-shadow: none; }
-      #loading > div { width:100%; max-width:none; display:flex; align-items:center; justify-content:center; gap:7px; }
-      #loading .spinner { width:14px; height:14px; border-width:2px; margin:0; flex:0 0 auto; }
-      #loading > div > div:nth-child(2) { font-size:11px; font-weight:650; white-space:nowrap; }
-      #loadStatus { display:none !important; }
-    `;
-    document.head.appendChild(style);
-    const status = document.querySelector("#loading > div > div:nth-child(2)");
-    if (status) status.textContent = "در حال آماده‌سازی…";
-  }
-
-  compactLoadingPanel();
-
   const normalize = value => String(value || "").trim().replace(/[\s\u3000]+/g, "");
 
   async function enrichExamples() {
@@ -57,7 +40,6 @@
           .slice(0, 2)
           .join("; ");
         if (!gloss) continue;
-
         for (const variant of entry.variants || []) {
           const written = normalize(variant.written);
           if (written && !meanings.has(written)) meanings.set(written, gloss);
@@ -74,7 +56,6 @@
         const wordText = normalize(textNode?.textContent || "");
         const meaning = meanings.get(wordText);
         if (!meaning) return;
-
         const el = document.createElement("small");
         el.className = "example-meaning";
         el.textContent = meaning;
