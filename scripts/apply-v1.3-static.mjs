@@ -14,10 +14,7 @@ const required = [
 
 let out = index;
 out = out.replace(/\s*<script src="\.\/v1\.3-(?:dont-know|production-ui|education-v2)\.js"><\/script>/g, '');
-for (const src of required) {
-  const tag = `<script src="${src}"></script>`;
-  out = out.replaceAll(tag, '');
-}
+for (const src of required) out = out.replaceAll(`<script src="${src}"></script>`, '');
 const anchor = '<script type="module">';
 if (!out.includes(anchor)) throw new Error('Could not find main module anchor in index.html');
 out = out.replace(anchor, required.map(src => `<script src="${src}"></script>`).join('\n') + '\n' + anchor);
@@ -41,7 +38,7 @@ self.addEventListener('install',e=>e.waitUntil(Promise.all([
   caches.open(API_CACHE)
 ]).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(
-  keys.filter(k=>k.startsWith('kanji5-')&&!['${'${CACHE}'},'${'${DATA_CACHE}'},'${'${API_CACHE}'}'].includes(k)).map(k=>caches.delete(k))
+  keys.filter(k=>k.startsWith('kanji5-') && ![CACHE,DATA_CACHE,API_CACHE].includes(k)).map(k=>caches.delete(k))
 )).then(()=>self.clients.claim()))));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback);if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
 async function networkFirst(req,name,fallback=req){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
