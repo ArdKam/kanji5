@@ -26,7 +26,6 @@ jobs:
         run: |
           python3 <<'PY'
           from pathlib import Path
-          import re
 
           index_path = Path('index.html')
           enh_path = Path('v1.2-enhancements.js')
@@ -35,11 +34,11 @@ jobs:
 
           marker = '<style id="v1.3-education">'
           if marker not in index:
-              css = '''<style id="v1.3-education">\n.first-exposure-reading{text-align:center;color:var(--muted);font-size:20px;line-height:1.7;margin:-4px 0 16px;direction:ltr}.first-exposure-reading .hira{font-size:24px;font-weight:750}.first-exposure-reading .roma{font-size:14px;opacity:.78;margin-top:2px}@media(max-width:700px){.first-exposure-reading{font-size:18px}.first-exposure-reading .hira{font-size:22px}}\n</style>'''
+              css = '''<style id="v1.3-education">\n.first-exposure-reading{text-align:center;color:var(--muted);font-size:20px;line-height:1.7;margin:-4px 0 16px;direction:ltr}.first-exposure-reading .hira{font-size:24px;font-weight:750}@media(max-width:700px){.first-exposure-reading{font-size:18px}.first-exposure-reading .hira{font-size:22px}}\n</style>'''
               index = index.replace('</head>', css + '</head>', 1)
 
           old = '<div class="kanjirow"><div class="kanji">${item.character}</div></div><div style="text-align:center;margin:-6px 0 14px">'
-          new = '<div class="kanjirow"><div class="kanji" data-kanji-id="${item.id}">${item.character}</div></div><div class="first-exposure-reading" style="display:${!rec?"block":"none"}"><div class="hira">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3):[]).join(" · ")}</div><div class="roma">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3).map(r=>r):[]).join(" · ")}</div></div><div style="text-align:center;margin:-6px 0 14px">'
+          new = '<div class="kanjirow"><div class="kanji" data-kanji-id="${item.id}">${item.character}</div></div><div class="first-exposure-reading" style="display:${!rec?"block":"none"}"><div class="hira">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3):[]).join(" · ")}</div></div><div style="text-align:center;margin:-6px 0 14px">'
           if old not in index:
               raise SystemExit('Could not locate renderCard kanji markup')
           index = index.replace(old, new, 1)
@@ -50,7 +49,6 @@ jobs:
               raise SystemExit('Could not locate renderCard hint markup')
           index = index.replace(old_hint, new_hint, 1)
 
-          # Replace only the capture handler so first exposure bypasses active recall.
           old_handler = '''    if (target?.id === "revealBtn" && !allowNativeReveal) {\n      event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return;\n    }'''
           new_handler = '''    if (target?.id === "revealBtn" && !allowNativeReveal) {\n      const kanjiEl = document.querySelector(".kanji[data-kanji-id]");\n      const id = kanjiEl?.dataset?.kanjiId;\n      let isFirstExposure = false;\n      try {\n        const raw = localStorage.getItem("kanji5-v1");\n        const saved = raw ? JSON.parse(raw) : null;\n        isFirstExposure = !!id && !saved?.cards?.[id];\n      } catch (_) {}\n      if (isFirstExposure) return;\n      event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return;\n    }'''
           if old_handler not in enh:
@@ -62,7 +60,7 @@ jobs:
           print('P0 patch applied')
           PY
 
-      - name: Validate JavaScript
+      - name: Validate
         run: |
           node --check v1.2-enhancements.js
           python3 - <<'PY'
