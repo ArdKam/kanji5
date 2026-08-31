@@ -33,6 +33,21 @@ jobs:
         run: node scripts/apply-v1.3-static.mjs
       - name: Remove dead v1.3 scripts
         run: rm -f v1.3-production-ui.js v1.3-education-v2.js v1.3-dont-know.js v1.3-smart-distractors.js scripts/apply-smart-distractors.mjs
+      - name: Fix education dataset race
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'v1.3-p1.js';
+          let s = fs.readFileSync(p, 'utf8');
+          const oldGet = "function getSeenItems(){const ids=new Set(Object.keys(readAppState().cards||{}));return getDeck().filter(x=>x?.id&&ids.has(x.id))}";
+          const newGet = "async function getSeenItems(){if(window.__KANJI5_P0_DATA_PROMISE){try{await window.__KANJI5_P0_DATA_PROMISE}catch(_){} }const ids=new Set(Object.keys(readAppState().cards||{}));return getDeck().filter(x=>x?.id&&ids.has(x.id))}";
+          if (s.includes(oldGet)) s = s.replace(oldGet, newGet);
+          const oldStart = "const seenItems=getSeenItems();";
+          const newStart = "const seenItems=await getSeenItems();";
+          if (s.includes(oldStart)) s = s.replace(oldStart, newStart);
+          if (!s.includes(newGet) || !s.includes(newStart)) throw new Error('Education dataset race patch failed');
+          fs.writeFileSync(p, s);
+          NODE
       - name: Validate dataset
         run: |
           node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset');"
@@ -56,4 +71,4 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html sw.js v1.3-p1.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
           git add -u
-          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): stabilize canonical education pipeline [skip ci]'; git push origin feature/v1.3; fi
+          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'fix(v1.3): wait for kanji dataset before education [skip ci]'; git push origin feature/v1.3; fi
