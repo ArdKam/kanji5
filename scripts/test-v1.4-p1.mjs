@@ -16,6 +16,8 @@ assert(core.chooseBestExercise({character:'学'},{meaning:{attempts:9,correct:9}
 const qualified=core.gradeMeaning('school work',['school work','education']);assert(qualified.correct&&qualified.quality==='exact','meaning exact grading failed');
 const partial=core.gradeMeaning('school',['school system']);assert(partial.correct&&partial.quality==='partial','meaning partial grading failed');
 assert(!core.gradeMeaning('schol',['school']).correct,'invalid typo was accepted');
+assert(!core.gradeMeaning('school unrelated',['school']).correct,'extra unrelated meaning text was accepted');
+assert(core.gradeMeaning('high school',['high school']).correct,'multi-token meaning failed');
 assert(core.gradeReading('gaku',['がく']).correct,'reading grading failed');
 assert(core.toRomaji('も')==='mo','Romaji も must map to mo');
 assert(core.toRomaji('もう')==='mou','Long vowel sequence もう must map to mou');
@@ -44,6 +46,7 @@ assert(core.scoreEducationItem(items[1],knowledge['校'],available,{now})>core.s
 const empty=core.ensureEntry({},'学',true)['学'];assert(empty.exposedAt&&empty.stage==='exposed','Exposure state initialization failed');
 const recorded=core.recordKnowledge({'学':empty},'学','production',false,'校')['学'];
 assert(recorded.production.attempts===1&&recorded.distractors['校']===1,'Knowledge recording failed');
+assert(recorded.educationEvidence?.lastMode==='production'&&recorded.educationEvidence?.lastCorrect===false,'Educational evidence was not persisted');
 const distractorTarget={character:'学',on:['ガク'],kun:['まなぶ'],meaning:['study','learning'],strokes:8,grade:1,frequency:100};
 const distractorCandidates=[{character:'校',on:['コウ'],meaning:['school'],strokes:10,grade:1,frequency:110},{character:'楽',on:['ガク'],meaning:['comfort'],strokes:13,grade:1,frequency:120},{character:'習',on:['シュウ'],meaning:['learn'],strokes:11,grade:1,frequency:90},{character:'語',on:['ゴ'],meaning:['language'],strokes:14,grade:2,frequency:800}];
 assert(typeof core.scoreDistractor==='function'&&typeof core.chooseDistractors==='function','Smart distractor API missing');
@@ -51,7 +54,15 @@ assert(core.scoreDistractor(distractorTarget,distractorCandidates[1],{})>core.sc
 const picked=core.chooseDistractors(distractorTarget,distractorCandidates,{習:2},2);
 assert(picked.length===2&&picked.some(x=>x.character==='習'),'Prior wrong distractor history did not influence ranking');
 assert(!picked.some(x=>x.character==='学'),'Target Kanji leaked into distractor list');
-assert(picked.every(x=>x.character!=='語'||core.scoreDistractor(distractorTarget,x,{習:2})>=0),'Invalid distractor score encountered');
+const ambiguous={character:'仮',on:['ガク'],meaning:['study'],strokes:8,grade:1,frequency:100};
+assert(core.distractorAmbiguous(distractorTarget,ambiguous,[])===true,'Ambiguous distractor was not rejected');
+const index=core.buildDistractorIndex([distractorTarget,...distractorCandidates]);
+assert(index.reading.gaku===undefined&&index.reading['がく']===undefined,'Unexpected unnormalized reading index key');
+assert(Array.isArray(index.reading.gaku||index.reading['ガク']),'Reading candidate index was not built');
+const indexedPool=core.candidatePool(distractorTarget,[...distractorCandidates],index);
+assert(Array.isArray(indexedPool)&&indexedPool.length>0,'Indexed distractor candidate pool is empty');
+assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
+assert(sync.includes('distractors')&&sync.includes('stage')&&sync.includes('educationEvidence'),'Sync educational metadata missing');
 assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'Migration missing');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses canonical education core');
 assert(ui.includes('fetchContextSentences')&&ui.includes('api.tatoeba.org/v1/sentences'),'Context sentence API wiring missing');
@@ -74,6 +85,4 @@ assert(ui.includes("checkButton=(edu.mode==='vocabulary'||edu.mode==='context')"
 assert(ui.includes('function escapeHTML'),'External content escaping helper missing');
 assert(sw.includes('TATOEBA_ORIGIN')&&sw.includes("u.pathname.startsWith('/v1/sentences')"),'Tatoeba service-worker cache missing');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy v1.3 education styles remain');
-assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
-assert(sync.includes('distractors')&&sync.includes('stage'),'Sync educational metadata missing');
-console.log('Kanji 5 v1.4 P1 tests passed.');
+console.log('Kanji 5 v1.5 P1 education tests passed.');
