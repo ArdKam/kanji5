@@ -11,10 +11,10 @@ assert(index.includes('while(start<unseen.length&&jlptRank(unseen[start])===rank
 assert(p0.includes("const COMP='kanji5-v1.5-components'"),'Component-level knowledge store missing');
 assert(p0.includes('focusComponent')&&p0.includes('recordComponent'),'Component-level focus/recording logic missing');
 assert(p0.includes('این بار سعی کن یک معنیِ دیگری')&&p0.includes('این بار سعی کن یک خوانشِ دیگری'),'Recall should deliberately target less-practiced components');
-assert(p0.includes('id=\'v15DontKnowReview\''),'Review “don’t know” control is missing');
+assert(p0.includes("b.id='v15DontKnowReview'"),'Review “don’t know” control is missing');
 assert(p0.includes("ratings.querySelector('.rate.again')?.click()"),'Review “don’t know” must map to FSRS Again behavior');
 assert(p0.includes("input.type='hidden'")&&p0.includes('v15-production-choice'),'Production exercise must be converted to non-typing choices');
 assert(p0.includes('productionTarget()')&&p0.includes('chooseDistractors'),'Production MCQ must derive target and distractors from canonical data/core');
-assert(!p0.includes('class=\"secondary v14-edu-choice v15-production-choice\"'),'Production choices must not double-fire the v1.4 generic MCQ handler');
+assert(!p0.includes('class="secondary v14-edu-choice v15-production-choice"'),'Production choices must not double-fire the v1.4 generic MCQ handler');
 assert(ui.includes("edu.mode==='production'")&&ui.includes('#v14EduProductionInput'),'Original production path remains available as the controlled backing field');
 console.log('Kanji 5 v1.5 P0 learning interaction checks passed.');
