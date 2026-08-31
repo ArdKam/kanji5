@@ -18,6 +18,19 @@
     document.getElementById("v12RuntimeRetry")?.addEventListener("click", () => location.reload());
   }
 
+  function compactLoadingPanel() {
+    const style = document.createElement("style");
+    style.id = "v13-compact-loading";
+    style.textContent = `
+      #loading { min-height: 180px; padding: 24px; }
+      #loading .spinner { width: 24px; height: 24px; border-width: 2px; margin-bottom: 10px; }
+      #loading > div { max-width: 420px; }
+      #loadStatus { margin-top: 5px !important; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  compactLoadingPanel();
   setTimeout(showStartupFallback, STARTUP_TIMEOUT);
 
   const normalize = value => String(value || "").trim().replace(/[\s\u3000]+/g, "");
