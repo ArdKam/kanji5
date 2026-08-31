@@ -34,10 +34,8 @@ const packageJson = JSON.parse(await read(`${packageRoot}/package.json`));
 const moduleEntry = packageJson.module || packageJson.exports?.["."]?.import || "dist/index.mjs";
 const entry = moduleEntry.startsWith("./") ? moduleEntry.slice(2) : moduleEntry;
 const sourcePath = `${packageRoot}/${entry}`;
-let fsrsSource = await read(sourcePath);
+const fsrsSource = await read(sourcePath);
 
-// Keep the browser import self-contained: npm's published ESM entry uses only
-// relative imports inside dist, so copy the complete dist tree when needed.
 const distDir = `${packageRoot}/dist`;
 const distEntries = await fs.readdir(distDir, { withFileTypes: true });
 await fs.rm(VENDOR_DIR, { recursive: true, force: true });
@@ -57,27 +55,29 @@ const duplicateBootstrap = /<script>\n\(\(\) => \{\n  const DATA_VERSION = "v1\.
 if (duplicateBootstrap.test(nextIndex)) nextIndex = nextIndex.replace(duplicateBootstrap, '<script id="v1.2-dataset-bootstrap">');
 
 const oldUpdateStats = /function updateStats\(\)\{[\s\S]*?\n\}\nfunction resetAll/;
-const newUpdateStats = `function updateStats(){
-  let due=0, mastered=0, studied=0;
-  const now=Date.now();
-  for(const k of state.deck){
-    const c=state.cards[k.id]?.card;
-    if(!c) continue;
-    studied++;
-    if(c.due && new Date(c.due).getTime()<=now) due++;
-    if(c.state===2&&(c.scheduled_days||0)>=21) mastered++;
-  }
-  $("dueCount").textContent=due;
-  $("newCount").textContent=Math.min(state.todayNew,state.settings.dailyNew);
-  $("masteredCount").textContent=mastered;
-  $("bar").style.width=\`${state.deck.length?Math.round(studied/state.deck.length*100):0}%\`;
-  $("streakCount").textContent=\`${state.streak.current||0}🔥\`;
-  const goalDone=Math.min(state.todayReviewCount||0,state.settings.dailyGoal);
-  $("goalLabel").textContent=\`هدف روزانه: \${state.todayReviewCount||0}/\${state.settings.dailyGoal}\`;
-  $("goalBar").style.width=\`${Math.round(goalDone/state.settings.dailyGoal*100)}%\`;
-  $("goalDone").style.display=(state.todayReviewCount||0)>=state.settings.dailyGoal?"inline":"none";
-}
-function resetAll`;
+const newUpdateStats = [
+  "function updateStats(){",
+  "  let due=0, mastered=0, studied=0;",
+  "  const now=Date.now();",
+  "  for(const k of state.deck){",
+  "    const c=state.cards[k.id]?.card;",
+  "    if(!c) continue;",
+  "    studied++;",
+  "    if(c.due && new Date(c.due).getTime()<=now) due++;",
+  "    if(c.state===2&&(c.scheduled_days||0)>=21) mastered++;",
+  "  }",
+  "  $(\"dueCount\").textContent=due;",
+  "  $(\"newCount\").textContent=Math.min(state.todayNew,state.settings.dailyNew);",
+  "  $(\"masteredCount\").textContent=mastered;",
+  "  $(\"bar\").style.width=(state.deck.length?Math.round(studied/state.deck.length*100):0)+\"%\";",
+  "  $(\"streakCount\").textContent=(state.streak.current||0)+\"🔥\";",
+  "  const goalDone=Math.min(state.todayReviewCount||0,state.settings.dailyGoal);",
+  "  $(\"goalLabel\").textContent=\"هدف روزانه: \"+(state.todayReviewCount||0)+\"/\"+state.settings.dailyGoal;",
+  "  $(\"goalBar\").style.width=Math.round(goalDone/state.settings.dailyGoal*100)+\"%\";",
+  "  $(\"goalDone\").style.display=(state.todayReviewCount||0)>=state.settings.dailyGoal?\"inline\":\"none\";",
+  "}",
+  "function resetAll"
+].join("\n");
 if (!oldUpdateStats.test(nextIndex)) throw new Error("Could not locate updateStats() for optimization");
 nextIndex = nextIndex.replace(oldUpdateStats, newUpdateStats);
 if (nextIndex === index) throw new Error("index.html was not changed");
