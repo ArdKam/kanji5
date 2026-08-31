@@ -40,46 +40,42 @@ async function fetchWords(ch){`;
   source = source.replace(needle, inserted);
 }
 
-source = source.replace(
-  'let edu={item:null,mode:null,word:null,answered:false};',
-  'let edu={item:null,mode:null,word:null,sentence:null,answered:false};'
-);
+if (!source.includes('sentence:null')) {
+  source = source.replace(
+    'let edu={item:null,mode:null,word:null,answered:false};',
+    'let edu={item:null,mode:null,word:null,sentence:null,answered:false};'
+  );
+}
 
 const oldContext = `else if(edu.mode==='context'&&edu.word){prompt='با توجه به معنی و خوانش، کانجی مناسب را انتخاب کن.';body=\`<div class="v14-edu-meaning">\${edu.word.meaning||'—'}</div><div class="v14-edu-reading">\${edu.word.reading}</div>\${renderChoices(chooseChoices(item))}\`}`;
-const newContext = `else if(edu.mode==='context'&&edu.sentence){prompt='در جملهٔ زیر، کانجی مناسب را انتخاب کن.';const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=\`<div class="v14-edu-word" style="font-size:24px;line-height:1.8;letter-spacing:0">\${blanked}</div><div class="v14-edu-meaning">\${edu.sentence.english||'—'}</div>\${renderChoices(chooseChoices(item))}\`}`;
-if (!source.includes(oldContext)) throw new Error('Expected context renderer not found');
-source = source.replace(oldContext, newContext);
+const newContext = `else if(edu.mode==='context'&&edu.sentence){prompt='با توجه به جمله، کانجی مناسب را انتخاب کن.';const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=\`<div class="v14-edu-word" style="font-size:24px;line-height:1.8;letter-spacing:0">\${blanked}</div><div class="v14-edu-meaning">\${edu.sentence.english||'—'}</div>\${renderChoices(chooseChoices(item))}\`}`;
+if (source.includes(oldContext)) source = source.replace(oldContext, newContext);
 
-const startPattern = /async function startEducation\(\)\{[\s\S]*?\nfunction record\(mode,result,wrong=''\)\{/;
-if (!startPattern.test(source)) throw new Error('Expected startEducation function not found');
-
-source = source.replace(startPattern, `async function startEducation(){
+const oldStart = /async function startEducation\(\)\{[\s\S]*?\nfunction record\(mode,result,wrong=''\)\{/;
+const newStart = `async function startEducation(){
   const p=pane();if(!p)return;
   const seen=getSeenItems();
   if(!seen.length){edu={item:null,mode:null,word:null,sentence:null,answered:false};showEmpty();return}
   showLoading();
-  const settings=readSettings();
-  const knowledge=readKnowledge();
-  const preliminaryModes=CORE.getAvailableModes(settings,true);
-  const item=CORE.selectEducationItem(seen,knowledge,preliminaryModes,{now:Date.now(),excludeCharacters:edu.item?.character?[edu.item.character]:[]})||seen[0];
-  const words=await fetchWords(item.character);
-  const finalModes=CORE.getAvailableModes(settings,words.length>0);
-  let mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},finalModes,{now:Date.now()});
-  let sentence=null;
-  if(mode==='context'){
+  const settings=readSettings(),modes=CORE.getAvailableModes(settings,true),knowledge=readKnowledge();
+  const item=CORE.selectEducationItem(seen,knowledge,modes,{now:Date.now(),excludeCharacters:edu.item?.character?[edu.item.character]:[]})||seen[0];
+  const stats=knowledge[item.character]||{};
+  let mode=CORE.chooseBestExercise(item,stats,modes,{now:Date.now()});
+  let words=[],sentence=null;
+  if(mode==='vocabulary'){
+    words=await fetchWords(item.character);
+    if(!words.length)mode=CORE.chooseBestExercise(item,stats,modes.filter(x=>x!=='vocabulary'),{now:Date.now()});
+  }else if(mode==='context'){
     const sentences=await fetchContextSentences(item.character);
-    if(!sentences.length){
-      mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},finalModes.filter(x=>x!=='context'),{now:Date.now()});
-    }else{
-      sentence=sentences[Math.floor(Math.random()*Math.min(sentences.length,8))];
-    }
+    sentence=sentences[Math.floor(Math.random()*Math.min(sentences.length,8))]||null;
+    if(!sentence)mode=CORE.chooseBestExercise(item,stats,modes.filter(x=>x!=='context'),{now:Date.now()});
   }
-  if(mode==='vocabulary'&&!words.length)mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},finalModes.filter(x=>x!=='vocabulary'&&x!=='context'),{now:Date.now()});
   writeKnowledge(CORE.ensureEntry(readKnowledge(),item.character,true));
   edu={item,mode,word:mode==='vocabulary'&&words.length?words[Math.floor(Math.random()*Math.min(words.length,8))]:null,sentence,answered:false};
   renderEducation();
 }
-function record(mode,result,wrong=''){`);
+function record(mode,result,wrong=''){`;
+if (oldStart.test(source)) source = source.replace(oldStart, newStart);
 
 fs.writeFileSync(path, source);
-console.log('Applied v1.4 contextual sentence exercise wiring.');
+console.log('Applied idempotent v1.4 contextual exercise wiring.');
