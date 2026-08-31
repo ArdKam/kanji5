@@ -41,11 +41,12 @@ jobs:
           node --check scripts/test-v1.4-p1.mjs
           node --check scripts/test-v1.5-p0.mjs
           node --check scripts/test-v1.5-p0-learning.mjs
+          node --check scripts/test-v1.5-jlpt-order.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts
-        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
+        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
       - name: Verify generated files
         run: |
           git diff --check
