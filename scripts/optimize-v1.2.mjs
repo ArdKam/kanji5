@@ -1,25 +1,52 @@
 import fs from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
+const exec = promisify(execFile);
 const INDEX = "index.html";
 const ENHANCEMENTS = "v1.2-enhancements.js";
 const RUNTIME = "v1.2-runtime-fixes.js";
 const SW = "sw.js";
-const VENDOR = "vendor/ts-fsrs.js";
-const FSRS_URL = "https://esm.sh/ts-fsrs@6.0.0-beta.7?bundle&target=es2022";
+const VENDOR_DIR = "vendor";
+const VENDOR = `${VENDOR_DIR}/ts-fsrs.js`;
+const FSRS_PACKAGE = "ts-fsrs@6.0.0-beta.7";
 
 async function read(path) { return fs.readFile(path, "utf8"); }
 async function write(path, content) { await fs.writeFile(path, content, "utf8"); }
-function count(text, needle) { return text.split(needle).length - 1; }
 
 const index = await read(INDEX);
 const enhancements = await read(ENHANCEMENTS);
 let runtime = await read(RUNTIME);
 let sw = await read(SW);
 
-await fs.mkdir("vendor", { recursive: true });
-const response = await fetch(FSRS_URL);
-if (!response.ok) throw new Error(`Failed to download ts-fsrs: HTTP ${response.status}`);
-await write(VENDOR, await response.text());
+await fs.mkdir(VENDOR_DIR, { recursive: true });
+const vendorDir = ".runtime-vendor";
+await fs.rm(vendorDir, { recursive: true, force: true });
+await fs.mkdir(vendorDir, { recursive: true });
+
+console.log(`Installing ${FSRS_PACKAGE} from npm registry...`);
+await exec("npm", ["install", "--no-save", "--ignore-scripts", `--prefix=${vendorDir}`, FSRS_PACKAGE], {
+  env: { ...process.env, npm_config_audit: "false", npm_config_fund: "false" }
+});
+
+const packageRoot = `${vendorDir}/node_modules/ts-fsrs`;
+const packageJson = JSON.parse(await read(`${packageRoot}/package.json`));
+const moduleEntry = packageJson.module || packageJson.exports?.["."]?.import || "dist/index.mjs";
+const entry = moduleEntry.startsWith("./") ? moduleEntry.slice(2) : moduleEntry;
+const sourcePath = `${packageRoot}/${entry}`;
+let fsrsSource = await read(sourcePath);
+
+// Keep the browser import self-contained: npm's published ESM entry uses only
+// relative imports inside dist, so copy the complete dist tree when needed.
+const distDir = `${packageRoot}/dist`;
+const distEntries = await fs.readdir(distDir, { withFileTypes: true });
+await fs.rm(VENDOR_DIR, { recursive: true, force: true });
+await fs.mkdir(VENDOR_DIR, { recursive: true });
+for (const entry of distEntries) {
+  if (!entry.isFile()) continue;
+  await fs.copyFile(`${distDir}/${entry.name}`, `${VENDOR_DIR}/${entry.name}`);
+}
+await write(VENDOR, fsrsSource);
 
 let nextIndex = index;
 const externalImport = 'import { createEmptyCard, fsrs, Rating } from "https://esm.sh/ts-fsrs@6.0.0-beta.7";';
@@ -77,13 +104,6 @@ sw = sw.replace(
   'event.waitUntil(caches.open(CACHE).then(async cache => { await Promise.allSettled(SHELL.map(url => cache.add(url))); }).then(() => self.skipWaiting()));'
 );
 await write(SW, sw);
+await fs.rm(vendorDir, { recursive: true, force: true });
 
 console.log("Optimized v1.2 runtime successfully.");
-console.log({
-  localFsrs: nextIndex.includes(localImport),
-  singlePassStats: nextIndex.includes("let due=0, mastered=0, studied=0"),
-  knowledgeCache: nextEnhancements.includes("knowledgeCache"),
-  scopedObserver: runtime.includes('document.getElementById("study")'),
-  conservativeExampleRetry: runtime.includes("retryCount < 1"),
-  vendorCached: sw.includes("./vendor/ts-fsrs.js")
-});
