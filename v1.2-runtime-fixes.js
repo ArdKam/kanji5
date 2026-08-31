@@ -122,75 +122,9 @@
     }, 80);
   }
 
-  // v1.5 P0: normalize the local 2136-card dataset before the main module consumes it.
-  // The main module's buildQueue() keeps its existing logic, so putting unseen cards in
-  // JLPT-first order makes its first N new cards follow N5 -> N4 -> N3 -> N2 -> N1,
-  // while shuffling each level independently.
-  const originalFetch = window.fetch.bind(window);
-
-  function jlptRank(item) {
-    return ({ N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 }[item?.jlpt] ?? 5);
-  }
-
-  function shuffle(items) {
-    for (let i = items.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [items[i], items[j]] = [items[j], items[i]];
-    }
-    return items;
-  }
-
-  async function fetchWithJLPTOrdering(input, init) {
-    const response = await originalFetch(input, init);
-    try {
-      const url = typeof input === "string" ? input : input?.url || "";
-      const parsed = new URL(url, location.href);
-      if (!parsed.pathname.endsWith("/kanji-data.json")) return response;
-
-      const payload = await response.clone().json();
-      const source = Array.isArray(payload) ? payload : payload?.kanji;
-      if (!Array.isArray(source) || source.length !== 2136) return response;
-
-      const ordered = [];
-      const sorted = source.slice().sort((a, b) => jlptRank(a) - jlptRank(b));
-      let start = 0;
-      while (start < sorted.length) {
-        const rank = jlptRank(sorted[start]);
-        const group = [];
-        while (start < sorted.length && jlptRank(sorted[start]) === rank) {
-          group.push(sorted[start]);
-          start += 1;
-        }
-        ordered.push(...shuffle(group));
-      }
-
-      const output = Array.isArray(payload)
-        ? ordered
-        : { ...payload, kanji: ordered };
-      const body = JSON.stringify(output);
-      return new Response(body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
-    } catch (_) {
-      return response;
-    }
-  }
-
-  window.fetch = fetchWithJLPTOrdering;
-
   const observer = new MutationObserver(() => {
     if (document.querySelector(EXAMPLE_SELECTOR)) scheduleExamples();
   });
   observer.observe(document.body, { childList: true, subtree: true });
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
-
-  window.__KANJI5_V15_P0_JLPT__ = {
-    jlptRank,
-    testOrder(items) {
-      const ranks = items.map(jlptRank);
-      return ranks.every((rank, i) => i === 0 || rank >= ranks[i - 1]);
-    }
-  };
 })();
