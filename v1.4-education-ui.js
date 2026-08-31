@@ -6,6 +6,7 @@ const CORE=window.__KANJI5_EDU_CORE__;if(!CORE)return;
 const KNOW='kanji5-v1.2-knowledge',SETTINGS='kanji5-v1.3-education-settings';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const DEFAULTS={production:true,vocabulary:true,context:true};
+function escapeHTML(value){return safe(value)}
 const safe=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 function readSettings(){try{return{...DEFAULTS,...JSON.parse(localStorage.getItem(SETTINGS)||'{}')}}catch(_){return{...DEFAULTS}}}
 function readKnowledge(){try{return JSON.parse(localStorage.getItem(KNOW)||'{}')}catch(_){return{}}}
