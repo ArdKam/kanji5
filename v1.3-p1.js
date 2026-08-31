@@ -3,6 +3,7 @@
 if(window.__KANJI5_EDUCATION_TAB_V6__)return;
 window.__KANJI5_EDUCATION_TAB_V6__=true;
 const KNOW='kanji5-v1.2-knowledge',SETTINGS='kanji5-v1.3-education-settings';
+const EDU_CORE=window.__KANJI5_EDU_CORE__;
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const DEFAULTS={production:true,vocabulary:true,context:true};
 const normalize=v=>String(v??'').trim().toLowerCase().normalize('NFKC').replace(/[\s\u3000]+/g,'');
@@ -16,8 +17,8 @@ function writeKnowledge(v){try{localStorage.setItem(KNOW,JSON.stringify(v))}catc
 function readAppState(){try{return JSON.parse(localStorage.getItem('kanji5-v1')||'{}')}catch(_){return{}}}
 function getDeck(){if(Array.isArray(window.__KANJI5_P0_DATA))return window.__KANJI5_P0_DATA;try{const c=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');return Array.isArray(c)?c:[]}catch(_){return[]}}
 function getSeenItems(){const ids=new Set(Object.keys(readAppState().cards||{}));return getDeck().filter(x=>x?.id&&ids.has(x.id))}
-function mastery(ch,mode){const s=readKnowledge()[ch]?.[mode]||{attempts:0,correct:0};return(s.correct+1)/(s.attempts+2)}
-function record(ch,mode,correct,wrong=''){const all=readKnowledge(),card=all[ch]||{},stats=card[mode]||{attempts:0,correct:0};stats.attempts+=1;if(correct)stats.correct+=1;stats.lastAt=new Date().toISOString();card[mode]=stats;if(wrong){card.distractors=card.distractors||{};card.distractors[wrong]=(card.distractors[wrong]||0)+1}all[ch]=card;writeKnowledge(all)}
+function mastery(ch,mode){const s=readKnowledge()[ch]?.[mode]||{attempts:0,correct:0};return EDU_CORE?EDU_CORE.mastery(s):(s.correct+1)/(s.attempts+2)}
+function record(ch,mode,correct,wrong=''){const all=readKnowledge();if(EDU_CORE){writeKnowledge(EDU_CORE.recordKnowledge(all,ch,mode,correct,wrong));return}const card=all[ch]||{},stats=card[mode]||{attempts:0,correct:0};stats.attempts+=1;if(correct)stats.correct+=1;stats.lastAt=new Date().toISOString();card[mode]=stats;if(wrong){card.distractors=card.distractors||{};card.distractors[wrong]=(card.distractors[wrong]||0)+1}all[ch]=card;writeKnowledge(all)}
 function meaningTokens(v){return String(v??'').toLowerCase().split(/[^a-z0-9]+/).filter(x=>x.length>1)}
 function scoreDistractor(target,candidate){
   if(!candidate||candidate.character===target.character)return-1;
@@ -52,10 +53,12 @@ async function fetchWords(ch){
   try{const r=await fetch(`https://kanjiapi.dev/v1/words/${encodeURIComponent(ch)}`,{cache:'force-cache'});if(!r.ok)return[];const data=await r.json(),out=[],seen=new Set();for(const entry of Array.isArray(data)?data:[]){for(const v of entry.variants||[]){const word=v.written||'',reading=v.pronounced||'';if(!word.includes(ch)||!reading||seen.has(word))continue;seen.add(word);out.push({word,reading,meaning:(entry.meanings||[]).flatMap(m=>m.glosses||[]).slice(0,2).join('; ')});if(out.length>=10)break}if(out.length>=10)break}try{localStorage.setItem(key,JSON.stringify(out))}catch(_){}return out}catch(_){return[]}
 }
 function pickMode(item,words){
-  const s=readSettings(),modes=['meaning','reading'];
-  if(s.production)modes.push('production');if(words.length&&s.vocabulary)modes.push('vocabulary');if(words.length&&s.context)modes.push('context');
-  const stats=readKnowledge()[item.character]||{},fresh=modes.filter(m=>!stats[m]?.attempts);
-  if(fresh.length)return fresh[Math.floor(Math.random()*Math.min(2,fresh.length))];
+  const s=readSettings();
+  const modes=EDU_CORE?EDU_CORE.getAvailableModes(s,words.length>0):['meaning','reading'];
+  if(!EDU_CORE){if(s.production)modes.push('production');if(words.length&&s.vocabulary)modes.push('vocabulary');if(words.length&&s.context)modes.push('context')}
+  const stats=readKnowledge()[item.character]||{};
+  if(EDU_CORE)return EDU_CORE.chooseMode(item,stats,modes);
+  const fresh=modes.filter(m=>!stats[m]?.attempts);if(fresh.length)return fresh[Math.floor(Math.random()*Math.min(2,fresh.length))];
   const ordered=modes.slice().sort((a,b)=>mastery(item.character,a)-mastery(item.character,b));
   return ordered[Math.floor(Math.random()*Math.min(2,ordered.length))]||'meaning';
 }
@@ -85,9 +88,9 @@ function renderEducation(){
 }
 async function startEducation(){const p=pane();if(!p)return;const seen=getSeenItems();if(!seen.length){edu={item:null,mode:null,word:null,answered:false};showEmpty();return}const item=seen[Math.floor(Math.random()*seen.length)];const words=await fetchWords(item.character);const mode=pickMode(item,words);edu={item,mode,word:(mode==='vocabulary'||mode==='context')&&words.length?words[Math.floor(Math.random()*Math.min(words.length,6))]:null,answered:false};renderEducation()}
 function submit(){
-  if(edu.answered||!edu.item)return;let correct=false,wrong='';
-  if(edu.mode==='meaning'){const v=normalize($('#v13EduInput')?.value||'');if(!v){$('#v13EduInput')?.focus();return}correct=(edu.item.meaning||[]).some(x=>normalize(x)===v)}
-  else if(edu.mode==='reading'){const v=$('#v13EduInput')?.value||'';if(!normalize(v)){$('#v13EduInput')?.focus();return}const a=normalize(v),r=normalizeRomaji(v);correct=[...(edu.item.on||[]),...(edu.item.kun||[])].some(x=>a===normalize(x)||r===normalizeRomaji(toRomaji(x)))}
+  if(edu.answered||!edu.item)return;let correct=false,wrong='',result=null;
+  if(edu.mode==='meaning'){const v=$('#v13EduInput')?.value||'';if(!normalize(v)){$('#v13EduInput')?.focus();return}result=EDU_CORE?EDU_CORE.gradeMeaning(v,edu.item.meaning):{correct:(edu.item.meaning||[]).some(x=>normalize(x)===normalize(v))};correct=result.correct}
+  else if(edu.mode==='reading'){const v=$('#v13EduInput')?.value||'';if(!normalize(v)){$('#v13EduInput')?.focus();return}result=EDU_CORE?EDU_CORE.gradeReading(v,[...(edu.item.on||[]),...(edu.item.kun||[])],toRomaji):{correct:[...(edu.item.on||[]),...(edu.item.kun||[])].some(x=>normalize(v)===normalize(x)||normalizeRomaji(v)===normalizeRomaji(toRomaji(x)))};correct=result.correct}
   else{const selected=document.activeElement?.closest?.('.v13-edu-choice');if(!selected)return;wrong=selected.dataset.choice||'';correct=wrong===edu.item.character}
   edu.answered=true;record(edu.item.character,edu.mode,correct,correct?'':wrong);$$('.v13-edu-choice').forEach(b=>b.disabled=true);renderResult(correct)
 }
