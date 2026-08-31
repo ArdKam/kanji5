@@ -27,9 +27,9 @@ const shell = [
   './vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js',
   './supabase-config.js','./supabase-sync.js'
 ];
-const sw = `const CACHE='kanji5-shell-v31';
-const DATA_CACHE='kanji5-data-v18';
-const API_CACHE='kanji5-api-v9';
+const sw = `const CACHE='kanji5-shell-v32';
+const DATA_CACHE='kanji5-data-v19';
+const API_CACHE='kanji5-api-v10';
 const SHELL=${JSON.stringify(shell)};
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
@@ -38,9 +38,11 @@ self.addEventListener('install',e=>e.waitUntil(Promise.all([
   caches.open(DATA_CACHE).then(c=>c.add('./kanji-data.json')),
   caches.open(API_CACHE)
 ]).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(
-  keys.filter(k=>k.startsWith('kanji5-') && ![CACHE,DATA_CACHE,API_CACHE].includes(k)).map(k=>caches.delete(k))
-)).then(()=>self.clients.claim()))));
+self.addEventListener('activate',e=>e.waitUntil(
+  caches.keys().then(keys=>Promise.all(
+    keys.filter(k=>k.startsWith('kanji5-') && ![CACHE,DATA_CACHE,API_CACHE].includes(k)).map(k=>caches.delete(k))
+  )).then(()=>self.clients.claim())
+));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback);if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
 async function networkFirst(req,name,fallback=req){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
 async function apiCacheFirst(req){const c=await caches.open(API_CACHE),hit=await c.match(req);if(hit)return hit;try{const r=await fetch(req);if(r.ok||r.type==='opaque')await c.put(req,r.clone());return r}catch(_){return(await c.match(req))||Response.error()}}
@@ -53,4 +55,4 @@ e.respondWith(caches.match(r).then(hit=>hit||fetch(r).then(res=>{if(res.ok)cache
 });
 `;
 fs.writeFileSync(swPath, sw);
-console.log('Applied static v1.3 wiring and rebuilt service worker.');
+console.log('Applied deterministic static v1.3 wiring and rebuilt service worker.');
