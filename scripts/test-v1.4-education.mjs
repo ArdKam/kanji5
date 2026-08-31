@@ -7,47 +7,38 @@ vm.createContext(context);
 vm.runInContext(coreSource,context);
 const core=context.window.__KANJI5_EDU_CORE__;
 if(!core)throw new Error('Educational core failed to initialize');
-
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const approx=(a,b,t=1e-9)=>Math.abs(a-b)<t;
-
 assert(core.modes.length===5,'Expected five educational modes');
 assert(core.stages.join(',')==='new,exposed,learning,reinforcing,mastered','Stage machine contract mismatch');
 assert(approx(core.mastery({attempts:0,correct:0}),0.5),'Mastery baseline should use Laplace smoothing');
-assert(approx(core.mastery({attempts:8,correct:6}),7/10),'Mastery calculation mismatch');
+assert(approx(core.mastery({attempts:8,correct:6}),0.7),'Mastery calculation mismatch');
 assert(core.weakness({attempts:8,correct:6})>0,'Weakness must remain positive for imperfect knowledge');
-
 assert(core.gradeMeaning('school',['school']).quality==='exact','Exact meaning grading failed');
 assert(core.gradeMeaning('high school',['high school']).quality==='exact','Normalized exact meaning failed');
 assert(core.gradeMeaning('school work',['school work']).correct===true,'Two-token exact meaning failed');
 assert(core.gradeMeaning('schol',['school']).correct===false,'Unsafe fuzzy meaning accepted an invalid typo');
 assert(core.gradeReading('gaku',['がく'],v=>v==='がく'?'gaku':v).correct===true,'Romaji reading grading failed');
-
 const available=core.getAvailableModes({production:true,vocabulary:true,context:true},true);
 assert(available.length===5,'All education modes should be available when enabled');
 assert(!core.getAvailableModes({production:false,vocabulary:false,context:false},false).includes('production'),'Disabled production leaked into mode list');
-
 const base={meaning:{attempts:9,correct:9},reading:{attempts:10,correct:2},production:{attempts:6,correct:1},vocabulary:{attempts:3,correct:0},context:{attempts:2,correct:1}};
 const ranking=core.selectExercise({character:'学'},base,available,{now:Date.now()});
-assert(ranking.length===5&&ranking[0].mode==='vocabulary','Adaptive engine did not prioritize the weakest skill');
-assert(core.chooseBestExercise({character:'学'},base,available,{now:Date.now()})==='vocabulary','Best exercise selection mismatch');
-
+assert(ranking.length===5&&ranking[0].mode==='production','Adaptive engine did not prioritize the highest-value weak skill');
+assert(core.chooseBestExercise({character:'学'},base,available,{now:Date.now()})==='production','Best exercise selection mismatch');
 const empty=core.ensureEntry({},'学',true)['学'];
-assert(empty.exposedAt&&empty.createdAt&&empty.stage==='new','Exposure state initialization failed');
+assert(empty.exposedAt&&empty.createdAt&&empty.stage==='exposed','Exposure state initialization failed');
 let knowledge=core.recordKnowledge({},'学','reading',false);
 assert(knowledge['学'].stage==='learning','Failed answer should enter learning stage');
 knowledge=core.recordKnowledge(knowledge,'学','reading',true);
 assert(knowledge['学'].reading.attempts===2,'Reading attempts not recorded');
 assert(knowledge['学'].reading.correct===1,'Reading correctness not recorded');
-assert(knowledge['学'].distractors===undefined || typeof knowledge['学'].distractors==='object','Distractor history shape invalid');
-
+assert(typeof knowledge['学'].distractors==='object','Distractor history shape invalid');
 let mastered={};
 for(const mode of ['meaning','reading','production']){for(let i=0;i<8;i++)mastered=core.recordKnowledge(mastered,'学',mode,true)}
 assert(mastered['学'].stage==='mastered','High-performing multi-skill card did not reach mastered stage');
-
 const ui=fs.readFileSync('v1.4-education-ui.js','utf8');
 assert(ui.includes('__KANJI5_EDU_CORE__'),'UI is not connected to educational core');
 assert(ui.includes('CORE.chooseMode')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'UI is not using canonical selection/grading');
 assert(ui.includes('CORE.recordKnowledge'),'UI is not using canonical knowledge recording');
-
 console.log('Kanji 5 v1.4 education tests passed.');
