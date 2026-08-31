@@ -1,0 +1,34 @@
+name: Optimize v1.2 runtime
+
+on:
+  push:
+    branches: [feature/v1.2]
+    paths:
+      - 'index.html'
+      - 'v1.2-enhancements.js'
+      - 'v1.2-runtime-fixes.js'
+      - 'sw.js'
+      - 'scripts/optimize-v1.2.mjs'
+      - '.github/workflows/optimize-v1.2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply runtime optimizations
+        run: node scripts/optimize-v1.2.mjs
+      - name: Commit optimized files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html v1.2-enhancements.js v1.2-runtime-fixes.js sw.js vendor/ts-fsrs.js
+          git diff --cached --quiet || git commit -m 'perf: optimize v1.2 runtime'
+          git push
