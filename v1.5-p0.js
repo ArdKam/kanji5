@@ -3,7 +3,7 @@
 
   if (window.__KANJI5_V15_P0__) return;
   window.__KANJI5_V15_P0__ = true;
-  const V15_P0_VERSION = "1.4";
+  const V15_P0_VERSION = "1.5";
 
   const KNOW_KEY = "kanji5-v1.2-knowledge";
   const COMPONENT_KEY = "kanji5-v1.5-components";
@@ -34,16 +34,6 @@
       .toLowerCase()
       .normalize("NFKC")
       .replace(/[\s\u3000]+/g, "");
-  }
-
-  function escapeHTML(value) {
-    return String(value == null ? "" : value).replace(/[&<>\"']/g, (ch) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '\"': "&quot;",
-      "'": "&#39;"
-    }[ch]));
   }
 
   function getDeck() {
@@ -170,18 +160,17 @@
     const wrap = input ? input.closest(".v14-edu-wrap") : null;
     if (!wrap) return null;
 
-    const visibleTexts = [...wrap.querySelectorAll("div")]
-      .map((node) => String(node.textContent || "").trim())
-      .filter(Boolean);
+    // The production prompt already identifies the target meaning.
+    // Read only the prompt instead of scanning every div and the whole deck.
+    const prompt = $(".v14-edu-prompt", wrap);
+    const promptText = String(prompt && prompt.textContent || "").trim();
+    if (!promptText) return null;
 
+    const normalizedPrompt = normalize(promptText);
     for (const item of getDeck()) {
       if (!item || !Array.isArray(item.meaning)) continue;
-      for (const meaning of item.meaning) {
-        const normalizedMeaning = normalize(meaning);
-        if (visibleTexts.some((text) =>
-          text.split(" · ").map(normalize).includes(normalizedMeaning))) {
-          return item;
-        }
+      if (item.meaning.some((meaning) => normalizedPrompt.includes(normalize(meaning)))) {
+        return item;
       }
     }
     return null;
@@ -225,7 +214,10 @@
     if (!wrap) return;
 
     const prompt = $(".v14-edu-prompt", wrap);
-    if (prompt) prompt.textContent = "برای معنی زیر، کانجی مناسب را انتخاب کن.";
+    if (prompt && !prompt.dataset.v15Prompt) {
+      prompt.textContent = "برای معنی زیر، کانجی مناسب را انتخاب کن.";
+      prompt.dataset.v15Prompt = "1";
+    }
 
     const submit = $("#v14EduSubmit", wrap);
     if (submit) submit.style.display = "none";
@@ -306,10 +298,16 @@
     ratings.appendChild(button);
   }
 
+  let observerScheduled = false;
   const observer = new MutationObserver(() => {
-    enhanceRecall();
-    enhanceProduction();
-    addDontKnow();
+    if (observerScheduled) return;
+    observerScheduled = true;
+    requestAnimationFrame(() => {
+      observerScheduled = false;
+      enhanceRecall();
+      enhanceProduction();
+      addDontKnow();
+    });
   });
 
   function start() {
