@@ -128,3 +128,22 @@
   observer.observe(document.body, { childList: true, subtree: true });
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
 })();
+
+// v1.5 P0 is loaded through this already-active shell runtime so the canonical
+// learning changes work even though the main application is bootstrapped by a module.
+(() => {
+  const SRC = "./v1.5-p0.js";
+  const FLAG = "__KANJI5_V15_P0_LOADER__";
+  if (window[FLAG]) return;
+  window[FLAG] = true;
+  function loadP0() {
+    if (window.__KANJI5_V15_P0__ || document.querySelector('script[data-kanji5-v15-p0]')) return;
+    const script = document.createElement("script");
+    script.src = SRC;
+    script.dataset.kanji5V15P0 = "true";
+    script.async = false;
+    (document.body || document.head || document.documentElement).appendChild(script);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadP0, { once: true });
+  else loadP0();
+})();
