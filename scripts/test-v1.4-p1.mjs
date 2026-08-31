@@ -14,8 +14,9 @@ assert(core.chooseBestExercise({character:'学'},{meaning:{attempts:9,correct:9}
 const qualified=core.gradeMeaning('school work',['school work','education']);assert(qualified.correct&&qualified.quality==='exact','meaning exact grading failed');
 const partial=core.gradeMeaning('school',['school system']);assert(partial.correct&&partial.quality==='partial','meaning partial grading failed');
 assert(!core.gradeMeaning('schol',['school']).correct,'invalid typo was accepted');
-assert(core.gradeReading('gaku',['がく'],v=>v==='がく'?'gaku':v).correct,'reading grading failed');
-let k=core.ensureEntry({},'学',true)['学'];assert(k.exposedAt&&k.stage==='new','exposure state initialization failed');
+assert(core.gradeReading('gaku',['がく']).correct,'reading grading failed');
+assert(core.gradeReading('mo',['も']).correct,'Romaji も grading regressed');
+let k=core.ensureEntry({},'学',true)['学'];assert(k.exposedAt&&k.stage==='exposed','exposure state initialization failed');
 k=core.recordKnowledge({'学':k},'学','production',false,'校')['学'];assert(k.production.attempts===1&&k.distractors['校']===1,'knowledge recording failed');
 assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'migration missing');
 assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses core');
