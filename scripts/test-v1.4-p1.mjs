@@ -44,6 +44,9 @@ const recorded=core.recordKnowledge({'学':empty},'学','production',false,'校'
 assert(recorded.production.attempts===1&&recorded.distractors['校']===1,'Knowledge recording failed');
 assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'Migration missing');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses canonical education core');
+assert(ui.includes('fetchContextSentences')&&ui.includes('api.tatoeba.org/v1/sentences'),'Context sentence API wiring missing');
+assert(ui.includes('edu.sentence.text.replaceAll(item.character','Context exercise does not blank the target Kanji');
+assert(ui.includes('edu.sentence.english'),'Context exercise is missing English translation');
 assert(ui.includes('v14EduProductionInput'),'Typed production UI missing');
 assert(ui.includes('context')&&ui.includes('vocabulary'),'Vocabulary/context missing');
 assert(ui.includes('تمرین بعدی'),'Next exercise flow missing');
