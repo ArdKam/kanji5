@@ -106,4 +106,21 @@
   });
   observer.observe(document.body, { childList: true, subtree: true });
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
+
+  function loadEducationModules() {
+    if (window.KANJI5_EDUCATION_SETTINGS && window.KANJI5_EDUCATION_P1_LOADED) return;
+    const settingsScript = document.createElement("script");
+    settingsScript.src = "./v1.3-settings.js";
+    settingsScript.onload = () => {
+      if (window.KANJI5_EDUCATION_P1_LOADED) return;
+      const p1 = document.createElement("script");
+      p1.src = "./v1.3-p1.js";
+      p1.onload = () => { window.KANJI5_EDUCATION_P1_LOADED = true; };
+      p1.onerror = () => console.error("Failed to load v1.3-p1.js");
+      document.body.appendChild(p1);
+    };
+    settingsScript.onerror = () => console.error("Failed to load v1.3-settings.js");
+    document.body.appendChild(settingsScript);
+  }
+  loadEducationModules();
 })();
