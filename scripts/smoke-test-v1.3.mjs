@@ -3,8 +3,8 @@ import vm from 'node:vm';
 
 const files = [
   'index.html','sw.js','v1.3-p1.js','v1.3-p0.js','v1.3-perf.js',
-  'v1.3-storage-bridge.js','v1.3-settings.js','v1.3-education-runtime-fix.js',
-  'vendor/ts-fsrs-5.4.1.mjs'
+  'v1.3-storage-bridge.js','v1.3-settings.js','v1.4-education-core.js',
+  'v1.3-education-runtime-fix.js','vendor/ts-fsrs-5.4.1.mjs'
 ];
 for (const file of files) if (!fs.existsSync(file)) throw new Error(`Missing required file: ${file}`);
 
@@ -13,15 +13,13 @@ const sw = fs.readFileSync('sw.js','utf8');
 const p1 = fs.readFileSync('v1.3-p1.js','utf8');
 const perf = fs.readFileSync('v1.3-perf.js','utf8');
 const p0 = fs.readFileSync('v1.3-p0.js','utf8');
+const core = fs.readFileSync('v1.4-education-core.js','utf8');
 const guard = fs.readFileSync('v1.3-education-runtime-fix.js','utf8');
 const fsrs = fs.readFileSync('vendor/ts-fsrs-5.4.1.mjs','utf8');
 
 const requiredScripts = [
-  './v1.3-p0.js',
-  './v1.3-perf.js',
-  './v1.3-storage-bridge.js',
-  './v1.3-settings.js',
-  './v1.3-p1.js',
+  './v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js',
+  './v1.3-settings.js','./v1.4-education-core.js','./v1.3-p1.js',
   './v1.3-education-runtime-fix.js'
 ];
 for (const src of requiredScripts) {
@@ -37,20 +35,40 @@ if (perf.includes('marks.app-ready')) throw new Error('Invalid app-ready propert
 if (!p1.includes('v13EduDontKnow')) throw new Error('Education mode lost the Do Not Know action');
 if (!p1.includes('v13-edu-choice')) throw new Error('Education multiple-choice UI is missing');
 if (!p1.includes('function scoreDistractor') || !p1.includes('function chooseChoices')) throw new Error('Canonical smart distractor logic missing');
-if (!p1.includes('history=readKnowledge()[target.character]?.distractors')) throw new Error('Personal distractor history missing');
-if (!p1.includes('sharedReading') || !p1.includes('sharedMeaning') || !p1.includes('strokeScore')) throw new Error('Smart distractor scoring missing');
-if (!p1.includes('function mastery(') || !p1.includes('mastery(target.character')) throw new Error('Difficulty calibration missing');
+if (!p1.includes('EDU_CORE.chooseMode') || !p1.includes('EDU_CORE.recordKnowledge')) throw new Error('P1 is not connected to v1.4 education core');
+if (!p1.includes('EDU_CORE.gradeMeaning') || !p1.includes('EDU_CORE.gradeReading')) throw new Error('P1 is not using standardized grading');
+if (!core.includes("version:'1.4.0-p0'")) throw new Error('v1.4 education core version marker missing');
+if (!core.includes('registry') || !core.includes('meaning') || !core.includes('reading') || !core.includes('production') || !core.includes('vocabulary') || !core.includes('context')) throw new Error('Exercise registry incomplete');
+if (!core.includes('mastery') || !core.includes('weakness') || !core.includes('chooseMode')) throw new Error('Adaptive mastery selection incomplete');
+if (!core.includes('gradeMeaning') || !core.includes('gradeReading')) throw new Error('Standardized grading functions missing');
+if (!core.includes('recordKnowledge')) throw new Error('Educational knowledge recording missing');
 if (!guard.includes('__KANJI5_P0_DATA_PROMISE')) throw new Error('Education dataset guard is not connected to P0');
 if (!guard.includes('stopPropagation')) throw new Error('Education guard does not prevent premature tab initialization');
-if (!guard.includes(".v13-tab[data-tab=\"education\"]")) throw new Error('Education tab selector missing from guard');
-if (fsrs.length < 30000 || /esm\.sh/i.test(fsrs)) throw new Error('Local FSRS bundle looks invalid');
+if (!fsrs.length < 30000 || /esm\.sh/i.test(fsrs)) throw new Error('Local FSRS bundle looks invalid');
 
 for (const file of ['v1.3-production-ui.js','v1.3-education-v2.js','v1.3-dont-know.js','v1.3-smart-distractors.js']) {
   if (fs.existsSync(file)) throw new Error(`Dead v1.3 file should be removed: ${file}`);
 }
 
-for (const source of [p1,perf,p0,guard,sw]) {
+for (const source of [core,p1,perf,p0,guard,sw]) {
   try { new vm.Script(source); } catch (e) { throw new Error(`Syntax error: ${e.message}`); }
 }
 
-console.log('Kanji 5 v1.3 smoke test passed.');
+const context={window:{},console,structuredClone};
+vm.createContext(context);
+vm.runInContext(core,context);
+const api=context.window.__KANJI5_EDU_CORE__;
+if(!api)throw new Error('v1.4 education core did not initialize');
+if(Math.abs(api.mastery({attempts:0,correct:0})-.5)>1e-9)throw new Error('Mastery baseline is incorrect');
+if(!api.gradeMeaning('school',['school']).correct)throw new Error('Exact meaning grading failed');
+if(!api.gradeMeaning('schooling',['school']).correct)throw new Error('Partial meaning grading failed');
+if(api.gradeMeaning('cat',['school']).correct)throw new Error('Wrong meaning grading failed');
+if(!api.gradeReading('がく',['がく'],v=>v).correct)throw new Error('Reading grading failed');
+const stats={meaning:{attempts:4,correct:4},reading:{attempts:4,correct:1},production:{attempts:0,correct:0}};
+const modes=api.getAvailableModes({production:true,vocabulary:false,context:false},false);
+if(!modes.includes('meaning')||!modes.includes('reading')||modes.includes('vocabulary'))throw new Error('Mode registry availability failed');
+if(!['meaning','reading','production'].includes(api.chooseMode({},stats,modes)))throw new Error('Adaptive mode selection returned invalid mode');
+const recorded=api.recordKnowledge({},'学','reading',false,'がく');
+if(!recorded['学']?.reading?.attempts||recorded['学'].distractors['がく']!==1)throw new Error('Knowledge recording failed');
+
+console.log('Kanji 5 v1.4 P0 smoke test passed.');
