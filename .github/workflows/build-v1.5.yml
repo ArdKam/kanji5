@@ -35,6 +35,7 @@ jobs:
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
           node --check v1.5-p0.js
+          node --check v1.5-production-mcq.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
           node --check scripts/test-v1.4-education.mjs
@@ -52,7 +53,9 @@ jobs:
           grep -q "const CACHE='kanji5-shell-v38'" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-p0.js"' sw.js
-          grep -q 'const pool=getDeck();return \[target,...CORE.chooseDistractors' v1.4-education-ui.js
+          grep -q '"./v1.5-production-mcq.js"' sw.js
+          grep -q 'data-v15-production' v1.5-production-mcq.js
+          grep -q 'input.type='\''hidden'\''' v1.5-production-mcq.js
           grep -q 'function jlptRank(item)' index.html
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
       - name: Commit canonical generated files
