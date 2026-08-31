@@ -2,7 +2,7 @@
 'use strict';
 if(window.__KANJI5_V15_PRODUCTION_MCQ__)return;
 window.__KANJI5_V15_PRODUCTION_MCQ__=true;
-const CORE=window.__KANJI5_EDU_CORE__;
+const core=()=>window.__KANJI5_EDU_CORE__;
 const deck=()=>Array.isArray(window.__KANJI5_P0_DATA)?window.__KANJI5_P0_DATA:[];
 const norm=v=>String(v??'').trim().toLowerCase().normalize('NFKC').replace(/[\s\u3000]+/g,'');
 const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
@@ -18,8 +18,9 @@ function updatePrompt(input){
  if(prompt)prompt.textContent='برای معنی زیر، کانجی مناسب را انتخاب کن.';
 }
 function renderChoices(input,target){
- if(!CORE||!target)return false;
- const choices=[target,...(CORE.chooseDistractors?.(target,deck(),{},3)||[])].filter(Boolean);
+ const educationCore=core();
+ if(!educationCore||!target)return false;
+ const choices=[target,...(educationCore.chooseDistractors?.(target,deck(),{},3)||[])].filter(Boolean);
  const unique=[];const seen=new Set();
  for(const c of choices){if(!c.character||seen.has(c.character))continue;seen.add(c.character);unique.push(c);if(unique.length===4)break;}
  if(unique.length<4)return false;
