@@ -3,11 +3,10 @@ import fs from 'node:fs';
 const path = 'v1.4-education-ui.js';
 let source = fs.readFileSync(path, 'utf8');
 
-if (!source.includes("function fetchContextSentences")) {
-  source = source.replace(
-    "async function fetchWords(ch){",
-    `async function fetchContextSentences(ch){
-  const key=\\`kanji5-edu-context-\${ch}\\`;
+if (!source.includes('function fetchContextSentences')) {
+  const needle = 'async function fetchWords(ch){';
+  const inserted = `async function fetchContextSentences(ch){
+  const key=\`kanji5-edu-context-\${ch}\`;
   try{const cached=JSON.parse(localStorage.getItem(key)||'null');if(Array.isArray(cached)&&cached.length)return cached}catch(_){}
   try{
     const url=new URL('https://api.tatoeba.org/v1/sentences');
@@ -22,8 +21,7 @@ if (!source.includes("function fetchContextSentences")) {
     if(!response.ok)return[];
     const payload=await response.json();
     const rows=Array.isArray(payload?.data)?payload.data:[];
-    const out=[];
-    const seen=new Set();
+    const out=[];const seen=new Set();
     for(const row of rows){
       const text=String(row?.text||'').trim();
       if(!text||!text.includes(ch)||seen.has(text))continue;
@@ -37,21 +35,22 @@ if (!source.includes("function fetchContextSentences")) {
     return out;
   }catch(_){return[]}
 }
-async function fetchWords(ch){`
-  );
+async function fetchWords(ch){`;
+  if (!source.includes(needle)) throw new Error('Expected fetchWords function not found');
+  source = source.replace(needle, inserted);
 }
 
 source = source.replace(
-  "let edu={item:null,mode:null,word:null,answered:false};",
-  "let edu={item:null,mode:null,word:null,sentence:null,answered:false};"
+  'let edu={item:null,mode:null,word:null,answered:false};',
+  'let edu={item:null,mode:null,word:null,sentence:null,answered:false};'
 );
 
-const oldContext = "else if(edu.mode==='context'&&edu.word){prompt='با توجه به معنی و خوانش، کانجی مناسب را انتخاب کن.';body=`<div class=\"v14-edu-meaning\">${edu.word.meaning||'—'}</div><div class=\"v14-edu-reading\">${edu.word.reading}</div>${renderChoices(chooseChoices(item))}`}";
-const newContext = "else if(edu.mode==='context'&&edu.sentence){prompt='در جملهٔ زیر، کدام کانجی را درست می‌بینی؟';const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=`<div class=\"v14-edu-word\" style=\"font-size:24px;line-height:1.8;letter-spacing:0\">${blanked}</div><div class=\"v14-edu-meaning\">${edu.sentence.english||'—'}</div>${renderChoices(chooseChoices(item))}`}";
+const oldContext = `else if(edu.mode==='context'&&edu.word){prompt='با توجه به معنی و خوانش، کانجی مناسب را انتخاب کن.';body=\`<div class="v14-edu-meaning">\${edu.word.meaning||'—'}</div><div class="v14-edu-reading">\${edu.word.reading}</div>\${renderChoices(chooseChoices(item))}\`}`;
+const newContext = `else if(edu.mode==='context'&&edu.sentence){prompt='در جملهٔ زیر، کانجی مناسب را انتخاب کن.';const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=\`<div class="v14-edu-word" style="font-size:24px;line-height:1.8;letter-spacing:0">\${blanked}</div><div class="v14-edu-meaning">\${edu.sentence.english||'—'}</div>\${renderChoices(chooseChoices(item))}\`}`;
 if (!source.includes(oldContext)) throw new Error('Expected context renderer not found');
 source = source.replace(oldContext, newContext);
 
-const startPattern = /async function startEducation\(\)\{.*?\nfunction record\(mode,result,wrong=' '\)\{/s;
+const startPattern = /async function startEducation\(\)\{[\s\S]*?\nfunction record\(mode,result,wrong=' '\)\{/;
 if (!startPattern.test(source)) {
   throw new Error('Expected startEducation function not found');
 }
@@ -70,13 +69,15 @@ source = source.replace(startPattern, `async function startEducation(){
   let sentence=null;
   if(mode==='context'){
     const sentences=await fetchContextSentences(item.character);
-    if(!sentences.length)mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},finalModes.filter(x=>x!=='context'),{now:Date.now()});
-    else sentence=sentences[Math.floor(Math.random()*Math.min(sentences.length,8))];
+    if(!sentences.length){
+      mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},finalModes.filter(x=>x!=='context'),{now:Date.now()});
+    }else{
+      sentence=sentences[Math.floor(Math.random()*Math.min(sentences.length,8))];
+    }
   }
-  const availableModes=CORE.getAvailableModes(settings,words.length>0);
-  if((mode==='vocabulary'||mode==='context')&&!words.length&&mode==='vocabulary')mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},availableModes.filter(x=>x!=='vocabulary'&&x!=='context'),{now:Date.now()});
+  if(mode==='vocabulary'&&!words.length)mode=CORE.chooseBestExercise(item,knowledge[item.character]||{},finalModes.filter(x=>x!=='vocabulary'&&x!=='context'),{now:Date.now()});
   writeKnowledge(CORE.ensureEntry(readKnowledge(),item.character,true));
-  edu={item,mode,word:(mode==='vocabulary'&&words.length)?words[Math.floor(Math.random()*Math.min(words.length,8))]:null,sentence,answered:false};
+  edu={item,mode,word:mode==='vocabulary'&&words.length?words[Math.floor(Math.random()*Math.min(words.length,8))]:null,sentence,answered:false};
   renderEducation();
 }
 function record(mode,result,wrong=''){`);
