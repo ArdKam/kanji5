@@ -58,9 +58,9 @@ assert(sw.includes('kanji5-shell-v39')&&sw.includes('kanji5-api-v14'),'Cache ver
 assert(sw.includes('const clone=r.clone();caches.open(CACHE).then(c=>c.put(req,clone))'),'Dynamic same-origin response is cloned before asynchronous caching');
 assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"),'Unsafe post-return response.clone caching pattern remains');
 
-assert(p0.includes("const V15_P0_VERSION='1.3'"),'Canonical v1.5 P0 runtime version mismatch');
+assert(p0.includes('const V15_P0_VERSION = "1.4"'),'Canonical v1.5 P0 runtime version mismatch');
 assert(p0.includes('function enhanceProduction()'),'Canonical production MCQ enhancer missing');
-assert(p0.includes("submit=wrap.querySelector('#v14EduSubmit')")&&p0.includes("submit.style.display='none'"),'Production submit control remains visible');
+assert(p0.includes('submit = $("#v14EduSubmit", wrap)')&&p0.includes('submit.style.display = "none"'),'Production submit control remains visible');
 
 assert(!fs.existsSync('package.json'),'Unexpected package.json dependency surface introduced');
 for(const forbidden of ['npm install ','https://unpkg.com/','https://cdn.jsdelivr.net/']) assert(!index.includes(forbidden)&&!ui.includes(forbidden),`Unexpected runtime dependency: ${forbidden}`);
