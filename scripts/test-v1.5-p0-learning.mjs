@@ -6,6 +6,7 @@ const assert = (x, m) => { if (!x) throw new Error(m); };
 
 const index = read('index.html');
 const runtime = read('v1.2-runtime-fixes.js');
+const v12 = read('v1.2-enhancements.js');
 const p0 = read('v1.5-p0.js');
 const sw = read('sw.js');
 const coreSource = read('v1.4-education-core.js');
@@ -37,6 +38,12 @@ assert(p0.includes('const core = window.__KANJI5_EDU_CORE__'), 'Production MCQ m
 assert(!p0.includes('کانجی را بنوی'), 'Canonical P0 runtime still contains a typing prompt');
 assert(!p0.includes('observer.observe(document.body'), 'P0 must not observe the entire document body');
 
+// P0 grading invariant: there must be one canonical meaning grader.
+assert(v12.includes('gradeMeaningCanonical'), 'Legacy active-recall layer is not delegated to the canonical grader');
+assert(!v12.includes('answer.includes(canonical)'), 'Substring meaning grading is still present in v1.2-enhancements.js');
+assert(!v12.includes('canonical.includes(answer)'), 'Reverse substring meaning grading is still present in v1.2-enhancements.js');
+
+// Behavioral tests: execute the real education core in an isolated VM.
 const sandbox = { window: {}, console, structuredClone };
 vm.runInNewContext(coreSource, sandbox, { filename: 'v1.4-education-core.js' });
 const core = sandbox.window.__KANJI5_EDU_CORE__;
