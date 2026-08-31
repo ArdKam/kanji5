@@ -48,6 +48,9 @@ jobs:
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
           node --check scripts/apply-v1.3-static.mjs
+          node --check scripts/test-v1.4-education.mjs
+          node --check scripts/test-v1.4-p1.mjs
+          node --check scripts/test-v1.5-p0.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
@@ -58,13 +61,15 @@ jobs:
         run: node scripts/test-v1.4-education.mjs
       - name: Run v1.4 education P1 tests
         run: node scripts/test-v1.4-p1.mjs
+      - name: Run v1.5 stabilization P0 tests
+        run: node scripts/test-v1.5-p0.mjs
       - name: Commit canonical generated files
         run: |
           set -e
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js scripts/apply-v1.3-static.mjs
+          git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js scripts/apply-v1.3-static.mjs scripts/test-v1.5-p0.mjs .github/workflows/build-v1.4.yml
           git add -u
           if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
-          git commit -m 'build(v1.4): persist canonical educational files [skip ci]'
+          git commit -m 'build(v1.5): persist stabilization checks [skip ci]'
           git push origin feature/v1.4
