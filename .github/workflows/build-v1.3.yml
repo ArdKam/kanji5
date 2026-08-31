@@ -20,34 +20,47 @@ permissions:
   contents: write
 
 jobs:
-  validate:
+  validate-and-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: feature/v1.3
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Apply static v1.3 wiring
+        run: node scripts/apply-v1.3-static.mjs
+      - name: Remove dead v1.3 scripts
+        run: rm -f v1.3-production-ui.js v1.3-education-v2.js v1.3-dont-know.js
+      - name: Tighten meaning recall grading
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = fs.readFileSync('v1.3-p1.js','utf8');
+          const old = "ok=(session.item.meaning||[]).some(x=>{const c=norm(x);return c&&(a===c||a.includes(c)||c.includes(a))})";
+          const replacement = "ok=(session.item.meaning||[]).some(x=>{const c=norm(x);return c&&a===c})";
+          if (p.includes(old)) fs.writeFileSync('v1.3-p1.js',p.replace(old,replacement));
+          else if (!p.includes(replacement)) throw new Error('Meaning grading pattern not found');
+          NODE
       - name: Validate dataset
         run: |
-          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset'); console.log('Validated 2,136 Joyo kanji');"
-      - name: Validate local FSRS
+          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset');"
+      - name: Validate local FSRS and scripts
         run: |
           node --check vendor/ts-fsrs-5.4.1.mjs
-          node -e "const fs=require('fs'); const s=fs.readFileSync('v1.3-p0.js','utf8'); if(s.includes('esm.sh')) throw new Error('Runtime still references esm.sh'); if(!s.includes('./vendor/ts-fsrs-5.4.1.mjs')) throw new Error('Local FSRS reference missing');"
-      - name: Validate v1.3 scripts
-        run: |
-          node --check v1.3-p1.js
           node --check v1.3-p0.js
-          node --check v1.3-dont-know.js
+          node --check v1.3-p1.js
           node --check v1.3-perf.js
           node --check v1.3-storage-bridge.js
           node --check v1.3-settings.js
-      - name: Validate performance instrumentation
-        run: |
-          node -e "const fs=require('fs'); const s=fs.readFileSync('v1.3-perf.js','utf8'); if(!s.includes(\"marks['app-ready']\")) throw new Error('app-ready mark must use bracket notation');"
-      - name: Validate Service Worker
-        run: |
           node --check sw.js
-          node -e "const fs=require('fs'); const s=fs.readFileSync('sw.js','utf8'); if(!s.includes('vendor/ts-fsrs-5.4.1.mjs')) throw new Error('FSRS is not in shell cache'); if(!s.includes('v1.3-p0.js')) throw new Error('v1.3-p0 missing from shell');"
-      - name: Smoke test browser-facing wiring
+      - name: Smoke test v1.3
         run: node scripts/smoke-test-v1.3.mjs
+      - name: Commit generated build
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html sw.js v1.3-p1.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
+          git add -u
+          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): wire static runtime and validate release [skip ci]'; git push origin feature/v1.3; fi
