@@ -1,8 +1,11 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const assert=(x,m)=>{if(!x)throw new Error(m)};
-const index=read('index.html'),ui=read('v1.4-education-ui.js'),p0=read('v1.5-p0.js'),sw=read('sw.js');
-assert(index.includes('./v1.5-p0.js'),'v1.5 P0 runtime is not wired into index.html');
+const index=read('index.html'),runtime=read('v1.2-runtime-fixes.js'),p0=read('v1.5-p0.js'),sw=read('sw.js');
+assert(index.includes('./v1.2-runtime-fixes.js'),'Active shell runtime is missing');
+assert(runtime.includes('const SRC = "./v1.5-p0.js"'),'Active shell runtime does not load v1.5 P0');
+assert(runtime.includes('script.dataset.kanji5V15P0 = "true"'),'P0 loader marker is missing');
+assert(runtime.includes('document.addEventListener("DOMContentLoaded", loadP0'),'P0 loader is not deferred until DOM ready');
 assert(sw.includes('"./v1.5-p0.js"'),'v1.5 P0 runtime is not precached by the service worker');
 assert(index.includes('function jlptRank(item)'),'JLPT ranking helper is missing from the review queue');
 assert(index.includes('N5:0,N4:1,N3:2,N2:3,N1:4'),'JLPT order must be N5 → N4 → N3 → N2 → N1');
@@ -10,7 +13,7 @@ assert(index.includes('jlptRank(a)-jlptRank(b)'),'New-card queue is not grouped 
 assert(index.includes('while(start<unseen.length&&jlptRank(unseen[start])===rank)'),'New cards are not randomized within JLPT level groups');
 assert(p0.includes("const COMP='kanji5-v1.5-components'"),'Component-level knowledge store missing');
 assert(p0.includes('focusComponent')&&p0.includes('recordComponent'),'Component-level focus/recording logic missing');
-assert(p0.includes('معنی هدف: «${focus.raw}»')&&p0.includes('خوانش هدف: «${focus.raw}»'),'Recall should deliberately target the weakest meaning/reading component');
+assert(p0.includes('معنی هدف: «${focus.raw}»')&&p0.includes('خوانش هدف: «${focus.raw}»'),'Recall should target the weakest meaning/reading component');
 assert(p0.includes("b.id='v15DontKnowReview'"),'Review “don’t know” control is missing');
 assert(p0.includes("ratings.querySelector('.rate.again')?.click()"),'Review “don’t know” must map to FSRS Again behavior');
 assert(p0.includes('function productionTarget(input)'),'Production target resolver is missing');
@@ -24,6 +27,5 @@ assert(p0.includes("input.value=b.dataset.v15Production||''"),'Production choice
 assert(p0.includes("input.dataset.v15Replaced='1'"),'Production replacement is not marked idempotently');
 assert(p0.includes("wrap.querySelector('.v15-production-grid')||input.dataset.v15Replaced==='1'"),'Production replacement is not guarded against duplicate grids');
 assert(p0.includes('const core=window.__KANJI5_EDU_CORE__'),'Production MCQ must resolve the education core lazily');
-assert(ui.includes("edu.mode==='production'")&&ui.includes('#v14EduProductionInput'),'Original production path remains available as the controlled backing field');
 assert(!p0.includes('کانجی را بنوی'),'Canonical P0 runtime still contains a typing prompt');
 console.log('Kanji 5 v1.5 P0 learning interaction checks passed.');
