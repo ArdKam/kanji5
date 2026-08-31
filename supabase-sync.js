@@ -93,6 +93,10 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
     }
     const stageRank = { new: 0, exposed: 1, learning: 2, reinforcing: 3, mastered: 4 };
     out.stage = stageRank[r.stage] > stageRank[l.stage] ? r.stage : (l.stage || r.stage || "new");
+    const le = l.educationEvidence && typeof l.educationEvidence === "object" ? l.educationEvidence : {};
+    const re = r.educationEvidence && typeof r.educationEvidence === "object" ? r.educationEvidence : {};
+    const leAt = String(le.updatedAt || ""), reAt = String(re.updatedAt || "");
+    out.educationEvidence = reAt > leAt ? { ...le, ...re } : { ...re, ...le };
     return out;
   };
   const mergeKnowledge = (local, remote) => {
