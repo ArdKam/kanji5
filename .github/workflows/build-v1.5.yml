@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate-and-build:
@@ -45,9 +45,9 @@ jobs:
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
-      - name: Validate v1.5 contracts
+      - name: Validate v1.5 contracts and behavior
         run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
-      - name: Verify generated files
+      - name: Verify generated files are committed
         run: |
           git diff --check
           grep -q "const CACHE='kanji5-shell-v41'" sw.js
@@ -58,12 +58,4 @@ jobs:
           grep -q 'input.type='\''hidden'\''' v1.5-p0.js
           grep -q 'data-v15-production' v1.5-p0.js
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
-      - name: Commit canonical generated files
-        run: |
-          set -e
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
-          git commit -m 'build(v1.5): persist P0 learning changes [skip ci]'
-          git push origin feature/v1.5
+          git diff --exit-code
