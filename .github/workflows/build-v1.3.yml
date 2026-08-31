@@ -31,20 +31,8 @@ jobs:
           node-version: 20
       - name: Apply static v1.3 wiring
         run: node scripts/apply-v1.3-static.mjs
-      - name: Wire smart distractors
-        run: node scripts/apply-smart-distractors.mjs
       - name: Remove dead v1.3 scripts
-        run: rm -f v1.3-production-ui.js v1.3-education-v2.js v1.3-dont-know.js
-      - name: Tighten meaning recall grading
-        run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const p = fs.readFileSync('v1.3-p1.js','utf8');
-          const old = "ok=(session.item.meaning||[]).some(x=>{const c=norm(x);return c&&(a===c||a.includes(c)||c.includes(a))})";
-          const replacement = "ok=(session.item.meaning||[]).some(x=>{const c=norm(x);return c&&a===c})";
-          if (p.includes(old)) fs.writeFileSync('v1.3-p1.js',p.replace(old,replacement));
-          else if (!p.includes(replacement)) throw new Error('Meaning grading pattern not found');
-          NODE
+        run: rm -f v1.3-production-ui.js v1.3-education-v2.js v1.3-dont-know.js v1.3-smart-distractors.js scripts/apply-smart-distractors.mjs
       - name: Validate dataset
         run: |
           node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8')); if(d.count!==2136 || !Array.isArray(d.kanji) || d.kanji.length!==2136) throw new Error('Invalid runtime dataset');"
@@ -53,20 +41,19 @@ jobs:
           node --check vendor/ts-fsrs-5.4.1.mjs
           node --check v1.3-p0.js
           node --check v1.3-p1.js
-          node --check v1.3-smart-distractors.js
           node --check v1.3-perf.js
           node --check v1.3-storage-bridge.js
           node --check v1.3-settings.js
           node --check sw.js
       - name: Validate smart distractors
         run: |
-          node -e "const fs=require('fs'); const s=fs.readFileSync('v1.3-smart-distractors.js','utf8'); const h=fs.readFileSync('index.html','utf8'); const w=fs.readFileSync('sw.js','utf8'); if(!h.includes('./v1.3-smart-distractors.js')) throw new Error('index.html is missing smart distractors'); if(!w.includes('./v1.3-smart-distractors.js')) throw new Error('Service worker is missing smart distractors'); if(!s.includes('distractors')) throw new Error('Personal distractor history missing'); if(!s.includes('sharedReading') || !s.includes('meaningScore') || !s.includes('strokeScore')) throw new Error('Smart distractor scoring missing'); if(!s.includes('mastery(')) throw new Error('Difficulty calibration missing');"
+          node -e "const fs=require('fs'); const p=fs.readFileSync('v1.3-p1.js','utf8'); const h=fs.readFileSync('index.html','utf8'); const w=fs.readFileSync('sw.js','utf8'); if(h.includes('./v1.3-smart-distractors.js')) throw new Error('Obsolete smart distractor script still wired into index.html'); if(w.includes('./v1.3-smart-distractors.js')) throw new Error('Obsolete smart distractor script still wired into service worker'); if(!p.includes('function scoreDistractor') || !p.includes('function chooseChoices')) throw new Error('Canonical smart distractor logic missing'); if(!p.includes('history=readKnowledge()[target.character]?.distractors')) throw new Error('Personal distractor history missing'); if(!p.includes('sharedReading') || !p.includes('sharedMeaning') || !p.includes('strokeScore')) throw new Error('Smart distractor scoring missing'); if(!p.includes('mastery(item.character,mode)')) throw new Error('Difficulty calibration missing');"
       - name: Smoke test v1.3
         run: node scripts/smoke-test-v1.3.mjs
       - name: Commit generated build
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html sw.js v1.3-p1.js v1.3-smart-distractors.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs scripts/apply-smart-distractors.mjs
+          git add index.html sw.js v1.3-p1.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
           git add -u
-          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): ship smart education distractors [skip ci]'; git push origin feature/v1.3; fi
+          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): stabilize canonical education pipeline [skip ci]'; git push origin feature/v1.3; fi
