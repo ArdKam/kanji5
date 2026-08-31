@@ -1,4 +1,4 @@
-# v1.5 P0 validation workflow — intentionally rerun on source changes.
+# v1.5 P0 validation workflow
 name: Build Kanji 5 v1.5
 
 on:
@@ -35,7 +35,6 @@ jobs:
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
           node --check v1.5-p0.js
-          node --check v1.5-production-mcq.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
           node --check scripts/test-v1.4-education.mjs
@@ -50,13 +49,13 @@ jobs:
       - name: Verify generated files
         run: |
           git diff --check
-          grep -q "const CACHE='kanji5-shell-v38'" sw.js
+          grep -q "const CACHE='kanji5-shell-v39'" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-p0.js"' sw.js
-          grep -q '"./v1.5-production-mcq.js"' sw.js
-          grep -q 'data-v15-production' v1.5-production-mcq.js
-          grep -q 'input.type='\''hidden'\''' v1.5-production-mcq.js
           grep -q 'function jlptRank(item)' index.html
+          grep -q 'v15-production-choice' v1.5-p0.js
+          grep -q 'input.type='\''hidden'\''' v1.5-p0.js
+          grep -q 'data-v15-production' v1.5-p0.js
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
       - name: Commit canonical generated files
         run: |
