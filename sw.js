@@ -1,4 +1,4 @@
-const CACHE='kanji5-shell-v25';
+const CACHE='kanji5-shell-v26';
 const DATA_CACHE='kanji5-data-v16';
 const API_CACHE='kanji5-api-v7';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./v1.3-p0.js','./v1.3-p1.js','./v1.3-dont-know.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js','./supabase-config.js','./supabase-sync.js'];
