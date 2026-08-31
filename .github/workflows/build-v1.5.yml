@@ -20,6 +20,8 @@ jobs:
           node-version: 24
       - name: Run canonical build wiring
         run: node scripts/apply-v1.3-static.mjs
+      - name: Apply v1.5 P0 learning changes
+        run: node scripts/apply-v1.5-p0.mjs
       - name: Validate dataset
         run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));if(d.count!==2136||!Array.isArray(d.kanji)||d.kanji.length!==2136)throw new Error('Invalid runtime dataset');"
       - name: Validate JavaScript
@@ -31,7 +33,9 @@ jobs:
           node --check v1.4-education-migration.js
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
+          node --check v1.5-p0.js
           node --check scripts/apply-v1.3-static.mjs
+          node --check scripts/apply-v1.5-p0.mjs
           node --check scripts/test-v1.4-education.mjs
           node --check scripts/test-v1.4-p1.mjs
           node --check scripts/test-v1.5-p0.mjs
@@ -45,7 +49,9 @@ jobs:
           git diff --check
           grep -q "const CACHE='kanji5-shell-v38'" sw.js
           grep -q "function dynamicSameOrigin" sw.js
-          grep -q "const pool=getDeck();return \[target,...CORE.chooseDistractors" v1.4-education-ui.js
+          grep -q '"./v1.5-p0.js"' sw.js
+          grep -q 'const pool=getDeck();return \[target,...CORE.chooseDistractors' v1.4-education-ui.js
+          grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
       - name: Commit canonical generated files
         run: |
           set -e
@@ -53,5 +59,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
-          git commit -m 'build(v1.5): persist canonical generated files [skip ci]'
+          git commit -m 'build(v1.5): persist P0 learning changes [skip ci]'
           git push origin feature/v1.5
