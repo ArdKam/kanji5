@@ -50,6 +50,14 @@ assert(ui.includes('edu.sentence.english'),'Context exercise is missing English 
 assert(ui.includes('v14EduProductionInput'),'Typed production UI missing');
 assert(ui.includes('context')&&ui.includes('vocabulary'),'Vocabulary/context missing');
 assert(ui.includes('تمرین بعدی'),'Next exercise flow missing');
+const selectIndex=ui.indexOf('const item=CORE.selectEducationItem');
+const modeIndex=ui.indexOf('let mode=CORE.chooseBestExercise(item,stats,modes');
+const wordFetchIndex=ui.indexOf('fetchWords(item.character)');
+const contextFetchIndex=ui.indexOf('fetchContextSentences(item.character)');
+assert(selectIndex>=0&&modeIndex>selectIndex,'Adaptive item/mode selection ordering is invalid');
+assert(wordFetchIndex>modeIndex,'Vocabulary API is fetched before exercise mode is selected');
+assert(contextFetchIndex>modeIndex,'Context data is fetched before exercise mode selection');
+assert(!ui.includes("const words=await fetchWords(item.character);const finalModes"),'Unconditional vocabulary fetch regression detected');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
 assert(sync.includes('distractors')&&sync.includes('stage'),'Sync educational metadata missing');
 console.log('Kanji 5 v1.4 P1 tests passed.');
