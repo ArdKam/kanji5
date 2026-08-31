@@ -1,40 +1,27 @@
 (() => {
-  const STARTUP_TIMEOUT = 6000;
   const EXAMPLE_SELECTOR = ".examples";
   const WORDS_URL = ch => "https://kanjiapi.dev/v1/words/" + encodeURIComponent(ch);
   let activeCharacter = "";
   let exampleRequest = null;
   let retryTimer = null;
   let retryCount = 0;
-  let startupShown = false;
-
-  function showStartupFallback() {
-    if (startupShown) return;
-    const loading = document.getElementById("loading");
-    const app = document.getElementById("app");
-    if (!loading || loading.hidden || !app || !app.hidden) return;
-    startupShown = true;
-    loading.innerHTML = '<div><div style="font-size:26px">⚠️</div><div style="font-weight:800;margin:6px 0">بارگذاری برنامه کمی طول کشید.</div><button class="primary" id="v12RuntimeRetry" style="margin-top:7px">تلاش دوباره</button></div>';
-    document.getElementById("v12RuntimeRetry")?.addEventListener("click", () => location.reload());
-  }
 
   function compactLoadingPanel() {
     const style = document.createElement("style");
     style.id = "v13-compact-loading";
     style.textContent = `
-      #loading { min-height: 64px !important; height: 64px; padding: 10px 16px !important; border-radius: 14px; box-shadow: none; }
-      #loading > div { width:100%; max-width:none; display:flex; align-items:center; justify-content:center; gap:9px; }
-      #loading .spinner { width:18px; height:18px; border-width:2px; margin:0; flex:0 0 auto; }
-      #loading > div > div:nth-child(2) { font-size:13px; font-weight:700; white-space:nowrap; }
+      #loading { min-height: 28px !important; height: 28px; padding: 4px 10px !important; border-radius: 10px; box-shadow: none; }
+      #loading > div { width:100%; max-width:none; display:flex; align-items:center; justify-content:center; gap:7px; }
+      #loading .spinner { width:14px; height:14px; border-width:2px; margin:0; flex:0 0 auto; }
+      #loading > div > div:nth-child(2) { font-size:11px; font-weight:650; white-space:nowrap; }
       #loadStatus { display:none !important; }
     `;
     document.head.appendChild(style);
     const status = document.querySelector("#loading > div > div:nth-child(2)");
-    if (status) status.textContent = "در حال آماده‌سازی برنامه…";
+    if (status) status.textContent = "در حال آماده‌سازی…";
   }
 
   compactLoadingPanel();
-  setTimeout(showStartupFallback, STARTUP_TIMEOUT);
 
   const normalize = value => String(value || "").trim().replace(/[\s\u3000]+/g, "");
 
