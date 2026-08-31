@@ -1,0 +1,71 @@
+name: Vendor FSRS for v1.3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/v1.3]
+    paths:
+      - '.github/workflows/vendor-fsrs-v1.3.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  vendor-fsrs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch official ts-fsrs 5.4.1 bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/ts-fsrs
+          mkdir -p /tmp/ts-fsrs vendor
+          cd /tmp/ts-fsrs
+          npm pack ts-fsrs@5.4.1 --silent
+          tar -xzf ts-fsrs-5.4.1.tgz
+          test -s package/dist/index.mjs
+          cp package/dist/index.mjs "$GITHUB_WORKSPACE/vendor/ts-fsrs-5.4.1.mjs"
+          node -e "const fs=require('fs'); const s=fs.statSync('package/dist/index.mjs').size; if(s<50000) throw new Error('Unexpected FSRS bundle size: '+s); console.log('Vendored ts-fsrs@5.4.1:',s,'bytes')"
+      - name: Switch runtime to local FSRS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          replacements = {
+              'const FSRS_URL="https://esm.sh/ts-fsrs@5.4.1?bundle";': 'const FSRS_URL="./vendor/ts-fsrs-5.4.1.mjs";',
+              "const FSRS_URL='https://esm.sh/ts-fsrs@5.4.1?bundle';": "const FSRS_URL='./vendor/ts-fsrs-5.4.1.mjs';",
+          }
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          for old,new in replacements.items():
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          p=Path('v1.3-p0.js')
+          s=p.read_text(encoding='utf-8')
+          for old,new in replacements.items():
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          p=Path('sw.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("'./v1.3-storage-bridge.js'", "'./v1.3-storage-bridge.js','./vendor/ts-fsrs-5.4.1.mjs'")
+          s=s.replace("const API_CACHE='kanji5-api-v7';", "const API_CACHE='kanji5-api-v7';")
+          s=s.replace('https://esm.sh/ts-fsrs@5.4.1?bundle', './vendor/ts-fsrs-5.4.1.mjs')
+          s=s.replace('kanji5-shell-v24','kanji5-shell-v25')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate local FSRS wiring
+        run: |
+          node --check v1.3-p0.js
+          node -e "const fs=require('fs'); const h=fs.readFileSync('index.html','utf8'); const p=fs.readFileSync('v1.3-p0.js','utf8'); const s=fs.readFileSync('sw.js','utf8'); if(!fs.existsSync('vendor/ts-fsrs-5.4.1.mjs')) throw new Error('Local FSRS bundle missing'); if(h.includes('esm.sh/ts-fsrs')) throw new Error('index.html still references esm.sh'); if(p.includes('esm.sh/ts-fsrs')) throw new Error('v1.3-p0.js still references esm.sh'); if(!s.includes('./vendor/ts-fsrs-5.4.1.mjs')) throw new Error('Service worker does not precache local FSRS'); console.log('Validated local FSRS wiring');"
+      - name: Commit vendored FSRS and wiring
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add vendor/ts-fsrs-5.4.1.mjs index.html v1.3-p0.js sw.js
+          git diff --cached --quiet || git commit -m 'build(v1.3): vendor ts-fsrs 5.4.1 locally'
+          git push
