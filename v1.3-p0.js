@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const DATA_URL='./kanji-data.json';
-const FSRS_URL='https://esm.sh/ts-fsrs@5.4.1?bundle';
+const FSRS_URL='./vendor/ts-fsrs-5.4.1.mjs';
 const ensureStatus=()=>{let loading=document.getElementById('loading');if(!loading)return;let status=document.getElementById('loadStatus');if(!status){status=document.createElement('div');status.id='loadStatus';status.style.cssText='display:none';loading.querySelector(':scope > div')?.appendChild(status)}};
 if(!window.__KANJI5_P0_DATA_PROMISE){
   window.__KANJI5_P0_DATA_PROMISE=fetch(DATA_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('KANJI_DATA_PREFETCH_FAILED');return r.json()}).then(data=>{
