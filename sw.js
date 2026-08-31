@@ -1,6 +1,6 @@
-const CACHE = "kanji5-shell-v12";
-const DATA_CACHE = "kanji5-data-v7";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.3-p1.js", "./v1.2-enhancements.js", "./v1.2-runtime-fixes.js", "./supabase-config.js", "./supabase-sync.js"];
+const CACHE = "kanji5-shell-v13";
+const DATA_CACHE = "kanji5-data-v8";
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.3-p0.js", "./v1.3-p1.js", "./v1.2-enhancements.js", "./v1.2-runtime-fixes.js", "./supabase-config.js", "./supabase-sync.js"];
 const DATA_URL = new URL("./kanji-data.json", self.location.href).href;
 
 self.addEventListener("install", event => {
@@ -51,7 +51,17 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request, CACHE, "./index.html"));
+    event.respondWith((async () => {
+      const response = await networkFirst(request, CACHE, "./index.html");
+      try {
+        const html = await response.text();
+        if (!html.includes('src="./v1.3-p0.js"')) {
+          const injected = html.replace("<script type=\"module\">", '<script src="./v1.3-p0.js"></script><script type="module">');
+          return new Response(injected, {status: response.status, statusText: response.statusText, headers: response.headers});
+        }
+      } catch (_) {}
+      return response;
+    })());
     return;
   }
 
