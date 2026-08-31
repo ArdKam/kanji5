@@ -1,3 +1,4 @@
+# v1.5 P0 validation workflow — intentionally rerun on source changes.
 name: Build Kanji 5 v1.5
 
 on:
