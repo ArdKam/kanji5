@@ -40,8 +40,8 @@ const excluded=core.selectEducationItem(items,knowledge,available,{now,excludeCh
 assert(excluded?.character!=='校','Adaptive Kanji selection ignored current-item exclusion');
 assert(core.scoreEducationItem(items[1],knowledge['校'],available,{now})>core.scoreEducationItem(items[0],knowledge['学'],available,{now}),'Weak Kanji did not outscore mastered Kanji');
 const empty=core.ensureEntry({},'学',true)['学'];assert(empty.exposedAt&&empty.stage==='exposed','Exposure state initialization failed');
-let k=core.recordKnowledge({'学':k=empty},'production',false,'校')['学'];
-assert(k.production.attempts===1&&k.distractors['校']===1,'Knowledge recording failed');
+const recorded=core.recordKnowledge({'学':empty},'学','production',false,'校')['学'];
+assert(recorded.production.attempts===1&&recorded.distractors['校']===1,'Knowledge recording failed');
 assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'Migration missing');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses canonical education core');
 assert(ui.includes('v14EduProductionInput'),'Typed production UI missing');
