@@ -59,9 +59,9 @@ assert(picked.length===2&&picked.some(x=>x.character==='習'),'Prior wrong distr
 assert(!picked.some(x=>x.character==='学'),'Target Kanji leaked into distractor list');
 const ambiguous={character:'仮',on:['ガク'],meaning:['study'],strokes:8,grade:1,frequency:100};
 assert(core.distractorAmbiguous(distractorTarget,ambiguous,[])===true,'Ambiguous distractor was not rejected');
-const index=core.buildDistractorIndex([distractorTarget,...distractorCandidates]);
-assert(Array.isArray(index.reading['ガク']),'Reading candidate index was not built');
-const indexedPool=core.candidatePool(distractorTarget,[...distractorCandidates],index);
+const distractorIndex=core.buildDistractorIndex([distractorTarget,...distractorCandidates]);
+assert(Array.isArray(distractorIndex.reading['ガク']),'Reading candidate index was not built');
+const indexedPool=core.candidatePool(distractorTarget,[...distractorCandidates],distractorIndex);
 assert(Array.isArray(indexedPool)&&indexedPool.length>0,'Indexed distractor candidate pool is empty');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
 assert(sync.includes('distractors')&&sync.includes('stage')&&sync.includes('educationEvidence'),'Sync educational metadata missing');
