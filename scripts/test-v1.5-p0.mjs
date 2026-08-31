@@ -3,16 +3,17 @@ import vm from 'node:vm';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
+const count=(text,needle)=>(text.split(needle).length-1);
 
 const index=read('index.html'),sw=read('sw.js'),migration=read('v1.4-education-migration.js'),workflow=read('.github/workflows/build-v1.5.yml'),core=read('v1.4-education-core.js'),ui=read('v1.4-education-ui.js'),p0=read('v1.5-p0.js');
 
 const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
-for(const src of required)assert((index.match(new RegExp(`<script src=\\"${src.replaceAll('.','\\.')}\\"></script>`,'g'))||[]).length===1,`${src} must be wired exactly once`);
-assert((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g)||[]).length===1,'v1.5 P0 runtime must be wired exactly once');
+for(const src of required)assert(count(index,`<script src="${src}"></script>` )===1,`${src} must be wired exactly once`);
+assert(count(index,'<script src="./v1.5-p0.js"></script>')===1,'v1.5 P0 runtime must be wired exactly once');
 for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
 assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
-assert((index.match(/v1\.2-dataset-2136/g)||[]).length===1,'Duplicate dataset bootstrap remains');
+assert(count(index,'v1.2-dataset-2136')===1,'Duplicate dataset bootstrap remains');
 
 class Store{constructor(values={}){this.values={...values}}getItem(k){return Object.prototype.hasOwnProperty.call(this.values,k)?this.values[k]:null}setItem(k,v){this.values[k]=String(v)}}
 function runMigration(initial){const store=new Store(initial),ctx={window:{},localStorage:store,Date,JSON};vm.createContext(ctx);vm.runInContext(migration,ctx);assert(ctx.window.__KANJI5_EDU_MIGRATION_API__,'Migration API missing');return{store,api:ctx.window.__KANJI5_EDU_MIGRATION_API__}}
@@ -48,7 +49,7 @@ assert(ui.includes('CORE.selectEducationItem'),'UI is not using adaptive Kanji s
 assert(ui.includes('safe(edu.sentence.english||\'\')'),'Context translation escaping is not wired');
 assert(workflow.includes('scripts/test-v1.5-p0.mjs')&&workflow.includes('scripts/test-v1.4-p1.mjs')&&workflow.includes('scripts/test-v1.4-education.mjs'),'Education CI gates are missing');
 assert(!workflow.includes('git push origin feature/v1.5'),'v1.5 CI must not self-push generated changes');
-assert(workflow.includes('git diff --exit-code'),'v1.5 CI must fail on generated-file drift');
+assert(workflow.includes('test "$(git status --porcelain)" = ""'),'v1.5 CI must fail on committed-build drift');
 assert(index.includes('function educationQueuePriority'),'Education/FSRS queue bridge is missing');
 assert(index.includes('educationQueuePriority(k')||index.includes('educationQueuePriority(item'),'Queue does not use education priority');
 assert(index.includes('dueItems')&&index.includes('dueItems.sort'),'FSRS due cards are not being ranked with education evidence');
