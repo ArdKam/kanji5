@@ -6,7 +6,7 @@ assert(index.includes('./v1.2-runtime-fixes.js'),'Active shell runtime is missin
 assert(index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g)?.length===1,'v1.5 P0 runtime must be wired exactly once in index.html');
 assert(runtime.includes('const SRC = "./v1.5-p0.js"'),'Active shell fallback loader does not reference v1.5 P0');
 assert(sw.includes('"./v1.5-p0.js"'),'v1.5 P0 runtime is not precached by the service worker');
-assert(sw.includes('kanji5-shell-v39'),'P0 cache version was not bumped');
+assert(sw.includes('kanji5-shell-v41'),'P0 cache version was not bumped');
 assert(index.includes('function jlptRank(item)'),'JLPT ranking helper is missing from the review queue');
 assert(index.includes('N5:0,N4:1,N3:2,N2:3,N1:4'),'JLPT order must be N5 → N4 → N3 → N2 → N1');
 assert(index.includes('jlptRank(a)-jlptRank(b)'),'New-card queue is not grouped by JLPT level');
@@ -28,4 +28,5 @@ assert(p0.includes('input.style.display = "none"'),'Production input remains vis
 assert(p0.includes('submit.style.display = "none"'),'Production text-submit control remains visible after MCQ conversion');
 assert(p0.includes('const core = window.__KANJI5_EDU_CORE__'),'Production MCQ must resolve the education core lazily');
 assert(!p0.includes('کانجی را بنوی'),'Canonical P0 runtime still contains a typing prompt');
+assert(!p0.includes('observer.observe(document.body'),'P0 must not observe the entire document body');
 console.log('Kanji 5 v1.5 P0 learning interaction checks passed.');
