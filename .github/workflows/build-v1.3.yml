@@ -8,6 +8,7 @@ on:
       - 'kanji-data.json'
       - 'kanji-joyo.json'
       - 'scripts/**'
+      - 'v1.4-education-core.js'
       - 'v1.3-*.js'
       - 'v1.2-*.js'
       - 'vendor/ts-fsrs-5.4.1.mjs'
@@ -44,17 +45,18 @@ jobs:
           node --check v1.3-perf.js
           node --check v1.3-storage-bridge.js
           node --check v1.3-settings.js
+          node --check v1.4-education-core.js
           node --check v1.3-education-runtime-fix.js
           node --check sw.js
       - name: Validate education architecture
         run: |
-          node -e "const fs=require('fs'); const p=fs.readFileSync('v1.3-p1.js','utf8'); const g=fs.readFileSync('v1.3-education-runtime-fix.js','utf8'); const h=fs.readFileSync('index.html','utf8'); const w=fs.readFileSync('sw.js','utf8'); if(h.includes('./v1.3-smart-distractors.js')||w.includes('./v1.3-smart-distractors.js')) throw new Error('Obsolete smart distractor wiring remains'); if(!p.includes('function scoreDistractor')||!p.includes('function chooseChoices')) throw new Error('Canonical smart distractor logic missing'); if(!p.includes('distractors')) throw new Error('Personal distractor history missing'); if(!p.includes('sharedReading')||!p.includes('sharedMeaning')||!p.includes('strokeScore')) throw new Error('Smart distractor scoring missing'); if(!p.includes('function mastery(')||!p.includes('mastery(target.character')) throw new Error('Difficulty calibration missing'); if(!g.includes('__KANJI5_P0_DATA_PROMISE')||!g.includes('stopPropagation')||!g.includes('waitForEducation')) throw new Error('Education dataset guard is not installed'); if(!h.includes('./v1.3-education-runtime-fix.js')) throw new Error('Education runtime guard missing from index.html'); if(!w.includes('./v1.3-education-runtime-fix.js')) throw new Error('Education runtime guard missing from service worker shell');"
+          node -e "const fs=require('fs'); const p=fs.readFileSync('v1.3-p1.js','utf8'); const g=fs.readFileSync('v1.3-education-runtime-fix.js','utf8'); const c=fs.readFileSync('v1.4-education-core.js','utf8'); const h=fs.readFileSync('index.html','utf8'); const w=fs.readFileSync('sw.js','utf8'); if(h.includes('./v1.3-smart-distractors.js')||w.includes('./v1.3-smart-distractors.js')) throw new Error('Obsolete smart distractor wiring remains'); if(!h.includes('./v1.4-education-core.js')) throw new Error('Education core missing from index.html'); if(!w.includes('./v1.4-education-core.js')) throw new Error('Education core missing from service worker shell'); if(!p.includes('EDU_CORE')||!p.includes('EDU_CORE.chooseMode')||!p.includes('EDU_CORE.recordKnowledge')) throw new Error('P1 is not connected to education core'); if(!c.includes("version:'1.4.0-p0'")||!c.includes('registry')||!c.includes('gradeMeaning')||!c.includes('gradeReading')||!c.includes('chooseMode')) throw new Error('v1.4 P0 education core is incomplete'); if(!g.includes('__KANJI5_P0_DATA_PROMISE')||!g.includes('stopPropagation')||!g.includes('waitForEducation')) throw new Error('Education dataset guard is not installed');"
       - name: Smoke test v1.3
         run: node scripts/smoke-test-v1.3.mjs
       - name: Commit generated build
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html sw.js v1.3-education-runtime-fix.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
+          git add index.html sw.js v1.4-education-core.js v1.3-p1.js scripts/smoke-test-v1.3.mjs scripts/apply-v1.3-static.mjs
           git add -u
-          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.3): stabilize education pipeline [skip ci]'; git push origin feature/v1.3; fi
+          if git diff --cached --quiet; then echo 'No generated changes to commit'; else git commit -m 'build(v1.4): wire educational knowledge core [skip ci]'; git push origin feature/v1.3; fi
