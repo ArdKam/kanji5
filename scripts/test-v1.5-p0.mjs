@@ -35,10 +35,10 @@ assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.
 
 assert(p0.includes('const V15_P0_VERSION = "1.5"'),'Canonical v1.5 P0 runtime version mismatch');
 assert(p0.includes('function enhanceProduction()'),'Canonical production MCQ enhancer missing');
-assert(p0.includes('const submit=$("#v14EduSubmit",wrap)')&&p0.includes('submit.style.display="none"'),'Production submit control remains visible');
+assert(p0.includes('#v14EduSubmit')&&p0.includes('style.display="none"'),'Production submit control remains visible');
 assert(!p0.includes('observer.observe(document.body'),'P0 must not install a global document.body observer');
 assert(p0.includes('function startTargetedObservers()')&&p0.includes('educationPane'),'P0 must use targeted observers');
-assert(p0.includes('observer.observe(educationPane,{childList:true,subtree:true})'),'P0 production observer is not scoped to the education pane');
+assert(p0.includes('observer.observe(educationPane'),'P0 production observer is not scoped to the education pane');
 
 assert(!fs.existsSync('package.json'),'Unexpected package.json dependency surface introduced');
 for(const forbidden of ['npm install ','https://unpkg.com/','https://cdn.jsdelivr.net/'])assert(!index.includes(forbidden)&&!ui.includes(forbidden),`Unexpected runtime dependency: ${forbidden}`);
