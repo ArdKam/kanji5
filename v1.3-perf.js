@@ -8,9 +8,9 @@
   const observer=new MutationObserver(()=>{
     const app=document.getElementById('app');
     const kanji=document.querySelector('.kanji');
-    if(app&&!app.hidden&&!window.__KANJI5_PERF.marks.app-ready)mark('app-ready');
-    if(kanji&&!window.__KANJI5_PERF.marks.first-card)mark('first-card');
-    if(window.__KANJI5_PERF.marks.first-card)observer.disconnect();
+    if(app&&!app.hidden&&!window.__KANJI5_PERF.marks['app-ready'])mark('app-ready');
+    if(kanji&&!window.__KANJI5_PERF.marks['first-card'])mark('first-card');
+    if(window.__KANJI5_PERF.marks['first-card'])observer.disconnect();
   });
   observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
 })();
