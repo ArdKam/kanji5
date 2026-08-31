@@ -1,15 +1,38 @@
-const CACHE = "kanji5-shell-v11";
-const DATA_CACHE = "kanji5-data-v6";
+const CACHE = "kanji5-shell-v12";
+const DATA_CACHE = "kanji5-data-v7";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./v1.3-p1.js", "./v1.2-enhancements.js", "./v1.2-runtime-fixes.js", "./supabase-config.js", "./supabase-sync.js"];
 const DATA_URL = new URL("./kanji-data.json", self.location.href).href;
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    Promise.all([
+      caches.open(CACHE).then(cache => cache.addAll(SHELL)),
+      caches.open(DATA_CACHE).then(cache => cache.add("./kanji-data.json"))
+    ]).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith("kanji5-") && key !== CACHE && key !== DATA_CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key.startsWith("kanji5-") && key !== CACHE && key !== DATA_CACHE)
+        .map(key => caches.delete(key))
+    )).then(() => self.clients.claim())
+  );
 });
+
+async function cacheFirst(request, cacheName, fallbackRequest = request) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(fallbackRequest);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  } catch (_) {
+    return (await cache.match(fallbackRequest)) || Response.error();
+  }
+}
 
 async function networkFirst(request, cacheName, fallbackRequest = request) {
   const cache = await caches.open(cacheName);
@@ -35,7 +58,7 @@ self.addEventListener("fetch", event => {
   if (url.origin !== self.location.origin) return;
 
   if (url.href === DATA_URL) {
-    event.respondWith(networkFirst(request, DATA_CACHE, request));
+    event.respondWith(cacheFirst(request, DATA_CACHE, "./kanji-data.json"));
     return;
   }
 
