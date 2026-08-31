@@ -17,5 +17,6 @@ const swPath='sw.js';
 let sw=fs.readFileSync(swPath,'utf8');
 if(!sw.includes('"./v1.5-p0.js"'))sw=sw.replace('"./v1.4-education-ui.js",','"./v1.4-education-ui.js","./v1.5-p0.js",');
 sw=sw.replace("const CACHE='kanji5-shell-v38';","const CACHE='kanji5-shell-v39';");
+sw=sw.split('\n').map(line=>line.replace(/[ \t]+$/,'')).join('\n');
 fs.writeFileSync(swPath,sw);
 console.log('Applied v1.5 P0 stabilization wiring.');
