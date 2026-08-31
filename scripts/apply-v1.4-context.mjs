@@ -51,7 +51,7 @@ const oldContext = `else if(edu.mode==='context'&&edu.word){prompt='با توج�
 const newContext = `else if(edu.mode==='context'&&edu.sentence){prompt='با توجه به جمله، کانجی مناسب را انتخاب کن.';const blanked=edu.sentence.text.replaceAll(item.character,'＿');body=\`<div class="v14-edu-word" style="font-size:24px;line-height:1.8;letter-spacing:0">\${blanked}</div><div class="v14-edu-meaning">\${edu.sentence.english||'—'}</div>\${renderChoices(chooseChoices(item))}\`}`;
 if (source.includes(oldContext)) source = source.replace(oldContext, newContext);
 
-const oldStart = /async function startEducation\(\)\{[\s\S]*?\nfunction record\(mode,result,wrong=''\)\{/;
+const oldStart = /async function startEducation\(\)[\\s\\S]*?\\nfunction record\(mode,result,wrong=''\)\{/;
 const newStart = `async function startEducation(){
   const p=pane();if(!p)return;
   const seen=getSeenItems();
@@ -77,5 +77,10 @@ const newStart = `async function startEducation(){
 function record(mode,result,wrong=''){`;
 if (oldStart.test(source)) source = source.replace(oldStart, newStart);
 
+const oldChoices = /function chooseChoices\(target\)\{[\s\S]*?\nasync function fetchContextSentences/;
+const newChoices = `function chooseChoices(target){const history=readKnowledge()[target.character]?.distractors||{};const pool=getDeck().filter(x=>x?.character&&x.character!==target.character);return [target,...CORE.chooseDistractors(target,pool,history,3)].sort(()=>Math.random()-.5)}
+async function fetchContextSentences`;
+if (oldChoices.test(source)) source = source.replace(oldChoices, newChoices);
+
 fs.writeFileSync(path, source);
-console.log('Applied idempotent v1.4 contextual exercise wiring.');
+console.log('Applied deterministic v1.4 contextual and smart-distractor wiring.');
