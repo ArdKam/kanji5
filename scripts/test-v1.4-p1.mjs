@@ -5,6 +5,8 @@ const coreSource=fs.readFileSync('v1.4-education-core.js','utf8');
 const migration=fs.readFileSync('v1.4-education-migration.js','utf8');
 const ui=fs.readFileSync('v1.4-education-ui.js','utf8');
 const sync=fs.readFileSync('supabase-sync.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+const index=fs.readFileSync('index.html','utf8');
 const ctx={window:{},structuredClone:global.structuredClone,localStorage:{getItem(){return null},setItem(){}}};
 vm.createContext(ctx);vm.runInContext(coreSource,ctx);
 const core=ctx.window.__KANJI5_EDU_CORE__;const assert=(x,m)=>{if(!x)throw new Error(m)};
@@ -43,12 +45,7 @@ const empty=core.ensureEntry({},'学',true)['学'];assert(empty.exposedAt&&empty
 const recorded=core.recordKnowledge({'学':empty},'学','production',false,'校')['学'];
 assert(recorded.production.attempts===1&&recorded.distractors['校']===1,'Knowledge recording failed');
 const distractorTarget={character:'学',on:['ガク'],kun:['まなぶ'],meaning:['study','learning'],strokes:8,grade:1,frequency:100};
-const distractorCandidates=[
-  {character:'校',on:['コウ'],meaning:['school'],strokes:10,grade:1,frequency:110},
-  {character:'楽',on:['ガク'],meaning:['comfort'],strokes:13,grade:1,frequency:120},
-  {character:'習',on:['シュウ'],meaning:['learn'],strokes:11,grade:1,frequency:90},
-  {character:'語',on:['ゴ'],meaning:['language'],strokes:14,grade:2,frequency:800}
-];
+const distractorCandidates=[{character:'校',on:['コウ'],meaning:['school'],strokes:10,grade:1,frequency:110},{character:'楽',on:['ガク'],meaning:['comfort'],strokes:13,grade:1,frequency:120},{character:'習',on:['シュウ'],meaning:['learn'],strokes:11,grade:1,frequency:90},{character:'語',on:['ゴ'],meaning:['language'],strokes:14,grade:2,frequency:800}];
 assert(typeof core.scoreDistractor==='function'&&typeof core.chooseDistractors==='function','Smart distractor API missing');
 assert(core.scoreDistractor(distractorTarget,distractorCandidates[1],{})>core.scoreDistractor(distractorTarget,distractorCandidates[0],{}),'Shared reading distractor did not receive higher score');
 const picked=core.chooseDistractors(distractorTarget,distractorCandidates,{習:2},2);
@@ -72,6 +69,11 @@ assert(selectIndex>=0&&modeIndex>selectIndex,'Adaptive item/mode selection order
 assert(wordFetchIndex>modeIndex,'Vocabulary API is fetched before exercise mode is selected');
 assert(contextFetchIndex>modeIndex,'Context data is fetched before exercise mode selection');
 assert(!ui.includes("const words=await fetchWords(item.character);const finalModes"),'Unconditional vocabulary fetch regression detected');
+assert(ui.includes("modes.filter(x=>x==='meaning'||x==='reading'||x==='production')"),'Unsafe API fallback is missing');
+assert(ui.includes("checkButton=(edu.mode==='vocabulary'||edu.mode==='context')"),'MCQ action-state fix is missing');
+assert(ui.includes('function escapeHTML'),'External content escaping helper missing');
+assert(sw.includes('TATOEBA_ORIGIN')&&sw.includes("u.pathname.startsWith('/v1/sentences')"),'Tatoeba service-worker cache missing');
+assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy v1.3 education styles remain');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
 assert(sync.includes('distractors')&&sync.includes('stage'),'Sync educational metadata missing');
 console.log('Kanji 5 v1.4 P1 tests passed.');
