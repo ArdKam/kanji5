@@ -17,14 +17,14 @@ const startupAnchor='<script id="v1.2-startup-guard">';
 if(!out.includes(startupAnchor))throw new Error('Startup guard anchor missing');
 out=out.replace(startupAnchor,canonical+startupAnchor);
 function injectFsrsEducationQueue(html){
+  const already=/function educationQueuePriority\(item,knowledge,now=Date\.now\(\)\)\{/.test(html)&&html.includes('const dueItems=state.deck.filter(')&&html.includes('dueItems.sort(');
+  if(already)return html;
   const old="function buildQueue(){const due=state.deck.filter(k=>state.cards[k.id]?.card&&dueNow(state.cards[k.id].card)).map(k=>k.id);for(let i=due.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[due[i],due[j]]=[due[j],due[i]]}const newCards=[];if(state.todayNew<state.settings.dailyNew)for(const item of state.deck)if(!state.cards[item.id]){newCards.push(item.id);if(newCards.length>=state.settings.dailyNew-state.todayNew)break}state.queue=[...due,...newCards];return state.queue}";
   const next="function educationQueuePriority(item,knowledge,now=Date.now()){const core=window.__KANJI5_EDU_CORE__;if(!core||!item)return 0;const entry=knowledge?.[item.character]||{};const signal=core.educationSchedulerSignal?core.educationSchedulerSignal(entry):null;if(!signal)return 0;const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;return signal.weakness*.7+(1-signal.weakestSkillMastery)*.3+Math.min(1,ageDays/14)*.15}\nfunction buildQueue(){let knowledge={};try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){}const now=Date.now();const dueItems=state.deck.filter(k=>state.cards[k.id]?.card&&dueNow(state.cards[k.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));dueItems.sort((a,b)=>{const aLate=Math.max(0,(now-new Date(a.card.due).getTime())/86400000),bLate=Math.max(0,(now-new Date(b.card.due).getTime())/86400000);const aScore=aLate*.6+educationQueuePriority(a.item,knowledge,now)*.4;const bScore=bLate*.6+educationQueuePriority(b.item,knowledge,now)*.4;return bScore-aScore||new Date(a.card.due)-new Date(b.card.due)});const due=dueItems.map(x=>x.item.id);const newCards=[];if(state.todayNew<state.settings.dailyNew)for(const item of state.deck)if(!state.cards[item.id]){newCards.push(item.id);if(newCards.length>=state.settings.dailyNew-state.todayNew)break}state.queue=[...due,...newCards];return state.queue}";
   if(html.includes(old))return html.replace(old,next);
-  if(html.includes('function buildQueue(){')&&html.includes('state.queue=[...due,...newCards]'))throw new Error('buildQueue format changed; refusing unsafe FSRS bridge patch');
-  throw new Error('buildQueue function not found for FSRS education bridge');
+  throw new Error('Could not locate legacy buildQueue and no canonical Education/FSRS bridge was found');
 }
 out=injectFsrsEducationQueue(out);
-fs.writeFileSync(indexPath,out);
 
 const eduPath='v1.4-education-ui.js';
 let eduUi=fs.readFileSync(eduPath,'utf8');
