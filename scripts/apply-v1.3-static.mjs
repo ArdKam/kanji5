@@ -9,11 +9,12 @@ const required = [
   './v1.3-perf.js',
   './v1.3-storage-bridge.js',
   './v1.3-settings.js',
-  './v1.3-p1.js'
+  './v1.3-p1.js',
+  './v1.3-education-runtime-fix.js'
 ];
 
 let out = index;
-out = out.replace(/\s*<script src="\.\/v1\.3-(?:dont-know|production-ui|education-v2)\.js"><\/script>/g, '');
+out = out.replace(/\s*<script src="\.\/v1\.3-(?:dont-know|production-ui|education-v2|smart-distractors)\.js"><\/script>/g, '');
 for (const src of required) out = out.replaceAll(`<script src="${src}"></script>`, '');
 const anchor = '<script type="module">';
 if (!out.includes(anchor)) throw new Error('Could not find main module anchor in index.html');
@@ -22,13 +23,13 @@ fs.writeFileSync(indexPath, out);
 
 const shell = [
   './','./index.html','./manifest.webmanifest','./icon.svg',
-  './v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.3-p1.js',
+  './v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.3-p1.js','./v1.3-education-runtime-fix.js',
   './vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js',
   './supabase-config.js','./supabase-sync.js'
 ];
-const sw = `const CACHE='kanji5-shell-v30';
-const DATA_CACHE='kanji5-data-v17';
-const API_CACHE='kanji5-api-v8';
+const sw = `const CACHE='kanji5-shell-v31';
+const DATA_CACHE='kanji5-data-v18';
+const API_CACHE='kanji5-api-v9';
 const SHELL=${JSON.stringify(shell)};
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
