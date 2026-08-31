@@ -114,16 +114,15 @@
 
   function finishGate(correct){
     const {character,item,mode,word}=active; record(character,mode,correct);
-    const gate=$(".v13-p1-gate"), answerBox=$("#answerBox"), ratings=$("#ratings");
-    if(!gate)return;
-    const result=document.createElement("div"); result.className="v13-p1-result "+(correct?"good":"bad"); result.textContent=correct?"✅ درست":"❌ درست نبود";
-    gate.appendChild(result);
-    gate.insertAdjacentHTML("beforeend",'<div class="v13-p1-answer">پاسخ صحیح: <strong>'+characterAnswer(item,mode,word,character)+'</strong></div>');
-    $("#v13P1Submit")?.setAttribute("disabled","true");
-    gate.remove();
+    const gate=$(".v13-p1-gate"); if(!gate)return;
+    gate.innerHTML='<div class="v13-p1-card"><div class="v13-p1-title">'+(correct?"✅ پاسخ درست بود":"❌ پاسخ درست نبود")+'</div><div class="v13-p1-answer">پاسخ صحیح: <strong>'+characterAnswer(item,mode,word,character)+'</strong></div><button id="v13P1RevealAnswer" class="primary" style="width:100%;margin-top:12px">نمایش پاسخ کامل</button></div>';
+    try{localStorage.setItem("kanji5-v1.2-last-attempt",JSON.stringify({character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct}))}catch(_){ }
+  }
+  function revealAnswer(){
+    const answerBox=$("#answerBox"), ratings=$("#ratings");
+    $(".v13-p1-gate")?.remove();
     if(answerBox){answerBox.classList.add("show");answerBox.removeAttribute("aria-hidden")}
     if(ratings)ratings.classList.add("show");
-    const storedKey="kanji5-v1.2-last-attempt"; try{localStorage.setItem(storedKey,JSON.stringify({character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct}))}catch(_){ }
     active=null;
   }
   function characterAnswer(item,mode,word,ch){
@@ -146,7 +145,8 @@
     if(t?.id==="revealBtn"&&!firstExposure()){
       event.preventDefault();event.stopImmediatePropagation();void openGate();return;
     }
-    if(t?.id==="v13P1Submit"){event.preventDefault();event.stopImmediatePropagation();void submit();}
+    if(t?.id==="v13P1Submit"){event.preventDefault();event.stopImmediatePropagation();void submit();return;}
+    if(t?.id==="v13P1RevealAnswer"){event.preventDefault();event.stopImmediatePropagation();revealAnswer();}
   },true);
   document.addEventListener("keydown",event=>{
     if(event.target?.id==="v13P1Input"&&(event.key==="Enter"||((event.ctrlKey||event.metaKey)&&event.key==="Enter"))){event.preventDefault();void submit();}
