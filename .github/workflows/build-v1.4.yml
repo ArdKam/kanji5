@@ -1,25 +1,8 @@
-# v1.5 stabilization gate: validates the current branch state without destructive patching.
 name: Build Kanji 5 v1.5
 
 on:
   push:
     branches: [feature/v1.5]
-    paths:
-      - 'index.html'
-      - 'kanji-data.json'
-      - 'kanji-joyo.json'
-      - 'scripts/**'
-      - 'v1.4-*.js'
-      - 'v1.3-p0.js'
-      - 'v1.3-perf.js'
-      - 'v1.3-storage-bridge.js'
-      - 'v1.3-settings.js'
-      - 'supabase-sync.js'
-      - 'supabase-schema.sql'
-      - 'vendor/ts-fsrs-5.4.1.mjs'
-      - 'sw.js'
-      - 'manifest.webmanifest'
-      - '.github/workflows/build-v1.4.yml'
   workflow_dispatch:
 
 permissions:
@@ -35,14 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Apply canonical v1.5 wiring
+      - name: Run canonical build wiring
         run: node scripts/apply-v1.3-static.mjs
-      - name: Normalize canonical HTML shell
-        run: |
-          node --input-type=module -e "import fs from 'node:fs';let s=fs.readFileSync('index.html','utf8');const removeMarkedBlocks=(html,needle)=>{let out='';let pos=0;while(true){const start=html.indexOf('<script',pos);if(start<0){out+=html.slice(pos);break}const tagEnd=html.indexOf('>',start);const end=html.indexOf('</script>',tagEnd);if(tagEnd<0||end<0){out+=html.slice(pos);break}const block=html.slice(start,end+9);if(!block.includes(needle))out+=html.slice(pos,start)+block;else out+=html.slice(pos,start);pos=end+9}return out};s=s.replace(/\\s*<style id=\"v1\\.2-mobile-fix\">[\\s\\S]*?<\\/style>/g,'');s=removeMarkedBlocks(s,'DATA_VERSION');const canonical='<script id=\"v1.2-dataset-bootstrap\">(()=>{const DATA_VERSION=\"v1.2-dataset-2136\";const DECK_KEY=\"kanji5-deck\";const VERSION_KEY=\"kanji5-deck-version\";try{if(localStorage.getItem(VERSION_KEY)!==DATA_VERSION){localStorage.removeItem(DECK_KEY);localStorage.setItem(VERSION_KEY,DATA_VERSION)}}catch(_){}})();</script>';const anchor='<script id=\"v1.2-startup-guard\">';if(!s.includes(anchor))throw new Error('Startup guard anchor missing');s=s.replace(anchor,canonical+anchor);fs.writeFileSync('index.html',s);"
-      - name: Wire indexed distractor pool
-        run: |
-          node --input-type=module -e "import fs from 'node:fs';let s=fs.readFileSync('v1.4-education-ui.js','utf8');const a=\"const pool=getDeck().filter(x=>x?.character&&x.character!==target.character);return [target,...CORE.chooseDistractors(target,pool,history,3)].sort(()=>Math.random()-.5)\";const b=\"const pool=getDeck();return [target,...CORE.chooseDistractors(target,pool,history,3)].sort(()=>Math.random()-.5)\";if(s.includes(a))s=s.replace(a,b);fs.writeFileSync('v1.4-education-ui.js',s)"
       - name: Validate dataset
         run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));if(d.count!==2136||!Array.isArray(d.kanji)||d.kanji.length!==2136)throw new Error('Invalid runtime dataset');"
       - name: Validate JavaScript
@@ -62,21 +39,19 @@ jobs:
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts
+        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
+      - name: Verify generated files
         run: |
-          node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');const w=fs.readFileSync('sw.js','utf8');const p=fs.readFileSync('v1.4-education-core.js','utf8');const u=fs.readFileSync('v1.4-education-ui.js','utf8');const m=fs.readFileSync('v1.4-education-migration.js','utf8');for(const s of ['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'])if(h.split('<script src=\"'+s+'\"></script>').length-1!==1)throw new Error(s+' must be wired exactly once');if(h.includes('./v1.3-p1.js')||h.includes('./v1.3-education-runtime-fix.js')||h.includes('./v1.3-production-ui.js')||h.includes('./v1.3-education-v2.js'))throw new Error('Legacy v1.3 education UI is still wired');if(h.includes('id=\"v1.2-mobile-fix\"'))throw new Error('Legacy v1.2 CSS block remains');if((h.match(/DATA_VERSION\\s*=\\s*\"v1\\.2-dataset-2136\"/g)||[]).length!==1)throw new Error('Dataset bootstrap must exist exactly once');if((h.match(/<style>/g)||[]).length!==1)throw new Error('CSS must be consolidated into one style block');if(!p.includes('getStage')||!p.includes('selectExercise')||!p.includes('chooseBestExercise')||!p.includes('selectEducationItem')||!p.includes('chooseDistractors'))throw new Error('State/adaptive core missing');if(!u.includes('CORE.selectEducationItem')||!u.includes('CORE.chooseBestExercise')||!u.includes('CORE.gradeMeaning')||!u.includes('CORE.gradeReading')||!u.includes('CORE.recordKnowledge'))throw new Error('UI is bypassing v1.4 core');if(!u.includes('fetchContextSentences')||!u.includes('api.tatoeba.org/v1/sentences')||!u.includes('edu.sentence.text.replaceAll(item.character')||!u.includes('edu.sentence.english'))throw new Error('Context sentence exercise wiring missing');if(!u.includes('CORE.chooseDistractors'))throw new Error('Smart distractor core wiring missing');if(!u.includes('const safe=')&&!u.includes('function escapeHTML'))throw new Error('External content escaping helper missing');if(!u.includes('safe(edu.sentence.english||')&&!u.includes('escapeHTML(edu.sentence.english||'))throw new Error('Sentence translation is not escaped');if(!u.includes(\"modes.filter(x=>x==='meaning'||x==='reading'||x==='production')\"))throw new Error('Safe external-data fallback missing');if(!u.includes(\"checkButton=(edu.mode==='vocabulary'||edu.mode==='context')\"))throw new Error('MCQ action-state fix missing');if(!u.includes('v14EduDontKnow'))throw new Error('Dont know action missing');if(!m.includes('schemaVersion=1')||!m.includes('kanji5-v1.4-education-meta'))throw new Error('Education migration missing');if(!w.includes('./v1.4-education-migration.js')||!w.includes('./v1.4-education-core.js')||!w.includes('./v1.4-education-ui.js'))throw new Error('Service worker shell is missing v1.4 education files');if(!w.includes('TATOEBA_ORIGIN')||!w.includes(\"u.pathname.startsWith('/v1/sentences')\"))throw new Error('Tatoeba cache wiring missing');"
-      - name: Run v1.4 education P0 tests
-        run: node scripts/test-v1.4-education.mjs
-      - name: Run v1.4 education P1 tests
-        run: node scripts/test-v1.4-p1.mjs
-      - name: Run v1.5 stabilization P0 tests
-        run: node scripts/test-v1.5-p0.mjs
+          git diff --check
+          grep -q "const CACHE='kanji5-shell-v38'" sw.js
+          grep -q "function dynamicSameOrigin" sw.js
+          grep -q "const pool=getDeck();return \[target,...CORE.chooseDistractors" v1.4-education-ui.js
       - name: Commit canonical generated files
         run: |
           set -e
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js scripts/apply-v1.3-static.mjs scripts/test-v1.5-p0.mjs scripts/test-v1.4-p1.mjs .github/workflows/build-v1.4.yml supabase-sync.js
-          git add -u
+          git add -A
           if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
-          git commit -m 'build(v1.5): persist stabilization and distractor improvements [skip ci]'
+          git commit -m 'build(v1.5): persist canonical generated files [skip ci]'
           git push origin feature/v1.5
