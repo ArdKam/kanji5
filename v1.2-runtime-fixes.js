@@ -5,8 +5,51 @@
   let exampleRequest = null;
   let retryTimer = null;
   let retryCount = 0;
+  let realStartupError = false;
 
   const normalize = value => String(value || "").trim().replace(/[\s\u3000]+/g, "");
+
+  function showRealStartupError(reason) {
+    if (realStartupError) return;
+    const loading = document.getElementById("loading");
+    const app = document.getElementById("app");
+    if (!loading || !app || !app.hidden) return;
+    realStartupError = true;
+    loading.hidden = false;
+    loading.style.display = "flex";
+    loading.innerHTML = '<div style="text-align:center"><div style="font-size:24px">⚠️</div><div style="font-weight:800;margin:6px 0">اجرای برنامه با مشکل مواجه شد.</div><div style="color:#6b7280;font-size:12px;margin:0 0 8px">لطفاً صفحه را دوباره بارگذاری کنید.</div><button class="primary" id="v12RuntimeRetry">تلاش دوباره</button></div>';
+    document.getElementById("v12RuntimeRetry")?.addEventListener("click", () => location.reload());
+    console.error("Kanji 5 startup failed:", reason);
+  }
+
+  function hideStartupPanel() {
+    const loading = document.getElementById("loading");
+    if (!loading) return;
+    loading.hidden = true;
+    loading.style.display = "none";
+    loading.setAttribute("aria-hidden", "true");
+  }
+
+  function prepareStartupPanel() {
+    const style = document.createElement("style");
+    style.id = "v13-silent-startup";
+    style.textContent = `
+      #loading { display:none !important; min-height:0 !important; height:0 !important; padding:0 !important; margin:0 !important; border:0 !important; box-shadow:none !important; overflow:hidden !important; }
+      #loading .spinner, #loadStatus { display:none !important; }
+      #loading.v13-real-error { display:flex !important; min-height:180px !important; height:auto !important; padding:24px !important; margin:auto !important; overflow:visible !important; }
+    `;
+    document.head.appendChild(style);
+    hideStartupPanel();
+  }
+
+  prepareStartupPanel();
+
+  window.addEventListener("error", event => {
+    if (event?.error) showRealStartupError(event.error);
+  });
+  window.addEventListener("unhandledrejection", event => {
+    if (event?.reason) showRealStartupError(event.reason);
+  });
 
   async function enrichExamples() {
     const examples = document.querySelector(EXAMPLE_SELECTOR);
@@ -26,19 +69,13 @@
 
     exampleRequest = new AbortController();
     try {
-      const response = await fetch(WORDS_URL(kanji), {
-        cache: "force-cache",
-        signal: exampleRequest.signal
-      });
+      const response = await fetch(WORDS_URL(kanji), { cache: "force-cache", signal: exampleRequest.signal });
       if (!response.ok) throw new Error("examples request failed");
       const data = await response.json();
       const meanings = new Map();
 
       for (const entry of Array.isArray(data) ? data : []) {
-        const gloss = (entry.meanings || [])
-          .flatMap(m => m.glosses || [])
-          .slice(0, 2)
-          .join("; ");
+        const gloss = (entry.meanings || []).flatMap(m => m.glosses || []).slice(0, 2).join("; ");
         if (!gloss) continue;
         for (const variant of entry.variants || []) {
           const written = normalize(variant.written);
