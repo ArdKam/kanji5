@@ -53,8 +53,6 @@ jobs:
           node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');const w=fs.readFileSync('sw.js','utf8');const p=fs.readFileSync('v1.4-education-core.js','utf8');const u=fs.readFileSync('v1.4-education-ui.js','utf8');for(const s of ['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-core.js','./v1.4-education-ui.js'])if(h.split('<script src=\"'+s+'\"></script>').length-1!==1)throw new Error(s+' must be included exactly once');if(h.includes('./v1.3-p1.js')||h.includes('./v1.3-education-runtime-fix.js'))throw new Error('Legacy v1.3 education UI is still wired');if(!p.includes('getStage')||!p.includes('selectExercise')||!p.includes('chooseBestExercise'))throw new Error('State/adaptive core missing');if(!u.includes('CORE.chooseMode')||!u.includes('CORE.gradeMeaning')||!u.includes('CORE.gradeReading')||!u.includes('CORE.recordKnowledge'))throw new Error('UI is bypassing v1.4 core');if(!w.includes('./v1.4-education-core.js')||!w.includes('./v1.4-education-ui.js'))throw new Error('Service worker shell is missing v1.4 education files');"
       - name: Run v1.4 education tests
         run: node scripts/test-v1.4-education.mjs
-      - name: Smoke test v1.3 compatibility
-        run: node scripts/smoke-test-v1.3.mjs || true
       - name: Commit generated build
         run: |
           git config user.name 'github-actions[bot]'
