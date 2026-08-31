@@ -129,8 +129,7 @@
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
 })();
 
-// v1.5 P0 is loaded through this already-active shell runtime so the canonical
-// learning changes work even though the main application is bootstrapped by a module.
+// v1.5 P0: load the canonical learning runtime from the active shell path.
 (() => {
   const SRC = "./v1.5-p0.js";
   const FLAG = "__KANJI5_V15_P0_LOADER__";
@@ -144,6 +143,9 @@
     script.async = false;
     (document.body || document.head || document.documentElement).appendChild(script);
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadP0, { once: true });
-  else loadP0();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadP0, { once: true });
+  } else {
+    loadP0();
+  }
 })();
