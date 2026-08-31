@@ -14,7 +14,7 @@
     const app = document.getElementById("app");
     if (!loading || loading.hidden || !app || !app.hidden) return;
     startupShown = true;
-    loading.innerHTML = '<div><div style="font-size:42px">⚠️</div><div style="font-weight:800;margin:10px 0">برنامه هنوز بارگذاری نشده است.</div><div style="color:#6b7280;font-size:13px;line-height:1.8">ممکن است اتصال به موتور مرور یا دادهٔ کانجی قطع شده باشد.</div><button class="primary" id="v12RuntimeRetry" style="margin-top:14px">تلاش دوباره</button></div>';
+    loading.innerHTML = '<div><div style="font-size:26px">⚠️</div><div style="font-weight:800;margin:6px 0">بارگذاری برنامه کمی طول کشید.</div><button class="primary" id="v12RuntimeRetry" style="margin-top:7px">تلاش دوباره</button></div>';
     document.getElementById("v12RuntimeRetry")?.addEventListener("click", () => location.reload());
   }
 
@@ -22,12 +22,15 @@
     const style = document.createElement("style");
     style.id = "v13-compact-loading";
     style.textContent = `
-      #loading { min-height: 180px; padding: 24px; }
-      #loading .spinner { width: 24px; height: 24px; border-width: 2px; margin-bottom: 10px; }
-      #loading > div { max-width: 420px; }
-      #loadStatus { margin-top: 5px !important; }
+      #loading { min-height: 64px !important; height: 64px; padding: 10px 16px !important; border-radius: 14px; box-shadow: none; }
+      #loading > div { width:100%; max-width:none; display:flex; align-items:center; justify-content:center; gap:9px; }
+      #loading .spinner { width:18px; height:18px; border-width:2px; margin:0; flex:0 0 auto; }
+      #loading > div > div:nth-child(2) { font-size:13px; font-weight:700; white-space:nowrap; }
+      #loadStatus { display:none !important; }
     `;
     document.head.appendChild(style);
+    const status = document.querySelector("#loading > div > div:nth-child(2)");
+    if (status) status.textContent = "در حال آماده‌سازی برنامه…";
   }
 
   compactLoadingPanel();
