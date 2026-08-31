@@ -2,7 +2,7 @@
 'use strict';
 if(window.__KANJI5_V15_P0__)return;
 window.__KANJI5_V15_P0__=true;
-const KNOW='kanji5-v1.2-knowledge',COMP='kanji5-v1.5-components',SIGNAL='kanji5-v1.5-review-signals';
+const V15_P0_VERSION='1.1',KNOW='kanji5-v1.2-knowledge',COMP='kanji5-v1.5-components',SIGNAL='kanji5-v1.5-review-signals';
 const $=(s,r=document)=>r.querySelector(s);
 const read=(key,fallback={})=>{try{const v=JSON.parse(localStorage.getItem(key)||'');return v&&typeof v==='object'?v:fallback}catch(_){return fallback}};
 const write=(key,v)=>{try{localStorage.setItem(key,JSON.stringify(v))}catch(_) {}};
