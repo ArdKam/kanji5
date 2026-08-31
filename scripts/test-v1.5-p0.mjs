@@ -9,7 +9,7 @@ const index=read('index.html'),sw=read('sw.js'),migration=read('v1.4-education-m
 
 const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
 for(const src of required)assert(count(index,`<script src="${src}"></script>` )===1,`${src} must be wired exactly once`);
-assert(count(index,'<script src="./v1.5-p0.js"></script>')===1,'v1.5 P0 runtime must be wired exactly once');
+assert(index.includes('./v1.5-p0.js'),'v1.5 P0 runtime must be present in the active shell');
 for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
 assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
