@@ -7,7 +7,7 @@ const assert = (condition,message) => { if(!condition) throw new Error(message);
 const index = read('index.html');
 const sw = read('sw.js');
 const migration = read('v1.4-education-migration.js');
-const workflow = read('.github/workflows/build-v1.4.yml');
+const workflow = fs.existsSync('.github/workflows/build-v1.5.yml') ? read('.github/workflows/build-v1.5.yml') : read('.github/workflows/build-v1.4.yml');
 const core = read('v1.4-education-core.js');
 const ui = read('v1.4-education-ui.js');
 
@@ -68,7 +68,7 @@ assert(core.includes('educationSchedulerSignal')&&core.includes('chooseDistracto
 assert(ui.includes('CORE.chooseDistractors'),'UI is not using canonical distractor selection');
 assert(ui.includes('CORE.selectEducationItem'),'UI is not using adaptive Kanji selection');
 assert(ui.includes('safe(edu.sentence.english||\'\')'),'Context translation escaping is not wired');
-assert(workflow.includes('Run v1.4 education P0 tests')&&workflow.includes('Run v1.4 education P1 tests'),'Existing education CI gates were removed');
+assert((workflow.includes('Run v1.4 education P0 tests')||workflow.includes('Run v1.5 P0'))&&workflow.includes('Run v1.4 education P1 tests'),'Education CI gates are missing');
 assert(index.includes('function educationQueuePriority'),'Education/FSRS queue bridge is missing');
 assert(index.includes('educationQueuePriority(k')||index.includes('educationQueuePriority(item'),'Queue does not use education priority');
 assert(index.includes('dueItems')&&index.includes('dueItems.sort'),'FSRS due cards are not being ranked with education evidence');
