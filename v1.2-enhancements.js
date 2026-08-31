@@ -267,6 +267,15 @@
   document.addEventListener("click", async event => {
     const target = event.target;
     if (target?.id === "revealBtn" && !allowNativeReveal) {
+      const kanjiEl = document.querySelector(".kanji[data-kanji-id]");
+      const id = kanjiEl?.dataset?.kanjiId;
+      let isFirstExposure = false;
+      try {
+        const raw = localStorage.getItem("kanji5-v1");
+        const saved = raw ? JSON.parse(raw) : null;
+        isFirstExposure = !!id && !saved?.cards?.[id];
+      } catch (_) {}
+      if (isFirstExposure) return;
       event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return;
     }
     if (target?.id === "v12SubmitRecall") { event.preventDefault(); await submitRecall(); }
