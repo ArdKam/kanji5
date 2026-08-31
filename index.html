@@ -21,19 +21,7 @@
 <main id="app" hidden><div class="grid"><div class="stat"><div class="n" id="dueCount">0</div><div class="l">مرورهای امروز</div></div><div class="stat"><div class="n" id="newCount">0</div><div class="l">کانجی جدید امروز</div></div><div class="stat"><div class="n" id="masteredCount">0</div><div class="l">یادگرفته‌شده</div></div><div class="stat streak"><div class="n" id="streakCount">0🔥</div><div class="l">روز پیاپی</div></div></div><div class="progress"><div id="bar" style="width:0%"></div></div><div class="goalrow"><span id="goalLabel">هدف روزانه: ۰/۲۰</span><span id="goalDone" style="display:none">🎉 تکمیل شد</span></div><div class="progress goal"><div id="goalBar" style="width:0%"></div></div><section class="panel" id="studyPanel"><div id="study"></div></section><div class="footer">دادهٔ کانجی: Jōyō 2136 بر پایهٔ KANJIDIC2؛ این نسخه شامل هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency است. مرور فاصله‌دار: FSRS. اطلاعات یادگیری شما در همین مرورگر ذخیره می‌شود.</div></main></div>
 <div id="toast" class="toast"></div><dialog id="settingsDialog"><div class="modal"><h2>تنظیمات</h2><div class="setting"><span>کانجی جدید در روز</span><input id="dailyNew" type="number" min="1" max="30" step="1"></div><div class="setting"><span>هدف تعداد مرور روزانه</span><input id="dailyGoal" type="number" min="1" max="500" step="1"></div><div class="setting"><span>آستانهٔ Leech (تعداد خطا)</span><input id="leechThreshold" type="number" min="2" max="30" step="1"></div><div class="setting"><span>هدف حفظ فعال</span><span>90%</span></div><div class="setting"><span>حداکثر بازهٔ مرور</span><span>36500 روز</span></div><div class="setting"><span>پاک کردن تمام پیشرفت</span><button class="secondary" id="resetBtn">Reset</button></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeSettings">بستن</button><button class="primary" id="saveSettings">ذخیره</button></div></div></dialog>
 <dialog id="statsDialog"><div class="modal"><h2>آمار</h2><div id="statsBody"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeStats">بستن</button></div></div></dialog>
-<script id="v1.2-dataset-bootstrap">
-(() => {
-  const DATA_VERSION = "v1.2-dataset-2136";
-  const DECK_KEY = "kanji5-deck";
-  const VERSION_KEY = "kanji5-deck-version";
-  try {
-    if (localStorage.getItem(VERSION_KEY) !== DATA_VERSION) {
-      localStorage.removeItem(DECK_KEY);
-      localStorage.setItem(VERSION_KEY, DATA_VERSION);
-    }
-  } catch (_) {}
-})();
-</script><script id="v1.2-startup-guard">
+<script id="v1.2-dataset-bootstrap">(()=>{const DATA_VERSION="v1.2-dataset-2136";const DECK_KEY="kanji5-deck";const VERSION_KEY="kanji5-deck-version";try{if(localStorage.getItem(VERSION_KEY)!==DATA_VERSION){localStorage.removeItem(DECK_KEY);localStorage.setItem(VERSION_KEY,DATA_VERSION)}}catch(_){}})();</script><script id="v1.2-startup-guard">
 (() => {
   let shown = false;
   async function clearRuntimeCaches() {
@@ -140,6 +128,10 @@
 
 
 
+
+
+
+
 <script src="./v1.3-p0.js"></script>
 <script src="./v1.3-perf.js"></script>
 <script src="./v1.3-storage-bridge.js"></script>
@@ -176,7 +168,8 @@ async function loadDeck(){
 function loadDeckFromCache(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2136){state.deck=x;return true}}catch(_){}return false}
 function ensureCard(item){if(!state.cards[item.id])state.cards[item.id]={card:createEmptyCard(),reviews:0,lapses:0,learnedAt:null};return state.cards[item.id]}
 function dueNow(card){return card&&card.due&&new Date(card.due)<=new Date()}
-function buildQueue(){const due=state.deck.filter(k=>state.cards[k.id]?.card&&dueNow(state.cards[k.id].card)).map(k=>k.id);for(let i=due.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[due[i],due[j]]=[due[j],due[i]]}const newCards=[];if(state.todayNew<state.settings.dailyNew)for(const item of state.deck)if(!state.cards[item.id]){newCards.push(item.id);if(newCards.length>=state.settings.dailyNew-state.todayNew)break}state.queue=[...due,...newCards];return state.queue}
+function educationQueuePriority(item,knowledge,now=Date.now()){const core=window.__KANJI5_EDU_CORE__;if(!core||!item)return 0;const entry=knowledge?.[item.character]||{};const signal=core.educationSchedulerSignal?core.educationSchedulerSignal(entry):null;if(!signal)return 0;const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;return signal.weakness*.7+(1-signal.weakestSkillMastery)*.3+Math.min(1,ageDays/14)*.15}
+function buildQueue(){let knowledge={};try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){}const now=Date.now();const dueItems=state.deck.filter(k=>state.cards[k.id]?.card&&dueNow(state.cards[k.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));dueItems.sort((a,b)=>{const aLate=Math.max(0,(now-new Date(a.card.due).getTime())/86400000),bLate=Math.max(0,(now-new Date(b.card.due).getTime())/86400000);const aScore=aLate*.6+educationQueuePriority(a.item,knowledge,now)*.4;const bScore=bLate*.6+educationQueuePriority(b.item,knowledge,now)*.4;return bScore-aScore||new Date(a.card.due)-new Date(b.card.due)});const due=dueItems.map(x=>x.item.id);const newCards=[];if(state.todayNew<state.settings.dailyNew)for(const item of state.deck)if(!state.cards[item.id]){newCards.push(item.id);if(newCards.length>=state.settings.dailyNew-state.todayNew)break}state.queue=[...due,...newCards];return state.queue}
 function formatInterval(card){const mins=Math.max(0,Math.round((new Date(card.due)-Date.now())/60000));if(mins<60)return`${Math.max(1,mins)}m`;const h=mins/60;if(h<24)return`${Math.round(h)}h`;return`${Math.round(h/24)}d`}
 function formatMeta(k){const chips=[];if(state.cards[k.id]?.leech)chips.push({t:"🥴 Leech",cls:" leech"});if(k.frequency)chips.push({t:`頻度 #${k.frequency}`});if(k.grade)chips.push({t:`Jōyō grade ${k.grade}`});if(k.jlpt)chips.push({t:k.jlpt});chips.push({t:`${k.strokes} strokes`});return chips.map(x=>`<span class="chip${x.cls||""}">${x.t}</span>`).join("")}
 async function fetchExamples(k){if(state.examples[k.id])return;try{const res=await fetch(WORDS_URL(k.character),{cache:"force-cache"});if(!res.ok)return;const data=await res.json();const seen=new Set(),out=[];for(const e of data){for(const v of(e.variants||[])){const term=v.written;if(term&&term.includes(k.character)&&!seen.has(term)){seen.add(term);const reading=v.pronounced;if(reading)out.push({word:term,reading});if(out.length>=4)break}}if(out.length>=4)break}state.examples[k.id]=out;save()}catch(_) {}}
