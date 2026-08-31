@@ -38,6 +38,8 @@ jobs:
         run: node scripts/apply-v1.3-static.mjs
       - name: Apply contextual sentence exercise
         run: node scripts/apply-v1.4-context.mjs
+      - name: Apply v1.4 release hardening
+        run: node scripts/apply-v1.4-release-fixes.mjs
       - name: Remove obsolete v1.3 education scripts
         run: rm -f v1.3-p1.js v1.3-education-runtime-fix.js v1.3-production-ui.js v1.3-education-v2.js v1.3-dont-know.js v1.3-smart-distractors.js scripts/apply-smart-distractors.mjs
       - name: Validate dataset
@@ -52,12 +54,13 @@ jobs:
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
           node --check scripts/apply-v1.4-context.mjs
+          node --check scripts/apply-v1.4-release-fixes.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.4 contracts
         run: |
-          node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');const w=fs.readFileSync('sw.js','utf8');const p=fs.readFileSync('v1.4-education-core.js','utf8');const u=fs.readFileSync('v1.4-education-ui.js','utf8');const m=fs.readFileSync('v1.4-education-migration.js','utf8');for(const s of ['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'])if(h.split('<script src=\"'+s+'\"></script>').length-1!==1)throw new Error(s+' must be included exactly once');if(h.includes('./v1.3-p1.js')||h.includes('./v1.3-education-runtime-fix.js'))throw new Error('Legacy v1.3 education UI is still wired');if(!p.includes('getStage')||!p.includes('selectExercise')||!p.includes('chooseBestExercise')||!p.includes('selectEducationItem'))throw new Error('State/adaptive core missing');if(!u.includes('CORE.selectEducationItem')||!u.includes('CORE.chooseBestExercise')||!u.includes('CORE.gradeMeaning')||!u.includes('CORE.gradeReading')||!u.includes('CORE.recordKnowledge'))throw new Error('UI is bypassing v1.4 core');if(!u.includes('fetchContextSentences')||!u.includes('api.tatoeba.org/v1/sentences')||!u.includes('edu.sentence.text.replaceAll(item.character')||!u.includes('edu.sentence.english'))throw new Error('Context sentence exercise wiring missing');if(!u.includes('v14EduProductionInput'))throw new Error('Typed production recall missing');if(!m.includes('schemaVersion=1')||!m.includes('kanji5-v1.4-education-meta'))throw new Error('Education migration missing');if(!w.includes('./v1.4-education-migration.js')||!w.includes('./v1.4-education-core.js')||!w.includes('./v1.4-education-ui.js'))throw new Error('Service worker shell is missing v1.4 education files');"
+          node -e "const fs=require('fs');const h=fs.readFileSync('index.html','utf8');const w=fs.readFileSync('sw.js','utf8');const p=fs.readFileSync('v1.4-education-core.js','utf8');const u=fs.readFileSync('v1.4-education-ui.js','utf8');const m=fs.readFileSync('v1.4-education-migration.js','utf8');for(const s of ['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'])if(h.split('<script src=\"'+s+'\"></script>').length-1!==1)throw new Error(s+' must be included exactly once');if(h.includes('./v1.3-p1.js')||h.includes('./v1.3-education-runtime-fix.js'))throw new Error('Legacy v1.3 education UI is still wired');if(h.includes('id=\"v1.3-education\"')||h.includes('id=\"v1.3-p1\"'))throw new Error('Legacy v1.3 education styles remain');if(!p.includes('getStage')||!p.includes('selectExercise')||!p.includes('chooseBestExercise')||!p.includes('selectEducationItem')||!p.includes('chooseDistractors'))throw new Error('State/adaptive core missing');if(!u.includes('CORE.selectEducationItem')||!u.includes('CORE.chooseBestExercise')||!u.includes('CORE.gradeMeaning')||!u.includes('CORE.gradeReading')||!u.includes('CORE.recordKnowledge'))throw new Error('UI is bypassing v1.4 core');if(!u.includes('fetchContextSentences')||!u.includes('api.tatoeba.org/v1/sentences')||!u.includes('edu.sentence.text.replaceAll(item.character')||!u.includes('edu.sentence.english'))throw new Error('Context sentence exercise wiring missing');if(!u.includes('CORE.chooseDistractors'))throw new Error('Smart distractor core wiring missing');if(!u.includes('function escapeHTML')||!u.includes('escapeHTML(edu.sentence.english'))throw new Error('External content is not escaped');if(!u.includes("modes.filter(x=>x==='meaning'||x==='reading'||x==='production')"))throw new Error('Safe external-data fallback missing');if(!u.includes("checkButton=(edu.mode==='vocabulary'||edu.mode==='context')"))throw new Error('MCQ action-state fix missing');if(!u.includes('v14EduDontKnow'))throw new Error('Dont know action missing');if(!m.includes('schemaVersion=1')||!m.includes('kanji5-v1.4-education-meta'))throw new Error('Education migration missing');if(!w.includes('./v1.4-education-migration.js')||!w.includes('./v1.4-education-core.js')||!w.includes('./v1.4-education-ui.js'))throw new Error('Service worker shell is missing v1.4 education files');if(!w.includes('TATOEBA_ORIGIN')||!w.includes("u.pathname.startsWith('/v1/sentences')"))throw new Error('Tatoeba cache wiring missing');"
       - name: Run v1.4 education P0 tests
         run: node scripts/test-v1.4-education.mjs
       - name: Run v1.4 education P1 tests
@@ -67,7 +70,7 @@ jobs:
           set -e
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js scripts/apply-v1.3-static.mjs scripts/apply-v1.4-context.mjs .github/workflows/build-v1.4.yml scripts/test-v1.4-education.mjs scripts/test-v1.4-p1.mjs supabase-sync.js supabase-schema.sql
+          git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js scripts/apply-v1.3-static.mjs scripts/apply-v1.4-context.mjs scripts/apply-v1.4-release-fixes.mjs .github/workflows/build-v1.4.yml scripts/test-v1.4-education.mjs scripts/test-v1.4-p1.mjs supabase-sync.js supabase-schema.sql README.md
           git add -u
           if git diff --cached --quiet; then echo 'No generated changes to commit'; exit 0; fi
           git commit -m 'build(v1.4): validate educational improvements [skip ci]'
@@ -77,7 +80,8 @@ jobs:
             git reset --hard FETCH_HEAD
             node scripts/apply-v1.3-static.mjs
             node scripts/apply-v1.4-context.mjs
-            git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js
+            node scripts/apply-v1.4-release-fixes.mjs
+            git add index.html sw.js v1.4-education-migration.js v1.4-education-core.js v1.4-education-ui.js scripts/apply-v1.3-static.mjs scripts/apply-v1.4-context.mjs scripts/apply-v1.4-release-fixes.mjs README.md
             git add -u
             if git diff --cached --quiet; then exit 0; fi
             git commit -m 'build(v1.4): rebase generated build [skip ci]'
