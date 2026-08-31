@@ -11,7 +11,15 @@ const anchor='<script type="module">';
 if(!out.includes(anchor))throw new Error('Could not find main module anchor in index.html');
 out=out.replace(anchor,required.map(src=>`<script src="${src}"></script>`).join('\n')+'\n'+anchor);
 fs.writeFileSync(indexPath,out);
+
+const eduPath='v1.4-education-ui.js';
+let eduUi=fs.readFileSync(eduPath,'utf8');
+if(!eduUi.includes('function escapeHTML')){
+  eduUi=eduUi.replace('const safe=v=>',"function escapeHTML(value){return safe(value)}\nconst safe=v=>");
+  fs.writeFileSync(eduPath,eduUi);
+}
+
 const shell=['./','./index.html','./manifest.webmanifest','./icon.svg',...required,'./vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js','./supabase-config.js','./supabase-sync.js'];
 const sw=`const CACHE='kanji5-shell-v37';\nconst DATA_CACHE='kanji5-data-v24';\nconst API_CACHE='kanji5-api-v14';\nconst SHELL=${JSON.stringify(shell)};\nconst DATA_URL=new URL('./kanji-data.json',self.location.href).href;\nconst API_ORIGIN='https://kanjiapi.dev';\nconst TATOEBA_ORIGIN='https://api.tatoeba.org';\nself.addEventListener('install',e=>e.waitUntil(Promise.all([caches.open(CACHE).then(c=>c.addAll(SHELL)),caches.open(DATA_CACHE).then(c=>c.add('./kanji-data.json')),caches.open(API_CACHE)]).then(()=>self.skipWaiting())));\nself.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('kanji5-')&&!([CACHE,DATA_CACHE,API_CACHE].includes(k))).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));\nasync function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback);if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}\nasync function networkFirst(req,name,fallback=req){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}\nasync function apiCacheFirst(req){const c=await caches.open(API_CACHE),hit=await c.match(req);if(hit)return hit;try{const r=await fetch(req);if(r.ok||r.type==='opaque')await c.put(req,r.clone());return r}catch(_){return(await c.match(req))||Response.error()}}\nself.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}if(u.origin!==self.location.origin)return;if(u.href===DATA_URL){e.respondWith(cacheFirst(r,DATA_CACHE,'./kanji-data.json'));return}e.respondWith(caches.match(r).then(hit=>hit||fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})))\n});\n`;
 fs.writeFileSync(swPath,sw);
-console.log('Applied v1.4 canonical wiring, legacy cleanup, and API caching.');
+console.log('Applied v1.4 canonical wiring, legacy cleanup, education escaping compatibility, and API caching.');
