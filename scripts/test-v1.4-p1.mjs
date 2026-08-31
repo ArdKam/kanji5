@@ -15,14 +15,13 @@ const qualified=core.gradeMeaning('school work',['school work','education']);ass
 const partial=core.gradeMeaning('school',['school system']);assert(partial.correct&&partial.quality==='partial','meaning partial grading failed');
 assert(!core.gradeMeaning('schol',['school']).correct,'invalid typo was accepted');
 assert(core.gradeReading('gaku',['がく'],v=>v==='がく'?'gaku':v).correct,'reading grading failed');
-let k=core.ensureEntry({},'学',true)['学'];assert(k.schemaVersion===undefined&&k.exposedAt,'exposure initialization failed');
+let k=core.ensureEntry({},'学',true)['学'];assert(k.exposedAt&&k.stage==='new','exposure state initialization failed');
 k=core.recordKnowledge({'学':k},'学','production',false,'校')['学'];assert(k.production.attempts===1&&k.distractors['校']===1,'knowledge recording failed');
 assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'migration missing');
-assert(ui.includes('CORE.chooseMode')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses core');
-assert(ui.includes('Production')||ui.includes('production'),'production mode missing');
+assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses core');
+assert(ui.includes('v14EduProductionInput'),'typed production UI missing');
 assert(ui.includes('context')&&ui.includes('vocabulary'),'vocabulary/context missing');
-assert(ui.includes('v14-edu-production-input'),'typed production UI missing');
-assert(ui.includes('retry')||ui.includes('تمرین بعدی'),'next exercise flow missing');
+assert(ui.includes('تمرین بعدی'),'next exercise flow missing');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'sync merge does not cover all educational modes');
 assert(sync.includes('distractors')&&sync.includes('stage'),'sync educational metadata missing');
 console.log('Kanji 5 v1.4 P1 tests passed.');
