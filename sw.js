@@ -1,7 +1,7 @@
-const CACHE='kanji5-shell-v19';
-const DATA_CACHE='kanji5-data-v11';
-const API_CACHE='kanji5-api-v2';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./v1.3-p0.js','./v1.3-p1.js','./v1.3-dont-know.js','./v1.2-enhancements.js','./v1.2-runtime-fixes.js','./supabase-config.js','./supabase-sync.js'];
+const CACHE='kanji5-shell-v20';
+const DATA_CACHE='kanji5-data-v12';
+const API_CACHE='kanji5-api-v3';
+const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./v1.3-p0.js','./v1.3-p1.js','./v1.3-dont-know.js','./v1.3-perf.js','./v1.2-enhancements.js','./v1.2-runtime-fixes.js','./supabase-config.js','./supabase-sync.js'];
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
 self.addEventListener('install',e=>e.waitUntil(Promise.all([caches.open(CACHE).then(c=>c.addAll(SHELL)),caches.open(DATA_CACHE).then(c=>c.add('./kanji-data.json')),caches.open(API_CACHE)]).then(()=>self.skipWaiting())));
@@ -12,6 +12,7 @@ async function apiCacheFirst(req){const c=await caches.open(API_CACHE),hit=await
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith((async()=>{const res=await networkFirst(r,CACHE,'./index.html');try{let html=await res.text();let out=html;
 if(!out.includes('src="./v1.3-p0.js"'))out=out.replace('<script type="module">','<script src="./v1.3-p0.js"></script><script type="module">');
 if(!out.includes('src="./v1.3-dont-know.js"'))out=out.replace('<script src="./v1.3-p1.js"></script>','<script src="./v1.3-p1.js"></script><script src="./v1.3-dont-know.js"></script>');
+if(!out.includes('src="./v1.3-perf.js"'))out=out.replace('<script src="./v1.3-p1.js"></script>','<script src="./v1.3-p1.js"></script><script src="./v1.3-perf.js"></script>');
 out=out.replace('const mod=await Promise.race([import(FSRS_URL),new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);','const mod=await Promise.race([window.__KANJI5_P0_FSRS_PROMISE||import(FSRS_URL),new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);');
 out=out.replace(/<script id="v1\.2-loading-watchdog">[\s\S]*?<\/script>/,'');
 out=out.replace('async function loadDeck(){\n  $("loadStatus").textContent="در حال دریافت فهرست Jōyō...";\n  const res=await fetch(DATA_URL,{cache:"force-cache"});\n  if(!res.ok)throw new Error("Could not load local kanji dataset");\n  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);','async function loadDeck(){\n  const data=window.__KANJI5_P0_DATA || await window.__KANJI5_P0_DATA_PROMISE;\n  if(!Array.isArray(data))throw new Error("Could not load local kanji dataset");\n  const all=data;');
