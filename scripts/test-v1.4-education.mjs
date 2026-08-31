@@ -17,8 +17,14 @@ assert(core.weakness({attempts:8,correct:6})>0,'Weakness must remain positive fo
 assert(core.gradeMeaning('school',['school']).quality==='exact','Exact meaning grading failed');
 assert(core.gradeMeaning('high school',['high school']).quality==='exact','Normalized exact meaning failed');
 assert(core.gradeMeaning('school work',['school work']).correct===true,'Two-token exact meaning failed');
+assert(core.gradeMeaning('school',['school system']).correct===true&&core.gradeMeaning('school',['school system']).quality==='partial','Partial meaning grading failed');
 assert(core.gradeMeaning('schol',['school']).correct===false,'Unsafe fuzzy meaning accepted an invalid typo');
+assert(core.toRomaji('も')==='mo','Hiragana も must map to mo');
+assert(core.toRomaji('もう')==='mou','Long vowel sequence もう must map to mou');
+assert(core.toRomaji('きょう')==='kyou','拗音 sequence きょう must map to kyou');
+assert(core.gradeReading('gaku',['がく']).correct===true,'Hiragana reading grading failed');
 assert(core.gradeReading('gaku',['がく'],v=>v==='がく'?'gaku':v).correct===true,'Romaji reading grading failed');
+assert(core.gradeReading('mo',['も']).correct===true,'Romaji grading regressed for も');
 const available=core.getAvailableModes({production:true,vocabulary:true,context:true},true);
 assert(available.length===5,'All education modes should be available when enabled');
 assert(!core.getAvailableModes({production:false,vocabulary:false,context:false},false).includes('production'),'Disabled production leaked into mode list');
@@ -39,6 +45,6 @@ for(const mode of ['meaning','reading','production']){for(let i=0;i<8;i++)master
 assert(mastered['学'].stage==='mastered','High-performing multi-skill card did not reach mastered stage');
 const ui=fs.readFileSync('v1.4-education-ui.js','utf8');
 assert(ui.includes('__KANJI5_EDU_CORE__'),'UI is not connected to educational core');
-assert(ui.includes('CORE.chooseMode')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'UI is not using canonical selection/grading');
+assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'UI is not using canonical selection/grading');
 assert(ui.includes('CORE.recordKnowledge'),'UI is not using canonical knowledge recording');
 console.log('Kanji 5 v1.4 education tests passed.');
