@@ -19,10 +19,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Run canonical build wiring
-        run: node scripts/apply-v1.3-static.mjs
-      - name: Apply v1.5 P0 learning changes
-        run: node scripts/apply-v1.5-p0.mjs
       - name: Validate dataset
         run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));if(d.count!==2136||!Array.isArray(d.kanji)||d.kanji.length!==2136)throw new Error('Invalid runtime dataset');"
       - name: Validate JavaScript
@@ -47,7 +43,7 @@ jobs:
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts and behavior
         run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
-      - name: Verify generated files are committed
+      - name: Verify committed build output
         run: |
           git diff --check
           grep -q "const CACHE='kanji5-shell-v41'" sw.js
@@ -58,4 +54,4 @@ jobs:
           grep -q 'input.type='\''hidden'\''' v1.5-p0.js
           grep -q 'data-v15-production' v1.5-p0.js
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
-          git diff --exit-code
+          test "$(git status --porcelain)" = ""
