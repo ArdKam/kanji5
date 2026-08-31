@@ -4,6 +4,8 @@ const KNOWLEDGE_KEY = `${V12}-knowledge`;
 const SYNC_META_KEY = `${V12}-sync-meta`;
 const POLL_MS = 15000;
 const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
+const EDUCATION_SCHEMA_VERSION = 1;
+const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "context"];
 
 (() => {
   if (!window.KANJI5_SUPABASE) return;
@@ -23,11 +25,12 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
   const localPayload = () => ({
     state: safeJSON(localStorage.getItem(STORAGE_KEY), null),
     knowledge: safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {}),
-    deckVersion: localStorage.getItem("kanji5-deck-version") || null
+    deckVersion: localStorage.getItem("kanji5-deck-version") || null,
+    educationSchemaVersion: EDUCATION_SCHEMA_VERSION
   });
   const json = value => JSON.stringify(value);
   const reviewsFor = state => Array.isArray(state?.reviews) ? state.reviews : [];
-  const stablePayload = payload => ({ state: payload.state || null, knowledge: payload.knowledge || {}, deckVersion: payload.deckVersion || null });
+  const stablePayload = payload => ({ state: payload.state || null, knowledge: payload.knowledge || {}, deckVersion: payload.deckVersion || null, educationSchemaVersion: payload.educationSchemaVersion || EDUCATION_SCHEMA_VERSION });
   const hash = value => { const s = json(stablePayload(value)); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); };
   const lastReviewAt = (state, id) => {
     let latest = "";
@@ -65,24 +68,43 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
     merged.examples = {};
     return merged;
   };
+  const mergeModeStats = (local, remote) => {
+    const l = local && typeof local === "object" ? local : null;
+    const r = remote && typeof remote === "object" ? remote : null;
+    if (!l) return r || { attempts: 0, correct: 0, lastAt: "" };
+    if (!r) return l;
+    const la = Math.max(0, Number(l.attempts) || 0), ra = Math.max(0, Number(r.attempts) || 0);
+    const lc = Math.min(Math.max(0, Number(l.correct) || 0), la), rc = Math.min(Math.max(0, Number(r.correct) || 0), ra);
+    const useRemote = ra > la || (ra === la && rc > lc) || (ra === la && rc === lc && String(r.lastAt || "") > String(l.lastAt || ""));
+    return { attempts: Math.max(la, ra), correct: Math.max(lc, rc), lastAt: useRemote ? String(r.lastAt || l.lastAt || "") : String(l.lastAt || r.lastAt || "") };
+  };
+  const mergeKnowledgeEntry = (localEntry, remoteEntry) => {
+    const l = localEntry && typeof localEntry === "object" ? localEntry : {};
+    const r = remoteEntry && typeof remoteEntry === "object" ? remoteEntry : {};
+    const out = { ...l, ...r, schemaVersion: EDUCATION_SCHEMA_VERSION };
+    for (const mode of EDUCATION_MODES) out[mode] = mergeModeStats(l[mode], r[mode]);
+    const ld = l.distractors || {}, rd = r.distractors || {};
+    out.distractors = { ...ld };
+    for (const [key, value] of Object.entries(rd)) out.distractors[key] = Math.max(Number(ld[key]) || 0, Number(value) || 0);
+    const timestampFields = ["createdAt", "exposedAt", "learningAt", "reinforcingAt", "masteredAt", "lastPromptAt"];
+    for (const field of timestampFields) {
+      const a = String(l[field] || ""), b = String(r[field] || "");
+      if (a || b) out[field] = a >= b ? (a || b) : b;
+    }
+    const stageRank = { new: 0, exposed: 1, learning: 2, reinforcing: 3, mastered: 4 };
+    out.stage = stageRank[r.stage] > stageRank[l.stage] ? r.stage : (l.stage || r.stage || "new");
+    return out;
+  };
   const mergeKnowledge = (local, remote) => {
     const out = structuredClone(local || {});
-    for (const [ch, rv] of Object.entries(remote || {})) {
-      if (!out[ch]) { out[ch] = rv; continue; }
-      for (const mode of ["meaning", "reading"]) {
-        const l = out[ch]?.[mode], r = rv?.[mode];
-        if (!l) out[ch][mode] = r;
-        else if (r && String(r.lastAt || "") > String(l.lastAt || "")) out[ch][mode] = r;
-        else if (r) out[ch][mode] = { attempts: Math.max(l.attempts || 0, r.attempts || 0), correct: Math.max(l.correct || 0, r.correct || 0), lastAt: String(l.lastAt || "") > String(r.lastAt || "") ? l.lastAt : r.lastAt };
-      }
-      if (String(rv?.lastPromptAt || "") > String(out[ch]?.lastPromptAt || "")) out[ch].lastPrompt = rv.lastPrompt;
-    }
+    for (const [ch, rv] of Object.entries(remote || {})) out[ch] = mergeKnowledgeEntry(out[ch], rv);
     return out;
   };
   const writeLocal = payload => {
     if (payload.state) localStorage.setItem(STORAGE_KEY, json(payload.state));
     localStorage.setItem(KNOWLEDGE_KEY, json(payload.knowledge || {}));
     if (payload.deckVersion) localStorage.setItem("kanji5-deck-version", payload.deckVersion);
+    localStorage.setItem(SYNC_META_KEY, json({ educationSchemaVersion: EDUCATION_SCHEMA_VERSION, syncedAt: new Date().toISOString() }));
   };
   const setStatus = (text, tone = "") => { const el = byId("syncStatusText"); if (el) { el.textContent = text; el.dataset.tone = tone; } };
 
@@ -90,7 +112,7 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
     if (!user || syncing) return;
     syncing = true;
     try {
-      const merged = { state: mergeState(local.state, remote?.state), knowledge: mergeKnowledge(local.knowledge, remote?.knowledge), deckVersion: local.deckVersion || remote?.deckVersion || null };
+      const merged = { state: mergeState(local.state, remote?.state), knowledge: mergeKnowledge(local.knowledge, remote?.knowledge), deckVersion: local.deckVersion || remote?.deckVersion || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
       writeLocal(merged);
       const now = new Date().toISOString();
       const { error } = await client.from("user_learning_state").upsert({ user_id: user.id, payload: { ...merged, clientUpdatedAt: now }, updated_at: now }, { onConflict: "user_id" });
@@ -111,7 +133,7 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
       const remote = data?.payload || null;
       if (!remote) { await push(local, null); return; }
       const remoteStable = stablePayload(remote);
-      const merged = { state: mergeState(local.state, remote.state), knowledge: mergeKnowledge(local.knowledge, remote.knowledge), deckVersion: local.deckVersion || remote.deckVersion || null };
+      const merged = { state: mergeState(local.state, remote.state), knowledge: mergeKnowledge(local.knowledge, remote.knowledge), deckVersion: local.deckVersion || remote.deckVersion || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
       const localHash = hash(local), mergedHash = hash(merged), remoteHash = hash(remoteStable);
       if (mergedHash !== localHash) {
         writeLocal(merged);
@@ -136,25 +158,19 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
     if (byId("syncBtn")) return;
     const wrap = document.querySelector("header > div:last-child");
     if (!wrap) return;
-    const button = document.createElement("button");
-    button.className = "iconbtn"; button.id = "syncBtn"; button.setAttribute("aria-label", "حساب و همگام‌سازی"); button.textContent = "☁️";
-    button.addEventListener("click", openAuth); wrap.prepend(button);
-    const dialog = document.createElement("dialog"); dialog.id = "syncDialog";
-    dialog.innerHTML = `<div class="modal"><h2>حساب و همگام‌سازی</h2><div id="syncContent"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeSync">بستن</button></div></div>`;
-    document.body.appendChild(dialog); byId("closeSync").addEventListener("click", () => dialog.close());
+    const button = document.createElement("button"); button.className = "iconbtn"; button.id = "syncBtn"; button.setAttribute("aria-label", "حساب و همگام‌سازی"); button.textContent = "☁️"; button.addEventListener("click", openAuth); wrap.prepend(button);
+    const dialog = document.createElement("dialog"); dialog.id = "syncDialog"; dialog.innerHTML = `<div class="modal"><h2>حساب و همگام‌سازی</h2><div id="syncContent"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeSync">بستن</button></div></div>`; document.body.appendChild(dialog); byId("closeSync").addEventListener("click", () => dialog.close());
   }
 
   function openAuth() {
     const dialog = byId("syncDialog"), content = byId("syncContent"); if (!dialog || !content) return;
     if (user) {
       content.innerHTML = `<p>ورود با <b>${user.email || "Google"}</b></p><p id="syncStatusText" style="color:#6b7280">همگام‌سازی خودکار فعال است.</p><div style="display:flex;gap:8px"><button class="primary" id="syncNow">همگام‌سازی الآن</button><button class="secondary" id="signOut">خروج</button></div>`;
-      byId("syncNow").addEventListener("click", pullAndMerge);
-      byId("signOut").addEventListener("click", async () => { await client.auth.signOut(); dialog.close(); });
+      byId("syncNow").addEventListener("click", pullAndMerge); byId("signOut").addEventListener("click", async () => { await client.auth.signOut(); dialog.close(); });
     } else {
       content.innerHTML = `<button class="primary" id="googleLogin" style="width:100%;margin-bottom:10px">ورود با Google</button><div style="text-align:center;color:#6b7280;margin:8px 0">یا</div><input id="syncEmail" type="email" placeholder="ایمیل" autocomplete="email" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;box-sizing:border-box"><input id="syncPassword" type="password" placeholder="رمز عبور" autocomplete="current-password" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;box-sizing:border-box;margin-top:8px"><div style="display:flex;gap:8px;margin-top:10px"><button class="primary" id="emailLogin">ورود</button><button class="secondary" id="emailSignup">ساخت حساب</button></div><p id="syncMsg" style="color:#6b7280;font-size:12px;margin-top:10px"></p>`;
       byId("googleLogin").addEventListener("click", async () => { const c = await getClient(); const { error } = await c.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.href } }); if (error) byId("syncMsg").textContent = error.message; });
-      byId("emailLogin").addEventListener("click", () => emailAuth(false));
-      byId("emailSignup").addEventListener("click", () => emailAuth(true));
+      byId("emailLogin").addEventListener("click", () => emailAuth(false)); byId("emailSignup").addEventListener("click", () => emailAuth(true));
     }
     dialog.showModal();
   }
@@ -171,8 +187,7 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
   async function boot() {
     ensureUI();
     try {
-      const c = await getClient();
-      const { data } = await c.auth.getSession(); user = data.session?.user || null;
+      const c = await getClient(); const { data } = await c.auth.getSession(); user = data.session?.user || null;
       if (user) { setStatus("در حال همگام‌سازی…"); await pullAndMerge(); clearInterval(pollTimer); pollTimer = setInterval(pullAndMerge, POLL_MS); window.addEventListener("online", pullAndMerge); document.addEventListener("visibilitychange", () => { if (!document.hidden) pullAndMerge(); }); }
       c.auth.onAuthStateChange(async (_event, session) => { user = session?.user || null; if (user) { await pullAndMerge(); clearInterval(pollTimer); pollTimer = setInterval(pullAndMerge, POLL_MS); } else { clearInterval(pollTimer); setStatus("وارد نشده"); } });
     } catch (e) { console.warn("Kanji 5 sync unavailable", e); }
