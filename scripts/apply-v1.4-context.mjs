@@ -50,10 +50,9 @@ const newContext = `else if(edu.mode==='context'&&edu.sentence){prompt='در ج�
 if (!source.includes(oldContext)) throw new Error('Expected context renderer not found');
 source = source.replace(oldContext, newContext);
 
-const startPattern = /async function startEducation\(\)\{[\s\S]*?\nfunction record\(mode,result,wrong=' '\)\{/;
-if (!startPattern.test(source)) {
-  throw new Error('Expected startEducation function not found');
-}
+const startPattern = /async function startEducation\(\)\{[\s\S]*?\nfunction record\(mode,result,wrong=''\)\{/;
+if (!startPattern.test(source)) throw new Error('Expected startEducation function not found');
+
 source = source.replace(startPattern, `async function startEducation(){
   const p=pane();if(!p)return;
   const seen=getSeenItems();
