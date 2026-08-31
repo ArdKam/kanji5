@@ -9,7 +9,6 @@
   let deckIndex = null;
   const wordsCache = new Map();
   const EDUCATION_DEFAULTS = {production:true, vocabulary:true, context:true};
-
   const norm = v => String(v || "").trim().toLowerCase().normalize("NFKC").replace(/[\s\u3000]+/g, "").replace(/[。、・,.;:!?！？\-ー]/g, "");
   const hiraMap = new Map([
     ["あ","a"],["い","i"],["う","u"],["え","e"],["お","o"],["か","ka"],["き","ki"],["く","ku"],["け","ke"],["こ","ko"],
@@ -23,94 +22,29 @@
     ["ひゃ","hya"],["ひゅ","hyu"],["ひょ","hyo"],["みゃ","mya"],["みゅ","myu"],["みょ","myo"],["りゃ","rya"],["りゅ","ryu"],["りょ","ryo"],
     ["ぎゃ","gya"],["ぎゅ","gyu"],["ぎょ","gyo"],["じゃ","ja"],["じゅ","ju"],["じょ","jo"],["びゃ","bya"],["びゅ","byu"],["びょ","byo"],["ぴゃ","pya"],["ぴゅ","pyu"],["ぴょ","pyo"]
   ]);
-
-  function readEducationSettings(){
-    try{
-      const value = JSON.parse(localStorage.getItem(EDUCATION_KEY) || "null");
-      return {...EDUCATION_DEFAULTS, ...(value && typeof value === "object" ? value : {})};
-    }catch(_){ return {...EDUCATION_DEFAULTS}; }
-  }
-  function writeEducationSettings(next){ try{localStorage.setItem(EDUCATION_KEY, JSON.stringify({...EDUCATION_DEFAULTS,...next}));}catch(_){} }
-  window.KANJI5_EDUCATION_SETTINGS = {read:readEducationSettings, write:writeEducationSettings, defaults:{...EDUCATION_DEFAULTS}};
-
-  function ensureEducationSettingsUI(){
-    const dialog = $("#settingsDialog");
-    if(!dialog || $("#v13EducationSettings", dialog)) return;
-    const modal = $(".modal", dialog);
-    if(!modal) return;
-    const section = document.createElement("section");
-    section.id = "v13EducationSettings";
-    section.innerHTML = '<h3 style="font-size:15px;margin:20px 0 8px">قابلیت‌های آموزشی</h3>' +
-      '<div style="color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:10px">تمرین‌های پیشرفته را می‌توانی جداگانه فعال یا غیرفعال کنی.</div>' +
-      '<label class="setting"><span>تولید کانجی (Kanji Production)</span><input id="v13Production" type="checkbox"></label>' +
-      '<label class="setting"><span>تکمیل واژه (Vocabulary Completion)</span><input id="v13Vocabulary" type="checkbox"></label>' +
-      '<label class="setting"><span>یادآوری بافت واژه (Context Recall)</span><input id="v13Context" type="checkbox"></label>';
-    const resetRow = $("#resetBtn", modal)?.closest(".setting");
-    (resetRow || $(".setting", modal))?.before(section);
-    const syncUI = () => {
-      const s = readEducationSettings();
-      $("#v13Production")?.setAttribute("checked", s.production ? "" : "false");
-      $("#v13Vocabulary")?.setAttribute("checked", s.vocabulary ? "" : "false");
-      $("#v13Context")?.setAttribute("checked", s.context ? "" : "false");
-      $("#v13Production").checked = !!s.production;
-      $("#v13Vocabulary").checked = !!s.vocabulary;
-      $("#v13Context").checked = !!s.context;
-    };
-    ["v13Production","v13Vocabulary","v13Context"].forEach(id => $("#"+id)?.addEventListener("change", () => {
-      writeEducationSettings({
-        production: !!$("#v13Production")?.checked,
-        vocabulary: !!$("#v13Vocabulary")?.checked,
-        context: !!$("#v13Context")?.checked
-      });
-    }));
-    syncUI();
-  }
-
-  document.addEventListener("DOMContentLoaded", ensureEducationSettingsUI, {once:true});
-  document.getElementById("settingsBtn")?.addEventListener("click", () => setTimeout(ensureEducationSettingsUI,0));
-
-  function hiraToRomaji(v){
-    const s = String(v || "").normalize("NFKC").replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0)-0x60));
-    let out="";
-    for(let i=0;i<s.length;){
-      if(s[i]==="っ"){
-        const n=hiraMap.get(s.slice(i+1,i+3))||hiraMap.get(s[i+1])||"";
-        if(n && /^[bcdfghjklmnpqrstvwxyz]/.test(n)) out+=n[0]; i++; continue;
-      }
-      const p=s.slice(i,i+2);
-      if(hiraMap.has(p)){out+=hiraMap.get(p);i+=2;continue;}
-      out+=hiraMap.get(s[i])||s[i];i++;
-    }
-    return out;
-  }
+  function readEducationSettings(){try{const value=JSON.parse(localStorage.getItem(EDUCATION_KEY)||"null");return {...EDUCATION_DEFAULTS,...(value&&typeof value==="object"?value:{})};}catch(_){return {...EDUCATION_DEFAULTS};}}
+  function writeEducationSettings(next){try{localStorage.setItem(EDUCATION_KEY,JSON.stringify({...EDUCATION_DEFAULTS,...next}));}catch(_){} }
+  window.KANJI5_EDUCATION_SETTINGS={read:readEducationSettings,write:writeEducationSettings,defaults:{...EDUCATION_DEFAULTS}};
+  function ensureEducationSettingsUI(){const dialog=$("#settingsDialog");if(!dialog||$("#v13EducationSettings",dialog))return;const modal=$(".modal",dialog);if(!modal)return;const section=document.createElement("section");section.id="v13EducationSettings";section.innerHTML='<h3 style="font-size:15px;margin:20px 0 8px">قابلیت‌های آموزشی</h3>'+'<div style="color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:10px">تمرین‌های پیشرفته را می‌توانی جداگانه فعال یا غیرفعال کنی.</div>'+'<label class="setting"><span>تولید کانجی (Kanji Production)</span><input id="v13Production" type="checkbox"></label>'+'<label class="setting"><span>تکمیل واژه (Vocabulary Completion)</span><input id="v13Vocabulary" type="checkbox"></label>'+'<label class="setting"><span>یادآوری بافت واژه (Context Recall)</span><input id="v13Context" type="checkbox"></label>';const resetRow=$("#resetBtn",modal)?.closest(".setting");(resetRow||$(".setting",modal))?.before(section);const syncUI=()=>{const s=readEducationSettings();$("#v13Production").checked=!!s.production;$("#v13Vocabulary").checked=!!s.vocabulary;$("#v13Context").checked=!!s.context;};["v13Production","v13Vocabulary","v13Context"].forEach(id=>$("#"+id)?.addEventListener("change",()=>{writeEducationSettings({production:!!$("#v13Production")?.checked,vocabulary:!!$("#v13Vocabulary")?.checked,context:!!$("#v13Context")?.checked});}));syncUI();}
+  document.addEventListener("DOMContentLoaded",ensureEducationSettingsUI,{once:true});
+  document.getElementById("settingsBtn")?.addEventListener("click",()=>setTimeout(ensureEducationSettingsUI,0));
+  function hiraToRomaji(v){const s=String(v||"").normalize("NFKC").replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));let out="";for(let i=0;i<s.length;){if(s[i]==="っ"){const n=hiraMap.get(s.slice(i+1,i+3))||hiraMap.get(s[i+1])||"";if(n&&/^[bcdfghjklmnpqrstvwxyz]/.test(n))out+=n[0];i++;continue;}const p=s.slice(i,i+2);if(hiraMap.has(p)){out+=hiraMap.get(p);i+=2;continue;}out+=hiraMap.get(s[i])||s[i];i++;}return out;}
   function normRomaji(v){return norm(v).replace(/[^a-z]/g,"").replace(/si/g,"shi").replace(/ti/g,"chi").replace(/tu/g,"tsu").replace(/hu/g,"fu").replace(/zi/g,"ji").replace(/du/g,"zu").replace(/di/g,"ji").replace(/wo/g,"o");}
-
   function knowledge(){try{const x=JSON.parse(localStorage.getItem(KNOWLEDGE_KEY)||"{}");return x&&typeof x==="object"?x:{}}catch(_){return {}}}
   function record(ch,mode,correct){const all=knowledge(),node=all[ch]||{},s=node[mode]||{attempts:0,correct:0,lastAt:null};s.attempts++;if(correct===true)s.correct++;s.lastAt=new Date().toISOString();node[mode]=s;node.lastPrompt=mode;all[ch]=node;try{localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(all))}catch(_){} }
-  function mastery(ch,mode){const s=(knowledge()[ch]||{})[mode]||{attempts:0,correct:0};return (s.correct+1)/(s.attempts+2)}
-  function getItem(){const ch=$(".kanji")?.textContent?.trim();if(!ch)return null;if(!deckIndex){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"[]");deckIndex=new Map((Array.isArray(x)?x:[]).map(i=>[i.character,i]));}catch(_){deckIndex=new Map()}}return {character:ch,item:deckIndex.get(ch)};}
+  function mastery(ch,mode){const s=(knowledge()[ch]||{})[mode]||{attempts:0,correct:0};return(s.correct+1)/(s.attempts+2)}
+  function getItem(){const ch=$(".kanji")?.textContent?.trim();if(!ch)return null;if(!deckIndex){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"[]");deckIndex=new Map((Array.isArray(x)?x:[]).map(i=>[i.character,i]));}catch(_){deckIndex=new Map()}}return{character:ch,item:deckIndex.get(ch)};}
   function firstExposure(){const id=$(".kanji")?.dataset?.kanjiId;if(!id)return false;try{const x=JSON.parse(localStorage.getItem(STORAGE)||"null");return !x?.cards?.[id]}catch(_){return false}}
   async function words(ch){if(wordsCache.has(ch))return wordsCache.get(ch);let out=[];try{const r=await fetch(WORDS_URL(ch),{cache:"force-cache"});if(r.ok){const data=await r.json(),seen=new Set();for(const e of data){for(const v of(e.variants||[])){const w=v.written||"",read=v.pronounced||"";if(w.includes(ch)&&read&&!seen.has(w)){seen.add(w);out.push({word:w,reading:read,meaning:(e.meanings||[]).flatMap(m=>m.glosses||[]).slice(0,2).join("; "));}if(out.length>=8)break}if(out.length>=8)break}}}catch(_){}wordsCache.set(ch,out);return out;}
-
-  function chooseMode(ch,hasWords){
-    const settings = readEducationSettings();
-    const modes=["meaning","reading"];
-    if(settings.production)modes.push("production");
-    if(hasWords&&settings.vocabulary)modes.push("vocabulary");
-    if(hasWords&&settings.context)modes.push("context");
-    const node=knowledge()[ch]||{};
-    const unattempted=modes.filter(m=>!(node[m]?.attempts));
-    if(unattempted.length)return unattempted[Math.floor(Math.random()*unattempted.length)];
-    return modes.slice().sort((a,b)=>mastery(ch,a)-mastery(ch,b))[0]||"meaning";
-  }
+  function chooseMode(ch,hasWords){const settings=readEducationSettings();const modes=["meaning","reading"];if(settings.production)modes.push("production");if(hasWords&&settings.vocabulary)modes.push("vocabulary");if(hasWords&&settings.context)modes.push("context");const node=knowledge()[ch]||{};const unattempted=modes.filter(m=>!(node[m]?.attempts));if(unattempted.length)return unattempted[Math.floor(Math.random()*unattempted.length)];return modes.slice().sort((a,b)=>mastery(ch,a)-mastery(ch,b))[0]||"meaning";}
   function answerForReading(item,v){const a=norm(v),ar=normRomaji(v);return[...(item.on||[]),...(item.kun||[])].some(r=>a===norm(r)||ar===normRomaji(hiraToRomaji(r)));}
-
-  async function openGate(){const data=getItem();if(!data?.item)return false;const ws=await words(data.character);const mode=chooseMode(data.character,ws.length>0);active={...data,mode,words:ws};const button=$("#revealBtn");if(!button)return false;const gate=document.createElement("div");gate.className="v13-p1-gate";gate.innerHTML='<div class="v13-p1-card"><div class="v13-p1-title">🧠 تمرین یادآوری</div><div id="v13P1Prompt" class="v13-p1-prompt"></div><div id="v13P1Body"></div><button id="v13P1Submit" class="primary" style="width:100%;margin-top:10px">بررسی پاسخ</button></div>';button.replaceWith(gate);const p=$("#v13P1Prompt"),body=$("#v13P1Body"),i=data.item;if(mode==="meaning"){p.textContent="حداقل یک معنی این کانجی را از حافظه بنویس.";body.innerHTML='<input id="v13P1Input" class="v13-p1-input" type="text" autocomplete="off" spellcheck="false" placeholder="مثلاً: school">';}else if(mode==="reading"){p.textContent="یک خوانش رایج را از حافظه بنویس؛ Hiragana یا Romaji هر دو قابل قبول‌اند.";body.innerHTML='<input id="v13P1Input" class="v13-p1-input" type="text" autocomplete="off" spellcheck="false" placeholder="مثلاً: gaku یا がく">';}else if(mode==="production"){p.innerHTML='معنی: <strong>'+((i.meaning||[]).join(" · ")||"—")+'</strong><br>کانجی مناسب را بنویس.';body.innerHTML='<input id="v13P1Input" class="v13-p1-input v13-p1-kanji" type="text" inputmode="text" maxlength="2" placeholder="کانجی">';}else{const w=ws[Math.floor(Math.random()*ws.length)];active.word=w;if(mode==="vocabulary"){p.textContent="کانجی گمشده را در این واژه کامل کن.";body.innerHTML='<div class="v13-p1-word">'+w.word.replace(data.character,"＿")+'</div><div class="v13-p1-reading">'+w.reading+'</div><input id="v13P1Input" class="v13-p1-input v13-p1-kanji" maxlength="2" placeholder="کانجی گمشده">';}else{p.textContent="از روی بافت واژه، کانجی را به یاد بیاور.";body.innerHTML='<div class="v13-p1-reading">خوانش: '+w.reading+'</div>'+(w.meaning?'<div class="v13-p1-word-meaning">'+w.meaning+'</div>':'')+'<input id="v13P1Input" class="v13-p1-input v13-p1-kanji" maxlength="2" placeholder="کانجی">';}}setTimeout(()=>$("#v13P1Input")?.focus(),0);return true;}
-  function finishGate(correct){const{character,item,mode,word}=active;record(character,mode,correct);const gate=$(".v13-p1-gate");if(!gate)return;gate.innerHTML='<div class="v13-p1-card"><div class="v13-p1-title">'+(correct?"✅ پاسخ درست بود":"❌ پاسخ درست نبود")+'</div><div class="v13-p1-answer">پاسخ صحیح: <strong>'+characterAnswer(item,mode,word,character)+'</strong></div><button id="v13P1RevealAnswer" class="primary" style="width:100%;margin-top:12px">نمایش پاسخ کامل</button></div>';try{localStorage.setItem("kanji5-v1.2-last-attempt",JSON.stringify({character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct}))}catch(_){}}
+  function choicesFor(target){const deck=getItemDeck();const pool=deck.map(x=>x.character).filter(ch=>ch&&ch!==target);const choices=[target];while(pool.length&&choices.length<4){const i=Math.floor(Math.random()*pool.length);choices.push(pool.splice(i,1)[0]);}return choices.sort(()=>Math.random()-.5);}
+  function getItemDeck(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"[]");return Array.isArray(x)?x:[];}catch(_){return[]}}
+  async function openGate(){const data=getItem();if(!data?.item)return false;const ws=await words(data.character);const mode=chooseMode(data.character,ws.length>0);active={...data,mode,words:ws};const button=$("#revealBtn");if(!button)return false;const gate=document.createElement("div");gate.className="v13-p1-gate";gate.innerHTML='<div class="v13-p1-card"><div class="v13-p1-title">🧠 تمرین یادآوری</div><div id="v13P1Prompt" class="v13-p1-prompt"></div><div id="v13P1Body"></div><button id="v13P1Submit" class="primary" style="width:100%;margin-top:10px">بررسی پاسخ</button></div>';button.replaceWith(gate);const p=$("#v13P1Prompt"),body=$("#v13P1Body"),i=data.item;if(mode==="meaning"){p.textContent="حداقل یک معنی این کانجی را از حافظه بنویس.";body.innerHTML='<input id="v13P1Input" class="v13-p1-input" type="text" autocomplete="off" spellcheck="false" placeholder="مثلاً: school">';}else if(mode==="reading"){p.textContent="یک خوانش رایج را از حافظه بنویس؛ Hiragana یا Romaji هر دو قابل قبول‌اند.";body.innerHTML='<input id="v13P1Input" class="v13-p1-input" type="text" autocomplete="off" spellcheck="false" placeholder="مثلاً: gaku یا がく">';}else if(mode==="production"){p.innerHTML='معنی: <strong>'+((i.meaning||[]).join(" · ")||"—")+'</strong><br>کانجی مناسب را انتخاب کن.';body.innerHTML='<div class="v13-production-choices" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">'+choicesFor(data.character).map(ch=>'<button type="button" class="secondary v13-production-choice" data-choice="'+ch+'" style="font-family:serif;font-size:38px;padding:14px 8px;min-height:78px">'+ch+'</button>').join("")+'</div><input id="v13P1Input" type="hidden">';}else{const w=ws[Math.floor(Math.random()*ws.length)];active.word=w;if(mode==="vocabulary"){p.textContent="کانجی گمشده را در این واژه کامل کن.";body.innerHTML='<div class="v13-p1-word">'+w.word.replace(data.character,"＿")+'</div><div class="v13-p1-reading">'+w.reading+'</div><input id="v13P1Input" class="v13-p1-input v13-p1-kanji" maxlength="2" placeholder="کانجی گمشده">';}else{p.textContent="از روی بافت واژه، کانجی را به یاد بیاور.";body.innerHTML='<div class="v13-p1-reading">خوانش: '+w.reading+'</div>'+(w.meaning?'<div class="v13-p1-word-meaning">'+w.meaning+'</div>':'')+'<input id="v13P1Input" class="v13-p1-input v13-p1-kanji" maxlength="2" placeholder="کانجی">';}}if(mode==="production"){$(".v13-production-choices")?.addEventListener("click",e=>{const b=e.target.closest("[data-choice]");if(!b)return;$("#v13P1Input").value=b.dataset.choice||"";$(".v13-production-choice").forEach(x=>x.disabled=true);submit();});}else setTimeout(()=>$("#v13P1Input")?.focus(),0);return true;}
+  function finishGate(correct){const{character,item,mode,word}=active;record(character,mode,correct);const gate=$(".v13-p1-gate");if(!gate)return;gate.innerHTML='<div class="v13-p1-card"><div class="v13-p1-title">'+(correct?"✅ پاسخ درست بود":"❌ پاسخ درست نبود")+'</div><div class="v13-p1-answer">پاسخ صحیح: <strong>'+characterAnswer(item,mode,word,character)+'</strong></div><button id="v13P1RevealAnswer" class="primary" style="width:100%;margin-top:12px">نمایش پاسخ کامل</button></div>';try{localStorage.setItem("kanji5-v1.2-last-attempt",JSON.stringify({character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct}))}catch(_){} }
   function revealAnswer(){const answerBox=$("#answerBox"),ratings=$("#ratings");$(".v13-p1-gate")?.remove();if(answerBox){answerBox.classList.add("show");answerBox.removeAttribute("aria-hidden")}if(ratings)ratings.classList.add("show");active=null;}
   function characterAnswer(item,mode,word,ch){if(mode==="meaning")return(item.meaning||[]).join(" · ")||"—";if(mode==="reading")return[...(item.on||[]),...(item.kun||[])].join(" · ")||"—";return ch;}
-  async function submit(){if(!active)return;const v=$("#v13P1Input")?.value||"";if(!norm(v)){$("#v13P1Input")?.focus();return;}const{item,mode,character,word}=active;let ok=false;if(mode==="meaning")ok=(item.meaning||[]).some(m=>{const a=norm(v),c=norm(m);return c&&(a===c||a.includes(c)||c.includes(a))});else if(mode==="reading")ok=answerForReading(item,v);else if(mode==="production")ok=norm(v)===norm(character);else ok=!!word&&norm(v)===norm(character);finishGate(ok);}
-
+  async function submit(){if(!active)return;const v=$("#v13P1Input")?.value||"";if(!norm(v)&&active.mode!=="production"){ $("#v13P1Input")?.focus();return;}const{item,mode,character,word}=active;let ok=false;if(mode==="meaning")ok=(item.meaning||[]).some(m=>{const a=norm(v),c=norm(m);return c&&(a===c||a.includes(c)||c.includes(a))});else if(mode==="reading")ok=answerForReading(item,v);else if(mode==="production")ok=norm(v)===norm(character);else ok=!!word&&norm(v)===norm(character);finishGate(ok);}
   document.addEventListener("click",event=>{const t=event.target;if(t?.id==="revealBtn"&&!firstExposure()){event.preventDefault();event.stopImmediatePropagation();void openGate();return;}if(t?.id==="v13P1Submit"){event.preventDefault();event.stopImmediatePropagation();void submit();return;}if(t?.id==="v13P1RevealAnswer"){event.preventDefault();event.stopImmediatePropagation();revealAnswer();}},true);
   document.addEventListener("keydown",event=>{if(event.target?.id==="v13P1Input"&&(event.key==="Enter"||((event.ctrlKey||event.metaKey)&&event.key==="Enter"))){event.preventDefault();void submit();}},true);
 })();
