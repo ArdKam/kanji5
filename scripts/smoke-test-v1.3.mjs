@@ -44,7 +44,7 @@ if (!core.includes('gradeMeaning') || !core.includes('gradeReading')) throw new 
 if (!core.includes('recordKnowledge')) throw new Error('Educational knowledge recording missing');
 if (!guard.includes('__KANJI5_P0_DATA_PROMISE')) throw new Error('Education dataset guard is not connected to P0');
 if (!guard.includes('stopPropagation')) throw new Error('Education guard does not prevent premature tab initialization');
-if (!fsrs.length < 30000 || /esm\.sh/i.test(fsrs)) throw new Error('Local FSRS bundle looks invalid');
+if (fsrs.length < 30000 || /esm\.sh/i.test(fsrs)) throw new Error('Local FSRS bundle looks invalid');
 
 for (const file of ['v1.3-production-ui.js','v1.3-education-v2.js','v1.3-dont-know.js','v1.3-smart-distractors.js']) {
   if (fs.existsSync(file)) throw new Error(`Dead v1.3 file should be removed: ${file}`);
