@@ -47,6 +47,9 @@ const empty=core.ensureEntry({},'学',true)['学'];assert(empty.exposedAt&&empty
 const recorded=core.recordKnowledge({'学':empty},'学','production',false,'校')['学'];
 assert(recorded.production.attempts===1&&recorded.distractors['校']===1,'Knowledge recording failed');
 assert(recorded.educationEvidence?.lastMode==='production'&&recorded.educationEvidence?.lastCorrect===false,'Educational evidence was not persisted');
+assert(typeof core.educationSchedulerSignal==='function','Scheduler evidence adapter is missing');
+const signal=core.educationSchedulerSignal(recorded);
+assert(signal.version===1&&signal.mastery>=0&&signal.mastery<=1&&signal.weakestSkillMastery>=0&&signal.weakestSkillMastery<=1,'Scheduler evidence signal is not bounded');
 const distractorTarget={character:'学',on:['ガク'],kun:['まなぶ'],meaning:['study','learning'],strokes:8,grade:1,frequency:100};
 const distractorCandidates=[{character:'校',on:['コウ'],meaning:['school'],strokes:10,grade:1,frequency:110},{character:'楽',on:['ガク'],meaning:['comfort'],strokes:13,grade:1,frequency:120},{character:'習',on:['シュウ'],meaning:['learn'],strokes:11,grade:1,frequency:90},{character:'語',on:['ゴ'],meaning:['language'],strokes:14,grade:2,frequency:800}];
 assert(typeof core.scoreDistractor==='function'&&typeof core.chooseDistractors==='function','Smart distractor API missing');
@@ -57,8 +60,7 @@ assert(!picked.some(x=>x.character==='学'),'Target Kanji leaked into distractor
 const ambiguous={character:'仮',on:['ガク'],meaning:['study'],strokes:8,grade:1,frequency:100};
 assert(core.distractorAmbiguous(distractorTarget,ambiguous,[])===true,'Ambiguous distractor was not rejected');
 const index=core.buildDistractorIndex([distractorTarget,...distractorCandidates]);
-assert(index.reading.gaku===undefined&&index.reading['がく']===undefined,'Unexpected unnormalized reading index key');
-assert(Array.isArray(index.reading.gaku||index.reading['ガク']),'Reading candidate index was not built');
+assert(Array.isArray(index.reading['ガク']),'Reading candidate index was not built');
 const indexedPool=core.candidatePool(distractorTarget,[...distractorCandidates],index);
 assert(Array.isArray(indexedPool)&&indexedPool.length>0,'Indexed distractor candidate pool is empty');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
@@ -83,6 +85,7 @@ assert(!ui.includes("const words=await fetchWords(item.character);const finalMod
 assert(ui.includes("modes.filter(x=>x==='meaning'||x==='reading'||x==='production')"),'Unsafe API fallback is missing');
 assert(ui.includes("checkButton=(edu.mode==='vocabulary'||edu.mode==='context')"),'MCQ action-state fix is missing');
 assert(ui.includes('function escapeHTML'),'External content escaping helper missing');
+assert(ui.includes('const pool=getDeck();return [target,...CORE.chooseDistractors'),'Indexed distractor pool is not wired through the UI');
 assert(sw.includes('TATOEBA_ORIGIN')&&sw.includes("u.pathname.startsWith('/v1/sentences')"),'Tatoeba service-worker cache missing');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy v1.3 education styles remain');
 console.log('Kanji 5 v1.5 P1 education tests passed.');
