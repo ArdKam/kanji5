@@ -1,7 +1,7 @@
 const CACHE='kanji5-shell-v32';
 const DATA_CACHE='kanji5-data-v19';
 const API_CACHE='kanji5-api-v10';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.3-p1.js','./v1.3-education-runtime-fix.js','./vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js','./supabase-config.js','./supabase-sync.js'];
+const SHELL=["./","./index.html","./manifest.webmanifest","./icon.svg","./v1.3-p0.js","./v1.3-perf.js","./v1.3-storage-bridge.js","./v1.3-settings.js","./v1.3-p1.js","./v1.3-education-runtime-fix.js","./vendor/ts-fsrs-5.4.1.mjs","./v1.2-enhancements.js","./v1.2-runtime-fixes.js","./supabase-config.js","./supabase-sync.js"];
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
 self.addEventListener('install',e=>e.waitUntil(Promise.all([
