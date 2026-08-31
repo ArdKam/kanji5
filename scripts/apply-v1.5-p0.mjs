@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+// v1.5: canonicalize JLPT-grouped new-card queue before each build.
 const indexPath='index.html';
 let html=fs.readFileSync(indexPath,'utf8');
 const runtimeTag='<script src="./v1.5-p0.js"></script>';
