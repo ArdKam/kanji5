@@ -50,7 +50,7 @@ jobs:
       - name: Verify generated files
         run: |
           git diff --check
-          grep -q "const CACHE='kanji5-shell-v39'" sw.js
+          grep -q "const CACHE='kanji5-shell-v41'" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-p0.js"' sw.js
           grep -q 'function jlptRank(item)' index.html
