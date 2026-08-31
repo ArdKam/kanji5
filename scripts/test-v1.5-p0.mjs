@@ -1,27 +1,21 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const read = p => fs.readFileSync(p,'utf8');
-const assert = (condition,message) => { if(!condition) throw new Error(message); };
+const read=p=>fs.readFileSync(p,'utf8');
+const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const index = read('index.html');
-const sw = read('sw.js');
-const migration = read('v1.4-education-migration.js');
-const workflow = read('.github/workflows/build-v1.5.yml');
-const core = read('v1.4-education-core.js');
-const ui = read('v1.4-education-ui.js');
-const p0 = read('v1.5-p0.js');
+const index=read('index.html'),sw=read('sw.js'),migration=read('v1.4-education-migration.js'),workflow=read('.github/workflows/build-v1.5.yml'),core=read('v1.4-education-core.js'),ui=read('v1.4-education-ui.js'),p0=read('v1.5-p0.js');
 
-const required = ['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
-for (const src of required) assert((index.match(new RegExp(`<script src=\\"${src.replaceAll('.','\\.')}\\"></script>`, 'g'))||[]).length===1,`${src} must be wired exactly once`);
+const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
+for(const src of required)assert((index.match(new RegExp(`<script src=\\"${src.replaceAll('.','\\.')}\\"></script>`,'g'))||[]).length===1,`${src} must be wired exactly once`);
 assert((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g)||[]).length===1,'v1.5 P0 runtime must be wired exactly once');
-for (const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js']) assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
+for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
 assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
 assert((index.match(/v1\.2-dataset-2136/g)||[]).length===1,'Duplicate dataset bootstrap remains');
 
-class Store { constructor(values={}){this.values={...values};} getItem(k){return Object.prototype.hasOwnProperty.call(this.values,k)?this.values[k]:null;} setItem(k,v){this.values[k]=String(v);} }
-function runMigration(initial){const store=new Store(initial),ctx={window:{},localStorage:store,Date,JSON};vm.createContext(ctx);vm.runInContext(migration,ctx);assert(ctx.window.__KANJI5_EDU_MIGRATION_API__,'Migration API missing');return{store,api:ctx.window.__KANJI5_EDU_MIGRATION_API__};}
+class Store{constructor(values={}){this.values={...values}}getItem(k){return Object.prototype.hasOwnProperty.call(this.values,k)?this.values[k]:null}setItem(k,v){this.values[k]=String(v)}}
+function runMigration(initial){const store=new Store(initial),ctx={window:{},localStorage:store,Date,JSON};vm.createContext(ctx);vm.runInContext(migration,ctx);assert(ctx.window.__KANJI5_EDU_MIGRATION_API__,'Migration API missing');return{store,api:ctx.window.__KANJI5_EDU_MIGRATION_API__}}
 const fresh=runMigration({});
 assert(fresh.api.version===1,'Fresh install migration version mismatch');
 assert(JSON.parse(fresh.store.getItem('kanji5-v1.2-knowledge')||'{}')?.constructor===Object,'Fresh install store should remain valid JSON object');
@@ -40,9 +34,10 @@ assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.
 
 assert(p0.includes('const V15_P0_VERSION = "1.5"'),'Canonical v1.5 P0 runtime version mismatch');
 assert(p0.includes('function enhanceProduction()'),'Canonical production MCQ enhancer missing');
-assert(p0.includes('submit = $("#v14EduSubmit",wrap)')&&p0.includes('submit.style.display = "none"'),'Production submit control remains visible');
+assert(p0.includes('const submit=$("#v14EduSubmit",wrap)')&&p0.includes('submit.style.display="none"'),'Production submit control remains visible');
 assert(!p0.includes('observer.observe(document.body'),'P0 must not install a global document.body observer');
-assert(p0.includes('educationObserver.observe(educationPane'),'P0 production observer must be scoped to the education pane');
+assert(p0.includes('function startTargetedObservers()')&&p0.includes('educationPane'),'P0 must use targeted observers');
+assert(p0.includes('observer.observe(educationPane,{childList:true,subtree:true})'),'P0 production observer is not scoped to the education pane');
 
 assert(!fs.existsSync('package.json'),'Unexpected package.json dependency surface introduced');
 for(const forbidden of ['npm install ','https://unpkg.com/','https://cdn.jsdelivr.net/'])assert(!index.includes(forbidden)&&!ui.includes(forbidden),`Unexpected runtime dependency: ${forbidden}`);
@@ -52,6 +47,8 @@ assert(ui.includes('CORE.chooseDistractors'),'UI is not using canonical distract
 assert(ui.includes('CORE.selectEducationItem'),'UI is not using adaptive Kanji selection');
 assert(ui.includes('safe(edu.sentence.english||\'\')'),'Context translation escaping is not wired');
 assert(workflow.includes('scripts/test-v1.5-p0.mjs')&&workflow.includes('scripts/test-v1.4-p1.mjs')&&workflow.includes('scripts/test-v1.4-education.mjs'),'Education CI gates are missing');
+assert(!workflow.includes('git push origin feature/v1.5'),'v1.5 CI must not self-push generated changes');
+assert(workflow.includes('git diff --exit-code'),'v1.5 CI must fail on generated-file drift');
 assert(index.includes('function educationQueuePriority'),'Education/FSRS queue bridge is missing');
 assert(index.includes('educationQueuePriority(k')||index.includes('educationQueuePriority(item'),'Queue does not use education priority');
 assert(index.includes('dueItems')&&index.includes('dueItems.sort'),'FSRS due cards are not being ranked with education evidence');
