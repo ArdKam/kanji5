@@ -10,17 +10,13 @@ permissions:
 
 jobs:
   apply:
-    if: !contains(github.event.head_commit.message, '[skip ci]')
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: feature/v1.3
           fetch-depth: 1
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
 
       - name: Patch P0 learning flow
         run: |
