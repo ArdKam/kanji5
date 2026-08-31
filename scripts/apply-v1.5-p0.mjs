@@ -1,11 +1,15 @@
 import fs from 'node:fs';
 const indexPath='index.html';
 let html=fs.readFileSync(indexPath,'utf8');
-const runtimeTag='<script src="./v1.5-p0.js"></script>';
-if(!html.includes(runtimeTag)){
-  const anchor='<script type="module">';
+const runtimeTags=['<script src="./v1.5-p0.js"></script>','<script src="./v1.5-production-mcq.js"></script>'];
+const anchor='<script type="module">';
+if(!html.includes(runtimeTags[0])){
   if(!html.includes(anchor))throw new Error('Main module anchor missing');
-  html=html.replace(anchor,runtimeTag+'\n'+anchor);
+  html=html.replace(anchor,runtimeTags[0]+'\n'+anchor);
+}
+if(!html.includes(runtimeTags[1])){
+  if(!html.includes(anchor))throw new Error('Main module anchor missing');
+  html=html.replace(anchor,runtimeTags[1]+'\n'+anchor);
 }
 if(!html.includes('function jlptRank(')){
   const blockPattern=/const newCards=\[\];if\(state\.todayNew<state\.settings\.dailyNew\)for\(const item of state\.deck\)if\(!state\.cards\[item\.id\]\)\{newCards\.push\(item\.id\);if\(newCards\.length>=state\.settings\.dailyNew-state\.todayNew\)break\}/;
@@ -16,5 +20,7 @@ if(!html.includes('function jlptRank(')){
 fs.writeFileSync(indexPath,html);
 const swPath='sw.js';
 let sw=fs.readFileSync(swPath,'utf8');
-if(!sw.includes('"./v1.5-p0.js"')){sw=sw.replace('"./v1.4-education-ui.js",','"./v1.4-education-ui.js","./v1.5-p0.js",');fs.writeFileSync(swPath,sw)}
+if(!sw.includes('"./v1.5-p0.js"'))sw=sw.replace('"./v1.4-education-ui.js",','"./v1.4-education-ui.js","./v1.5-p0.js",');
+if(!sw.includes('"./v1.5-production-mcq.js"'))sw=sw.replace('"./v1.5-p0.js",','"./v1.5-p0.js","./v1.5-production-mcq.js",');
+fs.writeFileSync(swPath,sw);
 console.log('Applied v1.5 P0.');
