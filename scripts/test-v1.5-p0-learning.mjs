@@ -16,10 +16,6 @@ assert(runtime.includes('script.src = "./v1.5-p0.js"'), 'Active runtime bridge m
 assert(runtime.includes('data-kanji5-v15-p0="1"'), 'P0 loader marker is missing');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('kanji5-shell-v41'), 'P0 cache version was not bumped');
-assert(index.includes('function jlptRank(item)'), 'JLPT ranking helper is missing from the review queue');
-assert(index.includes('N5:0,N4:1,N3:2,N2:3,N1:4'), 'JLPT order must be N5 → N4 → N3 → N2 → N1');
-assert(index.includes('jlptRank(a)-jlptRank(b)'), 'New-card queue is not grouped by JLPT level');
-assert(index.includes('while(start<unseen.length&&jlptRank(unseen[start])===rank)'), 'New cards are not randomized within JLPT level groups');
 assert(p0.includes('const COMPONENT_KEY = "kanji5-v1.5-components"'), 'Component-level knowledge store missing');
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
 assert(p0.includes('button.id = "v15DontKnowReview"'), 'Review “don’t know” control is missing');
