@@ -31,6 +31,7 @@
   }
 
   function prepareStartupPanel() {
+    if (document.getElementById("v13-silent-startup")) return;
     const style = document.createElement("style");
     style.id = "v13-silent-startup";
     style.textContent = `
@@ -122,9 +123,29 @@
     }, 80);
   }
 
+  // Observe only the study surface where examples are rendered.
+  // The previous document.body observer reacted to unrelated DOM changes.
+  const studyRoot = document.getElementById("studyPanel") || document.getElementById("study") || document.body;
   const observer = new MutationObserver(() => {
     if (document.querySelector(EXAMPLE_SELECTOR)) scheduleExamples();
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(studyRoot, { childList: true, subtree: true });
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
+
+  // v1.5 P0 is a first-class runtime dependency. Load it explicitly from the
+  // active runtime bridge so the shell does not depend on a fragile inline loader.
+  function loadV15P0() {
+    if (window.__KANJI5_V15_P0__ || document.querySelector('script[data-kanji5-v15-p0="1"]')) return;
+    const script = document.createElement("script");
+    script.src = "./v1.5-p0.js";
+    script.dataset.kanji5V15P0 = "1";
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadV15P0, { once: true });
+  } else {
+    loadV15P0();
+  }
 })();
