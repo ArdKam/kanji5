@@ -3,11 +3,9 @@
 
   if (window.__KANJI5_V15_P0__) return;
   window.__KANJI5_V15_P0__ = true;
-  const V15_P0_VERSION = "1.5";
 
   const KNOW_KEY = "kanji5-v1.2-knowledge";
   const COMPONENT_KEY = "kanji5-v1.5-components";
-  const REVIEW_SIGNAL_KEY = "kanji5-v1.5-review-signals";
   const $ = (selector, root = document) => root.querySelector(selector);
 
   function readJSON(key, fallback) { try { const raw=localStorage.getItem(key); if(!raw)return fallback; const value=JSON.parse(raw); return value&&typeof value==="object"?value:fallback; } catch(_){ return fallback; } }
@@ -44,10 +42,24 @@
     if(prompt)prompt.textContent=mode==="meaning"?`معنی هدف: «${focus.raw}» — سعی کن همین معنی را از حافظه به یاد بیاوری.`:`خوانش هدف: «${focus.raw}» — سعی کن همین خوانش را از حافظه به یاد بیاوری.`;
   }
   function recordRecall(event){
-    const gate=event.target?.closest?.(".v12-recall-gate"),button=event.target?.closest?.("button");if(!gate||!button)return;
+    const gate=event.target?.closest?.(".v12-recall-gate"),button=event.target?.closest?.("button");if(!gate||!button||button.id==="v15DontKnowRecall")return;
     const kanji=$(".kanji"),input=gate.querySelector("input,textarea");if(!kanji||!input)return;
     const character=String(kanji.textContent||"").trim(),answer=String(input.value||"").trim(),mode=gate.dataset.v15Mode||"meaning",focus=gate.dataset.v15Focus||"";
     if(!character||!answer||!focus)return;recordFocusedRecall(character,mode,focus,gradeFocusedRecall(mode,answer,focus));
+  }
+  function addDontKnowRecall(){
+    const gate=$(".v12-recall-gate");if(!gate||$("#v15DontKnowRecall",gate))return;
+    const input=gate.querySelector("input,textarea");if(!input)return;
+    const button=document.createElement("button");button.type="button";button.id="v15DontKnowRecall";button.className="secondary";button.textContent="نمی‌دانم";
+    button.addEventListener("click",()=>{
+      const answer=gate.querySelector(".answer");
+      if(answer)answer.classList.add("show");
+      gate.querySelector(".reveal")?.click();
+      const result=gate.querySelector(".v12-recall-result");
+      if(result){result.className="v12-recall-result unknown";result.textContent="این مورد را نمی‌دانستم";}
+      gate.dataset.v15DontKnow="1";
+    });
+    input.parentElement?.appendChild(button);
   }
 
   function getProductionTarget(input){
@@ -76,19 +88,12 @@
     input.parentNode.insertBefore(grid,input);
   }
   function chooseProduction(event){const button=event.target?.closest?.("[data-v15-production]");if(!button)return;const input=$("#v14EduProductionInput");if(!input)return;input.value=button.dataset.v15Production||"";$("#v14EduSubmit")?.click();}
-  function addDontKnow(){
-    const ratings=$("#ratings");if(!ratings||!ratings.classList.contains("show")||$("#v15DontKnowReview",ratings))return;
-    const button=document.createElement("button");button.type="button";button.id="v15DontKnowReview";button.className="rate";button.textContent="نمی‌دانم";button.title="این کارت را نمی‌دانم";
-    button.addEventListener("click",()=>{const id=$(".kanji")?.dataset?.kanjiId||"";if(id){const signals=readJSON(REVIEW_SIGNAL_KEY,{});signals[id]=(Number(signals[id])||0)+1;writeJSON(REVIEW_SIGNAL_KEY,signals);}$(".rate.again",ratings)?.click();});ratings.appendChild(button);
-  }
 
-  // Never observe document.body. Only observe the two dynamic surfaces that P0 modifies.
   function startTargetedObservers(){
-    const educationPane=$("#v14EducationPane");
-    if(educationPane){const observer=new MutationObserver(()=>{if($("#v14EduProductionInput",educationPane))enhanceProduction();});observer.observe(educationPane,{childList:true,subtree:true});}
-    const ratings=$("#ratings");
-    if(ratings){const observer=new MutationObserver(()=>addDontKnow());observer.observe(ratings,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});}
-    enhanceRecall();enhanceProduction();addDontKnow();
+    const studyRoot=$("#studyPanel")||$("#study")||document.body;
+    const observer=new MutationObserver(()=>{enhanceRecall();addDontKnowRecall();enhanceProduction();});
+    observer.observe(studyRoot,{childList:true,subtree:true});
+    enhanceRecall();addDontKnowRecall();enhanceProduction();
   }
   document.addEventListener("click",recordRecall,true);
   document.addEventListener("click",chooseProduction,true);
