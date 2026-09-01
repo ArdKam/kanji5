@@ -12,8 +12,8 @@ const sw = read('sw.js');
 const coreSource = read('v1.4-education-core.js');
 
 assert(index.includes('./v1.2-runtime-fixes.js'), 'Active shell runtime is missing');
-assert((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length === 1, 'v1.5 P0 runtime must be wired exactly once in index.html');
-assert(runtime.includes('const SRC = "./v1.5-p0.js"'), 'Active shell fallback loader does not reference v1.5 P0');
+assert(runtime.includes('script.src = "./v1.5-p0.js"'), 'Active runtime bridge must load v1.5 P0');
+assert(runtime.includes('data-kanji5-v15-p0="1"'), 'P0 loader marker is missing');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('kanji5-shell-v41'), 'P0 cache version was not bumped');
 assert(index.includes('function jlptRank(item)'), 'JLPT ranking helper is missing from the review queue');
@@ -38,12 +38,10 @@ assert(p0.includes('const core = window.__KANJI5_EDU_CORE__'), 'Production MCQ m
 assert(!p0.includes('کانجی را بنوی'), 'Canonical P0 runtime still contains a typing prompt');
 assert(!p0.includes('observer.observe(document.body'), 'P0 must not observe the entire document body');
 
-// P0 grading invariant: there must be one canonical meaning grader.
 assert(v12.includes('gradeMeaningCanonical'), 'Legacy active-recall layer is not delegated to the canonical grader');
 assert(!v12.includes('answer.includes(canonical)'), 'Substring meaning grading is still present in v1.2-enhancements.js');
 assert(!v12.includes('canonical.includes(answer)'), 'Reverse substring meaning grading is still present in v1.2-enhancements.js');
 
-// Behavioral tests: execute the real education core in an isolated VM.
 const sandbox = { window: {}, console, structuredClone };
 vm.runInNewContext(coreSource, sandbox, { filename: 'v1.4-education-core.js' });
 const core = sandbox.window.__KANJI5_EDU_CORE__;
