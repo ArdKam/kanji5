@@ -55,19 +55,28 @@
     const character=String(kanji.textContent||"").trim(),answer=String(input.value||"").trim(),mode=gate.dataset.v15Mode||"meaning",focus=gate.dataset.v15Focus||"";
     if(!character||!answer||!focus)return;recordFocusedRecall(character,mode,focus,gradeFocusedRecall(mode,answer,focus)?'correct':'wrong');
   }
+  function revealAfterUnknown(gate){
+    const answer=gate.closest?.("#study")?.querySelector?.(".answer")||$(".answer");
+    const answerBox=$("#answerBox");
+    const ratings=$("#ratings");
+    if(answer)answer.classList.add("show");
+    if(answerBox)answerBox.classList.add("show");
+    if(ratings){ratings.style.display="grid";ratings.classList.add("show");}
+    gate.remove();
+  }
   function addDontKnowRecall(){
     const gate=$(".v12-recall-gate");if(!gate||$("#v15DontKnowRecall",gate))return;
     const input=gate.querySelector("input,textarea");if(!input)return;
     const button=document.createElement("button");button.type="button";button.id="v15DontKnowRecall";button.className="secondary";button.textContent="نمی‌دانم";
     button.addEventListener("click",()=>{
       const kanji=$(".kanji"),character=String(kanji?.textContent||"").trim(),mode=gate.dataset.v15Mode||"meaning",focus=gate.dataset.v15Focus||"";
-      if(character&&focus)recordFocusedRecall(character,mode,focus,'unknown');
-      const answer=gate.querySelector(".answer");
-      if(answer)answer.classList.add("show");
-      gate.querySelector(".reveal")?.click();
+      if(character&&focus){
+        recordFocusedRecall(character,mode,focus,'unknown');
+        try{localStorage.setItem("kanji5-v1.2-last-attempt",JSON.stringify({character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct:false,unknown:true}));}catch(_){}
+      }
       const result=gate.querySelector(".v12-recall-result");
       if(result){result.className="v12-recall-result unknown";result.textContent="این مورد را نمی‌دانستم";}
-      gate.dataset.v15DontKnow="1";
+      revealAfterUnknown(gate);
     });
     input.parentElement?.appendChild(button);
   }
