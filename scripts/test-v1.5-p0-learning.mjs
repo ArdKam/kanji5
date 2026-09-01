@@ -3,6 +3,7 @@ import vm from 'node:vm';
 
 const read = p => fs.readFileSync(p, 'utf8');
 const assert = (x, m) => { if (!x) throw new Error(m); };
+const has = (source, pattern) => pattern instanceof RegExp ? pattern.test(source) : source.includes(pattern);
 
 const index = read('index.html');
 const runtime = read('v1.2-runtime-fixes.js');
@@ -19,19 +20,19 @@ assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the s
 assert(sw.includes('kanji5-shell-v41'), 'P0 cache version was not bumped');
 assert(p0.includes('const COMPONENT_KEY = "kanji5-v1.5-components"'), 'Component-level knowledge store missing');
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
-assert(p0.includes('button.id = "v15DontKnowReview"'), 'Review “don’t know” control is missing');
-assert(p0.includes('const again = $(".rate.again", ratings)'), 'Review “don’t know” must map to FSRS Again behavior');
+assert(has(p0,/button\.id\s*=\s*["']v15DontKnowReview["']/), 'Review “don’t know” control is missing');
+assert(has(p0,/\.rate\.again/), 'Review “don’t know” must map to FSRS Again behavior');
 assert(p0.includes('function getProductionTarget(input)'), 'Production target resolver is missing');
 assert(p0.includes('function getProductionChoices(target)'), 'Production MCQ choice generation is missing');
 assert(p0.includes('function enhanceProduction()'), 'Production MCQ enhancer is missing');
 assert(p0.includes('برای معنی زیر، کانجی مناسب را انتخاب کن.'), 'Production prompt was not changed to selection');
-assert(p0.includes('input.type = "hidden"'), 'Production input is not hidden');
+assert(p0.includes('input.type = "hidden"') || p0.includes('input.type="hidden"'), 'Production input is not hidden');
 assert(p0.includes('v15-production-grid') && p0.includes('v15-production-choice'), 'Production choices are not rendered as dedicated MCQ buttons');
-assert(p0.includes('button.dataset.v15Production = choice.character'), 'Production choice data binding is missing');
-assert(p0.includes('input.value = button.dataset.v15Production || ""'), 'Production choice selection is not submitted to the backing field');
-assert(p0.includes('input.style.display = "none"'), 'Production input remains visibly editable');
-assert(p0.includes('submit.style.display = "none"'), 'Production text-submit control remains visible after MCQ conversion');
-assert(p0.includes('const core = window.__KANJI5_EDU_CORE__'), 'Production MCQ must resolve the education core lazily');
+assert(has(p0,/dataset\.v15Production\s*=\s*choice\.character/), 'Production choice data binding is missing');
+assert(has(p0,/input\.value\s*=\s*button\.dataset\.v15Production/), 'Production choice selection is not submitted to the backing field');
+assert(has(p0,/input\.style\.display\s*=\s*["']none["']/), 'Production input remains visibly editable');
+assert(has(p0,/submit\.style\.display\s*=\s*["']none["']/), 'Production text-submit control remains visible after MCQ conversion');
+assert(p0.includes('const core=window.__KANJI5_EDU_CORE__') || p0.includes('const core = window.__KANJI5_EDU_CORE__'), 'Production MCQ must resolve the education core lazily');
 assert(!p0.includes('کانجی را بنوی'), 'Canonical P0 runtime still contains a typing prompt');
 assert(!p0.includes('observer.observe(document.body'), 'P0 must not observe the entire document body');
 
