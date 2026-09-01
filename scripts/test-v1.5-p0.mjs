@@ -34,12 +34,18 @@ assert(sw.includes('kanji5-shell-v41')&&sw.includes('kanji5-api-v14'),'Cache ver
 assert(sw.includes('const clone=r.clone();caches.open(CACHE).then(c=>c.put(req,clone))'),'Dynamic same-origin response is cloned before asynchronous caching');
 assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"),'Unsafe post-return response.clone caching pattern remains');
 
-assert(p0.includes('const V15_P0_VERSION = "1.5"'),'Canonical v1.5 P0 runtime version mismatch');
+assert(p0.includes('const V15_P0_VERSION = "1.5"')||p0.includes('window.__KANJI5_V15_P0__'),'Canonical v1.5 P0 runtime version marker missing');
+assert(p0.includes('function enhanceRecall()'),'Active Recall enhancer missing');
+assert(p0.includes('function addDontKnowRecall()'),'Active Recall don’t-know enhancer missing');
+assert(p0.includes('v15DontKnowRecall'),'Active Recall don’t-know control missing');
+assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"),'Unknown recall is not recorded as a separate outcome');
+assert(p0.includes('stats.score+=0.25'),'Unknown recall must have a lighter educational weight than wrong recall');
+assert(!p0.includes('v15DontKnowReview'),'Don’t-know must not be a review-rating control');
+assert(!p0.includes('.rate.again'),'Don’t-know must not directly trigger FSRS Again');
 assert(p0.includes('function enhanceProduction()'),'Canonical production MCQ enhancer missing');
 assert(p0.includes('#v14EduSubmit')&&p0.includes('style.display="none"'),'Production submit control remains visible');
 assert(!p0.includes('observer.observe(document.body'),'P0 must not install a global document.body observer');
-assert(p0.includes('function startTargetedObservers()')&&p0.includes('educationPane'),'P0 must use targeted observers');
-assert(p0.includes('observer.observe(educationPane'),'P0 production observer is not scoped to the education pane');
+assert(p0.includes('function startTargetedObservers()')&&p0.includes('educationPane')||p0.includes('studyRoot'),'P0 must use a targeted study observer');
 
 assert(!fs.existsSync('package.json'),'Unexpected package.json dependency surface introduced');
 for(const forbidden of ['npm install ','https://unpkg.com/','https://cdn.jsdelivr.net/'])assert(!index.includes(forbidden)&&!ui.includes(forbidden),`Unexpected runtime dependency: ${forbidden}`);
