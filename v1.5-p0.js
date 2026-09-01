@@ -20,7 +20,12 @@
     if(!all[character].reading||typeof all[character].reading!=="object")all[character].reading={};
     return all;
   }
-  function componentAccuracy(stats){const attempts=Math.max(0,Number(stats?.attempts)||0),correct=Math.min(attempts,Math.max(0,Number(stats?.correct)||0));return attempts?(correct+1)/(attempts+2):0;}
+  function componentAccuracy(stats){
+    const attempts=Math.max(0,Number(stats?.attempts)||0),correct=Math.min(attempts,Math.max(0,Number(stats?.correct)||0));
+    if(!attempts)return 0;
+    const score=Number.isFinite(Number(stats?.score))?Math.max(0,Math.min(attempts,Number(stats.score))):correct;
+    return (score+1)/(attempts+2);
+  }
   function getFocusComponent(character,mode){
     const item=getDeck().find(entry=>entry&&entry.character===character); if(!item)return null;
     const state=ensureComponentEntry(character)[character][mode];
@@ -29,9 +34,12 @@
     candidates.sort((a,b)=>a.accuracy-b.accuracy); return candidates[0]||null;
   }
   function gradeFocusedRecall(mode,answer,focus){const core=window.__KANJI5_EDU_CORE__;if(!core||!focus)return false;return mode==="reading"?Boolean(core.gradeReading(answer,[focus]).correct):Boolean(core.gradeMeaning(answer,[focus]).correct);}
-  function recordFocusedRecall(character,mode,focus,correct){
-    const all=ensureComponentEntry(character),bucket=all[character][mode],key=normalize(focus),stats=bucket[key]||{attempts:0,correct:0,lastAt:null};
-    stats.attempts+=1;if(correct)stats.correct+=1;stats.lastAt=new Date().toISOString();bucket[key]=stats;all[character].updatedAt=stats.lastAt;writeJSON(COMPONENT_KEY,all);
+  function recordFocusedRecall(character,mode,focus,outcome){
+    const all=ensureComponentEntry(character),bucket=all[character][mode],key=normalize(focus),stats=bucket[key]||{attempts:0,correct:0,unknown:0,score:0,lastAt:null};
+    stats.attempts+=1;
+    if(outcome==='correct'){stats.correct+=1;stats.score+=1;}
+    else if(outcome==='unknown'){stats.unknown=(Number(stats.unknown)||0)+1;stats.score+=0.25;}
+    stats.lastAt=new Date().toISOString();bucket[key]=stats;all[character].updatedAt=stats.lastAt;writeJSON(COMPONENT_KEY,all);
   }
   function enhanceRecall(){
     const gate=$(".v12-recall-gate"),kanji=$(".kanji");if(!gate||!kanji)return;
@@ -45,13 +53,15 @@
     const gate=event.target?.closest?.(".v12-recall-gate"),button=event.target?.closest?.("button");if(!gate||!button||button.id==="v15DontKnowRecall")return;
     const kanji=$(".kanji"),input=gate.querySelector("input,textarea");if(!kanji||!input)return;
     const character=String(kanji.textContent||"").trim(),answer=String(input.value||"").trim(),mode=gate.dataset.v15Mode||"meaning",focus=gate.dataset.v15Focus||"";
-    if(!character||!answer||!focus)return;recordFocusedRecall(character,mode,focus,gradeFocusedRecall(mode,answer,focus));
+    if(!character||!answer||!focus)return;recordFocusedRecall(character,mode,focus,gradeFocusedRecall(mode,answer,focus)?'correct':'wrong');
   }
   function addDontKnowRecall(){
     const gate=$(".v12-recall-gate");if(!gate||$("#v15DontKnowRecall",gate))return;
     const input=gate.querySelector("input,textarea");if(!input)return;
     const button=document.createElement("button");button.type="button";button.id="v15DontKnowRecall";button.className="secondary";button.textContent="نمی‌دانم";
     button.addEventListener("click",()=>{
+      const kanji=$(".kanji"),character=String(kanji?.textContent||"").trim(),mode=gate.dataset.v15Mode||"meaning",focus=gate.dataset.v15Focus||"";
+      if(character&&focus)recordFocusedRecall(character,mode,focus,'unknown');
       const answer=gate.querySelector(".answer");
       if(answer)answer.classList.add("show");
       gate.querySelector(".reveal")?.click();
