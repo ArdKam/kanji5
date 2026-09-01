@@ -20,8 +20,11 @@ assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the s
 assert(sw.includes('kanji5-shell-v41'), 'P0 cache version was not bumped');
 assert(p0.includes('const COMPONENT_KEY = "kanji5-v1.5-components"'), 'Component-level knowledge store missing');
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
-assert(has(p0,/button\.id\s*=\s*["']v15DontKnowReview["']/), 'Review “don’t know” control is missing');
-assert(has(p0,/\.rate\.again/), 'Review “don’t know” must map to FSRS Again behavior');
+assert(has(p0,/button\.id\s*=\s*["']v15DontKnowRecall["']/), 'Active Recall “don’t know” control is missing');
+assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'Active Recall “don’t know” must record an educational unknown outcome');
+assert(p0.includes('stats.score+=0.25'), 'Unknown recall must carry a smaller educational weight than a correct recall');
+assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” control must not be added');
+assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
 assert(p0.includes('function getProductionTarget(input)'), 'Production target resolver is missing');
 assert(p0.includes('function getProductionChoices(target)'), 'Production MCQ choice generation is missing');
 assert(p0.includes('function enhanceProduction()'), 'Production MCQ enhancer is missing');
@@ -59,7 +62,13 @@ assert(result.correct, 'Romaji reading must match kana');
 result = core.gradeReading('し', ['shi']);
 assert(result.correct, 'Kana reading must match romaji');
 result = core.gradeReading('si', ['し']);
-assert(result.correct, 'Accepted romaji variant must match');
+assert(result.correct, 'Hepburn/kunrei romaji variant must match');
+result = core.gradeReading('ti', ['ち']);
+assert(result.correct, 'Kunrei romaji variant must match');
+result = core.gradeReading('tu', ['つ']);
+assert(result.correct, 'Kunrei romaji variant must match');
+result = core.gradeReading('hu', ['ふ']);
+assert(result.correct, 'Kunrei romaji variant must match');
 result = core.gradeReading('a', ['し']);
 assert(!result.correct, 'Unrelated short reading must be incorrect');
 
@@ -77,4 +86,4 @@ assert(distractors.length === 3, 'chooseDistractors must return the requested nu
 assert(new Set(distractors.map(x => x.character)).size === 3, 'Distractors must be unique');
 assert(!distractors.some(x => x.character === target.character), 'Target cannot be a distractor');
 
-console.log('Kanji 5 v1.5 P0 structural + behavioral checks passed.');
+console.log('Kanji 5 v1.5 learning + P0 structural checks passed.');
