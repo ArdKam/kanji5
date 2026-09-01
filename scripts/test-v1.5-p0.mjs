@@ -5,11 +5,12 @@ const read=p=>fs.readFileSync(p,'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const count=(text,needle)=>(text.split(needle).length-1);
 
-const index=read('index.html'),sw=read('sw.js'),migration=read('v1.4-education-migration.js'),workflow=read('.github/workflows/build-v1.5.yml'),core=read('v1.4-education-core.js'),ui=read('v1.4-education-ui.js'),p0=read('v1.5-p0.js');
+const index=read('index.html'),runtime=read('v1.2-runtime-fixes.js'),sw=read('sw.js'),migration=read('v1.4-education-migration.js'),workflow=read('.github/workflows/build-v1.5.yml'),core=read('v1.4-education-core.js'),ui=read('v1.4-education-ui.js'),p0=read('v1.5-p0.js');
 
 const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
 for(const src of required)assert(count(index,`<script src="${src}"></script>` )===1,`${src} must be wired exactly once`);
-assert(index.includes('./v1.5-p0.js'),'v1.5 P0 runtime must be present in the active shell');
+assert(runtime.includes('script.src = "./v1.5-p0.js"'),'v1.5 P0 runtime must be loaded explicitly by the active runtime bridge');
+assert(runtime.includes('data-kanji5-v15-p0="1"'),'v1.5 P0 loader must be uniquely marked');
 for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
 assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
