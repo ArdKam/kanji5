@@ -14,6 +14,7 @@ const coreSource = read('v1.4-education-core.js');
 assert(index.includes('./v1.2-runtime-fixes.js'), 'Active shell runtime is missing');
 assert(runtime.includes('script.src = "./v1.5-p0.js"'), 'Active runtime bridge must load v1.5 P0');
 assert(runtime.includes('data-kanji5-v15-p0="1"'), 'P0 loader marker is missing');
+assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enrichment must not observe the entire document body');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('kanji5-shell-v41'), 'P0 cache version was not bumped');
 assert(p0.includes('const COMPONENT_KEY = "kanji5-v1.5-components"'), 'Component-level knowledge store missing');
