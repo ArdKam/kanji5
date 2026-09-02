@@ -5,7 +5,8 @@ const $=s=>document.querySelector(s);
 const dataPromise=window.__KANJI5_P0_DATA_PROMISE||Promise.resolve(window.__KANJI5_P0_DATA||[]);
 let waiting=false;
 function isEducationTab(target){return target?.closest?.('.v13-tab[data-tab="education"]')}
-function showLoading(){const pane=$('#v13EducationPane');if(pane&&!pane.hidden){pane.innerHTML='<div class="v13-edu-empty"><div style="font-size:42px">⏳</div><strong>در حال آماده‌سازی تمرین‌ها…</strong><div>دادهٔ کانجی در حال بارگذاری است.</div></div>'}}
+function showLoading(){const pane=$('#v13EducationPane');if(pane&&!pane.hidden)pane.innerHTML='<div class="v13-edu-empty"><div style="font-size:42px">⏳</div><strong>در حال آماده‌سازی تمرین‌ها…</strong><div>دادهٔ کانجی در حال بارگذاری است.</div></div>'}
+function syncChoiceSubmit(){const pane=$('#v13EducationPane');if(!pane)return;const submit=$('#v13EduSubmit',pane);if(submit)submit.hidden=Boolean($('.v13-edu-choice',pane))}
 async function waitForEducation(){
   if(waiting)return;
   waiting=true;
@@ -20,6 +21,8 @@ async function waitForEducation(){
     if(tab)tab.click();
   }finally{waiting=false}
 }
+const paneObserver=new MutationObserver(syncChoiceSubmit);
+paneObserver.observe(document.documentElement,{childList:true,subtree:true});
 document.addEventListener('click',event=>{
   if(event.target?.id==='v13EduBack'){
     setTimeout(()=>{$('#v13StartEducation')?.remove();$('#ratings')?.classList.add('show')},0);
