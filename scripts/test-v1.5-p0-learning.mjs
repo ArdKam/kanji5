@@ -21,7 +21,7 @@ assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enr
 assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall back to the document body');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
-assert(sw.includes('kanji5-shell-v45'), 'Runtime cache version was not bumped');
+assert(sw.includes('kanji5-shell-v46'), 'Runtime cache version was not bumped');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(p0.includes('const COMPONENT_KEY=\'kanji5-v1.5-components\''), 'Component-level knowledge store missing');
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
