@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const index=read('index.html');
+const p0=read('v1.3-p0.js');
+assert(index.includes('window.__KANJI5_P0_DATA_PROMISE'),'Main app does not consume the shared dataset promise');
+assert(index.includes('const prefetched=window.__KANJI5_P0_DATA_PROMISE'),'Dataset loader does not read the P0 promise');
+assert(index.includes('if(Array.isArray(all)&&all.length===2136){state.deck=all;'),'Dataset promise result is not used as the primary deck source');
+assert(index.includes('window.__KANJI5_P0_FSRS_PROMISE'),'Main app does not consume the shared FSRS promise');
+assert(index.includes('const shared=window.__KANJI5_P0_FSRS_PROMISE'),'FSRS loader does not read the P0 promise');
+assert(index.includes('const loadPromise=shared?shared.then(mod=>'),'FSRS shared promise is not the normal initialization path');
+assert(index.includes('):import(FSRS_URL)'),'FSRS direct import fallback is missing');
+assert(index.includes('const res=await fetch(DATA_URL,{cache:"force-cache"})'),'Dataset fetch fallback is missing');
+assert(p0.includes('window.__KANJI5_P0_DATA_PROMISE=fetch(DATA_URL'),'P0 does not own dataset prefetch');
+assert(p0.includes('window.__KANJI5_P0_FSRS_PROMISE=import(FSRS_URL)'),'P0 does not own FSRS prefetch');
+assert((index.match(/<script src="\.\/v1\.3-p0\.js"><\/script>/g)||[]).length===1,'P0 bootstrap must be loaded exactly once');
+console.log('Kanji 5 v1.5 shared dataset/FSRS initialization test passed.');
