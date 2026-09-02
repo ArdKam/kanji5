@@ -294,5 +294,6 @@
     const answerBox = $("#answerBox");
     if (answerBox?.classList.contains("show")) setupProgressiveReveal();
   });
-  observer.observe(document.body, { childList: true, subtree: true });
+  const studyRoot = document.getElementById("studyPanel") || document.getElementById("study");
+  if (studyRoot) observer.observe(studyRoot, { childList: true, subtree: true });
 })();
