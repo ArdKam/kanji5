@@ -170,7 +170,9 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
   function openAuth() {
     const dialog = byId("syncDialog"), content = byId("syncContent"); if (!dialog || !content) return;
     if (user) {
-      content.innerHTML = `<p>ورود با <b>${user.email || "Google"}</b></p><p id="syncStatusText" style="color:#6b7280">همگام‌سازی خودکار فعال است.</p><div style="display:flex;gap:8px"><button class="primary" id="syncNow">همگام‌سازی الآن</button><button class="secondary" id="signOut">خروج</button></div>`;
+      content.innerHTML = `<p>ورود با <b id="syncUserEmail"></b></p><p id="syncStatusText" style="color:#6b7280">همگام‌سازی خودکار فعال است.</p><div style="display:flex;gap:8px"><button class="primary" id="syncNow">همگام‌سازی الآن</button><button class="secondary" id="signOut">خروج</button></div>`;
+      const emailEl = byId("syncUserEmail");
+      if (emailEl) emailEl.textContent = user.email || "Google";
       byId("syncNow").addEventListener("click", pullAndMerge); byId("signOut").addEventListener("click", async () => { await client.auth.signOut(); dialog.close(); });
     } else {
       content.innerHTML = `<button class="primary" id="googleLogin" style="width:100%;margin-bottom:10px">ورود با Google</button><div style="text-align:center;color:#6b7280;margin:8px 0">یا</div><input id="syncEmail" type="email" placeholder="ایمیل" autocomplete="email" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;box-sizing:border-box"><input id="syncPassword" type="password" placeholder="رمز عبور" autocomplete="current-password" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;box-sizing:border-box;margin-top:8px"><div style="display:flex;gap:8px;margin-top:10px"><button class="primary" id="emailLogin">ورود</button><button class="secondary" id="emailSignup">ساخت حساب</button></div><p id="syncMsg" style="color:#6b7280;font-size:12px;margin-top:10px"></p>`;
