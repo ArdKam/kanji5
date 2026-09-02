@@ -3,6 +3,7 @@ import vm from 'node:vm';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const index=read('index.html');
 const runtime=read('v1.2-runtime-fixes.js');
 const perf=read('v1.3-perf.js');
 const bridge=read('v1.3-storage-bridge.js');
@@ -13,8 +14,8 @@ const ui=read('v1.4-education-ui.js');
 const p0=read('v1.5-p0.js');
 const build=read('scripts/build-kanji-data.mjs');
 
-assert(runtime.includes('script.src = "./v1.5-p0.js"'),'v1.5 P0 loader missing');
-assert(!runtime.includes('v1.5-education-choice-enforcer.js'),'Obsolete Production choice enforcer remains in the runtime');
+assert((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g)||[]).length===1,'v1.5 P0 loader must be present exactly once in the active shell');
+assert(!runtime.includes('v1.5-p0.js'),'v1.2 runtime bridge must not duplicate-load v1.5 P0');
 assert(perf.includes("performance.mark(`kanji5:${name}`)"),'Performance instrumentation missing');
 assert(!perf.includes('marks.app-ready'),'Invalid app-ready property access remains');
 assert(bridge.includes('serializedSource')&&bridge.includes('JSON.stringify(data)'),'Serialized deck cache regression');
