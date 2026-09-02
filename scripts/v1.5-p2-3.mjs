@@ -12,7 +12,12 @@ const saveFn=/function save\(\)\{[\s\S]*?\n\}/;if(saveFn.test(s))s=s.replace(sav
 const loadFn=/function loadSaved\(\)\{[\s\S]*?\n\}/;if(loadFn.test(s))s=s.replace(loadFn,'');
 const reviveFn=/function reviveCard\(card\)\{[\s\S]*?\n\}/;if(reviveFn.test(s))s=s.replace(reviveFn,'');
 const hydrateFn=/function hydrateCards\(\)\{[\s\S]*?\n\}/;if(hydrateFn.test(s))s=s.replace(hydrateFn,'');
-const scriptMarker='<script type="module">\nlet createEmptyCard, fsrs, Rating;';assert(s.includes(scriptMarker),'main application module marker missing');if(!s.includes('<script src="./v1.5-state.js"></script>'))s=s.replace(scriptMarker,'<script src="./v1.5-state.js"></script>'+scriptMarker);
+const hasStateLoader=()=>s.includes('<script src="./v1.5-state.js"></script>');
+if(!hasStateLoader()){
+  const moduleTag=/<script type="module">/;
+  assert(moduleTag.test(s),'main application module tag missing');
+  s=s.replace(moduleTag,'<script src="./v1.5-state.js"></script><script type="module">');
+}
 const resetRe=/function resetAll\(\)\{[\s\S]*?\n\}/;assert(resetRe.test(s),'resetAll marker missing');s=s.replace(resetRe,'function resetAll(){if(!confirm("تمام پیشرفت‌ها پاک شود؟"))return;localStorage.removeItem(STORAGE);localStorage.removeItem(CARDS_STORAGE);localStorage.removeItem(REVIEWS_STORAGE);state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();updateStats();toast("پیشرفت پاک شد.")}');
 const out=fs.readFileSync(path,'utf8');
 assert(out.includes('<script src="./v1.5-state.js"></script>'),'state module loader missing');
