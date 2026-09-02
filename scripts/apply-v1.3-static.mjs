@@ -10,7 +10,8 @@ const required = [
   './v1.3-storage-bridge.js',
   './v1.3-settings.js',
   './v1.3-p1.js',
-  './v1.3-education-runtime-fix.js'
+  './v1.3-education-runtime-fix.js',
+  './v1.3-education-choice-only.js'
 ];
 
 let out = index;
@@ -23,11 +24,11 @@ fs.writeFileSync(indexPath, out);
 
 const shell = [
   './','./index.html','./manifest.webmanifest','./icon.svg',
-  './v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.3-p1.js','./v1.3-education-runtime-fix.js',
+  './v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-education-choice-only.js',
   './vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js',
   './supabase-config.js','./supabase-sync.js'
 ];
-const sw = `const CACHE='kanji5-shell-v34';
+const sw = `const CACHE='kanji5-shell-v35';
 const DATA_CACHE='kanji5-data-v20';
 const API_CACHE='kanji5-api-v11';
 const SHELL=${JSON.stringify(shell)};
