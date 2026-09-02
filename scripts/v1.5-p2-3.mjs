@@ -5,16 +5,16 @@ const stateMarker='let state={settings:{...DEFAULTS},deck:[],cards:{},reviews:[]
 if(s.includes(stateMarker))s=s.replace(stateMarker,'let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;');
 const todayLine='const $=id=>document.getElementById(id);const todayKey=()=>new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());';
 if(s.includes(todayLine))s=s.replace(todayLine,'const $=id=>document.getElementById(id);const {todayKey,deviceId,eventId,save,loadSaved,reviveCard,hydrateCards}=window.__KANJI5_STATE__;');
-const deviceRe=/const DEVICE_KEY="kanji5-device-id";[\s\S]*?function eventId\(\)\{[^\n]+\}\n/;
+const deviceRe=/const DEVICE_KEY="kanji5-device-id";[^\n]*\nfunction deviceId\(\)[^\n]*\nfunction eventId\(\)[^\n]*\n/;
 if(deviceRe.test(s))s=s.replace(deviceRe,'');
 for(const regex of [
-  /function save\(\)\{[\s\S]*?\n\}/,
-  /function loadSaved\(\)\{[\s\S]*?\n\}/,
-  /function reviveCard\(card\)\{[\s\S]*?\n\}/,
-  /function hydrateCards\(\)\{[\s\S]*?\n\}/
+  /function save\(\)\{[^\n]*\}/,
+  /function loadSaved\(\)\{[^\n]*\}/,
+  /function reviveCard\(card\)\{[^\n]*\}/,
+  /function hydrateCards\(\)\{[^\n]*\}/
 ]){if(regex.test(s))s=s.replace(regex,'')}
 if(!s.includes('<script src="./v1.5-state.js"></script>')){assert(s.includes('<body>'),'body tag missing');s=s.replace('<body>','<body>\n<script src="./v1.5-state.js"></script>')}
-const resetRe=/function resetAll\(\)\{[\s\S]*?\n\}/;if(resetRe.test(s))s=s.replace(resetRe,'function resetAll(){if(!confirm("تمام پیشرفت‌ها پاک شود؟"))return;localStorage.removeItem(STORAGE);localStorage.removeItem(CARDS_STORAGE);localStorage.removeItem(REVIEWS_STORAGE);state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();updateStats();toast("پیشرفت پاک شد.")}');
+const resetRe=/function resetAll\(\)\{[^\n]*\}/;if(resetRe.test(s))s=s.replace(resetRe,'function resetAll(){if(!confirm("تمام پیشرفت‌ها پاک شود؟"))return;localStorage.removeItem(STORAGE);localStorage.removeItem(CARDS_STORAGE);localStorage.removeItem(REVIEWS_STORAGE);state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();updateStats();toast("پیشرفت پاک شد.")}');
 s=s.replace(/loadSaved\(\);/g,'state=loadSaved(state,DEFAULTS);');
 s=s.replace(/hydrateCards\(\);/g,'state=hydrateCards(state);');
 fs.writeFileSync(path,s);
