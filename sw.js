@@ -1,7 +1,7 @@
-const CACHE='kanji5-shell-v43';
+const CACHE='kanji5-shell-v44';
 const DATA_CACHE='kanji5-data-v24';
 const API_CACHE='kanji5-api-v14';
-const SHELL=["./","./index.html","./manifest.webmanifest","./icon.svg","./v1.3-p0.js","./v1.3-perf.js","./v1.3-storage-bridge.js","./v1.3-settings.js","./v1.4-education-migration.js","./v1.4-education-core.js","./v1.4-education-ui.js","./v1.5-p0.js","./vendor/ts-fsrs-5.4.1.mjs","./v1.2-enhancements.js","./v1.2-runtime-fixes.js","./supabase-config.js","./supabase-sync.js"];
+const SHELL=["./","./index.html","./manifest.webmanifest","./icon.svg","./v1.3-p0.js","./v1.3-perf.js","./v1.3-storage-bridge.js","./v1.3-settings.js","./v1.4-education-migration.js","./v1.4-education-core.js","./v1.4-education-ui.js","./v1.5-p0.js","./v1.5-education-choice-enforcer.js","./vendor/ts-fsrs-5.4.1.mjs","./v1.2-enhancements.js","./v1.2-runtime-fixes.js","./supabase-config.js","./supabase-sync.js"];
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
@@ -22,13 +22,12 @@ async function cacheFirst(req,name,fallback=req){
     return r;
   }catch(_){return(await c.match(fallback))||Response.error()}
 }
-async function networkFirst(req,name,fallback=req){
-  const c=await caches.open(name);
-  try{
-    const r=await fetch(req);
-    if(r.ok)await c.put(req,r.clone());
-    return r;
-  }catch(_){return(await c.match(fallback))||Response.error()}
+async function staleWhileRevalidate(req,name,fallback=req){
+  const c=await caches.open(name),hit=await c.match(fallback||req);
+  const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone()).catch(()=>{});return r}).catch(()=>null);
+  if(hit){void update;return hit}
+  const fresh=await update;
+  return fresh||Response.error();
 }
 async function apiCacheFirst(req){
   const c=await caches.open(API_CACHE),hit=await c.match(req);
@@ -52,7 +51,7 @@ self.addEventListener('fetch',e=>{
   const r=e.request;
   if(r.method!=='GET')return;
   const u=new URL(r.url);
-  if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}
+  if(r.mode==='navigate'){e.respondWith(staleWhileRevalidate(r,CACHE,'./index.html'));return}
   if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}
   if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}
   if(u.origin!==self.location.origin)return;
