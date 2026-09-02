@@ -32,6 +32,12 @@ assert(!enhanceRecallBody.includes('خوانش هدف:'),'Active Recall prompt m
 assert(enhanceRecallBody.includes('معنی این کانجی را از حافظه به یاد بیاور'),'Meaning recall prompt must require genuine retrieval');
 assert(enhanceRecallBody.includes('حداقل یک خوانش این کانجی را از حافظه به یاد بیاور'),'Reading recall prompt must require genuine retrieval');
 
+assert(p0.includes('function installTatoebaFetchDeduper()'),'Example request deduper is missing');
+assert(p0.includes('window.__KANJI5_V15_TATOEBA_DEDUP__'),'Example request deduper must be installed at most once');
+assert(p0.includes("url.startsWith('https://api.tatoeba.org/v1/sentences')"),'Deduper must be scoped to the Tatoeba sentence endpoint');
+assert(p0.includes('const pending=inflight.get(url)'),'Duplicate concurrent requests must reuse the same in-flight promise');
+assert(p0.includes('response.clone()'),'Each consumer must receive its own readable Response body');
+
 const revealIndex=p0.indexOf('function revealAfterUnknown(gate)');
 const revealBody=p0.slice(revealIndex,p0.indexOf('function addDontKnowRecall',revealIndex));
 assert(revealBody.includes("answer.classList.add('show')"),'Reveal helper must show the answer content');
@@ -40,4 +46,4 @@ assert(revealBody.includes("ratings.style.display='grid'"),'Reveal helper must r
 assert(revealBody.includes("ratings.classList.add('show')"),'Reveal helper must restore rating visibility');
 assert(revealBody.includes('gate.remove()'),'Reveal helper must remove the recall gate');
 
-console.log('Kanji 5 v1.5 Active Recall reveal + anti-leak checks passed.');
+console.log('Kanji 5 v1.5 Active Recall reveal + anti-leak + request dedupe checks passed.');
