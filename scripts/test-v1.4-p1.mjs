@@ -65,13 +65,13 @@ const indexedPool=core.candidatePool(distractorTarget,[...distractorCandidates],
 assert(Array.isArray(indexedPool)&&indexedPool.length>0,'Indexed distractor candidate pool is empty');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
 assert(sync.includes('distractors')&&sync.includes('stage')&&sync.includes('educationEvidence'),'Sync educational metadata missing');
-assert(migration.includes('schemaVersion=1')&&migration.includes('kanji5-v1.4-education-meta'),'Migration missing');
+assert(migration.includes('schemaVersion=VERSION')&&migration.includes("const KEY='kanji5-v1.2-knowledge',META='kanji5-v1.4-education-meta',VERSION=1"),'Migration version/schema contract missing');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses canonical education core');
 assert(ui.includes('fetchContextSentences')&&ui.includes('api.tatoeba.org/v1/sentences'),'Context sentence API wiring missing');
 assert(ui.includes('edu.sentence.text.replaceAll(item.character'),'Context exercise does not blank the target Kanji');
 assert(ui.includes('edu.sentence.english'),'Context exercise is missing English translation');
 assert(!ui.includes('v14EduProductionInput'),'Typed production UI must be replaced by MCQ in v1.5');
-assert(ui.includes("edu.mode==='production'&&" )||ui.includes('edu.mode===\'production\''),'Production MCQ flow missing');
+assert(ui.includes("prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.'")&&ui.includes('renderChoices(chooseChoices(item))'),'Production MCQ flow missing');
 assert(ui.includes('context')&&ui.includes('vocabulary'),'Vocabulary/context missing');
 assert(ui.includes('تمرین بعدی'),'Next exercise flow missing');
 assert(ui.includes('CORE.chooseDistractors'),'UI does not use canonical smart distractors');
