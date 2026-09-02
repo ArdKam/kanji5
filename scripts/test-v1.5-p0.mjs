@@ -9,9 +9,9 @@ const index=read('index.html'),runtime=read('v1.2-runtime-fixes.js'),sw=read('sw
 
 const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
 for(const src of required)assert(count(index,`<script src="${src}"></script>` )===1,`${src} must be wired exactly once`);
-assert(runtime.includes('script.src = "./v1.5-p0.js"'),'v1.5 P0 runtime must be loaded explicitly by the active runtime bridge');
-assert(runtime.includes('data-kanji5-v15-p0="1"'),'v1.5 P0 loader must be uniquely marked');
-assert(!runtime.includes('v1.5-education-choice-enforcer.js'),'Obsolete Production choice enforcer remains in the active runtime');
+assert(count(index,'<script src="./v1.5-p0.js"></script>')===1,'v1.5 P0 runtime must be loaded explicitly exactly once by the active HTML runtime');
+assert(!runtime.includes('v1.5-p0.js'),'v1.2 runtime bridge must not duplicate-load v1.5 P0');
+assert(!index.includes('v1.5-education-choice-enforcer.js')&&!runtime.includes('v1.5-education-choice-enforcer.js'),'Obsolete Production choice enforcer remains in the active runtime');
 for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
 assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
