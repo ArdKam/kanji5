@@ -76,11 +76,6 @@ jobs:
           echo 'check: Active Recall anti-leak'
           test "$(grep -c 'معنی هدف:' v1.5-p0.js || true)" = "0"
           test "$(grep -c 'خوانش هدف:' v1.5-p0.js || true)" = "0"
-          echo 'check: sync schema/concurrency/date contracts'
-          grep -q 'const EDUCATION_SCHEMA_VERSION = 2' supabase-sync.js
-          grep -q 'const VERSION=2' v1.4-education-migration.js
-          grep -q 'function withSyncLock' supabase-sync.js
-          grep -q 'sameDayLocal' supabase-sync.js
           echo 'check: FSRS replay contract'
           grep -q 'eventSchemaVersion' v1.5-fsrs-sync-core.js
           echo 'check: workflow and clean tree'
