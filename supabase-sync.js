@@ -1,3 +1,4 @@
+import { mergeModeStats as mergeEducationModeStats, mergeKnowledgeEntry as mergeEducationKnowledgeEntry, mergeKnowledge as mergeEducationKnowledge } from './v1.5-education-sync-core.js';
 const V12 = "kanji5-v1.2";
 const STORAGE_KEY = "kanji5-v1";
 const KNOWLEDGE_KEY = `${V12}-knowledge`;
@@ -69,42 +70,9 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
     merged.examples = {};
     return merged;
   };
-  const mergeModeStats = (local, remote) => {
-    const l = local && typeof local === "object" ? local : null;
-    const r = remote && typeof remote === "object" ? remote : null;
-    if (!l) return r || { attempts: 0, correct: 0, lastAt: "" };
-    if (!r) return l;
-    const la = Math.max(0, Number(l.attempts) || 0), ra = Math.max(0, Number(r.attempts) || 0);
-    const lc = Math.min(Math.max(0, Number(l.correct) || 0), la), rc = Math.min(Math.max(0, Number(r.correct) || 0), ra);
-    const useRemote = ra > la || (ra === la && rc > lc) || (ra === la && rc === lc && String(r.lastAt || "") > String(l.lastAt || ""));
-    return { attempts: Math.max(la, ra), correct: Math.max(lc, rc), lastAt: useRemote ? String(r.lastAt || l.lastAt || "") : String(l.lastAt || r.lastAt || "") };
-  };
-  const mergeKnowledgeEntry = (localEntry, remoteEntry) => {
-    const l = localEntry && typeof localEntry === "object" ? localEntry : {};
-    const r = remoteEntry && typeof remoteEntry === "object" ? remoteEntry : {};
-    const out = { ...l, ...r, schemaVersion: EDUCATION_SCHEMA_VERSION };
-    for (const mode of EDUCATION_MODES) out[mode] = mergeModeStats(l[mode], r[mode]);
-    const ld = l.distractors || {}, rd = r.distractors || {};
-    out.distractors = { ...ld };
-    for (const [key, value] of Object.entries(rd)) out.distractors[key] = Math.max(Number(ld[key]) || 0, Number(value) || 0);
-    const timestampFields = ["createdAt", "exposedAt", "learningAt", "reinforcingAt", "masteredAt", "lastPromptAt"];
-    for (const field of timestampFields) {
-      const a = String(l[field] || ""), b = String(r[field] || "");
-      if (a || b) out[field] = a >= b ? (a || b) : b;
-    }
-    const stageRank = { new: 0, exposed: 1, learning: 2, reinforcing: 3, mastered: 4 };
-    out.stage = stageRank[r.stage] > stageRank[l.stage] ? r.stage : (l.stage || r.stage || "new");
-    const le = l.educationEvidence && typeof l.educationEvidence === "object" ? l.educationEvidence : {};
-    const re = r.educationEvidence && typeof r.educationEvidence === "object" ? r.educationEvidence : {};
-    const leAt = String(le.updatedAt || ""), reAt = String(re.updatedAt || "");
-    out.educationEvidence = reAt > leAt ? { ...le, ...re } : { ...re, ...le };
-    return out;
-  };
-  const mergeKnowledge = (local, remote) => {
-    const out = structuredClone(local || {});
-    for (const [ch, rv] of Object.entries(remote || {})) out[ch] = mergeKnowledgeEntry(out[ch], rv);
-    return out;
-  };
+  const mergeModeStats = (local, remote) => mergeEducationModeStats(local, remote);
+  const mergeKnowledgeEntry = (localEntry, remoteEntry) => mergeEducationKnowledgeEntry(localEntry, remoteEntry);
+  const mergeKnowledge = (local, remote) => mergeEducationKnowledge(local, remote);
   const writeLocal = payload => {
     if (payload.state) localStorage.setItem(STORAGE_KEY, json(payload.state));
     localStorage.setItem(KNOWLEDGE_KEY, json(payload.knowledge || {}));
