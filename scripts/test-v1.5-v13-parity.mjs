@@ -18,6 +18,9 @@ assert(!runtime.includes('v1.5-education-choice-enforcer.js'),'Obsolete Producti
 assert(perf.includes("performance.mark(`kanji5:${name}`)"),'Performance instrumentation missing');
 assert(!perf.includes('marks.app-ready'),'Invalid app-ready property access remains');
 assert(bridge.includes('serializedSource')&&bridge.includes('JSON.stringify(data)'),'Serialized deck cache regression');
+assert(bridge.includes("const compactState=value=>")&&bridge.includes('delete state.deck'),'Persisted app state must not duplicate the immutable deck');
+assert(bridge.includes('state.reviews.length>5000')&&bridge.includes('slice(-5000)'),'Persisted review history must be capped');
+assert(bridge.includes("if(k===deckKey&&typeof v==='string'&&v.length)"),'Persistent deck writes must remain supported');
 assert(sw.includes("const CACHE='kanji5-shell-v45'"),'Shell cache was not invalidated after the Production renderer refactor');
 assert(sw.includes('async function staleWhileRevalidate'),'Navigation is not stale-while-revalidate');
 assert(sw.includes("if(r.mode==='navigate'){e.respondWith(staleWhileRevalidate"),'Navigation still bypasses stale-while-revalidate');
