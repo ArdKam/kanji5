@@ -38,12 +38,20 @@ assert(p0.includes("url.startsWith('https://api.tatoeba.org/v1/sentences')"),'De
 assert(p0.includes('const pending=inflight.get(url)'),'Duplicate concurrent requests must reuse the same in-flight promise');
 assert(p0.includes('response.clone()'),'Each consumer must receive its own readable Response body');
 
+assert(p0.includes('function installAccessibilityEnhancements()'),'Accessibility enhancement installer is missing');
+assert(p0.includes('button:focus-visible,input:focus-visible'),'Keyboard focus visibility is missing');
+assert(p0.includes('@media(prefers-reduced-motion:reduce)'),'Reduced-motion support is missing');
+assert(p0.includes('function syncEducationBusyState()'),'Education busy-state helper is missing');
+assert(p0.includes("setAttribute('aria-busy',busy?'true':'false')"),'Education panel must expose async busy state');
+assert(p0.includes("empty.setAttribute('role','status')"),'Education loading message must be announced as status');
+
 const revealIndex=p0.indexOf('function revealAfterUnknown(gate)');
 const revealBody=p0.slice(revealIndex,p0.indexOf('function addDontKnowRecall',revealIndex));
 assert(revealBody.includes("answer.classList.add('show')"),'Reveal helper must show the answer content');
 assert(revealBody.includes("answerBox.classList.add('show')"),'Reveal helper must show the complete answer box');
 assert(revealBody.includes("ratings.style.display='grid'"),'Reveal helper must restore rating controls');
 assert(revealBody.includes("ratings.classList.add('show')"),'Reveal helper must restore rating visibility');
+assert(revealBody.includes("ratings.querySelector('button')?.focus()"),'Reveal must return keyboard focus to the rating controls');
 assert(revealBody.includes('gate.remove()'),'Reveal helper must remove the recall gate');
 
-console.log('Kanji 5 v1.5 Active Recall reveal + anti-leak + request dedupe checks passed.');
+console.log('Kanji 5 v1.5 Active Recall + anti-leak + request dedupe + accessibility checks passed.');
