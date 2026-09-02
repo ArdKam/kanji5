@@ -1,0 +1,14 @@
+{
+  "name": "kanji5",
+  "private": true,
+  "version": "1.5.0",
+  "description": "Kanji 5 end-to-end test harness",
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.0"
+  }
+}
