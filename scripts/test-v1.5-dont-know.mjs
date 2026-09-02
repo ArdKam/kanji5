@@ -11,7 +11,7 @@ assert(has(p0,/answer\.classList\.add\(\s*["']show["']\s*\)/), 'Unknown recall m
 assert(has(p0,/answerBox\.classList\.add\(\s*["']show["']\s*\)/), 'Unknown recall must reveal the answer box');
 assert(has(p0,/ratings\.classList\.add\(\s*["']show["']\s*\)/), 'Unknown recall must return to the normal review-rating state');
 assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'Unknown recall must record an educational outcome');
-assert(has(p0,/stats\.score\+=\s*\.25/), 'Unknown recall must have a weaker educational weight than a correct recall');
+assert(has(p0,/stats\.score\+=\s*(?:\.25|0\.25)/), 'Unknown recall must have a weaker educational weight than a correct recall');
 assert(!p0.includes('v15DontKnowReview'), '“Don’t know” must not be a review-rating control');
 assert(!p0.includes('.rate.again'), 'Active Recall “don’t know” must not directly trigger FSRS Again');
 
