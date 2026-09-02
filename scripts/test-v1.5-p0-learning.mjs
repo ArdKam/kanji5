@@ -14,8 +14,8 @@ const sw = read('sw.js');
 const coreSource = read('v1.4-education-core.js');
 
 assert(index.includes('./v1.2-runtime-fixes.js'), 'Active shell runtime is missing');
-assert(runtime.includes('script.src = "./v1.5-p0.js"'), 'Active runtime bridge must load v1.5 P0');
-assert(runtime.includes('data-kanji5-v15-p0="1"'), 'P0 loader marker is missing');
+assert((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g)||[]).length===1, 'Active shell must load v1.5 P0 exactly once');
+assert(!runtime.includes('v1.5-p0.js'), 'v1.2 runtime bridge must not duplicate-load v1.5 P0');
 assert(!runtime.includes('v1.5-education-choice-enforcer.js'), 'Obsolete Production choice enforcer remains in the active runtime');
 assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enrichment must not observe the entire document body');
 assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall back to the document body');
