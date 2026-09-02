@@ -3,6 +3,8 @@ import { mergeReviewEvents, replayCards } from './v1.5-fsrs-sync-core.js';
 import { fsrs } from './vendor/ts-fsrs-5.4.1.mjs';
 const V12 = "kanji5-v1.2";
 const STORAGE_KEY = "kanji5-v1";
+const CARDS_STORAGE_KEY = "kanji5-v1-cards";
+const REVIEWS_STORAGE_KEY = "kanji5-v1-reviews";
 const KNOWLEDGE_KEY = `${V12}-knowledge`;
 const SYNC_META_KEY = `${V12}-sync-meta`;
 const POLL_MS = 15000;
@@ -25,12 +27,13 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
 
   const byId = id => document.getElementById(id);
   const safeJSON = (raw, fallback) => { try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; } };
-  const localPayload = () => ({
-    state: safeJSON(localStorage.getItem(STORAGE_KEY), null),
-    knowledge: safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {}),
-    deckVersion: localStorage.getItem("kanji5-deck-version") || null,
-    educationSchemaVersion: EDUCATION_SCHEMA_VERSION
-  });
+  const localPayload = () => {
+    const persisted = safeJSON(localStorage.getItem(STORAGE_KEY), null);
+    const cards = safeJSON(localStorage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});
+    const reviews = safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);
+    const state = persisted ? { ...persisted, cards, reviews, queue: [], current: null, revealed: false, examples: {} } : null;
+    return { state, knowledge: safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {}), deckVersion: localStorage.getItem("kanji5-deck-version") || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
+  };
   const json = value => JSON.stringify(value);
   const reviewsFor = state => Array.isArray(state?.reviews) ? state.reviews : [];
   const stablePayload = payload => ({ state: payload.state || null, knowledge: payload.knowledge || {}, deckVersion: payload.deckVersion || null, educationSchemaVersion: payload.educationSchemaVersion || EDUCATION_SCHEMA_VERSION });
@@ -76,7 +79,12 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
   const mergeKnowledgeEntry = (localEntry, remoteEntry) => mergeEducationKnowledgeEntry(localEntry, remoteEntry);
   const mergeKnowledge = (local, remote) => mergeEducationKnowledge(local, remote);
   const writeLocal = payload => {
-    if (payload.state) localStorage.setItem(STORAGE_KEY, json(payload.state));
+    if (payload.state) {
+      const state = payload.state;
+      localStorage.setItem(STORAGE_KEY, json({ settings: state.settings, today: state.today, todayNew: state.todayNew, todayReviewCount: state.todayReviewCount, goalCelebrated: state.goalCelebrated, streak: state.streak }));
+      localStorage.setItem(CARDS_STORAGE_KEY, json(state.cards || {}));
+      localStorage.setItem(REVIEWS_STORAGE_KEY, json(state.reviews || []));
+    }
     localStorage.setItem(KNOWLEDGE_KEY, json(payload.knowledge || {}));
     if (payload.deckVersion) localStorage.setItem("kanji5-deck-version", payload.deckVersion);
     localStorage.setItem(SYNC_META_KEY, json({ educationSchemaVersion: EDUCATION_SCHEMA_VERSION, syncedAt: new Date().toISOString() }));
