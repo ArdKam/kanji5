@@ -10,6 +10,7 @@ on:
       - 'scripts/**'
       - 'v1.3-*.js'
       - 'v1.2-*.js'
+      - 'supabase-sync.js'
       - 'vendor/ts-fsrs-5.4.1.mjs'
       - 'sw.js'
       - 'manifest.webmanifest'
@@ -45,10 +46,11 @@ jobs:
           node --check v1.3-storage-bridge.js
           node --check v1.3-settings.js
           node --check v1.3-education-runtime-fix.js
+          node --check supabase-sync.js
           node --check sw.js
-      - name: Validate education architecture
+      - name: Validate education and sync architecture
         run: |
-          node -e "const fs=require('fs'); const p=fs.readFileSync('v1.3-p1.js','utf8'); const g=fs.readFileSync('v1.3-education-runtime-fix.js','utf8'); const h=fs.readFileSync('index.html','utf8'); const w=fs.readFileSync('sw.js','utf8'); if(h.includes('./v1.3-smart-distractors.js')||w.includes('./v1.3-smart-distractors.js')) throw new Error('Obsolete smart distractor wiring remains'); if(!p.includes('function scoreDistractor')||!p.includes('function chooseChoices')) throw new Error('Canonical smart distractor logic missing'); if(!p.includes('distractors')) throw new Error('Personal distractor history missing'); if(!p.includes('sharedReading')||!p.includes('sharedMeaning')||!p.includes('strokeScore')) throw new Error('Smart distractor scoring missing'); if(!p.includes('function mastery(')||!p.includes('mastery(target.character')) throw new Error('Difficulty calibration missing'); if(!g.includes('__KANJI5_P0_DATA_PROMISE')||!g.includes('stopPropagation')||!g.includes('waitForEducation')) throw new Error('Education dataset guard is not installed'); if(!h.includes('./v1.3-education-runtime-fix.js')) throw new Error('Education runtime guard missing from index.html'); if(!w.includes('./v1.3-education-runtime-fix.js')) throw new Error('Education runtime guard missing from service worker shell');"
+          node -e "const fs=require('fs'); const p=fs.readFileSync('v1.3-p1.js','utf8'); const g=fs.readFileSync('v1.3-education-runtime-fix.js','utf8'); const b=fs.readFileSync('v1.3-storage-bridge.js','utf8'); const s=fs.readFileSync('supabase-sync.js','utf8'); const h=fs.readFileSync('index.html','utf8'); const w=fs.readFileSync('sw.js','utf8'); if(h.includes('./v1.3-smart-distractors.js')||w.includes('./v1.3-smart-distractors.js')) throw new Error('Obsolete smart distractor wiring remains'); if(!p.includes('function scoreDistractor')||!p.includes('function chooseChoices')) throw new Error('Canonical smart distractor logic missing'); if(!p.includes('distractors')) throw new Error('Personal distractor history missing'); if(!p.includes('sharedReading')||!p.includes('sharedMeaning')||!p.includes('strokeScore')) throw new Error('Smart distractor scoring missing'); if(!p.includes('function mastery(')||!p.includes('mastery(target.character')) throw new Error('Difficulty calibration missing'); if(!g.includes('__KANJI5_P0_DATA_PROMISE')||!g.includes('stopPropagation')||!g.includes('waitForEducation')) throw new Error('Education dataset guard is not installed'); if(!h.includes('./v1.3-education-runtime-fix.js')) throw new Error('Education runtime guard missing from index.html'); if(!w.includes('./v1.3-education-runtime-fix.js')) throw new Error('Education runtime guard missing from service worker shell'); if(!b.includes('serializedSource')||!b.includes('JSON.stringify(data)')) throw new Error('Storage bridge is not using serialized deck caching'); if(!s.includes('for (const mode of allModes)')||!s.includes('rv?.distractors')||!s.includes('remoteToday')) throw new Error('Sync merge does not cover v1.3 education state and daily state');"
       - name: Smoke test v1.3
         run: node scripts/smoke-test-v1.3.mjs
       - name: Commit generated build
