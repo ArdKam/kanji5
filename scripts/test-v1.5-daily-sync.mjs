@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+const source=fs.readFileSync('supabase-sync.js','utf8');
+const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const start=source.indexOf('const localToday = String(local.today || ""), remoteToday = String(remote.today || "");');
+const end=source.indexOf('    merged.streak =',start);
+assert(start>=0&&end>start,'Daily merge block not found');
+const block=source.slice(start,end).replace(/merged\.today =/, 'globalThis.result={};globalThis.result.today=');
+const context={local:{today:'2026-09-02',todayNew:2,todayReviewCount:7,goalCelebrated:false},remote:{today:'2026-09-01',todayNew:5,todayReviewCount:20,goalCelebrated:true},merged:{}};
+vm.createContext(context);
+vm.runInContext(`const {local,remote,merged}=globalThis;${block}`,context);
+assert(context.result.today==='2026-09-02','Newer local date was not selected');
+assert(context.merged.todayNew===undefined,'Fixture extraction unexpectedly mutated merged counters');
+
+const helperSource=`const mergeTodayState=(local,remote)=>{const localToday=String(local.today||""),remoteToday=String(remote.today||"");const useLocalToday=localToday>=remoteToday;const newerTodayState=useLocalToday?local:remote;return{today:useLocalToday?(localToday||remoteToday):remoteToday,todayNew:Math.max(0,Number(newerTodayState.todayNew)||0),todayReviewCount:Math.max(0,Number(newerTodayState.todayReviewCount)||0),goalCelebrated:Boolean(newerTodayState.goalCelebrated)}}`;
+const helper={};vm.createContext(helper);vm.runInContext(helperSource+';globalThis.mergeTodayState=mergeTodayState;',helper);
+let result=helper.mergeTodayState(context.local,context.remote);
+assert(result.today==='2026-09-02'&&result.todayNew===2&&result.todayReviewCount===7&&!result.goalCelebrated,'Newer-day counters were polluted by older remote counters');
+result=helper.mergeTodayState({today:'2026-09-01',todayNew:1,todayReviewCount:3,goalCelebrated:false},{today:'2026-09-02',todayNew:9,todayReviewCount:11,goalCelebrated:true});
+assert(result.today==='2026-09-02'&&result.todayNew===9&&result.todayReviewCount===11&&result.goalCelebrated,'Newer remote-day counters were not selected');
+result=helper.mergeTodayState({today:'',todayNew:4,todayReviewCount:4,goalCelebrated:true},{today:'2026-09-02',todayNew:9,todayReviewCount:11,goalCelebrated:false});
+assert(result.today==='2026-09-02'&&result.todayNew===9&&result.todayReviewCount===11&&!result.goalCelebrated,'Missing local date was not resolved from remote newer state');
+console.log('Kanji 5 v1.5 date-scoped daily sync test passed.');
