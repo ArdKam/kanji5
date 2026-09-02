@@ -23,6 +23,15 @@ assert(recordRecallBody.includes("recordFocusedRecall(character,mode,focus,corre
 assert(recordRecallBody.includes("result.className=correct?'v12-recall-result good':'v12-recall-result bad'"),'Normal recall must show a visible correct/incorrect result');
 assert(recordRecallBody.includes('revealAfterUnknown(gate)'), 'Normal recall submission must reveal the underlying Kanji answer and rating controls');
 
+const enhanceRecallMatch=p0.match(/function enhanceRecall\(\)\{([\s\S]*?)\}\nfunction recordRecall/);
+assert(enhanceRecallMatch,'Active Recall focus enhancer is missing');
+const enhanceRecallBody=enhanceRecallMatch[1];
+assert(enhanceRecallBody.includes('gate.dataset.v15Focus=focus.raw'),'Focused component must remain available internally for grading');
+assert(!enhanceRecallBody.includes('معنی هدف:'),'Active Recall prompt must not expose the target meaning');
+assert(!enhanceRecallBody.includes('خوانش هدف:'),'Active Recall prompt must not expose the target reading');
+assert(enhanceRecallBody.includes('معنی این کانجی را از حافظه به یاد بیاور'),'Meaning recall prompt must require genuine retrieval');
+assert(enhanceRecallBody.includes('حداقل یک خوانش این کانجی را از حافظه به یاد بیاور'),'Reading recall prompt must require genuine retrieval');
+
 const revealIndex=p0.indexOf('function revealAfterUnknown(gate)');
 const revealBody=p0.slice(revealIndex,p0.indexOf('function addDontKnowRecall',revealIndex));
 assert(revealBody.includes("answer.classList.add('show')"),'Reveal helper must show the answer content');
@@ -31,4 +40,4 @@ assert(revealBody.includes("ratings.style.display='grid'"),'Reveal helper must r
 assert(revealBody.includes("ratings.classList.add('show')"),'Reveal helper must restore rating visibility');
 assert(revealBody.includes('gate.remove()'),'Reveal helper must remove the recall gate');
 
-console.log('Kanji 5 v1.5 Active Recall reveal checks passed.');
+console.log('Kanji 5 v1.5 Active Recall reveal + anti-leak checks passed.');
