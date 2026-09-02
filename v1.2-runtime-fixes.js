@@ -15,7 +15,9 @@
     const app = document.getElementById("app");
     if (!loading || !app || !app.hidden) return;
     realStartupError = true;
+    loading.classList.add("v13-real-error");
     loading.hidden = false;
+    loading.removeAttribute("aria-hidden");
     loading.style.display = "flex";
     loading.innerHTML = '<div style="text-align:center"><div style="font-size:24px">⚠️</div><div style="font-weight:800;margin:6px 0">اجرای برنامه با مشکل مواجه شد.</div><div style="color:#6b7280;font-size:12px;margin:0 0 8px">لطفاً صفحه را دوباره بارگذاری کنید.</div><button class="primary" id="v12RuntimeRetry">تلاش دوباره</button></div>';
     document.getElementById("v12RuntimeRetry")?.addEventListener("click", () => location.reload());
