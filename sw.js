@@ -38,15 +38,7 @@ async function apiCacheFirst(req){
     return r;
   }catch(_){return(await c.match(req))||Response.error()}
 }
-async function dynamicSameOrigin(req){
-  const hit=await caches.match(req);
-  if(hit)return hit;
-  try{
-    const r=await fetch(req);
-    if(r.ok){const clone=r.clone();caches.open(CACHE).then(c=>c.put(req,clone)).catch(()=>{});}
-    return r;
-  }catch(_){return Response.error()}
-}
+async function dynamicSameOrigin(req){try{return await fetch(req)}catch(_){return Response.error()}}
 self.addEventListener('fetch',e=>{
   const r=e.request;
   if(r.method!=='GET')return;
