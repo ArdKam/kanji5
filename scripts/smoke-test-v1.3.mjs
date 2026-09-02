@@ -14,6 +14,7 @@ const p1 = fs.readFileSync('v1.3-p1.js','utf8');
 const perf = fs.readFileSync('v1.3-perf.js','utf8');
 const p0 = fs.readFileSync('v1.3-p0.js','utf8');
 const guard = fs.readFileSync('v1.3-education-runtime-fix.js','utf8');
+const bridge = fs.readFileSync('v1.3-storage-bridge.js','utf8');
 const fsrs = fs.readFileSync('vendor/ts-fsrs-5.4.1.mjs','utf8');
 
 const requiredScripts = [
@@ -31,6 +32,8 @@ for (const src of requiredScripts) {
 if (html.indexOf('./v1.3-p0.js') > html.indexOf('<script type="module">')) throw new Error('p0 must load before the main module');
 if (sw.includes('res.text()') || sw.includes("replace('<script")) throw new Error('Service worker must not rewrite HTML at request time');
 if (!sw.includes('./vendor/ts-fsrs-5.4.1.mjs')) throw new Error('Local FSRS bundle missing from service-worker shell');
+if (!sw.includes('kanji5-shell-v34')) throw new Error('Service-worker shell cache version regressed');
+if (!sw.includes('staleWhileRevalidate')) throw new Error('Navigation must use stale-while-revalidate caching');
 if (!p0.includes('window.__KANJI5_P0_DATA_PROMISE')) throw new Error('P0 dataset promise missing');
 if (p1.includes('a.includes(c)||c.includes(a)')) throw new Error('Meaning grading still uses unsafe bidirectional substring matching');
 if (perf.includes('marks.app-ready')) throw new Error('Invalid app-ready property access remains');
@@ -43,13 +46,16 @@ if (!p1.includes('function mastery(') || !p1.includes('mastery(target.character'
 if (!guard.includes('__KANJI5_P0_DATA_PROMISE')) throw new Error('Education dataset guard is not connected to P0');
 if (!guard.includes('stopPropagation')) throw new Error('Education guard does not prevent premature tab initialization');
 if (!guard.includes(".v13-tab[data-tab=\"education\"]")) throw new Error('Education tab selector missing from guard');
+if (!guard.includes('v13-edu-choice') || !guard.includes('v13EduSubmit')) throw new Error('Choice-mode submit cleanup is missing');
+if (!bridge.includes('serializedSource') || !bridge.includes('JSON.stringify(data)')) throw new Error('Storage bridge is not using serialized deck caching');
+if (fs.existsSync('scripts/build-kanji-data.mjs')) throw new Error('Broken raw-dataset build script should not be present');
 if (fsrs.length < 30000 || /esm\.sh/i.test(fsrs)) throw new Error('Local FSRS bundle looks invalid');
 
-for (const file of ['v1.3-production-ui.js','v1.3-education-v2.js','v1.3-dont-know.js','v1.3-smart-distractors.js']) {
+for (const file of ['v1.3-production-ui.js','v1.3-education-v2.js','v1.3-dont-know.js','v1.3-smart-distractors.js','scripts/apply-smart-distractors.mjs']) {
   if (fs.existsSync(file)) throw new Error(`Dead v1.3 file should be removed: ${file}`);
 }
 
-for (const source of [p1,perf,p0,guard,sw]) {
+for (const source of [p1,perf,p0,guard,sw,bridge]) {
   try { new vm.Script(source); } catch (e) { throw new Error(`Syntax error: ${e.message}`); }
 }
 
