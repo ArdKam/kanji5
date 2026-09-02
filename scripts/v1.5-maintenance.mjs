@@ -46,9 +46,17 @@ const patchInitializationSharing=()=>{
   index=index.replace(oldFsrs,newFsrs);
   fs.writeFileSync(path,index);
 };
+const patchDailyCounterMerge=()=>{
+  const path='supabase-sync.js';let sync=fs.readFileSync(path,'utf8');
+  const old='    const localToday = String(local.today || ""), remoteToday = String(remote.today || "");\n    merged.today = localToday >= remoteToday ? (localToday || remoteToday) : remoteToday;\n    merged.todayNew = Math.max(local.todayNew || 0, remote.todayNew || 0);\n    merged.todayReviewCount = Math.max(local.todayReviewCount || 0, remote.todayReviewCount || 0);\n    merged.goalCelebrated = Boolean(local.goalCelebrated || remote.goalCelebrated);';
+  const next='    const localToday = String(local.today || ""), remoteToday = String(remote.today || "");\n    const useLocalToday = localToday >= remoteToday;\n    const newerTodayState = useLocalToday ? local : remote;\n    merged.today = useLocalToday ? (localToday || remoteToday) : remoteToday;\n    merged.todayNew = Math.max(0, Number(newerTodayState.todayNew) || 0);\n    merged.todayReviewCount = Math.max(0, Number(newerTodayState.todayReviewCount) || 0);\n    merged.goalCelebrated = Boolean(newerTodayState.goalCelebrated);';
+  assert(sync.includes(old),'Daily counter merge block changed; refusing unsafe replacement');
+  sync=sync.replace(old,next);fs.writeFileSync(path,sync);
+};
 
 if(stage==='p0-3'){patchRecallCleanup();patchEducationTestApi()}
 if(stage==='p0-4'){patchInitializationSharing()}
+if(stage==='p1-3'){patchDailyCounterMerge()}
 if(stage.startsWith('p0-1-p0-2')){
   patchRecallCleanup();
   if(stage==='p0-1-p0-2-p0-loader'){
@@ -78,5 +86,13 @@ if(stage==='p0-4'){
   assert(verifyIndex.includes('const shared=window.__KANJI5_P0_FSRS_PROMISE'),'Main FSRS loader does not consume shared P0 promise');
   assert(verifyIndex.includes('const res=await fetch(DATA_URL,{cache:"force-cache"})'),'Dataset network fallback disappeared');
   assert(verifyIndex.includes('):import(FSRS_URL)'),'FSRS fallback import disappeared');
+}
+if(stage==='p1-3'){
+  const sync=fs.readFileSync('supabase-sync.js','utf8');
+  assert(sync.includes('const useLocalToday = localToday >= remoteToday;'),'Daily merge date selection missing');
+  assert(sync.includes('const newerTodayState = useLocalToday ? local : remote;'),'Daily counters are not tied to the newer date');
+  assert(sync.includes('Number(newerTodayState.todayNew)'),'Daily new counter still merges across dates');
+  assert(sync.includes('Number(newerTodayState.todayReviewCount)'),'Daily review counter still merges across dates');
+  assert(sync.includes('Boolean(newerTodayState.goalCelebrated)'),'Goal celebration is not scoped to newer date');
 }
 console.log(`Maintenance ${stage} passed.`);
