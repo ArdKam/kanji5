@@ -64,6 +64,7 @@ const core={
   gradeMeaning:()=>({correct:false,quality:'wrong'}),gradeReading:()=>({correct:false,quality:'wrong'}),ensureEntry:(k)=>k
 };
 const window={__KANJI5_EDU_CORE__:core,__KANJI5_P0_DATA__:[target,...distractors]};
+window.__KANJI5_P0_DATA=[target,...distractors];
 const context={window,document,localStorage,console,setTimeout:fn=>fn(),Math,Date,fetch:async()=>{throw new Error('unexpected fetch')}};
 vm.createContext(context);
 vm.runInContext(source,context,{filename:'v1.4-education-ui.js'});
