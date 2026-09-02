@@ -57,7 +57,8 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
       reviewMap.set(key, r);
     }
     merged.reviews = [...reviewMap.values()].sort((a, b) => String(a.at).localeCompare(String(b.at))).slice(-5000);
-    merged.today = local.today || remote.today || "";
+    const localToday = String(local.today || ""), remoteToday = String(remote.today || "");
+    merged.today = localToday >= remoteToday ? (localToday || remoteToday) : remoteToday;
     merged.todayNew = Math.max(local.todayNew || 0, remote.todayNew || 0);
     merged.todayReviewCount = Math.max(local.todayReviewCount || 0, remote.todayReviewCount || 0);
     merged.goalCelebrated = Boolean(local.goalCelebrated || remote.goalCelebrated);
