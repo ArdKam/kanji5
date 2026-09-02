@@ -1,0 +1,16 @@
+(()=>{
+'use strict';
+if(window.__KANJI5_STATE__)return;
+const DEVICE_KEY='kanji5-device-id',STORAGE='kanji5-v1',CARDS_STORAGE='kanji5-v1-cards',REVIEWS_STORAGE='kanji5-v1-reviews';
+const defaults={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
+const todayKey=()=>new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+function deviceId(){try{let id=localStorage.getItem(DEVICE_KEY);if(!id){id=crypto.randomUUID?.()||`device-${Date.now()}-${Math.random().toString(36).slice(2)}`;localStorage.setItem(DEVICE_KEY,id)}return id}catch(_){return'legacy'}}
+function eventId(){return crypto.randomUUID?.()||`review-${Date.now()}-${Math.random().toString(36).slice(2)}`}
+function createInitial(overrides={}){return{settings:{...defaults,...(overrides.settings||{})},deck:Array.isArray(overrides.deck)?overrides.deck:[],cards:overrides.cards&&typeof overrides.cards==='object'?overrides.cards:{},reviews:Array.isArray(overrides.reviews)?overrides.reviews:[],today:overrides.today||'',todayNew:Number(overrides.todayNew)||0,todayReviewCount:Number(overrides.todayReviewCount)||0,goalCelebrated:Boolean(overrides.goalCelebrated),queue:Array.isArray(overrides.queue)?overrides.queue:[],current:overrides.current||null,revealed:Boolean(overrides.revealed),examples:overrides.examples&&typeof overrides.examples==='object'?overrides.examples:{},streak:{current:0,longest:0,lastActiveDate:null,...(overrides.streak||{})}}}
+function save(state){const metadata={settings:state.settings,today:state.today,todayNew:state.todayNew,todayReviewCount:state.todayReviewCount,goalCelebrated:state.goalCelebrated,streak:state.streak};localStorage.setItem(STORAGE,JSON.stringify(metadata));localStorage.setItem(CARDS_STORAGE,JSON.stringify(state.cards||{}));localStorage.setItem(REVIEWS_STORAGE,JSON.stringify(state.reviews||[]))}
+function loadSaved(state,defaultsValue=defaults){try{const raw=localStorage.getItem(STORAGE),x=raw?JSON.parse(raw):null,cardsRaw=localStorage.getItem(CARDS_STORAGE),reviewsRaw=localStorage.getItem(REVIEWS_STORAGE);if(!raw)return{...state,today:todayKey()};const cards=cardsRaw?JSON.parse(cardsRaw):(x?.cards||{}),reviews=reviewsRaw?JSON.parse(reviewsRaw):(x?.reviews||[]);const next={...state,...x,cards,reviews,settings:{...defaultsValue,...(x.settings||{})},streak:{current:0,longest:0,lastActiveDate:null,...(x.streak||{})}};if(next.today!==todayKey()){next.today=todayKey();next.todayNew=0;next.todayReviewCount=0;next.goalCelebrated=false}return next}catch(_){return{...state,today:todayKey()}}}
+function reviveCard(card){if(!card)return null;const out=structuredClone(card);for(const key of ['due','last_review'])if(out[key])out[key]=new Date(out[key]);return out}
+function hydrateCards(state){for(const id of Object.keys(state.cards||{}))if(state.cards[id])state.cards[id].card=reviveCard(state.cards[id].card);return state}
+function reset(defaultsValue,deck=[]){return createInitial({settings:{...defaultsValue},deck,today:todayKey()})}
+window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,todayKey,deviceId,eventId,createInitial,save,loadSaved,reviveCard,hydrateCards,reset});
+})();
