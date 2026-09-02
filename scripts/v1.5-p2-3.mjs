@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+// P2-3: extract state lifecycle without touching shared dataset/FSRS initialization.
 const path='index.html';let s=fs.readFileSync(path,'utf8');const assert=(x,m)=>{if(!x)throw new Error(m)};
 const stateMarker='let state={settings:{...DEFAULTS},deck:[],cards:{},reviews:[],today:"",todayNew:0,todayReviewCount:0,goalCelebrated:false,queue:[],current:null,revealed:false,examples:{},streak:{current:0,longest:0,lastActiveDate:null}};let scheduler;';
 assert(s.includes(stateMarker),'inline state declaration marker missing');
