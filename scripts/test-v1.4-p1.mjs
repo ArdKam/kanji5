@@ -5,6 +5,7 @@ const coreSource=fs.readFileSync('v1.4-education-core.js','utf8');
 const migration=fs.readFileSync('v1.4-education-migration.js','utf8');
 const ui=fs.readFileSync('v1.4-education-ui.js','utf8');
 const sync=fs.readFileSync('supabase-sync.js','utf8');
+const syncCore=fs.readFileSync('v1.5-education-sync-core.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const ctx={window:{},structuredClone:global.structuredClone,localStorage:{getItem(){return null},setItem(){}}};
@@ -64,7 +65,7 @@ assert(Array.isArray(distractorIndex.reading['ガク']),'Reading candidate index
 const indexedPool=core.candidatePool(distractorTarget,[...distractorCandidates],distractorIndex);
 assert(Array.isArray(indexedPool)&&indexedPool.length>0,'Indexed distractor candidate pool is empty');
 assert(sync.includes('production')&&sync.includes('vocabulary')&&sync.includes('context'),'Sync merge does not cover all educational modes');
-assert(sync.includes('distractors')&&sync.includes('stage')&&sync.includes('educationEvidence'),'Sync educational metadata missing');
+assert((sync.includes('distractors')&&sync.includes('stage')&&sync.includes('educationEvidence'))||(sync.includes("from './v1.5-education-sync-core.js'")&&syncCore.includes('distractors')&&syncCore.includes('stage')&&syncCore.includes('educationEvidence')),'Sync educational metadata missing');
 assert(migration.includes('schemaVersion=VERSION')&&migration.includes("const KEY='kanji5-v1.2-knowledge',META='kanji5-v1.4-education-meta',VERSION=1"),'Migration version/schema contract missing');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading')&&ui.includes('CORE.recordKnowledge'),'UI bypasses canonical education core');
 assert(ui.includes('fetchContextSentences')&&ui.includes('api.tatoeba.org/v1/sentences'),'Context sentence API wiring missing');
