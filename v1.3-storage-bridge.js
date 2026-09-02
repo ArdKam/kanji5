@@ -24,7 +24,10 @@
     return get.call(this,k);
   };
   Storage.prototype.setItem=function(k,v){
-    if(k===key)return;
+    if(k===key&&typeof v==='string'&&v.length){
+      serializedDeck=v;
+      serializedSource=null;
+    }
     return set.call(this,k,v);
   };
 })();
