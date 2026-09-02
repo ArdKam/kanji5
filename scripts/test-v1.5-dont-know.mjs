@@ -44,6 +44,10 @@ assert(p0.includes('@media(prefers-reduced-motion:reduce)'),'Reduced-motion supp
 assert(p0.includes('function syncEducationBusyState()'),'Education busy-state helper is missing');
 assert(p0.includes("setAttribute('aria-busy',busy?'true':'false')"),'Education panel must expose async busy state');
 assert(p0.includes("empty.setAttribute('role','status')"),'Education loading message must be announced as status');
+assert(p0.includes('function guardBusyEducationClicks(event)'),'Education busy-click guard is missing');
+assert(p0.includes("root.getAttribute('aria-busy')!=='true'"),'Busy-click guard must only block controls while the education panel is loading');
+assert(p0.includes("event.stopImmediatePropagation()"),'Busy-click guard must prevent duplicate handlers from running');
+assert(p0.includes("document.addEventListener('click',guardBusyEducationClicks,true)"),'Busy-click guard must run during event capture');
 
 const revealIndex=p0.indexOf('function revealAfterUnknown(gate)');
 const revealBody=p0.slice(revealIndex,p0.indexOf('function addDontKnowRecall',revealIndex));
@@ -54,4 +58,4 @@ assert(revealBody.includes("ratings.classList.add('show')"),'Reveal helper must 
 assert(revealBody.includes("ratings.querySelector('button')?.focus()"),'Reveal must return keyboard focus to the rating controls');
 assert(revealBody.includes('gate.remove()'),'Reveal helper must remove the recall gate');
 
-console.log('Kanji 5 v1.5 Active Recall + anti-leak + request dedupe + accessibility checks passed.');
+console.log('Kanji 5 v1.5 Active Recall + anti-leak + request dedupe + accessibility + busy-state checks passed.');
