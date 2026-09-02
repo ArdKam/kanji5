@@ -5,6 +5,8 @@ on:
     branches: [feature/v1.5]
     paths:
       - scripts/v1.5-maintenance-stage.txt
+      - scripts/v1.5-p2-3.mjs
+      - .github/workflows/v1-5-maintenance.yml
   workflow_dispatch:
 
 permissions:
