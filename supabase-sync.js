@@ -1,4 +1,6 @@
 import { mergeModeStats as mergeEducationModeStats, mergeKnowledgeEntry as mergeEducationKnowledgeEntry, mergeKnowledge as mergeEducationKnowledge } from './v1.5-education-sync-core.js';
+import { mergeReviewEvents, replayCards } from './v1.5-fsrs-sync-core.js';
+import { fsrs } from './vendor/ts-fsrs-5.4.1.mjs';
 const V12 = "kanji5-v1.2";
 const STORAGE_KEY = "kanji5-v1";
 const KNOWLEDGE_KEY = `${V12}-knowledge`;
@@ -52,12 +54,12 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
       else if (!rc) merged.cards[id] = lc;
       else merged.cards[id] = lastReviewAt(local, id) >= lastReviewAt(remote, id) ? lc : rc;
     }
-    const reviewMap = new Map();
-    for (const r of [...reviewsFor(local), ...reviewsFor(remote)]) {
-      const key = `${r.id}|${r.at}|${r.rating}|${r.due || ""}|${r.scheduledDays || 0}`;
-      reviewMap.set(key, r);
+    merged.reviews = mergeReviewEvents(reviewsFor(local), reviewsFor(remote), 5000);
+    const replayable = merged.reviews.filter(event => event.eventId && event.baseRecord);
+    if (replayable.length) {
+      const settings = { retention: Number(merged.settings?.retention) || 0.90, maxInterval: Number(merged.settings?.maxInterval) || 36500 };
+      merged.cards = replayCards(merged.cards, replayable, () => { const scheduler=fsrs({request_retention:settings.retention,maximum_interval:settings.maxInterval,enable_fuzz:true,enable_short_term:true,learning_steps:["1m","10m"],relearning_steps:["10m"]}); return {next:scheduler.next.bind(scheduler),Rating:{Again:1,Hard:2,Good:3,Easy:4}}; }, Number(merged.settings?.leechThreshold) || 8);
     }
-    merged.reviews = [...reviewMap.values()].sort((a, b) => String(a.at).localeCompare(String(b.at))).slice(-5000);
     const localToday = String(local.today || ""), remoteToday = String(remote.today || "");
     merged.today = localToday >= remoteToday ? (localToday || remoteToday) : remoteToday;
     merged.todayNew = Math.max(local.todayNew || 0, remote.todayNew || 0);
