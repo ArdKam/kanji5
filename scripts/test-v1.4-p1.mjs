@@ -70,7 +70,8 @@ assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExer
 assert(ui.includes('fetchContextSentences')&&ui.includes('api.tatoeba.org/v1/sentences'),'Context sentence API wiring missing');
 assert(ui.includes('edu.sentence.text.replaceAll(item.character'),'Context exercise does not blank the target Kanji');
 assert(ui.includes('edu.sentence.english'),'Context exercise is missing English translation');
-assert(ui.includes('v14EduProductionInput'),'Typed production UI missing');
+assert(!ui.includes('v14EduProductionInput'),'Typed production UI must be replaced by MCQ in v1.5');
+assert(ui.includes("edu.mode==='production'&&" )||ui.includes('edu.mode===\'production\''),'Production MCQ flow missing');
 assert(ui.includes('context')&&ui.includes('vocabulary'),'Vocabulary/context missing');
 assert(ui.includes('تمرین بعدی'),'Next exercise flow missing');
 assert(ui.includes('CORE.chooseDistractors'),'UI does not use canonical smart distractors');
@@ -83,7 +84,7 @@ assert(wordFetchIndex>modeIndex,'Vocabulary API is fetched before exercise mode 
 assert(contextFetchIndex>modeIndex,'Context data is fetched before exercise mode selection');
 assert(!ui.includes("const words=await fetchWords(item.character);const finalModes"),'Unconditional vocabulary fetch regression detected');
 assert(ui.includes("modes.filter(x=>x==='meaning'||x==='reading'||x==='production')"),'Unsafe API fallback is missing');
-assert(ui.includes("checkButton=(edu.mode==='vocabulary'||edu.mode==='context')"),'MCQ action-state fix is missing');
+assert(ui.includes("checkButton=(edu.mode==='vocabulary'||edu.mode==='context'||edu.mode==='production')"),'MCQ action-state fix is missing');
 assert(ui.includes('function escapeHTML'),'External content escaping helper missing');
 assert(ui.includes('const pool=getDeck();return [target,...CORE.chooseDistractors'),'Indexed distractor pool is not wired through the UI');
 assert(sw.includes('TATOEBA_ORIGIN')&&sw.includes("u.pathname.startsWith('/v1/sentences')"),'Tatoeba service-worker cache missing');
