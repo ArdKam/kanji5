@@ -31,7 +31,6 @@ jobs:
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
           node --check v1.5-p0.js
-          node --check v1.5-education-choice-enforcer.js
           node --check v1.2-runtime-fixes.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
@@ -50,14 +49,15 @@ jobs:
       - name: Verify committed build output
         run: |
           git diff --check
-          grep -q "const CACHE='kanji5-shell-v44'" sw.js
+          grep -q "const CACHE='kanji5-shell-v45'" sw.js
           grep -q "function staleWhileRevalidate" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-p0.js"' sw.js
-          grep -q '"./v1.5-education-choice-enforcer.js"' sw.js
+          test "$(grep -c 'v1.5-education-choice-enforcer.js' sw.js || true)" = "0"
           grep -q 'function jlptRank(item)' index.html
-          grep -q 'v15-production-choice' v1.5-p0.js
-          grep -q 'input.type=\'hidden\'' v1.5-p0.js
-          grep -q 'data-v15-production' v1.5-p0.js
+          test "$(grep -c 'v15-production-choice' v1.5-p0.js || true)" = "0"
+          grep -q "prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.'" v1.4-education-ui.js
+          grep -q 'renderChoices(chooseChoices(item))' v1.4-education-ui.js
+          test "$(grep -c 'v14EduProductionInput' v1.4-education-ui.js || true)" = "0"
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
           test "$(git status --porcelain)" = ""
