@@ -11,6 +11,7 @@ const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1
 for(const src of required)assert(count(index,`<script src="${src}"></script>` )===1,`${src} must be wired exactly once`);
 assert(runtime.includes('script.src = "./v1.5-p0.js"'),'v1.5 P0 runtime must be loaded explicitly by the active runtime bridge');
 assert(runtime.includes('data-kanji5-v15-p0="1"'),'v1.5 P0 loader must be uniquely marked');
+assert(runtime.includes('v1.5-education-choice-enforcer.js'),'Production choice enforcer must be loaded by the active runtime bridge');
 for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
 assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
 assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
@@ -30,7 +31,9 @@ assert(sw.includes("const API_ORIGIN='https://kanjiapi.dev'"),'kanjiapi origin m
 assert(sw.includes("const TATOEBA_ORIGIN='https://api.tatoeba.org'"),'Tatoeba origin missing from service worker');
 assert(sw.includes("u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')"),'Vocabulary API cache route missing');
 assert(sw.includes("u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')"),'Context API cache route missing');
-assert(sw.includes('kanji5-shell-v43')&&sw.includes('kanji5-api-v14'),'Cache versions were not bumped');
+assert(sw.includes('kanji5-shell-v44')&&sw.includes('kanji5-api-v14'),'Cache versions were not bumped');
+assert(sw.includes('async function staleWhileRevalidate'),'Navigation stale-while-revalidate helper missing');
+assert(sw.includes("if(r.mode==='navigate'){e.respondWith(staleWhileRevalidate"),'Navigation is not using stale-while-revalidate');
 assert(sw.includes('const clone=r.clone();caches.open(CACHE).then(c=>c.put(req,clone))'),'Dynamic same-origin response is cloned before asynchronous caching');
 assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"),'Unsafe post-return response.clone caching pattern remains');
 
