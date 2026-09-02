@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const p0=fs.readFileSync('v1.5-p0.js','utf8');
+const index=fs.readFileSync('index.html','utf8');
+const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+assert(p0.includes("const KNOWLEDGE_KEY='kanji5-v1.2-knowledge'"),'Component evidence bridge missing knowledge key');
+assert(p0.includes('function componentSignal(entry)'), 'Component signal calculation missing');
+assert(p0.includes('target.componentEvidence={...signal'), 'Component evidence is not persisted into education knowledge');
+assert(p0.includes('writeSchedulerComponentEvidence(character)'), 'Component result is not forwarded to scheduler evidence');
+assert(index.includes('entry.componentEvidence?.[mode]?.weakness'),'Education scheduler does not consume component evidence');
+assert(index.includes('const componentWeakness=componentValues.length?Math.max(...componentValues):0'),'Component weakness aggregation missing');
+assert(index.includes('+componentWeakness*.25'),'Component weakness is not weighted into queue priority');
+console.log('Kanji 5 v1.5 component-to-scheduler integration test passed.');
