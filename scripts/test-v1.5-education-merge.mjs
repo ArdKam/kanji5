@@ -1,0 +1,16 @@
+import {mergeModeStats,mergeKnowledgeEntry} from '../v1.5-education-sync-core.js';
+const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const local={attempts:3,correct:2,lastAt:'2026-09-02T10:00:00Z',byDevice:{deviceA:{attempts:3,correct:2,lastAt:'2026-09-02T10:00:00Z'}}};
+const remote={attempts:4,correct:1,lastAt:'2026-09-02T11:00:00Z',byDevice:{deviceB:{attempts:4,correct:1,lastAt:'2026-09-02T11:00:00Z'}}};
+let merged=mergeModeStats(local,remote);
+assert(merged.attempts===7&&merged.correct===3,'Concurrent offline attempts from different devices were lost');
+assert(merged.byDevice.deviceA.attempts===3&&merged.byDevice.deviceB.attempts===4,'Per-device buckets were not unioned');
+merged=mergeModeStats(merged,remote);
+assert(merged.attempts===7&&merged.correct===3,'Repeated sync double-counted or changed merged totals');
+merged=mergeModeStats({attempts:5,correct:4,lastAt:'2026-09-02T12:00:00Z',byDevice:{deviceA:{attempts:5,correct:4,lastAt:'2026-09-02T12:00:00Z'}}},{attempts:2,correct:1,lastAt:'2026-09-02T09:00:00Z',byDevice:{deviceA:{attempts:2,correct:1,lastAt:'2026-09-02T09:00:00Z'}}});
+assert(merged.attempts===5&&merged.correct===4,'Same-device stale state was incorrectly added');
+merged=mergeModeStats({attempts:2,correct:1,lastAt:'2026-09-02T08:00:00Z'},{attempts:3,correct:2,lastAt:'2026-09-02T09:00:00Z',byDevice:{deviceB:{attempts:3,correct:2,lastAt:'2026-09-02T09:00:00Z'}}});
+assert(merged.attempts===5&&merged.correct===3&&merged.byDevice.legacy.attempts===2&&merged.byDevice.deviceB.attempts===3,'Legacy data was not preserved when merged with device-scoped data');
+const entry=mergeKnowledgeEntry({meaning:local},{meaning:remote});
+assert(entry.meaning.attempts===7&&entry.meaning.byDevice.deviceA&&entry.meaning.byDevice.deviceB,'Knowledge-entry merge did not use conflict-safe mode merge');
+console.log('Kanji 5 v1.5 conflict-safe education merge test passed.');
