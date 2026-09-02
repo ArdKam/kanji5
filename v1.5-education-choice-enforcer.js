@@ -51,25 +51,6 @@ function enforce(){
   input.parentNode.insertBefore(grid,input);
   wrap.dataset.v15ProductionTarget=target.character;
 }
-document.addEventListener('click',event=>{
-  const button=event.target?.closest?.('.v15-production-choice');
-  if(!button)return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  const input=button.closest('.v14-edu-wrap')?.querySelector('#v14EduProductionInput');
-  if(!input)return;
-  input.value=button.dataset.v15Production||'';
-  input.dispatchEvent(new Event('input',{bubbles:true}));
-  const submit=input.closest('.v14-edu-wrap')?.querySelector('#v14EduSubmit');
-  if(submit){submit.click();return;}
-  const value=input.value,ok=value===input.closest('.v14-edu-wrap')?.dataset.v15ProductionTarget;
-  const paneEl=input.closest('#v14EducationPane');
-  if(paneEl&&window.__KANJI5_EDU_CORE__&&typeof window.__KANJI5_EDU_CORE__.recordKnowledge==='function'){
-    // The canonical v1.4 choice handler may be unavailable when this enforcer wins the race.
-    // In that case, leave grading to the canonical layer rather than creating duplicate state.
-    button.dataset.v15Selected=ok?'correct':'wrong';
-  }
-},true);
 const observe=()=>{const pane=root();if(!pane)return false;const observer=new MutationObserver(enforce);observer.observe(pane,{childList:true,subtree:true});enforce();return true};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',observe,{once:true});else observe();
 setTimeout(enforce,50);setTimeout(enforce,250);setTimeout(enforce,1000);
