@@ -28,8 +28,7 @@ if(stage.startsWith('p0-1-p0-2')){
     let index=fs.readFileSync(indexPath,'utf8');
     const anchor='<script src="./v1.4-education-ui.js"></script>';
     assert(index.includes(anchor),'Education UI script anchor missing');
-    assert(!index.includes('<script src="./v1.5-p0.js"></script>'),'v1.5 P0 loader already present unexpectedly');
-    index=index.replace(anchor,anchor+'\n<script src="./v1.5-p0.js"></script>');
+    if(!index.includes('<script src="./v1.5-p0.js"></script>')) index=index.replace(anchor,anchor+'\n<script src="./v1.5-p0.js"></script>');
     fs.writeFileSync(indexPath,index);
   }
   const verifyIndex=fs.readFileSync('index.html','utf8');
