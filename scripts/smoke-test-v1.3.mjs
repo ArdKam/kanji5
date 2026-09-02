@@ -46,7 +46,7 @@ if (!guard.includes(".v13-tab[data-tab=\"education\"]")) throw new Error('Educat
 if (!guard.includes('v13-edu-choice') || !guard.includes('v13EduSubmit')) throw new Error('Choice-mode submit cleanup is missing');
 if (!bridge.includes('serializedSource') || !bridge.includes('JSON.stringify(data)')) throw new Error('Storage bridge is not using serialized deck caching');
 if (!choices.includes('v13-edu-choice-only')) throw new Error('Choice-only education layer missing');
-if (!choices.includes("mode==='meaning'") || !choices.includes("mode==='reading'")) throw new Error('Choice-only layer must cover meaning and reading');
+if (!/mode\s*===\s*['"]meaning['"]/.test(choices) || !/mode\s*===\s*['"]reading['"]/.test(choices)) throw new Error('Choice-only layer must cover meaning and reading');
 if (!choices.includes('submit.click()') || !choices.includes("type:'hidden'")) throw new Error('Choice-only layer is not wired to canonical grading');
 if (/<textarea/i.test(choices) || /<input[^>]+type=["']text/i.test(choices)) throw new Error('Choice-only layer must not add free-text educational controls');
 if (fs.existsSync('scripts/build-kanji-data.mjs')) throw new Error('Broken raw-dataset build script should not be present');
