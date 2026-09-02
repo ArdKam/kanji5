@@ -33,11 +33,22 @@ const patchEducationTestApi=()=>{
   else ui=ui.replace(/window\.__KANJI5_EDU_UI_API__=Object\.freeze\([^;]+\);/,api);
   fs.writeFileSync(path,ui);
 };
+const patchInitializationSharing=()=>{
+  const path='index.html';
+  let index=fs.readFileSync(path,'utf8');
+  const oldDeck=`async function loadDeck(){\n  $("loadStatus").textContent="در حال دریافت فهرست Jōyō...";\n  const res=await fetch(DATA_URL,{cache:"force-cache"});\n  if(!res.ok)throw new Error("Could not load local kanji dataset");\n  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);\n  if(all.length!==2136)throw new Error(\`Runtime kanji dataset must contain 2136 entries, got \${all.length}\`);\n  state.deck=all;\n  localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));\n}`;
+  const newDeck=`async function loadDeck(){\n  $("loadStatus").textContent="در حال دریافت فهرست Jōyō...";\n  const prefetched=window.__KANJI5_P0_DATA_PROMISE;\n  if(prefetched){\n    const all=await prefetched;\n    if(Array.isArray(all)&&all.length===2136){state.deck=all;localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));return}\n  }\n  const res=await fetch(DATA_URL,{cache:"force-cache"});\n  if(!res.ok)throw new Error("Could not load local kanji dataset");\n  const data=await res.json();\n  const all=Array.isArray(data)?data:(data.kanji||[]);\n  if(all.length!==2136)throw new Error(\`Runtime kanji dataset must contain 2136 entries, got \${all.length}\`);\n  state.deck=all;\n  localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));\n}`;
+  assert(index.includes(oldDeck),'Dataset loader shape changed; refusing unsafe replacement');
+  index=index.replace(oldDeck,newDeck);
+  const oldFsrs=`const mod=await Promise.race([import(FSRS_URL),new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);({createEmptyCard,fsrs,Rating}=mod);`;
+  const newFsrs=`const shared=window.__KANJI5_P0_FSRS_PROMISE;const loadPromise=shared?shared.then(mod=>{if(!mod)throw new Error("FSRS_PREFETCH_FAILED");return mod}):import(FSRS_URL);const mod=await Promise.race([loadPromise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);({createEmptyCard,fsrs,Rating}=mod);`;
+  assert(index.includes(oldFsrs),'FSRS loader shape changed; refusing unsafe replacement');
+  index=index.replace(oldFsrs,newFsrs);
+  fs.writeFileSync(path,index);
+};
 
-if(stage==='p0-3'){
-  patchRecallCleanup();
-  patchEducationTestApi();
-}
+if(stage==='p0-3'){patchRecallCleanup();patchEducationTestApi()}
+if(stage==='p0-4'){patchInitializationSharing()}
 if(stage.startsWith('p0-1-p0-2')){
   patchRecallCleanup();
   if(stage==='p0-1-p0-2-p0-loader'){
@@ -61,5 +72,11 @@ if(stage==='p0-3'){
   const edu=fs.readFileSync('v1.4-education-ui.js','utf8');
   assert(edu.includes('__KANJI5_EDU_UI_API__'),'Behavioral Education test API missing');
   assert(edu.includes('function handleChoice(t)'),'Behavioral Production handler API missing');
+}
+if(stage==='p0-4'){
+  assert(verifyIndex.includes('const prefetched=window.__KANJI5_P0_DATA_PROMISE'),'Main dataset loader does not consume shared P0 promise');
+  assert(verifyIndex.includes('const shared=window.__KANJI5_P0_FSRS_PROMISE'),'Main FSRS loader does not consume shared P0 promise');
+  assert(verifyIndex.includes('const res=await fetch(DATA_URL,{cache:"force-cache"})'),'Dataset network fallback disappeared');
+  assert(verifyIndex.includes('):import(FSRS_URL)'),'FSRS fallback import disappeared');
 }
 console.log(`Maintenance ${stage} passed.`);
