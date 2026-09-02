@@ -34,7 +34,8 @@ assert(sw.includes("u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/senten
 assert(sw.includes('kanji5-shell-v45')&&sw.includes('kanji5-api-v14'),'Cache versions were not bumped');
 assert(sw.includes('async function staleWhileRevalidate'),'Navigation stale-while-revalidate helper missing');
 assert(sw.includes("if(r.mode==='navigate'){e.respondWith(staleWhileRevalidate"),'Navigation is not using stale-while-revalidate');
-assert(sw.includes('const clone=r.clone();caches.open(CACHE).then(c=>c.put(req,clone))'),'Dynamic same-origin response is cloned before asynchronous caching');
+const dynamicStart=sw.indexOf('async function dynamicSameOrigin'),dynamicEnd=sw.indexOf("self.addEventListener('fetch'",dynamicStart),dynamicHelper=sw.slice(dynamicStart,dynamicEnd);
+assert(dynamicHelper.includes('fetch(req)')&&!dynamicHelper.includes('caches.'),'Dynamic same-origin caching must remain bounded');
 assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"),'Unsafe post-return response.clone caching pattern remains');
 
 assert(p0.includes('window.__KANJI5_V15_P0__'),'Canonical v1.5 P0 runtime version marker missing');
