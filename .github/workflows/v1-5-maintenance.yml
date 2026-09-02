@@ -23,8 +23,10 @@ jobs:
           node-version: 24
       - name: Apply staged maintenance patch
         run: |
+          stage="$(tr -d '[:space:]' < scripts/v1.5-maintenance-stage.txt)"
           node scripts/v1.5-maintenance.mjs
-          node scripts/v1.5-p1-1.mjs
+          if [ "$stage" = "p1-1" ]; then node scripts/v1.5-p1-1.mjs; fi
+          if [ "$stage" = "p1-2" ]; then node scripts/v1.5-p1-2.mjs; fi
       - name: Validate staged patch
         run: |
           node --check v1.2-enhancements.js
@@ -32,6 +34,7 @@ jobs:
           node --check v1.4-education-ui.js
           node --check supabase-sync.js
           node --check v1.5-education-sync-core.js
+          node --check v1.5-fsrs-sync-core.js
           node scripts/test-v1.5-p0.mjs
           node scripts/test-v1.5-p0-learning.mjs
           node scripts/test-v1.5-dont-know.mjs
@@ -45,6 +48,8 @@ jobs:
           node scripts/test-v1.5-runtime-reviews.mjs
           node scripts/test-v1.5-component-scheduler.mjs
           node scripts/test-v1.5-education-merge.mjs
+          stage="$(tr -d '[:space:]' < scripts/v1.5-maintenance-stage.txt)"
+          if [ "$stage" = "p1-2" ]; then node scripts/test-v1.5-fsrs-sync.mjs; fi
           test "$(grep -c 'v1.2-recall-result-fix' index.html || true)" = "0"
           test "$(grep -c 'setInterval(paint, 500)' index.html || true)" = "0"
           test "$(grep -c 'observer.observe(document.body, {childList:true,subtree:true})' index.html || true)" = "0"
@@ -56,10 +61,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html v1.2-enhancements.js v1.4-education-ui.js scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs scripts/test-v1.5-component-scheduler.mjs scripts/test-v1.5-education-merge.mjs scripts/v1.5-p1-1.mjs supabase-sync.js v1.4-education-core.js v1.5-education-sync-core.js
+          git add index.html v1.2-enhancements.js v1.4-education-ui.js scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs scripts/test-v1.5-component-scheduler.mjs scripts/test-v1.5-education-merge.mjs scripts/v1.5-p1-1.mjs scripts/v1.5-p1-2.mjs supabase-sync.js v1.4-education-core.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js scripts/test-v1.5-fsrs-sync.mjs scripts/v1.5-maintenance.mjs scripts/v1.5-maintenance-stage.txt
           if git diff --cached --quiet; then
             echo "No staged changes."
             exit 0
           fi
-          git commit -m "fix(v1.5): make education sync merge conflict-safe"
+          stage="$(tr -d '[:space:]' < scripts/v1.5-maintenance-stage.txt)"
+          git commit -m "fix(v1.5): make ${stage} maintenance green"
           git push origin HEAD:feature/v1.5
