@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const index=fs.readFileSync('index.html','utf8'),sync=fs.readFileSync('supabase-sync.js','utf8');
+const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+assert(index.includes('const CARDS_STORAGE="kanji5-v1-cards";const REVIEWS_STORAGE="kanji5-v1-reviews";'),'Persistent slice keys missing');
+assert(index.includes('const metadata={settings:state.settings,today:state.today,todayNew:state.todayNew,todayReviewCount:state.todayReviewCount,goalCelebrated:state.goalCelebrated,streak:state.streak};'),'save() must persist only metadata in the primary key');
+assert(index.includes('localStorage.setItem(CARDS_STORAGE,JSON.stringify(state.cards||{}))'),'cards slice is not persisted separately');
+assert(index.includes('localStorage.setItem(REVIEWS_STORAGE,JSON.stringify(state.reviews||[]))'),'reviews slice is not persisted separately');
+assert(!index.includes('function save(){localStorage.setItem(STORAGE,JSON.stringify(state))}'),'save() still serializes the whole state');
+assert(index.includes('cardsRaw=localStorage.getItem(CARDS_STORAGE),reviewsRaw=localStorage.getItem(REVIEWS_STORAGE)'),'loadSaved() does not read separate slices');
+assert(index.includes('(x?.cards||{})')&&index.includes('(x?.reviews||[])'),'Legacy monolithic state fallback was removed');
+assert(index.includes('localStorage.removeItem(CARDS_STORAGE);localStorage.removeItem(REVIEWS_STORAGE);'),'resetAll() does not clear slice storage');
+assert(sync.includes('const CARDS_STORAGE_KEY = "kanji5-v1-cards";')&&sync.includes('const REVIEWS_STORAGE_KEY = "kanji5-v1-reviews";'),'Sync slice constants missing');
+assert(sync.includes('const cards = safeJSON(localStorage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});'),'Sync does not read cards slice');
+assert(sync.includes('const reviews = safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);'),'Sync does not read reviews slice');
+assert(sync.includes('localStorage.setItem(CARDS_STORAGE_KEY, json(state.cards || {}));')&&sync.includes('localStorage.setItem(REVIEWS_STORAGE_KEY, json(state.reviews || []));'),'Sync does not write slices separately');
+assert(sync.includes('settings: state.settings, today: state.today'),'Sync metadata persistence is missing');
+console.log('Kanji 5 v1.5 persistence-slice tests passed.');
