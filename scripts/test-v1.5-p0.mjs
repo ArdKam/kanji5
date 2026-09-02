@@ -30,7 +30,7 @@ assert(sw.includes("const API_ORIGIN='https://kanjiapi.dev'"),'kanjiapi origin m
 assert(sw.includes("const TATOEBA_ORIGIN='https://api.tatoeba.org'"),'Tatoeba origin missing from service worker');
 assert(sw.includes("u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')"),'Vocabulary API cache route missing');
 assert(sw.includes("u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')"),'Context API cache route missing');
-assert(sw.includes('kanji5-shell-v42')&&sw.includes('kanji5-api-v14'),'Cache versions were not bumped');
+assert(sw.includes('kanji5-shell-v43')&&sw.includes('kanji5-api-v14'),'Cache versions were not bumped');
 assert(sw.includes('const clone=r.clone();caches.open(CACHE).then(c=>c.put(req,clone))'),'Dynamic same-origin response is cloned before asynchronous caching');
 assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"),'Unsafe post-return response.clone caching pattern remains');
 
@@ -43,10 +43,12 @@ assert(p0.includes('stats.score+=.25'),'Unknown recall must have a lighter educa
 assert(!p0.includes('v15DontKnowReview'),'Don’t-know must not be a review-rating control');
 assert(!p0.includes('.rate.again'),'Don’t-know must not directly trigger FSRS Again');
 assert(p0.includes('function enhanceProduction()'),'Canonical production MCQ enhancer missing');
-assert(p0.includes('#v14EduSubmit')&&p0.includes('style.display="none"'),'Production submit control remains visible');
+assert(p0.includes("const submit=$('#v14EduSubmit',wrap);if(submit)submit.style.display='none';"),'Production submit control is not hidden by the active P0 enhancer');
 assert(!p0.includes('observer.observe(document.body'),'P0 must not install a global document.body observer');
 assert(!p0.includes('||document.body'),'P0 observer must not fall back to the document body');
 assert(p0.includes('function startTargetedObservers()')&&p0.includes('studyRoot'),'P0 must use a targeted study observer');
+assert(p0.includes('const mode=String(gate.textContent||\'\').includes(\'خوانش\')?\'reading\':\'meaning\',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;'),'Recall enhancement must remain retryable until a focus component is available');
+assert(runtime.includes('loading.classList.add("v13-real-error")'),'Startup errors must opt into the visible error-panel CSS override');
 
 assert(!fs.existsSync('package.json'),'Unexpected package.json dependency surface introduced');
 for(const forbidden of ['npm install ','https://unpkg.com/','https://cdn.jsdelivr.net/'])assert(!index.includes(forbidden)&&!ui.includes(forbidden),`Unexpected runtime dependency: ${forbidden}`);
