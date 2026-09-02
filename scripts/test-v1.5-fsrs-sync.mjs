@@ -14,7 +14,7 @@ assert(mergeReviewEvents(merged,[legacyEvent]).length===2,'Review merge is not i
 let calls=0;
 const createScheduler=()=>({Rating:{Again:1,Hard:2,Good:3,Easy:4},next(card,when,rating){calls+=1;return{card:{...card,state:rating,due:when,last_review:when,_applied:(card._applied||0)+1}}}});
 const cards=replayCards({},[newEvent],createScheduler);assert(cards.a.reviews===1,'A schema-v2 FSRS event should replay exactly once');assert(calls===1,'A schema-v2 FSRS event was applied more than once');
-const legacyCards=replayCards({},[legacyEvent],createScheduler);assert(legacyCards.a.reviews===1,'A legacy post-review snapshot must not be applied twice');assert(calls===2,'Legacy root event was incorrectly replayed');
+const legacyCalls=calls;const legacyCards=replayCards({},[legacyEvent],createScheduler);assert(legacyCards.a.reviews===1,'A legacy post-review snapshot must not be applied twice');assert(calls===legacyCalls,'Legacy root event was incorrectly replayed');
 const legacyChild={eventId:'A2',deviceId:'A',id:'a',at:'2026-09-02T10:03:00Z',rating:'Again',parentEventId:'A1',baseRecord:structuredClone({...postLegacy,reviews:2,lapses:1}),eventSchemaVersion:1};
 const legacyChain=replayCards({},[legacyEvent,legacyChild],createScheduler);assert(legacyChain.a.reviews===2,'Causal child review was not replayed from a legacy root snapshot');assert(legacyChain.a.lapses===1,'Again review was not reflected in reconstructed card metadata');
 const legacyRoot2={eventId:'C1',deviceId:'C',id:'a',at:'2026-09-02T10:04:00Z',rating:'Good',parentEventId:null,baseRecord:structuredClone({...base,card:{...base.card,state:2,due:new Date('2026-09-02T10:04:00Z'),last_review:new Date('2026-09-02T10:04:00Z')},reviews:1}),eventSchemaVersion:1};
