@@ -9,16 +9,20 @@ const index = read('index.html');
 const runtime = read('v1.2-runtime-fixes.js');
 const v12 = read('v1.2-enhancements.js');
 const p0 = read('v1.5-p0.js');
+const enforcer = read('v1.5-education-choice-enforcer.js');
 const sw = read('sw.js');
 const coreSource = read('v1.4-education-core.js');
 
 assert(index.includes('./v1.2-runtime-fixes.js'), 'Active shell runtime is missing');
 assert(runtime.includes('script.src = "./v1.5-p0.js"'), 'Active runtime bridge must load v1.5 P0');
 assert(runtime.includes('data-kanji5-v15-p0="1"'), 'P0 loader marker is missing');
+assert(runtime.includes('v1.5-education-choice-enforcer.js'), 'Production choice enforcer is missing from the active runtime');
 assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enrichment must not observe the entire document body');
 assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall back to the document body');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
-assert(sw.includes('kanji5-shell-v43'), 'Runtime cache version was not bumped');
+assert(sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Production choice enforcer is not precached by the service worker');
+assert(sw.includes('kanji5-shell-v44'), 'Runtime cache version was not bumped');
+assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(p0.includes('const COMPONENT_KEY=\'kanji5-v1.5-components\''), 'Component-level knowledge store missing');
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
 assert(has(p0,/button\.id\s*=\s*["']v15DontKnowRecall["']/), 'Active Recall “don’t know” control is missing');
@@ -38,8 +42,12 @@ assert(has(p0,/input\.style\.display='none'/), 'Production input remains visibly
 assert(has(p0,/submit\.style\.display='none'/), 'Production text-submit control remains visible after MCQ conversion');
 assert(p0.includes('const core=window.__KANJI5_EDU_CORE__'), 'Production MCQ must resolve the education core lazily');
 assert(!p0.includes('کانجی را بنوی'), 'Canonical P0 runtime still contains a typing prompt');
+assert(enforcer.includes('#v14EduProductionInput') && enforcer.includes("input.type='hidden'"), 'Choice enforcer does not hide the production input');
+assert(enforcer.includes('v15-production-choice'), 'Choice enforcer does not render production choices');
+assert(!enforcer.includes('input.type=\'text\''), 'Choice enforcer must not create a text input');
 assert(!p0.includes('observer.observe(document.body'), 'P0 must not observe the entire document body');
 assert(!p0.includes('||document.body'), 'P0 observer must not fall back to the document body');
+assert(p0.includes('function startTargetedObservers()')&&p0.includes('studyRoot'),'P0 must use a targeted study observer');
 assert(p0.includes("const mode=String(gate.textContent||'').includes('خوانش')?'reading':'meaning',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;"), 'Recall enhancement must remain retryable until a focus component is available');
 assert(runtime.includes('loading.classList.add("v13-real-error")'), 'Startup errors must opt into the visible error-panel CSS override');
 
