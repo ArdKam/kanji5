@@ -141,6 +141,11 @@
     script.dataset.kanji5V15P0 = "1";
     script.defer = true;
     document.head.appendChild(script);
+    const choiceScript = document.createElement("script");
+    choiceScript.src = "./v1.5-education-choice-enforcer.js";
+    choiceScript.dataset.kanji5V15ChoiceEnforcer = "1";
+    choiceScript.defer = true;
+    document.head.appendChild(choiceScript);
   }
 
   if (document.readyState === "loading") {
