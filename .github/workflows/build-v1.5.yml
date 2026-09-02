@@ -53,38 +53,28 @@ jobs:
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: Run browser smoke tests
         run: npx playwright test e2e/app-smoke.spec.mjs
       - name: Verify committed build output
         shell: bash
         run: |
           set -euo pipefail
-          echo 'check: git diff --check'
           git diff --check
-          echo 'check: shell cache version'
           grep -q "const CACHE='kanji5-shell-v46'" sw.js
-          echo 'check: SW helpers'
           grep -q "function staleWhileRevalidate" sw.js
           grep -q "function dynamicSameOrigin" sw.js
-          echo 'check: offline runtime dependencies'
           grep -q '"./v1.5-state.js"' sw.js
           grep -q '"./v1.5-p0.js"' sw.js
           grep -q '"./v1.5-education-sync-core.js"' sw.js
           grep -q '"./v1.5-fsrs-sync-core.js"' sw.js
-          echo 'check: removed obsolete runtime'
           test "$(grep -c 'v1.5-education-choice-enforcer.js' sw.js || true)" = "0"
           test "$(grep -c 'v15-production-choice' v1.5-p0.js || true)" = "0"
-          echo 'check: production education contract'
           grep -q "prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.'" v1.4-education-ui.js
           grep -q 'renderChoices(chooseChoices(item))' v1.4-education-ui.js
           test "$(grep -c 'v14EduProductionInput' v1.4-education-ui.js || true)" = "0"
-          echo 'check: Active Recall anti-leak'
           test "$(grep -c 'معنی هدف:' v1.5-p0.js || true)" = "0"
           test "$(grep -c 'خوانش هدف:' v1.5-p0.js || true)" = "0"
-          echo 'check: FSRS replay contract'
           grep -q 'eventSchemaVersion' v1.5-fsrs-sync-core.js
-          echo 'check: workflow and clean tree'
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
-          git status --short
           test -z "$(git status --porcelain)"
