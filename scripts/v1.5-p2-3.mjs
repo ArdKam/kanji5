@@ -9,17 +9,18 @@ assert(s.includes(todayLine),'inline state helper header missing');
 s=s.replace(todayLine,'const $=id=>document.getElementById(id);const {todayKey,deviceId,eventId,save,loadSaved,reviveCard,hydrateCards}=window.__KANJI5_STATE__;');
 const deviceLine='const DEVICE_KEY="kanji5-device-id";\nfunction deviceId(){try{let id=localStorage.getItem(DEVICE_KEY);if(!id){id=(crypto.randomUUID?.()||`device-${Date.now()}-${Math.random().toString(36).slice(2)}`);localStorage.setItem(DEVICE_KEY,id)}return id}catch(_){return "legacy"}}\nfunction eventId(){return crypto.randomUUID?.()||`review-${Date.now()}-${Math.random().toString(36).slice(2)}`}\n';
 if(s.includes(deviceLine))s=s.replace(deviceLine,'');
-const saveFn=/function save\(\)\{[\s\S]*?\n\}/;if(saveFn.test(s))s=s.replace(saveFn,'');
-const loadFn=/function loadSaved\(\)\{[\s\S]*?\n\}/;if(loadFn.test(s))s=s.replace(loadFn,'');
-const reviveFn=/function reviveCard\(card\)\{[\s\S]*?\n\}/;if(reviveFn.test(s))s=s.replace(reviveFn,'');
-const hydrateFn=/function hydrateCards\(\)\{[\s\S]*?\n\}/;if(hydrateFn.test(s))s=s.replace(hydrateFn,'');
-const hasStateLoader=()=>s.includes('<script src="./v1.5-state.js"></script>');
-if(!hasStateLoader()){
-  const moduleTag=/<script type="module">/;
-  assert(moduleTag.test(s),'main application module tag missing');
-  s=s.replace(moduleTag,'<script src="./v1.5-state.js"></script><script type="module">');
+for(const [name,regex] of [
+  ['save',/function save\(\)\{[\s\S]*?\n\}/],
+  ['loadSaved',/function loadSaved\(\)\{[\s\S]*?\n\}/],
+  ['reviveCard',/function reviveCard\(card\)\{[\s\S]*?\n\}/],
+  ['hydrateCards',/function hydrateCards\(\)\{[\s\S]*?\n\}/]
+]){if(regex.test(s))s=s.replace(regex,'')}
+if(!s.includes('<script src="./v1.5-state.js"></script>')){
+  assert(s.includes('<body>'),'body tag missing');
+  s=s.replace('<body>','<body>\n<script src="./v1.5-state.js"></script>');
 }
 const resetRe=/function resetAll\(\)\{[\s\S]*?\n\}/;assert(resetRe.test(s),'resetAll marker missing');s=s.replace(resetRe,'function resetAll(){if(!confirm("تمام پیشرفت‌ها پاک شود؟"))return;localStorage.removeItem(STORAGE);localStorage.removeItem(CARDS_STORAGE);localStorage.removeItem(REVIEWS_STORAGE);state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();updateStats();toast("پیشرفت پاک شد.")}');
+fs.writeFileSync(path,s);
 const out=fs.readFileSync(path,'utf8');
 assert(out.includes('<script src="./v1.5-state.js"></script>'),'state module loader missing');
 assert(out.includes('let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});'),'inline state object was not replaced');
