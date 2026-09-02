@@ -133,24 +133,4 @@
     observer.observe(studyRoot, { childList: true, subtree: true });
   }
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
-
-  function loadV15P0() {
-    if (window.__KANJI5_V15_P0__ || document.querySelector('script[data-kanji5-v15-p0="1"]')) return;
-    const script = document.createElement("script");
-    script.src = "./v1.5-p0.js";
-    script.dataset.kanji5V15P0 = "1";
-    script.defer = true;
-    document.head.appendChild(script);
-    const choiceScript = document.createElement("script");
-    choiceScript.src = "./v1.5-education-choice-enforcer.js";
-    choiceScript.dataset.kanji5V15ChoiceEnforcer = "1";
-    choiceScript.defer = true;
-    document.head.appendChild(choiceScript);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadV15P0, { once: true });
-  } else {
-    loadV15P0();
-  }
 })();
