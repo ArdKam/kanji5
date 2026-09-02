@@ -54,11 +54,16 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
       reviewMap.set(key, r);
     }
     merged.reviews = [...reviewMap.values()].sort((a, b) => String(a.at).localeCompare(String(b.at))).slice(-5000);
-    merged.today = local.today || remote.today || "";
-    merged.todayNew = Math.max(local.todayNew || 0, remote.todayNew || 0);
-    merged.todayReviewCount = Math.max(local.todayReviewCount || 0, remote.todayReviewCount || 0);
-    merged.goalCelebrated = Boolean(local.goalCelebrated || remote.goalCelebrated);
-    merged.streak = (local.streak?.lastActiveDate || "") >= (remote.streak?.lastActiveDate || "") ? local.streak : remote.streak;
+    const localToday = String(local.today || "");
+    const remoteToday = String(remote.today || "");
+    const activeToday = localToday >= remoteToday ? localToday : remoteToday;
+    const localIsActive = localToday === activeToday;
+    const remoteIsActive = remoteToday === activeToday;
+    merged.today = activeToday;
+    merged.todayNew = (localIsActive ? Number(local.todayNew || 0) : 0) + (remoteIsActive ? Number(remote.todayNew || 0) : 0);
+    merged.todayReviewCount = (localIsActive ? Number(local.todayReviewCount || 0) : 0) + (remoteIsActive ? Number(remote.todayReviewCount || 0) : 0);
+    merged.goalCelebrated = (localIsActive && Boolean(local.goalCelebrated)) || (remoteIsActive && Boolean(remote.goalCelebrated));
+    merged.streak = (String(local.streak?.lastActiveDate || "") >= String(remote.streak?.lastActiveDate || "")) ? local.streak : remote.streak;
     merged.queue = [];
     merged.current = null;
     merged.revealed = false;
@@ -68,14 +73,30 @@ const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
   const mergeKnowledge = (local, remote) => {
     const out = structuredClone(local || {});
     for (const [ch, rv] of Object.entries(remote || {})) {
-      if (!out[ch]) { out[ch] = rv; continue; }
-      for (const mode of ["meaning", "reading"]) {
-        const l = out[ch]?.[mode], r = rv?.[mode];
-        if (!l) out[ch][mode] = r;
-        else if (r && String(r.lastAt || "") > String(l.lastAt || "")) out[ch][mode] = r;
-        else if (r) out[ch][mode] = { attempts: Math.max(l.attempts || 0, r.attempts || 0), correct: Math.max(l.correct || 0, r.correct || 0), lastAt: String(l.lastAt || "") > String(r.lastAt || "") ? l.lastAt : r.lastAt };
+      if (!out[ch]) { out[ch] = structuredClone(rv); continue; }
+      const lv = out[ch] || {};
+      const allModes = new Set([...Object.keys(lv), ...Object.keys(rv || {})]);
+      for (const mode of allModes) {
+        if (mode === "distractors" || mode === "lastPrompt") continue;
+        const l = lv[mode], r = rv?.[mode];
+        if (!l) lv[mode] = structuredClone(r);
+        else if (r && String(r.lastAt || "") > String(l.lastAt || "")) lv[mode] = structuredClone(r);
+        else if (r && String(r.lastAt || "") === String(l.lastAt || "")) lv[mode] = {
+          attempts: Math.max(l.attempts || 0, r.attempts || 0),
+          correct: Math.max(l.correct || 0, r.correct || 0),
+          lastAt: String(l.lastAt || "")
+        };
       }
-      if (String(rv?.lastPromptAt || "") > String(out[ch]?.lastPromptAt || "")) out[ch].lastPrompt = rv.lastPrompt;
+      const distractors = { ...(lv.distractors || {}) };
+      for (const [wrong, count] of Object.entries(rv?.distractors || {})) distractors[wrong] = Math.max(Number(distractors[wrong] || 0), Number(count || 0));
+      if (Object.keys(distractors).length) lv.distractors = distractors;
+      if (String(rv?.lastPromptAt || "") > String(lv.lastPromptAt || "")) {
+        lv.lastPromptAt = rv.lastPromptAt;
+        lv.lastPrompt = rv.lastPrompt;
+      } else if (String(rv?.lastPromptAt || "") === String(lv.lastPromptAt || "") && rv?.lastPrompt) {
+        lv.lastPrompt = rv.lastPrompt;
+      }
+      out[ch] = lv;
     }
     return out;
   };
