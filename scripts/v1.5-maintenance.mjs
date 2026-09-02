@@ -6,7 +6,7 @@ const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 if(stage==='p0-1-p0-2'){
   const indexPath='index.html';
   let index=fs.readFileSync(indexPath,'utf8');
-  const duplicate=/<script id="v1\\.2-recall-result-fix">[\\s\\S]*?<\\/script>/;
+  const duplicate=/<script id="v1\.2-recall-result-fix">[\s\S]*?<\/script>/;
   assert(duplicate.test(index),'Duplicate recall-result implementation not found');
   index=index.replace(duplicate,'');
   fs.writeFileSync(indexPath,index);
