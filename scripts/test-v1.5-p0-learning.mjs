@@ -18,8 +18,8 @@ assert(runtime.includes('data-kanji5-v15-p0="1"'), 'P0 loader marker is missing'
 assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enrichment must not observe the entire document body');
 assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall back to the document body');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
-assert(sw.includes('kanji5-shell-v42'), 'Runtime cache version was not bumped');
-assert(p0.includes('const COMPONENT_KEY = "kanji5-v1.5-components"'), 'Component-level knowledge store missing');
+assert(sw.includes('kanji5-shell-v43'), 'Runtime cache version was not bumped');
+assert(p0.includes('const COMPONENT_KEY=\'kanji5-v1.5-components\''), 'Component-level knowledge store missing');
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
 assert(has(p0,/button\.id\s*=\s*["']v15DontKnowRecall["']/), 'Active Recall “don’t know” control is missing');
 assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'Active Recall “don’t know” must record an educational unknown outcome');
@@ -40,6 +40,8 @@ assert(p0.includes('const core=window.__KANJI5_EDU_CORE__'), 'Production MCQ mus
 assert(!p0.includes('کانجی را بنوی'), 'Canonical P0 runtime still contains a typing prompt');
 assert(!p0.includes('observer.observe(document.body'), 'P0 must not observe the entire document body');
 assert(!p0.includes('||document.body'), 'P0 observer must not fall back to the document body');
+assert(p0.includes("const mode=String(gate.textContent||'').includes('خوانش')?'reading':'meaning',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;"), 'Recall enhancement must remain retryable until a focus component is available');
+assert(runtime.includes('loading.classList.add("v13-real-error")'), 'Startup errors must opt into the visible error-panel CSS override');
 
 assert(v12.includes('gradeMeaningCanonical'), 'Legacy active-recall layer is not delegated to the canonical grader');
 assert(!v12.includes('answer.includes(canonical)'), 'Substring meaning grading is still present in v1.2-enhancements.js');
