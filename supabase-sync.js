@@ -9,7 +9,7 @@ const KNOWLEDGE_KEY = `${V12}-knowledge`;
 const SYNC_META_KEY = `${V12}-sync-meta`;
 const POLL_MS = 15000;
 const SUPABASE_JS = "https://esm.sh/@supabase/supabase-js@2.57.4";
-const EDUCATION_SCHEMA_VERSION = 1;
+const EDUCATION_SCHEMA_VERSION = 2;
 const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "context"];
 
 (() => {
@@ -23,6 +23,7 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
   let client = null;
   let user = null;
   let syncing = false;
+  let syncPromise = null;
   let pollTimer = null;
 
   const byId = id => document.getElementById(id);
@@ -34,10 +35,9 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
     const state = persisted ? { ...persisted, cards, reviews, queue: [], current: null, revealed: false, examples: {} } : null;
     return { state, knowledge: safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {}), deckVersion: localStorage.getItem("kanji5-deck-version") || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
   };
-  const json = value => JSON.stringify(value);
   const reviewsFor = state => Array.isArray(state?.reviews) ? state.reviews : [];
   const stablePayload = payload => ({ state: payload.state || null, knowledge: payload.knowledge || {}, deckVersion: payload.deckVersion || null, educationSchemaVersion: payload.educationSchemaVersion || EDUCATION_SCHEMA_VERSION });
-  const hash = value => { const s = json(stablePayload(value)); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); };
+  const hash = value => { const s = JSON.stringify(stablePayload(value)); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); };
   const lastReviewAt = (state, id) => {
     let latest = "";
     for (const review of reviewsFor(state)) if (review.id === id && review.at && review.at > latest) latest = review.at;
@@ -63,11 +63,15 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
       const settings = { retention: Number(merged.settings?.retention) || 0.90, maxInterval: Number(merged.settings?.maxInterval) || 36500 };
       merged.cards = replayCards(merged.cards, replayable, () => { const scheduler=fsrs({request_retention:settings.retention,maximum_interval:settings.maxInterval,enable_fuzz:true,enable_short_term:true,learning_steps:["1m","10m"],relearning_steps:["10m"]}); return {next:scheduler.next.bind(scheduler),Rating:{Again:1,Hard:2,Good:3,Easy:4}}; }, Number(merged.settings?.leechThreshold) || 8);
     }
+    const currentToday = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
     const localToday = String(local.today || ""), remoteToday = String(remote.today || "");
     merged.today = localToday >= remoteToday ? (localToday || remoteToday) : remoteToday;
-    merged.todayNew = Math.max(local.todayNew || 0, remote.todayNew || 0);
-    merged.todayReviewCount = Math.max(local.todayReviewCount || 0, remote.todayReviewCount || 0);
-    merged.goalCelebrated = Boolean(local.goalCelebrated || remote.goalCelebrated);
+    if (!merged.today || merged.today < currentToday) merged.today = currentToday;
+    const sameDayLocal = localToday === merged.today;
+    const sameDayRemote = remoteToday === merged.today;
+    merged.todayNew = Math.max(sameDayLocal ? Number(local.todayNew) || 0 : 0, sameDayRemote ? Number(remote.todayNew) || 0 : 0);
+    merged.todayReviewCount = Math.max(sameDayLocal ? Number(local.todayReviewCount) || 0 : 0, sameDayRemote ? Number(remote.todayReviewCount) || 0 : 0);
+    merged.goalCelebrated = Boolean((sameDayLocal && local.goalCelebrated) || (sameDayRemote && remote.goalCelebrated));
     merged.streak = (local.streak?.lastActiveDate || "") >= (remote.streak?.lastActiveDate || "") ? local.streak : remote.streak;
     merged.queue = [];
     merged.current = null;
@@ -81,53 +85,67 @@ const EDUCATION_MODES = ["meaning", "reading", "production", "vocabulary", "cont
   const writeLocal = payload => {
     if (payload.state) {
       const state = payload.state;
-      localStorage.setItem(STORAGE_KEY, json({ settings: state.settings, today: state.today, todayNew: state.todayNew, todayReviewCount: state.todayReviewCount, goalCelebrated: state.goalCelebrated, streak: state.streak }));
-      localStorage.setItem(CARDS_STORAGE_KEY, json(state.cards || {}));
-      localStorage.setItem(REVIEWS_STORAGE_KEY, json(state.reviews || []));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: state.settings, today: state.today, todayNew: state.todayNew, todayReviewCount: state.todayReviewCount, goalCelebrated: state.goalCelebrated, streak: state.streak }));
+      localStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(state.cards || {}));
+      localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(state.reviews || []));
     }
-    localStorage.setItem(KNOWLEDGE_KEY, json(payload.knowledge || {}));
+    localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(payload.knowledge || {}));
     if (payload.deckVersion) localStorage.setItem("kanji5-deck-version", payload.deckVersion);
-    localStorage.setItem(SYNC_META_KEY, json({ educationSchemaVersion: EDUCATION_SCHEMA_VERSION, syncedAt: new Date().toISOString() }));
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify({ educationSchemaVersion: EDUCATION_SCHEMA_VERSION, syncedAt: new Date().toISOString() }));
   };
   const setStatus = (text, tone = "") => { const el = byId("syncStatusText"); if (el) { el.textContent = text; el.dataset.tone = tone; } };
 
+  async function withSyncLock(task) {
+    if (syncPromise) return syncPromise;
+    syncPromise = (async () => {
+      syncing = true;
+      try { return await task(); }
+      finally { syncing = false; syncPromise = null; }
+    })();
+    return syncPromise;
+  }
+
+  async function pushUnlocked(local, remote) {
+    if (!user) return;
+    const merged = { state: mergeState(local.state, remote?.state), knowledge: mergeKnowledge(local.knowledge, remote?.knowledge), deckVersion: local.deckVersion || remote?.deckVersion || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
+    writeLocal(merged);
+    const now = new Date().toISOString();
+    const { error } = await client.from("user_learning_state").upsert({ user_id: user.id, payload: { ...merged, clientUpdatedAt: now }, updated_at: now }, { onConflict: "user_id" });
+    if (error) throw error;
+    setStatus("همگام شد", "ok");
+  }
+
   async function push(local, remote) {
-    if (!user || syncing) return;
-    syncing = true;
-    try {
-      const merged = { state: mergeState(local.state, remote?.state), knowledge: mergeKnowledge(local.knowledge, remote?.knowledge), deckVersion: local.deckVersion || remote?.deckVersion || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
-      writeLocal(merged);
-      const now = new Date().toISOString();
-      const { error } = await client.from("user_learning_state").upsert({ user_id: user.id, payload: { ...merged, clientUpdatedAt: now }, updated_at: now }, { onConflict: "user_id" });
-      if (error) throw error;
-      setStatus("همگام شد", "ok");
-    } catch (e) {
-      console.warn("Kanji 5 sync push failed", e);
-      setStatus("همگام‌سازی ناموفق", "error");
-    } finally { syncing = false; }
+    if (!user) return;
+    return withSyncLock(async () => {
+      try { await pushUnlocked(local, remote); }
+      catch (e) { console.warn("Kanji 5 sync push failed", e); setStatus("همگام‌سازی ناموفق", "error"); }
+    });
   }
 
   async function pullAndMerge() {
-    if (!user || syncing) return;
-    const local = localPayload();
-    try {
-      const { data, error } = await client.from("user_learning_state").select("payload,updated_at").eq("user_id", user.id).maybeSingle();
-      if (error) throw error;
-      const remote = data?.payload || null;
-      if (!remote) { await push(local, null); return; }
-      const remoteStable = stablePayload(remote);
-      const merged = { state: mergeState(local.state, remote.state), knowledge: mergeKnowledge(local.knowledge, remote.knowledge), deckVersion: local.deckVersion || remote.deckVersion || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
-      const localHash = hash(local), mergedHash = hash(merged), remoteHash = hash(remoteStable);
-      if (mergedHash !== localHash) {
-        writeLocal(merged);
-        setStatus("داده‌های جدید دریافت شد", "ok");
-        setTimeout(() => location.reload(), 250);
-      } else setStatus("همگام است", "ok");
-      if (mergedHash !== remoteHash) await push(merged, remote);
-    } catch (e) {
-      console.warn("Kanji 5 sync pull failed", e);
-      setStatus("اتصال به sync ناموفق", "error");
-    }
+    if (!user) return;
+    return withSyncLock(async () => {
+      try {
+        const local = localPayload();
+        const { data, error } = await client.from("user_learning_state").select("payload,updated_at").eq("user_id", user.id).maybeSingle();
+        if (error) throw error;
+        const remote = data?.payload || null;
+        if (!remote) { await pushUnlocked(local, null); return; }
+        const remoteStable = stablePayload(remote);
+        const merged = { state: mergeState(local.state, remote.state), knowledge: mergeKnowledge(local.knowledge, remote.knowledge), deckVersion: local.deckVersion || remote.deckVersion || null, educationSchemaVersion: EDUCATION_SCHEMA_VERSION };
+        const localHash = hash(local), mergedHash = hash(merged), remoteHash = hash(remoteStable);
+        if (mergedHash !== localHash) {
+          writeLocal(merged);
+          setStatus("داده‌های جدید دریافت شد", "ok");
+          setTimeout(() => location.reload(), 250);
+        } else setStatus("همگام است", "ok");
+        if (mergedHash !== remoteHash) await pushUnlocked(merged, remote);
+      } catch (e) {
+        console.warn("Kanji 5 sync pull failed", e);
+        setStatus("اتصال به sync ناموفق", "error");
+      }
+    });
   }
 
   async function getClient() {
