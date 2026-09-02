@@ -123,17 +123,15 @@
     }, 80);
   }
 
-  // Observe only the study surface where examples are rendered.
-  // The previous document.body observer reacted to unrelated DOM changes.
-  const studyRoot = document.getElementById("studyPanel") || document.getElementById("study") || document.body;
-  const observer = new MutationObserver(() => {
-    if (document.querySelector(EXAMPLE_SELECTOR)) scheduleExamples();
-  });
-  observer.observe(studyRoot, { childList: true, subtree: true });
+  const studyRoot = document.getElementById("studyPanel") || document.getElementById("study");
+  if (studyRoot) {
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(EXAMPLE_SELECTOR)) scheduleExamples();
+    });
+    observer.observe(studyRoot, { childList: true, subtree: true });
+  }
   document.addEventListener("DOMContentLoaded", scheduleExamples, { once: true });
 
-  // v1.5 P0 is a first-class runtime dependency. Load it explicitly from the
-  // active runtime bridge so the shell does not depend on a fragile inline loader.
   function loadV15P0() {
     if (window.__KANJI5_V15_P0__ || document.querySelector('script[data-kanji5-v15-p0="1"]')) return;
     const script = document.createElement("script");
