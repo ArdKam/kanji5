@@ -26,11 +26,20 @@ jobs:
       - name: Validate staged patch
         run: |
           node --check v1.2-enhancements.js
+          node --check v1.5-p0.js
+          node scripts/test-v1.5-p0.mjs
+          node scripts/test-v1.5-p0-learning.mjs
+          node scripts/test-v1.5-dont-know.mjs
+          node scripts/test-v1.5-jlpt-order.mjs
+          node scripts/test-v1.5-v13-parity.mjs
+          node scripts/test-v1.4-p1.mjs
+          node scripts/test-v1.4-education.mjs
           test "$(grep -c 'v1.2-recall-result-fix' index.html || true)" = "0"
           test "$(grep -c 'setInterval(paint, 500)' index.html || true)" = "0"
           test "$(grep -c 'observer.observe(document.body, {childList:true,subtree:true})' index.html || true)" = "0"
           test "$(grep -c 'observer.observe(document.body, { childList: true, subtree: true })' v1.2-enhancements.js || true)" = "0"
           grep -q 'const studyRoot = document.getElementById("studyPanel") || document.getElementById("study")' v1.2-enhancements.js
+          test "$(grep -c '<script src=\"./v1.5-p0.js\"></script>' index.html || true)" = "1"
           git diff --check
       - name: Commit and push
         run: |
@@ -41,5 +50,5 @@ jobs:
             echo "No staged changes."
             exit 0
           fi
-          git commit -m "fix(v1.5): remove duplicate recall observer and polling"
+          git commit -m "fix(v1.5): apply staged maintenance"
           git push origin HEAD:feature/v1.5
