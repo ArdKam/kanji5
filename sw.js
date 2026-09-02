@@ -17,7 +17,6 @@ self.addEventListener('activate',e=>e.waitUntil(
 ]).then(()=>self.clients.claim()))
 ));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback);if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
-async function networkFirst(req,name,fallback=req){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
 async function staleWhileRevalidate(req,name,fallback=req){const c=await caches.open(name);const hit=await c.match(fallback||req);const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone());return r}).catch(()=>null);if(hit){void update;return hit}const fresh=await update;return fresh||Response.error()}
 async function apiCacheFirst(req){const c=await caches.open(API_CACHE),hit=await c.match(req);if(hit)return hit;try{const r=await fetch(req);if(r.ok||r.type==='opaque')await c.put(req,r.clone());return r}catch(_){return(await c.match(req))||Response.error()}}
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
