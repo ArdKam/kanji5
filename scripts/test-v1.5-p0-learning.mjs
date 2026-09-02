@@ -34,7 +34,7 @@ assert(p0.includes('function getProductionTarget(input)'), 'Production target re
 assert(p0.includes('function getProductionChoices(target)'), 'Production MCQ choice generation is missing');
 assert(p0.includes('function enhanceProduction()'), 'Production MCQ enhancer is missing');
 assert(p0.includes('برای معنی زیر، کانجی مناسب را انتخاب کن.'), 'Production prompt was not changed to selection');
-assert(p0.includes('input.type="hidden"'), 'Production input is not hidden');
+assert(has(p0,/input\.type\s*=\s*["']hidden["']/), 'Production input is not hidden');
 assert(p0.includes('v15-production-grid') && p0.includes('v15-production-choice'), 'Production choices are not rendered as dedicated MCQ buttons');
 assert(has(p0,/dataset\.v15Production=choice\.character/), 'Production choice data binding is missing');
 assert(has(p0,/input\.value=button\.dataset\.v15Production/), 'Production choice selection is not submitted to the backing field');
