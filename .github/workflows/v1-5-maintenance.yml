@@ -39,6 +39,7 @@ jobs:
           node scripts/test-v1.5-education-dom.mjs
           node scripts/test-v1.5-init-sharing.mjs
           node scripts/test-v1.5-daily-sync.mjs
+          node scripts/test-v1.5-runtime-reviews.mjs
           test "$(grep -c 'v1.2-recall-result-fix' index.html || true)" = "0"
           test "$(grep -c 'setInterval(paint, 500)' index.html || true)" = "0"
           test "$(grep -c 'observer.observe(document.body, {childList:true,subtree:true})' index.html || true)" = "0"
@@ -50,10 +51,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html v1.2-enhancements.js v1.4-education-ui.js scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs supabase-sync.js
+          git add index.html v1.2-enhancements.js v1.4-education-ui.js scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs supabase-sync.js
           if git diff --cached --quiet; then
             echo "No staged changes."
             exit 0
           fi
-          git commit -m "fix(v1.5): scope daily sync counters to newer date"
+          git commit -m "fix(v1.5): apply staged maintenance change"
           git push origin HEAD:feature/v1.5
