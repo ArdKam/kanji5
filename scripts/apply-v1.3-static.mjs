@@ -27,9 +27,9 @@ const shell = [
   './vendor/ts-fsrs-5.4.1.mjs','./v1.2-enhancements.js','./v1.2-runtime-fixes.js',
   './supabase-config.js','./supabase-sync.js'
 ];
-const sw = `const CACHE='kanji5-shell-v32';
-const DATA_CACHE='kanji5-data-v19';
-const API_CACHE='kanji5-api-v10';
+const sw = `const CACHE='kanji5-shell-v33';
+const DATA_CACHE='kanji5-data-v20';
+const API_CACHE='kanji5-api-v11';
 const SHELL=${JSON.stringify(shell)};
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
@@ -39,9 +39,10 @@ self.addEventListener('install',e=>e.waitUntil(Promise.all([
   caches.open(API_CACHE)
 ]).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(
-  caches.keys().then(keys=>Promise.all(
-    keys.filter(k=>k.startsWith('kanji5-') && ![CACHE,DATA_CACHE,API_CACHE].includes(k)).map(k=>caches.delete(k))
-  )).then(()=>self.clients.claim())
+  caches.keys().then(keys=>Promise.all([
+    ...keys.filter(k=>k.startsWith('kanji5-') && ![CACHE,DATA_CACHE,API_CACHE].includes(k)).map(k=>caches.delete(k)),
+    ...keys.map(async key=>{try{const c=await caches.open(key);for(const req of await c.keys()){if(new URL(req.url).pathname.endsWith('/kanji-joyo.json'))await c.delete(req)}}catch(_) {}})
+  ])).then(()=>self.clients.claim())
 ));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback);if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
 async function networkFirst(req,name,fallback=req){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback))||Response.error()}}
