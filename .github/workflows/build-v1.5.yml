@@ -50,6 +50,12 @@ jobs:
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts and behavior
         run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
+      - name: Install browser test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser smoke tests
+        run: npx playwright test e2e/app-smoke.spec.mjs
       - name: Verify committed build output
         shell: bash
         run: |
