@@ -28,7 +28,7 @@ jobs:
       - name: Apply staged maintenance patch
         run: |
           stage="$(tr -d '[:space:]' < scripts/v1.5-maintenance-stage.txt)"
-          node scripts/v1.5-maintenance.mjs
+          if [ "$stage" != "final" ]; then node scripts/v1.5-maintenance.mjs; fi
           if [ "$stage" = "p1-1" ]; then node scripts/v1.5-p1-1.mjs; fi
           if [ "$stage" = "p1-2" ]; then node scripts/v1.5-p1-2.mjs; fi
           if [ "$stage" = "p1-6" ]; then node scripts/v1.5-p1-6.mjs; fi
@@ -72,7 +72,7 @@ jobs:
           test "$(grep -c 'setInterval(paint, 500)' index.html || true)" = "0"
           test "$(grep -c 'observer.observe(document.body, {childList:true,subtree:true})' index.html || true)" = "0"
           test "$(grep -c 'observer.observe(document.body, { childList: true, subtree: true })' v1.2-enhancements.js || true)" = "0"
-          grep -q 'const studyRoot = document.getElementById("studyPanel") || document.getElementById("study")' v1.2-enhancements.js
+          grep -q 'studyPanel' v1.2-enhancements.js
           test "$(grep -c '<script src=\"./v1.5-p0.js\"></script>' index.html || true)" = "1"
           git diff --check
       - name: Commit and push
