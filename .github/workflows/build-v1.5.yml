@@ -1,4 +1,4 @@
-# v1.5 P0 validation workflow
+# v1.5 P0/P1 validation workflow
 name: Build Kanji 5 v1.5
 
 on:
@@ -34,6 +34,7 @@ jobs:
           node --check v1.5-state.js
           node --check v1.5-education-sync-core.js
           node --check v1.5-fsrs-sync-core.js
+          node --check v1.5-sync-core.js
           node --check v1.2-runtime-fixes.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
@@ -43,13 +44,14 @@ jobs:
           node --check scripts/test-v1.5-p0-learning.mjs
           node --check scripts/test-v1.5-dont-know.mjs
           node --check scripts/test-v1.5-fsrs-sync.mjs
+          node --check scripts/test-v1.5-sync.mjs
           node --check scripts/test-v1.5-jlpt-order.mjs
           node --check scripts/test-v1.5-v13-parity.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts and behavior
-        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
+        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
@@ -68,6 +70,7 @@ jobs:
           grep -q '"./v1.5-p0.js"' sw.js
           grep -q '"./v1.5-education-sync-core.js"' sw.js
           grep -q '"./v1.5-fsrs-sync-core.js"' sw.js
+          grep -q '"./v1.5-sync-core.js"' sw.js
           test "$(grep -c 'v1.5-education-choice-enforcer.js' sw.js || true)" = "0"
           test "$(grep -c 'v15-production-choice' v1.5-p0.js || true)" = "0"
           grep -q "prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.'" v1.4-education-ui.js
@@ -76,5 +79,8 @@ jobs:
           test "$(grep -c 'معنی هدف:' v1.5-p0.js || true)" = "0"
           test "$(grep -c 'خوانش هدف:' v1.5-p0.js || true)" = "0"
           grep -q 'eventSchemaVersion' v1.5-fsrs-sync-core.js
+          grep -q 'SYNC_SCHEMA_VERSION' v1.5-sync-core.js
+          grep -q 'expectedUpdatedAt' supabase-sync.js
+          grep -q 'MAX_SYNC_ATTEMPTS' supabase-sync.js
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
           test -z "$(git status --porcelain)"
