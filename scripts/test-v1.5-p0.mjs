@@ -78,7 +78,7 @@ assert.ok(index.includes('./vendor/ts-fsrs-5.4.1.mjs'), 'pinned local FSRS vendo
 assert.ok(core.includes('educationSchedulerSignal') && core.includes('chooseDistractors'), 'canonical education core missing');
 assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'education UI is not using canonical adaptive helpers');
 assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
-assert.ok(!workflow.includes('git push origin feature/v1.5'), 'CI must not self-push');
+assert.ok(!workflow.includes('git push origin'), 'CI must not self-push');
 assert.ok(workflow.includes('git diff --check'), 'CI must verify the checked-out build instead of mutating and pushing it');
 assert.ok(!workflow.includes('scripts/v1.5-roadmap-finalize.mjs'), 'CI must not invoke the roadmap mutator');
 assert.ok(supabase.includes('function withSyncLock') && supabase.includes('MAX_SYNC_ATTEMPTS'), 'sync retry/lock hardening missing');
@@ -91,25 +91,18 @@ class Store {
 }
 
 const migration = read('v1.4-education-migration.js');
-const migrationStore = new Store({});
-const migrationContext = { window: {}, localStorage: migrationStore, Date, JSON };
+const migrationContext = { window: {}, localStorage: new Store(), Date, JSON };
 vm.createContext(migrationContext);
 vm.runInContext(migration, migrationContext);
 assert.ok(migrationContext.window.__KANJI5_EDU_MIGRATION_API__, 'education migration API missing');
 assert.equal(migrationContext.window.__KANJI5_EDU_MIGRATION_API__.version, 2);
 
-const stateContext = {
-  window: {},
-  localStorage: new Store(),
-  crypto: { randomUUID: () => 'test-id' },
-  Date, JSON, structuredClone
-};
+const stateContext = { window: {}, localStorage: new Store(), crypto: { randomUUID: () => 'test-id' }, Date, JSON, structuredClone };
 vm.createContext(stateContext);
 vm.runInContext(state, stateContext);
 const stateApi = stateContext.window.__KANJI5_STATE__;
 assert.ok(stateApi, 'state API missing');
-const review = { eventId: 'legacy', id: '学', at: '2026-09-02T10:00:00.000Z', rating: 'Good', baseRecord: { reviews: 1 } };
-const normalized = stateApi.normalizeReviewEvent(review);
+const normalized = stateApi.normalizeReviewEvent({ eventId: 'legacy', id: '学', at: '2026-09-02T10:00:00.000Z', rating: 'Good', baseRecord: { reviews: 1 } });
 assert.equal(normalized.eventSchemaVersion, 1);
 assert.equal(normalized.resultRecord.reviews, 1);
 
