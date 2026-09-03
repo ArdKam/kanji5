@@ -6,6 +6,8 @@ on:
     paths:
       - scripts/v1.5-maintenance-stage.txt
       - scripts/v1.5-p2-3.mjs
+      - scripts/v1.5-roadmap-finalize.mjs
+      - scripts/test-v1.5-roadmap-final.mjs
       - .github/workflows/v1-5-maintenance.yml
   workflow_dispatch:
 
@@ -33,6 +35,7 @@ jobs:
           if [ "$stage" = "p2-1" ]; then node scripts/v1.5-p2-1.mjs; fi
           if [ "$stage" = "p2-2" ]; then node scripts/v1.5-p2-2.mjs; fi
           if [ "$stage" = "p2-3" ]; then node scripts/v1.5-p2-3.mjs; fi
+          if [ "$stage" = "final" ]; then node scripts/v1.5-roadmap-finalize.mjs; fi
       - name: Validate staged patch
         run: |
           node --check v1.2-enhancements.js
@@ -57,6 +60,7 @@ jobs:
           node scripts/test-v1.5-runtime-reviews.mjs
           node scripts/test-v1.5-component-scheduler.mjs
           node scripts/test-v1.5-education-merge.mjs
+          node scripts/test-v1.5-roadmap-final.mjs
           stage="$(tr -d '[:space:]' < scripts/v1.5-maintenance-stage.txt)"
           if [ "$stage" = "p1-2" ]; then node scripts/test-v1.5-fsrs-sync.mjs; fi
           if [ "$stage" = "p1-6" ]; then node scripts/test-v1.5-persistence-slices.mjs; fi
@@ -75,7 +79,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html v1.2-enhancements.js v1.4-education-ui.js v1.4-education-migration.js v1.5-state.js sw.js scripts/test-v1.5-p0.mjs scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs scripts/test-v1.5-component-scheduler.mjs scripts/test-v1.5-education-merge.mjs scripts/v1.5-p1-1.mjs scripts/v1.5-p1-2.mjs scripts/v1.5-p1-6.mjs scripts/v1.5-p2-1.mjs scripts/v1.5-p2-2.mjs scripts/v1.5-p2-3.mjs scripts/test-v1.5-fsrs-sync.mjs scripts/test-v1.5-persistence-slices.mjs scripts/test-v1.5-sw-cache-bound.mjs scripts/test-v1.5-api-cache.mjs scripts/test-v1.5-state-module.mjs scripts/test-v1.5-migration-chain.mjs supabase-sync.js v1.4-education-core.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js scripts/v1.5-maintenance.mjs scripts/v1.5-maintenance-stage.txt
+          git add index.html v1.2-enhancements.js v1.4-education-ui.js v1.4-education-migration.js v1.5-state.js sw.js scripts/test-v1.5-p0.mjs scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs scripts/test-v1.5-component-scheduler.mjs scripts/test-v1.5-education-merge.mjs scripts/v1.5-p1-1.mjs scripts/v1.5-p1-2.mjs scripts/v1.5-p1-6.mjs scripts/v1.5-p2-1.mjs scripts/v1.5-p2-2.mjs scripts/v1.5-p2-3.mjs scripts/test-v1.5-fsrs-sync.mjs scripts/test-v1.5-persistence-slices.mjs scripts/test-v1.5-sw-cache-bound.mjs scripts/test-v1.5-api-cache.mjs scripts/test-v1.5-state-module.mjs scripts/test-v1.5-migration-chain.mjs scripts/v1.5-roadmap-finalize.mjs scripts/test-v1.5-roadmap-final.mjs scripts/v1.5-maintenance.mjs scripts/v1.5-maintenance-stage.txt supabase-sync.js v1.4-education-core.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js
           if git diff --cached --quiet; then
             echo "No staged changes."
             exit 0
