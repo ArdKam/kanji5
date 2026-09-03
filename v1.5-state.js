@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 if(window.__KANJI5_STATE__)return;
-const DEVICE_KEY='kanji5-device-id',STORAGE='kanji5-v1',CARDS_STORAGE='kanji5-v1-cards',REVIEWS_STORAGE='kanji5-v1-reviews',KNOWLEDGE_STORAGE='kanji5-v1.2-knowledge',COMPONENT_KEY='kanji5-v1.5-components',LAST_ATTEMPT_KEY='kanji5-v1.2-last-attempt',DECK_KEY='kanji5-deck';
+const DEVICE_KEY='kanji5-device-id',STORAGE='kanji5-v1',CARDS_STORAGE='kanji5-v1-cards',REVIEWS_STORAGE='kanji5-v1-reviews',KNOWLEDGE_STORAGE='kanji5-v1.2-knowledge',COMPONENT_KEY='kanji5-v1.5-components',LAST_ATTEMPT_KEY='kanji5-v1.2-last-attempt',DECK_KEY='kanji5-deck',SETTINGS_KEY='kanji5-v1.3-education-settings';
 const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2;
 const defaults={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
+const educationDefaults={production:true,vocabulary:true,context:true};
 let activeState=null;
 const todayKey=()=>new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function deviceId(){try{let id=localStorage.getItem(DEVICE_KEY);if(!id){id=crypto.randomUUID?.()||`device-${Date.now()}-${Math.random().toString(36).slice(2)}`;localStorage.setItem(DEVICE_KEY,id)}return id}catch(_){return'legacy'}}
@@ -20,6 +21,8 @@ function readValue(key,fallback=null){try{const raw=localStorage.getItem(key);re
 function readDeck(){const value=safeParse(readValue(DECK_KEY,null));return Array.isArray(value)?value:[]}
 function readKnowledge(){return readObject(KNOWLEDGE_STORAGE,{})}
 function writeKnowledge(value){const next=value&&typeof value==='object'&&!Array.isArray(value)?value:{};if(!writeObject(KNOWLEDGE_STORAGE,next))return false;if(activeState)activeState.knowledge=structuredClone(next);return true}
+function readSettings(){return{...educationDefaults,...readObject(SETTINGS_KEY,{})}}
+function readAppState(){return safeObject(safeParse(readValue(STORAGE,null)))||{}}
 function readComponents(){return readObject(COMPONENT_KEY,{})}
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
@@ -43,5 +46,5 @@ function reset(defaultsValue,deck=[]){const next=createInitial({settings:{...def
 function loadState(defaultsValue=defaults){return loadSaved(createInitial({today:todayKey()}),defaultsValue)}
 function saveState(state){save(state);return state}
 function transaction(mutator){if(typeof mutator!=='function')throw new TypeError('transaction requires a function');const current=loadState();const draft=structuredClone(current);const result=mutator(draft)??draft;save(result);return result}
-window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,DECK_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readComponents,writeComponents,writeLastAttempt,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
+window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,readAppState,readComponents,writeComponents,writeLastAttempt,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
 })();
