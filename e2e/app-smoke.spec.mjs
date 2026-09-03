@@ -34,6 +34,8 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(firstKanji).toBeTruthy();
     expect(firstId).toBeTruthy();
 
+    // First exposure is intentionally information-only. Rate Again so the same
+    // card is persisted and remains part of the reviewable card set.
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Again"]').click();
@@ -49,18 +51,10 @@ test.describe('Kanji 5 browser smoke', () => {
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
 
-    // v1.2's reveal guard reads the legacy metadata shape. Seed that view
-    // synchronously immediately before the click, using the real v1.5 card.
-    await page.evaluate(id => {
-      const cardsRaw = localStorage.getItem('kanji5-v1-cards');
-      if (!cardsRaw || !id) throw new Error('persisted card missing');
-      const cards = JSON.parse(cardsRaw);
-      if (!cards[id]) throw new Error('target card missing from persisted cards');
-      localStorage.setItem('kanji5-v1', JSON.stringify({ cards: { [id]: cards[id] } }));
-      document.getElementById('revealBtn')?.click();
-    }, firstId);
-
+    // Persisted cards are now handled by v1.2 through the v1.5 card store.
+    // This is the real production Active Recall path; no legacy-state seeding.
     const gate = page.locator('.v12-recall-gate');
+    await page.locator('#revealBtn').click();
     await expect(gate).toBeVisible({ timeout: 10_000 });
 
     const prompt = await gate.innerText();
