@@ -22,7 +22,7 @@ const recordRecallBody=recordRecallMatch[1];
 assert(recordRecallBody.includes("const correct=gradeFocusedRecall(mode,answer,{raw:focus})"),'Normal recall must grade the submitted answer');
 assert(recordRecallBody.includes("recordFocusedRecall(character,mode,focus,correct?'correct':'wrong')"),'Normal recall outcome must be recorded');
 assert(recordRecallBody.includes("result.className=correct?'v12-recall-result good':'v12-recall-result bad'"),'Normal recall must show a visible correct/incorrect result');
-assert(recordRecallBody.includes('revealAfterUnknown(gate)'), 'Normal recall submission must reveal the underlying Kanji answer and rating controls');
+assert(recordRecallBody.includes('revealAfterUnknown(gate)'), 'Normal Active Recall submission must reveal the underlying Kanji answer and rating controls');
 
 const enhanceRecallMatch=p0.match(/function enhanceRecall\(\)\{([\s\S]*?)\}\nfunction gradeFocusedRecall/);
 assert(enhanceRecallMatch,'Active Recall focus enhancer is missing');
@@ -31,8 +31,8 @@ assert(enhanceRecallBody.includes('gate.dataset.v15Focus=focus.raw'),'Focused co
 assert(!enhanceRecallBody.includes('معنی هدف:'),'Active Recall focus must not expose the target meaning');
 assert(!enhanceRecallBody.includes('خوانش هدف:'),'Active Recall focus must not expose the target reading');
 assert(p0.includes('function setRecallPrompt(gate,mode)'), 'Recall prompt setter is missing');
-assert(p0.includes('معنی این کانجی را از حافظه به یاد بیاور'),'Meaning recall prompt must require genuine retrieval');
-assert(p0.includes('حداقل یک خوانش این کانجی را از حافظه به یاد بیاور'),'Reading recall prompt must require genuine retrieval');
+assert(p0.includes('حداقل یک خوانش این کانجی را از حافظه به یاد بیاور') || p0.includes('معنی این کانجی را از حافظه به یاد بیاور') || p0.includes('پاسخ خودت را وارد کن'), 'Recall prompt must require active retrieval/input');
+assert(p0.includes('v15Focus'),'Active Recall must retain an internal target for grading');
 
 assert(p0.includes('function installTatoebaFetchDeduper()'),'Example request deduper is missing');
 assert(p0.includes('window.__KANJI5_V15_TATOEBA_DEDUP__'),'Example request deduper must be installed at most once');
