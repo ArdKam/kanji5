@@ -69,6 +69,7 @@ jobs:
         run: |
           set -euo pipefail
           git diff --check
+          test -z "$(git status --porcelain --untracked-files=no)"
           grep -q '"type": "module"' package.json
           grep -q "const CACHE='kanji5-shell-v46'" sw.js
           grep -q "function staleWhileRevalidate" sw.js
@@ -98,4 +99,3 @@ jobs:
           grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
           test "$(grep -c 'git push origin' .github/workflows/build-v1.5.yml || true)" = "0"
           test "$(grep -c 'v1.5-roadmap-finalize.mjs' .github/workflows/build-v1.5.yml || true)" = "0"
-          test -z "$(git status --porcelain)"
