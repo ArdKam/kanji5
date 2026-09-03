@@ -9,6 +9,7 @@ const index = read('index.html');
 const runtime = read('v1.2-runtime-fixes.js');
 const v12 = read('v1.2-enhancements.js');
 const p0 = read('v1.5-p0.js');
+const recallCore = read('v1.5-recall-core.js');
 const ui = read('v1.4-education-ui.js');
 const sw = read('sw.js');
 const coreSource = read('v1.4-education-core.js');
@@ -20,6 +21,7 @@ assert(!runtime.includes('v1.5-education-choice-enforcer.js'), 'Obsolete Product
 assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enrichment must not observe the entire document body');
 assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall back to the document body');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
+assert(sw.includes('"./v1.5-recall-core.js"'), 'v1.5 recall core is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
 assert(sw.includes('kanji5-shell-v46'), 'Runtime cache version was not bumped');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
@@ -27,7 +29,8 @@ assert(p0.includes('const COMPONENT_KEY=\'kanji5-v1.5-components\''), 'Component
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
 assert(has(p0,/button\.id\s*=\s*["']v15DontKnowRecall["']/), 'Active Recall “don’t know” control is missing');
 assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'Active Recall “don’t know” must record an educational unknown outcome');
-assert(has(p0,/stats\.score\+=\s*\.25/), 'Unknown recall must carry a smaller educational weight than a correct recall');
+assert(p0.includes("await import('./v1.5-recall-core.js')"), 'P0 must delegate pure recall behavior to the dedicated core');
+assert(has(recallCore,/score\s*=\s*Number\(stats\.score\)\s*\+\s*0\.25/), 'Unknown recall must carry a smaller educational weight than a correct recall');
 assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” must not be added');
 assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
 assert(ui.includes("else if(edu.mode==='production'){prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';"), 'Production must use a selection prompt');
