@@ -67,7 +67,8 @@ assert.equal(boundaryStorage.getItem('kanji5-v1.2-knowledge'), null);
 assert.equal(boundaryStorage.getItem('kanji5-v1.5-components'), null);
 assert.equal(boundaryStorage.getItem('kanji5-v1.2-last-attempt'), null);
 
-const stateApi = boot(new MemoryStorage());
+const storage = new MemoryStorage();
+const stateApi = boot(storage);
 const state = stateApi.createInitial({
   settings: { dailyNew: 7 },
   cards: { a: { card: { due: '2026-09-04T00:00:00.000Z' }, reviews: 1 } },
@@ -76,50 +77,32 @@ const state = stateApi.createInitial({
   today: stateApi.todayKey()
 });
 stateApi.saveState(state);
-const storage = stateApi;
-const baselineSnapshot = boundaryStorage.getItem(stateApi.SNAPSHOT_STORAGE);
-const baselineCommit = boundaryStorage.getItem(stateApi.SNAPSHOT_COMMIT);
-void storage;
-void baselineSnapshot;
-void baselineCommit;
+const baselineSnapshot = storage.getItem(stateApi.SNAPSHOT_STORAGE);
+const baselineCommit = storage.getItem(stateApi.SNAPSHOT_COMMIT);
+assert.ok(baselineSnapshot);
+assert.ok(baselineCommit);
+assert.ok(storage.getItem(stateApi.KNOWLEDGE_STORAGE));
 
-const persisted = boot((() => { const s = new MemoryStorage(); return s; })());
-const persistedState = persisted.createInitial({
-  settings: { dailyNew: 7 },
-  cards: { a: { card: { due: '2026-09-04T00:00:00.000Z' }, reviews: 1 } },
-  knowledge: { a: { meaning: { day: 1 } } },
-  reviews: [{ id: 'a', eventId: 'e1', at: '2026-09-04T00:00:00.000Z', rating: 'Good' }],
-  today: persisted.todayKey()
-});
-const persistedStorage = new MemoryStorage();
-const persistedWriter = boot(persistedStorage);
-persistedWriter.saveState(persistedState);
-const baselineSnapshot2 = persistedStorage.getItem(persistedWriter.SNAPSHOT_STORAGE);
-const baselineCommit2 = persistedStorage.getItem(persistedWriter.SNAPSHOT_COMMIT);
-assert.ok(baselineSnapshot2);
-assert.ok(baselineCommit2);
-assert.ok(persistedStorage.getItem(persistedWriter.KNOWLEDGE_STORAGE));
-
-const reloadedApi = boot(persistedStorage);
+const reloadedApi = boot(storage);
 const loaded = reloadedApi.loadState();
 assert.equal(loaded.settings.dailyNew, 7);
-assert.equal(JSON.stringify(loaded.cards), JSON.stringify(persistedState.cards));
-assert.equal(JSON.stringify(loaded.knowledge), JSON.stringify(persistedState.knowledge));
+assert.equal(JSON.stringify(loaded.cards), JSON.stringify(state.cards));
+assert.equal(JSON.stringify(loaded.knowledge), JSON.stringify(state.knowledge));
 assert.equal(loaded.reviews.length, 1);
 
-persistedStorage.setItem(reloadedApi.CARDS_STORAGE, JSON.stringify({ ...persistedState.cards, b: { card: {} } }));
-persistedStorage.setItem(reloadedApi.KNOWLEDGE_STORAGE, JSON.stringify({ ...persistedState.knowledge, b: { meaning: { night: 1 } } }));
-const reconciled = boot(persistedStorage).loadState();
+storage.setItem(stateApi.CARDS_STORAGE, JSON.stringify({ ...state.cards, b: { card: {} } }));
+storage.setItem(stateApi.KNOWLEDGE_STORAGE, JSON.stringify({ ...state.knowledge, b: { meaning: { night: 1 } } }));
+const reconciled = boot(storage).loadState();
 assert.ok(reconciled.cards.b);
 assert.ok(reconciled.knowledge.b);
 
 const torn = new MemoryStorage({
-  [reloadedApi.STORAGE]: persistedStorage.getItem(reloadedApi.STORAGE),
-  [reloadedApi.CARDS_STORAGE]: '{not-json',
-  [reloadedApi.REVIEWS_STORAGE]: '[]',
-  [reloadedApi.KNOWLEDGE_STORAGE]: '{not-json',
-  [reloadedApi.SNAPSHOT_STORAGE]: baselineSnapshot2,
-  [reloadedApi.SNAPSHOT_COMMIT]: baselineCommit2
+  [stateApi.STORAGE]: storage.getItem(stateApi.STORAGE),
+  [stateApi.CARDS_STORAGE]: '{not-json',
+  [stateApi.REVIEWS_STORAGE]: '[]',
+  [stateApi.KNOWLEDGE_STORAGE]: '{not-json',
+  [stateApi.SNAPSHOT_STORAGE]: baselineSnapshot,
+  [stateApi.SNAPSHOT_COMMIT]: baselineCommit
 });
 const tornApi = boot(torn);
 const recovered = tornApi.loadState();
@@ -129,12 +112,12 @@ assert.equal(recovered.reviews.length, 1);
 assert.ok(recovered.knowledge.a);
 
 const corrupt = new MemoryStorage({
-  [reloadedApi.STORAGE]: persistedStorage.getItem(reloadedApi.STORAGE),
-  [reloadedApi.CARDS_STORAGE]: persistedStorage.getItem(reloadedApi.CARDS_STORAGE),
-  [reloadedApi.REVIEWS_STORAGE]: persistedStorage.getItem(reloadedApi.REVIEWS_STORAGE),
-  [reloadedApi.KNOWLEDGE_STORAGE]: persistedStorage.getItem(reloadedApi.KNOWLEDGE_STORAGE),
-  [reloadedApi.SNAPSHOT_STORAGE]: JSON.stringify({ schemaVersion: 1, payload: { cards: {}, reviews: [] }, checksum: 'bad' }),
-  [reloadedApi.SNAPSHOT_COMMIT]: baselineCommit2
+  [stateApi.STORAGE]: storage.getItem(stateApi.STORAGE),
+  [stateApi.CARDS_STORAGE]: storage.getItem(stateApi.CARDS_STORAGE),
+  [stateApi.REVIEWS_STORAGE]: storage.getItem(stateApi.REVIEWS_STORAGE),
+  [stateApi.KNOWLEDGE_STORAGE]: storage.getItem(stateApi.KNOWLEDGE_STORAGE),
+  [stateApi.SNAPSHOT_STORAGE]: JSON.stringify({ schemaVersion: 1, payload: { cards: {}, reviews: [] }, checksum: 'bad' }),
+  [stateApi.SNAPSHOT_COMMIT]: baselineCommit
 });
 const corruptApi = boot(corrupt);
 const legacyRecovered = corruptApi.loadState();
@@ -142,10 +125,10 @@ assert.equal(legacyRecovered.settings.dailyNew, 7);
 assert.ok(legacyRecovered.knowledge.a);
 
 const legacyOnly = new MemoryStorage({
-  [reloadedApi.STORAGE]: JSON.stringify({ settings: { dailyNew: 9 }, today: reloadedApi.todayKey(), cards: { legacy: { card: {} } } }),
-  [reloadedApi.CARDS_STORAGE]: JSON.stringify({ legacy: { card: {} } }),
-  [reloadedApi.REVIEWS_STORAGE]: JSON.stringify([{ id: 'legacy', eventId: 'legacy-e1', at: '2026-09-04T00:00:00.000Z', rating: 'Again' }]),
-  [reloadedApi.KNOWLEDGE_STORAGE]: JSON.stringify({ legacy: { reading: { on: 1 } } })
+  [stateApi.STORAGE]: JSON.stringify({ settings: { dailyNew: 9 }, today: stateApi.todayKey(), cards: { legacy: { card: {} } } }),
+  [stateApi.CARDS_STORAGE]: JSON.stringify({ legacy: { card: {} } }),
+  [stateApi.REVIEWS_STORAGE]: JSON.stringify([{ id: 'legacy', eventId: 'legacy-e1', at: '2026-09-04T00:00:00.000Z', rating: 'Again' }]),
+  [stateApi.KNOWLEDGE_STORAGE]: JSON.stringify({ legacy: { reading: { on: 1 } } })
 });
 const legacyApi = boot(legacyOnly);
 const migrated = legacyApi.loadState();
@@ -156,8 +139,8 @@ assert.ok(legacyOnly.getItem(legacyApi.SNAPSHOT_STORAGE));
 assert.ok(legacyOnly.getItem(legacyApi.SNAPSHOT_COMMIT));
 
 const uncommitted = new MemoryStorage({
-  [reloadedApi.SNAPSHOT_STORAGE]: baselineSnapshot2,
-  [reloadedApi.SNAPSHOT_COMMIT]: ''
+  [stateApi.SNAPSHOT_STORAGE]: baselineSnapshot,
+  [stateApi.SNAPSHOT_COMMIT]: ''
 });
 const uncommittedApi = boot(uncommitted);
 const fallback = uncommittedApi.loadState();
