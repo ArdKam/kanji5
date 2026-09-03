@@ -27,3 +27,5 @@ Active Recall keeps its focus internally and exposes only an explicit browser re
 ## CI requirement
 
 Architecture boundaries are executable contracts. JavaScript syntax checks, pure-core unit tests, legacy/P0 behavior checks, persistence/sync checks, Playwright smoke tests, and committed-build verification must all pass before a refactor is considered complete.
+
+CI itself is source-immutable: validation must inspect the committed checkout and must never mutate, commit, or push application files during the test run.
