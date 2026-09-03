@@ -34,8 +34,6 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(firstKanji).toBeTruthy();
     expect(firstId).toBeTruthy();
 
-    // First exposure is intentionally information-only. Rate Again so the same
-    // card is persisted and remains due for the next review cycle.
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Again"]').click();
@@ -51,19 +49,16 @@ test.describe('Kanji 5 browser smoke', () => {
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
 
-    // Exercise the legacy v1.2 recall listener against the persisted v1.5 card.
-    // Write the compatibility view and dispatch the reveal click in the same
-    // browser task so no asynchronous startup/save step can overwrite it first.
-    await page.evaluate(() => {
-      const metadataRaw = localStorage.getItem('kanji5-v1');
+    // v1.2's reveal guard reads the legacy metadata shape. Seed that view
+    // synchronously immediately before the click, using the real v1.5 card.
+    await page.evaluate(id => {
       const cardsRaw = localStorage.getItem('kanji5-v1-cards');
-      if (!metadataRaw || !cardsRaw) throw new Error('persisted state missing');
-      const metadata = JSON.parse(metadataRaw);
+      if (!cardsRaw || !id) throw new Error('persisted card missing');
       const cards = JSON.parse(cardsRaw);
-      metadata.cards = cards;
-      localStorage.setItem('kanji5-v1', JSON.stringify(metadata));
+      if (!cards[id]) throw new Error('target card missing from persisted cards');
+      localStorage.setItem('kanji5-v1', JSON.stringify({ cards: { [id]: cards[id] } }));
       document.getElementById('revealBtn')?.click();
-    });
+    }, firstId);
 
     const gate = page.locator('.v12-recall-gate');
     await expect(gate).toBeVisible({ timeout: 10_000 });
@@ -82,7 +77,6 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(reviewsBefore.at(-1).rating).toBe('Again');
 
     await page.locator('#v15DontKnowRecall').click();
-
     await expect(gate).toHaveCount(0);
     await expect(page.locator('#answerBox')).toHaveClass(/show/);
     await expect(page.locator('#ratings')).toHaveClass(/show/);
@@ -91,12 +85,7 @@ test.describe('Kanji 5 browser smoke', () => {
       const raw = localStorage.getItem('kanji5-v1.2-last-attempt');
       return raw ? JSON.parse(raw) : null;
     });
-    expect(lastAttempt).toMatchObject({
-      character: firstKanji,
-      correct: false,
-      unknown: true,
-      hadAttempt: true,
-    });
+    expect(lastAttempt).toMatchObject({ character: firstKanji, correct: false, unknown: true, hadAttempt: true });
 
     const componentEvidence = await page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1.5-components');
