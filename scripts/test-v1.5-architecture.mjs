@@ -19,7 +19,19 @@ assert.match(syncCore, /^import /m, 'sync core must remain an explicit ESM modul
 assert.match(sync, /from ['"]\.\/v1\.5-sync-core\.js['"]/, 'Supabase sync must consume the sync core through its module boundary');
 
 assert.match(state, /window\.__KANJI5_STATE__/, 'state module must expose one public browser API');
-assert.match(p0, /window\.__KANJI5_V15_RECALL_API__/, 'P0 must expose one explicit recall API');
+for (const boundary of ['readDeck','readKnowledge','writeKnowledge','readComponents','writeComponents','writeLastAttempt','clearRuntimeKnowledge']) {
+  assert.match(state, new RegExp(`function ${boundary}\\b`), `state module must own ${boundary}`);
+  assert.match(state, new RegExp(`\\b${boundary}\\b`), `state module must expose ${boundary}`);
+}
+assert.match(p0, /const state=window\.__KANJI5_STATE__/, 'P0 must depend on the explicit persistence boundary');
+assert.doesNotMatch(p0, /\blocalStorage\b/, 'P0 must not access localStorage directly');
+assert.doesNotMatch(p0, /window\.fetch\s*=|globalThis\.fetch\s*=|self\.fetch\s*=/, 'P0 must not monkey-patch fetch');
+assert.match(p0, /state\.readDeck\(\)/, 'P0 must read deck through state boundary');
+assert.match(p0, /state\.readKnowledge\(\)/, 'P0 must read knowledge through state boundary');
+assert.match(p0, /state\.writeKnowledge\(/, 'P0 must write knowledge through state boundary');
+assert.match(p0, /state\.readComponents\(\)/, 'P0 must read recall component state through state boundary');
+assert.match(p0, /state\.writeComponents\(/, 'P0 must write recall component state through state boundary');
+assert.match(p0, /state\.writeLastAttempt\(/, 'P0 must write last-attempt state through state boundary');
 assert.doesNotMatch(p0, /function\s+normalize\(/, 'pure recall normalization must live in the recall core');
 assert.doesNotMatch(p0, /function\s+componentAccuracy\(/, 'component accuracy must live in the recall core');
 assert.doesNotMatch(p0, /function\s+componentSignal\(/, 'component signal aggregation must live in the recall core');
@@ -30,6 +42,13 @@ assert.doesNotMatch(p0, /\|\|document\.body/, 'P0 must not fall back to the glob
 assert.doesNotMatch(p0, /function\s+enhanceProduction\(/, 'Production UI logic must stay in the education UI module');
 assert.doesNotMatch(p0, /function\s+getProductionTarget\(/, 'Production target inference must stay out of the P0 overlay');
 assert.doesNotMatch(p0, /v15Production/, 'P0 must not own production-choice state');
+
+assert.match(state, /function readObject\(/, 'state persistence implementation must own storage reads');
+assert.match(state, /function writeObject\(/, 'state persistence implementation must own storage writes');
+assert.match(sw, /const API_INFLIGHT=new Map\(\)/, 'service worker must own API request coalescing');
+assert.match(sw, /API_INFLIGHT\.get\(key\)/, 'service worker must reuse concurrent requests');
+assert.match(sw, /\.clone\(\)/, 'service worker must return independent response bodies to coalesced callers');
+assert.doesNotMatch(index, /window\.fetch\s*=|globalThis\.fetch\s*=/, 'application shell must not monkey-patch fetch');
 
 assert.match(index, /<script src="\.\/v1\.5-state\.js"><\/script>/, 'state boundary must be loaded before the application runtime');
 assert.match(index, /<script src="\.\/v1\.5-p0\.js"><\/script>/, 'P0 must be explicitly wired once by the active shell');
