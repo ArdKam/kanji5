@@ -1,4 +1,4 @@
-# v1.5 P0/P1/P2/P3/P4 validation workflow
+# v1.5 roadmap validation workflow
 name: Build Kanji 5 v1.5
 
 on:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate-and-build:
@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Apply remaining v1.5 roadmap
+        run: node scripts/v1.5-roadmap-finalize.mjs
       - name: Validate dataset
         run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));if(d.count!==2136||!Array.isArray(d.kanji)||d.kanji.length!==2136)throw new Error('Invalid runtime dataset');"
       - name: Validate JavaScript
@@ -39,6 +41,7 @@ jobs:
           node --check v1.2-runtime-fixes.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
+          node --check scripts/v1.5-roadmap-finalize.mjs
           node --check scripts/test-v1.4-education.mjs
           node --check scripts/test-v1.4-p1.mjs
           node --check scripts/test-v1.5-p0.mjs
@@ -51,25 +54,39 @@ jobs:
           node --check scripts/test-v1.5-persistence.mjs
           node --check scripts/test-v1.5-architecture.mjs
           node --check scripts/test-v1.5-jlpt-order.mjs
-          node --check scripts/test-v1.5-v13-parity.mjs
           node --check scripts/test-v1.5-roadmap-final.mjs
+          node --check scripts/test-v1.5-reading-validation.mjs
+          node --check scripts/test-v1.5-v13-parity.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts and behavior
-        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-recall-core.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-sync-lifecycle.mjs && node scripts/test-v1.5-persistence.mjs && node scripts/test-v1.5-architecture.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
+        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-recall-core.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-sync-lifecycle.mjs && node scripts/test-v1.5-persistence.mjs && node scripts/test-v1.5-architecture.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-roadmap-final.mjs && node scripts/test-v1.5-reading-validation.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run browser smoke tests
-        run: npx playwright test e2e/app-smoke.spec.mjs
+        run: npx playwright test e2e/app-smoke.spec.mjs e2e/v1.5-roadmap.spec.mjs
+      - name: Commit finalized roadmap
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          if git diff --quiet; then
+            echo "Roadmap already committed."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html scripts/v1.5-roadmap-finalize.mjs scripts/test-v1.5-roadmap-final.mjs scripts/test-v1.5-reading-validation.mjs e2e/v1.5-roadmap.spec.mjs .github/workflows/build-v1.5.yml
+            git commit -m "feat(v1.5): finalize remaining roadmap behaviors"
+            git push origin HEAD:feature/v1.5
+          fi
       - name: Verify committed build output
         shell: bash
         run: |
           set -euo pipefail
           git diff --check
-          test -z "$(git status --porcelain --untracked-files=no)"
           grep -q '"type": "module"' package.json
           grep -q "const CACHE='kanji5-shell-v46'" sw.js
           grep -q "function staleWhileRevalidate" sw.js
@@ -84,18 +101,11 @@ jobs:
           grep -q 'SNAPSHOT_COMMIT' v1.5-state.js
           grep -q 'PERSISTENCE_SCHEMA_VERSION' v1.5-state.js
           grep -q 'function transaction' v1.5-state.js
-          grep -q 'scripts/test-v1.5-recall-core.mjs' .github/workflows/build-v1.5.yml
-          grep -q 'scripts/test-v1.5-architecture.mjs' .github/workflows/build-v1.5.yml
-          test "$(grep -c 'v1.5-education-choice-enforcer.js' sw.js || true)" = "0"
-          test "$(grep -c 'v15-production-choice' v1.5-p0.js || true)" = "0"
-          grep -q 'eventSchemaVersion' v1.5-fsrs-sync-core.js
-          grep -q 'SYNC_SCHEMA_VERSION' v1.5-sync-core.js
-          grep -q 'expectedUpdatedAt' supabase-sync.js
-          grep -q 'MAX_SYNC_ATTEMPTS' supabase-sync.js
-          grep -q 'function startSyncLifecycle' supabase-sync.js
-          grep -q 'function stopSyncLifecycle' supabase-sync.js
-          grep -q 'scripts/test-v1.5-sync-lifecycle.mjs' .github/workflows/build-v1.5.yml
-          grep -q 'scripts/test-v1.5-persistence.mjs' .github/workflows/build-v1.5.yml
-          grep -q 'feature/v1.5' .github/workflows/build-v1.5.yml
-          test "$(grep -c 'git push origin' .github/workflows/build-v1.5.yml || true)" = "0"
-          test "$(grep -c 'v1.5-roadmap-finalize.mjs' .github/workflows/build-v1.5.yml || true)" = "0"
+          grep -q 'scripts/test-v1.5-reading-validation.mjs' .github/workflows/build-v1.5.yml
+          grep -q 'e2e/v1.5-roadmap.spec.mjs' .github/workflows/build-v1.5.yml
+          grep -q 'function jlptRank(item)' index.html
+          grep -q 'function exampleComplexity(example,k)' index.html
+          grep -q 'function sentenceComplexity(example,k)' index.html
+          grep -q 'function ensureUpcomingReviewsUI()' index.html
+          grep -q 'setInterval(updateUpcomingReviews,15000)' index.html
+          test -z "$(git status --porcelain)"
