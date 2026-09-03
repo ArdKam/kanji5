@@ -88,5 +88,5 @@ jobs:
           grep -q 'function transaction' v1.5-state.js
           grep -q 'scripts/test-v1.5-recall-core.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.5-architecture.mjs' .github/workflows/build-v1.5.yml
-          test "$(grep -c 'git push origin' .github/workflows/build-v1.5.yml || true)" = "0"
-          test "$(grep -Ec '(^|[[:space:]])node[[:space:]]+scripts/v1.5-roadmap-finalize.mjs' .github/workflows/build-v1.5.yml || true)" = "0"
+          ! grep -Eq '^[[:space:]]+git[[:space:]]+push[[:space:]]+origin([[:space:]]|$)' .github/workflows/build-v1.5.yml
+          ! grep -Eq '^[[:space:]]+node[[:space:]]+scripts/v1.5-roadmap-finalize\.mjs([[:space:]]|$)' .github/workflows/build-v1.5.yml
