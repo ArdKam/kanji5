@@ -30,7 +30,7 @@ assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), '
 assert(has(p0,/button\.id\s*=\s*["']v15DontKnowRecall["']/), 'Active Recall “don’t know” control is missing');
 assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'Active Recall “don’t know” must record an educational unknown outcome');
 assert(p0.includes("await import('./v1.5-recall-core.js')"), 'P0 must delegate pure recall behavior to the dedicated core');
-assert(has(recallCore,/score\s*=\s*Number\(stats\.score\)\s*\+\s*0\.25/), 'Unknown recall must carry a smaller educational weight than a correct recall');
+assert(has(recallCore,/stats\.score\s*=\s*Number\(stats\.score\s*\|\|\s*0\)\s*\+\s*0\.25/), 'Unknown recall must carry a smaller educational weight than a correct recall');
 assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” must not be added');
 assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
 assert(ui.includes("else if(edu.mode==='production'){prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';"), 'Production must use a selection prompt');
@@ -42,9 +42,9 @@ assert(!p0.includes('function enhanceProduction'), 'Production rendering should 
 assert(!p0.includes('data-v15Production'), 'Production choice handling should use the canonical education UI');
 assert(!p0.includes('برای معنی زیر، کانجی مناسب را انتخاب کن.'), 'P0 must not duplicate the Production renderer');
 assert(!p0.includes('observer.observe(document.body'), 'P0 must not observe the entire document body');
-assert(!p0.includes('||document.body'), 'P0 observer must not fall back to the document body');
+assert(!p0.includes('||document.body'), 'P0 must not observe the entire document body');
 assert(p0.includes('function startTargetedObservers()')&&p0.includes('studyRoot'),'P0 must use a targeted study observer');
-assert(p0.includes("const mode=String(gate.textContent||'').includes('خوانش')?'reading':'meaning',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;"), 'Recall enhancement must remain retryable until a focus component is available');
+assert(p0.includes("const mode=String(gate.textContent||'').includes('خوانش')?'reading':\'meaning',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;"), 'Recall enhancement must remain retryable until a focus component is available');
 assert(runtime.includes('loading.classList.add("v13-real-error")'), 'Startup errors must opt into the visible error-panel CSS override');
 
 assert(v12.includes('gradeMeaningCanonical'), 'Legacy active-recall layer is not delegated to the canonical grader');
@@ -81,14 +81,7 @@ result = core.gradeReading('a', ['し']);
 assert(!result.correct, 'Unrelated short reading must be incorrect');
 
 const target = { character: '学', meaning: ['study'], on: ['がく'], kun: ['まなぶ'], strokes: 8, grade: 2 };
-const pool = [
-  target,
-  { character: '校', meaning: ['school'], on: ['こう'], kun: [], strokes: 10, grade: 2 },
-  { character: '生', meaning: ['life'], on: ['せい'], kun: ['いきる'], strokes: 5, grade: 2 },
-  { character: '習', meaning: ['learn'], on: ['しゅう'], kun: ['ならう'], strokes: 11, grade: 3 },
-  { character: '先', meaning: ['previous'], on: ['せん'], kun: ['さき'], strokes: 6, grade: 1 },
-  { character: '大', meaning: ['big'], on: ['だい'], kun: ['おおきい'], strokes: 3, grade: 1 }
-];
+const pool = [target,{character: '校', meaning: ['school'], on: ['こう'], kun: [], strokes: 10, grade: 2},{character: '生', meaning: ['life'], on: ['せい'], kun: ['いきる'], strokes: 5, grade: 2},{character: '習', meaning: ['learn'], on: ['しゅう'], kun: ['ならう'], strokes: 11, grade: 3},{character: '先', meaning: ['previous'], on: ['せん'], kun: ['さき'], strokes: 6, grade: 1},{character: '大', meaning: ['big'], on: ['だい'], kun: ['おおきい'], strokes: 3, grade: 1}];
 const distractors = core.chooseDistractors(target, pool, {}, 3);
 assert(distractors.length === 3, 'chooseDistractors must return the requested number');
 assert(new Set(distractors.map(x => x.character)).size === 3, 'Distractors must be unique');
