@@ -26,6 +26,6 @@ assert(sw.includes('response.clone()') || sw.includes('await request).clone()'),
 
 assert(p0.includes('function installAccessibilityEnhancements()'),'Accessibility enhancement installer is missing');
 assert(p0.includes('button:focus-visible,input:focus-visible'),'Keyboard focus visibility is missing');
-assert(recallCore.includes('stats.score=Number(stats.score||0)+0.25'),'Unknown recall must carry a smaller educational weight');
+assert(has(recallCore,/stats\.score\s*=\s*Number\(stats\.score\s*\|\|\s*0\)\s*\+\s*0\.25/),'Unknown recall must carry a smaller educational weight');
 
 console.log('Kanji 5 v1.5 Active Recall + network-boundary + accessibility checks passed.');
