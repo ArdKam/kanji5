@@ -8,222 +8,27 @@ const KNOWLEDGE_KEY='kanji5-v1.2-knowledge';
 const LAST_ATTEMPT_KEY='kanji5-v1.2-last-attempt';
 const $=(selector,root=document)=>root.querySelector(selector);
 
-function readJSON(key,fallback){
-  try{
-    const raw=localStorage.getItem(key);
-    if(!raw)return fallback;
-    const value=JSON.parse(raw);
-    return value&&typeof value==='object'?value:fallback;
-  }catch(_){return fallback}
-}
+function readJSON(key,fallback){try{const raw=localStorage.getItem(key);if(!raw)return fallback;const value=JSON.parse(raw);return value&&typeof value==='object'?value:fallback}catch(_){return fallback}}
 function writeJSON(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(_) {}}
 function normalize(value){return String(value??'').trim().toLowerCase().normalize('NFKC').replace(/[\s\u3000]+/g,'')}
-function getDeck(){
-  const prefetched=window.__KANJI5_P0_DATA;
-  if(Array.isArray(prefetched)&&prefetched.length)return prefetched;
-  const cached=readJSON('kanji5-deck',[]);
-  return Array.isArray(cached)?cached:[];
-}
-function ensureComponentEntry(character){
-  const all=readJSON(COMPONENT_KEY,{});
-  if(!all[character]||typeof all[character]!=='object')all[character]={meaning:{},reading:{},updatedAt:null};
-  if(!all[character].meaning||typeof all[character].meaning!=='object')all[character].meaning={};
-  if(!all[character].reading||typeof all[character].reading!=='object')all[character].reading={};
-  return all;
-}
-function componentAccuracy(stats){
-  const attempts=Math.max(0,Number(stats?.attempts)||0);
-  if(!attempts)return 0;
-  const correct=Math.min(attempts,Math.max(0,Number(stats?.correct)||0));
-  const score=Number.isFinite(Number(stats?.score))?Math.max(0,Math.min(attempts,Number(stats.score))):correct;
-  return(score+1)/(attempts+2);
-}
-function componentSignal(entry){
-  const out={};
-  for(const mode of ['meaning','reading']){
-    const values=Object.values(entry?.[mode]||{}).filter(value=>value&&typeof value==='object'&&(Number(value.attempts)||0)>0);
-    if(!values.length){out[mode]={accuracy:null,weakness:null,attempts:0,lastAt:null};continue}
-    let weight=0,total=0,lastAt=null;
-    for(const value of values){
-      const attempts=Math.max(0,Number(value.attempts)||0);
-      weight+=attempts;
-      total+=componentAccuracy(value)*attempts;
-      const at=typeof value.lastAt==='string'?value.lastAt:'';
-      if(at&&(lastAt===null||at>lastAt))lastAt=at;
-    }
-    const accuracy=weight?total/weight:0;
-    out[mode]={accuracy,weakness:Math.max(0,Math.min(1,1-accuracy)),attempts:weight,lastAt};
-  }
-  return out;
-}
-function writeSchedulerComponentEvidence(character){
-  const all=readJSON(COMPONENT_KEY,{}),entry=all[character],knowledge=readJSON(KNOWLEDGE_KEY,{});
-  if(!entry)return;
-  const target=knowledge[character]&&typeof knowledge[character]==='object'?knowledge[character]:{};
-  target.componentEvidence={...componentSignal(entry),updatedAt:entry.updatedAt||new Date().toISOString(),version:1};
-  knowledge[character]=target;
-  writeJSON(KNOWLEDGE_KEY,knowledge);
-}
-function getFocusComponent(character,mode){
-  const item=getDeck().find(value=>value&&value.character===character);
-  if(!item)return null;
-  const all=ensureComponentEntry(character),state=all[character][mode]||{};
-  const values=mode==='reading'?[...(item.on||[]),...(item.kun||[])]:[...(item.meaning||[])];
-  const candidates=values.map(raw=>({raw,key:normalize(raw),accuracy:componentAccuracy(state[normalize(raw)]||{})}));
-  candidates.sort((a,b)=>a.accuracy-b.accuracy);
-  return candidates[0]||null;
-}
-function recordFocusedRecall(character,mode,focus,outcome){
-  if(!character||!focus)return;
-  const all=ensureComponentEntry(character),bucket=all[character][mode],key=normalize(focus);
-  const stats=bucket[key]||{attempts:0,correct:0,unknown:0,score:0,lastAt:null};
-  stats.attempts+=1;
-  if(outcome==='correct'){stats.correct+=1;stats.score+=1}
-  else if(outcome==='unknown'){stats.unknown=(Number(stats.unknown)||0)+1;stats.score+=.25}
-  stats.lastAt=new Date().toISOString();
-  bucket[key]=stats;
-  all[character].updatedAt=stats.lastAt;
-  writeJSON(COMPONENT_KEY,all);
-  writeSchedulerComponentEvidence(character);
-}
+function getDeck(){const prefetched=window.__KANJI5_P0_DATA;if(Array.isArray(prefetched)&&prefetched.length)return prefetched;const cached=readJSON('kanji5-deck',[]);return Array.isArray(cached)?cached:[]}
+function ensureComponentEntry(character){const all=readJSON(COMPONENT_KEY,{});if(!all[character]||typeof all[character]!=='object')all[character]={meaning:{},reading:{},updatedAt:null};if(!all[character].meaning||typeof all[character].meaning!=='object')all[character].meaning={};if(!all[character].reading||typeof all[character].reading!=='object')all[character].reading={};return all}
+function componentAccuracy(stats){const attempts=Math.max(0,Number(stats?.attempts)||0);if(!attempts)return 0;const correct=Math.min(attempts,Math.max(0,Number(stats?.correct)||0));const score=Number.isFinite(Number(stats?.score))?Math.max(0,Math.min(attempts,Number(stats.score))):correct;return(score+1)/(attempts+2)}
+function componentSignal(entry){const out={};for(const mode of ['meaning','reading']){const values=Object.values(entry?.[mode]||{}).filter(value=>value&&typeof value==='object'&&(Number(value.attempts)||0)>0);if(!values.length){out[mode]={accuracy:null,weakness:null,attempts:0,lastAt:null};continue}let weight=0,total=0,lastAt=null;for(const value of values){const attempts=Math.max(0,Number(value.attempts)||0);weight+=attempts;total+=componentAccuracy(value)*attempts;const at=typeof value.lastAt==='string'?value.lastAt:'';if(at&&(lastAt===null||at>lastAt))lastAt=at}const accuracy=weight?total/weight:0;out[mode]={accuracy,weakness:Math.max(0,Math.min(1,1-accuracy)),attempts:weight,lastAt}}return out}
+function writeSchedulerComponentEvidence(character){const all=readJSON(COMPONENT_KEY,{}),entry=all[character],knowledge=readJSON(KNOWLEDGE_KEY,{});if(!entry)return;const target=knowledge[character]&&typeof knowledge[character]==='object'?knowledge[character]:{};target.componentEvidence={...componentSignal(entry),updatedAt:entry.updatedAt||new Date().toISOString(),version:1};knowledge[character]=target;writeJSON(KNOWLEDGE_KEY,knowledge)}
+function getFocusComponent(character,mode){const item=getDeck().find(value=>value&&value.character===character);if(!item)return null;const all=ensureComponentEntry(character),state=all[character][mode]||{};const values=mode==='reading'?[...(item.on||[]),...(item.kun||[])]:[...(item.meaning||[])];const candidates=values.map(raw=>({raw,key:normalize(raw),accuracy:componentAccuracy(state[normalize(raw)]||{})}));candidates.sort((a,b)=>a.accuracy-b.accuracy);return candidates[0]||null}
+function recordFocusedRecall(character,mode,focus,outcome){if(!character||!focus)return;const all=ensureComponentEntry(character),bucket=all[character][mode],key=normalize(focus);const stats=bucket[key]||{attempts:0,correct:0,unknown:0,score:0,lastAt:null};stats.attempts+=1;if(outcome==='correct'){stats.correct+=1;stats.score+=1}else if(outcome==='unknown'){stats.unknown=(Number(stats.unknown)||0)+1;stats.score+=.25}stats.lastAt=new Date().toISOString();bucket[key]=stats;all[character].updatedAt=stats.lastAt;writeJSON(COMPONENT_KEY,all);writeSchedulerComponentEvidence(character)}
 function inferMode(gate){return String(gate?.textContent||'').includes('خوانش')?'reading':'meaning'}
-function setRecallPrompt(gate,mode){
-  const nextPrompt=mode==='meaning'?'معنی این کانجی را از حافظه به یاد بیاور و پاسخ خودت را وارد کن.':'حداقل یک خوانش این کانجی را از حافظه به یاد بیاور و پاسخ خودت را وارد کن.';
-  const prompt=[...gate.querySelectorAll('div')].find(node=>{const text=String(node.textContent||'').trim();return text.includes('معنی این کانجی')||text.includes('حداقل یک خوانش')});
-  if(prompt&&prompt.textContent!==nextPrompt)prompt.textContent=nextPrompt;
-}
-function revealAfterUnknown(gate){
-  const answer=$('#answerBox')||$('.answer');
-  const ratings=$('#ratings');
-  if(answer){answer.classList.add('show');answer.style.display='block'}
-  if(ratings){ratings.classList.add('show');ratings.style.display='grid';ratings.querySelector('button')?.focus()}
-  gate?.remove();
-}
-function addDontKnowRecall(){
-  const gate=$('.v12-recall-gate');
-  if(!gate||$('#v15DontKnowRecall',gate))return;
-  const input=gate.querySelector('input,textarea');
-  if(!input)return;
-  const button=document.createElement('button');
-  button.type='button';
-  button.id='v15DontKnowRecall';
-  button.className='secondary';
-  button.textContent='نمی‌دانم';
-  button.style.width='100%';
-  button.style.marginTop='9px';
-  button.addEventListener('click',event=>{
-    event.preventDefault();
-    event.stopPropagation();
-    const character=String($('.kanji')?.textContent||'').trim();
-    const mode=gate.dataset.v15Mode||inferMode(gate);
-    const focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';
-    if(character)writeJSON(LAST_ATTEMPT_KEY,{character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct:false,unknown:true});
-    if(character&&focus)recordFocusedRecall(character,mode,focus,'unknown');
-    revealAfterUnknown(gate);
-  },false);
-  input.parentElement?.appendChild(button);
-}
-function enhanceRecall(){
-  const gate=$('.v12-recall-gate');
-  const kanji=$('.kanji');
-  if(!gate||!kanji)return;
-  const character=String(kanji.textContent||'').trim();
-  const mode=String(gate.textContent||'').includes('خوانش')?'reading':'meaning',focus=getFocusComponent(character,mode);
-  gate.dataset.v15Mode=mode;
-  if(focus)gate.dataset.v15Focus=focus.raw;
-  setRecallPrompt(gate,mode);
-  addDontKnowRecall();
-}
-function gradeFocusedRecall(mode,answer,focus){
-  const character=String($('.kanji')?.textContent||'').trim();
-  const item=getDeck().find(value=>value&&value.character===character);
-  const target=String(focus?.raw||'');
-  const core=window.__KANJI5_EDU_CORE__;
-  if(!item||!target)return false;
-  if(mode==='meaning')return Boolean(core?.gradeMeaning?.(answer,[target])?.correct);
-  return Boolean(core?.gradeReading?.(answer,[target])?.correct);
-}
-function recordRecall(event){
-  const gate=$('.v12-recall-gate');
-  if(!gate)return false;
-  const input=$('#v12RecallInput',gate);
-  const character=String($('.kanji')?.textContent||'').trim();
-  const mode=gate.dataset.v15Mode||inferMode(gate);
-  const focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';
-  if(!input||!character||!focus)return false;
-  event?.preventDefault?.();
-  event?.stopPropagation?.();
-  const answer=String(input.value||'');
-  const correct=gradeFocusedRecall(mode,answer,{raw:focus});
-  const result=$('.v12-recall-result',gate);
-  result.className=correct?'v12-recall-result good':'v12-recall-result bad';
-  result.textContent=correct?'✅ پاسخ درست بود':'❌ پاسخ درست نبود';
-  recordFocusedRecall(character,mode,focus,correct?'correct':'wrong');
-  const knowledge=readJSON(KNOWLEDGE_KEY,{});
-  const entry=knowledge[character]||{};
-  const stats=entry[mode]||{attempts:0,correct:0,lastAt:null};
-  stats.attempts=Number(stats.attempts)||0;
-  stats.correct=Number(stats.correct)||0;
-  stats.attempts+=1;
-  if(correct)stats.correct+=1;
-  stats.lastAt=new Date().toISOString();
-  entry[mode]=stats;
-  entry.lastPrompt=mode;
-  knowledge[character]=entry;
-  writeJSON(KNOWLEDGE_KEY,knowledge);
-  revealAfterUnknown(gate);
-  return correct;
-}
-function startTargetedObservers(){
-  const studyRoot=document.getElementById("studyPanel")||document.getElementById("study");
-  if(!studyRoot)return;
-  const observer=new MutationObserver(()=>enhanceRecall());
-  observer.observe(studyRoot,{childList:true,subtree:true});
-  enhanceRecall();
-}
-function installTatoebaFetchDeduper(){
-  if(window.__KANJI5_V15_TATOEBA_DEDUP__)return;
-  const nativeFetch=window.fetch?.bind(window);
-  if(!nativeFetch)return;
-  const inflight=new Map();
-  window.fetch=(input,init)=>{
-    const url=typeof input==='string'?input:input?.url||'';
-    const method=String(init?.method||input?.method||'GET').toUpperCase();
-    if(method!=='GET'||!url.startsWith('https://api.tatoeba.org/v1/sentences'))return nativeFetch(input,init);
-    const pending=inflight.get(url);
-    if(pending)return pending.then(response=>response.clone());
-    const request=nativeFetch(input,init).finally(()=>inflight.delete(url));
-    inflight.set(url,request);
-    return request.then(response=>response.clone());
-  };
-  window.__KANJI5_V15_TATOEBA_DEDUP__=true;
-}
-function installAccessibilityEnhancements(){
-  if($('#v15-a11y-style'))return;
-  const style=document.createElement('style');
-  style.id='v15-a11y-style';
-  style.textContent='button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[role="button"]:focus-visible{outline:3px solid var(--accent,var(--primary,#4f46e5));outline-offset:3px}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}';
-  document.head.appendChild(style);
-}
-function syncEducationBusyState(){
-  const root=document.getElementById('educationPanel')||document.querySelector('.education-panel');
-  if(!root)return;
-  const busy=root.getAttribute('aria-busy')==='true';
-  if(!busy)root.setAttribute('aria-busy','false');
-  const empty=root.querySelector('.empty');
-  if(empty)empty.setAttribute('role','status');
-}
-function guardBusyEducationClicks(event){
-  const control=event.target?.closest?.('button,[role="button"]');
-  if(!control||control.id==='v15DontKnowRecall')return;
-  const root=control.closest?.('#educationPanel,.education-panel');
-  if(!root||root.getAttribute('aria-busy')!=='true')return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-}
-installTatoebaFetchDeduper();
-installAccessibilityEnhancements();
-document.addEventListener('click',guardBusyEducationClicks,true);
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});
-else startTargetedObservers();
+function setRecallPrompt(gate,mode){const nextPrompt=mode==='meaning'?'معنی این کانجی را از حافظه به یاد بیاور و پاسخ خودت را وارد کن.':'حداقل یک خوانش این کانجی را از حافظه به یاد بیاور و پاسخ خودت را وارد کن.';const prompt=[...gate.querySelectorAll('div')].find(node=>{const text=String(node.textContent||'').trim();return text.includes('معنی این کانجی')||text.includes('حداقل یک خوانش')});if(prompt&&prompt.textContent!==nextPrompt)prompt.textContent=nextPrompt}
+function revealAfterUnknown(gate){const answer=$('#answerBox')||$('.answer'),ratings=$('#ratings');if(answer){answer.classList.add('show');answer.style.display='block'}if(ratings){ratings.classList.add('show');ratings.style.display='grid';ratings.querySelector('button')?.focus()}gate?.remove()}
+function addDontKnowRecall(){const gate=$('.v12-recall-gate');if(!gate||$('#v15DontKnowRecall',gate))return;const input=gate.querySelector('input,textarea');if(!input)return;const button=document.createElement('button');button.type='button';button.id='v15DontKnowRecall';button.className='secondary';button.textContent='نمی‌دانم';button.style.width='100%';button.style.marginTop='9px';button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const character=String($('.kanji')?.textContent||'').trim();const mode=gate.dataset.v15Mode||inferMode(gate);const focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';if(character)writeJSON(LAST_ATTEMPT_KEY,{character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct:false,unknown:true});if(character&&focus)recordFocusedRecall(character,mode,focus,'unknown');revealAfterUnknown(gate)},false);input.parentElement?.appendChild(button)}
+function enhanceRecall(){const gate=$('.v12-recall-gate'),kanji=$('.kanji');if(!gate||!kanji)return;const character=String(kanji.textContent||'').trim(),mode=String(gate.textContent||'').includes('خوانش')?'reading':'meaning',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;gate.dataset.v15Mode=mode;gate.dataset.v15Focus=focus.raw;setRecallPrompt(gate,mode);addDontKnowRecall()}
+function gradeFocusedRecall(mode,answer,focus){const character=String($('.kanji')?.textContent||'').trim(),item=getDeck().find(value=>value&&value.character===character),target=String(focus?.raw||''),core=window.__KANJI5_EDU_CORE__;if(!item||!target)return false;if(mode==='meaning')return Boolean(core?.gradeMeaning?.(answer,[target])?.correct);return Boolean(core?.gradeReading?.(answer,[target])?.correct)}
+function recordRecall(event){const gate=$('.v12-recall-gate');if(!gate)return false;const input=$('#v12RecallInput',gate),character=String($('.kanji')?.textContent||'').trim(),mode=gate.dataset.v15Mode||inferMode(gate),focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';if(!input||!character||!focus)return false;event?.preventDefault?.();event?.stopPropagation?.();const answer=String(input.value||''),correct=gradeFocusedRecall(mode,answer,{raw:focus}),result=$('.v12-recall-result',gate);result.className=correct?'v12-recall-result good':'v12-recall-result bad';result.textContent=correct?'✅ پاسخ درست بود':'❌ پاسخ درست نبود';recordFocusedRecall(character,mode,focus,correct?'correct':'wrong');const knowledge=readJSON(KNOWLEDGE_KEY,{}),entry=knowledge[character]||{},stats=entry[mode]||{attempts:0,correct:0,lastAt:null};stats.attempts=Number(stats.attempts)||0;stats.correct=Number(stats.correct)||0;stats.attempts+=1;if(correct)stats.correct+=1;stats.lastAt=new Date().toISOString();entry[mode]=stats;entry.lastPrompt=mode;knowledge[character]=entry;writeJSON(KNOWLEDGE_KEY,knowledge);revealAfterUnknown(gate);return correct}
+function startTargetedObservers(){const studyRoot=document.getElementById("studyPanel")||document.getElementById("study");if(!studyRoot)return;const observer=new MutationObserver(()=>enhanceRecall());observer.observe(studyRoot,{childList:true,subtree:true});enhanceRecall()}
+function installTatoebaFetchDeduper(){if(window.__KANJI5_V15_TATOEBA_DEDUP__)return;const nativeFetch=window.fetch?.bind(window);if(!nativeFetch)return;const inflight=new Map;window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'',method=String(init?.method||input?.method||'GET').toUpperCase();if(method!=='GET'||!url.startsWith('https://api.tatoeba.org/v1/sentences'))return nativeFetch(input,init);const pending=inflight.get(url);if(pending)return pending.then(response=>response.clone());const request=nativeFetch(input,init).finally(()=>inflight.delete(url));inflight.set(url,request);return request.then(response=>response.clone())};window.__KANJI5_V15_TATOEBA_DEDUP__=true}
+function installAccessibilityEnhancements(){if($('#v15-a11y-style'))return;const style=document.createElement('style');style.id='v15-a11y-style';style.textContent='button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[role="button"]:focus-visible{outline:3px solid var(--accent,var(--primary,#4f46e5));outline-offset:3px}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}';document.head.appendChild(style)}
+function syncEducationBusyState(){const root=document.getElementById('educationPanel')||document.querySelector('.education-panel');if(!root)return;const busy=root.getAttribute('aria-busy')==='true';if(!busy)root.setAttribute('aria-busy','false');const empty=root.querySelector('.empty');if(empty)empty.setAttribute('role','status')}
+function guardBusyEducationClicks(event){const control=event.target?.closest?.('button,[role="button"]');if(!control||control.id==='v15DontKnowRecall')return;const root=control.closest?.('#educationPanel,.education-panel');if(!root||root.getAttribute('aria-busy')!=='true')return;event.preventDefault();event.stopImmediatePropagation()}
+installTatoebaFetchDeduper();installAccessibilityEnhancements();document.addEventListener('click',guardBusyEducationClicks,true);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});else startTargetedObservers();
 })();
