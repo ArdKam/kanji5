@@ -1,4 +1,4 @@
-# v1.5 P0/P1/P2/P3 validation workflow
+# v1.5 P0/P1/P2/P3/P4 validation workflow
 name: Build Kanji 5 v1.5
 
 on:
@@ -30,6 +30,7 @@ jobs:
           node --check v1.4-education-migration.js
           node --check v1.4-education-core.js
           node --check v1.4-education-ui.js
+          node --check v1.5-recall-core.js
           node --check v1.5-p0.js
           node --check v1.5-state.js
           node --check v1.5-education-sync-core.js
@@ -41,6 +42,7 @@ jobs:
           node --check scripts/test-v1.4-education.mjs
           node --check scripts/test-v1.4-p1.mjs
           node --check scripts/test-v1.5-p0.mjs
+          node --check scripts/test-v1.5-recall-core.mjs
           node --check scripts/test-v1.5-p0-learning.mjs
           node --check scripts/test-v1.5-dont-know.mjs
           node --check scripts/test-v1.5-fsrs-sync.mjs
@@ -54,7 +56,7 @@ jobs:
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
       - name: Validate v1.5 contracts and behavior
-        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-sync-lifecycle.mjs && node scripts/test-v1.5-persistence.mjs && node scripts/test-v1.5-architecture.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
+        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-recall-core.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-sync-lifecycle.mjs && node scripts/test-v1.5-persistence.mjs && node scripts/test-v1.5-architecture.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
@@ -71,6 +73,7 @@ jobs:
           grep -q "function staleWhileRevalidate" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-state.js"' sw.js
+          grep -q '"./v1.5-recall-core.js"' sw.js
           grep -q '"./v1.5-p0.js"' sw.js
           grep -q '"./v1.5-education-sync-core.js"' sw.js
           grep -q '"./v1.5-fsrs-sync-core.js"' sw.js
@@ -79,6 +82,7 @@ jobs:
           grep -q 'SNAPSHOT_COMMIT' v1.5-state.js
           grep -q 'PERSISTENCE_SCHEMA_VERSION' v1.5-state.js
           grep -q 'function transaction' v1.5-state.js
+          grep -q 'scripts/test-v1.5-recall-core.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.5-architecture.mjs' .github/workflows/build-v1.5.yml
           test "$(grep -c 'v1.5-education-choice-enforcer.js' sw.js || true)" = "0"
           test "$(grep -c 'v15-production-choice' v1.5-p0.js || true)" = "0"
