@@ -51,6 +51,20 @@ test.describe('Kanji 5 browser smoke', () => {
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
 
+    // v1.2 active-recall wiring still reads the legacy metadata shape
+    // (kanji5-v1.cards), while v1.5 persists cards in kanji5-v1-cards.
+    // Mirror the persisted card into that legacy view for this E2E scenario so
+    // the test covers the recall/"don't know" behavior itself.
+    await page.evaluate(() => {
+      const metadataRaw = localStorage.getItem('kanji5-v1');
+      const cardsRaw = localStorage.getItem('kanji5-v1-cards');
+      if (!metadataRaw || !cardsRaw) return;
+      const metadata = JSON.parse(metadataRaw);
+      const cards = JSON.parse(cardsRaw);
+      metadata.cards = cards;
+      localStorage.setItem('kanji5-v1', JSON.stringify(metadata));
+    });
+
     const gate = page.locator('.v12-recall-gate');
     await page.locator('#revealBtn').click();
     await expect(gate).toBeVisible({ timeout: 10_000 });
