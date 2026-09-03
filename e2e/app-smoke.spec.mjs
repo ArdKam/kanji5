@@ -40,9 +40,10 @@ test.describe('Kanji 5 browser smoke', () => {
     }, firstId);
     expect(cardWasPersisted).toBe(true);
 
+    // A review can legitimately schedule the card in the future. The first
+    // reload therefore verifies persistence without assuming it is immediately due.
     await page.reload();
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
-    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
 
     const persistedTarget = await page.evaluate(id => {
       const raw = localStorage.getItem('kanji5-v1-cards');
@@ -57,7 +58,22 @@ test.describe('Kanji 5 browser smoke', () => {
     }, firstId);
     expect(persistedTarget.card).toBe(true);
     expect(persistedTarget.legacyCard).toBe(true);
-    expect(persistedTarget.buttonText).toContain('نمایش پاسخ');
+
+    // Make the persisted card due through the same persisted-card storage path,
+    // then reload so the production queue must select it for review.
+    await page.evaluate(id => {
+      const key = 'kanji5-v1-cards';
+      const raw = localStorage.getItem(key);
+      const cards = raw ? JSON.parse(raw) : {};
+      if (!id || !cards[id]?.card) throw new Error('persisted card missing');
+      cards[id].card.due = new Date(Date.now() - 1000).toISOString();
+      localStorage.setItem(key, JSON.stringify(cards));
+    }, firstId);
+
+    await page.reload();
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
+    await expect(page.locator('#revealBtn')).toHaveText(/نمایش پاسخ/);
 
     const gate = page.locator('.v12-recall-gate');
     await page.locator('#revealBtn').click();
