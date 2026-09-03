@@ -17,7 +17,6 @@ export default defineConfig({
     serviceWorkers: 'block',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
   },
   webServer: {
     command: 'node scripts/serve-static.mjs 4173',
