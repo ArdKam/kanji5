@@ -21,23 +21,46 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 
-  test('active recall does not leak the target and can use don\'t know', async ({ page }) => {
+  test('persisted cards can enter active recall and use don\'t know', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
     await page.goto('/');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
-    const firstKanji = await page.locator('.kanji').textContent();
+    const firstKanji = (await page.locator('.kanji').textContent())?.trim();
+    expect(firstKanji).toBeTruthy();
+
+    // First exposure is intentionally information-only. Rate Again so the same
+    // persisted card remains due for the next review cycle.
+    await page.locator('#revealBtn').click();
+    await expect(page.locator('#ratings')).toHaveClass(/show/);
+    await page.locator('.rate[data-r="Again"]').click();
+
+    const firstId = await page.locator('.kanji').getAttribute('data-kanji-id');
+    expect(firstId).toBeTruthy();
+
+    const cardWasPersisted = await page.evaluate(id => {
+      const raw = localStorage.getItem('kanji5-v1-cards');
+      const cards = raw ? JSON.parse(raw) : {};
+      return Boolean(id && cards[id]);
+    }, firstId);
+    expect(cardWasPersisted).toBe(true);
+
+    await page.reload();
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
+
     const gate = page.locator('.v12-recall-gate');
+    await page.locator('#revealBtn').click();
     await expect(gate).toBeVisible({ timeout: 10_000 });
 
     const prompt = await gate.innerText();
     expect(prompt).not.toContain('معنی هدف:');
     expect(prompt).not.toContain('خوانش هدف:');
     await expect(page.locator('#v15DontKnowRecall')).toBeVisible();
-
     await expect(page.locator('#ratings')).not.toHaveClass(/show/);
+
     const reviewsBefore = await page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1-reviews');
       return raw ? JSON.parse(raw) : [];
@@ -55,7 +78,7 @@ test.describe('Kanji 5 browser smoke', () => {
       return raw ? JSON.parse(raw) : null;
     });
     expect(lastAttempt).toMatchObject({
-      character: firstKanji?.trim(),
+      character: firstKanji,
       correct: false,
       unknown: true,
       hadAttempt: true,
@@ -65,7 +88,7 @@ test.describe('Kanji 5 browser smoke', () => {
       const raw = localStorage.getItem('kanji5-v1.5-components');
       return raw ? JSON.parse(raw) : {};
     });
-    const entry = componentEvidence[firstKanji?.trim() || ''];
+    const entry = componentEvidence[firstKanji || ''];
     expect(entry).toBeTruthy();
     const componentStats = Object.values(entry?.meaning || {}).concat(Object.values(entry?.reading || {}));
     expect(componentStats.some(stat => Number(stat?.attempts) >= 1 && Number(stat?.unknown) >= 1)).toBe(true);
