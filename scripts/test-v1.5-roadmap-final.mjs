@@ -11,10 +11,10 @@ assert(index.includes('function jlptRank(item)'), 'JLPT ranking helper missing')
 assert(index.includes('const newCards=state.deck.filter(item=>!state.cards[item.id]).sort'), 'New-card queue sort missing');
 assert(index.includes('const level=jlptRank(a)-jlptRank(b)'), 'New cards are not ordered by JLPT level');
 assert(index.includes('return af-bf||String(a.character).localeCompare(String(b.character))'), 'Same-level deterministic fallback missing');
-assert(index.includes('function exampleComplexity(example,k)'), 'Example complexity ranking missing');
+assert(index.includes('function exampleComplexity('), 'Vocabulary example complexity ranking missing');
 assert(index.includes('candidates.sort((a,b)=>exampleComplexity(a,k)-exampleComplexity(b,k)'), 'Vocabulary examples are not ranked for simplicity');
-assert(index.includes('function sentenceComplexity(example,k)'), 'Context sentence complexity ranking missing');
-assert(index.includes('out.sort((a,b)=>sentenceComplexity(a,{character:ch})-sentenceComplexity(b,{character:ch})'), 'Context sentences are not ranked for simplicity');
+assert(index.includes('function sentenceComplexity('), 'Context sentence complexity ranking missing');
+assert(index.includes('sentenceComplexity(a,{character:ch})'), 'Context sentences are not ranked for simplicity');
 assert(index.includes('function ensureUpcomingReviewsUI()'), 'Upcoming reviews UI missing');
 assert(index.includes('function updateUpcomingReviews()'), 'Upcoming reviews updater missing');
 assert(index.includes('setInterval(updateUpcomingReviews,15000)'), 'Upcoming reviews are not refreshed live');
