@@ -202,6 +202,7 @@
         <button id="v12SubmitRecall" class="primary" type="button" style="width:100%;margin-top:9px">بررسی پاسخ</button>
       </div>`;
     originalRevealButton?.insertAdjacentElement("afterend", gate);
+    window.__KANJI5_V15_RECALL_API__?.refresh?.();
     const input = $("#v12RecallInput", gate);
     input?.focus();
   }
