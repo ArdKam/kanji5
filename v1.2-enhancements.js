@@ -1,6 +1,7 @@
 (() => {
   const V12 = "kanji5-v1.2";
   const KNOWLEDGE_KEY = `${V12}-knowledge`;
+  const CARDS_KEY = "kanji5-v1-cards";
   const $ = (sel, root = document) => root.querySelector(sel);
 
   let activePrompt = null;
@@ -193,77 +194,39 @@
     const gate = document.createElement("div");
     gate.className = "v12-recall-gate";
     gate.innerHTML = `
-      <div style="border:1px solid var(--line);background:#f9fafb;border-radius:16px;padding:14px;margin-top:14px">
-        <div style="font-weight:800;margin-bottom:8px">🧠 بازیابی فعال</div>
-        <div style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:10px">${prompt}</div>
-        <textarea id="v12RecallInput" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="پاسخ خودت را اینجا بنویس..." style="width:100%;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;box-sizing:border-box"></textarea>
-        <button id="v12SubmitRecall" class="primary" style="margin-top:9px;width:100%">ثبت تلاش و نمایش پاسخ</button>
-        <div style="color:var(--muted);font-size:11px;text-align:center;margin-top:7px">برای ثبت با صفحه‌کلید: Ctrl+Enter</div>
+      <div style="border:1px solid var(--line);background:#f9fafb;border-radius:16px;padding:16px;margin-top:14px">
+        <div style="font-weight:800;margin-bottom:8px">یادآوری فعال</div>
+        <div style="color:var(--muted);margin-bottom:10px">${prompt}</div>
+        <input id="v12RecallInput" type="text" autocomplete="off" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px" />
+        <div class="v12-recall-result" aria-live="polite"></div>
+        <button id="v12SubmitRecall" class="primary" type="button" style="width:100%;margin-top:9px">بررسی پاسخ</button>
       </div>`;
-    originalRevealButton?.replaceWith(gate);
-    void loadDeckIndex();
-    setTimeout(() => $("#v12RecallInput")?.focus(), 0);
+    originalRevealButton?.insertAdjacentElement("afterend", gate);
+    const input = $("#v12RecallInput", gate);
+    input?.focus();
   }
 
   async function submitRecall() {
-    const input = $("#v12RecallInput");
-    const value = input?.value || "";
-    if (!normalize(value)) { input?.focus(); return; }
-    await loadDeckIndex();
-    const correct = checkRecall(activeCharacter, activePrompt, value);
+    const gate = $(".v12-recall-gate");
+    const input = $("#v12RecallInput", gate);
+    if (!gate || !input) return;
+    if (!deckIndex) await loadDeckIndex();
+    const answer = input.value;
+    const correct = checkRecall(activeCharacter, activePrompt, answer);
+    if (correct === null) return;
+    const result = $(".v12-recall-result", gate);
+    if (correct) {
+      result.className = "v12-recall-result good";
+      result.textContent = "✅ پاسخ درست بود";
+    } else {
+      result.className = "v12-recall-result bad";
+      result.textContent = "❌ پاسخ درست نبود";
+    }
     recordAttempt(activeCharacter, activePrompt, correct);
-    try {
-      localStorage.setItem(`${V12}-last-attempt`, JSON.stringify({ character: activeCharacter, mode: activePrompt, attemptedAt: new Date().toISOString(), hadAttempt: true, correct }));
-    } catch (_) {}
-    const gate = input?.closest(".v12-recall-gate");
-    if (!originalRevealButton || !gate) return;
-    gate.replaceWith(originalRevealButton);
     allowNativeReveal = true;
-    originalRevealButton.click();
+    gate.remove();
+    originalRevealButton?.click();
     allowNativeReveal = false;
-    originalRevealButton = null;
-  }
-
-  function addStageButton(container, text, onClick) {
-    const button = document.createElement("button");
-    button.className = "secondary";
-    button.textContent = text;
-    button.style.width = "100%";
-    button.style.marginTop = "12px";
-    button.addEventListener("click", onClick);
-    container.appendChild(button);
-    return button;
-  }
-
-  function setupProgressiveReveal() {
-    const answerBox = $("#answerBox");
-    const ratings = $("#ratings");
-    if (!answerBox || !ratings || answerBox.dataset.v12Enhanced === "1") return;
-    answerBox.dataset.v12Enhanced = "1";
-    const readings = answerBox.querySelector(".readings");
-    const examples = answerBox.querySelector(".examples");
-    const meta = answerBox.querySelector(".meta");
-    if (readings) readings.style.display = "none";
-    if (examples) examples.style.display = "none";
-    if (meta) meta.style.display = "none";
-    ratings.style.display = "grid";
-    const readingsButton = addStageButton(answerBox, "نمایش خوانش‌ها", () => {
-      if (readings) readings.style.display = "grid";
-      readingsButton.remove();
-      if (examples) {
-        const examplesButton = addStageButton(answerBox, "نمایش واژه‌های نمونه (اختیاری)", () => {
-          examples.style.display = "block";
-          if (meta) meta.style.display = "flex";
-          examplesButton.remove();
-        });
-      }
-    });
-  }
-
-  function showOfflineHint() {
-    const examples = document.getElementById("examples");
-    if (!examples || examples.innerHTML.trim()) return;
-    examples.innerHTML = '<div style="color:var(--muted);font-size:13px;margin-top:10px">واژه‌های نمونه در حالت آفلاین در دسترس نیستند؛ می‌توانی مرور را ادامه بدهی.</div>';
   }
 
   document.addEventListener("click", async event => {
@@ -273,9 +236,9 @@
       const id = kanjiEl?.dataset?.kanjiId;
       let isFirstExposure = false;
       try {
-        const raw = localStorage.getItem("kanji5-v1");
-        const saved = raw ? JSON.parse(raw) : null;
-        isFirstExposure = !!id && !saved?.cards?.[id];
+        const raw = localStorage.getItem(CARDS_KEY);
+        const cards = raw ? JSON.parse(raw) : null;
+        isFirstExposure = !!id && !cards?.[id];
       } catch (_) {}
       if (isFirstExposure) return;
       event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return;
@@ -283,17 +246,11 @@
     if (target?.id === "v12SubmitRecall") { event.preventDefault(); await submitRecall(); }
   }, true);
 
-  document.addEventListener("keydown", event => {
-    if (event.target?.id === "v12RecallInput" && (event.ctrlKey || event.metaKey) && event.key === "Enter") {
-      event.preventDefault(); event.stopImmediatePropagation(); void submitRecall();
-    }
-  }, true);
-
-  window.addEventListener("offline", showOfflineHint);
-  const observer = new MutationObserver(() => {
-    const answerBox = $("#answerBox");
-    if (answerBox?.classList.contains("show")) setupProgressiveReveal();
+  const observer = new MutationObserver(async () => {
+    if (!(document.querySelector(".kanji[data-kanji-id]"))) return;
+    if (!deckIndex) await loadDeckIndex();
   });
-  const studyRoot = document.getElementById("studyPanel") || document.getElementById("study");
-  if (studyRoot) observer.observe(studyRoot, { childList: true, subtree: true });
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",()=>loadDeckIndex(),{once:true});
+  else loadDeckIndex();
 })();
