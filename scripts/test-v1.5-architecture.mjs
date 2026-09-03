@@ -13,6 +13,7 @@ const pkg = JSON.parse(read('package.json'));
 
 assert.equal(pkg.type, 'module', 'package must declare the ESM boundary');
 assert.match(recallCore, /^export /m, 'recall core must be an explicit ESM module');
+assert.doesNotMatch(recallCore, /\b(?:window|document|localStorage)\b/, 'recall core must remain browser-side-effect free');
 assert.match(p0, /await import\(['"]\.\/v1\.5-recall-core\.js['"]\)/, 'P0 must consume recall behavior through the dedicated core boundary');
 assert.match(syncCore, /^import /m, 'sync core must remain an explicit ESM module');
 assert.match(sync, /from ['"]\.\/v1\.5-sync-core\.js['"]/, 'Supabase sync must consume the sync core through its module boundary');
