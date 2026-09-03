@@ -80,7 +80,7 @@ assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEduca
 assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
 assert.ok(!workflow.includes('git push origin feature/v1.5'), 'CI must not self-push');
 assert.ok(workflow.includes('git diff --check'), 'CI must verify the checked-out build instead of mutating and pushing it');
-assert.ok(workflow.includes('test "$(grep -c \'v1.5-roadmap-finalize.mjs\' .github/workflows/build-v1.5.yml || true)" = "0"'), 'CI must not invoke the roadmap mutator');
+assert.ok(!workflow.includes('scripts/v1.5-roadmap-finalize.mjs'), 'CI must not invoke the roadmap mutator');
 assert.ok(supabase.includes('function withSyncLock') && supabase.includes('MAX_SYNC_ATTEMPTS'), 'sync retry/lock hardening missing');
 assert.ok(fsrsSync.includes('isPreEventSnapshot') && fsrsSync.includes('legacyRoots'), 'FSRS replay safety guards missing');
 
