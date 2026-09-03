@@ -23,6 +23,7 @@ const EDUCATION_SCHEMA_VERSION = 2;
   let user = null;
   let syncPromise = null;
   let pollTimer = null;
+  let lifecycleInstalled = false;
 
   const byId = id => document.getElementById(id);
   const safeJSON = (raw, fallback) => { try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; } };
@@ -120,13 +121,31 @@ const EDUCATION_SCHEMA_VERSION = 2;
     try { const c = await getClient(); const result = signup ? await c.auth.signUp({ email, password, options: { emailRedirectTo: location.href } }) : await c.auth.signInWithPassword({ email, password }); if (result.error) { if (msg) msg.textContent = result.error.message; return; } if (signup && !result.data.session && msg) msg.textContent = "ایمیل تأیید برایت ارسال شد."; }
     catch (e) { if (msg) msg.textContent = e.message || String(e); }
   }
+  function startSyncLifecycle() {
+    if (!user) return;
+    clearInterval(pollTimer);
+    pollTimer = setInterval(pullAndMerge, POLL_MS);
+    if (lifecycleInstalled) return;
+    lifecycleInstalled = true;
+    window.addEventListener("online", pullAndMerge);
+    window.addEventListener("storage", event => { if ([STORAGE_KEY, CARDS_STORAGE_KEY, REVIEWS_STORAGE_KEY, KNOWLEDGE_KEY].includes(event.key)) pullAndMerge(); });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) pullAndMerge(); });
+  }
+  function stopSyncLifecycle() {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
   async function boot() {
     ensureUI();
     try {
       const c = await getClient(); const { data } = await c.auth.getSession(); user = data.session?.user || null;
-      if (user) { setStatus("در حال همگام‌سازی…"); await pullAndMerge(); clearInterval(pollTimer); pollTimer = setInterval(pullAndMerge, POLL_MS); window.addEventListener("online", pullAndMerge); window.addEventListener("storage", event => { if ([STORAGE_KEY, CARDS_STORAGE_KEY, REVIEWS_STORAGE_KEY, KNOWLEDGE_KEY].includes(event.key)) pullAndMerge(); }); document.addEventListener("visibilitychange", () => { if (!document.hidden) pullAndMerge(); }); }
-      c.auth.onAuthStateChange(async (_event, session) => { user = session?.user || null; if (user) { await pullAndMerge(); clearInterval(pollTimer); pollTimer = setInterval(pullAndMerge, POLL_MS); } else { clearInterval(pollTimer); setStatus("وارد نشده"); } });
-    } catch (e) { console.warn("Kanji 5 sync unavailable", e); }
+      if (user) { setStatus("در حال همگام‌سازی…"); await pullAndMerge(); startSyncLifecycle(); }
+      c.auth.onAuthStateChange(async (_event, session) => {
+        user = session?.user || null;
+        if (user) { startSyncLifecycle(); await pullAndMerge(); }
+        else { stopSyncLifecycle(); setStatus("وارد نشده"); }
+      });
+    } catch (e) { console.warn("Kanji 5 sync unavailable", e); stopSyncLifecycle(); }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true }); else boot();
 })();
