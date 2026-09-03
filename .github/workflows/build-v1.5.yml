@@ -1,4 +1,5 @@
 # v1.5 validation workflow — deterministic, source-immutable CI
+# P4 recall-core refactor gate
 name: Build Kanji 5 v1.5
 
 on:
