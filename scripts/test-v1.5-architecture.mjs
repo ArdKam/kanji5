@@ -8,6 +8,9 @@ const recallCore = read('v1.5-recall-core.js');
 const p0 = read('v1.5-p0.js');
 const syncCore = read('v1.5-sync-core.js');
 const sync = read('supabase-sync.js');
+const network = read('v1.5-network.js');
+const educationUi = read('v1.5-education-ui.js');
+const migration = read('v1.4-education-migration.js');
 const sw = read('sw.js');
 const pkg = JSON.parse(read('package.json'));
 
@@ -19,7 +22,7 @@ assert.match(syncCore, /^import /m, 'sync core must remain an explicit ESM modul
 assert.match(sync, /from ['"]\.\/v1\.5-sync-core\.js['"]/, 'Supabase sync must consume the sync core through its module boundary');
 
 assert.match(state, /window\.__KANJI5_STATE__/, 'state module must expose one public browser API');
-for (const boundary of ['readDeck','readKnowledge','writeKnowledge','readComponents','writeComponents','writeLastAttempt','clearRuntimeKnowledge']) {
+for (const boundary of ['readDeck','readKnowledge','writeKnowledge','readSettings','readAppState','readComponents','writeComponents','writeLastAttempt','clearRuntimeKnowledge']) {
   assert.match(state, new RegExp(`function ${boundary}\\b`), `state module must own ${boundary}`);
   assert.match(state, new RegExp(`\\b${boundary}\\b`), `state module must expose ${boundary}`);
 }
@@ -45,6 +48,18 @@ assert.doesNotMatch(p0, /v15Production/, 'P0 must not own production-choice stat
 
 assert.match(state, /function readObject\(/, 'state persistence implementation must own storage reads');
 assert.match(state, /function writeObject\(/, 'state persistence implementation must own storage writes');
+assert.doesNotMatch(educationUi, /\blocalStorage\b|\bsessionStorage\b/, 'active education UI must not own browser storage');
+assert.doesNotMatch(educationUi, /https:\/\/kanjiapi\.dev|https:\/\/api\.tatoeba\.org/, 'active education UI must not own network endpoints');
+assert.match(educationUi, /import\('\.\/v1\.5-network\.js'\)/, 'active education UI must consume the network adapter');
+assert.match(educationUi, /state\.readSettings\(\)/, 'education UI must consume settings through state');
+assert.match(educationUi, /state\.readKnowledge\(\)/, 'education UI must consume knowledge through state');
+assert.match(educationUi, /state\.writeKnowledge\(/, 'education UI must persist knowledge through state');
+assert.match(educationUi, /state\.readAppState\(\)/, 'education UI must consume app state through state');
+assert.match(migration, /window\.__KANJI5_EDU_UI_V1_4__=true/, 'legacy education UI must be made inert');
+assert.match(migration, /import\('\.\/v1\.5-education-ui\.js'\)/, 'migration must hand off to the v1.5 education UI');
+assert.match(network, /^export async function fetchWords/m, 'network adapter must export vocabulary retrieval');
+assert.match(network, /^export async function fetchContextSentences/m, 'network adapter must export context retrieval');
+assert.doesNotMatch(network, /localStorage|sessionStorage/, 'network adapter must not own storage');
 assert.match(sw, /const API_INFLIGHT=new Map\(\)/, 'service worker must own API request coalescing');
 assert.match(sw, /API_INFLIGHT\.get\(key\)/, 'service worker must reuse concurrent requests');
 assert.match(sw, /\.clone\(\)/, 'service worker must return independent response bodies to coalesced callers');
@@ -57,6 +72,8 @@ assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).l
 assert.match(sw, /"\.\/v1\.5-state\.js"/, 'state module must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-recall-core\.js"/, 'recall core must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-p0\.js"/, 'P0 must be offline-precached');
+assert.match(sw, /"\.\/v1\.5-network\.js"/, 'network adapter must be offline-precached');
+assert.match(sw, /"\.\/v1\.5-education-sync-core\.js"/, 'education sync core must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-sync-core\.js"/, 'sync core must be offline-precached for sync-enabled startup paths');
 
 assert.doesNotMatch(sync, /sameDayLocal\s*=|sameDayRemote\s*=/, 'date-aware merge implementation must not be duplicated in Supabase sync');
