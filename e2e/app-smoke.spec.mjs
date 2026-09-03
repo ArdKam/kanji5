@@ -27,6 +27,8 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(firstKanji).toBeTruthy();
     expect(firstId).toBeTruthy();
 
+    // First exposure is intentionally information-only. Rate Again so the same
+    // card is persisted and remains part of the reviewable card set.
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Again"]').click();
@@ -38,6 +40,8 @@ test.describe('Kanji 5 browser smoke', () => {
     }, firstId);
     expect(cardWasPersisted).toBe(true);
 
+    // A review can legitimately schedule the card in the future. The first
+    // reload therefore verifies persistence without assuming it is immediately due.
     await page.reload();
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
@@ -55,6 +59,8 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(persistedTarget.card).toBe(true);
     expect(persistedTarget.legacyCard).toBe(true);
 
+    // Make the persisted card due through the same persisted-card storage path,
+    // then reload so the production queue must select it for review.
     await page.evaluate(id => {
       const key = 'kanji5-v1-cards';
       const raw = localStorage.getItem(key);
@@ -76,24 +82,6 @@ test.describe('Kanji 5 browser smoke', () => {
     const prompt = await gate.innerText();
     expect(prompt).not.toContain('معنی هدف:');
     expect(prompt).not.toContain('خوانش هدف:');
-
-    const diagnostics = await page.evaluate(() => ({
-      ready: document.readyState,
-      state: Boolean(window.__KANJI5_STATE__),
-      bridge: Boolean(window.__KANJI5_RECALL_BRIDGE__),
-      p0: Boolean(window.__KANJI5_V15_P0__),
-      api: Boolean(window.__KANJI5_V15_RECALL_API__),
-      scripts: [...document.scripts].map(script => script.src || script.id),
-      gate: Boolean(document.querySelector('.v12-recall-gate')),
-      input: Boolean(document.querySelector('.v12-recall-gate input')),
-      button: Boolean(document.querySelector('#v15DontKnowRecall')),
-      studyPanel: Boolean(document.getElementById('studyPanel')),
-      study: Boolean(document.getElementById('study')),
-      stateSource: document.querySelector('script[src*="v1.5-state.js"]')?.src || null,
-    }));
-    console.log('V15_DIAGNOSTIC', JSON.stringify(diagnostics));
-    console.log('V15_PAGE_ERRORS', JSON.stringify(pageErrors));
-
     await expect(page.locator('#v15DontKnowRecall')).toBeVisible();
     await expect(page.locator('#ratings')).not.toHaveClass(/show/);
 
