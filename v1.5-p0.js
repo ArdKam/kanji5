@@ -99,11 +99,11 @@ function revealAfterUnknown(gate){
   if(ratings){ratings.classList.add('show');ratings.style.display='grid';ratings.querySelector('button')?.focus()}
   gate?.remove();
 }
-function addDontKnowRecall(gate){
-  if(!gate)return false;
-  if($('#v15DontKnowRecall',gate))return true;
+function addDontKnowRecall(){
+  const gate=$('.v12-recall-gate');
+  if(!gate||$('#v15DontKnowRecall',gate))return;
   const input=gate.querySelector('input,textarea');
-  if(!input)return false;
+  if(!input)return;
   const button=document.createElement('button');
   button.type='button';
   button.id='v15DontKnowRecall';
@@ -122,7 +122,6 @@ function addDontKnowRecall(gate){
     revealAfterUnknown(gate);
   },false);
   input.parentElement?.appendChild(button);
-  return Boolean($('#v15DontKnowRecall',gate));
 }
 function enhanceRecall(){
   const gate=$('.v12-recall-gate');
@@ -133,7 +132,7 @@ function enhanceRecall(){
   gate.dataset.v15Mode=mode;
   if(focus)gate.dataset.v15Focus=focus.raw;
   setRecallPrompt(gate,mode);
-  addDontKnowRecall(gate);
+  addDontKnowRecall();
 }
 function gradeFocusedRecall(mode,answer,focus){
   const character=String($('.kanji')?.textContent||'').trim();
