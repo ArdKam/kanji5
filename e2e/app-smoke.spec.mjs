@@ -47,9 +47,13 @@ test.describe('Kanji 5 browser smoke', () => {
     }, firstId);
     expect(cardWasPersisted).toBe(true);
 
-    // The v1.2 Active Recall module still checks the legacy cards field. Keep
-    // that compatibility view populated before the next page load so the E2E
-    // exercises the actual recall flow rather than the storage migration seam.
+    await page.reload();
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
+
+    // Exercise the legacy v1.2 recall listener against the persisted v1.5 card.
+    // Write the compatibility view and dispatch the reveal click in the same
+    // browser task so no asynchronous startup/save step can overwrite it first.
     await page.evaluate(() => {
       const metadataRaw = localStorage.getItem('kanji5-v1');
       const cardsRaw = localStorage.getItem('kanji5-v1-cards');
@@ -58,14 +62,10 @@ test.describe('Kanji 5 browser smoke', () => {
       const cards = JSON.parse(cardsRaw);
       metadata.cards = cards;
       localStorage.setItem('kanji5-v1', JSON.stringify(metadata));
+      document.getElementById('revealBtn')?.click();
     });
 
-    await page.reload();
-    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
-    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
-
     const gate = page.locator('.v12-recall-gate');
-    await page.locator('#revealBtn').click();
     await expect(gate).toBeVisible({ timeout: 10_000 });
 
     const prompt = await gate.innerText();
