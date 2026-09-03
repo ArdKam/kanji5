@@ -8,6 +8,7 @@ on:
       - scripts/v1.5-p2-3.mjs
       - scripts/v1.5-roadmap-finalize.mjs
       - scripts/test-v1.5-roadmap-final.mjs
+      - scripts/test-v1.5-reading-validation.mjs
       - .github/workflows/v1-5-maintenance.yml
   workflow_dispatch:
 
@@ -28,14 +29,14 @@ jobs:
       - name: Apply staged maintenance patch
         run: |
           stage="$(tr -d '[:space:]' < scripts/v1.5-maintenance-stage.txt)"
-          if [ "$stage" != "final2" ]; then node scripts/v1.5-maintenance.mjs; fi
+          if [ "$stage" != "final3" ]; then node scripts/v1.5-maintenance.mjs; fi
           if [ "$stage" = "p1-1" ]; then node scripts/v1.5-p1-1.mjs; fi
           if [ "$stage" = "p1-2" ]; then node scripts/v1.5-p1-2.mjs; fi
           if [ "$stage" = "p1-6" ]; then node scripts/v1.5-p1-6.mjs; fi
           if [ "$stage" = "p2-1" ]; then node scripts/v1.5-p2-1.mjs; fi
           if [ "$stage" = "p2-2" ]; then node scripts/v1.5-p2-2.mjs; fi
           if [ "$stage" = "p2-3" ]; then node scripts/v1.5-p2-3.mjs; fi
-          if [ "$stage" = "final" ] || [ "$stage" = "final2" ]; then node scripts/v1.5-roadmap-finalize.mjs; fi
+          if [ "$stage" = "final" ] || [ "$stage" = "final2" ] || [ "$stage" = "final3" ]; then node scripts/v1.5-roadmap-finalize.mjs; fi
       - name: Validate staged patch
         run: |
           node --check v1.2-enhancements.js
@@ -54,6 +55,7 @@ jobs:
           node --check scripts/test-v1.5-jlpt-order.mjs
           node --check scripts/test-v1.5-v13-parity.mjs
           node --check scripts/test-v1.5-roadmap-final.mjs
+          node --check scripts/test-v1.5-reading-validation.mjs
           node --check scripts/test-v1.4-p1.mjs
           node --check scripts/test-v1.4-education.mjs
           node scripts/test-v1.5-p0.mjs
@@ -64,6 +66,7 @@ jobs:
           node scripts/test-v1.4-education.mjs
           node scripts/test-v1.5-component-scheduler.mjs
           node scripts/test-v1.5-roadmap-final.mjs
+          node scripts/test-v1.5-reading-validation.mjs
           test "$(grep -c 'v1.2-recall-result-fix' index.html || true)" = "0"
           test "$(grep -c 'setInterval(paint, 500)' index.html || true)" = "0"
           grep -q 'studyPanel' v1.2-enhancements.js
@@ -73,7 +76,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html v1.2-enhancements.js v1.4-education-ui.js v1.4-education-migration.js v1.5-state.js v1.5-p0.js v1.5-recall-core.js sw.js scripts/test-v1.5-p0.mjs scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs scripts/test-v1.5-component-scheduler.mjs scripts/test-v1.5-education-merge.mjs scripts/v1.5-p1-1.mjs scripts/v1.5-p1-2.mjs scripts/v1.5-p1-6.mjs scripts/v1.5-p2-1.mjs scripts/v1.5-p2-2.mjs scripts/v1.5-p2-3.mjs scripts/test-v1.5-fsrs-sync.mjs scripts/test-v1.5-persistence-slices.mjs scripts/test-v1.5-sw-cache-bound.mjs scripts/test-v1.5-api-cache.mjs scripts/test-v1.5-state-module.mjs scripts/test-v1.5-migration-chain.mjs scripts/v1.5-roadmap-finalize.mjs scripts/test-v1.5-roadmap-final.mjs scripts/v1.5-maintenance.mjs scripts/v1.5-maintenance-stage.txt supabase-sync.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js .github/workflows/v1-5-maintenance.yml
+          git add index.html v1.2-enhancements.js v1.4-education-ui.js v1.4-education-migration.js v1.5-state.js v1.5-p0.js v1.5-recall-core.js sw.js scripts/test-v1.5-p0.mjs scripts/test-v1.5-education-dom.mjs scripts/test-v1.5-init-sharing.mjs scripts/test-v1.5-daily-sync.mjs scripts/test-v1.5-runtime-reviews.mjs scripts/test-v1.5-component-scheduler.mjs scripts/test-v1.5-education-merge.mjs scripts/v1.5-p1-1.mjs scripts/v1.5-p1-2.mjs scripts/v1.5-p1-6.mjs scripts/v1.5-p2-1.mjs scripts/v1.5-p2-2.mjs scripts/v1.5-p2-3.mjs scripts/test-v1.5-fsrs-sync.mjs scripts/test-v1.5-persistence-slices.mjs scripts/test-v1.5-sw-cache-bound.mjs scripts/test-v1.5-api-cache.mjs scripts/test-v1.5-state-module.mjs scripts/test-v1.5-migration-chain.mjs scripts/v1.5-roadmap-finalize.mjs scripts/test-v1.5-roadmap-final.mjs scripts/test-v1.5-reading-validation.mjs scripts/v1.5-maintenance.mjs scripts/v1.5-maintenance-stage.txt supabase-sync.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js .github/workflows/v1-5-maintenance.yml
           if git diff --cached --quiet; then
             echo "No staged changes."
             exit 0
