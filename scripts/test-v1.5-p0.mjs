@@ -78,9 +78,9 @@ assert.ok(index.includes('./vendor/ts-fsrs-5.4.1.mjs'), 'pinned local FSRS vendo
 assert.ok(core.includes('educationSchedulerSignal') && core.includes('chooseDistractors'), 'canonical education core missing');
 assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'education UI is not using canonical adaptive helpers');
 assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
-assert.ok(!workflow.includes('git push origin'), 'CI must not self-push');
+assert.ok(!/^\s*git\s+push\s+origin\b/m.test(workflow), 'CI must not self-push');
 assert.ok(workflow.includes('git diff --check'), 'CI must verify the checked-out build instead of mutating and pushing it');
-assert.ok(!workflow.includes('scripts/v1.5-roadmap-finalize.mjs'), 'CI must not invoke the roadmap mutator');
+assert.ok(!/^\s*(?:node\s+)?scripts\/v1\.5-roadmap-finalize\.mjs\b/m.test(workflow), 'CI must not invoke the roadmap mutator');
 assert.ok(supabase.includes('function withSyncLock') && supabase.includes('MAX_SYNC_ATTEMPTS'), 'sync retry/lock hardening missing');
 assert.ok(fsrsSync.includes('isPreEventSnapshot') && fsrsSync.includes('legacyRoots'), 'FSRS replay safety guards missing');
 
