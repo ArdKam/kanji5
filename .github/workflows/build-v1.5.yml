@@ -89,4 +89,4 @@ jobs:
           grep -q 'scripts/test-v1.5-recall-core.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.5-architecture.mjs' .github/workflows/build-v1.5.yml
           test "$(grep -c 'git push origin' .github/workflows/build-v1.5.yml || true)" = "0"
-          test "$(grep -c 'scripts/v1.5-roadmap-finalize.mjs' .github/workflows/build-v1.5.yml || true)" = "0"
+          test "$(grep -Ec '(^|[[:space:]])node[[:space:]]+scripts/v1.5-roadmap-finalize.mjs' .github/workflows/build-v1.5.yml || true)" = "0"
