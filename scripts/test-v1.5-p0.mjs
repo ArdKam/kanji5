@@ -45,7 +45,11 @@ assert.ok(!p0.includes('||document.body'), 'P0 observer must not fall back to do
 assert.ok(p0.includes('function startTargetedObservers()') && p0.includes('studyRoot'), 'P0 must use a targeted observer');
 assert.ok(p0.includes('gate.dataset.v15Focus=focus.raw'), 'recall focus must remain internal');
 assert.ok(!p0.includes('معنی هدف:') && !p0.includes('خوانش هدف:'), 'recall focus must not leak into the prompt');
-assert.ok(p0.includes('function installTatoebaFetchDeduper()') && p0.includes('const pending=inflight.get(url)'), 'Tatoeba requests must be deduplicated');
+assert.ok(!p0.includes('localStorage'), 'P0 must use the persistence boundary');
+assert.ok(!p0.includes('window.fetch='), 'P0 must not monkey-patch fetch');
+assert.ok(p0.includes('state.readDeck()') && p0.includes('state.readKnowledge()') && p0.includes('state.writeKnowledge('), 'P0 must use state knowledge/deck APIs');
+assert.ok(p0.includes('state.readComponents()') && p0.includes('state.writeComponents('), 'P0 must use state component APIs');
+assert.ok(p0.includes('state.writeLastAttempt('), 'P0 must use state last-attempt API');
 assert.ok(p0.includes('function installAccessibilityEnhancements()') && p0.includes('button:focus-visible,input:focus-visible'), 'keyboard focus support missing');
 assert.ok(p0.includes('@media(prefers-reduced-motion:reduce)'), 'reduced-motion support missing');
 assert.ok(p0.includes('function guardBusyEducationClicks(event)'), 'busy-click guard missing');
@@ -69,6 +73,9 @@ assert.ok(sw.includes('"./v1.5-education-sync-core.js"'), 'education sync depend
 assert.ok(sw.includes('"./v1.5-fsrs-sync-core.js"'), 'FSRS sync dependency missing from offline shell');
 assert.ok(sw.includes("const API_ORIGIN='https://kanjiapi.dev'"));
 assert.ok(sw.includes("const TATOEBA_ORIGIN='https://api.tatoeba.org'"));
+assert.ok(sw.includes('const API_INFLIGHT=new Map()'), 'API request coalescer missing');
+assert.ok(sw.includes('API_INFLIGHT.get(key)'), 'API request coalescer lookup missing');
+assert.ok(sw.includes('async function filterVocabularyResponse'), 'vocabulary response filter moved to network boundary');
 assert.ok(sw.includes('async function staleWhileRevalidate'));
 assert.ok(sw.includes("if(r.mode==='navigate')"));
 assert.ok(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"));
@@ -78,6 +85,7 @@ assert.ok(index.includes('./vendor/ts-fsrs-5.4.1.mjs'), 'pinned local FSRS vendo
 assert.ok(core.includes('educationSchedulerSignal') && core.includes('chooseDistractors'), 'canonical education core missing');
 assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'education UI is not using canonical adaptive helpers');
 assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
+
 const ciSelfPushPattern=/^\s*git\s+push\s+origin\b/m;
 const ciRoadmapPattern=/^\s*(?:node\s+)?scripts\/v1\.5-roadmap-finalize\.mjs\b/m;
 assert.ok(!ciSelfPushPattern.test(workflow), 'CI must not self-push');
@@ -99,11 +107,12 @@ vm.runInContext(migration, migrationContext);
 assert.ok(migrationContext.window.__KANJI5_EDU_MIGRATION_API__, 'education migration API missing');
 assert.equal(migrationContext.window.__KANJI5_EDU_MIGRATION_API__.version, 2);
 
-const stateContext = { window: {}, localStorage: new Store(), crypto: { randomUUID: () => 'test-id' }, Date, JSON, structuredClone };
+const stateContext = { window: {}, localStorage: new Store(), crypto: { randomUUID: () => 'test-id' }, Date, JSON, structuredClone, Intl };
 vm.createContext(stateContext);
 vm.runInContext(state, stateContext);
 const stateApi = stateContext.window.__KANJI5_STATE__;
 assert.ok(stateApi, 'state API missing');
+for (const name of ['readDeck','readKnowledge','writeKnowledge','readComponents','writeComponents','writeLastAttempt','clearRuntimeKnowledge']) assert.equal(typeof stateApi[name], 'function', `${name} state boundary API missing`);
 const normalized = stateApi.normalizeReviewEvent({ eventId: 'legacy', id: '学', at: '2026-09-02T10:00:00.000Z', rating: 'Good', baseRecord: { reviews: 1 } });
 assert.equal(normalized.eventSchemaVersion, 1);
 assert.equal(normalized.resultRecord.reviews, 1);
