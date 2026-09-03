@@ -100,9 +100,10 @@ function revealAfterUnknown(gate){
   gate?.remove();
 }
 function addDontKnowRecall(gate){
-  if(!gate||$('#v15DontKnowRecall',gate))return;
+  if(!gate)return false;
+  if($('#v15DontKnowRecall',gate))return true;
   const input=gate.querySelector('input,textarea');
-  if(!input)return;
+  if(!input)return false;
   const button=document.createElement('button');
   button.type='button';
   button.id='v15DontKnowRecall';
@@ -121,6 +122,7 @@ function addDontKnowRecall(gate){
     revealAfterUnknown(gate);
   },false);
   input.parentElement?.appendChild(button);
+  return Boolean($('#v15DontKnowRecall',gate));
 }
 function enhanceRecall(){
   const gate=$('.v12-recall-gate');
