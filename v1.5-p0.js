@@ -1,14 +1,8 @@
-import {
-  applyRecallOutcome,
-  componentAccuracy,
-  componentSignal,
-  normalize,
-  selectFocus
-} from './v1.5-recall-core.js';
-
-(()=>{
+(async()=>{
 'use strict';
 if(window.__KANJI5_V15_P0__)return;
+const core=await import('./v1.5-recall-core.js');
+const {applyRecallOutcome,componentSignal,selectFocus}=core;
 window.__KANJI5_V15_P0__=true;
 const COMPONENT_KEY='kanji5-v1.5-components';
 const KNOWLEDGE_KEY='kanji5-v1.2-knowledge';
@@ -25,7 +19,7 @@ function inferMode(gate){return String(gate?.textContent||'').includes('خوان
 function findRecallPrompt(gate){const nodes=[...gate.children].flatMap(child=>[...child.children]);return nodes.find(node=>{const text=String(node.textContent||'').trim();return text.includes('معنی این کانجی')||text.includes('حداقل یک خوانش')})||null}
 function setRecallPrompt(gate,mode){const nextPrompt=mode==='meaning'?'معنی این کانجی را از حافظه به یاد بیاور و پاسخ خودت را وارد کن.':'حداقل یک خوانش این کانجی را از حافظه به یاد بیاور و پاسخ خودت را وارد کن.';const prompt=findRecallPrompt(gate);if(prompt&&prompt.textContent!==nextPrompt)prompt.textContent=nextPrompt}
 function enhanceRecall(){const gate=$('.v12-recall-gate'),kanji=$('.kanji');if(!gate||!kanji)return;const character=String(kanji.textContent||'').trim();addDontKnowRecall();const mode=String(gate.textContent||'').includes('خوانش')?'reading':'meaning',focus=getFocusComponent(character,mode);if(!focus)return;gate.dataset.v15Ready=character;gate.dataset.v15Mode=mode;gate.dataset.v15Focus=focus.raw;setRecallPrompt(gate,mode)}
-function gradeFocusedRecall(mode,answer,focus){const character=String($('.kanji')?.textContent||'').trim(),item=getDeck().find(value=>value&&value.character===character),target=String(focus?.raw||''),core=window.__KANJI5_EDU_CORE__;if(!item||!target)return false;if(mode==='meaning')return Boolean(core?.gradeMeaning?.(answer,[target])?.correct);return Boolean(core?.gradeReading?.(answer,[target])?.correct)}
+function gradeFocusedRecall(mode,answer,focus){const character=String($('.kanji')?.textContent||'').trim(),item=getDeck().find(value=>value&&value.character===character),target=String(focus?.raw||''),canonicalCore=window.__KANJI5_EDU_CORE__;if(!item||!target)return false;if(mode==='meaning')return Boolean(canonicalCore?.gradeMeaning?.(answer,[target])?.correct);return Boolean(canonicalCore?.gradeReading?.(answer,[target])?.correct)}
 function recordRecall(event){const gate=$('.v12-recall-gate');if(!gate)return false;const input=$('#v12RecallInput',gate),character=String($('.kanji')?.textContent||'').trim(),mode=gate.dataset.v15Mode||inferMode(gate),focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';if(!input||!character||!focus)return false;event?.preventDefault?.();event?.stopPropagation?.();const answer=String(input.value||'');const correct=gradeFocusedRecall(mode,answer,{raw:focus});const result=$('.v12-recall-result',gate);result.className=correct?'v12-recall-result good':'v12-recall-result bad';result.textContent=correct?'✅ پاسخ درست بود':'❌ پاسخ درست نبود';recordFocusedRecall(character,mode,focus,correct?'correct':'wrong');const knowledge=readJSON(KNOWLEDGE_KEY,{}),entry=knowledge[character]||{},stats=entry[mode]||{attempts:0,correct:0,lastAt:null};stats.attempts=Number(stats.attempts)||0;stats.correct=Number(stats.correct)||0;stats.attempts+=1;if(correct)stats.correct+=1;stats.lastAt=new Date().toISOString();entry[mode]=stats;entry.lastPrompt=mode;knowledge[character]=entry;writeJSON(KNOWLEDGE_KEY,knowledge);revealAfterUnknown(gate);return correct}
 function revealAfterUnknown(gate){const answer=$('.answer'),answerBox=$('#answerBox'),ratings=$('#ratings');if(answer){answer.classList.add('show');answer.style.display='block'}if(answerBox){answerBox.classList.add('show');answerBox.style.display='block'}if(ratings){ratings.classList.add('show');ratings.style.display='grid';ratings.querySelector('button')?.focus()}gate.remove()}
 function addDontKnowRecall(){const gate=$('.v12-recall-gate');if(!gate||$('#v15DontKnowRecall',gate))return;const input=gate.querySelector('input,textarea');if(!input)return;const button=document.createElement('button');button.type='button';button.id='v15DontKnowRecall';button.className='secondary';button.textContent='نمی‌دانم';button.style.width='100%';button.style.marginTop='9px';button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const character=String($('.kanji')?.textContent||'').trim();const mode=gate.dataset.v15Mode||inferMode(gate);const focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';if(character)writeJSON(LAST_ATTEMPT_KEY,{character,mode,attemptedAt:new Date().toISOString(),hadAttempt:true,correct:false,unknown:true});if(character&&focus)recordFocusedRecall(character,mode,focus,'unknown');revealAfterUnknown(gate)},false);input.parentElement?.appendChild(button)}
