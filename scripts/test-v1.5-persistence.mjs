@@ -50,8 +50,10 @@ const state = stateApi.createInitial({
   today: stateApi.todayKey()
 });
 stateApi.saveState(state);
-assert.ok(storage.getItem(stateApi.SNAPSHOT_STORAGE));
-assert.ok(storage.getItem(stateApi.SNAPSHOT_COMMIT));
+const baselineSnapshot = storage.getItem(stateApi.SNAPSHOT_STORAGE);
+const baselineCommit = storage.getItem(stateApi.SNAPSHOT_COMMIT);
+assert.ok(baselineSnapshot);
+assert.ok(baselineCommit);
 assert.ok(storage.getItem(stateApi.KNOWLEDGE_STORAGE));
 
 const reloadedApi = boot(storage);
@@ -72,12 +74,11 @@ const torn = new MemoryStorage({
   [stateApi.CARDS_STORAGE]: '{not-json',
   [stateApi.REVIEWS_STORAGE]: '[]',
   [stateApi.KNOWLEDGE_STORAGE]: '{not-json',
-  [stateApi.SNAPSHOT_STORAGE]: storage.getItem(stateApi.SNAPSHOT_STORAGE),
-  [stateApi.SNAPSHOT_COMMIT]: storage.getItem(stateApi.SNAPSHOT_COMMIT)
+  [stateApi.SNAPSHOT_STORAGE]: baselineSnapshot,
+  [stateApi.SNAPSHOT_COMMIT]: baselineCommit
 });
 const tornApi = boot(torn);
 const recovered = tornApi.loadState();
-console.log('persistence recovery reviews:', JSON.stringify(recovered.reviews));
 assert.equal(recovered.settings.dailyNew, 7);
 assert.equal(Object.keys(recovered.cards).length, 1);
 assert.equal(recovered.reviews.length, 1);
@@ -89,7 +90,7 @@ const corrupt = new MemoryStorage({
   [stateApi.REVIEWS_STORAGE]: storage.getItem(stateApi.REVIEWS_STORAGE),
   [stateApi.KNOWLEDGE_STORAGE]: storage.getItem(stateApi.KNOWLEDGE_STORAGE),
   [stateApi.SNAPSHOT_STORAGE]: JSON.stringify({ schemaVersion: 1, payload: { cards: {}, reviews: [] }, checksum: 'bad' }),
-  [stateApi.SNAPSHOT_COMMIT]: storage.getItem(stateApi.SNAPSHOT_COMMIT)
+  [stateApi.SNAPSHOT_COMMIT]: baselineCommit
 });
 const corruptApi = boot(corrupt);
 const legacyRecovered = corruptApi.loadState();
@@ -111,7 +112,7 @@ assert.ok(legacyOnly.getItem(legacyApi.SNAPSHOT_STORAGE));
 assert.ok(legacyOnly.getItem(legacyApi.SNAPSHOT_COMMIT));
 
 const uncommitted = new MemoryStorage({
-  [stateApi.SNAPSHOT_STORAGE]: storage.getItem(stateApi.SNAPSHOT_STORAGE),
+  [stateApi.SNAPSHOT_STORAGE]: baselineSnapshot,
   [stateApi.SNAPSHOT_COMMIT]: ''
 });
 const uncommittedApi = boot(uncommitted);
