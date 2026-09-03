@@ -41,7 +41,7 @@ function componentAccuracy(stats){
 function componentSignal(entry){
   const out={};
   for(const mode of ['meaning','reading']){
-    const values=Object.values(entry?.[mode]||{}).filter(v=>v&&typeof v==='object'&&(Number(v.attempts)||0)>0);
+    const values=Object.values(entry?.[mode]||{}).filter(value=>value&&typeof value==='object'&&(Number(value.attempts)||0)>0);
     if(!values.length){out[mode]={accuracy:null,weakness:null,attempts:0,lastAt:null};continue}
     let weight=0,total=0,lastAt=null;
     for(const value of values){
@@ -67,8 +67,7 @@ function writeSchedulerComponentEvidence(character){
 function getFocusComponent(character,mode){
   const item=getDeck().find(value=>value&&value.character===character);
   if(!item)return null;
-  const all=ensureComponentEntry(character);
-  const state=all[character][mode]||{};
+  const all=ensureComponentEntry(character),state=all[character][mode]||{};
   const values=mode==='reading'?[...(item.on||[]),...(item.kun||[])]:[...(item.meaning||[])];
   const candidates=values.map(raw=>({raw,key:normalize(raw),accuracy:componentAccuracy(state[normalize(raw)]||{})}));
   candidates.sort((a,b)=>a.accuracy-b.accuracy);
@@ -134,6 +133,15 @@ function enhanceRecall(){
   setRecallPrompt(gate,mode);
   addDontKnowRecall(gate);
 }
+function gradeFocusedRecall(mode,answer,focus){
+  const character=String($('.kanji')?.textContent||'').trim();
+  const item=getDeck().find(value=>value&&value.character===character);
+  const target=String(focus?.raw||'');
+  const core=window.__KANJI5_EDU_CORE__;
+  if(!item||!target)return false;
+  if(mode==='meaning')return Boolean(core?.gradeMeaning?.(answer,[target])?.correct);
+  return Boolean(core?.gradeReading?.(answer,[target])?.correct);
+}
 function recordRecall(event){
   const gate=$('.v12-recall-gate');
   if(!gate)return false;
@@ -142,12 +150,10 @@ function recordRecall(event){
   const mode=gate.dataset.v15Mode||inferMode(gate);
   const focus=gate.dataset.v15Focus||getFocusComponent(character,mode)?.raw||'';
   if(!input||!character||!focus)return false;
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
   const answer=String(input.value||'');
-  const grader=window.__KANJI5_EDU_CORE__;
-  const item=getDeck().find(value=>value&&value.character===character);
-  let correct=false;
-  if(mode==='meaning')correct=Boolean(grader?.gradeMeaning?.(answer,item?.meaning||[]).correct);
-  else correct=Boolean(grader?.gradeReading?.(answer,[...(item?.on||[]),...(item?.kun||[])]).correct);
+  const correct=gradeFocusedRecall(mode,answer,{raw:focus});
   const result=$('.v12-recall-result',gate);
   result.className=correct?'v12-recall-result good':'v12-recall-result bad';
   result.textContent=correct?'✅ پاسخ درست بود':'❌ پاسخ درست نبود';
