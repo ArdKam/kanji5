@@ -51,8 +51,21 @@ test.describe('Kanji 5 browser smoke', () => {
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
 
-    // Persisted cards are now handled by v1.2 through the v1.5 card store.
-    // This is the real production Active Recall path; no legacy-state seeding.
+    const persistedTarget = await page.evaluate(id => {
+      const raw = localStorage.getItem('kanji5-v1-cards');
+      const cards = raw ? JSON.parse(raw) : {};
+      const legacyRaw = localStorage.getItem('kanji5-v1');
+      const legacy = legacyRaw ? JSON.parse(legacyRaw) : null;
+      return {
+        card: Boolean(id && cards[id]),
+        legacyCard: Boolean(id && legacy?.cards?.[id]),
+        buttonText: document.getElementById('revealBtn')?.textContent?.trim() || '',
+      };
+    }, firstId);
+    expect(persistedTarget.card).toBe(true);
+    expect(persistedTarget.legacyCard).toBe(true);
+    expect(persistedTarget.buttonText).toContain('نمایش پاسخ');
+
     const gate = page.locator('.v12-recall-gate');
     await page.locator('#revealBtn').click();
     await expect(gate).toBeVisible({ timeout: 10_000 });
