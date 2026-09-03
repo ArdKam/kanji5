@@ -40,7 +40,9 @@ self.addEventListener('fetch',e=>{
   if(r.method!=='GET')return;
   const u=new URL(r.url);
   if(r.mode==='navigate'){e.respondWith(staleWhileRevalidate(r,CACHE,'./index.html'));return}
-  if(u.origin===self.location.origin){e.respondWith(dynamicSameOrigin(r));return}
   if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}
   if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}
+  if(u.origin!==self.location.origin)return;
+  if(u.href===DATA_URL){e.respondWith(cacheFirst(r,DATA_CACHE,'./kanji-data.json'));return}
+  e.respondWith(dynamicSameOrigin(r));
 });
