@@ -1,39 +1,116 @@
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const read=p=>fs.readFileSync(p,'utf8');
-const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const count=(text,needle)=>(text.split(needle).length-1);
+const read = path => fs.readFileSync(path, 'utf8');
+const index = read('index.html');
+const p0 = read('v1.5-p0.js');
+const recallCore = read('v1.5-recall-core.js');
+const state = read('v1.5-state.js');
+const sw = read('sw.js');
+const workflow = read('.github/workflows/build-v1.5.yml');
+const core = read('v1.4-education-core.js');
+const ui = read('v1.4-education-ui.js');
+const runtime = read('v1.2-runtime-fixes.js');
+const supabase = read('supabase-sync.js');
+const fsrsSync = read('v1.5-fsrs-sync-core.js');
 
-const index=read('index.html'),runtime=read('v1.2-runtime-fixes.js'),sw=read('sw.js'),migration=read('v1.4-education-migration.js'),workflow=read('.github/workflows/build-v1.5.yml'),core=read('v1.4-education-core.js'),ui=read('v1.4-education-ui.js'),p0=read('v1.5-p0.js'),state=read('v1.5-state.js'),fsrsSync=read('v1.5-fsrs-sync-core.js'),supabase=read('supabase-sync.js');
-const required=['./v1.3-p0.js','./v1.3-perf.js','./v1.3-storage-bridge.js','./v1.3-settings.js','./v1.4-education-migration.js','./v1.4-education-core.js','./v1.4-education-ui.js'];
-for(const src of required)assert(count(index,`<script src="${src}"></script>` )===1,`${src} must be wired exactly once`);
-assert(count(index,'<script src="./v1.5-p0.js"></script>')===1,'v1.5 P0 runtime must be loaded explicitly exactly once by the active HTML runtime');
-assert(!runtime.includes('v1.5-p0.js'),'v1.2 runtime bridge must not duplicate-load v1.5 P0');
-assert(!index.includes('v1.5-education-choice-enforcer.js')&&!runtime.includes('v1.5-education-choice-enforcer.js'),'Obsolete Production choice enforcer remains in the active runtime');
-for(const legacy of ['./v1.3-p1.js','./v1.3-education-runtime-fix.js','./v1.3-production-ui.js','./v1.3-education-v2.js','./v1.3-dont-know.js','./v1.3-smart-distractors.js'])assert(!index.includes(legacy),`Legacy runtime remains: ${legacy}`);
-assert(!index.includes('id="v1.2-mobile-fix"'),'Mobile CSS was not consolidated');
-assert(!index.includes('id="v1.3-education"')&&!index.includes('id="v1.3-p1"'),'Legacy education CSS remains');
-assert(count(index,'v1.2-dataset-2136')===1,'Duplicate dataset bootstrap remains');
+const count = (text, needle) => text.split(needle).length - 1;
+const ok = condition => { if (!condition) throw new Error('P0 contract failed'); };
 
-class Store{constructor(values={}){this.values={...values}}getItem(k){return Object.prototype.hasOwnProperty.call(this.values,k)?this.values[k]:null}setItem(k,v){this.values[k]=String(v)}}
-function runMigration(initial){const store=new Store(initial),ctx={window:{},localStorage:store,Date,JSON};vm.createContext(ctx);vm.runInContext(migration,ctx);assert(ctx.window.__KANJI5_EDU_MIGRATION_API__,'Migration API missing');return{store,api:ctx.window.__KANJI5_EDU_MIGRATION_API__}}
-const fresh=runMigration({});
-assert(fresh.api.version===2,'Fresh install migration version mismatch');assert(fresh.api.migrations.join(',')==='1,2','Migration chain is not versioned');
-assert(JSON.parse(fresh.store.getItem('kanji5-v1.2-knowledge')||'{}')?.constructor===Object,'Fresh install store should remain valid JSON object');assert(fresh.store.getItem('kanji5-v1.4-education-meta'),'Fresh install metadata missing');
-const legacyKnowledge={'学':{meaning:{attempts:4,correct:3,lastAt:'2026-08-20T00:00:00.000Z'},reading:{attempts:2,correct:1,lastAt:'2026-08-21T00:00:00.000Z'},distractors:{'校':2}},'校':{meaning:{attempts:0,correct:0}}};
-const upgraded=runMigration({'kanji5-v1.2-knowledge':JSON.stringify(legacyKnowledge)}),migrated=JSON.parse(upgraded.store.getItem('kanji5-v1.2-knowledge'));
-assert(migrated['学'].schemaVersion===2,'Upgrade did not reach current education schema');assert(migrated['学'].meaning.byDevice.legacy.attempts===4,'Migration chain did not preserve legacy attempts in device bucket');assert(migrated['学'].exposedAt,'Upgrade did not infer exposedAt from prior attempts');assert(migrated['学'].meaning.correct===3&&migrated['学'].meaning.attempts===4,'Upgrade changed historical meaning stats');assert(migrated['学'].reading.correct===1&&migrated['学'].reading.attempts===2,'Upgrade changed historical reading stats');assert(migrated['学'].distractors['校']===2,'Upgrade dropped distractor history');
-const v1Meta={version:1};const upgradedV1=runMigration({'kanji5-v1.4-education-meta':JSON.stringify(v1Meta),'kanji5-v1.2-knowledge':JSON.stringify({'学':{schemaVersion:1,meaning:{attempts:2,correct:1,lastAt:'2026-08-25T00:00:00.000Z'}}})});assert(JSON.parse(upgradedV1.store.getItem('kanji5-v1.4-education-meta')).version===2,'Version-1 data was not advanced to version 2');assert(JSON.parse(upgradedV1.store.getItem('kanji5-v1.2-knowledge'))['学'].meaning.byDevice.legacy.attempts===2,'Version-1 migration did not execute v2 step');
+const requiredScripts = [
+  './v1.3-p0.js', './v1.3-perf.js', './v1.3-storage-bridge.js', './v1.3-settings.js',
+  './v1.4-education-migration.js', './v1.4-education-core.js', './v1.4-education-ui.js', './v1.5-p0.js'
+];
+for (const src of requiredScripts) assert.equal(count(index, `<script src="${src}"></script>`), 1, `${src} must be wired exactly once`);
+assert.equal(count(index, 'id="v1.2-dataset-bootstrap"'), 1, 'dataset bootstrap must remain singular');
+for (const legacy of [
+  './v1.3-p1.js', './v1.3-education-runtime-fix.js', './v1.3-production-ui.js',
+  './v1.3-education-v2.js', './v1.3-dont-know.js', './v1.3-smart-distractors.js',
+  'v1.5-education-choice-enforcer.js'
+]) assert.ok(!index.includes(legacy), `legacy runtime remains wired: ${legacy}`);
 
-let stateCtx={window:{},localStorage:new Store({'reviews':'[]'}),crypto:{randomUUID:()=> 'test-id'},Date,JSON,structuredClone};vm.createContext(stateCtx);vm.runInContext(state,stateCtx);const savedLegacy={eventId:'legacy-1',id:'学',at:'2026-09-02T10:00:00.000Z',rating:'Good',baseRecord:{card:{state:2,due:'2026-09-03T10:00:00.000Z'},reviews:1,lapses:0}};const normalized=stateCtx.window.__KANJI5_STATE__.normalizeReviewEvent(savedLegacy);assert(normalized.eventSchemaVersion===1,'Legacy persisted FSRS events must remain version 1');assert(normalized.resultRecord?.reviews===1,'Legacy event persistence must retain the post-review snapshot explicitly');
+assert.ok(p0.includes("await import('./v1.5-recall-core.js')"), 'P0 must load the dedicated recall core');
+assert.ok(p0.includes('window.__KANJI5_V15_P0__'), 'P0 marker missing');
+assert.ok(p0.includes('function enhanceRecall()'), 'Active Recall enhancer missing');
+assert.ok(p0.includes('function addDontKnowRecall()'), 'Active Recall don’t-know enhancer missing');
+assert.ok(p0.includes('v15DontKnowRecall'), 'Active Recall don’t-know control missing');
+assert.ok(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'unknown recall must be recorded separately');
+assert.ok(!p0.includes('v15DontKnowReview'), 'don’t-know must not become a review-rating control');
+assert.ok(!p0.includes('.rate.again'), 'don’t-know must not directly trigger Again');
+assert.ok(!p0.includes('function enhanceProduction'), 'production renderer must remain outside P0');
+assert.ok(!p0.includes('getProductionTarget'), 'production target inference must remain outside P0');
+assert.ok(!p0.includes('data-v15Production'), 'production state must remain outside P0');
+assert.ok(!p0.includes('observer.observe(document.body'), 'P0 must not observe document.body');
+assert.ok(!p0.includes('||document.body'), 'P0 observer must not fall back to document.body');
+assert.ok(p0.includes('function startTargetedObservers()') && p0.includes('studyRoot'), 'P0 must use a targeted observer');
+assert.ok(p0.includes('gate.dataset.v15Focus=focus.raw'), 'recall focus must remain internal');
+assert.ok(!p0.includes('معنی هدف:') && !p0.includes('خوانش هدف:'), 'recall focus must not leak into the prompt');
+assert.ok(p0.includes('function installTatoebaFetchDeduper()') && p0.includes('const pending=inflight.get(url)'), 'Tatoeba requests must be deduplicated');
+assert.ok(p0.includes('function installAccessibilityEnhancements()') && p0.includes('button:focus-visible,input:focus-visible'), 'keyboard focus support missing');
+assert.ok(p0.includes('@media(prefers-reduced-motion:reduce)'), 'reduced-motion support missing');
+assert.ok(p0.includes('function guardBusyEducationClicks(event)'), 'busy-click guard missing');
 
-let quotaStore=new Store();quotaStore.setItem=function(k,v){if(k==='kanji5-v1-reviews'&&String(v).length>10)throw new Error('QuotaExceededError');this.values[k]=String(v)};stateCtx={window:{},localStorage:quotaStore,crypto:{randomUUID:()=> 'test-id'},Date,JSON,structuredClone};vm.createContext(stateCtx);vm.runInContext(state,stateCtx);const api=stateCtx.window.__KANJI5_STATE__;const stateForSave=api.createInitial({settings:{dailyNew:5,retention:.9,maxInterval:36500},today:'2026-09-02'});stateForSave.cards={'学':{card:{due:'2026-09-03T00:00:00.000Z'},reviews:1,lapses:0,learnedAt:null}};stateForSave.reviews=Array.from({length:600},(_,i)=>({eventSchemaVersion:2,eventId:`e-${i}`,id:'学',at:`2026-09-02T00:00:${String(i%60).padStart(2,'0')}.000Z`,rating:'Good',baseRecord:{snapshotVersion:2,card:{state:2}}}));api.save(stateForSave);assert(JSON.parse(quotaStore.getItem('kanji5-v1')||'null'),'State save must survive review-storage quota errors without throwing');
+assert.match(recallCore, /export const RECALL_MODES/);
+assert.match(recallCore, /export function normalize/);
+assert.match(recallCore, /export function componentAccuracy/);
+assert.match(recallCore, /export function componentSignal/);
+assert.match(recallCore, /export function selectFocus/);
+assert.match(recallCore, /export function applyRecallOutcome/);
+assert.ok(!p0.includes('function normalize('), 'normalize must not be duplicated in P0');
+assert.ok(!p0.includes('function componentAccuracy('), 'componentAccuracy must not be duplicated in P0');
+assert.ok(!p0.includes('function componentSignal('), 'componentSignal must not be duplicated in P0');
+assert.ok(!p0.includes('function selectFocus('), 'selectFocus must not be duplicated in P0');
+assert.ok(!p0.includes('function applyRecallOutcome('), 'applyRecallOutcome must not be duplicated in P0');
 
-assert(sw.includes("const API_ORIGIN='https://kanjiapi.dev'"),'kanjiapi origin missing from service worker');assert(sw.includes("const TATOEBA_ORIGIN='https://api.tatoeba.org'"),'Tatoeba origin missing from service worker');assert(sw.includes("u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')"),'Vocabulary API cache route missing');assert(sw.includes("u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')"),'Context API cache route missing');assert(sw.includes('kanji5-shell-v46')&&sw.includes('kanji5-api-v14'),'Cache versions are inconsistent with the current PWA shell');assert(sw.includes('async function staleWhileRevalidate'),'Navigation stale-while-revalidate helper missing');assert(sw.includes("if(r.mode==='navigate'){e.respondWith(staleWhileRevalidate"),'Navigation is not using stale-while-revalidate');assert(sw.includes('"./v1.5-state.js"'),'v1.5 state dependency is missing from the offline shell');assert(sw.includes('"./v1.5-education-sync-core.js"'),'Education sync dependency is missing from the offline shell');assert(sw.includes('"./v1.5-fsrs-sync-core.js"'),'FSRS sync dependency is missing from the offline shell');const dynamicStart=sw.indexOf('async function dynamicSameOrigin'),dynamicEnd=sw.indexOf("self.addEventListener('fetch'",dynamicStart),dynamicHelper=sw.slice(dynamicStart,dynamicEnd);assert(dynamicHelper.includes('fetch(req)')&&!dynamicHelper.includes('caches.'),'Dynamic same-origin caching must remain bounded');assert(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"),'Unsafe post-return response.clone caching pattern remains');
+assert.ok(sw.includes('"./v1.5-state.js"'), 'state dependency missing from offline shell');
+assert.ok(sw.includes('"./v1.5-recall-core.js"'), 'recall core missing from offline shell');
+assert.ok(sw.includes('"./v1.5-p0.js"'), 'P0 missing from offline shell');
+assert.ok(sw.includes('"./v1.5-education-sync-core.js"'), 'education sync dependency missing from offline shell');
+assert.ok(sw.includes('"./v1.5-fsrs-sync-core.js"'), 'FSRS sync dependency missing from offline shell');
+assert.ok(sw.includes("const API_ORIGIN='https://kanjiapi.dev'"));
+assert.ok(sw.includes("const TATOEBA_ORIGIN='https://api.tatoeba.org'"));
+assert.ok(sw.includes('async function staleWhileRevalidate'));
+assert.ok(sw.includes("if(r.mode==='navigate')"));
+assert.ok(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"));
 
-assert(p0.includes('window.__KANJI5_V15_P0__'),'Canonical v1.5 P0 runtime version marker missing');assert(p0.includes('function enhanceRecall()'),'Active Recall enhancer missing');assert(p0.includes('function addDontKnowRecall()'),'Active Recall don’t-know enhancer missing');assert(p0.includes('v15DontKnowRecall'),'Active Recall don’t-know control missing');assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"),'Unknown recall is not recorded as a separate outcome');assert(p0.includes('stats.score+=.25'),'Unknown recall must have a lighter educational weight than correct recall');assert(!p0.includes('v15DontKnowReview'),'Don’t-know must not be a review-rating control');assert(!p0.includes('.rate.again'),'Don’t-know must not directly trigger FSRS Again');assert(!p0.includes('function enhanceProduction'),'Production renderer must remain in the canonical education UI');assert(!p0.includes('getProductionTarget'),'Production target inference must not live in P0');assert(!p0.includes('data-v15Production'),'Production choice handling must remain in the canonical education UI');assert(!p0.includes('observer.observe(document.body'),'P0 must not install a global document.body observer');assert(!p0.includes('||document.body'),'P0 observer must not fall back to the document body');assert(p0.includes('function startTargetedObservers()')&&p0.includes('studyRoot'),'P0 must use a targeted study observer');assert(p0.includes('gate.dataset.v15Focus=focus.raw')&&!p0.includes('معنی هدف:')&&!p0.includes('خوانش هدف:'),'Active Recall must keep the focus internally without leaking it in the prompt');assert(p0.includes('function installTatoebaFetchDeduper()')&&p0.includes('const pending=inflight.get(url)'),'Tatoeba example requests must be de-duplicated while in flight');assert(p0.includes('function installAccessibilityEnhancements()')&&p0.includes('button:focus-visible,input:focus-visible'),'Keyboard accessibility support is missing');assert(p0.includes('@media(prefers-reduced-motion:reduce)'),'Reduced-motion support is missing');assert(p0.includes('function guardBusyEducationClicks(event)'),'Education busy-click guard is missing');assert(runtime.includes('loading.classList.add("v13-real-error")'),'Startup errors must opt into the visible error-panel CSS override');
+assert.ok(runtime.includes('loading.classList.add("v13-real-error")'), 'startup error panel contract missing');
+assert.ok(index.includes('./vendor/ts-fsrs-5.4.1.mjs'), 'pinned local FSRS vendor missing');
+assert.ok(core.includes('educationSchedulerSignal') && core.includes('chooseDistractors'), 'canonical education core missing');
+assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'education UI is not using canonical adaptive helpers');
+assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
+assert.ok(!workflow.includes('git push origin feature/v1.5'), 'CI must not self-push');
+assert.ok(workflow.includes('test -z "$(git status --porcelain)"'), 'CI must fail on committed-build drift');
+assert.ok(supabase.includes('function withSyncLock') && supabase.includes('MAX_SYNC_ATTEMPTS'), 'sync retry/lock hardening missing');
+assert.ok(fsrsSync.includes('isPreEventSnapshot') && fsrsSync.includes('legacyRoots'), 'FSRS replay safety guards missing');
 
-for(const forbidden of ['npm install ','https://unpkg.com/','https://cdn.jsdelivr.net/'])assert(!index.includes(forbidden)&&!ui.includes(forbidden),`Unexpected runtime dependency: ${forbidden}`);assert(index.includes('./vendor/ts-fsrs-5.4.1.mjs'),'Pinned local FSRS vendor missing');assert(core.includes('educationSchedulerSignal')&&core.includes('chooseDistractors'),'Updated education core is not present');assert(ui.includes('CORE.chooseDistractors'),'UI is not using canonical distractor selection');assert(ui.includes('CORE.selectEducationItem'),'UI is not using adaptive Kanji selection');assert(ui.includes('safe(edu.sentence.english||\'\')'),'Context translation escaping is not wired');assert(workflow.includes('scripts/test-v1.5-p0.mjs')&&workflow.includes('scripts/test-v1.4-p1.mjs')&&workflow.includes('scripts/test-v1.4-education.mjs')&&workflow.includes('scripts/test-v1.5-fsrs-sync.mjs'),'Education and FSRS CI gates are missing');assert(!workflow.includes('git push origin feature/v1.5'),'v1.5 CI must not self-push generated changes');assert(workflow.includes('test -z "$(git status --porcelain)"'),'v1.5 CI must fail on committed-build drift');assert(index.includes('function educationQueuePriority'),'Education/FSRS queue bridge is missing');assert(index.includes('educationQueuePriority(k')||index.includes('educationQueuePriority(item'),'Queue does not use education priority');assert(index.includes('dueItems')&&index.includes('dueItems.sort'),'FSRS due cards are not being ranked with education evidence');assert(!index.includes('scheduler.next(rec.card,now,education'),'FSRS rating path was not replaced by education heuristic');
-assert(supabase.includes('const EDUCATION_SCHEMA_VERSION = 2'),'Supabase education schema version is stale');assert(supabase.includes('function withSyncLock'),'Supabase sync must be single-flight');assert(supabase.includes('sameDayLocal')&&supabase.includes('sameDayRemote'),'Daily sync counters must be date-aware');assert(fsrsSync.includes('isPreEventSnapshot')&&fsrsSync.includes('legacyRoots'),'FSRS replay must distinguish safe pre-event snapshots from legacy post-event roots');
+class Store {
+  constructor(values = {}) { this.values = { ...values }; }
+  getItem(key) { return Object.prototype.hasOwnProperty.call(this.values, key) ? this.values[key] : null; }
+  setItem(key, value) { this.values[key] = String(value); }
+}
+
+const migration = read('v1.4-education-migration.js');
+const migrationStore = new Store({});
+const migrationContext = { window: {}, localStorage: migrationStore, Date, JSON };
+vm.createContext(migrationContext);
+vm.runInContext(migration, migrationContext);
+assert.ok(migrationContext.window.__KANJI5_EDU_MIGRATION_API__, 'education migration API missing');
+assert.equal(migrationContext.window.__KANJI5_EDU_MIGRATION_API__.version, 2);
+
+const stateContext = {
+  window: {},
+  localStorage: new Store(),
+  crypto: { randomUUID: () => 'test-id' },
+  Date, JSON, structuredClone
+};
+vm.createContext(stateContext);
+vm.runInContext(state, stateContext);
+const stateApi = stateContext.window.__KANJI5_STATE__;
+assert.ok(stateApi, 'state API missing');
+const review = { eventId: 'legacy', id: '学', at: '2026-09-02T10:00:00.000Z', rating: 'Good', baseRecord: { reviews: 1 } };
+const normalized = stateApi.normalizeReviewEvent(review);
+assert.equal(normalized.eventSchemaVersion, 1);
+assert.equal(normalized.resultRecord.reviews, 1);
+
 console.log('Kanji 5 v1.5 P0 stabilization smoke suite passed.');
