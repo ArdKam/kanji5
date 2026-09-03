@@ -77,6 +77,7 @@ const torn = new MemoryStorage({
 });
 const tornApi = boot(torn);
 const recovered = tornApi.loadState();
+console.log('persistence recovery reviews:', JSON.stringify(recovered.reviews));
 assert.equal(recovered.settings.dailyNew, 7);
 assert.equal(Object.keys(recovered.cards).length, 1);
 assert.equal(recovered.reviews.length, 1);
