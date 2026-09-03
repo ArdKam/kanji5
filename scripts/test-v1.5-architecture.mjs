@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const index = read('index.html');
 const state = read('v1.5-state.js');
+const recallCore = read('v1.5-recall-core.js');
 const p0 = read('v1.5-p0.js');
 const syncCore = read('v1.5-sync-core.js');
 const sync = read('supabase-sync.js');
@@ -11,11 +12,18 @@ const sw = read('sw.js');
 const pkg = JSON.parse(read('package.json'));
 
 assert.equal(pkg.type, 'module', 'package must declare the ESM boundary');
+assert.match(recallCore, /^export /m, 'recall core must be an explicit ESM module');
+assert.match(p0, /await import\(['"]\.\/v1\.5-recall-core\.js['"]\)/, 'P0 must consume recall behavior through the dedicated core boundary');
 assert.match(syncCore, /^import /m, 'sync core must remain an explicit ESM module');
 assert.match(sync, /from ['"]\.\/v1\.5-sync-core\.js['"]/, 'Supabase sync must consume the sync core through its module boundary');
 
 assert.match(state, /window\.__KANJI5_STATE__/, 'state module must expose one public browser API');
 assert.match(p0, /window\.__KANJI5_V15_RECALL_API__/, 'P0 must expose one explicit recall API');
+assert.doesNotMatch(p0, /function\s+normalize\(/, 'pure recall normalization must live in the recall core');
+assert.doesNotMatch(p0, /function\s+componentAccuracy\(/, 'component accuracy must live in the recall core');
+assert.doesNotMatch(p0, /function\s+componentSignal\(/, 'component signal aggregation must live in the recall core');
+assert.doesNotMatch(p0, /function\s+selectFocus\(/, 'focus selection must live in the recall core');
+assert.doesNotMatch(p0, /function\s+applyRecallOutcome\(/, 'recall outcome mutation must live in the recall core');
 assert.doesNotMatch(p0, /observer\.observe\(document\.body/, 'P0 must not observe the global document body');
 assert.doesNotMatch(p0, /\|\|document\.body/, 'P0 must not fall back to the global document body');
 assert.doesNotMatch(p0, /function\s+enhanceProduction\(/, 'Production UI logic must stay in the education UI module');
@@ -27,6 +35,7 @@ assert.match(index, /<script src="\.\/v1\.5-p0\.js"><\/script>/, 'P0 must be exp
 assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length, 1, 'P0 must be loaded exactly once');
 
 assert.match(sw, /"\.\/v1\.5-state\.js"/, 'state module must be offline-precached');
+assert.match(sw, /"\.\/v1\.5-recall-core\.js"/, 'recall core must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-p0\.js"/, 'P0 must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-sync-core\.js"/, 'sync core must be offline-precached for sync-enabled startup paths');
 
