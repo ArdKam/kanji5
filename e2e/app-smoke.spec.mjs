@@ -28,17 +28,17 @@ test.describe('Kanji 5 browser smoke', () => {
     await page.goto('/');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
-    const firstKanji = (await page.locator('.kanji').textContent())?.trim();
+    const firstCard = page.locator('.kanji');
+    const firstKanji = (await firstCard.textContent())?.trim();
+    const firstId = await firstCard.getAttribute('data-kanji-id');
     expect(firstKanji).toBeTruthy();
+    expect(firstId).toBeTruthy();
 
     // First exposure is intentionally information-only. Rate Again so the same
-    // persisted card remains due for the next review cycle.
+    // card is persisted and remains due for the next review cycle.
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Again"]').click();
-
-    const firstId = await page.locator('.kanji').getAttribute('data-kanji-id');
-    expect(firstId).toBeTruthy();
 
     const cardWasPersisted = await page.evaluate(id => {
       const raw = localStorage.getItem('kanji5-v1-cards');
@@ -65,7 +65,8 @@ test.describe('Kanji 5 browser smoke', () => {
       const raw = localStorage.getItem('kanji5-v1-reviews');
       return raw ? JSON.parse(raw) : [];
     });
-    expect(reviewsBefore).toEqual([]);
+    expect(reviewsBefore.length).toBe(1);
+    expect(reviewsBefore.at(-1).rating).toBe('Again');
 
     await page.locator('#v15DontKnowRecall').click();
 
@@ -97,7 +98,17 @@ test.describe('Kanji 5 browser smoke', () => {
       const raw = localStorage.getItem('kanji5-v1-reviews');
       return raw ? JSON.parse(raw) : [];
     });
-    expect(reviewsAfterUnknown).toEqual([]);
+    expect(reviewsAfterUnknown.length).toBe(1);
+    expect(reviewsAfterUnknown.at(-1).rating).toBe('Again');
+
+    await page.locator('.rate[data-r="Good"]').click();
+
+    const reviewsAfterGood = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      return raw ? JSON.parse(raw) : [];
+    });
+    expect(reviewsAfterGood.length).toBe(2);
+    expect(reviewsAfterGood.at(-1).rating).toBe('Good');
 
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
