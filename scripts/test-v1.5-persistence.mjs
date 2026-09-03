@@ -41,7 +41,7 @@ assert.equal(typeof base.loadState, 'function');
 assert.equal(typeof base.saveState, 'function');
 
 const storage = new MemoryStorage();
-let stateApi = boot(storage);
+const stateApi = boot(storage);
 const state = stateApi.createInitial({
   settings: { dailyNew: 7 },
   cards: { a: { card: { due: '2026-09-04T00:00:00.000Z' }, reviews: 1 } },
@@ -55,7 +55,7 @@ assert.ok(storage.getItem(stateApi.SNAPSHOT_COMMIT));
 const reloadedApi = boot(storage);
 const loaded = reloadedApi.loadState();
 assert.equal(loaded.settings.dailyNew, 7);
-assert.deepEqual(JSON.parse(JSON.stringify(loaded.cards)), JSON.parse(JSON.stringify(state.cards)));
+assert.equal(JSON.stringify(loaded.cards), JSON.stringify(state.cards));
 assert.equal(loaded.reviews.length, 1);
 
 const torn = new MemoryStorage({
@@ -89,7 +89,7 @@ const uncommitted = new MemoryStorage({
 });
 const uncommittedApi = boot(uncommitted);
 const fallback = uncommittedApi.loadState();
-assert.deepEqual(fallback.cards, {});
+assert.equal(JSON.stringify(fallback.cards), JSON.stringify({}));
 assert.equal(fallback.reviews.length, 0);
 
 const txStorage = new MemoryStorage();
