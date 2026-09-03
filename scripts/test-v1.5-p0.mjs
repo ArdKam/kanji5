@@ -16,7 +16,6 @@ const supabase = read('supabase-sync.js');
 const fsrsSync = read('v1.5-fsrs-sync-core.js');
 
 const count = (text, needle) => text.split(needle).length - 1;
-const ok = condition => { if (!condition) throw new Error('P0 contract failed'); };
 
 const requiredScripts = [
   './v1.3-p0.js', './v1.3-perf.js', './v1.3-storage-bridge.js', './v1.3-settings.js',
@@ -80,7 +79,8 @@ assert.ok(core.includes('educationSchedulerSignal') && core.includes('chooseDist
 assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'education UI is not using canonical adaptive helpers');
 assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
 assert.ok(!workflow.includes('git push origin feature/v1.5'), 'CI must not self-push');
-assert.ok(workflow.includes('test -z "$(git status --porcelain)"'), 'CI must fail on committed-build drift');
+assert.ok(workflow.includes('git diff --check'), 'CI must verify the checked-out build instead of mutating and pushing it');
+assert.ok(workflow.includes('test "$(grep -c \'v1.5-roadmap-finalize.mjs\' .github/workflows/build-v1.5.yml || true)" = "0"'), 'CI must not invoke the roadmap mutator');
 assert.ok(supabase.includes('function withSyncLock') && supabase.includes('MAX_SYNC_ATTEMPTS'), 'sync retry/lock hardening missing');
 assert.ok(fsrsSync.includes('isPreEventSnapshot') && fsrsSync.includes('legacyRoots'), 'FSRS replay safety guards missing');
 
