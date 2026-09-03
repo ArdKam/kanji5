@@ -47,23 +47,22 @@ test.describe('Kanji 5 browser smoke', () => {
     }, firstId);
     expect(cardWasPersisted).toBe(true);
 
-    await page.reload();
-    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
-    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
-
-    // v1.2 active-recall wiring still reads the legacy metadata shape
-    // (kanji5-v1.cards), while v1.5 persists cards in kanji5-v1-cards.
-    // Mirror the persisted card into that legacy view for this E2E scenario so
-    // the test covers the recall/"don't know" behavior itself.
+    // The v1.2 Active Recall module still checks the legacy cards field. Keep
+    // that compatibility view populated before the next page load so the E2E
+    // exercises the actual recall flow rather than the storage migration seam.
     await page.evaluate(() => {
       const metadataRaw = localStorage.getItem('kanji5-v1');
       const cardsRaw = localStorage.getItem('kanji5-v1-cards');
-      if (!metadataRaw || !cardsRaw) return;
+      if (!metadataRaw || !cardsRaw) throw new Error('persisted state missing');
       const metadata = JSON.parse(metadataRaw);
       const cards = JSON.parse(cardsRaw);
       metadata.cards = cards;
       localStorage.setItem('kanji5-v1', JSON.stringify(metadata));
     });
+
+    await page.reload();
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
 
     const gate = page.locator('.v12-recall-gate');
     await page.locator('#revealBtn').click();
