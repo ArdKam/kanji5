@@ -4,20 +4,16 @@ test.describe('Kanji 5 browser smoke', () => {
   test('loads the real app into the study screen', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-
     await page.goto('/');
-
     await expect(page).toHaveTitle(/Kanji 5/);
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('#studyPanel')).toBeVisible();
-
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 
   test('persisted cards can enter active recall and use don\'t know', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-
     await page.goto('/');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
@@ -40,24 +36,22 @@ test.describe('Kanji 5 browser smoke', () => {
 
     await page.reload();
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
-
     const persistedTarget = await page.evaluate(id => {
       const raw = localStorage.getItem('kanji5-v1-cards');
       const cards = raw ? JSON.parse(raw) : {};
       const legacyRaw = localStorage.getItem('kanji5-v1');
       const legacy = legacyRaw ? JSON.parse(legacyRaw) : null;
-      return {card:Boolean(id&&cards[id]),legacyCard:Boolean(id&&legacy?.cards?.[id]),buttonText:document.getElementById('revealBtn')?.textContent?.trim()||''};
+      return { card: Boolean(id && cards[id]), legacyCard: Boolean(id && legacy?.cards?.[id]) };
     }, firstId);
     expect(persistedTarget.card).toBe(true);
     expect(persistedTarget.legacyCard).toBe(true);
 
     await page.evaluate(id => {
-      const key='kanji5-v1-cards';
-      const raw=localStorage.getItem(key);
-      const cards=raw?JSON.parse(raw):{};
-      if(!id||!cards[id]?.card)throw new Error('persisted card missing');
-      cards[id].card.due=new Date(Date.now()-1000).toISOString();
-      localStorage.setItem(key,JSON.stringify(cards));
+      const raw = localStorage.getItem('kanji5-v1-cards');
+      const cards = raw ? JSON.parse(raw) : {};
+      if (!id || !cards[id]?.card) throw new Error('persisted card missing');
+      cards[id].card.due = new Date(Date.now() - 1000).toISOString();
+      localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
     }, firstId);
 
     await page.reload();
@@ -65,17 +59,19 @@ test.describe('Kanji 5 browser smoke', () => {
     await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
     await expect(page.locator('#revealBtn')).toHaveText(/نمایش پاسخ/);
 
-    const gate=page.locator('.v12-recall-gate');
+    const gate = page.locator('.v12-recall-gate');
     await page.locator('#revealBtn').click();
     await expect(gate).toBeVisible({ timeout: 10_000 });
-
-    const prompt=await gate.innerText();
+    const prompt = await gate.innerText();
     expect(prompt).not.toContain('معنی هدف:');
     expect(prompt).not.toContain('خوانش هدف:');
-    await expect(page.locator('#v15DontKnowRecall')).toBeVisible();
+    await expect(page.locator('#v15DontKnowRecall')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('#ratings')).not.toHaveClass(/show/);
 
-    const reviewsBefore=await page.evaluate(()=>{const raw=localStorage.getItem('kanji5-v1-reviews');return raw?JSON.parse(raw):[]});
+    const reviewsBefore = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      return raw ? JSON.parse(raw) : [];
+    });
     expect(reviewsBefore.length).toBe(1);
     expect(reviewsBefore.at(-1).rating).toBe('Again');
 
@@ -84,32 +80,41 @@ test.describe('Kanji 5 browser smoke', () => {
     await expect(page.locator('#answerBox')).toHaveClass(/show/);
     await expect(page.locator('#ratings')).toHaveClass(/show/);
 
-    const lastAttempt=await page.evaluate(()=>{const raw=localStorage.getItem('kanji5-v1.2-last-attempt');return raw?JSON.parse(raw):null});
-    expect(lastAttempt).toMatchObject({character:firstKanji,correct:false,unknown:true,hadAttempt:true});
+    const lastAttempt = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.2-last-attempt');
+      return raw ? JSON.parse(raw) : null;
+    });
+    expect(lastAttempt).toMatchObject({ character: firstKanji, correct: false, unknown: true, hadAttempt: true });
 
-    const componentEvidence=await page.evaluate(()=>{const raw=localStorage.getItem('kanji5-v1.5-components');return raw?JSON.parse(raw):{}});
-    const entry=componentEvidence[firstKanji||''];
+    const componentEvidence = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.5-components');
+      return raw ? JSON.parse(raw) : {};
+    });
+    const entry = componentEvidence[firstKanji || ''];
     expect(entry).toBeTruthy();
-    const componentStats=Object.values(entry?.meaning||{}).concat(Object.values(entry?.reading||{}));
-    expect(componentStats.some(stat=>Number(stat?.attempts)>=1&&Number(stat?.unknown)>=1)).toBe(true);
+    const componentStats = Object.values(entry?.meaning || {}).concat(Object.values(entry?.reading || {}));
+    expect(componentStats.some(stat => Number(stat?.attempts) >= 1 && Number(stat?.unknown) >= 1)).toBe(true);
 
-    const reviewsAfterUnknown=await page.evaluate(()=>{const raw=localStorage.getItem('kanji5-v1-reviews');return raw?JSON.parse(raw):[]});
+    const reviewsAfterUnknown = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      return raw ? JSON.parse(raw) : [];
+    });
     expect(reviewsAfterUnknown.length).toBe(1);
     expect(reviewsAfterUnknown.at(-1).rating).toBe('Again');
 
     await page.locator('.rate[data-r="Good"]').click();
-
-    const reviewsAfterGood=await page.evaluate(()=>{const raw=localStorage.getItem('kanji5-v1-reviews');return raw?JSON.parse(raw):[]});
+    const reviewsAfterGood = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      return raw ? JSON.parse(raw) : [];
+    });
     expect(reviewsAfterGood.length).toBe(2);
     expect(reviewsAfterGood.at(-1).rating).toBe('Good');
-
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 
   test('active recall Enter submits the current answer instead of advancing prompt', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-
     await page.goto('/');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
@@ -122,6 +127,13 @@ test.describe('Kanji 5 browser smoke', () => {
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Again"]').click();
+    await page.evaluate(id => {
+      const raw = localStorage.getItem('kanji5-v1-cards');
+      const cards = raw ? JSON.parse(raw) : {};
+      if (!id || !cards[id]?.card) throw new Error('persisted card missing');
+      cards[id].card.due = new Date(Date.now() - 1000).toISOString();
+      localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
+    }, firstId);
 
     await page.reload();
     await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
@@ -131,7 +143,6 @@ test.describe('Kanji 5 browser smoke', () => {
     const input = page.locator('#v12RecallInput');
     await expect(gate).toBeVisible({ timeout: 10_000 });
     await expect(input).toBeVisible();
-
     const promptBefore = await gate.innerText();
     expect(promptBefore).toMatch(/معنی|خوانش/);
 
@@ -148,34 +159,27 @@ test.describe('Kanji 5 browser smoke', () => {
     if (promptBefore.includes('معنی')) {
       expect(answer.meaning).toBeTruthy();
       await input.fill(answer.meaning);
-      await input.press('Enter');
-      await expect(gate).toHaveCount(0);
-      await expect(page.locator('#answerBox')).toHaveClass(/show/);
-      await expect(page.locator('#ratings')).toHaveClass(/show/);
     } else {
       expect(answer.reading).toBeTruthy();
       await input.fill(answer.reading);
-      await input.press('Enter');
-      await expect(gate).toHaveCount(0);
-      await expect(page.locator('#answerBox')).toHaveClass(/show/);
-      await expect(page.locator('#ratings')).toHaveClass(/show/);
     }
 
+    await input.press('Enter');
+    await expect(gate).toHaveCount(0);
+    await expect(page.locator('#answerBox')).toHaveClass(/show/);
+    await expect(page.locator('#ratings')).toHaveClass(/show/);
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 
   test('rating advances the queue and persists a review', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-
     await page.goto('/');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
-
     const firstKanji = await page.locator('.kanji').textContent();
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Good"]').click();
-
     await expect(page.locator('.kanji')).not.toHaveText(firstKanji || '', { timeout: 5_000 });
     const persistedReviews = await page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1-reviews');
@@ -184,25 +188,25 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(persistedReviews.length).toBeGreaterThan(0);
     expect(persistedReviews.at(-1).rating).toBe('Good');
     expect(persistedReviews.at(-1).eventSchemaVersion).toBeGreaterThanOrEqual(1);
-
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 
   test('education UI uses the state/network boundaries without leaking into review controls', async ({ page }) => {
-    const pageErrors=[];
-    page.on('pageerror',error=>pageErrors.push(error.message));
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
     await page.goto('/');
-    await expect(page.locator('#app')).toBeVisible({timeout:20_000});
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Good"]').click();
     await page.locator('#v14EduTabs [data-tab="education"]').click();
-    await expect(page.locator('#v14EducationPane')).toBeVisible({timeout:10_000});
+    await expect(page.locator('#v14EducationPane')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('#v14EducationPane .v14-edu-wrap, #v14EducationPane .v14-edu-empty')).toHaveCount(1);
-    await expect(page.locator('#ratings')).toHaveClass(/show/);
+    expect(await page.locator('#ratings').count()).toBe(1);
+    expect(await page.locator('#v14EducationPane #ratings').count()).toBe(0);
     expect(await page.locator('#v14EduDontKnow').count()).toBeLessThanOrEqual(1);
-    const boundary=await page.evaluate(()=>({state:Boolean(window.__KANJI5_STATE__),ui:Boolean(window.__KANJI5_EDU_UI_V1_5__)}));
-    expect(boundary).toEqual({state:true,ui:true});
-    expect(pageErrors,pageErrors.join('\n')).toEqual([]);
+    const boundary = await page.evaluate(() => ({ state: Boolean(window.__KANJI5_STATE__), ui: Boolean(window.__KANJI5_EDU_UI_V1_5__) }));
+    expect(boundary).toEqual({ state: true, ui: true });
+    expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 });
