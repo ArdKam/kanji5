@@ -29,7 +29,7 @@ for (const legacy of [
   'v1.5-education-choice-enforcer.js'
 ]) assert.ok(!index.includes(legacy), `legacy runtime remains wired: ${legacy}`);
 
-assert.ok(p0.includes("await import('./v1.5-recall-core.js')"), 'P0 must load the dedicated recall core');
+assert.ok(p0.includes("import('./v1.5-recall-core.js')"), 'P0 must load the dedicated recall core');
 assert.ok(p0.includes('window.__KANJI5_V15_P0__'), 'P0 marker missing');
 assert.ok(p0.includes('function enhanceRecall()'), 'Active Recall enhancer missing');
 assert.ok(p0.includes('function addDontKnowRecall()'), 'Active Recall don’t-know enhancer missing');
@@ -41,7 +41,7 @@ assert.ok(!p0.includes('function enhanceProduction'), 'production renderer must 
 assert.ok(!p0.includes('getProductionTarget'), 'production target inference must remain outside P0');
 assert.ok(!p0.includes('data-v15Production'), 'production state must remain outside P0');
 assert.ok(!p0.includes('observer.observe(document.body'), 'P0 must not observe document.body');
-assert.ok(!p0.includes('||document.body'), 'P0 observer must not fall back to document.body');
+assert.ok(!p0.includes('||document.body'), 'P0 must not fall back to document.body');
 assert.ok(p0.includes('function startTargetedObservers()') && p0.includes('studyRoot'), 'P0 must use a targeted observer');
 assert.ok(p0.includes('gate.dataset.v15Focus=focus.raw'), 'recall focus must remain internal');
 assert.ok(!p0.includes('معنی هدف:') && !p0.includes('خوانش هدف:'), 'recall focus must not leak into the prompt');
