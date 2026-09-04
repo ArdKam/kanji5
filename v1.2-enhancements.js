@@ -6,146 +6,71 @@
 
   let activePrompt = null;
   let activeCharacter = null;
-  let originalRevealButton = null;
-  let allowNativeReveal = false;
   let deckIndex = null;
-  let deckLoadPromise = null;
+  let allowNativeReveal = false;
 
-  const normalize = value => String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s\u3000]+/g, "")
-    .replace(/[。、・,.;:!?！？\-ー]/g, "");
+  function normalize(value) {
+    return String(value ?? "").trim().toLowerCase().normalize("NFKC").replace(/[\s\u3000]+/g, "");
+  }
 
-  const ROMAJI_VARIANTS = [
-    ["shi", "し"], ["chi", "ち"], ["tsu", "つ"], ["fu", "ふ"], ["ji", "じ"], ["dzu", "づ"],
-    ["sha", "しゃ"], ["shu", "しゅ"], ["sho", "しょ"], ["cha", "ちゃ"], ["chu", "ちゅ"], ["cho", "ちょ"],
-    ["ja", "じゃ"], ["ju", "じゅ"], ["jo", "じょ"],
-    ["kya", "きゃ"], ["kyu", "きゅ"], ["kyo", "きょ"], ["gya", "ぎゃ"], ["gyu", "ぎゅ"], ["gyo", "ぎょ"],
-    ["nya", "にゃ"], ["nyu", "にゅ"], ["nyo", "にょ"], ["hya", "ひゃ"], ["hyu", "ひゅ"], ["hyo", "ひょ"],
-    ["mya", "みゃ"], ["myu", "みゅ"], ["myo", "みょ"], ["rya", "りゃ"], ["ryu", "りゅ"], ["ryo", "りょ"],
-    ["bya", "びゃ"], ["byu", "びゅ"], ["byo", "びょ"], ["pya", "ぴゃ"], ["pyu", "ぴゅ"], ["pyo", "ぴょ"],
-    ["ja", "ぢゃ"], ["ju", "ぢゅ"], ["jo", "ぢょ"],
-    ["a", "あ"], ["i", "い"], ["u", "う"], ["e", "え"], ["o", "お"],
-    ["ka", "か"], ["ki", "き"], ["ku", "く"], ["ke", "け"], ["ko", "こ"],
-    ["sa", "さ"], ["su", "す"], ["se", "せ"], ["so", "そ"],
-    ["ta", "た"], ["te", "て"], ["to", "と"],
-    ["na", "な"], ["ni", "に"], ["nu", "ぬ"], ["ne", "ね"], ["no", "の"],
-    ["ha", "は"], ["hi", "ひ"], ["he", "へ"], ["ho", "ほ"],
-    ["ma", "ま"], ["mi", "み"], ["mu", "む"], ["me", "め"], ["mo", "も"],
-    ["ya", "や"], ["yu", "ゆ"], ["yo", "よ"], ["ra", "ら"], ["ri", "り"], ["ru", "る"], ["re", "れ"], ["ro", "ろ"],
-    ["wa", "わ"], ["wo", "を"], ["n", "ん"],
-    ["ga", "が"], ["gi", "ぎ"], ["gu", "ぐ"], ["ge", "げ"], ["go", "ご"],
-    ["za", "ざ"], ["zu", "ず"], ["ze", "ぜ"], ["zo", "ぞ"],
-    ["da", "だ"], ["de", "で"], ["do", "ど"], ["ba", "ば"], ["bi", "び"], ["bu", "ぶ"], ["be", "べ"], ["bo", "ぼ"],
-    ["pa", "ぱ"], ["pi", "ぴ"], ["pu", "ぷ"], ["pe", "ぺ"], ["po", "ぽ"],
-    ["va", "ゔぁ"], ["vi", "ゔぃ"], ["ve", "ゔぇ"], ["vo", "ゔぉ"], ["vu", "ゔ"],
-    ["di", "ぢ"], ["du", "づ"], ["ti", "ち"], ["tu", "つ"], ["si", "し"], ["hu", "ふ"], ["zi", "じ"], ["wi", "うぃ"], ["we", "うぇ"]
-  ];
-
-  const HIRA_TO_ROMAJI = new Map([
-    ["あ","a"],["い","i"],["う","u"],["え","e"],["お","o"],["か","ka"],["き","ki"],["く","ku"],["け","ke"],["こ","ko"],
-    ["さ","sa"],["し","shi"],["す","su"],["せ","se"],["そ","so"],["た","ta"],["ち","chi"],["つ","tsu"],["て","te"],["と","to"],
-    ["な","na"],["に","ni"],["ぬ","nu"],["ね","ne"],["の","no"],["は","ha"],["ひ","hi"],["ふ","fu"],["へ","he"],["ほ","ho"],
-    ["ま","ma"],["み","mi"],["む","mu"],["め","me"],["も","mo"],["や","ya"],["ゆ","yu"],["よ","yo"],["ら","ra"],["り","ri"],["る","ru"],["れ","re"],["ろ","ro"],
-    ["わ","wa"],["を","o"],["ん","n"],["が","ga"],["ぎ","gi"],["ぐ","gu"],["げ","ge"],["ご","go"],["ざ","za"],["じ","ji"],["ず","zu"],["ぜ","ze"],["ぞ","zo"],
-    ["だ","da"],["ぢ","ji"],["づ","zu"],["で","de"],["ど","do"],["ば","ba"],["び","bi"],["ぶ","bu"],["べ","be"],["ぼ","bo"],
-    ["ぱ","pa"],["ぴ","pi"],["ぷ","pu"],["ぺ","pe"],["ぽ","po"],["ゔ","vu"],
-    ["きゃ","kya"],["きゅ","kyu"],["きょ","kyo"],["しゃ","sha"],["しゅ","shu"],["しょ","sho"],["ちゃ","cha"],["ちゅ","chu"],["ちょ","cho"],
-    ["にゃ","nya"],["にゅ","nyu"],["にょ","nyo"],["ひゃ","hya"],["ひゅ","hyu"],["ひょ","hyo"],["みゃ","mya"],["みゅ","myu"],["みょ","myo"],
-    ["りゃ","rya"],["りゅ","ryu"],["りょ","ryo"],["ぎゃ","gya"],["ぎゅ","gyu"],["ぎょ","gyo"],["じゃ","ja"],["じゅ","ju"],["じょ","jo"],
-    ["びゃ","bya"],["びゅ","byu"],["びょ","byo"],["ぴゃ","pya"],["ぴゅ","pyu"],["ぴょ","pyo"]
-  ]);
+  function normalizeRomaji(value) {
+    return normalize(value)
+      .replace(/shi/g, "si")
+      .replace(/chi/g, "ti")
+      .replace(/tsu/g, "tu")
+      .replace(/fu/g, "hu")
+      .replace(/ji/g, "zi")
+      .replace(/ou/g, "o")
+      .replace(/aa/g, "a")
+      .replace(/ii/g, "i")
+      .replace(/uu/g, "u")
+      .replace(/ee/g, "e");
+  }
 
   function kanaToRomaji(value) {
-    const input = String(value || "")
-      .normalize("NFKC")
-      .replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
-      .replace(/ー/g, "");
+    const map = new Map([
+      ["あ", "a"], ["い", "i"], ["う", "u"], ["え", "e"], ["お", "o"], ["か", "ka"], ["き", "ki"], ["く", "ku"], ["け", "ke"], ["こ", "ko"],
+      ["さ", "sa"], ["し", "shi"], ["す", "su"], ["せ", "se"], ["そ", "so"], ["た", "ta"], ["ち", "chi"], ["つ", "tsu"], ["て", "te"], ["と", "to"],
+      ["な", "na"], ["に", "ni"], ["ぬ", "nu"], ["ね", "ne"], ["の", "no"], ["は", "ha"], ["ひ", "hi"], ["ふ", "fu"], ["へ", "he"], ["ほ", "ho"],
+      ["ま", "ma"], ["み", "mi"], ["む", "mu"], ["め", "me"], ["も", "mo"], ["や", "ya"], ["ゆ", "yu"], ["よ", "yo"], ["ら", "ra"], ["り", "ri"], ["る", "ru"], ["れ", "re"], ["ろ", "ro"], ["わ", "wa"], ["を", "wo"], ["ん", "n"],
+      ["が", "ga"], ["ぎ", "gi"], ["ぐ", "gu"], ["げ", "ge"], ["ご", "go"], ["ざ", "za"], ["じ", "ji"], ["ず", "zu"], ["ぜ", "ze"], ["ぞ", "zo"],
+      ["だ", "da"], ["ぢ", "ji"], ["づ", "zu"], ["で", "de"], ["ど", "do"], ["ば", "ba"], ["び", "bi"], ["ぶ", "bu"], ["べ", "be"], ["ぼ", "bo"], ["ぱ", "pa"], ["ぴ", "pi"], ["ぷ", "pu"], ["ぺ", "pe"], ["ぽ", "po"]
+    ]);
+    const digraphs = { "きゃ": "kya", "きゅ": "kyu", "きょ": "kyo", "しゃ": "sha", "しゅ": "shu", "しょ": "sho", "ちゃ": "cha", "ちゅ": "chu", "ちょ": "cho", "にゃ": "nya", "にゅ": "nyu", "にょ": "nyo", "ひゃ": "hya", "ひゅ": "hyu", "ひょ": "hyo", "みゃ": "mya", "みゅ": "myu", "みょ": "myo", "りゃ": "rya", "りゅ": "ryu", "りょ": "ryo", "ぎゃ": "gya", "ぎゅ": "gyu", "ぎょ": "gyo", "じゃ": "ja", "じゅ": "ju", "じょ": "jo", "びゃ": "bya", "びゅ": "byu", "びょ": "byo", "ぴゃ": "pya", "ぴゅ": "pyu", "ぴょ": "pyo" };
     let out = "";
-    for (let i = 0; i < input.length;) {
-      if (input[i] === "っ") {
-        const pair = input.slice(i + 1, i + 3);
-        const tri = input.slice(i + 1, i + 4);
-        const next = HIRA_TO_ROMAJI.get(tri) || HIRA_TO_ROMAJI.get(pair) || HIRA_TO_ROMAJI.get(input[i + 1]) || "";
-        out += next && /^[bcdfghjklmnpqrstvwxyz]/.test(next) ? next[0] : "";
-        i += 1;
-        continue;
-      }
-      const tri = input.slice(i, i + 3);
-      const pair = input.slice(i, i + 2);
-      if (HIRA_TO_ROMAJI.has(tri)) { out += HIRA_TO_ROMAJI.get(tri); i += 3; continue; }
-      if (HIRA_TO_ROMAJI.has(pair)) { out += HIRA_TO_ROMAJI.get(pair); i += 2; continue; }
-      out += HIRA_TO_ROMAJI.get(input[i]) || input[i];
-      i += 1;
+    for (let i = 0; i < value.length; i += 1) {
+      const pair = value.slice(i, i + 2);
+      if (digraphs[pair]) { out += digraphs[pair]; i += 1; continue; }
+      if (value[i] === "っ") { out += map.get(value[i + 1])?.[0] || ""; continue; }
+      if (value[i] === "ー") continue;
+      out += map.get(value[i]) || value[i];
     }
     return out;
   }
 
-  function normalizeRomaji(value) {
-    let s = normalize(value).replace(/[^a-z]/g, "");
-    const variants = [
-      [/shi/g,"shi"],[/si/g,"shi"],[/chi/g,"chi"],[/ti/g,"chi"],[/tsu/g,"tsu"],[/tu/g,"tsu"],[/fu/g,"fu"],[/hu/g,"fu"],
-      [/ji/g,"ji"],[/zi/g,"ji"],[/dzu/g,"zu"],[/du/g,"zu"],[/di/g,"ji"],[/wo/g,"o"]
-    ];
-    for (const [re, replacement] of variants) s = s.replace(re, replacement);
-    return s;
-  }
-
   function loadKnowledge() {
-    try {
-      const raw = localStorage.getItem(KNOWLEDGE_KEY);
-      const value = raw ? JSON.parse(raw) : {};
-      return value && typeof value === "object" ? value : {};
-    } catch (_) { return {}; }
+    try { return JSON.parse(localStorage.getItem(KNOWLEDGE_KEY) || "{}"); } catch (_) { return {}; }
   }
 
   function saveKnowledge(value) {
     try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value)); } catch (_) {}
   }
 
-  function getStats(character, mode) {
-    const byChar = loadKnowledge()[character] || {};
-    return byChar[mode] || { attempts: 0, correct: 0, lastAt: null };
-  }
-
-  function score(character, mode) {
-    const stats = getStats(character, mode);
-    return (stats.correct + 1) / (stats.attempts + 2);
+  async function loadDeckIndex() {
+    if (deckIndex) return;
+    try {
+      const raw = localStorage.getItem("kanji5-deck");
+      const deck = raw ? JSON.parse(raw) : [];
+      deckIndex = new Map((Array.isArray(deck) ? deck : []).map(item => [item.character, item]));
+    } catch (_) { deckIndex = new Map(); }
   }
 
   function choosePrompt(character) {
-    const meaning = getStats(character, "meaning");
-    const reading = getStats(character, "reading");
-    if (!meaning.attempts && !reading.attempts) return Math.random() < 0.5 ? "meaning" : "reading";
-    if (!meaning.attempts) return "meaning";
-    if (!reading.attempts) return "reading";
-    const meaningScore = score(character, "meaning");
-    const readingScore = score(character, "reading");
-    if (Math.abs(meaningScore - readingScore) >= 0.10) return meaningScore < readingScore ? "meaning" : "reading";
-    return loadKnowledge()[character]?.lastPrompt === "meaning" ? "reading" : "meaning";
-  }
-
-  async function loadDeckIndex() {
-    if (deckIndex) return deckIndex;
-    if (deckLoadPromise) return deckLoadPromise;
-    deckLoadPromise = (async () => {
-      try {
-        const raw = localStorage.getItem("kanji5-deck");
-        const cached = raw ? JSON.parse(raw) : null;
-        if (Array.isArray(cached) && cached.length) {
-          deckIndex = new Map(cached.map(item => [item.character, item]));
-          return deckIndex;
-        }
-        const response = await fetch("./kanji-data.json", { cache: "force-cache" });
-        if (!response.ok) throw new Error("dataset load failed");
-        const data = await response.json();
-        const items = Array.isArray(data) ? data : data.kanji || [];
-        deckIndex = new Map(items.map(item => [item.character, item]));
-      } catch (_) { deckIndex = new Map(); }
-      return deckIndex;
-    })();
-    return deckLoadPromise;
+    const knowledge = loadKnowledge();
+    const entry = knowledge[character] || {};
+    const meaningAttempts = Number(entry.meaning?.attempts) || 0;
+    const readingAttempts = Number(entry.reading?.attempts) || 0;
+    return readingAttempts < meaningAttempts ? "reading" : "meaning";
   }
 
   function gradeMeaningCanonical(value, meanings) {
@@ -161,7 +86,6 @@
     const answer = normalize(value);
     if (!answer) return false;
     if (mode === "meaning") return gradeMeaningCanonical(value, item.meaning || []);
-
     const answerKana = answer;
     const answerRomaji = normalizeRomaji(answer);
     return [...(item.on || []), ...(item.kun || [])].some(reading => {
@@ -202,6 +126,7 @@
         <button id="v12SubmitRecall" class="primary" type="button" style="width:100%;margin-top:9px">بررسی پاسخ</button>
       </div>`;
     originalRevealButton?.insertAdjacentElement("afterend", gate);
+    window.__KANJI5_V15_RECALL_API__?.ensureDontKnow?.(gate);
     window.__KANJI5_V15_RECALL_API__?.refresh?.();
     const input = $("#v12RecallInput", gate);
     input?.focus();
