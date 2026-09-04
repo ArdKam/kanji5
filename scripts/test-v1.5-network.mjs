@@ -18,6 +18,6 @@ assert.doesNotMatch(ui,/\blocalStorage\b|\bsessionStorage\b/);
 assert.doesNotMatch(ui,/https:\/\/kanjiapi\.dev|https:\/\/api\.tatoeba\.org/);
 assert.match(ui,/import\('\.\/v1\.5-network\.js'\)/);
 assert.match(sw,/"\.\/v1\.5-network\.js"/);
-assert.match(sw,/const CACHE='kanji5-shell-v47'/);
+assert.match(sw,/const CACHE='kanji5-shell-v49'/);
 
 console.log('Kanji 5 v1.5 network boundary checks passed.');
