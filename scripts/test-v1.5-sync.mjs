@@ -13,7 +13,8 @@ const eventB = {
   resultRecord: { id: '校', card: { ...structuredClone(baseCard), state: 1, due: new Date('2026-09-03T10:12:00Z'), last_review: new Date('2026-09-03T10:02:00Z') }, reviews: 1, lapses: 1, learnedAt: '2026-09-03T10:02:00Z', leech: false }
 };
 
-const local = { settings: { retention: .9, maxInterval: 36500, leechThreshold: 8 }, today: '2026-09-03', todayNew: 2, todayReviewCount: 3, goalCelebrated: false, streak: { current: 4, longest: 7, lastActiveDate: '2026-09-02' }, cards: { 学: eventA.resultRecord }, reviews: [eventA], queue: ['学'], current: '学', revealed: true, examples: { 学: [] } };
+// Keep the logical “same day” merge fixture aligned with the current test date.
+const local = { settings: { retention: .9, maxInterval: 36500, leechThreshold: 8 }, today: '2026-09-04', todayNew: 2, todayReviewCount: 3, goalCelebrated: false, streak: { current: 4, longest: 7, lastActiveDate: '2026-09-03' }, cards: { 学: eventA.resultRecord }, reviews: [eventA], queue: ['学'], current: '学', revealed: true, examples: { 学: [] } };
 const remote = { ...structuredClone(local), todayNew: 4, todayReviewCount: 5, goalCelebrated: true, cards: { 校: eventB.resultRecord }, reviews: [eventB], queue: ['校'], current: '校', revealed: true, examples: { 校: [] } };
 
 const merged = mergeState(local, remote);
