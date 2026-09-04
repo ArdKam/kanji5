@@ -4,7 +4,7 @@ import vm from 'node:vm';
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const index=fs.readFileSync('index.html','utf8');
 const p0=fs.readFileSync('v1.5-p0.js','utf8');
-const ui=fs.readFileSync('v1.4-education-ui.js','utf8');
+const ui=fs.readFileSync('v1.5-education-ui.js','utf8');
 const data=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));
 const items=Array.isArray(data)?data:data.kanji;
 assert(index.includes('function jlptRank(item)'), 'JLPT ranking helper missing');
@@ -19,7 +19,8 @@ assert(index.includes('setInterval(updateUpcomingReviews,15000)'), 'Upcoming rev
 assert(p0.includes('function getFocusComponent(character,mode)'), 'Component focus missing');
 assert(p0.includes('function recordFocusedRecall(character,mode,focus,outcome)'), 'Component recording missing');
 assert(p0.includes('componentSignal(entry)'), 'Component aggregate signal missing');
-assert(ui.includes('function record(mode,result,wrong=\'\')'), 'Education record path missing');
+assert(ui.includes("function record(correct,wrong='')"), 'Active education result must have a dedicated recording path');
+assert(ui.includes('state.writeKnowledge(next)'), 'Education recording must persist through the state boundary');
 assert(items.length===2136, 'Runtime dataset size changed unexpectedly');
 const rank={N5:0,N4:1,N3:2,N2:3,N1:4};
 const synthetic=[{character:'N3',jlpt:'N3',frequency:1},{character:'N5',jlpt:'N5',frequency:999},{character:'N4',jlpt:'N4',frequency:2}];
