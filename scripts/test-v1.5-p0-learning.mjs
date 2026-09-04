@@ -27,7 +27,7 @@ assert(state.includes('function readComponents(') && state.includes('function wr
 assert(p0.includes('getFocusComponent') && p0.includes('recordFocusedRecall'), 'Component-level focus/recording logic missing');
 assert(has(p0,/button\.id\s*=\s*["']v15DontKnowRecall["']/), 'Active Recall “don’t know” control is missing');
 assert(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'Active Recall “don’t know” must record an educational unknown outcome');
-assert(p0.includes("await import('./v1.5-recall-core.js')"), 'P0 must delegate pure recall behavior to the dedicated core');
+assert(p0.includes("import('./v1.5-recall-core.js')"), 'P0 must delegate pure recall behavior to the dedicated core');
 assert(has(recallCore,/stats\.score\s*=\s*Number\(stats\.score\s*\|\|\s*0\)\s*\+\s*0\.25/), 'Unknown recall must carry a smaller educational weight than a correct recall');
 assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” must not be added');
 assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
