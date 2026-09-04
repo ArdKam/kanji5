@@ -32,7 +32,7 @@ for (const legacy of [
 assert.ok(p0.includes("import('./v1.5-recall-core.js')"), 'P0 must load the dedicated recall core');
 assert.ok(p0.includes('window.__KANJI5_V15_P0__'), 'P0 marker missing');
 assert.ok(p0.includes('function enhanceRecall()'), 'Active Recall enhancer missing');
-assert.ok(p0.includes('function addDontKnowRecall()'), 'Active Recall don’t-know enhancer missing');
+assert.ok(/(?:async\s+)?function\s+addDontKnowRecall\(/.test(p0), 'Active Recall don’t-know enhancer missing');
 assert.ok(p0.includes('v15DontKnowRecall'), 'Active Recall don’t-know control missing');
 assert.ok(p0.includes("recordFocusedRecall(character,mode,focus,'unknown')"), 'unknown recall must be recorded separately');
 assert.ok(!p0.includes('v15DontKnowReview'), 'don’t-know must not become a review-rating control');
