@@ -106,6 +106,64 @@ test.describe('Kanji 5 browser smoke', () => {
     expect(pageErrors, pageErrors.join('\n')).toEqual([]);
   });
 
+  test('active recall Enter submits the current answer instead of advancing prompt', async ({ page }) => {
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.goto('/');
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+
+    const firstCard = page.locator('.kanji');
+    const firstKanji = (await firstCard.textContent())?.trim();
+    const firstId = await firstCard.getAttribute('data-kanji-id');
+    expect(firstKanji).toBeTruthy();
+    expect(firstId).toBeTruthy();
+
+    await page.locator('#revealBtn').click();
+    await expect(page.locator('#ratings')).toHaveClass(/show/);
+    await page.locator('.rate[data-r="Again"]').click();
+
+    await page.reload();
+    await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id', firstId);
+    await page.locator('#revealBtn').click();
+
+    const gate = page.locator('.v12-recall-gate');
+    const input = page.locator('#v12RecallInput');
+    await expect(gate).toBeVisible({ timeout: 10_000 });
+    await expect(input).toBeVisible();
+
+    const promptBefore = await gate.innerText();
+    expect(promptBefore).toMatch(/معنی|خوانش/);
+
+    const answer = await page.evaluate(id => {
+      const raw = localStorage.getItem('kanji5-deck');
+      const deck = raw ? JSON.parse(raw) : [];
+      const item = deck.find(value => value?.character === id);
+      return {
+        meaning: Array.isArray(item?.meaning) ? item.meaning[0] : null,
+        reading: Array.isArray(item?.on) && item.on.length ? item.on[0] : (Array.isArray(item?.kun) ? item.kun[0] : null)
+      };
+    }, firstKanji);
+
+    if (promptBefore.includes('معنی')) {
+      expect(answer.meaning).toBeTruthy();
+      await input.fill(answer.meaning);
+      await input.press('Enter');
+      await expect(gate).toHaveCount(0);
+      await expect(page.locator('#answerBox')).toHaveClass(/show/);
+      await expect(page.locator('#ratings')).toHaveClass(/show/);
+    } else {
+      expect(answer.reading).toBeTruthy();
+      await input.fill(answer.reading);
+      await input.press('Enter');
+      await expect(gate).toHaveCount(0);
+      await expect(page.locator('#answerBox')).toHaveClass(/show/);
+      await expect(page.locator('#ratings')).toHaveClass(/show/);
+    }
+
+    expect(pageErrors, pageErrors.join('\n')).toEqual([]);
+  });
+
   test('rating advances the queue and persists a review', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
