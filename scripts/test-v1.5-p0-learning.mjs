@@ -33,6 +33,7 @@ assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” must not be adde
 assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
 assert(ui.includes("else if(edu.mode==='production'){prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';"), 'Production must use a selection prompt');
 assert(ui.includes('${renderChoices(chooseChoices(item))}'), 'Production must render canonical four-choice options');
-assert(ui.includes("edu.mode==='vocabulary'||edu.mode==='context'||edu.mode==='production"), 'Production must not render a text-submit control');
+assert(has(ui,/const check=\(edu\.mode==='meaning'\|\|edu\.mode==='reading'\)\?/), 'Only meaning/reading exercises may render a text-submit control');
+assert(!has(ui,/id=\\"v14EduSubmit\\"[^\n]+edu\.mode==='production'/), 'Production must not wire the text-submit control');
 
 console.log('Kanji 5 v1.5 learning + P0 structural checks passed.');
