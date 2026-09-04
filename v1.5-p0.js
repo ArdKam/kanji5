@@ -30,10 +30,10 @@ function syncEducationBusyState(){const root=document.getElementById('educationP
 function guardBusyEducationClicks(event){const control=event.target?.closest?.('button,[role="button"]');if(!control||control.id==='v15DontKnowRecall')return;const root=control.closest?.('#educationPanel,.education-panel');if(!root||root.getAttribute('aria-busy')!=='true')return;event.preventDefault();event.stopImmediatePropagation()}
 window.__KANJI5_V15_RECALL_API__=Object.freeze({refresh:()=>enhanceRecall(),ensureDontKnow:addDontKnowRecall});
 if(typeof document!=='undefined'){
-  installRecallWindowCapture();
-  installRecallKeyboard();
-  installAccessibilityEnhancements();
-  document.addEventListener('click',guardBusyEducationClicks,true);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});else startTargetedObservers();
+ installRecallWindowCapture();
+ installRecallKeyboard();
+ installAccessibilityEnhancements();
+ document.addEventListener('click',guardBusyEducationClicks,true);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});else startTargetedObservers();
 }
 })();
