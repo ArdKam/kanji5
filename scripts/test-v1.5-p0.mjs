@@ -100,19 +100,19 @@ class Store {
   setItem(key, value) { this.values[key] = String(value); }
 }
 
-const migration = read('v1.4-education-migration.js');
-const migrationContext = { window: {}, localStorage: new Store(), Date, JSON };
-vm.createContext(migrationContext);
-vm.runInContext(migration, migrationContext);
-assert.ok(migrationContext.window.__KANJI5_EDU_MIGRATION_API__, 'education migration API missing');
-assert.equal(migrationContext.window.__KANJI5_EDU_MIGRATION_API__.version, 2);
-
 const documentMock = {
   readyState: 'complete',
   addEventListener() {},
   getElementById() { return null; },
   querySelector() { return null; }
 };
+const migration = read('v1.4-education-migration.js');
+const migrationContext = { window: {}, document: documentMock, localStorage: new Store(), Date, JSON, setTimeout, clearTimeout };
+vm.createContext(migrationContext);
+vm.runInContext(migration, migrationContext);
+assert.ok(migrationContext.window.__KANJI5_EDU_MIGRATION_API__, 'education migration API missing');
+assert.equal(migrationContext.window.__KANJI5_EDU_MIGRATION_API__.version, 2);
+
 const stateContext = { window: {}, document: documentMock, localStorage: new Store(), crypto: { randomUUID: () => 'test-id' }, Date, JSON, structuredClone, Intl };
 vm.createContext(stateContext);
 vm.runInContext(state, stateContext);
