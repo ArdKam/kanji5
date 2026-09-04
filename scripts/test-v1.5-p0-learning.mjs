@@ -7,7 +7,7 @@ const state = read('v1.5-state.js');
 const recallCore = read('v1.5-recall-core.js');
 const runtime = read('v1.2-runtime-fixes.js');
 const sw = read('sw.js');
-const ui = read('v1.4-education-ui.js');
+const ui = read('v1.5-education-ui.js');
 const has = (text, regex) => regex.test(text);
 const assert = (x, m) => { if (!x) throw new Error(m); };
 
@@ -19,7 +19,7 @@ assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall ba
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('"./v1.5-recall-core.js"'), 'v1.5 recall core is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
-assert(sw.includes('kanji5-shell-v46'), 'Runtime cache version was not bumped');
+assert(sw.includes('kanji5-shell-v49'), 'Runtime cache version was not bumped');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(state.includes("const DEVICE_KEY='kanji5-device-id'"), 'State persistence boundary missing device identity');
 assert(state.includes("COMPONENT_KEY='kanji5-v1.5-components'"), 'Component-level knowledge store must belong to the state boundary');
