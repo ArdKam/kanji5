@@ -10,7 +10,7 @@ const state = read('v1.5-state.js');
 const sw = read('sw.js');
 const workflow = read('.github/workflows/build-v1.5.yml');
 const core = read('v1.4-education-core.js');
-const ui = read('v1.4-education-ui.js');
+const ui = read('v1.5-education-ui.js');
 const runtime = read('v1.2-runtime-fixes.js');
 const supabase = read('supabase-sync.js');
 const fsrsSync = read('v1.5-fsrs-sync-core.js');
@@ -83,7 +83,7 @@ assert.ok(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=
 assert.ok(runtime.includes('loading.classList.add("v13-real-error")'), 'startup error panel contract missing');
 assert.ok(index.includes('./vendor/ts-fsrs-5.4.1.mjs'), 'pinned local FSRS vendor missing');
 assert.ok(core.includes('educationSchedulerSignal') && core.includes('chooseDistractors'), 'canonical education core missing');
-assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'education UI is not using canonical adaptive helpers');
+assert.ok(ui.includes('CORE.chooseDistractors') && ui.includes('CORE.selectEducationItem'), 'active education UI is not using canonical adaptive helpers');
 assert.ok(ui.includes('safe(edu.sentence.english||\'\')'), 'context translation escaping missing');
 
 const ciSelfPushPattern=/^\s*git\s+push\s+origin\b/m;
