@@ -43,8 +43,8 @@ assert(typeof knowledge['学'].distractors==='object','Distractor history shape 
 let mastered={};
 for(const mode of ['meaning','reading','production']){for(let i=0;i<8;i++)mastered=core.recordKnowledge(mastered,'学',mode,true)}
 assert(mastered['学'].stage==='mastered','High-performing multi-skill card did not reach mastered stage');
-const ui=fs.readFileSync('v1.4-education-ui.js','utf8');
-assert(ui.includes('__KANJI5_EDU_CORE__'),'UI is not connected to educational core');
-assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'UI is not using canonical selection/grading');
-assert(ui.includes('CORE.recordKnowledge'),'UI is not using canonical knowledge recording');
+const ui=fs.readFileSync('v1.5-education-ui.js','utf8');
+assert(ui.includes('__KANJI5_EDU_CORE__'),'Active UI is not connected to educational core');
+assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'Active UI is not using canonical selection/grading');
+assert(ui.includes('CORE.recordKnowledge'),'Active UI is not using canonical knowledge recording');
 console.log('Kanji 5 v1.4 education tests passed.');
