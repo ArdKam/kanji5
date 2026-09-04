@@ -6,7 +6,7 @@ const {applyRecallOutcome,componentSignal,selectFocus}=core;
 const state=window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 window.__KANJI5_V15_P0__=true;
-const $=(selector,root=document)=>root.querySelector(selector);
+const $=(selector,root)=>root?.querySelector?.(selector)||null;
 function getDeck(){const prefetched=window.__KANJI5_P0_DATA;if(Array.isArray(prefetched)&&prefetched.length)return prefetched;return state.readDeck()}
 function ensureComponentEntry(character){const all=state.readComponents();if(!all[character]||typeof all[character]!=='object')all[character]={meaning:{},reading:{},updatedAt:null};if(!all[character].meaning||typeof all[character].meaning!=='object')all[character].meaning={};if(!all[character].reading||typeof all[character].reading!=='object')all[character].reading={};return all}
 function writeSchedulerComponentEvidence(character){const all=state.readComponents(),entry=all[character],knowledge=state.readKnowledge();if(!entry)return;const target=knowledge[character]&&typeof knowledge[character]==='object'?knowledge[character]:{};target.componentEvidence={...componentSignal(entry),updatedAt:entry.updatedAt||new Date().toISOString(),version:1};knowledge[character]=target;state.writeKnowledge(knowledge)}
@@ -27,5 +27,11 @@ function installAccessibilityEnhancements(){if($('#v15-a11y-style'))return;const
 function syncEducationBusyState(){const root=document.getElementById('educationPanel')||document.querySelector('.education-panel');if(!root)return;const busy=root.getAttribute('aria-busy')==='true';if(root.getAttribute('aria-busy')!==(busy?'true':'false'))root.setAttribute('aria-busy',busy?'true':'false');const empty=root.querySelector('.empty');if(empty&&empty.getAttribute('role')!=='status')empty.setAttribute('role','status')}
 function guardBusyEducationClicks(event){const control=event.target?.closest?.('button,[role="button"]');if(!control||control.id==='v15DontKnowRecall')return;const root=control.closest?.('#educationPanel,.education-panel');if(!root||root.getAttribute('aria-busy')!=='true')return;event.preventDefault();event.stopImmediatePropagation()}
 window.__KANJI5_V15_RECALL_API__=Object.freeze({refresh:()=>enhanceRecall()});
-installRecallWindowCapture();installRecallKeyboard();installAccessibilityEnhancements();document.addEventListener('click',guardBusyEducationClicks,true);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});else startTargetedObservers();
+if(typeof document!=='undefined'){
+  installRecallWindowCapture();
+  installRecallKeyboard();
+  installAccessibilityEnhancements();
+  document.addEventListener('click',guardBusyEducationClicks,true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});else startTargetedObservers();
+}
 })();
