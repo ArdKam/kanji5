@@ -7,6 +7,7 @@
   let activePrompt = null;
   let activeCharacter = null;
   let deckIndex = null;
+  let originalRevealButton = null;
   let allowNativeReveal = false;
 
   function normalize(value) {
@@ -48,135 +49,17 @@
     return out;
   }
 
-  function loadKnowledge() {
-    try { return JSON.parse(localStorage.getItem(KNOWLEDGE_KEY) || "{}"); } catch (_) { return {}; }
-  }
-
-  function saveKnowledge(value) {
-    try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value)); } catch (_) {}
-  }
-
-  async function loadDeckIndex() {
-    if (deckIndex) return;
-    try {
-      const raw = localStorage.getItem("kanji5-deck");
-      const deck = raw ? JSON.parse(raw) : [];
-      deckIndex = new Map((Array.isArray(deck) ? deck : []).map(item => [item.character, item]));
-    } catch (_) { deckIndex = new Map(); }
-  }
-
-  function choosePrompt(character) {
-    const knowledge = loadKnowledge();
-    const entry = knowledge[character] || {};
-    const meaningAttempts = Number(entry.meaning?.attempts) || 0;
-    const readingAttempts = Number(entry.reading?.attempts) || 0;
-    return readingAttempts < meaningAttempts ? "reading" : "meaning";
-  }
-
-  function gradeMeaningCanonical(value, meanings) {
-    const core = window.__KANJI5_EDU_CORE__;
-    if (core?.gradeMeaning) return Boolean(core.gradeMeaning(value, meanings).correct);
-    const answer = normalize(value);
-    return Array.isArray(meanings) && meanings.some(meaning => answer === normalize(meaning));
-  }
-
-  function checkRecall(character, mode, value) {
-    const item = deckIndex?.get(character);
-    if (!item) return null;
-    const answer = normalize(value);
-    if (!answer) return false;
-    if (mode === "meaning") return gradeMeaningCanonical(value, item.meaning || []);
-    const answerKana = answer;
-    const answerRomaji = normalizeRomaji(answer);
-    return [...(item.on || []), ...(item.kun || [])].some(reading => {
-      const canonicalKana = normalize(reading);
-      const canonicalRomaji = normalizeRomaji(kanaToRomaji(canonicalKana));
-      return answerKana === canonicalKana || (answerRomaji && answerRomaji === canonicalRomaji);
-    });
-  }
-
-  function recordAttempt(character, mode, correct) {
-    const knowledge = loadKnowledge();
-    const byChar = knowledge[character] || {};
-    const stats = byChar[mode] || { attempts: 0, correct: 0, lastAt: null };
-    stats.attempts += 1;
-    if (correct === true) stats.correct += 1;
-    stats.lastAt = new Date().toISOString();
-    byChar[mode] = stats;
-    byChar.lastPrompt = mode;
-    knowledge[character] = byChar;
-    saveKnowledge(knowledge);
-  }
-
-  function makeRecallGate() {
-    activeCharacter = $(".kanji")?.textContent?.trim() || "";
-    activePrompt = choosePrompt(activeCharacter);
-    originalRevealButton = document.getElementById("revealBtn");
-    const prompt = activePrompt === "meaning"
-      ? "معنی این کانجی چیست؟ سعی کن حداقل یک معنی را از حافظه بنویسی."
-      : "حداقل یک خوانش رایج این کانجی را از حافظه بنویس؛ kana یا romaji هر دو قابل قبول‌اند.";
-    const gate = document.createElement("div");
-    gate.className = "v12-recall-gate";
-    gate.innerHTML = `
-      <div style="border:1px solid var(--line);background:#f9fafb;border-radius:16px;padding:16px;margin-top:14px">
-        <div style="font-weight:800;margin-bottom:8px">یادآوری فعال</div>
-        <div style="color:var(--muted);margin-bottom:10px">${prompt}</div>
-        <input id="v12RecallInput" type="text" autocomplete="off" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px" />
-        <div class="v12-recall-result" aria-live="polite"></div>
-        <button id="v12SubmitRecall" class="primary" type="button" style="width:100%;margin-top:9px">بررسی پاسخ</button>
-      </div>`;
-    originalRevealButton?.insertAdjacentElement("afterend", gate);
-    window.__KANJI5_V15_RECALL_API__?.ensureDontKnow?.(gate);
-    window.__KANJI5_V15_RECALL_API__?.refresh?.();
-    const input = $("#v12RecallInput", gate);
-    input?.focus();
-  }
-
-  async function submitRecall() {
-    const gate = $(".v12-recall-gate");
-    const input = $("#v12RecallInput", gate);
-    if (!gate || !input) return;
-    if (!deckIndex) await loadDeckIndex();
-    const answer = input.value;
-    const correct = checkRecall(activeCharacter, activePrompt, answer);
-    if (correct === null) return;
-    const result = $(".v12-recall-result", gate);
-    if (correct) {
-      result.className = "v12-recall-result good";
-      result.textContent = "✅ پاسخ درست بود";
-    } else {
-      result.className = "v12-recall-result bad";
-      result.textContent = "❌ پاسخ درست نبود";
-    }
-    recordAttempt(activeCharacter, activePrompt, correct);
-    allowNativeReveal = true;
-    gate.remove();
-    originalRevealButton?.click();
-    allowNativeReveal = false;
-  }
-
-  document.addEventListener("click", async event => {
-    const target = event.target;
-    if (target?.id === "revealBtn" && event.isTrusted && !allowNativeReveal && !window.__KANJI5_STATE__?.revealed && !window.__KANJI5_CANONICAL_REVEAL__) {
-      const kanjiEl = document.querySelector(".kanji[data-kanji-id]");
-      const id = kanjiEl?.dataset?.kanjiId;
-      let isFirstExposure = false;
-      try {
-        const raw = localStorage.getItem(CARDS_KEY);
-        const cards = raw ? JSON.parse(raw) : null;
-        isFirstExposure = !!id && !cards?.[id];
-      } catch (_) {}
-      if (isFirstExposure) return;
-      event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return;
-    }
-    if (target?.id === "v12SubmitRecall") { event.preventDefault(); await submitRecall(); }
-  }, true);
-
-  const observer = new MutationObserver(async () => {
-    if (!(document.querySelector(".kanji[data-kanji-id]"))) return;
-    if (!deckIndex) await loadDeckIndex();
-  });
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",()=>loadDeckIndex(),{once:true});
-  else loadDeckIndex();
+  function loadKnowledge() { try { return JSON.parse(localStorage.getItem(KNOWLEDGE_KEY) || "{}"); } catch (_) { return {}; } }
+  function saveKnowledge(value) { try { localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(value)); } catch (_) {} }
+  async function loadDeckIndex() { if (deckIndex) return; try { const raw = localStorage.getItem("kanji5-deck"); const deck = raw ? JSON.parse(raw) : []; deckIndex = new Map((Array.isArray(deck) ? deck : []).map(item => [item.character, item])); } catch (_) { deckIndex = new Map(); } }
+  function choosePrompt(character) { const knowledge = loadKnowledge(); const entry = knowledge[character] || {}; return (Number(entry.reading?.attempts) || 0) < (Number(entry.meaning?.attempts) || 0) ? "reading" : "meaning"; }
+  function gradeMeaningCanonical(value, meanings) { const core = window.__KANJI5_EDU_CORE__; if (core?.gradeMeaning) return Boolean(core.gradeMeaning(value, meanings).correct); const answer = normalize(value); return Array.isArray(meanings) && meanings.some(meaning => answer === normalize(meaning)); }
+  function checkRecall(character, mode, value) { const item = deckIndex?.get(character); if (!item) return null; const answer = normalize(value); if (!answer) return false; if (mode === "meaning") return gradeMeaningCanonical(value, item.meaning || []); const answerRomaji = normalizeRomaji(answer); return [...(item.on || []), ...(item.kun || [])].some(reading => { const canonicalKana = normalize(reading); const canonicalRomaji = normalizeRomaji(kanaToRomaji(canonicalKana)); return answer === canonicalKana || (answerRomaji && answerRomaji === canonicalRomaji); }); }
+  function recordAttempt(character, mode, correct) { const knowledge = loadKnowledge(); const byChar = knowledge[character] || {}; const stats = byChar[mode] || { attempts: 0, correct: 0, lastAt: null }; stats.attempts += 1; if (correct === true) stats.correct += 1; stats.lastAt = new Date().toISOString(); byChar[mode] = stats; byChar.lastPrompt = mode; knowledge[character] = byChar; saveKnowledge(knowledge); }
+  function makeRecallGate() { activeCharacter = $(".kanji")?.textContent?.trim() || ""; activePrompt = choosePrompt(activeCharacter); originalRevealButton = document.getElementById("revealBtn"); const prompt = activePrompt === "meaning" ? "معنی این کانجی چیست؟ سعی کن حداقل یک معنی را از حافظه بنویسی." : "حداقل یک خوانش رایج این کانجی را از حافظه بنویس؛ kana یا romaji هر دو قابل قبول‌اند."; const gate = document.createElement("div"); gate.className = "v12-recall-gate"; gate.innerHTML = `<div style="border:1px solid var(--line);background:#f9fafb;border-radius:16px;padding:16px;margin-top:14px"><div style="font-weight:800;margin-bottom:8px">یادآوری فعال</div><div style="color:var(--muted);margin-bottom:10px">${prompt}</div><input id="v12RecallInput" type="text" autocomplete="off" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px" /><div class="v12-recall-result" aria-live="polite"></div><button id="v12SubmitRecall" class="primary" type="button" style="width:100%;margin-top:9px">بررسی پاسخ</button></div>`; originalRevealButton?.insertAdjacentElement("afterend", gate); window.__KANJI5_V15_RECALL_API__?.ensureDontKnow?.(gate); window.__KANJI5_V15_RECALL_API__?.refresh?.(); $("#v12RecallInput", gate)?.focus(); }
+  async function submitRecall() { const gate = $(".v12-recall-gate"); const input = $("#v12RecallInput", gate); if (!gate || !input) return; if (!deckIndex) await loadDeckIndex(); const correct = checkRecall(activeCharacter, activePrompt, input.value); if (correct === null) return; const result = $(".v12-recall-result", gate); result.className = correct ? "v12-recall-result good" : "v12-recall-result bad"; result.textContent = correct ? "✅ پاسخ درست بود" : "❌ پاسخ درست نبود"; recordAttempt(activeCharacter, activePrompt, correct); revealCanonical(); }
+  function revealCanonical() { allowNativeReveal = true; try { const button = originalRevealButton || document.getElementById("revealBtn"); if (button) button.click(); } finally { allowNativeReveal = false; } }
+  window.__KANJI5_V12_REVEAL__ = revealCanonical;
+  document.addEventListener("click", async event => { const target = event.target; if (target?.id === "revealBtn" && event.isTrusted && !allowNativeReveal && !window.__KANJI5_STATE__?.revealed && !window.__KANJI5_CANONICAL_REVEAL__) { const kanjiEl = document.querySelector(".kanji[data-kanji-id]"); const id = kanjiEl?.dataset?.kanjiId; let isFirstExposure = false; try { const raw = localStorage.getItem(CARDS_KEY); const cards = raw ? JSON.parse(raw) : null; isFirstExposure = !!id && !cards?.[id]; } catch (_) {} if (isFirstExposure) return; event.preventDefault(); event.stopImmediatePropagation(); makeRecallGate(); return; } if (target?.id === "v12SubmitRecall") { event.preventDefault(); await submitRecall(); } });
+  const observer = new MutationObserver(async () => { if (!(document.querySelector(".kanji[data-kanji-id]"))) return; if (!deckIndex) await loadDeckIndex(); }); observer.observe(document.documentElement,{childList:true,subtree:true}); if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",()=>loadDeckIndex(),{once:true}); else loadDeckIndex();
 })();
