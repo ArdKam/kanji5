@@ -13,11 +13,12 @@ const eventB = {
   resultRecord: { id: '校', card: { ...structuredClone(baseCard), state: 1, due: new Date('2026-09-03T10:12:00Z'), last_review: new Date('2026-09-03T10:02:00Z') }, reviews: 1, lapses: 1, learnedAt: '2026-09-03T10:02:00Z', leech: false }
 };
 
-// Keep the logical “same day” merge fixture aligned with the current test date.
+// Keep this logical fixture on a fixed date so the test is deterministic across CI days.
+const fixtureNow = new Date('2026-09-04T12:00:00Z');
 const local = { settings: { retention: .9, maxInterval: 36500, leechThreshold: 8 }, today: '2026-09-04', todayNew: 2, todayReviewCount: 3, goalCelebrated: false, streak: { current: 4, longest: 7, lastActiveDate: '2026-09-03' }, cards: { 学: eventA.resultRecord }, reviews: [eventA], queue: ['学'], current: '学', revealed: true, examples: { 学: [] } };
 const remote = { ...structuredClone(local), todayNew: 4, todayReviewCount: 5, goalCelebrated: true, cards: { 校: eventB.resultRecord }, reviews: [eventB], queue: ['校'], current: '校', revealed: true, examples: { 校: [] } };
 
-const merged = mergeState(local, remote);
+const merged = mergeState(local, remote, fixtureNow);
 assert.deepEqual(new Set(merged.reviews.map(event => event.eventId)), new Set(['A1', 'B1']));
 assert.ok(merged.cards.学 && merged.cards.校, 'Concurrent device changes must be preserved');
 assert.equal(merged.todayNew, 4, 'Daily new count must merge without double-counting across devices');
@@ -28,7 +29,7 @@ assert.equal(merged.current, null, 'Ephemeral current-card state must never ente
 assert.equal(merged.revealed, false, 'Ephemeral reveal state must never enter persisted sync payload');
 assert.deepEqual(merged.examples, {}, 'Fetched examples must never enter persisted sync payload');
 
-const payload = mergeSyncPayload({ state: local, knowledge: { 学: { meaning: { attempts: 1, correct: 1 } } }, deckVersion: 'v1' }, { state: remote, knowledge: { 学: { meaning: { attempts: 2, correct: 1 } } }, deckVersion: 'v1', educationSchemaVersion: 2 });
+const payload = mergeSyncPayload({ state: local, knowledge: { 学: { meaning: { attempts: 1, correct: 1 } } }, deckVersion: 'v1' }, { state: remote, knowledge: { 学: { meaning: { attempts: 2, correct: 1 } } }, deckVersion: 'v1', educationSchemaVersion: 2 }, fixtureNow);
 assert.equal(payload.syncSchemaVersion, SYNC_SCHEMA_VERSION);
 assert.equal(payload.deckVersion, 'v1');
 assert.equal(payload.state.todayNew, 4);
