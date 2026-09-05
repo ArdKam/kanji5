@@ -46,7 +46,7 @@ export function hashPayload(payload) {
   return (hash >>> 0).toString(16);
 }
 
-export function mergeState(local, remote) {
+export function mergeState(local, remote, now = new Date()) {
   if (!local) return remote ? clone(remote) : null;
   if (!remote) return clone(local);
   const merged = { ...clone(local), ...clone(remote), settings: { ...(local.settings || {}), ...(remote.settings || {}) } };
@@ -62,7 +62,7 @@ export function mergeState(local, remote) {
   if (merged.reviews.some(event => event?.eventId && event?.baseRecord)) {
     merged.cards = replayCards(merged.cards, merged.reviews, () => schedulerFactory(merged.settings), Number(merged.settings?.leechThreshold) || 8);
   }
-  const today = todayKey(new Date());
+  const today = todayKey(now);
   const localToday = String(local.today || ''), remoteToday = String(remote.today || '');
   merged.today = [localToday, remoteToday, today].filter(Boolean).sort().at(-1) || today;
   const sameLocal = localToday === merged.today, sameRemote = remoteToday === merged.today;
@@ -78,10 +78,10 @@ export function mergeState(local, remote) {
   return merged;
 }
 
-export function mergeSyncPayload(localPayload, remotePayload) {
+export function mergeSyncPayload(localPayload, remotePayload, now = new Date()) {
   const local = stablePayload(localPayload || {}), remote = stablePayload(remotePayload || {});
   return {
-    state: mergeState(local.state, remote.state),
+    state: mergeState(local.state, remote.state, now),
     knowledge: mergeKnowledge(local.knowledge, remote.knowledge),
     deckVersion: local.deckVersion || remote.deckVersion || null,
     educationSchemaVersion: Math.max(Number(local.educationSchemaVersion) || 2, Number(remote.educationSchemaVersion) || 2),
