@@ -6,7 +6,7 @@ const state=window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 window.__KANJI5_V15_P0__=true;
 let coreApi=null;
-const $=(selector,root)=>root?.querySelector?.(selector)||null;
+const $=(selector,root=document)=>root?.querySelector?.(selector)||null;
 async function ensureCore(){return coreApi||(coreApi=await corePromise)}
 function getDeck(){const prefetched=window.__KANJI5_P0_DATA;if(Array.isArray(prefetched)&&prefetched.length)return prefetched;return state.readDeck()}
 function ensureComponentEntry(character){const all=state.readComponents();if(!all[character]||typeof all[character]!=='object')all[character]={meaning:{},reading:{},updatedAt:null};if(!all[character].meaning||typeof all[character].meaning!=='object')all[character].meaning={};if(!all[character].reading||typeof all[character].reading!=='object')all[character].reading={};return all}
