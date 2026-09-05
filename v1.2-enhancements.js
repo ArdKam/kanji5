@@ -157,7 +157,7 @@
 
   document.addEventListener("click", async event => {
     const target = event.target;
-    if (target?.id === "revealBtn" && !allowNativeReveal) {
+    if (target?.id === "revealBtn" && !allowNativeReveal && !window.__KANJI5_STATE__?.revealed) {
       const kanjiEl = document.querySelector(".kanji[data-kanji-id]");
       const id = kanjiEl?.dataset?.kanjiId;
       let isFirstExposure = false;
