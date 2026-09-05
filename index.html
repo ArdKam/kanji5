@@ -1,16 +1,16 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
-  <meta name="description" content="۵ کانجی مهم ژاپنی در روز با مرور فاصله‌دار تطبیقی FSRS" />
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <title>Kanji 5 — پنج کانجی در روز</title>
-  <style>
-    :root{--bg:#f4f5f7;--panel:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--accent2:#eef2ff;--good:#166534;--bad:#991b1b;--warn:#92400e;--shadow:0 12px 35px rgba(0,0,0,.08);--radius:22px}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif} button{font:inherit}.wrap{max-width:980px;margin:0 auto;padding:22px}header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:20px}.brand h1{font-size:27px;margin:0 0 4px;font-weight:850}.brand p{margin:0;color:var(--muted)}.iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 12px;cursor:pointer}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}.stat .n{font-size:28px;font-weight:800}.stat .l{color:var(--muted);font-size:13px;margin-top:4px}.stat.streak .n{color:#c2410c}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}#loading{min-height:420px;display:flex;align-items:center;justify-content:center;text-align:center}.spinner{width:30px;height:30px;border:3px solid #e5e7eb;border-top-color:#111827;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}.kanji{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:150px;line-height:1;text-align:center;margin:4px 0 14px}.hint{text-align:center;color:var(--muted);margin-bottom:22px}.reveal{width:100%;border:0;background:var(--accent);color:#fff;padding:14px 18px;border-radius:15px;cursor:pointer;font-weight:800}.answer{display:none}.answer.show{display:block}.answerbox{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}.meaning{font-size:21px;font-weight:750;text-align:center}.readings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.readbox{background:#f9fafb;border:1px solid var(--line);border-radius:16px;padding:12px}.readbox .t{font-size:12px;color:var(--muted);margin-bottom:6px}.readbox .v{font-size:19px;direction:ltr;text-align:center}.examples{margin-top:14px}.examples h3{font-size:14px;color:var(--muted);margin:0 0 8px}.examples .words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.word{background:#f9fafb;border:1px solid var(--line);border-radius:999px;padding:8px 12px}.word span{direction:ltr;display:inline-block}.meta{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}.chip{background:#f3f4f6;border-radius:999px;padding:6px 10px;font-size:12px;color:#4b5563}.ratings{display:none;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:20px}.ratings.show{display:grid}.rate{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 8px;cursor:pointer;font-weight:800}.rate small{display:block;color:var(--muted);font-weight:600;margin-top:3px;direction:ltr}.rate.again{border-color:#fecaca}.rate.hard{border-color:#fde68a}.rate.good{border-color:#bbf7d0}.rate.easy{border-color:#bfdbfe}.progress{height:8px;background:#eef0f2;border-radius:99px;overflow:hidden;margin:0 0 16px}.progress>div{height:100%;background:#111827;border-radius:99px;transition:width .25s}.goalrow{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin:-8px 0 8px}.progress.goal{background:#eef0f2}.progress.goal>div{background:#c2410c}.chip.leech{background:#fee2e2;color:var(--bad);font-weight:700}.audiobtn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;font-size:14px}.audiobtn:active{transform:scale(.97)}.kanjirow{display:flex;justify-content:center;align-items:center;gap:10px}.readbox .t{display:flex;justify-content:space-between;align-items:center}.readbox .audiobtn{padding:3px 8px;font-size:12px;border-radius:8px}.word{display:flex;align-items:center;gap:6px}.word .audiobtn{padding:2px 7px;font-size:11px;border-radius:8px}.statsgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.statsgrid .box{background:#f9fafb;border:1px solid var(--line);border-radius:14px;padding:12px}.statsgrid .box .n{font-size:22px;font-weight:800}.statsgrid .box .l{font-size:12px;color:var(--muted);margin-top:2px}.bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin:12px 0 4px}.bars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}.bars .col .fill{width:100%;background:#111827;border-radius:6px 6px 0 0;min-height:2px}.bars .col .lbl{font-size:10px;color:var(--muted);margin-top:4px}.statesrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.empty{padding:55px 20px;text-align:center}.empty h2{margin:0 0 8px}.empty p{color:var(--muted);margin:0 0 18px}.primary{border:0;background:#111827;color:#fff;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:800}.secondary{border:1px solid var(--line);background:#fff;color:#111827;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:750}.footer{margin:14px 3px 0;color:#8a8f98;font-size:11px;line-height:1.6}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;z-index:20}dialog{border:0;border-radius:22px;padding:0;width:min(560px,calc(100% - 28px));box-shadow:0 30px 90px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.45)}.modal{padding:22px}.modal h2{margin-top:0}.setting{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);padding:13px 14px;border-radius:15px;margin:9px 0}input[type=number]{width:85px;border:1px solid var(--line);border-radius:10px;padding:8px}@media(max-width:700px){.wrap{padding:14px}.grid{grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:12px}.stat .n{font-size:22px}.stat .l{font-size:11px}.panel{padding:18px}.kanji{font-size:115px}.readings{grid-template-columns:1fr}.ratings{grid-template-columns:repeat(2,1fr)}}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#111827" />
+<meta name="description" content="۵ کانجی مهم ژاپنی در روز با مرور فاصله‌دار تطبیقی FSRS" />
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Kanji 5 — پنج کانجی در روز</title>
+<style>
+:root{--bg:#f4f5f7;--panel:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--accent2:#eef2ff;--good:#166534;--bad:#991b1b;--warn:#92400e;--shadow:0 12px 35px rgba(0,0,0,.08);--radius:22px}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif} button{font:inherit}.wrap{max-width:980px;margin:0 auto;padding:22px}header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:20px}.brand h1{font-size:27px;margin:0 0 4px;font-weight:850}.brand p{margin:0;color:var(--muted)}.iconbtn{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 12px;cursor:pointer}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}.stat .n{font-size:28px;font-weight:800}.stat .l{color:var(--muted);font-size:13px;margin-top:4px}.stat.streak .n{color:#c2410c}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}#loading{min-height:420px;display:flex;align-items:center;justify-content:center;text-align:center}.spinner{width:30px;height:30px;border:3px solid #e5e7eb;border-top-color:#111827;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}.kanji{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:150px;line-height:1;text-align:center;margin:4px 0 14px}.hint{text-align:center;color:var(--muted);margin-bottom:22px}.reveal{width:100%;border:0;background:var(--accent);color:#fff;padding:14px 18px;border-radius:15px;cursor:pointer;font-weight:800}.answer{display:none}.answer.show{display:block}.answerbox{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}.meaning{font-size:21px;font-weight:750;text-align:center}.readings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.readbox{background:#f9fafb;border:1px solid var(--line);border-radius:16px;padding:12px}.readbox .t{font-size:12px;color:var(--muted);margin-bottom:6px}.readbox .v{font-size:19px;direction:ltr;text-align:center}.examples{margin-top:14px}.examples h3{font-size:14px;color:var(--muted);margin:0 0 8px}.examples .words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.word{background:#f9fafb;border:1px solid var(--line);border-radius:999px;padding:8px 12px}.word span{direction:ltr;display:inline-block}.meta{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}.chip{background:#f3f4f6;border-radius:999px;padding:6px 10px;font-size:12px;color:#4b5563}.ratings{display:none;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:20px}.ratings.show{display:grid}.rate{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 8px;cursor:pointer;font-weight:800}.rate small{display:block;color:var(--muted);font-weight:600;margin-top:3px;direction:ltr}.rate.again{border-color:#fecaca}.rate.hard{border-color:#fde68a}.rate.good{border-color:#bbf7d0}.rate.easy{border-color:#bfdbfe}.progress{height:8px;background:#eef0f2;border-radius:99px;overflow:hidden;margin:0 0 16px}.progress>div{height:100%;background:#111827;border-radius:99px;transition:width .25s}.goalrow{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin:-8px 0 8px}.progress.goal{background:#eef0f2}.progress.goal>div{background:#c2410c}.chip.leech{background:#fee2e2;color:var(--bad);font-weight:700}.audiobtn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;font-size:14px}.audiobtn:active{transform:scale(.97)}.kanjirow{display:flex;justify-content:center;align-items:center;gap:10px}.readbox .t{display:flex;justify-content:space-between;align-items:center}.readbox .audiobtn{padding:3px 8px;font-size:12px;border-radius:8px}.word{display:flex;align-items:center;gap:6px}.word .audiobtn{padding:2px 7px;font-size:11px;border-radius:8px}.statsgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.statsgrid .box{background:#f9fafb;border:1px solid var(--line);border-radius:14px;padding:12px}.statsgrid .box .n{font-size:22px;font-weight:800}.statsgrid .box .l{font-size:12px;color:var(--muted);margin-top:2px}.bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin:12px 0 4px}.bars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}.bars .col .fill{width:100%;background:#111827;border-radius:6px 6px 0 0;min-height:2px}.bars .col .lbl{font-size:10px;color:var(--muted);margin-top:4px}.statesrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.empty{padding:55px 20px;text-align:center}.empty h2{margin:0 0 8px}.empty p{color:var(--muted);margin:0 0 18px}.primary{border:0;background:#111827;color:#fff;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:800}.secondary{border:1px solid var(--line);background:#fff;color:#111827;padding:12px 16px;border-radius:14px;cursor:pointer;font-weight:750}.footer{margin:14px 3px 0;color:#8a8f98;font-size:11px;line-height:1.6}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;z-index:20}dialog{border:0;border-radius:22px;padding:0;width:min(560px,calc(100% - 28px));box-shadow:0 30px 90px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.45)}.modal{padding:22px}.modal h2{margin-top:0}.setting{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);padding:13px 14px;border-radius:15px;margin:9px 0}input[type=number]{width:85px;border:1px solid var(--line);border-radius:10px;padding:8px}@media(max-width:700px){.wrap{padding:14px}.grid{grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:12px}.stat .n{font-size:22px}.stat .l{font-size:11px}.panel{padding:18px}.kanji{font-size:115px}.readings{grid-template-columns:1fr}.ratings{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){#app{display:flex;flex-direction:column}#studyPanel{order:1;margin-top:0}#app>.grid{order:2}#app>.progress:not(.goal){order:3}#app>.goalrow{order:4}#app>.progress.goal{order:5}#app>.footer{order:6}.kanji{margin-top:0}.readings{grid-template-columns:1fr}}
 .reading-list{display:flex;flex-direction:column;gap:6px;align-items:center}.reading-entry{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 7px}.reading-entry .audiobtn{padding:2px 6px;font-size:11px;border-radius:7px}.example-meaning{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:2px;direction:ltr;text-align:left}.v12-recall-result{border-radius:12px;padding:10px;margin-top:9px;font-weight:800;text-align:center}.v12-recall-result.good{background:#dcfce7;color:#166534}.v12-recall-result.bad{background:#fee2e2;color:#991b1b}.v12-recall-result.unknown{background:#f3f4f6;color:#4b5563}
 </style></head>
@@ -61,78 +61,6 @@
   setTimeout(showFallback, 7000);
 })();
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <script src="./v1.3-p0.js"></script>
 <script src="./v1.3-perf.js"></script>
 <script src="./v1.3-storage-bridge.js"></script>
@@ -151,19 +79,9 @@ const DEFAULTS={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThr
 let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;
 const $=id=>document.getElementById(id);const {todayKey,deviceId,eventId,save,loadSaved,reviveCard,hydrateCards}=window.__KANJI5_STATE__;
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
-function speak(text){if(!text)return;if(!( "speechSynthesis" in window)){toast("مرورگر شما از خواندن صدا پشتیبانی نمی‌کند.");return}try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(_){toast("پخش صدا ممکن نشد.")}}
+function speak(text){if(!text)return;if(!("speechSynthesis"in window)){toast("مرورگر شما از خواندن صدا پشتیبانی نمی‌کند.");return}try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(_){toast("پخش صدا ممکن نشد.")}}
 function initScheduler(){scheduler=fsrs({request_retention:state.settings.retention,maximum_interval:state.settings.maxInterval,enable_fuzz:true,enable_short_term:true,learning_steps:["1m","10m"],relearning_steps:["10m"]})}
-async function loadDeck(){
-  $("loadStatus").textContent="در حال دریافت فهرست Jōyō...";
-  const prefetched=window.__KANJI5_P0_DATA_PROMISE;
-  if(prefetched){const all=await prefetched;if(Array.isArray(all)&&all.length===2136){state.deck=all;localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));return}}
-  const res=await fetch(DATA_URL,{cache:"force-cache"});
-  if(!res.ok)throw new Error("Could not load local kanji dataset");
-  const data=await res.json();
-  const all=Array.isArray(data)?data:(data.kanji||[]);
-  if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);
-  state.deck=all;localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));
-}
+async function loadDeck(){ $("loadStatus").textContent="در حال دریافت فهرست Jōyō...";const prefetched=window.__KANJI5_P0_DATA_PROMISE;if(prefetched){const all=await prefetched;if(Array.isArray(all)&&all.length===2136){state.deck=all;localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));return}}const res=await fetch(DATA_URL,{cache:"force-cache"});if(!res.ok)throw new Error("Could not load local kanji dataset");const data=await res.json();const all=Array.isArray(data)?data:(data.kanji||[]);if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);state.deck=all;localStorage.setItem("kanji5-deck",JSON.stringify(state.deck))}
 function loadDeckFromCache(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2136){state.deck=x;return true}}catch(_){}return false}
 function ensureCard(item){if(!state.cards[item.id])state.cards[item.id]={card:createEmptyCard(),reviews:0,lapses:0,learnedAt:null};return state.cards[item.id]}
 function dueNow(card){return card&&card.due&&new Date(card.due)<=new Date()}
@@ -179,7 +97,9 @@ function renderEmpty(){const remaining=state.deck.filter(k=>!state.cards[k.id]).
 let upcomingReviewsTimerStarted=false;function ensureUpcomingReviewsUI(){const studyPanel=$("studyPanel");if(!studyPanel)return null;let panel=$("upcomingReviews");if(panel)return panel;panel=document.createElement('section');panel.id='upcomingReviews';panel.className='panel';panel.style.marginTop='14px';panel.innerHTML='<div style="font-weight:850;font-size:16px;margin-bottom:8px">مرورهای پیش‌رو</div><div id="upcomingReviewsBody" style="color:var(--muted);font-size:13px">—</div>';studyPanel.insertAdjacentElement('afterend',panel);return panel}
 function updateUpcomingReviews(){const panel=ensureUpcomingReviewsUI(),body=$("upcomingReviewsBody");if(!panel||!body)return;const now=Date.now();const rows=state.deck.map(item=>{const card=state.cards[item.id]?.card;if(!card?.due)return null;const due=new Date(card.due).getTime();return Number.isFinite(due)&&due>now?{item,due}:null}).filter(Boolean).sort((a,b)=>a.due-b.due).slice(0,6);if(!rows.length){body.textContent='فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';return}body.innerHTML=rows.map(row=>{const mins=Math.max(1,Math.round((row.due-now)/60000));let when;if(mins<60)when=String(mins)+' دقیقه دیگر';else if(mins<1440)when=String(Math.round(mins/60))+' ساعت دیگر';else when=String(Math.round(mins/1440))+' روز دیگر';return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><strong>'+row.item.character+'</strong><span>'+when+'</span></div>'}).join('')}
 function startUpcomingReviews(){if(upcomingReviewsTimerStarted)return;upcomingReviewsTimerStarted=true;updateUpcomingReviews();setInterval(updateUpcomingReviews,15000)}
-function renderCard(){startUpcomingReviews();const id=state.current;if(!id){renderEmpty();updateStats();return}const item=state.deck.find(x=>x.id===id),rec=state.cards[item.id],card=rec?.card;if(card)reviveCard(card);const preview=card?scheduler.repeat(card,new Date()):null;const getPreview=r=>{try{return formatInterval(preview[r].card)}catch(_){return"—"}};$("study").innerHTML=`<div class="kanjirow"><div class="kanji" data-kanji-id="${item.id}">${item.character}</div></div><div class="first-exposure-reading" style="display:${!rec?"block":"none"}"><div class="hira">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3):[]).join(" · ")}</div></div><div style="text-align:center;margin:-6px 0 14px"><button class="audiobtn" id="speakKanjiBtn" aria-label="تلفظ کانجی">🔊 تلفظ</button></div><div class="hint">${rec?"اول خودت معنی یا خوانش را حدس بزن.":"این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر."}</div><button class="reveal" id="revealBtn">${rec?"نمایش پاسخ":"نمایش اطلاعات کانجی"}</button><div class="answer ${state.revealed?'show':''}" id="answerBox"><div class="answerbox"><div class="meaning">${item.meaning.join(" · ")||"—"}</div><div class="readings"><div class="readbox"><div class="t"><span>On'yomi</span>${item.on.length?'<button class="audiobtn" data-speak="'+item.on.join(" ")+'" aria-label="تلفظ آن‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.on.length?item.on.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div><div class="readbox"><div class="t"><span>Kun'yomi</span>${item.kun.length?'<button class="audiobtn" data-speak="'+item.kun.join(" ")+'" aria-label="تلفظ کون‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.kun.length?item.kun.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div></div><div class="examples" id="examples"></div><div class="meta">${formatMeta(item)}</div></div><div class="ratings ${state.revealed?'show':''}" id="ratings"><button class="rate again" data-r="Again">Again<small>${getPreview(Rating.Again)}</small></button><button class="rate hard" data-r="Hard">Hard<small>${getPreview(Rating.Hard)}</small></button><button class="rate good" data-r="Good">Good<small>${getPreview(Rating.Good)}</small></button><button class="rate easy" data-r="Easy">Easy<small>${getPreview(Rating.Easy)}</small></button></div></div>`;$("revealBtn").addEventListener("click",()=>{if(window.__KANJI5_CANONICAL_REVEAL__)delete window.__KANJI5_CANONICAL_REVEAL__;state.revealed=true;renderCard();fetchExamples(item).then(renderExamples)});document.querySelectorAll(".rate").forEach(b=>b.addEventListener("click",()=>review(b.dataset.r)));$("speakKanjiBtn")?.addEventListener("click",()=>speak(item.character));document.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)));renderExamples();if(state.revealed)fetchExamples(item).then(renderExamples)}
+function renderCard(){startUpcomingReviews();const id=state.current;if(!id){renderEmpty();updateStats();return}const item=state.deck.find(x=>x.id===id),rec=state.cards[item.id],card=rec?.card;if(card)reviveCard(card);const preview=card?scheduler.repeat(card,new Date()):null;const getPreview=r=>{try{return formatInterval(preview[r].card)}catch(_){return"—"}};$("study").innerHTML=`<div class="kanjirow"><div class="kanji" data-kanji-id="${item.id}">${item.character}</div></div><div class="first-exposure-reading" style="display:${!rec?"block":"none"}"><div class="hira">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3):[]).join(" · ")}</div></div><div style="text-align:center;margin:-6px 0 14px"><button class="audiobtn" id="speakKanjiBtn" aria-label="تلفظ کانجی">🔊 تلفظ</button></div><div class="hint">${rec?"اول خودت معنی یا خوانش را حدس بزن.":"این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر."}</div><button class="reveal" id="revealBtn">${rec?"نمایش پاسخ":"نمایش اطلاعات کانجی"}</button><div class="answer ${state.revealed?'show':''}" id="answerBox"><div class="answerbox"><div class="meaning">${item.meaning.join(" · ")||"—"}</div><div class="readings"><div class="readbox"><div class="t"><span>On'yomi</span>${item.on.length?'<button class="audiobtn" data-speak="'+item.on.join(" ")+'" aria-label="تلفظ آن‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.on.length?item.on.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div><div class="readbox"><div class="t"><span>Kun'yomi</span>${item.kun.length?'<button class="audiobtn" data-speak="'+item.kun.join(" ")+'" aria-label="تلفظ کون‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.kun.length?item.kun.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div></div><div class="examples" id="examples"></div><div class="meta">${formatMeta(item)}</div></div><div class="ratings ${state.revealed?'show':''}" id="ratings"><button class="rate again" data-r="Again">Again<small>${getPreview(Rating.Again)}</small></button><button class="rate hard" data-r="Hard">Hard<small>${getPreview(Rating.Hard)}</small></button><button class="rate good" data-r="Good">Good<small>${getPreview(Rating.Good)}</small></button><button class="rate easy" data-r="Easy">Easy<small>${getPreview(Rating.Easy)}</small></button></div></div>`;
+$("revealBtn").addEventListener("click",()=>{if(!window.__KANJI5_CANONICAL_REVEAL__&&rec){window.__KANJI5_V12_OPEN_RECALL__?.();return}if(window.__KANJI5_CANONICAL_REVEAL__)delete window.__KANJI5_CANONICAL_REVEAL__;state.revealed=true;renderCard();fetchExamples(item).then(renderExamples)});
+document.querySelectorAll(".rate").forEach(b=>b.addEventListener("click",()=>review(b.dataset.r)));$("speakKanjiBtn")?.addEventListener("click",()=>speak(item.character));document.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)));renderExamples();if(state.revealed)fetchExamples(item).then(renderExamples)}
 function renderExamples(){const el=$("examples");if(!el||!state.current)return;const ex=state.examples[state.current]||[];if(!ex.length){el.innerHTML="";return}el.innerHTML=`<h3>نمونه‌های واژگانی</h3><div class="words">${ex.map(x=>`<div class="word"><span>${x.word}</span> <small style="color:#6b7280;direction:ltr;display:inline-block">${x.reading}</small><button class="audiobtn" data-speak="${x.reading||x.word}" aria-label="تلفظ واژه">🔊</button></div>`).join("")}</div>`;el.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)))}
 function next(){if(state.queue.length===0){state.current=null;state.revealed=false;renderEmpty();updateStats();return}state.current=state.queue[0];state.revealed=false;renderCard();updateStats()}
 function updateStreak(){const t=todayKey(),s=state.streak;if(s.lastActiveDate===t)return;const y=new Date();y.setDate(y.getDate()-1);const yesterday=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(y);s.current=s.lastActiveDate===yesterday?(s.current||0)+1:1;s.longest=Math.max(s.longest||0,s.current);s.lastActiveDate=t}
