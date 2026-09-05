@@ -47,6 +47,16 @@ function loadState(defaultsValue=defaults){return loadSaved(createInitial({today
 function saveState(state){save(state);return state}
 function transaction(mutator){if(typeof mutator!=='function')throw new TypeError('transaction requires a function');const current=loadState();const draft=structuredClone(current);const result=mutator(draft)??draft;save(result);return result}
 const api={DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,readAppState,readComponents,writeComponents,writeLastAttempt,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset};
-Object.defineProperty(api,'revealed',{enumerable:true,configurable:false,get:()=>Boolean(activeState?.revealed),set:value=>{if(activeState)activeState.revealed=Boolean(value)}});
+let revealBridgePending=false;
+Object.defineProperty(api,'revealed',{enumerable:true,configurable:false,get:()=>Boolean(activeState?.revealed),set:value=>{
+  const next=Boolean(value),previous=Boolean(activeState?.revealed);
+  if(activeState)activeState.revealed=next;
+  if(next&&!previous&&!revealBridgePending&&typeof document!=='undefined'){
+    revealBridgePending=true;
+    setTimeout(()=>{
+      try{document.getElementById('revealBtn')?.click()}finally{revealBridgePending=false}
+    },0);
+  }
+}});
 window.__KANJI5_STATE__=Object.freeze(api);
 })();
