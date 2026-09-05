@@ -77,14 +77,6 @@ test.describe('Kanji 5 browser smoke', () => {
 
     await page.locator('#v15DontKnowRecall').click();
     await expect(gate).toHaveCount(0);
-    const revealDebug = await page.evaluate(() => ({
-      apiRevealed: window.__KANJI5_STATE__?.revealed,
-      revealButton: Boolean(document.getElementById('revealBtn')),
-      answerClass: document.getElementById('answerBox')?.className || null,
-      ratingsClass: document.getElementById('ratings')?.className || null
-    }));
-    console.log('reveal-debug', JSON.stringify(revealDebug));
-    expect(revealDebug.apiRevealed).toBe(true);
     await expect(page.locator('#answerBox')).toHaveClass(/show/);
     await expect(page.locator('#ratings')).toHaveClass(/show/);
 
