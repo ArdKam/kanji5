@@ -72,7 +72,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run browser tests
-        run: npx playwright test e2e/**/*.spec.mjs
+        run: npx playwright test e2e
       - name: Verify checked-out tree is committed and immutable
         shell: bash
         run: |
