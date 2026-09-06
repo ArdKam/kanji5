@@ -6,7 +6,8 @@ const V12="kanji5-v1.2",STORAGE_KEY="kanji5-v1",CARDS_STORAGE_KEY="kanji5-v1-car
 if(!window.KANJI5_SUPABASE)return;
 const cfg=window.KANJI5_SUPABASE;
 if(!cfg.url||!cfg.anonKey||cfg.url.includes("YOUR_PROJECT_ID")||cfg.anonKey.includes("YOUR_SUPABASE")){console.info("Kanji 5 sync is not configured yet.");return}
-let client=null,user=null,syncPromise=null,pollTimer=null,lifecycleInstalled=false;
+let lifecycleInstalled=false;
+let client=null,user=null,syncPromise=null,pollTimer=null;
 const byId=id=>document.getElementById(id),safeJSON=(raw,fallback)=>{try{return raw?JSON.parse(raw):fallback}catch(_){return fallback}};
 const localPayload=()=>{const persisted=safeJSON(localStorage.getItem(STORAGE_KEY),null),cards=safeJSON(localStorage.getItem(CARDS_STORAGE_KEY),persisted?.cards||{}),reviews=safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY),persisted?.reviews||[]),state=persisted?{...persisted,cards,reviews,queue:[],current:null,revealed:false,examples:{}}:null;const components=safeJSON(localStorage.getItem(COMPONENT_KEY),{}),history=safeJSON(localStorage.getItem(SESSION_HISTORY_KEY),[]),profile=components?.v16SkillProfile||null;return{state,knowledge:safeJSON(localStorage.getItem(KNOWLEDGE_KEY),{}),deckVersion:localStorage.getItem("kanji5-deck-version")||null,educationSchemaVersion:EDUCATION_SCHEMA_VERSION,syncSchemaVersion:SYNC_SCHEMA_VERSION,v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,sessionHistory:Array.isArray(history)?history:[],components:components&&typeof components==='object'?components:{},skillProfile:profile}};
 const readRemote=async()=>{const{data,error}=await client.from("user_learning_state").select("payload,updated_at").eq("user_id",user.id).maybeSingle();if(error)throw error;return data?{payload:data.payload||null,updatedAt:data.updated_at||null}:null};
