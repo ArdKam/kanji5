@@ -16,3 +16,8 @@ export function buildSessionPlan(knowledge={},options={}){
  return{version:1,target,generatedAt:new Date(now).toISOString(),modes:shares.map(item=>({mode:item.mode,label:item.label,plannedCount:item.plannedCount,share:item.share,mastery:item.mastery,accuracy:item.accuracy,attempts:item.attempts,score:item.score})),priority:shares.filter(item=>item.plannedCount>0).map(item=>item.mode)};
 }
 export function weakestMode(plan){return plan?.modes?.slice().sort((a,b)=>a.mastery-b.mastery||b.score-a.score)[0]?.mode||null}
+export function nextPlannedMode(plan,remaining={},availableModes=MODES){
+ const available=new Set(Array.isArray(availableModes)&&availableModes.length?availableModes:MODES);
+ const candidates=(plan?.modes||[]).filter(item=>available.has(item.mode)&&Number(remaining[item.mode]??item.plannedCount)>0).sort((a,b)=>b.score-a.score||a.mode.localeCompare(b.mode));
+ return candidates[0]?.mode||null;
+}
