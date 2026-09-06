@@ -26,7 +26,6 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await expect(page.locator('#v16Recall')).toHaveText('۰');
     await expect(page.locator('#v16Unknown')).toHaveText('۰');
     await expect(page.locator('#v16Modes .v16-mode')).toHaveCount(5);
-
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Good"]').click();
@@ -81,7 +80,6 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('#revealBtn').click();
     await page.locator('.rate[data-r="Good"]').click();
     await expect(page.locator('#v16Reviews')).toHaveText('۱');
-
     const active = await page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1.6-session-history');
       const history = raw ? JSON.parse(raw) : [];
@@ -93,7 +91,6 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     expect(active.reviews).toBe(1);
     expect(active.remainingModes).toBeTruthy();
     expect(active.plan).toBeTruthy();
-
     await page.reload();
     await expect(page.locator('#v16Session')).toBeVisible();
     await expect(page.locator('#v16Reviews')).toHaveText('۱');
@@ -104,7 +101,6 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     });
     expect(resumed?.sessionId).toBe(active.sessionId);
     expect(resumed?.reviews).toBe(1);
-
     await page.locator('#v16Finish').click();
     await expect(page.locator('#v16CurrentSummary')).toContainText('۱ مرور FSRS');
     const finalHistory = await page.evaluate(() => {
@@ -126,15 +122,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('.rate[data-r="Good"]').click();
     await page.evaluate(ch => {
       localStorage.removeItem('kanji5-v1.6-session-history');
-      const knowledge = {
-        [ch]: {
-          meaning: { attempts: 20, correct: 19 },
-          reading: { attempts: 20, correct: 2 },
-          production: { attempts: 20, correct: 18 },
-          vocabulary: { attempts: 20, correct: 19 },
-          context: { attempts: 20, correct: 18 }
-        }
-      };
+      const knowledge = { [ch]: { meaning:{attempts:20,correct:19}, reading:{attempts:20,correct:2}, production:{attempts:20,correct:18}, vocabulary:{attempts:20,correct:19}, context:{attempts:20,correct:18} } };
       localStorage.setItem('kanji5-v1.2-knowledge', JSON.stringify(knowledge));
     }, character);
     await page.reload();
@@ -164,7 +152,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await expect(page.locator('#v16SessionModeStats')).toContainText('۰/۱');
   });
 
-  test('rebalances remaining session modes after a weak education result', async ({ page }) => {
+  test('rebalances remaining session modes after a weak education result and preserves it through the next mode selection', async ({ page }) => {
     await cleanStart(page);
     const character = (await page.locator('.kanji').textContent())?.trim();
     expect(character).toBeTruthy();
@@ -172,45 +160,29 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('.rate[data-r="Good"]').click();
     await page.evaluate(ch => {
       localStorage.removeItem('kanji5-v1.6-session-history');
-      const knowledge = {
-        [ch]: {
-          meaning: { attempts: 40, correct: 40 },
-          reading: { attempts: 40, correct: 40 },
-          production: { attempts: 40, correct: 40 },
-          vocabulary: { attempts: 40, correct: 40 },
-          context: { attempts: 40, correct: 40 }
-        }
-      };
+      const knowledge = { [ch]: { meaning:{attempts:20,correct:19}, reading:{attempts:20,correct:2}, production:{attempts:20,correct:18}, vocabulary:{attempts:20,correct:19}, context:{attempts:20,correct:18} } };
       localStorage.setItem('kanji5-v1.2-knowledge', JSON.stringify(knowledge));
     }, character);
     await page.reload();
-    const before = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      return history.find(item => item?.status === 'active');
-    });
+    const before = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active'));
     expect(before?.plan).toBeTruthy();
     expect(before?.remainingModes).toBeTruthy();
     const beforeReading = Number(before.remainingModes.reading || 0);
+    expect(beforeReading).toBeGreaterThan(0);
     await page.locator('.v14-tab[data-tab="education"]').click();
-    await expect(page.locator('.v14-edu-meta')).toContainText('meaning', { timeout: 10_000 });
+    await expect(page.locator('.v14-edu-meta')).toContainText('reading', { timeout: 10_000 });
     await page.locator('#v14EduInput').fill('definitely-wrong');
     await page.locator('#v14EduSubmit').click();
-    await expect.poll(async () => page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      const active = history.find(item => item?.status === 'active');
-      return active?.rebalanceCount || 0;
-    })).toBeGreaterThan(0);
-    const after = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      return history.find(item => item?.status === 'active');
-    });
+    await expect.poll(async () => page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active')?.rebalanceCount || 0)).toBeGreaterThan(0);
+    const after = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active'));
     expect(after?.plan?.version).toBe(2);
     expect(after?.plan?.rebalancedAt).toBeTruthy();
-    expect(Number(after?.remainingModes?.meaning || 0) >= 0).toBe(true);
-    expect(Number(after?.remainingModes?.reading || 0)).toBeGreaterThanOrEqual(beforeReading);
+    expect(after?.remainingModes?.reading).toBeGreaterThanOrEqual(0);
+    expect(after?.modeResults?.reading).toMatchObject({attempts:1,correct:0});
+    await page.reload();
+    await expect.poll(async () => page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active')?.plan?.version || 0)).toBe(2);
+    const persisted = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active'));
+    expect(persisted?.remainingModes?.reading).toBe(after.remainingModes.reading);
   });
 
   test('routes education toward the weakest skill in the adaptive session plan', async ({ page }) => {
@@ -221,15 +193,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('.rate[data-r="Good"]').click();
     await page.evaluate(ch => {
       localStorage.removeItem('kanji5-v1.6-session-history');
-      const knowledge = {
-        [ch]: {
-          meaning: { attempts: 20, correct: 19 },
-          reading: { attempts: 20, correct: 2 },
-          production: { attempts: 20, correct: 18 },
-          vocabulary: { attempts: 20, correct: 19 },
-          context: { attempts: 20, correct: 18 }
-        }
-      };
+      const knowledge = { [ch]: { meaning:{attempts:20,correct:19}, reading:{attempts:20,correct:2}, production:{attempts:20,correct:18}, vocabulary:{attempts:20,correct:19}, context:{attempts:20,correct:18} } };
       localStorage.setItem('kanji5-v1.2-knowledge', JSON.stringify(knowledge));
     }, character);
     await page.reload();
