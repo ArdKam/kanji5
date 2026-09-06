@@ -39,6 +39,7 @@ jobs:
           node --check v1.6-session.js
           node --check v1.6-session-core.js
           node --check v1.6-session-feedback.js
+          node --check v1.6-session-analytics.js
           node --check v1.2-runtime-fixes.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
@@ -61,6 +62,7 @@ jobs:
           node --check scripts/test-v1.6-session.mjs
           node --check scripts/test-v1.6-session-core.mjs
           node --check scripts/test-v1.6-session-feedback.mjs
+          node --check scripts/test-v1.6-session-analytics.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
@@ -72,6 +74,8 @@ jobs:
         run: node scripts/test-v1.6-session-core.mjs
       - name: Validate v1.6 session feedback contract
         run: node scripts/test-v1.6-session-feedback.mjs
+      - name: Validate v1.6 session analytics contract
+        run: node scripts/test-v1.6-session-analytics.mjs
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
@@ -86,7 +90,7 @@ jobs:
           git diff --exit-code
           git diff --cached --exit-code
           grep -q '"type": "module"' package.json
-          grep -q "const CACHE='kanji5-shell-v56'" sw.js
+          grep -q "const CACHE='kanji5-shell-v57'" sw.js
           grep -q "function staleWhileRevalidate" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-state.js"' sw.js
@@ -101,6 +105,7 @@ jobs:
           grep -q '"./v1.6-session.js"' sw.js
           grep -q '"./v1.6-session-core.js"' sw.js
           grep -q '"./v1.6-session-feedback.js"' sw.js
+          grep -q '"./v1.6-session-analytics.js"' sw.js
           grep -q 'SNAPSHOT_STORAGE' v1.5-state.js
           grep -q 'SNAPSHOT_COMMIT' v1.5-state.js
           grep -q 'PERSISTENCE_SCHEMA_VERSION' v1.5-state.js
@@ -109,6 +114,7 @@ jobs:
           grep -q 'scripts/test-v1.6-session.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.6-session-core.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.6-session-feedback.mjs' .github/workflows/build-v1.5.yml
+          grep -q 'scripts/test-v1.6-session-analytics.mjs' .github/workflows/build-v1.5.yml
           grep -q "ACTIVE_STATUS='active'" v1.6-session.js
           grep -q 'remainingModes' v1.6-session.js
           grep -q 'modeResults' v1.6-session-feedback.js
