@@ -37,6 +37,7 @@ test.describe('v1.5 roadmap browser verification', () => {
 
     await expect(page.locator('.kanji')).not.toHaveText(firstKanji || '', { timeout: 5_000 });
     await expect(page.locator('#upcomingReviews')).toBeVisible({ timeout: 5_000 });
-    await expect(page.locator('#upcomingReviewsBody')).toContainText(firstKanji || '');
+    // The v1.5 roadmap intentionally refreshes this panel every 15 seconds.
+    await expect(page.locator('#upcomingReviewsBody')).toContainText(firstKanji || '', { timeout: 20_000 });
   });
 });
