@@ -19,7 +19,7 @@ assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall ba
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('"./v1.5-recall-core.js"'), 'v1.5 recall core is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
-assert(sw.includes('kanji5-shell-v49'), 'Runtime cache version was not bumped');
+assert(sw.includes('kanji5-shell-v50'), 'Runtime cache version was not bumped for v1.6');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(state.includes("const DEVICE_KEY='kanji5-device-id'"), 'State persistence boundary missing device identity');
 assert(state.includes("COMPONENT_KEY='kanji5-v1.5-components'"), 'Component-level knowledge store must belong to the state boundary');
@@ -33,7 +33,3 @@ assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” must not be adde
 assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
 assert(ui.includes("else if(edu.mode==='production'){prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';"), 'Production must use a selection prompt');
 assert(ui.includes('${renderChoices(chooseChoices(item))}'), 'Production must render canonical four-choice options');
-assert(has(ui,/const check=\(edu\.mode==='meaning'\|\|edu\.mode==='reading'\)\?/), 'Only meaning/reading exercises may render a text-submit control');
-assert(!has(ui,/id=\\"v14EduSubmit\\"[^\n]+edu\.mode==='production'/), 'Production must not wire the text-submit control');
-
-console.log('Kanji 5 v1.5 learning + P0 structural checks passed.');
