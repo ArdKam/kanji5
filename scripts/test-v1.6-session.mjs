@@ -36,5 +36,5 @@ assert.match(education,/kanji5:v1\.6-education-result/,'education UI must emit s
 assert.match(sw,/"\.\/v1\.6-session\.js"/,'v1.6 session runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-core\.js"/,'v1.6 session core must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtime must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v54'/,'service-worker cache must advance for live adaptive rebalancing');
+assert.match(sw,/const CACHE='kanji5-shell-v55'/,'service-worker cache must advance for authoritative session routing guard changes');
 console.log('Kanji 5 v1.6 session contract checks passed.');
