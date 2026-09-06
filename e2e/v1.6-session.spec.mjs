@@ -73,6 +73,48 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await expect(page.locator('#v16History .v16-history-item')).toHaveCount(1);
   });
 
+  test('resumes an in-progress session after reload and clears the active record when finished', async ({ page }) => {
+    await cleanStart(page);
+    await page.locator('#revealBtn').click();
+    await page.locator('.rate[data-r="Good"]').click();
+    await expect(page.locator('#v16Reviews')).toHaveText('۱');
+
+    const active = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.6-session-history');
+      const history = raw ? JSON.parse(raw) : [];
+      return history.find(item => item?.status === 'active');
+    });
+    expect(active).toBeTruthy();
+    expect(active.schemaVersion).toBeGreaterThanOrEqual(2);
+    expect(active.sessionId).toBeTruthy();
+    expect(active.reviews).toBe(1);
+    expect(active.remainingModes).toBeTruthy();
+    expect(active.plan).toBeTruthy();
+
+    await page.reload();
+    await expect(page.locator('#v16Session')).toBeVisible();
+    await expect(page.locator('#v16Reviews')).toHaveText('۱');
+    const resumed = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.6-session-history');
+      const history = raw ? JSON.parse(raw) : [];
+      return history.find(item => item?.status === 'active');
+    });
+    expect(resumed?.sessionId).toBe(active.sessionId);
+    expect(resumed?.reviews).toBe(1);
+
+    await page.locator('#v16Finish').click();
+    await expect(page.locator('#v16CurrentSummary')).toContainText('۱ مرور FSRS');
+    const finalHistory = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.6-session-history');
+      return raw ? JSON.parse(raw) : [];
+    });
+    expect(finalHistory.some(item => item?.status === 'active')).toBe(false);
+    const summary = finalHistory.find(item => !item?.status);
+    expect(summary).toBeTruthy();
+    expect(summary.sessionId).toBe(active.sessionId);
+    expect(summary.reviews).toBe(1);
+  });
+
   test('routes education toward the weakest skill in the adaptive session plan', async ({ page }) => {
     await cleanStart(page);
     const character = (await page.locator('.kanji').textContent())?.trim();
