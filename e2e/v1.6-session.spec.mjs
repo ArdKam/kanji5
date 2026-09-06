@@ -80,11 +80,8 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('#revealBtn').click();
     await page.locator('.rate[data-r="Good"]').click();
     await expect(page.locator('#v16Reviews')).toHaveText('۱');
-    const active = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      return history.find(item => item?.status === 'active');
-    });
+    await expect.poll(async () => page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active')?.reviews || 0)).toBe(1);
+    const active = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active'));
     expect(active).toBeTruthy();
     expect(active.schemaVersion).toBeGreaterThanOrEqual(2);
     expect(active.sessionId).toBeTruthy();
@@ -94,19 +91,12 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.reload();
     await expect(page.locator('#v16Session')).toBeVisible();
     await expect(page.locator('#v16Reviews')).toHaveText('۱');
-    const resumed = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      return history.find(item => item?.status === 'active');
-    });
+    const resumed = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active'));
     expect(resumed?.sessionId).toBe(active.sessionId);
     expect(resumed?.reviews).toBe(1);
     await page.locator('#v16Finish').click();
     await expect(page.locator('#v16CurrentSummary')).toContainText('۱ مرور FSRS');
-    const finalHistory = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      return raw ? JSON.parse(raw) : [];
-    });
+    const finalHistory = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]'));
     expect(finalHistory.some(item => item?.status === 'active')).toBe(false);
     const summary = finalHistory.find(item => !item?.status);
     expect(summary).toBeTruthy();
@@ -132,27 +122,19 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('#v14EduInput').fill('definitely-not-a-reading');
     await page.locator('#v14EduSubmit').click();
     await expect(page.locator('#v16SessionModeStats')).toContainText('خوانش');
-    const active = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      return history.find(item => item?.status === 'active');
-    });
+    const active = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => item?.status === 'active'));
     expect(active?.modeResults?.reading).toMatchObject({attempts:1,correct:0});
     await page.locator('#v16Finish').click();
     await expect(page.locator('#v16CurrentSummary')).toBeVisible();
     await page.waitForTimeout(400);
-    const completed = await page.evaluate(() => {
-      const raw = localStorage.getItem('kanji5-v1.6-session-history');
-      const history = raw ? JSON.parse(raw) : [];
-      return history.find(item => !item?.status);
-    });
+    const completed = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]').find(item => !item?.status));
     expect(completed?.modeResults?.reading).toMatchObject({attempts:1,correct:0});
     await page.reload();
     await expect(page.locator('#v16SessionModeStats')).toContainText('خوانش');
     await expect(page.locator('#v16SessionModeStats')).toContainText('۰/۱');
   });
 
-  test('rebalances remaining session modes after a weak education result and preserves it through the next mode selection', async ({ page }) => {
+  test('rebalances remaining session modes after a weak education result and preserves it through reload', async ({ page }) => {
     await cleanStart(page);
     const character = (await page.locator('.kanji').textContent())?.trim();
     expect(character).toBeTruthy();
