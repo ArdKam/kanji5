@@ -16,11 +16,17 @@ assert.match(feedback,/rebalance\(\)/,'feedback must trigger live session rebala
 assert.match(feedback,/rebalanceSessionPlan/,'feedback must delegate rebalancing to the pure core');
 assert.match(feedback,/rebalanceCount/,'live rebalance count missing');
 assert.match(feedback,/lastRebalanceToken/,'feedback dedupe guard missing');
+assert.match(feedback,/authoritativeNextMode/,'authoritative next-mode guard missing');
+assert.match(feedback,/authoritativeConsumeMode/,'authoritative consume-mode guard missing');
+assert.match(feedback,/installRuntimeGuards/,'runtime guard installer missing');
+assert.match(feedback,/__V16_AUTHORITATIVE_GUARDS__/,'runtime guard marker missing');
+assert.match(feedback,/priority\.find/,'authoritative routing must consume persisted plan priority');
+assert.match(feedback,/next\.remainingModes/,'authoritative consume must persist remaining modes');
 assert.match(feedback,/v16SessionModeStats/,'session mode analytics UI missing');
 assert.match(core,/export function rebalanceSessionPlan/,'live adaptive rebalancer missing');
 assert.match(core,/rebalancedAt/,'rebalanced plan timestamp missing');
 assert.match(education,/import\('\.\/v1\.6-session-feedback\.js'\)/,'education UI must load session feedback boundary');
 assert.match(education,/kanji5:v1\.6-education-result/,'education UI must emit canonical session feedback events');
 assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'feedback runtime must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v54'/,'service-worker cache must advance for live rebalancing runtime changes');
+assert.match(sw,/const CACHE='kanji5-shell-v55'/,'service-worker cache must advance for authoritative session guard changes');
 console.log('Kanji 5 v1.6 session feedback/rebalancing contract checks passed.');
