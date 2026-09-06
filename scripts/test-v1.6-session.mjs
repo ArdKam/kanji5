@@ -1,13 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-
 const session=fs.readFileSync('v1.6-session.js','utf8');
 const core=fs.readFileSync('v1.6-session-core.js','utf8');
 const p0=fs.readFileSync('v1.5-p0.js','utf8');
 const education=fs.readFileSync('v1.5-education-ui.js','utf8');
 const feedback=fs.readFileSync('v1.6-session-feedback.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
-
 assert.match(session,/window\.__KANJI5_V16_SESSION__/,'v1.6 session runtime marker missing');
 for(const id of ['v16Session','v16Due','v16New','v16Mastered','v16Streak','v16GoalBar','v16Reviews','v16Recall','v16Unknown','v16Duration','v16Plan','v16Modes','v16Attention','v16Finish','v16CurrentSummary','v16History'])assert.match(session,new RegExp(`["']${id}["']`),`session dashboard node missing: ${id}`);
 assert.match(session,/state\.readKnowledge\(\)/,'session dashboard must consume knowledge through the state boundary');
@@ -42,5 +40,6 @@ assert.match(sw,/"\.\/v1\.6-session-core\.js"/,'v1.6 session core must be offlin
 assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/,'v1.6 session analytics runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-skill-profile\.js"/,'long-term skill profile runtime must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v58'/,'service-worker cache must advance for skill profile changes');
+assert.match(sw,/"\.\/v1\.6-sync-core\.js"/,'v1.6 sync core must be offline-precached');
+assert.match(sw,/const CACHE='kanji5-shell-v59'/,'service-worker cache must advance for v1.6 sync changes');
 console.log('Kanji 5 v1.6 session contract checks passed.');
