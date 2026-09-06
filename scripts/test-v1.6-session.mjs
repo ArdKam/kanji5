@@ -13,7 +13,7 @@ assert.match(session,/state\.readKnowledge\(\)/,'session dashboard must consume 
 assert.match(session,/\.rate\[data-r\]/,'session dashboard must observe FSRS ratings');
 assert.match(session,/#v15DontKnowRecall/,'session dashboard must observe Active Recall unknown outcomes');
 assert.match(session,/state\.writeSessionHistory\?\./,'active session persistence must use the state history boundary');
-assert.match(session,/status:'active'/,'active session record status missing');
+assert.match(session,/status:ACTIVE_STATUS/,'active session record status missing');
 assert.match(session,/schemaVersion:ACTIVE_SCHEMA/,'active session schema version missing');
 assert.match(session,/sessionId:session\.sessionId/,'stable session id must survive reload');
 assert.match(session,/remainingModes/,'adaptive plan remainder must survive reload');
