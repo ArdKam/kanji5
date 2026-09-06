@@ -82,7 +82,7 @@ jobs:
           git diff --exit-code
           git diff --cached --exit-code
           grep -q '"type": "module"' package.json
-          grep -q "const CACHE='kanji5-shell-v51'" sw.js
+          grep -q "const CACHE='kanji5-shell-v52'" sw.js
           grep -q "function staleWhileRevalidate" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-state.js"' sw.js
@@ -103,5 +103,7 @@ jobs:
           grep -q "import('./v1.6-session.js')" v1.5-p0.js
           grep -q 'scripts/test-v1.6-session.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.6-session-core.mjs' .github/workflows/build-v1.5.yml
+          grep -q 'status:'"'"'active'"'"'' v1.6-session.js
+          grep -q 'remainingModes' v1.6-session.js
           ! grep -Eq '^[[:space:]]+git[[:space:]]+push[[:space:]]+origin([[:space:]]|$)' .github/workflows/build-v1.5.yml
           ! grep -Eq '^[[:space:]]+node[[:space:]]+scripts/v1.5-roadmap-finalize\.mjs([[:space:]]|$)' .github/workflows/build-v1.5.yml
