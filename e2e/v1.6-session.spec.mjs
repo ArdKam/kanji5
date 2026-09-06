@@ -72,4 +72,27 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await expect(page.locator('#v16CurrentSummary')).toContainText('خلاصهٔ آخرین جلسه');
     await expect(page.locator('#v16History .v16-history-item')).toHaveCount(1);
   });
+
+  test('routes education toward the weakest skill in the adaptive session plan', async ({ page }) => {
+    await cleanStart(page);
+    await page.locator('#revealBtn').click();
+    await page.locator('.rate[data-r="Good"]').click();
+    await page.evaluate(() => {
+      const knowledge = {
+        '一': {
+          meaning: { attempts: 20, correct: 19 },
+          reading: { attempts: 20, correct: 2 },
+          production: { attempts: 20, correct: 18 },
+          vocabulary: { attempts: 20, correct: 19 },
+          context: { attempts: 20, correct: 18 }
+        }
+      };
+      localStorage.setItem('kanji5-v1.2-knowledge', JSON.stringify(knowledge));
+    });
+    await page.reload();
+    await expect(page.locator('#v16Plan')).toContainText('خوانش');
+    await page.locator('.v14-tab[data-tab="education"]').click();
+    await expect(page.locator('#v14EducationPane')).toBeVisible();
+    await expect(page.locator('.v14-edu-meta')).toContainText('reading', { timeout: 10_000 });
+  });
 });
