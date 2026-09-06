@@ -19,7 +19,7 @@ assert.match(feedback,/lastRebalanceToken/,'feedback dedupe guard missing');
 assert.match(feedback,/authoritativeNextMode/,'authoritative next-mode guard missing');
 assert.match(feedback,/authoritativeConsumeMode/,'authoritative consume-mode guard missing');
 assert.match(feedback,/installRuntimeGuards/,'runtime guard installer missing');
-assert.match(feedback,/__V16_AUTHORITATIVE_GUARDS__/,'runtime guard marker missing');
+assert.match(feedback,/guardedApis/,'runtime guard must not mutate the API object with a marker property');
 assert.match(feedback,/priority\.find/,'authoritative routing must consume persisted plan priority');
 assert.match(feedback,/next\.remainingModes/,'authoritative consume must persist remaining modes');
 assert.match(feedback,/v16SessionModeStats/,'session mode analytics UI missing');
