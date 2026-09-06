@@ -75,11 +75,13 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
 
   test('routes education toward the weakest skill in the adaptive session plan', async ({ page }) => {
     await cleanStart(page);
+    const character = (await page.locator('.kanji').textContent())?.trim();
+    expect(character).toBeTruthy();
     await page.locator('#revealBtn').click();
     await page.locator('.rate[data-r="Good"]').click();
-    await page.evaluate(() => {
+    await page.evaluate(ch => {
       const knowledge = {
-        '一': {
+        [ch]: {
           meaning: { attempts: 20, correct: 19 },
           reading: { attempts: 20, correct: 2 },
           production: { attempts: 20, correct: 18 },
@@ -88,7 +90,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
         }
       };
       localStorage.setItem('kanji5-v1.2-knowledge', JSON.stringify(knowledge));
-    });
+    }, character);
     await page.reload();
     await expect(page.locator('#v16Plan')).toContainText('خوانش');
     await page.locator('.v14-tab[data-tab="education"]').click();
