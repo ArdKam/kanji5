@@ -1,11 +1,21 @@
 import { test, expect } from '@playwright/test';
 
+async function cleanStart(page){
+  await page.goto('/');
+  await page.evaluate(() => {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith('kanji5-')) localStorage.removeItem(key);
+    }
+  });
+  await page.reload();
+  await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+}
+
 test.describe('Kanji 5 v1.6 session dashboard', () => {
   test('shows live session metrics and updates after a rating', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-    await page.goto('/');
-    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await cleanStart(page);
     await expect(page.locator('#v16Session')).toBeVisible();
     await expect(page.locator('#v16Due')).toBeVisible();
     await expect(page.locator('#v16New')).toBeVisible();
@@ -26,8 +36,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
   });
 
   test('counts an Active Recall dont-know attempt separately from FSRS ratings', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await cleanStart(page);
     const firstId = await page.locator('.kanji').getAttribute('data-kanji-id');
     expect(firstId).toBeTruthy();
     await page.locator('#revealBtn').click();
@@ -47,5 +56,20 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await expect(page.locator('#v16Recall')).toHaveText('۱');
     await expect(page.locator('#v16Unknown')).toHaveText('۱');
     await expect(page.locator('#v16Reviews')).toHaveText('۰');
+  });
+
+  test('finishes a session, persists the summary, and restores recent history after reload', async ({ page }) => {
+    await cleanStart(page);
+    await page.locator('#revealBtn').click();
+    await page.locator('.rate[data-r="Good"]').click();
+    await expect(page.locator('#v16Reviews')).toHaveText('۱');
+    await page.locator('#v16Finish').click();
+    await expect(page.locator('#v16CurrentSummary')).toContainText('خلاصهٔ آخرین جلسه');
+    await expect(page.locator('#v16CurrentSummary')).toContainText('۱ مرور FSRS');
+    await expect(page.locator('#v16Finish')).toBeDisabled();
+    await expect(page.locator('#v16History .v16-history-item')).toHaveCount(1);
+    await page.reload();
+    await expect(page.locator('#v16CurrentSummary')).toContainText('خلاصهٔ آخرین جلسه');
+    await expect(page.locator('#v16History .v16-history-item')).toHaveCount(1);
   });
 });
