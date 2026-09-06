@@ -7,9 +7,10 @@ const wf=fs.readFileSync('.github/workflows/build-v1.5.yml','utf8');
 
 assert.match(src,/__KANJI5_V16_SESSION_ANALYTICS__/);
 assert.match(src,/readSessionHistory/);
-assert.match(src,/7/);
+assert.match(src,/slice\(-7\)/);
 assert.match(src,/modeResults/);
 assert.match(src,/accuracy/);
+assert.match(src,/signedPct/);
 assert.match(src,/v16SessionAnalytics/);
 assert.match(src,/قوی‌ترین/);
 assert.match(src,/نیازمند توجه/);
