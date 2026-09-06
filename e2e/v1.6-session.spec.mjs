@@ -42,12 +42,14 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
     await page.locator('.rate[data-r="Again"]').click();
-    await page.evaluate(id => {
+    await page.evaluate(async id => {
       const raw = localStorage.getItem('kanji5-v1-cards');
       const cards = raw ? JSON.parse(raw) : {};
       if (!id || !cards[id]?.card) throw new Error('persisted card missing');
       cards[id].card.due = new Date(Date.now() - 1000).toISOString();
       localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
+      localStorage.removeItem('kanji5-v1.6-session-history');
+      await new Promise(resolve => setTimeout(resolve, 60));
       localStorage.removeItem('kanji5-v1.6-session-history');
     }, firstId);
     await page.reload();
