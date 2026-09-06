@@ -164,6 +164,55 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await expect(page.locator('#v16SessionModeStats')).toContainText('۰/۱');
   });
 
+  test('rebalances remaining session modes after a weak education result', async ({ page }) => {
+    await cleanStart(page);
+    const character = (await page.locator('.kanji').textContent())?.trim();
+    expect(character).toBeTruthy();
+    await page.locator('#revealBtn').click();
+    await page.locator('.rate[data-r="Good"]').click();
+    await page.evaluate(ch => {
+      localStorage.removeItem('kanji5-v1.6-session-history');
+      const knowledge = {
+        [ch]: {
+          meaning: { attempts: 40, correct: 40 },
+          reading: { attempts: 40, correct: 40 },
+          production: { attempts: 40, correct: 40 },
+          vocabulary: { attempts: 40, correct: 40 },
+          context: { attempts: 40, correct: 40 }
+        }
+      };
+      localStorage.setItem('kanji5-v1.2-knowledge', JSON.stringify(knowledge));
+    }, character);
+    await page.reload();
+    const before = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.6-session-history');
+      const history = raw ? JSON.parse(raw) : [];
+      return history.find(item => item?.status === 'active');
+    });
+    expect(before?.plan).toBeTruthy();
+    expect(before?.remainingModes).toBeTruthy();
+    const beforeReading = Number(before.remainingModes.reading || 0);
+    await page.locator('.v14-tab[data-tab="education"]').click();
+    await expect(page.locator('.v14-edu-meta')).toContainText('meaning', { timeout: 10_000 });
+    await page.locator('#v14EduInput').fill('definitely-wrong');
+    await page.locator('#v14EduSubmit').click();
+    await expect.poll(async () => page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.6-session-history');
+      const history = raw ? JSON.parse(raw) : [];
+      const active = history.find(item => item?.status === 'active');
+      return active?.rebalanceCount || 0;
+    })).toBeGreaterThan(0);
+    const after = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1.6-session-history');
+      const history = raw ? JSON.parse(raw) : [];
+      return history.find(item => item?.status === 'active');
+    });
+    expect(after?.plan?.version).toBe(2);
+    expect(after?.plan?.rebalancedAt).toBeTruthy();
+    expect(Number(after?.remainingModes?.meaning || 0) >= 0).toBe(true);
+    expect(Number(after?.remainingModes?.reading || 0)).toBeGreaterThanOrEqual(beforeReading);
+  });
+
   test('routes education toward the weakest skill in the adaptive session plan', async ({ page }) => {
     await cleanStart(page);
     const character = (await page.locator('.kanji').textContent())?.trim();
