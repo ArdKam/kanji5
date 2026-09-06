@@ -56,6 +56,6 @@ function bindSession(){
  setInterval(()=>{if(!session.finished)update()},1000); update();
 }
 function start(){injectStyle();const ready=()=>{ensurePanel();bindSession()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready()}
-window.__KANJI5_V16_SESSION_API__=Object.freeze({refresh:update,getSession:()=>({...session,ratings:{...session.ratings}},finish:finishSession)});
+window.__KANJI5_V16_SESSION_API__=Object.freeze({refresh:update,getSession:()=>({...session,ratings:{...session.ratings}}),finish:finishSession});
 start();
 })();
