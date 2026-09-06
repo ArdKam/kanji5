@@ -10,13 +10,9 @@ for(const id of ['v16Session','v16Due','v16New','v16Mastered','v16Streak','v16Go
 assert.match(session,/state\.readKnowledge\(\)/,'session dashboard must consume knowledge through the state boundary');
 assert.match(session,/\.rate\[data-r\]/,'session dashboard must observe FSRS ratings');
 assert.match(session,/#v15DontKnowRecall/,'session dashboard must observe Active Recall unknown outcomes');
-assert.match(session,/\[\['meaning','معنی'\]/,'meaning skill metric missing');
-assert.match(session,/\[\['reading','خوانش'\]/,'reading skill metric missing');
-assert.match(session,/\[\['production','تولید'\]/,'production skill metric missing');
-assert.match(session,/\[\['vocabulary','واژگان'\]/,'vocabulary skill metric missing');
-assert.match(session,/\[\['context','بافت'\]/,'context skill metric missing');
+for(const [key,label] of [['meaning','معنی'],['reading','خوانش'],['production','تولید'],['vocabulary','واژگان'],['context','بافت']])assert.match(session,new RegExp(`\\['${key}','${label}'\\]`),`${key} skill metric missing`);
 assert.match(p0,/import\('\.\/v1\.6-session\.js'\)/,'v1.6 session runtime must be wired from the active browser runtime');
 assert.match(sw,/"\.\/v1\.6-session\.js"/,'v1.6 session runtime must be offline-precached');
 assert.match(sw,/const CACHE='kanji5-shell-v50'/,'service-worker cache must advance for the new runtime dependency');
 console.log('Kanji 5 v1.6 session contract checks passed.');
-// Matcher intentionally accepts either quote style because runtime HTML uses single quotes in JS strings.
+// Matcher accepts both single and double quote styles for generated DOM identifiers.
