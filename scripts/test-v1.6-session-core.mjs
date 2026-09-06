@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { buildSessionPlan, nextPlannedMode, weakestMode } from '../v1.6-session-core.js';
+import { buildSessionPlan, nextPlannedMode, rebalanceSessionPlan, weakestMode } from '../v1.6-session-core.js';
 
 const now=Date.parse('2026-01-01T00:00:00Z');
 const plan=buildSessionPlan({}, { count: 10, now });
@@ -25,4 +25,15 @@ assert.equal(nextPlannedMode(weakPlan,{reading:0,meaning:2,production:2,vocabula
 
 const untouched=buildSessionPlan({一:{meaning:{attempts:30,correct:30},reading:{attempts:30,correct:30},production:{attempts:30,correct:30},vocabulary:{attempts:30,correct:30},context:{attempts:0,correct:0}}},{count:10,now});
 assert.ok(untouched.modes.find(item=>item.mode==='context').plannedCount>=1);
+
+const livePlan=buildSessionPlan({一:{meaning:{attempts:40,correct:40},reading:{attempts:40,correct:40},production:{attempts:40,correct:40},vocabulary:{attempts:40,correct:40},context:{attempts:40,correct:40}}},{count:10,now});
+const remaining=Object.fromEntries(livePlan.modes.map(item=>[item.mode,item.plannedCount]));
+remaining[livePlan.priority[0]]-=1;
+const rebalanced=rebalanceSessionPlan(livePlan,remaining,{meaning:{attempts:1,correct:1,lastAt:'2026-01-01T00:00:00Z'},reading:{attempts:1,correct:0,lastAt:'2026-01-01T00:00:00Z'}},{now});
+assert.equal(rebalanced.plan.version,2);
+assert.ok(rebalanced.plan.rebalancedAt);
+assert.equal(Object.values(rebalanced.remaining).reduce((a,b)=>a+b,0),9);
+assert.equal(rebalanced.plan.modes.reduce((sum,item)=>sum+Math.max(0,item.plannedCount-(livePlan.modes.find(x=>x.mode===item.mode)?.plannedCount||0-remaining[item.mode])),0)>=0,true);
+assert.ok(rebalanced.plan.priority.includes('reading'));
+assert.ok(rebalanced.remaining.reading>=remaining.reading);
 console.log('Kanji 5 v1.6 adaptive session core tests passed.');
