@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { mergeV16SyncData, mergeSessionHistory, mergeSkillProfile, sanitizeSessionHistory, V16_SYNC_SCHEMA_VERSION } from '../v1.6-sync-core.js';
+assert.equal(V16_SYNC_SCHEMA_VERSION,1);
+const a={sessionId:'a',endedAt:'2026-09-01T10:00:00Z',modeResults:{reading:{attempts:2,correct:1}}};
+const b={sessionId:'b',endedAt:'2026-09-02T10:00:00Z',modeResults:{reading:{attempts:3,correct:3}}};
+assert.equal(sanitizeSessionHistory([{status:'active',sessionId:'x',endedAt:'2026-09-03'},a]).length,1);
+assert.deepEqual(mergeSessionHistory([a],[a,b]).map(x=>x.sessionId),['a','b']);
+const p1={schemaVersion:1,updatedAt:'2026-09-01T00:00:00Z',sessions:1,skills:{reading:{attempts:2,correct:1}}};
+const p2={schemaVersion:1,updatedAt:'2026-09-02T00:00:00Z',sessions:2,skills:{reading:{attempts:3,correct:3}}};
+const p=mergeSkillProfile(p1,p2);assert.equal(p.skills.reading.attempts,5);assert.equal(p.skills.reading.correct,4);assert.equal(p.sessions,2);
+const merged=mergeV16SyncData({sessionHistory:[a],components:{x:1},skillProfile:p1},{sessionHistory:[b],components:{y:2},skillProfile:p2});
+assert.equal(merged.v16SyncSchemaVersion,1);assert.deepEqual(merged.sessionHistory.map(x=>x.sessionId),['a','b']);assert.deepEqual(merged.components,{x:1,y:2});assert.equal(merged.skillProfile.skills.reading.attempts,5);
+console.log('v1.6 sync contract: OK');
