@@ -1,0 +1,51 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Kanji 5 v1.6 session dashboard', () => {
+  test('shows live session metrics and updates after a rating', async ({ page }) => {
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+    await page.goto('/');
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('#v16Session')).toBeVisible();
+    await expect(page.locator('#v16Due')).toBeVisible();
+    await expect(page.locator('#v16New')).toBeVisible();
+    await expect(page.locator('#v16Mastered')).toBeVisible();
+    await expect(page.locator('#v16Streak')).toBeVisible();
+    await expect(page.locator('#v16GoalText')).toContainText('هدف روزانه');
+    await expect(page.locator('#v16Reviews')).toHaveText('۰');
+    await expect(page.locator('#v16Recall')).toHaveText('۰');
+    await expect(page.locator('#v16Unknown')).toHaveText('۰');
+    await expect(page.locator('#v16Modes .v16-mode')).toHaveCount(5);
+
+    await page.locator('#revealBtn').click();
+    await expect(page.locator('#ratings')).toHaveClass(/show/);
+    await page.locator('.rate[data-r="Good"]').click();
+    await expect(page.locator('#v16Reviews')).toHaveText('۱');
+    await expect(page.locator('#v16SessionText')).toContainText('۱ مرور');
+    expect(pageErrors, pageErrors.join('\n')).toEqual([]);
+  });
+
+  test('counts an Active Recall dont-know attempt separately from FSRS ratings', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
+    const firstId = await page.locator('.kanji').getAttribute('data-kanji-id');
+    expect(firstId).toBeTruthy();
+    await page.locator('#revealBtn').click();
+    await expect(page.locator('#ratings')).toHaveClass(/show/);
+    await page.locator('.rate[data-r="Again"]').click();
+    await page.evaluate(id => {
+      const raw = localStorage.getItem('kanji5-v1-cards');
+      const cards = raw ? JSON.parse(raw) : {};
+      if (!id || !cards[id]?.card) throw new Error('persisted card missing');
+      cards[id].card.due = new Date(Date.now() - 1000).toISOString();
+      localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
+    }, firstId);
+    await page.reload();
+    await page.locator('#revealBtn').click();
+    await expect(page.locator('#v15DontKnowRecall')).toBeVisible({ timeout: 10_000 });
+    await page.locator('#v15DontKnowRecall').click();
+    await expect(page.locator('#v16Recall')).toHaveText('۱');
+    await expect(page.locator('#v16Unknown')).toHaveText('۱');
+    await expect(page.locator('#v16Reviews')).toHaveText('۰');
+  });
+});
