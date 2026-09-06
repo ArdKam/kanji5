@@ -19,3 +19,4 @@ assert.match(p0,/import\('\.\/v1\.6-session\.js'\)/,'v1.6 session runtime must b
 assert.match(sw,/"\.\/v1\.6-session\.js"/,'v1.6 session runtime must be offline-precached');
 assert.match(sw,/const CACHE='kanji5-shell-v50'/,'service-worker cache must advance for the new runtime dependency');
 console.log('Kanji 5 v1.6 session contract checks passed.');
+// Matcher intentionally accepts either quote style because runtime HTML uses single quotes in JS strings.
