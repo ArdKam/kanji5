@@ -1,4 +1,5 @@
 # v1.6 validation workflow — deterministic, source-immutable CI
+# Session Dashboard 2.0 validation gate
 name: Build Kanji 5 v1.6
 
 on:
