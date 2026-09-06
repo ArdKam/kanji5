@@ -48,6 +48,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
       if (!id || !cards[id]?.card) throw new Error('persisted card missing');
       cards[id].card.due = new Date(Date.now() - 1000).toISOString();
       localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
+      localStorage.removeItem('kanji5-v1.6-session-history');
     }, firstId);
     await page.reload();
     await page.locator('#revealBtn').click();
