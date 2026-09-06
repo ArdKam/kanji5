@@ -29,4 +29,5 @@ document.addEventListener('click',e=>{const button=e.target.closest?.('#v16Finis
 setInterval(()=>{exposeAuthoritativeApi();const a=active();if(a){lastResults=normalizeResults(a.modeResults);lastSessionId=a.sessionId;render();return}if(lastResults&&lastSessionId){if(migrateCompletedModeResults(lastSessionId,lastResults))lastResults=null}render()},250);
 exposeAuthoritativeApi();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{exposeAuthoritativeApi();render()},{once:true});else render();
+void import('./v1.6-session-analytics.js').catch(()=>{});
 })();
