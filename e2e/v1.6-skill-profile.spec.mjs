@@ -18,8 +18,8 @@ test('builds and restores the long-term skill profile from completed sessions', 
   await expect.poll(() => page.locator('#v16SkillProfile').count()).toBe(1);
   await expect(page.locator('#v16SkillProfile')).toContainText('پروفایل مهارت بلندمدت');
   await expect.poll(async () => page.evaluate(() => {
-    const h = JSON.parse(localStorage.getItem('kanji5-v1.6-session-history') || '[]');
-    return h.find(x => x.status === 'skill-profile')?.skills?.reading?.attempts || 0;
+    const c = JSON.parse(localStorage.getItem('kanji5-v1.5-components') || '{}');
+    return c.v16SkillProfile?.skills?.reading?.attempts || 0;
   })).toBe(4);
   await page.reload();
   await expect(page.locator('#v16SkillProfile')).toContainText('۴');
