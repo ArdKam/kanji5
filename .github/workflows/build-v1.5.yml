@@ -126,7 +126,8 @@ jobs:
           grep -q 'modeResults' v1.6-session-feedback.js
           grep -q 'rebalanceSessionPlan' v1.6-session-core.js
           grep -q '__KANJI5_V16_SESSION_AUTH__' v1.6-session-feedback.js
-          grep -q 'STATUS=.skill-profile.' v1.6-skill-profile.js
-          grep -q 'writeSessionHistory' v1.6-skill-profile.js
+          grep -q "KEY='v16SkillProfile'" v1.6-skill-profile.js
+          grep -q 'readComponents' v1.6-skill-profile.js
+          grep -q 'writeComponents' v1.6-skill-profile.js
           ! grep -Eq '^[[:space:]]+git[[:space:]]+push[[:space:]]+origin([[:space:]]|$)' .github/workflows/build-v1.5.yml
           ! grep -Eq '^[[:space:]]+node[[:space:]]+scripts/v1.5-roadmap-finalize\.mjs([[:space:]]|$)' .github/workflows/build-v1.5.yml
