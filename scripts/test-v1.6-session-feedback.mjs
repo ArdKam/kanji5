@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const feedback=fs.readFileSync('v1.6-session-feedback.js','utf8');
 const education=fs.readFileSync('v1.5-education-ui.js','utf8');
 const core=fs.readFileSync('v1.6-session-core.js','utf8');
+const analytics=fs.readFileSync('v1.6-session-analytics.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 
 assert.match(feedback,/window\.__KANJI5_V16_SESSION_FEEDBACK__/,'session feedback runtime marker missing');
@@ -28,6 +29,7 @@ assert.match(feedback,/migrateAfterFinish/,'finish migration hook missing');
 assert.match(feedback,/#v16Finish/,'feedback must observe session finish');
 assert.match(feedback,/setTimeout\(\(\)=>\{if\(lastSessionId&&lastResults\)migrateCompletedModeResults/,'finish migration must run after session completion');
 assert.match(feedback,/v16SessionModeStats/,'session mode analytics UI missing');
+assert.match(feedback,/v1\.6-session-analytics\.js/,'feedback must load the session analytics module');
 assert.match(core,/export function rebalanceSessionPlan/,'live adaptive rebalancer missing');
 assert.match(core,/rebalancedAt/,'rebalanced plan timestamp missing');
 assert.match(education,/import\('\.\/v1\.6-session-feedback\.js'\)/,'education UI must load session feedback boundary');
@@ -35,6 +37,11 @@ assert.match(education,/await sessionFeedback/,'education UI must wait for the a
 assert.match(education,/__KANJI5_V16_SESSION_AUTH__/,'education UI must prefer the authoritative session API');
 assert.match(education,/sessionApi/,'education UI session API resolver missing');
 assert.match(education,/kanji5:v1\.6-education-result/,'education UI must emit canonical session feedback events');
+assert.match(analytics,/readSessionHistory/,'analytics must consume persisted session history');
+assert.match(analytics,/slice\(-7\)/,'analytics must cap the view at the seven latest completed sessions');
+assert.match(analytics,/modeResults/,'analytics must aggregate persisted mode results');
+assert.match(analytics,/v16SessionAnalytics/,'analytics UI node missing');
 assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'feedback runtime must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v56'/,'service-worker cache must advance for authoritative session API changes');
+assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/,'analytics runtime must be offline-precached');
+assert.match(sw,/const CACHE='kanji5-shell-v57'/,'service-worker cache must advance for session analytics changes');
 console.log('Kanji 5 v1.6 session feedback/rebalancing contract checks passed.');
