@@ -122,6 +122,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await page.locator('#revealBtn').click();
     await page.locator('.rate[data-r="Good"]').click();
     await page.evaluate(ch => {
+      localStorage.removeItem('kanji5-v1.6-session-history');
       const knowledge = {
         [ch]: {
           meaning: { attempts: 20, correct: 19 },
