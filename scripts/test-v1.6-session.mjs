@@ -28,6 +28,7 @@ for(const [key,label] of [['meaning','معنی'],['reading','خوانش'],['prod
 assert.match(core,/export function buildSessionPlan/,'adaptive session planner missing');
 assert.match(core,/export function nextPlannedMode/,'adaptive planned-mode selector missing');
 assert.match(core,/export function weakestMode/,'weakest-mode selector missing');
+assert.match(core,/export function rebalanceSessionPlan/,'live adaptive rebalancer missing');
 assert.match(education,/__KANJI5_V16_SESSION_API__/,'education UI must consult the v1.6 session API');
 assert.match(education,/nextMode/,'education UI must request the planned mode');
 assert.match(education,/consumeMode/,'education UI must consume a planned mode only after successful content resolution');
@@ -35,5 +36,5 @@ assert.match(education,/kanji5:v1\.6-education-result/,'education UI must emit s
 assert.match(sw,/"\.\/v1\.6-session\.js"/,'v1.6 session runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-core\.js"/,'v1.6 session core must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtime must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v53'/,'service-worker cache must advance for session feedback runtime changes');
+assert.match(sw,/const CACHE='kanji5-shell-v54'/,'service-worker cache must advance for live adaptive rebalancing');
 console.log('Kanji 5 v1.6 session contract checks passed.');
