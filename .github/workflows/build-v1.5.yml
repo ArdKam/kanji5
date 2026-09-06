@@ -41,6 +41,7 @@ jobs:
           node --check v1.6-session-feedback.js
           node --check v1.6-session-analytics.js
           node --check v1.6-skill-profile.js
+          node --check v1.6-sync-core.js
           node --check v1.2-runtime-fixes.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
@@ -65,6 +66,7 @@ jobs:
           node --check scripts/test-v1.6-session-feedback.mjs
           node --check scripts/test-v1.6-session-analytics.mjs
           node --check scripts/test-v1.6-skill-profile.mjs
+          node --check scripts/test-v1.6-sync.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
@@ -80,6 +82,8 @@ jobs:
         run: node scripts/test-v1.6-session-analytics.mjs
       - name: Validate v1.6 skill profile contract
         run: node scripts/test-v1.6-skill-profile.mjs
+      - name: Validate v1.6 durable sync core
+        run: node scripts/test-v1.6-sync.mjs
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
@@ -94,9 +98,9 @@ jobs:
           git diff --exit-code
           git diff --cached --exit-code
           grep -q '"type": "module"' package.json
-          grep -q "const CACHE='kanji5-shell-v58'" sw.js
-          grep -q "function staleWhileRevalidate" sw.js
-          grep -q "function dynamicSameOrigin" sw.js
+          grep -q "const CACHE='kanji5-shell-v59'" sw.js
+          grep -q 'function staleWhileRevalidate' sw.js
+          grep -q 'function dynamicSameOrigin' sw.js
           grep -q '"./v1.5-state.js"' sw.js
           grep -q '"./v1.5-recall-core.js"' sw.js
           grep -q '"./v1.5-p0.js"' sw.js
@@ -111,6 +115,7 @@ jobs:
           grep -q '"./v1.6-session-feedback.js"' sw.js
           grep -q '"./v1.6-session-analytics.js"' sw.js
           grep -q '"./v1.6-skill-profile.js"' sw.js
+          grep -q '"./v1.6-sync-core.js"' sw.js
           grep -q 'SNAPSHOT_STORAGE' v1.5-state.js
           grep -q 'SNAPSHOT_COMMIT' v1.5-state.js
           grep -q 'PERSISTENCE_SCHEMA_VERSION' v1.5-state.js
@@ -121,13 +126,10 @@ jobs:
           grep -q 'scripts/test-v1.6-session-feedback.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.6-session-analytics.mjs' .github/workflows/build-v1.5.yml
           grep -q 'scripts/test-v1.6-skill-profile.mjs' .github/workflows/build-v1.5.yml
-          grep -q "ACTIVE_STATUS='active'" v1.6-session.js
-          grep -q 'remainingModes' v1.6-session.js
-          grep -q 'modeResults' v1.6-session-feedback.js
-          grep -q 'rebalanceSessionPlan' v1.6-session-core.js
-          grep -q '__KANJI5_V16_SESSION_AUTH__' v1.6-session-feedback.js
-          grep -q "KEY='v16SkillProfile'" v1.6-skill-profile.js
-          grep -q 'readComponents' v1.6-skill-profile.js
-          grep -q 'writeComponents' v1.6-skill-profile.js
+          grep -q 'scripts/test-v1.6-sync.mjs' .github/workflows/build-v1.5.yml
+          grep -q 'mergeV16SyncData' v1.6-sync-core.js
+          grep -q 'v16SyncSchemaVersion' supabase-sync.js
+          grep -q 'COMPONENT_KEY' supabase-sync.js
+          grep -q 'SESSION_HISTORY_KEY' supabase-sync.js
           ! grep -Eq '^[[:space:]]+git[[:space:]]+push[[:space:]]+origin([[:space:]]|$)' .github/workflows/build-v1.5.yml
           ! grep -Eq '^[[:space:]]+node[[:space:]]+scripts/v1.5-roadmap-finalize\.mjs([[:space:]]|$)' .github/workflows/build-v1.5.yml
