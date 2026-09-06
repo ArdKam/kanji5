@@ -7,7 +7,7 @@ const wf=fs.readFileSync('.github/workflows/build-v1.5.yml','utf8');
 assert.match(src,/__KANJI5_V16_SKILL_PROFILE__/);
 assert.match(src,/readSessionHistory/);
 assert.match(src,/writeSessionHistory/);
-assert.match(src,/status==='skill-profile'/);
+assert.match(src,/STATUS='skill-profile'/);
 assert.match(src,/aggregate/);
 assert.match(src,/accuracy/);
 assert.match(src,/rank/);
