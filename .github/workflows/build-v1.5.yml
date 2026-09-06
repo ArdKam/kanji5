@@ -1,15 +1,12 @@
 # v1.6 validation workflow — deterministic, source-immutable CI
 # Session Dashboard 2.0 validation gate
 name: Build Kanji 5 v1.6
-
 on:
   push:
     branches: [feature/v1.6]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   validate-and-build:
     runs-on: ubuntu-latest
@@ -40,6 +37,7 @@ jobs:
           node --check v1.5-fsrs-sync-core.js
           node --check v1.5-sync-core.js
           node --check v1.6-session.js
+          node --check v1.6-session-core.js
           node --check v1.2-runtime-fixes.js
           node --check scripts/apply-v1.3-static.mjs
           node --check scripts/apply-v1.5-p0.mjs
@@ -60,6 +58,7 @@ jobs:
           node --check scripts/test-v1.5-v13-parity.mjs
           node --check scripts/test-v1.4-education.mjs
           node --check scripts/test-v1.6-session.mjs
+          node --check scripts/test-v1.6-session-core.mjs
           node --check supabase-sync.js
           node --check sw.js
           node --check vendor/ts-fsrs-5.4.1.mjs
@@ -67,6 +66,8 @@ jobs:
         run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-recall-core.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-sync-lifecycle.mjs && node scripts/test-v1.5-persistence.mjs && node scripts/test-v1.5-architecture.mjs && node scripts/test-v1.5-network.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-roadmap-final.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs
       - name: Validate v1.6 session contract
         run: node scripts/test-v1.6-session.mjs
+      - name: Validate v1.6 adaptive session core
+        run: node scripts/test-v1.6-session-core.mjs
       - name: Install browser test dependencies
         run: npm install --no-audit --no-fund --package-lock=false
       - name: Install Chromium
@@ -81,7 +82,7 @@ jobs:
           git diff --exit-code
           git diff --cached --exit-code
           grep -q '"type": "module"' package.json
-          grep -q "const CACHE='kanji5-shell-v50'" sw.js
+          grep -q "const CACHE='kanji5-shell-v51'" sw.js
           grep -q "function staleWhileRevalidate" sw.js
           grep -q "function dynamicSameOrigin" sw.js
           grep -q '"./v1.5-state.js"' sw.js
@@ -94,11 +95,13 @@ jobs:
           grep -q '"./v1.5-fsrs-sync-core.js"' sw.js
           grep -q '"./v1.5-sync-core.js"' sw.js
           grep -q '"./v1.6-session.js"' sw.js
+          grep -q '"./v1.6-session-core.js"' sw.js
           grep -q 'SNAPSHOT_STORAGE' v1.5-state.js
           grep -q 'SNAPSHOT_COMMIT' v1.5-state.js
           grep -q 'PERSISTENCE_SCHEMA_VERSION' v1.5-state.js
           grep -q 'function transaction' v1.5-state.js
           grep -q "import('./v1.6-session.js')" v1.5-p0.js
           grep -q 'scripts/test-v1.6-session.mjs' .github/workflows/build-v1.5.yml
+          grep -q 'scripts/test-v1.6-session-core.mjs' .github/workflows/build-v1.5.yml
           ! grep -Eq '^[[:space:]]+git[[:space:]]+push[[:space:]]+origin([[:space:]]|$)' .github/workflows/build-v1.5.yml
           ! grep -Eq '^[[:space:]]+node[[:space:]]+scripts/v1.5-roadmap-finalize\.mjs([[:space:]]|$)' .github/workflows/build-v1.5.yml
