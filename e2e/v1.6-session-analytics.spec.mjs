@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 async function cleanStart(page){
   await page.goto('/');
-  await page.evaluate(() => { for (const key of Object.keys(localStorage)) if (key.startsWith('kanji5-')) localStorage.removeItem(key); });
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 }
@@ -26,6 +26,8 @@ test('renders seven-session performance analytics from persisted history', async
   }));
   await page.evaluate(value=>localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify(value)),rows);
   await page.reload();
+  await expect(page.locator('#v16Start')).toBeVisible();
+  await page.locator('#v16Start').click();
   await expect(page.locator('#v16DashboardToggle')).toHaveText('نمایش داشبورد جلسه');
   await page.locator('#v16DashboardToggle').click();
   await expect(page.locator('#v16SessionAnalytics')).toBeVisible();
