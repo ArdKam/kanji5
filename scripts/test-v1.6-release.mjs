@@ -6,6 +6,7 @@ const packageJson = JSON.parse(read('package.json'));
 const readme = read('README.md');
 const architecture = read('ARCHITECTURE.md');
 const workflow = read('.github/workflows/build-v1.6.yml');
+const sw = read('sw.js');
 
 assert.equal(packageJson.version, '1.6.0', 'package version must be 1.6.0 for the v1.6 release');
 assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-release\.mjs/, 'package must expose the v1.6 release contract');
@@ -17,6 +18,7 @@ assert.match(architecture, /## Long-term skill profile/, 'architecture must docu
 assert.match(architecture, /## CI and release gates/, 'architecture must document release gates');
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be named for v1.6');
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
+assert.match(sw, /"\.\/v1\.6-ui-hotfix\.js"/, 'service worker must precache the UX hotfix runtime');
 
 for (const path of [
   'v1.6-session.js',
