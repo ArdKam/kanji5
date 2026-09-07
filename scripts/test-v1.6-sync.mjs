@@ -5,9 +5,9 @@ const a={sessionId:'a',endedAt:'2026-09-01T10:00:00Z',modeResults:{reading:{atte
 const b={sessionId:'b',endedAt:'2026-09-02T10:00:00Z',modeResults:{reading:{attempts:3,correct:3}}};
 assert.equal(sanitizeSessionHistory([{status:'active',sessionId:'x',endedAt:'2026-09-03'},a]).length,1);
 assert.deepEqual(mergeSessionHistory([a],[a,b]).map(x=>x.sessionId),['a','b']);
-const p1={schemaVersion:1,updatedAt:'2026-09-01T00:00:00Z',sessions:1,skills:{reading:{attempts:2,correct:1}}};
-const p2={schemaVersion:1,updatedAt:'2026-09-02T00:00:00Z',sessions:2,skills:{reading:{attempts:3,correct:3}}};
-const p=mergeSkillProfile(p1,p2);assert.equal(p.skills.reading.attempts,5);assert.equal(p.skills.reading.correct,4);assert.equal(p.sessions,2);
+const p1={schemaVersion:1,updatedAt:'2026-09-01T00:00:00Z',sessions:1,skills:{reading:{attempts:2,correct:1,recentAttempts:2,recentCorrect:1,recentAccuracy:50,momentum:-0.1}}};
+const p2={schemaVersion:1,updatedAt:'2026-09-02T00:00:00Z',sessions:2,skills:{reading:{attempts:3,correct:3,recentAttempts:3,recentCorrect:3,recentAccuracy:100,momentum:0.4}}};
+const p=mergeSkillProfile(p1,p2);assert.equal(p.skills.reading.attempts,5);assert.equal(p.skills.reading.correct,4);assert.equal(p.sessions,2);assert.equal(p.skills.reading.recentAttempts,3);assert.equal(p.skills.reading.recentCorrect,3);assert.equal(p.skills.reading.recentAccuracy,100);assert.equal(p.skills.reading.momentum,0.4);
 const merged=mergeV16SyncData({sessionHistory:[a],components:{x:1},skillProfile:p1},{sessionHistory:[b],components:{y:2},skillProfile:p2});
-assert.equal(merged.v16SyncSchemaVersion,1);assert.deepEqual(merged.sessionHistory.map(x=>x.sessionId),['a','b']);assert.deepEqual(merged.components,{x:1,y:2});assert.equal(merged.skillProfile.skills.reading.attempts,5);
+assert.equal(merged.v16SyncSchemaVersion,1);assert.deepEqual(merged.sessionHistory.map(x=>x.sessionId),['a','b']);assert.deepEqual(merged.components,{x:1,y:2});assert.equal(merged.skillProfile.skills.reading.attempts,5);assert.equal(merged.skillProfile.skills.reading.recentAccuracy,100);assert.equal(merged.skillProfile.skills.reading.momentum,0.4);
 console.log('v1.6 sync contract: OK');
