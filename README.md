@@ -63,6 +63,10 @@ v1.6 لایهٔ session را از یک dashboard صرف به یک چرخهٔ ada
 4. committed-tree immutability و runtime wiring
 5. release contract شامل نسخهٔ package، مستندات و CI wiring v1.6
 
+## Release status
+
+Branch `feature/v1.6` is feature-complete and uses the explicit v1.6 release contract and validation workflow.
+
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
 - KANJIDIC2/EDRDG license: CC BY-SA 4.0
