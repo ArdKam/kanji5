@@ -28,6 +28,7 @@ assert.match(core,/export function buildSessionPlan/,'adaptive session planner m
 assert.match(core,/export function nextPlannedMode/,'adaptive planned-mode selector missing');
 assert.match(core,/export function weakestMode/,'weakest-mode selector missing');
 assert.match(core,/export function rebalanceSessionPlan/,'live adaptive rebalancer missing');
+assert.match(core,/import\('\.\/v1\.6-ui-hotfix-safe\.js'\)/,'session core must load the safe UI runtime');
 assert.match(feedback,/__KANJI5_V16_SESSION_AUTH__/,'authoritative session API must be provided separately');
 assert.match(education,/__KANJI5_V16_SESSION_API__/,'education UI must retain legacy session API compatibility');
 assert.match(education,/await sessionFeedback/,'education UI must await the authoritative session boundary');
@@ -41,5 +42,6 @@ assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtim
 assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/,'v1.6 session analytics runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-skill-profile\.js"/,'long-term skill profile runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-sync-core\.js"/,'v1.6 sync core must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v62'/,'service-worker cache must advance for v1.6 UX runtime changes');
+assert.match(sw,/"\.\/v1\.6-ui-hotfix-safe\.js"/,'safe UI runtime must be offline-precached');
+assert.match(sw,/const CACHE='kanji5-shell-v63'/,'service-worker cache must advance for the safe UX runtime');
 console.log('Kanji 5 v1.6 session contract checks passed.');
