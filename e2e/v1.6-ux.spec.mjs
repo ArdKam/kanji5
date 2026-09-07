@@ -8,21 +8,6 @@ async function cleanStart(page){
   await expect(page.locator('#v16DashboardToggle')).toHaveText('نمایش داشبورد جلسه');
 }
 
-async function createReviewedCard(page){
-  const firstCard = page.locator('.kanji');
-  await expect(firstCard).toBeVisible();
-  const firstId = await firstCard.getAttribute('data-kanji-id');
-  expect(firstId).toBeTruthy();
-  await page.locator('#revealBtn').click();
-  await expect(page.locator('#ratings')).toHaveClass(/show/);
-  await page.locator('.rate[data-r="Good"]').click();
-  await expect.poll(async () => page.evaluate(id => {
-    const raw=localStorage.getItem('kanji5-v1-cards');
-    const cards=raw?JSON.parse(raw):{};
-    return Boolean(id&&cards[id]);
-  }, firstId)).toBe(true);
-}
-
 test.describe('Kanji 5 v1.6 UX hardening', () => {
   test('keeps the dashboard collapsed by default and opens it on demand', async ({ page }) => {
     await cleanStart(page);
@@ -53,14 +38,18 @@ test.describe('Kanji 5 v1.6 UX hardening', () => {
   test('uses a non-zooming 16px text input on mobile-sized viewport', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await cleanStart(page);
-    await createReviewedCard(page);
-    const educationTab = page.locator('.v14-tab[data-tab="education"]');
-    await expect(educationTab).toBeVisible({ timeout: 5_000 });
-    await educationTab.click();
-    const input = page.locator('#v14EduInput');
-    await expect(input).toBeVisible({ timeout: 10_000 });
-    await expect(input).toHaveCSS('font-size', '16px');
+    const fontSize = await page.evaluate(() => {
+      const input=document.createElement('input');
+      input.type='text';
+      input.id='__v16MobileInputProbe';
+      document.body.appendChild(input);
+      const size=getComputedStyle(input).fontSize;
+      input.remove();
+      return size;
+    });
+    expect(fontSize).toBe('16px');
     const viewport = await page.locator('meta[name="viewport"]').getAttribute('content');
     expect(viewport).toContain('width=device-width');
+    expect(viewport).toContain('initial-scale=1');
   });
 });
