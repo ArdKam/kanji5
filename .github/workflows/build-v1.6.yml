@@ -3,6 +3,8 @@ name: Build Kanji 5 v1.6
 on:
   push:
     branches: [feature/v1.6]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
