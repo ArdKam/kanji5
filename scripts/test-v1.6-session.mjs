@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import assert from 'node:assert/strict';
 const session=fs.readFileSync('v1.6-session.js','utf8');
 const core=fs.readFileSync('v1.6-session-core.js','utf8');
 const p0=fs.readFileSync('v1.5-p0.js','utf8');
