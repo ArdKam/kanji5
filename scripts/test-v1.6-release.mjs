@@ -21,9 +21,10 @@ assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be name
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
 assert.match(sw, /"\.\/v1\.6-ui-hotfix-safe\.js"/, 'service worker must precache the safe UX runtime');
 assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache must be v63');
-assert.equal(hotfix.includes('observe(document.documentElement'), false, 'UI hotfix must not observe the whole document');
-assert.equal(hotfix.includes('setInterval('), false, 'UI hotfix must not use a permanent polling loop');
-assert.match(hotfix, /observe\(panel,/, 'UI hotfix may observe only the session panel');
+assert.equal(hotfix.includes('MutationObserver'), false, 'UI runtime must not install a mutation observer');
+assert.match(hotfix, /setInterval\(timer,1000\)/, 'timer normalization may use one bounded one-second tick');
+assert.match(hotfix, /clearInterval\(timerId\)/, 'timer normalization must stop after session completion');
+assert.match(hotfix, /observe\(/, /__never__/); 
 
 for (const path of [
   'v1.6-session.js',
