@@ -25,6 +25,10 @@ async function openDashboard(page){
   await expect(page.locator('#v16Session')).toBeVisible();
 }
 
+async function pinDueCard(page,id){
+  await page.evaluate(async id=>{const raw=localStorage.getItem('kanji5-v1-cards');const cards=raw?JSON.parse(raw):{};if(!id||!cards[id]?.card)throw new Error('persisted card missing');const future=new Date(Date.now()+365*24*60*60*1000).toISOString();for(const [key,value] of Object.entries(cards))if(key!==id&&value?.card)value.card.due=future;cards[id].card.due=new Date(Date.now()-1000).toISOString();localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));await new Promise(r=>setTimeout(r,50));},id);
+}
+
 async function prepareWeakReading(page){
   const character=(await page.locator('.kanji').textContent())?.trim();
   const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
@@ -44,6 +48,7 @@ async function prepareWeakReading(page){
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
     localStorage.removeItem('kanji5-v1.6-session-history');
   },{character,id:firstId});
+  await pinDueCard(page,firstId);
   return {character,firstId};
 }
 
@@ -81,8 +86,9 @@ test('preserves the selected adaptive recall intent across a reload', async ({ p
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  await prepareWeakReading(page);
+  const {firstId}=await prepareWeakReading(page);
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -93,6 +99,7 @@ test('preserves the selected adaptive recall intent across a reload', async ({ p
   expect(intent).toMatchObject({schemaVersion:1,attribute:'reading'});
   expect(intent.character).toBe((await page.locator('.kanji').textContent())?.trim());
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -105,8 +112,9 @@ test('explains why the adaptive recall focus was selected', async ({ page }) => 
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  await prepareWeakReading(page);
+  const {firstId}=await prepareWeakReading(page);
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -120,8 +128,9 @@ test('moves to the secondary supported attribute after a wrong answer and persis
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  await prepareWeakReading(page);
+  const {firstId}=await prepareWeakReading(page);
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -134,6 +143,7 @@ test('moves to the secondary supported attribute after a wrong answer and persis
   expect(intent).toMatchObject({schemaVersion:1,attribute:'meaning'});
   expect(intent.attributes).toEqual(['meaning']);
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -144,7 +154,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  const {character}=await prepareWeakReading(page);
+  const {character,firstId}=await prepareWeakReading(page);
   const readingInfo=await page.evaluate((character)=>{
     const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
     const item=deck.find(entry=>entry.character===character);
@@ -163,6 +173,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   },{character,reading:readingInfo.readings[0]});
   await persistReadingIntent(page,character);
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -182,6 +193,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     localStorage.removeItem('kanji5-v1.6-session-history');
   },{character,reading:readingInfo.readings[0]});
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
@@ -203,7 +215,7 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  const {character}=await prepareWeakReading(page);
+  const {character,firstId}=await prepareWeakReading(page);
   const info=await page.evaluate((character)=>{
     const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
     const item=deck.find(entry=>entry.character===character);
@@ -218,6 +230,7 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   expect(info.romaji).toBeTruthy();
   await persistReadingIntent(page,character,['reading','meaning']);
   await page.reload();
+  await pinDueCard(page,firstId);
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
