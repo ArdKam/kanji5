@@ -17,6 +17,7 @@ assert.match(architecture, /## Long-term skill profile/, 'architecture must docu
 assert.match(architecture, /## CI and release gates/, 'architecture must document release gates');
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be named for v1.6');
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
+assert.match(workflow, /v1\.6-ui-hotfix\.js/, 'CI must validate the v1.6 UX hotfix runtime');
 
 for (const path of [
   'v1.6-session.js',
@@ -24,7 +25,8 @@ for (const path of [
   'v1.6-session-feedback.js',
   'v1.6-session-analytics.js',
   'v1.6-skill-profile.js',
-  'v1.6-sync-core.js'
+  'v1.6-sync-core.js',
+  'v1.6-ui-hotfix.js'
 ]) {
   assert.ok(fs.existsSync(path), `required v1.6 runtime file missing: ${path}`);
 }
