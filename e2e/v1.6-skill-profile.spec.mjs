@@ -33,7 +33,7 @@ test('builds and restores the long-term skill profile from completed sessions', 
   expect(profile.skills.reading.recentAccuracy).toBe(50);
   expect(profile.skills.reading.momentum).toBeLessThan(0);
   await page.reload();
-  await expect(page.locator('#v16SkillProfile')).toContainText('۸');
+  await expect(page.locator('#v16SkillProfile')).toContainText('اخیر ۵۰٪');
   await expect(page.locator('#v16SkillProfile')).toContainText('نیازمند توجه: خوانش');
   await expect(page.locator('#v16SkillProfile')).toContainText('ضعیف‌تر');
 });
