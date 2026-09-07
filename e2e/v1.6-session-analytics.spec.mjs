@@ -9,7 +9,11 @@ async function cleanStart(page){
 
 async function startSession(page){
   await expect(page.locator('#v16Start')).toBeVisible();
+  await expect(page.locator('#v16Start')).toHaveAttribute('data-bound','1');
   await page.locator('#v16Start').click();
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V16_SESSION_API__?.getSession?.().started))).toBe(true);
+  await expect(page.locator('#v16Start')).toBeHidden();
+  await expect(page.locator('#v16FinishExternal')).toBeVisible();
   await expect(page.locator('#v16DashboardToggle')).toBeVisible();
   await expect(page.locator('#v16Session')).toBeHidden();
 }
