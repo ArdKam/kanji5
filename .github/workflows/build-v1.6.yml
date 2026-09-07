@@ -2,7 +2,7 @@
 name: Build Kanji 5 v1.6
 on:
   push:
-    branches: [feature/v1.6]
+    branches: [main, feature/v1.6]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: feature/v1.6
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -43,6 +41,7 @@ jobs:
           git diff --check
           git diff --exit-code
           git diff --cached --exit-code
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test "$(node -p "require('./package.json').version")" = "1.6.0"
           grep -q '"type": "module"' package.json
           grep -q "const CACHE='kanji5-shell-v63'" sw.js
