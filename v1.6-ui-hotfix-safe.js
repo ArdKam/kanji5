@@ -39,7 +39,7 @@ function setup(){
   };
   if(start&&!start.dataset.bound){
     start.dataset.bound='1';
-    start.addEventListener('click',()=>{api.start?.();sync();setOpen(panel,toggle,true);api.refresh?.();});
+    start.addEventListener('click',()=>{api.start?.();setOpen(panel,toggle,false);sync();api.refresh?.();});
   }
   if(finish&&!finish.dataset.bound){
     finish.dataset.bound='1';
