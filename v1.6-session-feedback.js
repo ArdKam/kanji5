@@ -25,6 +25,7 @@ let lastResults=null,lastSessionId=null,lastRebalanceToken='';
 function onResult(e){const d=e?.detail||{};const mode=String(d.mode||'');const correct=Boolean(d.correct);const before=active()?.modeResults||{};const r=normalizeResults(before);if(!MODES.includes(mode))return;r[mode].attempts+=1;if(correct)r[mode].correct+=1;r[mode].lastAt=new Date().toISOString();lastResults=r;lastSessionId=active()?.sessionId||null;record(mode,correct);const token=`${lastSessionId||''}:${mode}:${r[mode].attempts}:${r[mode].correct}`;if(token!==lastRebalanceToken){lastRebalanceToken=token;void rebalance()}render()}
 document.addEventListener('kanji5:v1.6-education-result',onResult);
 document.addEventListener('click',e=>{const button=e.target.closest?.('#v16Finish');if(!button)return;const a=active();if(a){lastSessionId=a.sessionId;lastResults=normalizeResults(a.modeResults)}setTimeout(()=>{if(lastSessionId&&lastResults)migrateCompletedModeResults(lastSessionId,lastResults);window.__KANJI5_V16_SKILL_PROFILE__?.update?.();render()},0)},true);
+document.addEventListener('kanji5:v1.6-session-finished',()=>{setTimeout(()=>{if(lastSessionId&&lastResults)migrateCompletedModeResults(lastSessionId,lastResults);window.__KANJI5_V16_SKILL_PROFILE__?.update?.();render()},0)});
 exposeAuthoritativeApi();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{exposeAuthoritativeApi();render()},{once:true});else render();
 void import('./v1.6-session-analytics.js').catch(()=>{});
