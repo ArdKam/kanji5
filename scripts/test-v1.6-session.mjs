@@ -21,6 +21,7 @@ assert.match(session,/filter\(x=>x\?\.status!==ACTIVE_STATUS\)/,'completed histo
 assert.match(session,/const persisted=readActive\(\)/,'runtime must restore the active session on boot');
 assert.match(session,/session\.resumed/,'runtime must expose resumed-session state');
 assert.match(session,/import\('\.\/v1\.6-session-core\.js'\)/,'session runtime must load the adaptive session core');
+assert.match(session,/import\('\.\/v1\.6-ui-hotfix-safe\.js'\)/,'session runtime must load the UX setup after its panel lifecycle is ready');
 assert.match(session,/nextPlannedMode/,'session runtime must expose planned-mode selection');
 assert.match(session,/consumeMode/,'session runtime must expose planned-mode consumption');
 assert.equal(session.includes('new MutationObserver'),false,'session runtime must not install a hot-path mutation observer');
@@ -30,7 +31,7 @@ assert.match(core,/export function buildSessionPlan/,'adaptive session planner m
 assert.match(core,/export function nextPlannedMode/,'adaptive planned-mode selector missing');
 assert.match(core,/export function weakestMode/,'weakest-mode selector missing');
 assert.match(core,/export function rebalanceSessionPlan/,'live adaptive rebalancer missing');
-assert.match(core,/import\('\.\/v1\.6-ui-hotfix-safe\.js'\)/,'session core must load the safe UI runtime');
+assert.equal(core.includes('v1.6-ui-hotfix'),false,'planning core must remain UI-free');
 assert.match(feedback,/__KANJI5_V16_SESSION_AUTH__/,'authoritative session API must be provided separately');
 assert.match(education,/__KANJI5_V16_SESSION_API__/,'education UI must retain legacy session API compatibility');
 assert.match(education,/await sessionFeedback/,'education UI must await the authoritative session boundary');
@@ -42,8 +43,8 @@ assert.match(sw,/"\.\/v1\.6-session\.js"/,'v1.6 session runtime must be offline-
 assert.match(sw,/"\.\/v1\.6-session-core\.js"/,'v1.6 session core must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/,'v1.6 session analytics runtime must be offline-precached');
-assert.match(sw,/"\.\/v1\.6-skill-profile\.js"/,'long-term skill profile runtime must be offline-precached');
-assert.match(sw,/"\.\/v1\.6-sync-core\.js"/,'v1.6 sync core must be offline-precached');
-assert.match(sw,/"\.\/v1\.6-ui-hotfix-safe\.js"/,'safe UI runtime must be offline-precached');
+assert.match(sw,/"\.\/v1.6-skill-profile\.js"/,'long-term skill profile runtime must be offline-precached');
+assert.match(sw,/"\.\/v1.6-sync-core\.js"/,'v1.6 sync core must be offline-precached');
+assert.match(sw,/"\.\/v1.6-ui-hotfix-safe\.js"/,'safe UI runtime must be offline-precached');
 assert.match(sw,/const CACHE='kanji5-shell-v63'/,'service-worker cache must advance for the safe UX runtime');
 console.log('Kanji 5 v1.6 session contract checks passed.');
