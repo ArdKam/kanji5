@@ -20,7 +20,7 @@ assert.equal(profiledReading.profileAccuracy,35);
 assert.equal(profiled.priority[0],'reading');
 assert.ok(profiledReading.score>baselineReading.score);
 assert.equal(profiled.modes.reduce((sum,item)=>sum+item.plannedCount,0),10);
-assert.equal(profiled.modes.reduce((sum,item)=>sum+item.share,0),1);
+assert.ok(Math.abs(profiled.modes.reduce((sum,item)=>sum+item.share,0)-1)<1e-12);
 const remaining=Object.fromEntries(profiled.modes.map(item=>[item.mode,item.plannedCount]));
 const beforeProfileScore=profiledReading.score;
 remaining.reading=Math.max(0,remaining.reading-1);
