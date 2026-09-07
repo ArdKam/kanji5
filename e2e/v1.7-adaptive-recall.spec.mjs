@@ -25,38 +25,31 @@ async function openDashboard(page){
   await expect(page.locator('#v16Session')).toBeVisible();
 }
 
-test('routes Active Recall toward the weakest supported learning attribute', async ({ page }) => {
-  await cleanStart(page);
-  await startSession(page);
-  await openDashboard(page);
+async function prepareWeakReading(page){
   const character=(await page.locator('.kanji').textContent())?.trim();
   const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
   expect(character).toBeTruthy();
   expect(firstId).toBeTruthy();
-
   await page.locator('#revealBtn').click();
   await expect(page.locator('#ratings')).toHaveClass(/show/);
   await page.locator('.rate[data-r="Again"]').click();
-
   await page.evaluate(({character,id})=>{
     const raw=localStorage.getItem('kanji5-v1-cards');
     const cards=raw?JSON.parse(raw):{};
     if(!cards[id]?.card)throw new Error('persisted card missing');
     cards[id].card.due=new Date(Date.now()-1000).toISOString();
     localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
-    const knowledge={
-      [character]:{
-        meaning:{attempts:20,correct:19},
-        reading:{attempts:20,correct:2},
-        production:{attempts:20,correct:18},
-        vocabulary:{attempts:20,correct:19},
-        context:{attempts:20,correct:18}
-      }
-    };
-    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
     localStorage.removeItem('kanji5-v1.6-session-history');
   },{character,id:firstId});
+  return {character,firstId};
+}
 
+test('routes Active Recall toward the weakest supported learning attribute', async ({ page }) => {
+  await cleanStart(page);
+  await startSession(page);
+  await openDashboard(page);
+  await prepareWeakReading(page);
   await page.reload();
   await startSession(page);
   await openDashboard(page);
@@ -66,4 +59,28 @@ test('routes Active Recall toward the weakest supported learning attribute', asy
   await expect(gate).toHaveAttribute('data-v17-adaptive','1');
   await expect(gate).toHaveAttribute('data-v17-attribute','reading');
   await expect(gate).toContainText('خوانش');
+});
+
+test('preserves the selected adaptive recall intent across a reload', async ({ page }) => {
+  await cleanStart(page);
+  await startSession(page);
+  await openDashboard(page);
+  await prepareWeakReading(page);
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  const gate=page.locator('.v12-recall-gate');
+  await expect(gate).toBeVisible({timeout:10_000});
+  await expect(gate).toHaveAttribute('data-v17-attribute','reading');
+  const intent=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.7-recall-intent')||'null'));
+  expect(intent).toMatchObject({schemaVersion:1,attribute:'reading'});
+  expect(intent.character).toBe((await page.locator('.kanji').textContent())?.trim());
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','reading');
+  const persisted=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.7-recall-intent')||'null'));
+  expect(persisted?.character).toBe((await page.locator('.kanji').textContent())?.trim());
 });
