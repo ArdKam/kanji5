@@ -16,5 +16,4 @@ function render(){const host=document.getElementById('v16Session');if(!host)retu
 render();
 document.addEventListener('kanji5:v1.6-education-result',render);
 document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(render,0));
-document.addEventListener('click',e=>{if(e.target.closest?.('#v16Finish'))setTimeout(render,0)},true);
 })();
