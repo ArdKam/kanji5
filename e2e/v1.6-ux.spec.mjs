@@ -23,14 +23,14 @@ test.describe('Kanji 5 v1.6 UX hardening', () => {
     await expect(page.locator('#v16FinishExternal')).toBeVisible();
     await expect(page.locator('#v16DashboardToggle')).toBeVisible();
     await expect(page.locator('#v16DashboardMini')).toBeVisible();
-    await expect(page.locator('#v16Session')).toBeVisible();
+    await expect(page.locator('#v16Session')).toBeHidden();
     await expect(page.locator('#v16FinishExternal').evaluate(el => el.parentElement.id)).resolves.toBe('v16DashboardToolbar');
     await expect(page.locator('#v16DashboardToggle').evaluate(el => el.parentElement.id)).resolves.toBe('v16DashboardToolbar');
 
     await page.locator('#v16DashboardToggle').click();
-    await expect(page.locator('#v16Session')).toBeHidden();
-    await page.locator('#v16DashboardToggle').click();
     await expect(page.locator('#v16Session')).toBeVisible();
+    await page.locator('#v16DashboardToggle').click();
+    await expect(page.locator('#v16Session')).toBeHidden();
   });
 
   test('shows the whole session timer in Persian digits and freezes it after finishing', async ({ page }) => {
