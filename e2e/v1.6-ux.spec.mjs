@@ -10,7 +10,7 @@ async function cleanStart(page){
 }
 
 test.describe('Kanji 5 v1.6 UX hardening', () => {
-  test('shows only the start control before a session begins, then reveals session controls outside the dashboard', async ({ page }) => {
+  test('shows only the start control before a session begins, then keeps the dashboard closed until toggled', async ({ page }) => {
     await cleanStart(page);
     await expect(page.locator('#v16FinishExternal')).toBeHidden();
     await expect(page.locator('#v16DashboardToggle')).toBeHidden();
@@ -31,6 +31,14 @@ test.describe('Kanji 5 v1.6 UX hardening', () => {
     await expect(page.locator('#v16Session')).toBeVisible();
     await page.locator('#v16DashboardToggle').click();
     await expect(page.locator('#v16Session')).toBeHidden();
+
+    await page.reload();
+    await expect(page.locator('#v16FinishExternal')).toBeVisible();
+    await expect(page.locator('#v16DashboardToggle')).toBeVisible();
+    await expect(page.locator('#v16Session')).toBeHidden();
+
+    await page.locator('#v16DashboardToggle').click();
+    await expect(page.locator('#v16Session')).toBeVisible();
   });
 
   test('shows the whole session timer in Persian digits and freezes it after finishing', async ({ page }) => {
