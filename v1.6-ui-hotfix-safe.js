@@ -22,9 +22,6 @@ function setOpen(panel,toggle,open){
   panel.classList.toggle('v16-dashboard-collapsed',!open);
   if(toggle){toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'بستن داشبورد':'نمایش داشبورد جلسه';}
 }
-function emitFinished(){
-  document.dispatchEvent(new CustomEvent('kanji5:v1.6-session-finished'));
-}
 function setup(){
   ensureStyle();
   const panel=document.querySelector('#v16Session'),study=document.querySelector('#studyPanel'),api=window.__KANJI5_V16_SESSION_API__;
@@ -53,7 +50,7 @@ function setup(){
   }
   if(finish&&!finish.dataset.bound){
     finish.dataset.bound='1';
-    finish.addEventListener('click',()=>{const result=api.finish?.();writeDashboardOpen(false);setOpen(panel,toggle,false);sync();api.refresh?.();if(result)emitFinished();});
+    finish.addEventListener('click',()=>{api.finish?.();writeDashboardOpen(false);setOpen(panel,toggle,false);sync();api.refresh?.();});
   }
   if(toggle&&!toggle.dataset.bound){
     toggle.dataset.bound='1';
