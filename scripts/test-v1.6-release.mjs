@@ -8,6 +8,7 @@ const architecture = read('ARCHITECTURE.md');
 const workflow = read('.github/workflows/build-v1.6.yml');
 const sw = read('sw.js');
 const hotfix = read('v1.6-ui-hotfix-safe.js');
+const session = read('v1.6-session.js');
 
 assert.equal(packageJson.version, '1.6.0', 'package version must be 1.6.0 for the v1.6 release');
 assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-release\.mjs/, 'package must expose the v1.6 release contract');
@@ -22,9 +23,11 @@ assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the expl
 assert.match(sw, /"\.\/v1\.6-ui-hotfix-safe\.js"/, 'service worker must precache the safe UX runtime');
 assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache must be v63');
 assert.equal(hotfix.includes('MutationObserver'), false, 'UI runtime must not install a mutation observer');
-assert.match(hotfix, /setInterval\(tick,1000\)/, 'timer normalization may use one bounded one-second tick');
-assert.match(hotfix, /clearInterval\(timerId\)/, 'timer normalization must stop after session completion');
+assert.equal(hotfix.includes('setInterval('), false, 'UI setup runtime must not own a background timer');
 assert.equal(hotfix.includes('observe('), false, 'UI runtime must not observe DOM mutations');
+assert.match(session, /const durationNode=\$\('#v16Duration'\)/, 'session runtime must own the lightweight timer tick');
+assert.match(session, /timerId=setInterval\(\(\)=>/, 'session timer must use a single interval');
+assert.match(session, /clearInterval\(timerId\)/, 'session timer must stop explicitly');
 assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false, 'obsolete UI runtime must not remain in the release tree');
 
 for (const path of [
