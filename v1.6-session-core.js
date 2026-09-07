@@ -9,7 +9,7 @@ function allocate(shares,target){const sum=shares.reduce((a,b)=>a+b.share,0)||1;
 export function buildSessionPlan(knowledge={},options={}){
  const now=Number(options.now)||Date.now();
  const target=Math.max(1,Math.min(30,Number(options.count)||10));
- const profile=safeProfile(options.profile);
+ const profile=safeProfile(options.profile??globalThis.__KANJI5_V16_PROFILE_PRIOR__);
  const hasProfile=profile.schemaVersion>0&&profile.sessions>0;
  const entries=MODES.map(mode=>{let attempts=0,correct=0,lastAt='';for(const entry of Object.values(knowledge||{})){const s=safeStats(entry?.[mode]);attempts+=s.attempts;correct+=s.correct;if(s.lastAt>lastAt)lastAt=s.lastAt}const mastery=(correct+1)/(attempts+2),weakness=1-mastery,profileRow=hasProfile?profileStats(profile,mode):null,profileBoost=profileRow?.weakness*.65*(.25+.75*profileRow.confidence)||0,urgency=weakness*1.7+profileBoost+recencyBoost(lastAt,now)*.15+(attempts===0?.45:0);return{mode,label:LABELS[mode],attempts,correct,mastery,accuracy:attempts?correct/attempts*100:0,profileAttempts:profileRow?.attempts||0,profileAccuracy:profileRow?.accuracy||0,profileMastery:profileRow?.mastery||0,score:Math.max(.01,urgency)}});
  let shares=entries.map(item=>({...item,share:item.score/(entries.reduce((sum,x)=>sum+x.score,0)||1)}));
