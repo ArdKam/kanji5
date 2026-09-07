@@ -26,7 +26,6 @@ test('renders seven-session performance analytics from persisted history', async
   }));
   await page.evaluate(value=>localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify(value)),rows);
   await page.reload();
-  // v1.6 intentionally hides the analytics dashboard by default; open it on demand.
   await expect(page.locator('#v16DashboardToggle')).toHaveText('نمایش داشبورد جلسه');
   await page.locator('#v16DashboardToggle').click();
   await expect(page.locator('#v16SessionAnalytics')).toBeVisible();
