@@ -1,7 +1,7 @@
 const MODES=['meaning','reading','production','vocabulary','context'];
 const LABELS={meaning:'معنی',reading:'خوانش',production:'تولید',vocabulary:'واژگان',context:'بافت'};
 const MIN_SHARE=.08;
-function safeStats(value){const s=value&&typeof value==='object'?value:{};const attempts=Math.max(0,Number(s.attempts)||0);const correct=Math.min(attempts,Math.max(0,Number(s.correct)||0));return{attempts,correct,mastery:(correct+1)/(attempts+2),lastAt:typeof s.lastAt==='string'?s.lastAt:''}}
+function safeStats(value){const s=value&&typeof value==='object'?value:{};const attempts=Math.max(0,Number(s.attempts)||0);const correct=Math.min(attempts,Math.max(0,Number(s.correct)||0));return{attempts,correct,mastery:(correct+1)/(attempts+2),accuracy:attempts?correct/attempts*100:0,lastAt:typeof s.lastAt==='string'?s.lastAt:''}}
 function safeProfile(value){const p=value&&typeof value==='object'?value:null;const skills=p?.skills&&typeof p.skills==='object'?p.skills:{};return{schemaVersion:Number(p?.schemaVersion)||0,sessions:Math.max(0,Number(p?.sessions)||0),skills}}
 function profileStats(profile,mode){const s=safeStats(profile.skills?.[mode]);const confidence=Math.min(1,s.attempts/20);return{...s,confidence,weakness:1-s.mastery}}
 function recencyBoost(lastAt,now=Date.now()){if(!lastAt)return 1.25;const time=Date.parse(lastAt);if(!Number.isFinite(time))return 1.25;const ageDays=Math.max(0,now-time)/86400000;return Math.min(1.5,1+ageDays/21)}
