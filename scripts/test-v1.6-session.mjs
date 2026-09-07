@@ -41,5 +41,5 @@ assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtim
 assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/,'v1.6 session analytics runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-skill-profile\.js"/,'long-term skill profile runtime must be offline-precached');
 assert.match(sw,/"\.\/v1\.6-sync-core\.js"/,'v1.6 sync core must be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v61'/,'service-worker cache must advance for v1.6 profile-aware planning changes');
+assert.match(sw,/const CACHE='kanji5-shell-v62'/,'service-worker cache must advance for v1.6 UX runtime changes');
 console.log('Kanji 5 v1.6 session contract checks passed.');
