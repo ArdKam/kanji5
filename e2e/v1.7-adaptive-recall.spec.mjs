@@ -53,6 +53,18 @@ function persistReadingIntent(page,character,attributes=['reading','meaning']){
   },{character,attributes});
 }
 
+function readingKey(value){
+  return String(value||'').trim().toLowerCase().normalize('NFKC');
+}
+
+async function readComponentReading(page,character,key){
+  return page.evaluate(({character,key})=>{
+    const raw=localStorage.getItem('kanji5-v1.5-components');
+    const all=raw?JSON.parse(raw):{};
+    return all?.[character]?.reading?.[key]||null;
+  },{character,key});
+}
+
 test('routes Active Recall toward the weakest supported learning attribute', async ({ page }) => {
   await cleanStart(page);
   await startSession(page);
@@ -187,9 +199,9 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await page.locator('#v12RecallInput').fill(readingInfo.readings[1]);
   await page.locator('#v12SubmitRecall').click();
   await page.waitForTimeout(350);
-  const updated=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
-  const targetKey=readingInfo.readings[1].normalize('NFKC').trim().toLowerCase();
-  expect(Object.values(updated?.variants||{}).some(variant=>variant.reading?.normalize('NFKC').trim().toLowerCase()===targetKey&&variant.correct===1)).toBe(true);
+  const key=readingKey(readingInfo.readings[1]);
+  const component=await readComponentReading(page,character,key);
+  expect(component).toMatchObject({reading:readingInfo.readings[1],attempts:1,correct:1});
 });
 
 test('accepts romaji for a katakana on-reading and records that reading variant', async ({ page }) => {
@@ -220,7 +232,6 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   await page.locator('#v12SubmitRecall').click();
   await expect(page.locator('.v12-recall-result')).toHaveCount(0);
   await page.waitForTimeout(350);
-  const knowledge=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
-  expect(knowledge?.attempts).toBe(21);
-  expect(Object.values(knowledge?.variants||{}).some(variant=>variant.correct===1)).toBe(true);
+  const component=await readComponentReading(page,character,readingKey(info.on));
+  expect(component).toMatchObject({reading:info.on,attempts:1,correct:1});
 });
