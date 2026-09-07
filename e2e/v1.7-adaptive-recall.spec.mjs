@@ -123,3 +123,37 @@ test('moves to the secondary supported attribute after a wrong answer and persis
   await page.locator('#revealBtn').click();
   await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','meaning');
 });
+
+test('surfaces an alternate reading only after stable reading evidence', async ({ page }) => {
+  await cleanStart(page);
+  await startSession(page);
+  await openDashboard(page);
+  const character=(await page.locator('.kanji').textContent())?.trim();
+  const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
+  const readingInfo=await page.evaluate((character)=>{
+    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
+    const item=deck.find(entry=>entry.character===character);
+    const readings=Array.from(new Set([...(item?.on||[]),...(item?.kun||[])].map(value=>String(value||'').trim()).filter(Boolean)));
+    return {readings};
+  },character);
+  expect(readingInfo.readings.length).toBeGreaterThanOrEqual(2);
+  await page.evaluate(({character,id,reading})=>{
+    const raw=localStorage.getItem('kanji5-v1-cards');
+    const cards=raw?JSON.parse(raw):{};
+    if(!cards[id]?.card)throw new Error('persisted card missing');
+    cards[id].card.due=new Date(Date.now()-1000).toISOString();
+    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
+    const key=reading.normalize('NFKC').trim().toLowerCase();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:8,correct:8},reading:{attempts:3,correct:3,variants:{[key]:{reading,attempts:1,correct:1}}},production:{attempts:8,correct:8},vocabulary:{attempts:8,correct:8},context:{attempts:8,correct:8}}}));
+    localStorage.removeItem('kanji5-v1.6-session-history');
+  },{character,id:firstId,reading:readingInfo.readings[0]});
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  const gate=page.locator('.v12-recall-gate');
+  await expect(gate).toHaveAttribute('data-v17-attribute','reading');
+  await expect(gate).toHaveAttribute('data-v17-reading-alternate','1');
+  await expect(gate).toContainText('یک خوانش دیگر');
+  await expect(gate.locator('[data-v17-reason-text]')).toContainText('همهٔ خوانش‌های موجود');
+});
