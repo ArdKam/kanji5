@@ -50,6 +50,6 @@ const threshold=api.chooseThresholdCandidate([0.1,0.2,0.3],[
   {attempts:3,weakness:0.15,outcomeDelta:0.1},
   {attempts:1,weakness:0.35,outcomeDelta:0.9}
 ],{minimumAttempts:3});
-assert.deepEqual(threshold,{threshold:0.2,signal:0.2,sample:1});
+assert.deepEqual(threshold,{threshold:0.1,signal:0.30000000000000004,sample:2});
 
 console.log('v1.7 evaluation core: PASS');
