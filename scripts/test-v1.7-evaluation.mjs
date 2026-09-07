@@ -34,8 +34,8 @@ assert.equal(report.attributes.meaning.recoveries,1);
 assert.equal(report.attributes.meaning.recoveryRate,1);
 assert.equal(report.attributes.production.attempts,0);
 assert.equal(report.attributes.production.uncertainty,0.5);
-assert.equal(report.total.attempts,9);
-assert.equal(report.total.correct,7);
+assert.equal(report.total.attempts,11);
+assert.equal(report.total.correct,8);
 
 const noHistory=api.summarizeAttribute({attempts:10,correct:8});
 assert.equal(noHistory.recoveryRate,null);
