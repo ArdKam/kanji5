@@ -3,12 +3,19 @@
 if(typeof window==='undefined'||typeof document==='undefined')return;
 if(window.__KANJI5_V16_UI_HOTFIX_SAFE__)return;
 window.__KANJI5_V16_UI_HOTFIX_SAFE__=true;
+const DASHBOARD_STATE_KEY='kanji5-v16-dashboard-open';
 function ensureStyle(){
   if(document.getElementById('v16-ui-hotfix-safe-style'))return;
   const style=document.createElement('style');
   style.id='v16-ui-hotfix-safe-style';
   style.textContent=`#v16Session.v16-dashboard-collapsed{display:none!important}#v16DashboardToolbar{display:flex;align-items:center;justify-content:flex-start;gap:8px;margin:0 0 12px;min-height:42px}#v16DashboardToolbar button{border:1px solid var(--line,#e5e7eb);background:var(--panel,#fff);color:var(--ink,#111827);border-radius:12px;padding:9px 12px;cursor:pointer;font-weight:800;font-size:12px}#v16DashboardToolbar #v16Start{background:var(--accent,#111827);color:#fff;border-color:var(--accent,#111827);padding:13px 20px;font-size:15px;min-height:48px}#v16DashboardToolbar #v16FinishExternal{background:#fff;border-color:#d1d5db}.v16-dashboard-mini{font-size:11px;color:var(--muted,#6b7280)}.v14-edu-input,input,textarea,select{font-size:16px!important}@media(max-width:700px){#v16DashboardToolbar{margin-bottom:8px;flex-wrap:wrap}#v16DashboardToolbar #v16Start{width:100%;min-height:52px}.v16-dashboard-mini{white-space:nowrap}}`;
   document.head.appendChild(style);
+}
+function readDashboardOpen(){
+  try{return sessionStorage.getItem(DASHBOARD_STATE_KEY)==='1';}catch(e){return false;}
+}
+function writeDashboardOpen(open){
+  try{sessionStorage.setItem(DASHBOARD_STATE_KEY,open?'1':'0');}catch(e){}
 }
 function setOpen(panel,toggle,open){
   panel.classList.toggle('v16-dashboard-open',open);
@@ -35,22 +42,30 @@ function setup(){
     if(finish)finish.hidden=!started||finished;
     if(toggle)toggle.hidden=!started;
     if(mini){mini.hidden=!started;mini.textContent=started?(finished?'جلسه پایان یافت':`جلسه: ${s.reviews||0} مرور`):'';}
-    if(!started)setOpen(panel,toggle,false);
+    if(!started){writeDashboardOpen(false);setOpen(panel,toggle,false);}
   };
   if(start&&!start.dataset.bound){
     start.dataset.bound='1';
-    start.addEventListener('click',()=>{api.start?.();setOpen(panel,toggle,false);sync();api.refresh?.();});
+    start.addEventListener('click',()=>{api.start?.();writeDashboardOpen(false);setOpen(panel,toggle,false);sync();api.refresh?.();});
   }
   if(finish&&!finish.dataset.bound){
     finish.dataset.bound='1';
-    finish.addEventListener('click',()=>{api.finish?.();sync();api.refresh?.();});
+    finish.addEventListener('click',()=>{api.finish?.();writeDashboardOpen(false);sync();api.refresh?.();});
   }
   if(toggle&&!toggle.dataset.bound){
     toggle.dataset.bound='1';
-    toggle.addEventListener('click',()=>setOpen(panel,toggle,!panel.classList.contains('v16-dashboard-open')));
+    toggle.addEventListener('click',()=>{
+      const open=!panel.classList.contains('v16-dashboard-open');
+      writeDashboardOpen(open);
+      setOpen(panel,toggle,open);
+    });
   }
   window.__KANJI5_V16_UI_HOTFIX_API__=Object.freeze({refresh:setup,stop:()=>{}});
   sync();
+  const s=api.getSession?.()||{};
+  const started=Boolean(s.startedAt)||Boolean(s.started);
+  const finished=Boolean(s.finished);
+  if(started&&!finished)setOpen(panel,toggle,readDashboardOpen());
   return true;
 }
 setup();
