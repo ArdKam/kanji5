@@ -22,9 +22,10 @@ assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the expl
 assert.match(sw, /"\.\/v1\.6-ui-hotfix-safe\.js"/, 'service worker must precache the safe UX runtime');
 assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache must be v63');
 assert.equal(hotfix.includes('MutationObserver'), false, 'UI runtime must not install a mutation observer');
-assert.match(hotfix, /setInterval\(timer,1000\)/, 'timer normalization may use one bounded one-second tick');
+assert.match(hotfix, /setInterval\(tick,1000\)/, 'timer normalization may use one bounded one-second tick');
 assert.match(hotfix, /clearInterval\(timerId\)/, 'timer normalization must stop after session completion');
-assert.match(hotfix, /observe\(/, /__never__/); 
+assert.equal(hotfix.includes('observe('), false, 'UI runtime must not observe DOM mutations');
+assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false, 'obsolete UI runtime must not remain in the release tree');
 
 for (const path of [
   'v1.6-session.js',
