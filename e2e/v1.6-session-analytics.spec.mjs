@@ -7,6 +7,13 @@ async function cleanStart(page){
   await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 }
 
+async function startSession(page){
+  await expect(page.locator('#v16Start')).toBeVisible();
+  await page.locator('#v16Start').click();
+  await expect(page.locator('#v16DashboardToggle')).toBeVisible();
+  await expect(page.locator('#v16Session')).toBeHidden();
+}
+
 test('renders seven-session performance analytics from persisted history', async ({ page }) => {
   await cleanStart(page);
   const rows=Array.from({length:7},(_,i)=>({
@@ -26,9 +33,7 @@ test('renders seven-session performance analytics from persisted history', async
   }));
   await page.evaluate(value=>localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify(value)),rows);
   await page.reload();
-  await expect(page.locator('#v16Start')).toBeVisible();
-  await page.locator('#v16Start').click();
-  await expect(page.locator('#v16DashboardToggle')).toHaveText('نمایش داشبورد جلسه');
+  await startSession(page);
   await page.locator('#v16DashboardToggle').click();
   await expect(page.locator('#v16SessionAnalytics')).toBeVisible();
   await expect(page.locator('#v16SessionAnalytics')).toContainText('روند عملکرد');
