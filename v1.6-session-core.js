@@ -32,3 +32,4 @@ export function rebalanceSessionPlan(plan,remaining={},modeResults={},options={}
  nextModes.sort((a,b)=>b.score-a.score||a.mode.localeCompare(b.mode));
  return{plan:{...plan,version:2,rebalancedAt:new Date(now).toISOString(),modes:nextModes,priority:nextModes.filter(x=>x.plannedCount>0).map(x=>x.mode)},remaining:nextRemaining};
 }
+import('./v1.6-ui-hotfix.js');
