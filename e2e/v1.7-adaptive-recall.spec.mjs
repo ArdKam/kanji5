@@ -84,3 +84,18 @@ test('preserves the selected adaptive recall intent across a reload', async ({ p
   const persisted=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.7-recall-intent')||'null'));
   expect(persisted?.character).toBe((await page.locator('.kanji').textContent())?.trim());
 });
+
+test('explains why the adaptive recall focus was selected', async ({ page }) => {
+  await cleanStart(page);
+  await startSession(page);
+  await openDashboard(page);
+  await prepareWeakReading(page);
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  const gate=page.locator('.v12-recall-gate');
+  await expect(gate).toHaveAttribute('data-v17-attribute','reading');
+  await expect(gate.locator('[data-v17-reason-text]')).toContainText('عملکردت در این مهارت ضعیف‌تر بوده');
+  await expect(gate.locator('[data-v17-reason]')).toHaveText('چرا؟');
+});
