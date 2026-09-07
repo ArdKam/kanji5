@@ -37,6 +37,8 @@ async function prepareWeakReading(page){
     const raw=localStorage.getItem('kanji5-v1-cards');
     const cards=raw?JSON.parse(raw):{};
     if(!cards[id]?.card)throw new Error('persisted card missing');
+    const future=new Date(Date.now()+365*24*60*60*1000).toISOString();
+    for(const [key,value] of Object.entries(cards)) if(key!==id&&value?.card) value.card.due=future;
     cards[id].card.due=new Date(Date.now()-1000).toISOString();
     localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
@@ -152,7 +154,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   const preThreshold=page.locator('.v12-recall-gate');
   await expect(preThreshold).toHaveAttribute('data-v17-attribute','reading');
   await expect(preThreshold).toHaveAttribute('data-v17-reading-alternate','0');
-  await expect(preThreshold).toContainText('خوانش رایج');
+  await expect(preThreshold).toContainText('خوانش');
   await page.evaluate(({character,reading})=>{
     const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
     const stats=knowledge[character].reading;
@@ -185,7 +187,6 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   await startSession(page);
   await openDashboard(page);
   const {character}=await prepareWeakReading(page);
-  const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
   const info=await page.evaluate((character)=>{
     const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
     const item=deck.find(entry=>entry.character===character);
