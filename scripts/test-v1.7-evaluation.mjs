@@ -9,14 +9,14 @@ const api=context.globalThis.__KANJI5_V17_EVALUATION__;
 assert.ok(api);
 assert.deepEqual(Array.from(api.ATTRIBUTES),['meaning','reading','production','vocabulary','context']);
 
-const summary=api.summarizeAttribute({attempts:4,correct:3,history:[{correct:false},{correct:true},{correct:false},{correct:false},{correct:true}]});
+const summary=api.summarizeAttribute({attempts:4,correct:3,history:[{correct:false},{correct:true},{correct:false},{correct:false}]});
 assert.equal(summary.attempts,4);
 assert.equal(summary.correct,3);
 assert.equal(summary.accuracy,0.75);
 assert.equal(summary.errors,3);
-assert.equal(summary.recoveryOpportunities,3);
+assert.equal(summary.recoveryOpportunities,2);
 assert.equal(summary.recoveries,1);
-assert.equal(summary.recoveryRate,1/3);
+assert.equal(summary.recoveryRate,0.5);
 assert.ok(summary.uncertainty>0);
 
 const knowledge={
