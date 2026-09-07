@@ -8,6 +8,10 @@ const architecture = read('ARCHITECTURE.md');
 const workflow = read('.github/workflows/build-v1.6.yml');
 const sw = read('sw.js');
 const hotfix = read('v1.6-ui-hotfix-safe.js');
+const feedback = read('v1.6-session-feedback.js');
+const analytics = read('v1.6-session-analytics.js');
+const profile = read('v1.6-skill-profile.js');
+const sync = read('v1.6-sync-core.js');
 const session = read('v1.6-session.js');
 
 assert.equal(packageJson.version, '1.6.0', 'package version must be 1.6.0 for the v1.6 release');
@@ -25,6 +29,13 @@ assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache m
 assert.equal(hotfix.includes('MutationObserver'), false, 'UI runtime must not install a mutation observer');
 assert.equal(hotfix.includes('setInterval('), false, 'UI setup runtime must not own a background timer');
 assert.equal(hotfix.includes('observe('), false, 'UI runtime must not observe DOM mutations');
+assert.match(hotfix, /kanji5:v1\.6-session-finished/, 'external finish must emit the v1.6 session-finished lifecycle event');
+assert.match(feedback, /kanji5:v1\.6-session-finished/, 'feedback must finalize mode results from external finish');
+assert.match(analytics, /kanji5:v1\.6-session-finished/, 'analytics must refresh from external finish');
+assert.match(profile, /kanji5:v1\.6-session-finished/, 'skill profile must refresh from external finish');
+assert.match(sync, /recentAccuracy/, 'v1.6 sync must preserve temporal profile accuracy');
+assert.match(sync, /recentCorrect/, 'v1.6 sync must preserve temporal profile correctness');
+assert.match(sync, /momentum/, 'v1.6 sync must preserve temporal profile momentum');
 assert.match(session, /const durationNode=\$\('#v16Duration'\)/, 'session runtime must own the lightweight timer tick');
 assert.match(session, /timerId=setInterval\(\(\)=>/, 'session timer must use a single interval');
 assert.match(session, /clearInterval\(timerId\)/, 'session timer must stop explicitly');
