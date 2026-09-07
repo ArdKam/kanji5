@@ -155,7 +155,6 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await expect(preThreshold).toHaveAttribute('data-v17-attribute','reading');
   await expect(preThreshold).toHaveAttribute('data-v17-reading-alternate','0');
   await expect(preThreshold).toContainText('خوانش رایج');
-
   await page.evaluate(({character,reading})=>{
     const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
     const stats=knowledge[character].reading;
@@ -175,4 +174,44 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await expect(postThreshold).toHaveAttribute('data-v17-reading-alternate','1');
   await expect(postThreshold).toContainText('یک خوانش دیگر');
   await expect(postThreshold.locator('[data-v17-reason-text]')).toContainText('همهٔ خوانش‌های موجود');
+});
+
+test('accepts romaji for a katakana on-reading and records that reading variant', async ({ page }) => {
+  await cleanStart(page);
+  await startSession(page);
+  await openDashboard(page);
+  const character=(await page.locator('.kanji').textContent())?.trim();
+  const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
+  const info=await page.evaluate((character)=>{
+    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
+    const item=deck.find(entry=>entry.character===character);
+    const on=String(item?.on?.[0]||'');
+    const hira=on.replace(/[\u30a1-\u30f6]/g,char=>String.fromCharCode(char.charCodeAt(0)-0x60));
+    const map={あ:'a',い:'i',う:'u',え:'e',お:'o',か:'ka',き:'ki',く:'ku',け:'ke',こ:'ko',さ:'sa',し:'shi',す:'su',せ:'se',そ:'so',た:'ta',ち:'chi',つ:'tsu',て:'te',と:'to',な:'na',に:'ni',ぬ:'nu',ね:'ne',の:'no',は:'ha',ひ:'hi',ふ:'fu',へ:'he',ほ:'ho',ま:'ma',み:'mi',む:'mu',め:'me',も:'mo',や:'ya',ゆ:'yu',よ:'yo',ら:'ra',り:'ri',る:'ru',れ:'re',ろ:'ro',わ:'wa',を:'wo',ん:'n',が:'ga',ぎ:'gi',ぐ:'gu',げ:'ge',ご:'go',ざ:'za',じ:'ji',ず:'zu',ぜ:'ze',ぞ:'zo',だ:'da',ぢ:'ji',づ:'zu',で:'de',ど:'do',ば:'ba',び:'bi',ぶ:'bu',べ:'be',ぼ:'bo',ぱ:'pa',ぴ:'pi',ぷ:'pu',ぺ:'pe',ぽ:'po'};
+    let romaji='';
+    for(const ch of hira)romaji+=map[ch]||ch;
+    return {on,romaji};
+  },character);
+  expect(info.on).toBeTruthy();
+  expect(info.romaji).toBeTruthy();
+  await page.evaluate(({character,id})=>{
+    const raw=localStorage.getItem('kanji5-v1-cards');
+    const cards=raw?JSON.parse(raw):{};
+    if(!cards[id]?.card)throw new Error('persisted card missing');
+    cards[id].card.due=new Date(Date.now()-1000).toISOString();
+    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
+    localStorage.removeItem('kanji5-v1.6-session-history');
+  },{character,id:firstId});
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','reading');
+  await page.locator('#v12RecallInput').fill(info.romaji);
+  await page.locator('#v12SubmitRecall').click();
+  await expect(page.locator('.v12-recall-result')).toHaveCount(0);
+  const knowledge=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
+  expect(knowledge?.attempts).toBe(21);
+  expect(Object.values(knowledge?.variants||{}).some(variant=>variant.correct===1)).toBe(true);
 });
