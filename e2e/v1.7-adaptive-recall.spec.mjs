@@ -99,3 +99,27 @@ test('explains why the adaptive recall focus was selected', async ({ page }) => 
   await expect(gate.locator('[data-v17-reason-text]')).toContainText('عملکردت در این مهارت ضعیف‌تر بوده');
   await expect(gate.locator('[data-v17-reason]')).toHaveText('چرا؟');
 });
+
+test('moves to the secondary supported attribute after a wrong answer and persists it', async ({ page }) => {
+  await cleanStart(page);
+  await startSession(page);
+  await openDashboard(page);
+  await prepareWeakReading(page);
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  const gate=page.locator('.v12-recall-gate');
+  await expect(gate).toHaveAttribute('data-v17-attribute','reading');
+  await page.locator('#v12RecallInput').fill('definitely-not-a-reading');
+  await page.locator('#v12SubmitRecall').click();
+  await expect(gate).toHaveAttribute('data-v17-attribute','meaning');
+  const intent=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.7-recall-intent')||'null'));
+  expect(intent).toMatchObject({schemaVersion:1,attribute:'meaning'});
+  expect(intent.attributes).toEqual(['meaning']);
+  await page.reload();
+  await startSession(page);
+  await openDashboard(page);
+  await page.locator('#revealBtn').click();
+  await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','meaning');
+});
