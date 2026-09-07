@@ -20,5 +20,7 @@ function render(){const host=document.getElementById('v16Session');if(!host)retu
 const api=Object.freeze({read,update,rank});
 window.__KANJI5_V16_SKILL_PROFILE__=api;
 publish(read());
-update();render();setInterval(()=>{update();render()},1000);
+update();
+document.addEventListener('click',e=>{if(e.target.closest?.('#v16Finish'))setTimeout(update,0)},true);
+document.addEventListener('kanji5:v1.6-education-result',()=>{publish(read())});
 })();
