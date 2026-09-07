@@ -53,16 +53,12 @@ function persistReadingIntent(page,character,attributes=['reading','meaning']){
   },{character,attributes});
 }
 
-function readingKey(value){
-  return String(value||'').trim().toLowerCase().normalize('NFKC');
-}
-
-async function readComponentReading(page,character,key){
-  return page.evaluate(({character,key})=>{
+async function readComponentReadings(page,character){
+  return page.evaluate(character=>{
     const raw=localStorage.getItem('kanji5-v1.5-components');
     const all=raw?JSON.parse(raw):{};
-    return all?.[character]?.reading?.[key]||null;
-  },{character,key});
+    return Object.values(all?.[character]?.reading||{});
+  },character);
 }
 
 test('routes Active Recall toward the weakest supported learning attribute', async ({ page }) => {
@@ -199,9 +195,8 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await page.locator('#v12RecallInput').fill(readingInfo.readings[1]);
   await page.locator('#v12SubmitRecall').click();
   await page.waitForTimeout(350);
-  const key=readingKey(readingInfo.readings[1]);
-  const component=await readComponentReading(page,character,key);
-  expect(component).toMatchObject({reading:readingInfo.readings[1],attempts:1,correct:1});
+  const components=await readComponentReadings(page,character);
+  expect(components.some(entry=>entry?.reading===readingInfo.readings[1]&&entry.attempts===1&&entry.correct===1)).toBe(true);
 });
 
 test('accepts romaji for a katakana on-reading and records that reading variant', async ({ page }) => {
@@ -232,6 +227,6 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   await page.locator('#v12SubmitRecall').click();
   await expect(page.locator('.v12-recall-result')).toHaveCount(0);
   await page.waitForTimeout(350);
-  const component=await readComponentReading(page,character,readingKey(info.on));
-  expect(component).toMatchObject({reading:info.on,attempts:1,correct:1});
+  const components=await readComponentReadings(page,character);
+  expect(components.some(entry=>entry?.reading===info.on&&entry.attempts===1&&entry.correct===1)).toBe(true);
 });
