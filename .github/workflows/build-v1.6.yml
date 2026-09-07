@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Validate CI checkout invariant
+        run: node scripts/test-ci-workflow.mjs
       - name: Validate dataset
         run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));if(d.count!==2136||!Array.isArray(d.kanji)||d.kanji.length!==2136)throw new Error('Invalid runtime dataset');"
       - name: Validate JavaScript
