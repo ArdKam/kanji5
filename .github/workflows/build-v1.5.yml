@@ -1,0 +1,12 @@
+# Legacy compatibility placeholder.
+# v1.6 validation lives in .github/workflows/build-v1.6.yml.
+name: Legacy Kanji 5 v1.5 compatibility
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  legacy-placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "v1.5 validation was superseded by the v1.6 workflow"
