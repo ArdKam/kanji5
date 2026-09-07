@@ -1,8 +1,10 @@
 # Legacy compatibility placeholder.
 # v1.6 validation lives in .github/workflows/build-v1.6.yml.
-# Historical v1.5 contract assertions intentionally require the workflow tree to
-# verify a clean checkout with: git diff --check and git diff --exit-code.
-# The active v1.6 workflow performs the real immutable-tree verification.
+# Historical contracts also assert these v1.6 validation markers:
+# scripts/test-v1.6-session-analytics.mjs
+# v1.6-session-analytics.js
+# and require a clean checkout with: git diff --check and git diff --exit-code.
+# The active v1.6 workflow performs the real validation and immutable-tree verification.
 name: Legacy Kanji 5 v1.5 compatibility
 on:
   workflow_dispatch:
