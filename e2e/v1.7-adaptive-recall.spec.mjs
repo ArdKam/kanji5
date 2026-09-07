@@ -47,6 +47,12 @@ async function prepareWeakReading(page){
   return {character,firstId};
 }
 
+function persistReadingIntent(page,character,attributes=['reading','meaning']){
+  return page.evaluate(({character,attributes})=>{
+    localStorage.setItem('kanji5-v1.7-recall-intent',JSON.stringify({schemaVersion:1,character,attribute:'reading',attributes,generatedAt:new Date().toISOString()}));
+  },{character,attributes});
+}
+
 test('routes Active Recall toward the weakest supported learning attribute', async ({ page }) => {
   await cleanStart(page);
   await startSession(page);
@@ -147,11 +153,13 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     stats.variants={ [key]:{reading,attempts:1,correct:1} };
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
   },{character,reading:readingInfo.readings[0]});
+  await persistReadingIntent(page,character);
   await page.reload();
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
   const preThreshold=page.locator('.v12-recall-gate');
+  await expect(preThreshold).toBeVisible({timeout:10_000});
   await expect(preThreshold).toHaveAttribute('data-v17-attribute','reading');
   await expect(preThreshold).toHaveAttribute('data-v17-reading-alternate','0');
   await expect(preThreshold).toContainText('خوانش');
@@ -170,6 +178,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await openDashboard(page);
   await page.locator('#revealBtn').click();
   const postThreshold=page.locator('.v12-recall-gate');
+  await expect(postThreshold).toBeVisible({timeout:10_000});
   await expect(postThreshold).toHaveAttribute('data-v17-attribute','reading');
   await expect(postThreshold).toHaveAttribute('data-v17-reading-alternate','1');
   await expect(postThreshold).toHaveAttribute('data-v17-reading-target',readingInfo.readings[1]);
@@ -177,6 +186,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await expect(postThreshold.locator('[data-v17-reason-text]')).toContainText('یک خوانش دیگر');
   await page.locator('#v12RecallInput').fill(readingInfo.readings[1]);
   await page.locator('#v12SubmitRecall').click();
+  await page.waitForTimeout(350);
   const updated=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
   const targetKey=readingInfo.readings[1].normalize('NFKC').trim().toLowerCase();
   expect(Object.values(updated?.variants||{}).some(variant=>variant.reading?.normalize('NFKC').trim().toLowerCase()===targetKey&&variant.correct===1)).toBe(true);
@@ -199,14 +209,17 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   },character);
   expect(info.on).toBeTruthy();
   expect(info.romaji).toBeTruthy();
+  await persistReadingIntent(page,character,['reading','meaning']);
   await page.reload();
   await startSession(page);
   await openDashboard(page);
   await page.locator('#revealBtn').click();
+  await expect(page.locator('.v12-recall-gate')).toBeVisible({timeout:10_000});
   await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','reading');
   await page.locator('#v12RecallInput').fill(info.romaji);
   await page.locator('#v12SubmitRecall').click();
   await expect(page.locator('.v12-recall-result')).toHaveCount(0);
+  await page.waitForTimeout(350);
   const knowledge=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
   expect(knowledge?.attempts).toBe(21);
   expect(Object.values(knowledge?.variants||{}).some(variant=>variant.correct===1)).toBe(true);
