@@ -30,7 +30,7 @@ function setup(){
   if(!bar){
     bar=document.createElement('div');
     bar.id='v16DashboardToolbar';
-    bar.innerHTML='<button id="v16Start" type="button">شروع جلسه</button><button id="v16FinishExternal" type="button" hidden>پایان جلسه</button><button id="v16DashboardToggle" type="button" aria-expanded="true" aria-controls="v16Session" hidden>بستن داشبورد</button><span class="v16-dashboard-mini" id="v16DashboardMini" aria-live="polite" hidden></span>';
+    bar.innerHTML='<button id="v16Start" type="button">شروع جلسه</button><button id="v16FinishExternal" type="button" hidden>پایان جلسه</button><button id="v16DashboardToggle" type="button" aria-expanded="false" aria-controls="v16Session" hidden>بستن داشبورد</button><span class="v16-dashboard-mini" id="v16DashboardMini" aria-live="polite" hidden></span>';
     panel.parentNode.insertBefore(bar,panel);
   }
   const start=document.querySelector('#v16Start'),finish=document.querySelector('#v16FinishExternal'),toggle=document.querySelector('#v16DashboardToggle'),mini=document.querySelector('#v16DashboardMini');
@@ -46,11 +46,25 @@ function setup(){
   };
   if(start&&!start.dataset.bound){
     start.dataset.bound='1';
-    start.addEventListener('click',()=>{api.start?.();writeDashboardOpen(false);setOpen(panel,toggle,false);sync();api.refresh?.();});
+    start.addEventListener('click',()=>{
+      const result=api.start?.();
+      writeDashboardOpen(false);
+      setOpen(panel,toggle,false);
+      sync();
+      api.refresh?.();
+      sync();
+      if(result!==false){
+        start.hidden=true;
+        finish.hidden=false;
+        toggle.hidden=false;
+        mini.hidden=false;
+        setOpen(panel,toggle,false);
+      }
+    });
   }
   if(finish&&!finish.dataset.bound){
     finish.dataset.bound='1';
-    finish.addEventListener('click',()=>{api.finish?.();writeDashboardOpen(false);setOpen(panel,toggle,false);sync();api.refresh?.();});
+    finish.addEventListener('click',()=>{api.finish?.();writeDashboardOpen(false);setOpen(panel,toggle,false);sync();api.refresh?.();sync();});
   }
   if(toggle&&!toggle.dataset.bound){
     toggle.dataset.bound='1';
@@ -64,7 +78,10 @@ function setup(){
   sync();
   const s=api.getSession?.()||{};
   const started=Boolean(s.startedAt)||Boolean(s.started);
-  if(started)setOpen(panel,toggle,readDashboardOpen());
+  if(started){
+    writeDashboardOpen(false);
+    setOpen(panel,toggle,false);
+  }
   return true;
 }
 setup();
