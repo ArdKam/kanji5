@@ -23,6 +23,8 @@ assert.match(session,/session\.resumed/,'runtime must expose resumed-session sta
 assert.match(session,/import\('\.\/v1\.6-session-core\.js'\)/,'session runtime must load the adaptive session core');
 assert.match(session,/nextPlannedMode/,'session runtime must expose planned-mode selection');
 assert.match(session,/consumeMode/,'session runtime must expose planned-mode consumption');
+assert.equal(session.includes('new MutationObserver'),false,'session runtime must not install a hot-path mutation observer');
+assert.match(session,/timerId=setInterval\(\(\)=>/,'session timer must use a single bounded interval');
 for(const [key,label] of [['meaning','معنی'],['reading','خوانش'],['production','تولید'],['vocabulary','واژگان'],['context','بافت']])assert.match(session,new RegExp(`\\['${key}','${label}'\\]`),`${key} skill metric missing`);
 assert.match(core,/export function buildSessionPlan/,'adaptive session planner missing');
 assert.match(core,/export function nextPlannedMode/,'adaptive planned-mode selector missing');
