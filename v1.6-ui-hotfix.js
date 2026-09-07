@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+if(typeof window==='undefined'||typeof document==='undefined')return;
 if(window.__KANJI5_V16_UI_HOTFIX__)return;
 window.__KANJI5_V16_UI_HOTFIX__=true;
 const faDigits=s=>String(s??'').replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
