@@ -29,7 +29,8 @@ assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache m
 assert.equal(hotfix.includes('MutationObserver'), false, 'UI runtime must not install a mutation observer');
 assert.equal(hotfix.includes('setInterval('), false, 'UI setup runtime must not own a background timer');
 assert.equal(hotfix.includes('observe('), false, 'UI runtime must not observe DOM mutations');
-assert.match(hotfix, /kanji5:v1\.6-session-finished/, 'external finish must emit the v1.6 session-finished lifecycle event');
+assert.equal(hotfix.includes('kanji5:v1.6-session-finished'), false, 'UI runtime must not own session lifecycle events');
+assert.match(session, /kanji5:v1\.6-session-finished/, 'session runtime must emit the v1.6 session-finished lifecycle event');
 assert.match(feedback, /kanji5:v1\.6-session-finished/, 'feedback must finalize mode results from external finish');
 assert.match(analytics, /kanji5:v1\.6-session-finished/, 'analytics must refresh from external finish');
 assert.match(profile, /kanji5:v1\.6-session-finished/, 'skill profile must refresh from external finish');
