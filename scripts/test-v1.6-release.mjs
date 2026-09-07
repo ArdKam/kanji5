@@ -19,7 +19,8 @@ assert.match(architecture, /## Long-term skill profile/, 'architecture must docu
 assert.match(architecture, /## CI and release gates/, 'architecture must document release gates');
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be named for v1.6');
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
-assert.match(sw, /"\.\/v1\.6-ui-hotfix-safe\.js"/, 'service worker must precache the cache-busted safe UX runtime');
+assert.match(sw, /"\.\/v1\.6-ui-hotfix-safe\.js"/, 'service worker must precache the safe UX runtime');
+assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache must be v63');
 assert.equal(hotfix.includes('observe(document.documentElement'), false, 'UI hotfix must not observe the whole document');
 assert.equal(hotfix.includes('setInterval('), false, 'UI hotfix must not use a permanent polling loop');
 assert.match(hotfix, /observe\(panel,/, 'UI hotfix may observe only the session panel');
