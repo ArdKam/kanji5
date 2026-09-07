@@ -5,6 +5,9 @@ test('builds and restores the long-term skill profile from completed sessions', 
   await page.evaluate(() => {
     localStorage.clear();
     const history = [
+      { sessionId: 's0', endedAt: new Date(Date.now() - 4 * 86400000).toISOString(), reviews: 2, modeResults: {
+        meaning: { attempts: 2, correct: 2 }, reading: { attempts: 2, correct: 2 }, production: { attempts: 1, correct: 1 }, vocabulary: { attempts: 1, correct: 1 }, context: { attempts: 1, correct: 1 }
+      } },
       { sessionId: 's1', endedAt: new Date(Date.now() - 3 * 86400000).toISOString(), reviews: 3, modeResults: {
         meaning: { attempts: 2, correct: 2 }, reading: { attempts: 2, correct: 2 }, production: { attempts: 1, correct: 1 }, vocabulary: { attempts: 1, correct: 1 }, context: { attempts: 1, correct: 1 }
       } },
@@ -23,14 +26,14 @@ test('builds and restores the long-term skill profile from completed sessions', 
   await expect.poll(async () => page.evaluate(() => {
     const c = JSON.parse(localStorage.getItem('kanji5-v1.5-components') || '{}');
     return c.v16SkillProfile?.skills?.reading?.attempts || 0;
-  })).toBe(6);
+  })).toBe(8);
   const profile = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1.5-components') || '{}').v16SkillProfile);
-  expect(profile.sessions).toBe(3);
+  expect(profile.sessions).toBe(4);
   expect(profile.skills.reading.recentAttempts).toBe(6);
   expect(profile.skills.reading.recentAccuracy).toBe(50);
   expect(profile.skills.reading.momentum).toBeLessThan(0);
   await page.reload();
-  await expect(page.locator('#v16SkillProfile')).toContainText('۶');
+  await expect(page.locator('#v16SkillProfile')).toContainText('۸');
   await expect(page.locator('#v16SkillProfile')).toContainText('نیازمند توجه: خوانش');
   await expect(page.locator('#v16SkillProfile')).toContainText('ضعیف‌تر');
 });
