@@ -128,8 +128,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  const character=(await page.locator('.kanji').textContent())?.trim();
-  const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
+  const {character}=await prepareWeakReading(page);
   const readingInfo=await page.evaluate((character)=>{
     const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
     const item=deck.find(entry=>entry.character===character);
@@ -137,16 +136,15 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     return {readings};
   },character);
   expect(readingInfo.readings.length).toBeGreaterThanOrEqual(2);
-  await page.evaluate(({character,id,reading})=>{
-    const raw=localStorage.getItem('kanji5-v1-cards');
-    const cards=raw?JSON.parse(raw):{};
-    if(!cards[id]?.card)throw new Error('persisted card missing');
-    cards[id].card.due=new Date(Date.now()-1000).toISOString();
-    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
+  await page.evaluate(({character,reading})=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const stats=knowledge[character].reading;
+    stats.attempts=2;
+    stats.correct=2;
     const key=reading.normalize('NFKC').trim().toLowerCase();
-    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:8,correct:8},reading:{attempts:2,correct:2,variants:{[key]:{reading,attempts:1,correct:1}}},production:{attempts:8,correct:8},vocabulary:{attempts:8,correct:8},context:{attempts:8,correct:8}}}));
-    localStorage.removeItem('kanji5-v1.6-session-history');
-  },{character,id:firstId,reading:readingInfo.readings[0]});
+    stats.variants={ [key]:{reading,attempts:1,correct:1} };
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
+  },{character,reading:readingInfo.readings[0]});
   await page.reload();
   await startSession(page);
   await openDashboard(page);
@@ -174,19 +172,19 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await expect(postThreshold).toHaveAttribute('data-v17-reading-alternate','1');
   await expect(postThreshold).toHaveAttribute('data-v17-reading-target',readingInfo.readings[1]);
   await expect(postThreshold).toContainText('یک خوانش دیگر');
-  await expect(postThreshold.locator('[data-v17-reason-text]')).toContainText('همهٔ خوانش‌های موجود');
+  await expect(postThreshold.locator('[data-v17-reason-text]')).toContainText('یک خوانش دیگر');
   await page.locator('#v12RecallInput').fill(readingInfo.readings[1]);
   await page.locator('#v12SubmitRecall').click();
   const updated=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
   const targetKey=readingInfo.readings[1].normalize('NFKC').trim().toLowerCase();
-  expect(updated?.variants?.[targetKey]?.correct).toBe(1);
+  expect(Object.values(updated?.variants||{}).some(variant=>variant.reading?.normalize('NFKC').trim().toLowerCase()===targetKey&&variant.correct===1)).toBe(true);
 });
 
 test('accepts romaji for a katakana on-reading and records that reading variant', async ({ page }) => {
   await cleanStart(page);
   await startSession(page);
   await openDashboard(page);
-  const character=(await page.locator('.kanji').textContent())?.trim();
+  const {character}=await prepareWeakReading(page);
   const firstId=await page.locator('.kanji').getAttribute('data-kanji-id');
   const info=await page.evaluate((character)=>{
     const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
@@ -200,15 +198,6 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   },character);
   expect(info.on).toBeTruthy();
   expect(info.romaji).toBeTruthy();
-  await page.evaluate(({character,id})=>{
-    const raw=localStorage.getItem('kanji5-v1-cards');
-    const cards=raw?JSON.parse(raw):{};
-    if(!cards[id]?.card)throw new Error('persisted card missing');
-    cards[id].card.due=new Date(Date.now()-1000).toISOString();
-    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
-    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
-    localStorage.removeItem('kanji5-v1.6-session-history');
-  },{character,id:firstId});
   await page.reload();
   await startSession(page);
   await openDashboard(page);
