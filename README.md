@@ -30,6 +30,39 @@
 - fallback ایمن به تمرین‌های محلی Meaning / Reading / Production در صورت در دسترس نبودن APIهای خارجی
 - Cache محلی برای Vocabulary و Context
 
+## v1.5
+- Active Recall با یادگیری component-level و scheduler اختصاصی
+- جداسازی pure recall core از UI/orchestration
+- persistence مبتنی بر snapshot و transaction با recovery/reconciliation
+- sync چندلایه برای education، FSRS و state با merge/replay قطعی
+- Supabase sync با optimistic concurrency، locking و retry
+- network adapter مستقل برای KanjiAPI/Tatoeba و coalescing در service worker
+- تست‌های architecture، persistence، sync lifecycle، network و browser smoke
+
+## v1.6 — Adaptive Session Intelligence
+v1.6 لایهٔ session را از یک dashboard صرف به یک چرخهٔ adaptive کامل تبدیل می‌کند:
+
+- **Session Dashboard:** شمارنده‌های due/new/mastered، goal progress، streak، review count، active mode plan و session summary
+- **Session Persistence & Resume:** شناسهٔ پایدار session، snapshot طرح، `remainingModes` و status برای resume بعد از reload یا خروج ناخواسته
+- **Adaptive Session Engine:** ساخت plan اولیه، انتخاب mode بعدی بر اساس وضعیت جلسه و مصرف mode فقط پس از موفقیت در resolve شدن محتوای تمرین
+- **Live Rebalancing:** تغییر plan در میانهٔ جلسه بر اساس feedback همان session، بدون از دست دادن remainder اصلی
+- **Session-scoped Feedback:** ثبت نتیجهٔ educational و اتصال authoritative feedback به session؛ نتیجهٔ `نمی‌دانم` همچنان outcome آموزشی است و rating مستقیم FSRS نیست
+- **Session Analytics:** خلاصهٔ session و تاریخچهٔ mode-level برای تحلیل عملکرد و trend
+- **Long-term Skill Profile:** تجمیع sessionهای کامل برای پنج مهارت Meaning، Reading، Production، Vocabulary و Context
+- **Temporal Skill Profile:** نگهداری `recentAttempts`، `recentAccuracy` و `momentum` بر پایهٔ سه session اخیر
+- **Profile-aware Planning:** استفاده از accuracy، recent accuracy و momentum در امتیازدهی modeها و اولویت‌بندی plan بعدی
+- **Durable Sync Core:** merge/replay لایهٔ v1.6 برای session history، component state و profile-aware state بدون انتقال منطق merge به transport
+- **Offline Runtime Contract:** تمام runtimeهای v1.6 در service worker precache شده‌اند و CI عدم mutation در checkout را بررسی می‌کند
+
+### v1.6 release contract
+قبل از اعلام release، این لایه‌ها باید همگی سبز باشند:
+
+1. syntax و pure-core tests
+2. session / feedback / analytics / skill-profile / sync contracts
+3. browser E2E و persistence/resume behavior
+4. committed-tree immutability و runtime wiring
+5. release contract شامل نسخهٔ package، مستندات و CI wiring v1.6
+
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
 - KANJIDIC2/EDRDG license: CC BY-SA 4.0
