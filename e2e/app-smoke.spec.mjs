@@ -50,6 +50,8 @@ test.describe('Kanji 5 browser smoke', () => {
       const raw = localStorage.getItem('kanji5-v1-cards');
       const cards = raw ? JSON.parse(raw) : {};
       if (!id || !cards[id]?.card) throw new Error('persisted card missing');
+      const future = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+      for (const [key, value] of Object.entries(cards)) if (key !== id && value?.card) value.card.due = future;
       cards[id].card.due = new Date(Date.now() - 1000).toISOString();
       localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
     }, firstId);
@@ -131,6 +133,8 @@ test.describe('Kanji 5 browser smoke', () => {
       const raw = localStorage.getItem('kanji5-v1-cards');
       const cards = raw ? JSON.parse(raw) : {};
       if (!id || !cards[id]?.card) throw new Error('persisted card missing');
+      const future = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+      for (const [key, value] of Object.entries(cards)) if (key !== id && value?.card) value.card.due = future;
       cards[id].card.due = new Date(Date.now() - 1000).toISOString();
       localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
     }, firstId);
