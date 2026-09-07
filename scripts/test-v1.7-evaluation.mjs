@@ -15,7 +15,10 @@ const history=api.summarizeHistory([
   {correct:false,at:'4'},
   {correct:true,at:'5'}
 ]);
-assert.deepEqual(history,{errors:3,recoveryOpportunities:3,recoveries:2,recoveryRate:2/3});
+assert.equal(history.errors,3);
+assert.equal(history.recoveryOpportunities,3);
+assert.equal(history.recoveries,2);
+assert.equal(history.recoveryRate,2/3);
 
 const knowledge={
   A:{meaning:{attempts:4,correct:3,history:[{correct:false},{correct:true},{correct:true},{correct:true}]},reading:{attempts:3,correct:1,history:[{correct:false},{correct:false},{correct:true}]}},
@@ -42,14 +45,20 @@ const compared=api.comparePolicyOutcomes([
   {policy:'adaptive',attempts:2,correct:1},
   {policy:'baseline',attempts:5,correct:3}
 ]);
-assert.deepEqual(compared.adaptive,{attempts:6,correct:4,accuracy:4/6});
-assert.deepEqual(compared.baseline,{attempts:5,correct:3,accuracy:3/5});
+assert.equal(compared.adaptive.attempts,6);
+assert.equal(compared.adaptive.correct,4);
+assert.equal(compared.adaptive.accuracy,4/6);
+assert.equal(compared.baseline.attempts,5);
+assert.equal(compared.baseline.correct,3);
+assert.equal(compared.baseline.accuracy,3/5);
 
 const threshold=api.chooseThresholdCandidate([0.1,0.2,0.3],[
   {attempts:3,weakness:0.25,outcomeDelta:0.2},
   {attempts:3,weakness:0.15,outcomeDelta:0.1},
   {attempts:1,weakness:0.35,outcomeDelta:0.9}
 ],{minimumAttempts:3});
-assert.deepEqual(threshold,{threshold:0.1,signal:0.30000000000000004,sample:2});
+assert.equal(threshold.threshold,0.1);
+assert.equal(threshold.sample,2);
+assert.ok(Math.abs(threshold.signal-0.3)<1e-12);
 
 console.log('v1.7 evaluation core: PASS');
