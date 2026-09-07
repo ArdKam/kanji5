@@ -172,8 +172,14 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   const postThreshold=page.locator('.v12-recall-gate');
   await expect(postThreshold).toHaveAttribute('data-v17-attribute','reading');
   await expect(postThreshold).toHaveAttribute('data-v17-reading-alternate','1');
+  await expect(postThreshold).toHaveAttribute('data-v17-reading-target',readingInfo.readings[1]);
   await expect(postThreshold).toContainText('یک خوانش دیگر');
   await expect(postThreshold.locator('[data-v17-reason-text]')).toContainText('همهٔ خوانش‌های موجود');
+  await page.locator('#v12RecallInput').fill(readingInfo.readings[1]);
+  await page.locator('#v12SubmitRecall').click();
+  const updated=await page.evaluate((character)=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.reading,{character});
+  const targetKey=readingInfo.readings[1].normalize('NFKC').trim().toLowerCase();
+  expect(updated?.variants?.[targetKey]?.correct).toBe(1);
 });
 
 test('accepts romaji for a katakana on-reading and records that reading variant', async ({ page }) => {
