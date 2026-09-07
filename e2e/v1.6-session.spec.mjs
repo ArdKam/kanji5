@@ -32,8 +32,13 @@ async function pinOnlyCard(page,id){
     const cards=raw?JSON.parse(raw):{};
     if(!id||!cards[id]?.card)throw new Error('persisted card missing');
     const target=cards[id];
-    target.card.due=new Date(Date.now()-1000).toISOString();
-    localStorage.setItem('kanji5-v1-cards',JSON.stringify({[id]:target}));
+    const future=new Date(Date.now()+365*24*60*60*1000).toISOString();
+    const seeded={};
+    for(const item of JSON.parse(localStorage.getItem('kanji5-deck')||'[]')){
+      const source=cards[item.id]||target;
+      seeded[item.id]={...source,card:{...source.card,due:item.id===id?new Date(Date.now()-1000).toISOString():future},reviews:0,lapses:0,learnedAt:null};
+    }
+    localStorage.setItem('kanji5-v1-cards',JSON.stringify(seeded));
     localStorage.removeItem('kanji5-v1-snapshot');
     localStorage.removeItem('kanji5-v1-snapshot-commit');
     localStorage.removeItem('kanji5-v1.6-session-history');
