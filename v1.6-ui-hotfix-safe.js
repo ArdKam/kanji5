@@ -67,8 +67,7 @@ function setup(){
   sync();
   const s=api.getSession?.()||{};
   const started=Boolean(s.startedAt)||Boolean(s.started);
-  const finished=Boolean(s.finished);
-  if(started&&!finished)setOpen(panel,toggle,readDashboardOpen());
+  if(started)setOpen(panel,toggle,readDashboardOpen());
   return true;
 }
 setup();
