@@ -26,7 +26,7 @@ function normalizeSession(raw){
   return Object.freeze({sessionId:String(raw.sessionId||''),strategy,evaluationSchemaVersion:Number(raw.evaluationSchemaVersion)||0,modeResults,attempts,correct,accuracy:correct/attempts,endedAt:String(raw.endedAt||'')});
 }
 function summarizeSessions(sessions,strategy){
-  const normalized=(Array.isArray(sessions)?sessions:[]).map(normalizeSession).filter(Boolean).filter(session=>session.strategy===strategy);
+  const normalized=(Array.isArray(sessions)?sessions:[]).map(item=>item?.strategy&&item?.modeResults?item:normalizeSession(item)).filter(Boolean).filter(session=>session.strategy===strategy);
   let attempts=0,correct=0;
   const attributes={};
   for(const attribute of ATTRIBUTES){let a=0,c=0;for(const session of normalized){a+=session.modeResults[attribute].attempts;c+=session.modeResults[attribute].correct}attributes[attribute]={attempts:a,correct:c,accuracy:a?c/a:0}}
