@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const session=fs.readFileSync('v1.6-session.js','utf8');
+const ui=fs.readFileSync('v1.6-session-ui.js','utf8');
 const core=fs.readFileSync('v1.6-session-core.js','utf8');
 const p0=fs.readFileSync('v1.5-p0.js','utf8');
 const education=fs.readFileSync('v1.5-education-ui.js','utf8');
@@ -21,11 +22,16 @@ assert.match(session,/filter\(x=>x\?\.status!==ACTIVE_STATUS\)/,'completed histo
 assert.match(session,/const persisted=readActive\(\)/,'runtime must restore the active session on boot');
 assert.match(session,/session\.resumed/,'runtime must expose resumed-session state');
 assert.match(session,/import\('\.\/v1\.6-session-core\.js'\)/,'session runtime must load the adaptive session core');
+assert.match(session,/import\('\.\/v1\.6-session-ui\.js'\)/,'session runtime must load the active session UI runtime');
+assert.doesNotMatch(session,/v1\.6-ui-hotfix-safe\.js/,'retired hotfix shim must not be referenced');
 assert.match(session,/nextPlannedMode/,'session runtime must expose planned-mode selection');
 assert.match(session,/consumeMode/,'session runtime must expose planned-mode consumption');
 assert.equal(session.includes('new MutationObserver'),false,'session runtime must not install a hot-path mutation observer');
 assert.match(session,/timerId=setInterval\(\(\)=>/,'session timer must use a single bounded interval');
 for(const [key,label] of [['meaning','معنی'],['reading','خوانش'],['production','تولید'],['vocabulary','واژگان'],['context','بافت']])assert.match(session,new RegExp(`\\['${key}','${label}'\\]`),`${key} skill metric missing`);
+assert.match(ui,/id='v16Start'/,'session UI runtime must own the session start control');
+assert.match(ui,/__KANJI5_V16_SESSION_API__/,'session UI runtime must bind through the session API');
+assert.match(ui,/v16DashboardToolbar/,'session UI runtime must own the dashboard toolbar');
 assert.match(core,/export function buildSessionPlan/,'adaptive session planner missing');
 assert.match(core,/export function nextPlannedMode/,'adaptive planned-mode selector missing');
 assert.match(core,/export function weakestMode/,'weakest-mode selector missing');
@@ -38,12 +44,7 @@ assert.match(education,/__KANJI5_V16_SESSION_AUTH__/,'education UI must prefer t
 assert.match(education,/nextMode/,'education UI must request the planned mode');
 assert.match(education,/consumeMode/,'education UI must consume a planned mode only after successful content resolution');
 assert.match(education,/kanji5:v1\.6-education-result/,'education UI must emit session feedback outcomes');
-assert.match(sw,/"\.\/v1\.6-session\.js"/,'v1.6 session runtime must be offline-precached');
-assert.match(sw,/"\.\/v1\.6-session-core\.js"/,'v1.6 session core must be offline-precached');
-assert.match(sw,/"\.\/v1\.6-session-feedback\.js"/,'v1.6 session feedback runtime must be offline-precached');
-assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/,'v1.6 session analytics runtime must be offline-precached');
-assert.match(sw,/"\.\/v1.6-skill-profile\.js"/,'long-term skill profile runtime must be offline-precached');
-assert.match(sw,/"\.\/v1.6-sync-core\.js"/,'v1.6 sync core must be offline-precached');
+for(const file of ['v1.6-session-ui.js','v1.6-session.js','v1.6-session-core.js','v1.6-session-feedback.js','v1.6-session-analytics.js','v1.6-skill-profile.js','v1.6-sync-core.js'])assert.match(sw,new RegExp(`"\\.\\/${file.replace(/[-/.]/g,'\\$&')}"`),`${file} must be offline-precached`);
 assert.doesNotMatch(sw,/v1\.6-ui-hotfix-safe\.js/,'retired safe UI hotfix must not be offline-precached');
 assert.match(sw,/const CACHE='kanji5-shell-v64'/,'service-worker cache must remain bumped after shim retirement');
 console.log('Kanji 5 v1.6 session contract checks passed.');
