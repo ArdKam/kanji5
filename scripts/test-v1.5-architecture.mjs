@@ -55,7 +55,8 @@ assert.match(educationUi, /state\.readSettings\(\)/, 'education UI must consume 
 assert.match(educationUi, /state\.readKnowledge\(\)/, 'education UI must consume knowledge through state');
 assert.match(educationUi, /state\.writeKnowledge\(/, 'education UI must persist knowledge through state');
 assert.match(educationUi, /state\.readAppState\(\)/, 'education UI must consume app state through state');
-assert.match(migration, /window\.__KANJI5_EDU_UI_V1_4__=true/, 'legacy education UI must be made inert');
+assert.match(migration, /window\.__KANJI5_EDU_MIGRATION_API__/, 'education migration must expose its migration API');
+assert.doesNotMatch(migration, /__KANJI5_EDU_UI_V1_4__/, 'retired v1.4 education UI marker must stay removed');
 assert.match(migration, /import\('\.\/v1\.5-education-ui\.js'\)/, 'migration must hand off to the v1.5 education UI');
 assert.match(network, /^export async function fetchWords/m, 'network adapter must export vocabulary retrieval');
 assert.match(network, /^export async function fetchContextSentences/m, 'network adapter must export context retrieval');
@@ -87,7 +88,9 @@ const deprecatedRuntimeFiles = [
   'v1.3-education-v2.js',
   'v1.3-dont-know.js',
   'v1.3-smart-distractors.js',
-  'v1.5-education-choice-enforcer.js'
+  'v1.4-education-ui.js',
+  'v1.5-education-choice-enforcer.js',
+  'v1.6-ui-hotfix-safe.js'
 ];
 for (const file of deprecatedRuntimeFiles) {
   assert.doesNotMatch(index, new RegExp(file.replaceAll('.', '\\.'), 'g'), `Deprecated runtime must not be wired: ${file}`);
