@@ -32,11 +32,14 @@ jobs:
       - name: Validate JavaScript
         run: |
           node --check v1.7-adaptive-recall-core.js
+          node --check v1.7-evaluation-core.js
           node --check v1.2-enhancements.js
       - name: Run adaptive recall core tests
         run: node scripts/test-v1.7-adaptive-recall.mjs
       - name: Run recall intent contract tests
         run: node scripts/test-v1.7-recall-intent.mjs
+      - name: Run evaluation core tests
+        run: node scripts/test-v1.7-evaluation.mjs
       - name: Run v1.7 browser tests
         run: |
           npm install --no-audit --no-fund --package-lock=false
