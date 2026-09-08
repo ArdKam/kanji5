@@ -17,7 +17,11 @@ assert(core.weakness({attempts:8,correct:6})>0,'Weakness must remain positive fo
 assert(core.gradeMeaning('school',['school']).quality==='exact','Exact meaning grading failed');
 assert(core.gradeMeaning('high school',['high school']).quality==='exact','Normalized exact meaning failed');
 assert(core.gradeMeaning('school work',['school work']).correct===true,'Two-token exact meaning failed');
-assert(core.gradeMeaning('school',['school system']).correct===true&&core.gradeMeaning('school',['school system']).quality==='partial','Partial meaning grading failed');
+assert(core.gradeMeaning('school',['school system']).correct===false,'Single-token subset must not auto-pass a multi-token meaning');
+assert(core.gradeMeaning('system',['school system']).correct===false,'Wrong token from a multi-token meaning must not pass');
+assert(core.gradeMeaning('school',['school system']).quality==='wrong','Single-token subset must be graded wrong');
+assert(core.gradeMeaning('school system',['school system']).quality==='exact','Full multi-token recall must remain exact');
+assert(core.gradeMeaning('school work',['school system']).correct===false,'Insufficient semantic overlap must remain wrong');
 assert(core.gradeMeaning('schol',['school']).correct===false,'Unsafe fuzzy meaning accepted an invalid typo');
 assert(core.toRomaji('も')==='mo','Hiragana も must map to mo');
 assert(core.toRomaji('もう')==='mou','Long vowel sequence もう must map to mou');
