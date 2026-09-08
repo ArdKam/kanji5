@@ -2,7 +2,7 @@ name: Build Kanji 5 v1.7
 
 on:
   push:
-    branches: [main, feature/v1.7, feature/v1.7-p0, feature/v1.7-p2-evidence-integrated]
+    branches: [main, feature/v1.7, feature/v1.7-p0, feature/v1.7-p2-evidence-integrated, feature/v1.7-p2-tuning]
     paths:
       - 'v1.7-*.js'
       - 'v1.2-enhancements.js'
@@ -34,6 +34,7 @@ jobs:
           node --check v1.7-adaptive-recall-core.js
           node --check v1.7-evaluation-core.js
           node --check v1.7-baseline-evaluation-core.js
+          node --check v1.7-tuning-core.js
           node --check v1.2-enhancements.js
       - name: Run adaptive recall core tests
         run: node scripts/test-v1.7-adaptive-recall.mjs
@@ -43,6 +44,8 @@ jobs:
         run: node scripts/test-v1.7-evaluation.mjs
       - name: Run persisted adaptive baseline evaluation tests
         run: node scripts/test-v1.7-baseline-evaluation.mjs
+      - name: Run tuning tests
+        run: node scripts/test-v1.7-tuning.mjs
       - name: Run v1.7 browser tests
         run: |
           npm install --no-audit --no-fund --package-lock=false
