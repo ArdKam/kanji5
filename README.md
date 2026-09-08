@@ -3,7 +3,7 @@
 یک PWA شخصی برای یادگیری ۲۱۳۶ کانجی Jōyō ژاپنی، روزانه ۵ کانجی جدید، با مرور فاصله‌دار تطبیقی بر پایهٔ FSRS.
 
 ## ویژگی‌ها
-- پوشش هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency
+a- پوشش هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency
 - ۵ کانجی جدید در روز (قابل تنظیم)
 - مرورهای due قبل/در کنار کانجی‌های جدید
 - چهار امتیاز Again / Hard / Good / Easy
@@ -53,6 +53,15 @@ v1.6 لایهٔ session را از یک dashboard صرف به یک چرخهٔ ada
 - **Profile-aware Planning:** استفاده از accuracy، recent accuracy و momentum در امتیازدهی modeها و اولویت‌بندی plan بعدی
 - **Durable Sync Core:** merge/replay لایهٔ v1.6 برای session history، component state و profile-aware state بدون انتقال منطق merge به transport
 - **Offline Runtime Contract:** تمام runtimeهای v1.6 در service worker precache شده‌اند و CI عدم mutation در checkout را بررسی می‌کند
+
+### v1.6 release contract
+قبل از اعلام release، این لایه‌ها باید همگی سبز باشند:
+
+1. syntax و pure-core tests
+2. session / feedback / analytics / skill-profile / sync contracts
+3. browser E2E و persistence/resume behavior
+4. committed-tree immutability و runtime wiring
+5. release contract شامل نسخهٔ package، مستندات و CI wiring v1.6
 
 ## v1.7 — Adaptive Attribute Recall
 v1.7 adaptive recall را از سطح card/session به سطح attribute یادگیری ارتقا می‌دهد، بدون جایگزین‌کردن FSRS یا شکستن جریان learning-first.
