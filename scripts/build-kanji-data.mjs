@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 
-const SOURCE_URL = "https://raw.githubusercontent.com/jkindrix/japanese-language-data/main/data/core/kanji-joyo.json";
-const SOURCE_SHA = "b1bad3d556d0a8509a0c15093c4052eafce374ff";
+const SOURCE_URL = "https://raw.githubusercontent.com/jkindrix/japanese-language-data/f79c68c9e35c6f8269a6b66e86c63c3713db06a0/data/core/kanji-joyo.json";
+const SOURCE_COMMIT = "f79c68c9e35c6f8269a6b66e86c63c3713db06a0";
 const OUT = "kanji-data.json";
 const COUNT = 2136;
 
 const response = await fetch(SOURCE_URL);
-if (!response.ok) throw new Error(`Failed to fetch Jōyō source: HTTP ${response.status}`);
+if (!response.ok) throw new Error(`Failed to fetch pinned Jōyō source: HTTP ${response.status}`);
 const source = await response.json();
 const allKanji = source.kanji || [];
 
@@ -39,9 +39,9 @@ if (ranked.length !== COUNT) throw new Error(`Expected ${COUNT} kanji, got ${ran
 await fs.writeFile(OUT, JSON.stringify({
   version: 1,
   count: COUNT,
-  source: `KANJIDIC2 via jkindrix/japanese-language-data (pinned source blob ${SOURCE_SHA})`,
+  source: `KANJIDIC2 via jkindrix/japanese-language-data @ ${SOURCE_COMMIT}`,
   selection: "All 2,136 Jōyō kanji by newspaper frequency rank",
   kanji: ranked
 }), "utf8");
 
-console.log(`Generated ${OUT} with ${ranked.length} kanji from pinned Jōyō source ${SOURCE_SHA}.`);
+console.log(`Generated ${OUT} with ${ranked.length} kanji from pinned source ${SOURCE_COMMIT}.`);
