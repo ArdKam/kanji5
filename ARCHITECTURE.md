@@ -81,7 +81,7 @@ Persistence uses bounded review/session history and graceful degradation when br
 
 Runtime consumes the derived `kanji-data.json`. The large upstream Jōyō source is not committed to this application repository. `scripts/build-kanji-data.mjs` fetches the pinned upstream Jōyō dataset from the documented source and deterministically derives the runtime dataset. Source provenance and license information must remain documented alongside the build script.
 
-## Testing and release gates
+## CI and release gates
 
 `npm test` is the single local entry point for every `scripts/test-*.mjs` contract/unit test. CI may add targeted subsets and browser E2E tests, but it must not require contributors to reconstruct the test list from workflow YAML.
 
