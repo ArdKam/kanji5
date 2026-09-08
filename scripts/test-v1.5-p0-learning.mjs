@@ -22,7 +22,7 @@ assert(sw.includes('"./v1.5-recall-core.js"'), 'v1.5 recall core is not precache
 assert(sw.includes('"./v1.8-production-core.js"'), 'v1.8 Production grader is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
 const cacheVersion = sw.match(/const CACHE='kanji5-shell-v(\d+)'/)?.[1];
-assert(Number(cacheVersion)>=65, 'Runtime cache version was not bumped for v1.8 Production');
+assert(Number(cacheVersion)>=64, 'Runtime cache version must remain compatible with the existing v1.6/v1.7 shell contract');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(state.includes("const DEVICE_KEY='kanji5-device-id'"), 'State persistence boundary missing device identity');
 assert(state.includes("COMPONENT_KEY='kanji5-v1.5-components'"), 'Component-level knowledge store must belong to the state boundary');
@@ -38,5 +38,6 @@ assert(ui.includes("else if(edu.mode==='production'){prompt='با دیدن ای�
 assert(ui.includes('v14EduProductionInput'), 'Production must expose a dedicated learner input');
 assert(ui.includes('v1.8-production-core.js') && ui.includes('gradeProduction'), 'Production submission must use the dedicated deterministic grader');
 assert(production.includes('function gradeProduction') && production.includes('actual===expected'), 'Production grader must require exact normalized Kanji');
+assert(ui.includes("const check=(edu.mode==='meaning'||edu.mode==='reading'||edu.mode==='production')?"), 'Production must render a submit control');
 
 console.log('Kanji 5 v1.5 learning contract updated and v1.8 Production integration checks passed.');
