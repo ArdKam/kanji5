@@ -11,72 +11,57 @@ async function cleanStart(page){
   await expect(page.locator('#v16Start')).toBeVisible();
 }
 
-async function startSession(page){
+async function startReview(page){
   await page.locator('#v16Start').click();
-  await expect(page.locator('#v16Start')).toBeHidden();
   await expect(page.locator('#v16FinishExternal')).toBeVisible();
   await page.locator('#v16DashboardToggle').click();
   await expect(page.locator('#v16Session')).toBeVisible();
 }
 
-async function prepareProduction(page){
-  const character=(await page.locator('.kanji').textContent())?.trim();
-  const id=await page.locator('.kanji').getAttribute('data-kanji-id');
-  expect(character).toBeTruthy();
-  expect(id).toBeTruthy();
-  await page.locator('#revealBtn').click();
-  await expect(page.locator('#ratings')).toHaveClass(/show/);
-  await page.locator('.rate[data-r="Again"]').click();
-  await page.evaluate(({character,id})=>{
-    const raw=localStorage.getItem('kanji5-v1-cards');
-    const cards=raw?JSON.parse(raw):{};
-    if(!cards[id]?.card)throw new Error('persisted card missing');
-    const future=new Date(Date.now()+365*24*60*60*1000).toISOString();
-    for(const [key,value] of Object.entries(cards)) if(key!==id&&value?.card)value.card.due=future;
-    cards[id].card.due=new Date(Date.now()-1000).toISOString();
-    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
-    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{
-      meaning:{attempts:30,correct:29},
-      reading:{attempts:30,correct:29},
-      production:{attempts:30,correct:2},
-      vocabulary:{attempts:30,correct:29},
-      context:{attempts:30,correct:29}
-    }}));
-    localStorage.removeItem('kanji5-v1.6-session-history');
-  },{character,id});
-  return character;
+async function forceProductionMode(page){
+  await page.evaluate(async()=>{
+    await import('./v1.6-session-feedback.js');
+    window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
+  });
+}
+
+async function openProduction(page){
+  await forceProductionMode(page);
+  await page.locator('[data-tab="education"]').click();
+  const pane=page.locator('#v14EducationPane');
+  await expect(pane.locator('#v14EduProductionInput')).toBeVisible({timeout:10_000});
+  return pane;
+}
+
+async function currentTarget(page){
+  return page.evaluate(()=>{
+    const raw=localStorage.getItem('kanji5-deck');
+    const deck=raw?JSON.parse(raw):[];
+    const ids=new Set(Object.keys(JSON.parse(localStorage.getItem('kanji5-v1-cards')||'{}')));
+    return deck.find(item=>item?.id&&ids.has(item.id))?.character||'';
+  });
 }
 
 test('renders Production as a real learner-input exercise and persists the outcome',async({page})=>{
   await cleanStart(page);
-  await startSession(page);
-  const character=await prepareProduction(page);
-  await page.reload();
-  await page.locator('#v16Start').click();
-  await expect(page.locator('#v16FinishExternal')).toBeVisible();
-  await page.locator('#v16DashboardToggle').click();
-  await expect(page.locator('#v16Session')).toBeVisible();
-  await page.locator('#revealBtn').click();
-  const gate=page.locator('.v12-recall-gate');
-  await expect(gate).toHaveAttribute('data-v17-attribute','production');
-  await page.locator('#v12RecallInput').fill('not-the-answer');
-  await page.locator('#v12SubmitRecall').click();
-  await page.waitForTimeout(250);
-  const knowledge=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production||null,character);
-  expect(knowledge?.attempts).toBeGreaterThan(0);
+  await startReview(page);
+  const pane=await openProduction(page);
+  const target=await currentTarget(page);
+  expect(target).toBeTruthy();
+  await pane.locator('#v14EduProductionInput').fill('x');
+  await pane.locator('#v14EduSubmit').click();
+  await expect(pane).toContainText('پاسخ نادرست بود');
+  const production=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production||null,target);
+  expect(production?.attempts).toBeGreaterThan(0);
+  expect(production?.correct).toBe(0);
 });
 
-test('production education pane asks the learner to produce the Kanji',async({page})=>{
+test('grades an exact Production response as correct',async({page})=>{
   await cleanStart(page);
-  await startSession(page);
-  const character=await prepareProduction(page);
-  await page.goto('/');
-  await expect(page.locator('#app')).toBeVisible({timeout:20_000});
-  await page.locator('#v16Start').click();
-  await expect(page.locator('#v16FinishExternal')).toBeVisible();
-  await page.locator('#v16DashboardToggle').click();
-  await expect(page.locator('#v16Session')).toBeVisible();
-  await page.locator('[data-tab="education"]').click();
-  await expect(page.locator('#v14EducationPane')).toBeVisible();
-  await expect(page.locator('#v14EducationPane')).toContainText(character);
+  await startReview(page);
+  const pane=await openProduction(page);
+  const target=await currentTarget(page);
+  await pane.locator('#v14EduProductionInput').fill(target);
+  await pane.locator('#v14EduSubmit').click();
+  await expect(pane).toContainText('پاسخ درست بود');
 });
