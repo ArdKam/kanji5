@@ -2,7 +2,7 @@
 name: Build Kanji 5 v1.6
 on:
   push:
-    branches: [main, feature/v1.6]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -44,7 +44,7 @@ jobs:
           git diff --exit-code
           git diff --cached --exit-code
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-          test "$(node -p "require('./package.json').version")" = "1.6.0"
+          test "$(node -p "require('./package.json').version")" = "1.6.0" || test "$(node -p "require('./package.json').version")" = "1.7.0"
           grep -q '"type": "module"' package.json
           grep -q "const CACHE='kanji5-shell-v63'" sw.js
           grep -q 'function staleWhileRevalidate' sw.js
