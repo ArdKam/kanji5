@@ -18,9 +18,10 @@ assert.match(packageJson.version, /^1\.(6|7)\.0$/, 'package must stay on the com
 assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-release\.mjs/, 'package must expose the v1.6 release contract');
 assert.match(readme, /^## v1\.6 — Adaptive Session Intelligence$/m, 'README must document v1.6');
 assert.match(readme, /## v1\.6 release contract/, 'README must describe the release contract');
-assert.match(architecture, /^# Kanji 5 v1\.6 Architecture$/m, 'architecture document must be explicitly versioned as v1.6');
+assert.match(architecture, /^# Kanji 5 Architecture$/m, 'architecture must remain the living architecture document');
 assert.match(architecture, /## Session lifecycle/, 'architecture must document session lifecycle');
 assert.match(architecture, /## Long-term skill profile/, 'architecture must document the long-term profile');
+assert.match(architecture, /## Adaptive recall/, 'architecture must document the v1.7 adaptive-recall layer');
 assert.match(architecture, /## CI and release gates/, 'architecture must document release gates');
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be named for v1.6');
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
