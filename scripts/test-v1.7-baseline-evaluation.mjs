@@ -34,7 +34,7 @@ const report=api.compareStrategies(history);
 assert.equal(report.status,'ready');
 assert.equal(report.adaptive.accuracy,0.7);
 assert.equal(report.baseline.accuracy,0.5);
-assert.equal(report.delta.accuracy,0.2);
+assert.ok(Math.abs(report.delta.accuracy-0.2)<Number.EPSILON*16);
 assert.equal(report.evidence.eligibleSessions,3);
 assert.equal(report.evidence.excludedSessions,1);
 
