@@ -11,13 +11,15 @@ assert.deepEqual(Array.from(api.ATTRIBUTES),['meaning','reading','production','v
 
 const strong={meaning:{attempts:20,correct:19},reading:{attempts:20,correct:4},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:17}};
 assert.deepEqual(Array.from(api.selectRecallAttributes(strong,{maxAttributes:2})),['reading','context']);
+assert.deepEqual(Array.from(api.selectRecallAttributes(strong,{maxAttributes:2,supportedAttributes:['meaning','reading']})),['reading','meaning']);
 
 const unseen={meaning:{attempts:0,correct:0},reading:{attempts:10,correct:9},production:{attempts:10,correct:9},vocabulary:{attempts:10,correct:9},context:{attempts:10,correct:9}};
 assert.deepEqual(Array.from(api.selectRecallAttributes(unseen,{maxAttributes:2})),['meaning','reading']);
+assert.deepEqual(Array.from(api.selectRecallAttributes(unseen,{maxAttributes:2,supportedAttributes:['meaning','reading']})),['meaning','reading']);
 
-const plan=api.buildAdaptiveRecallPlan({A:strong},{cardId:'A',maxAttributes:2,now:0});
+const plan=api.buildAdaptiveRecallPlan({A:strong},{cardId:'A',maxAttributes:2,now:0,supportedAttributes:['meaning','reading']});
 assert.equal(plan.schemaVersion,1);
 assert.equal(plan.cardId,'A');
 assert.equal(plan.primary,'reading');
-assert.deepEqual(Array.from(plan.attributes),['reading','context']);
+assert.deepEqual(Array.from(plan.attributes),['reading','meaning']);
 console.log('v1.7 adaptive recall core: PASS');

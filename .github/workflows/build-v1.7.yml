@@ -2,16 +2,20 @@ name: Build Kanji 5 v1.7
 
 on:
   push:
-    branches: [feature/v1.7]
+    branches: [main, feature/v1.7, feature/v1.7-p0]
     paths:
       - 'v1.7-*.js'
+      - 'v1.2-enhancements.js'
       - 'scripts/test-v1.7-*.mjs'
+      - 'e2e/v1.7-*.mjs'
       - '.github/workflows/build-v1.7.yml'
   pull_request:
     branches: [main]
     paths:
       - 'v1.7-*.js'
+      - 'v1.2-enhancements.js'
       - 'scripts/test-v1.7-*.mjs'
+      - 'e2e/v1.7-*.mjs'
       - '.github/workflows/build-v1.7.yml'
 
 permissions:
@@ -26,6 +30,15 @@ jobs:
         with:
           node-version: 20
       - name: Validate JavaScript
-        run: node --check v1.7-adaptive-recall-core.js
+        run: |
+          node --check v1.7-adaptive-recall-core.js
+          node --check v1.2-enhancements.js
       - name: Run adaptive recall core tests
         run: node scripts/test-v1.7-adaptive-recall.mjs
+      - name: Run recall intent contract tests
+        run: node scripts/test-v1.7-recall-intent.mjs
+      - name: Run v1.7 browser tests
+        run: |
+          npm install --no-audit --no-fund --package-lock=false
+          npx playwright install chromium
+          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs

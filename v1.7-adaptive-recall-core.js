@@ -15,6 +15,11 @@ function normalizeKnowledgeEntry(raw){
   const source=raw&&typeof raw==='object'?raw:{};
   return Object.freeze(Object.fromEntries(ATTRIBUTES.map(attribute=>[attribute,normalizeAttributeStats(source[attribute])])));
 }
+function normalizeSupportedAttributes(value){
+  const source=Array.isArray(value)?value:ATTRIBUTES;
+  const seen=new Set();
+  return ATTRIBUTES.filter(attribute=>source.includes(attribute)&&!seen.has(attribute)&&seen.add(attribute));
+}
 function scoreAttribute(raw,{now=Date.now(),windowDays=DEFAULT_WINDOW_DAYS}={}){
   const stats=normalizeAttributeStats(raw);
   const uncertainty=stats.attempts===0?0.25:1/Math.sqrt(stats.attempts+1);
@@ -22,22 +27,24 @@ function scoreAttribute(raw,{now=Date.now(),windowDays=DEFAULT_WINDOW_DAYS}={}){
   const underSampled=Math.min(0.25,uncertainty*0.75);
   return clamp(weakness*0.7+underSampled,0,1);
 }
-function rankWeakAttributes(entry,options={}){
+function rankWeakAttributes(entry,{supportedAttributes=ATTRIBUTES,...options}={}){
   const normalized=normalizeKnowledgeEntry(entry);
-  return ATTRIBUTES.map(attribute=>({attribute,score:scoreAttribute(normalized[attribute],options),stats:normalized[attribute]}))
+  const supported=new Set(normalizeSupportedAttributes(supportedAttributes));
+  return ATTRIBUTES.filter(attribute=>supported.has(attribute)).map(attribute=>({attribute,score:scoreAttribute(normalized[attribute],options),stats:normalized[attribute]}))
     .sort((a,b)=>b.score-a.score||ATTRIBUTES.indexOf(a.attribute)-ATTRIBUTES.indexOf(b.attribute));
 }
-function selectRecallAttributes(entry,{maxAttributes=2,minScore=0.15,...options}={}){
-  const limit=Math.max(1,Math.min(ATTRIBUTES.length,Number(maxAttributes)||2));
-  const ranked=rankWeakAttributes(entry,options);
+function selectRecallAttributes(entry,{maxAttributes=2,minScore=0.15,supportedAttributes=ATTRIBUTES,...options}={}){
+  const supported=normalizeSupportedAttributes(supportedAttributes);
+  const limit=Math.max(1,Math.min(supported.length||1,Number(maxAttributes)||2));
+  const ranked=rankWeakAttributes(entry,{supportedAttributes:supported,...options});
   const selected=ranked.filter(item=>item.score>=minScore).slice(0,limit);
   return (selected.length?selected:ranked.slice(0,1)).map(item=>item.attribute);
 }
-function buildAdaptiveRecallPlan(knowledgeByCard,{cardId,maxAttributes=2,minScore=0.15,...options}={}){
+function buildAdaptiveRecallPlan(knowledgeByCard,{cardId,maxAttributes=2,minScore=0.15,supportedAttributes=ATTRIBUTES,...options}={}){
   const entry=knowledgeByCard?.[cardId]||{};
-  const attributes=selectRecallAttributes(entry,{maxAttributes,minScore,...options});
+  const attributes=selectRecallAttributes(entry,{maxAttributes,minScore,supportedAttributes,...options});
   return Object.freeze({schemaVersion:1,cardId:String(cardId||''),attributes,primary:attributes[0]||null,generatedAt:new Date(options.now||Date.now()).toISOString()});
 }
-const api=Object.freeze({ATTRIBUTES,normalizeKnowledgeEntry,scoreAttribute,rankWeakAttributes,selectRecallAttributes,buildAdaptiveRecallPlan});
+const api=Object.freeze({ATTRIBUTES,normalizeAttributeStats,normalizeKnowledgeEntry,scoreAttribute,rankWeakAttributes,selectRecallAttributes,buildAdaptiveRecallPlan});
 globalThis.__KANJI5_V17_ADAPTIVE_RECALL__=api;
 })();
