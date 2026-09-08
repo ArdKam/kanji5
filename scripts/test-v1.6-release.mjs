@@ -7,7 +7,6 @@ const readme = read('README.md');
 const architecture = read('ARCHITECTURE.md');
 const workflow = read('.github/workflows/build-v1.6.yml');
 const sw = read('sw.js');
-const hotfix = read('v1.6-ui-hotfix-safe.js');
 const feedback = read('v1.6-session-feedback.js');
 const analytics = read('v1.6-session-analytics.js');
 const profile = read('v1.6-skill-profile.js');
@@ -25,12 +24,10 @@ assert.match(architecture, /## Adaptive recall/, 'architecture must document the
 assert.match(architecture, /## (CI and release gates|Testing and release gates)/, 'architecture must document release gates');
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be named for v1.6');
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
-assert.match(sw, /"\.\/v1\.6-ui-hotfix-safe\.js"/, 'service worker must precache the safe UX runtime');
-assert.match(sw, /const CACHE='kanji5-shell-v63'/, 'service-worker shell cache must be v63');
-assert.equal(hotfix.includes('MutationObserver'), false, 'UI runtime must not install a mutation observer');
-assert.equal(hotfix.includes('setInterval('), false, 'UI setup runtime must not own a background timer');
-assert.equal(hotfix.includes('observe('), false, 'UI runtime must not observe DOM mutations');
-assert.equal(hotfix.includes('kanji5:v1.6-session-finished'), false, 'UI runtime must not own session lifecycle events');
+assert.doesNotMatch(sw, /v1\.6-ui-hotfix-safe\.js/, 'retired safe UI hotfix shim must stay out of the service-worker shell');
+assert.match(sw, /const CACHE='kanji5-shell-v64'/, 'service-worker shell cache must be v64 after shim retirement');
+assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false, 'obsolete UI runtime must not remain in the release tree');
+assert.equal(fs.existsSync('v1.6-ui-hotfix-safe.js'), false, 'retired safe UI shim must not remain in the release tree');
 assert.match(session, /kanji5:v1\.6-session-finished/, 'session runtime must emit the v1.6 session-finished lifecycle event');
 assert.match(feedback, /kanji5:v1\.6-session-finished/, 'feedback must finalize mode results from external finish');
 assert.match(analytics, /kanji5:v1\.6-session-finished/, 'analytics must refresh from external finish');
@@ -41,7 +38,6 @@ assert.match(sync, /momentum/, 'v1.6 sync must preserve temporal profile momentu
 assert.match(session, /const durationNode=\$\('#v16Duration'\)/, 'session runtime must own the lightweight timer tick');
 assert.match(session, /timerId=setInterval\(\(\)=>/, 'session timer must use a single interval');
 assert.match(session, /clearInterval\(timerId\)/, 'session timer must stop explicitly');
-assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false, 'obsolete UI runtime must not remain in the release tree');
 
 for (const path of [
   'v1.6-session.js',
@@ -49,8 +45,7 @@ for (const path of [
   'v1.6-session-feedback.js',
   'v1.6-session-analytics.js',
   'v1.6-skill-profile.js',
-  'v1.6-sync-core.js',
-  'v1.6-ui-hotfix-safe.js'
+  'v1.6-sync-core.js'
 ]) {
   assert.ok(fs.existsSync(path), `required v1.6 runtime file missing: ${path}`);
 }
