@@ -10,6 +10,8 @@ on:
       - 'e2e/v1.7-*.mjs'
       - 'V1.7-ROADMAP.md'
       - 'CHANGELOG.md'
+      - 'README.md'
+      - 'package.json'
       - '.github/workflows/build-v1.7.yml'
   pull_request:
     branches: [main]
@@ -20,6 +22,7 @@ on:
       - 'e2e/v1.7-*.mjs'
       - 'V1.7-ROADMAP.md'
       - 'CHANGELOG.md'
+      - 'README.md'
       - '.github/workflows/build-v1.7.yml'
       - 'package.json'
 
