@@ -39,6 +39,26 @@ Pure cores must not depend on DOM, `window`, localStorage, or network APIs. UI/o
 
 Compatibility shims are migration boundaries, not permanent homes for business logic. A shim may remain only while an active consumer depends on it; once migration is verified by tests and runtime wiring, it should be retired.
 
+## Session lifecycle
+
+The active session boundary owns session identity, plan persistence, resume behavior, feedback consumption, and completion history. The lifecycle is:
+
+1. Load the persisted active session, if present.
+2. Otherwise build a deterministic adaptive plan from knowledge and the long-term skill profile.
+3. Persist the session identity, plan snapshot, and remaining work before user-facing work begins.
+4. Request the next planned mode from the authoritative feedback boundary.
+5. Consume a planned mode only after the associated educational content resolves successfully.
+6. Record the mode outcome as session-scoped feedback.
+7. Rebalance only remaining work from fresh feedback; completed work is not rewritten.
+8. On completion, append an immutable session-history record.
+9. On reload, resume the active session rather than starting a competing session.
+
+## Long-term skill profile
+
+`v1.6-skill-profile.js` projects completed session history into independent Meaning, Reading, Production, Vocabulary, and Context skills. It tracks lifetime accuracy plus recent-window accuracy and momentum. The profile is persisted as data and passed into pure planning functions; it does not make network calls or directly mutate UI state.
+
+The planner uses weaker accuracy, weaker recent accuracy, and negative momentum as priority signals. This keeps adaptive scheduling deterministic and testable while allowing v1.7 adaptive recall to focus on attribute-level retrieval.
+
 ## Adaptive recall
 
 v1.7 adds an adaptive-recall layer that treats recall attributes as independently learnable skills. The adaptive planner receives a knowledge snapshot, supported attributes, and a maximum attribute budget, then deterministically prioritizes weak or unseen attributes. It does not persist its own state and does not bypass the authoritative education/session boundaries.
