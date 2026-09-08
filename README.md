@@ -54,18 +54,21 @@ v1.6 لایهٔ session را از یک dashboard صرف به یک چرخهٔ ada
 - **Durable Sync Core:** merge/replay لایهٔ v1.6 برای session history، component state و profile-aware state بدون انتقال منطق merge به transport
 - **Offline Runtime Contract:** تمام runtimeهای v1.6 در service worker precache شده‌اند و CI عدم mutation در checkout را بررسی می‌کند
 
-### v1.6 release contract
-قبل از اعلام release، این لایه‌ها باید همگی سبز باشند:
+## v1.7 — Adaptive Attribute Recall
+v1.7 adaptive recall را از سطح card/session به سطح attribute یادگیری ارتقا می‌دهد، بدون جایگزین‌کردن FSRS یا شکستن جریان learning-first.
 
-1. syntax و pure-core tests
-2. session / feedback / analytics / skill-profile / sync contracts
-3. browser E2E و persistence/resume behavior
-4. committed-tree immutability و runtime wiring
-5. release contract شامل نسخهٔ package، مستندات و CI wiring v1.6
+- **Adaptive Decision Core:** مدل‌سازی و رتبه‌بندی مستقل Meaning، Reading، Production، Vocabulary و Context بر اساس weakness و uncertainty
+- **Adaptive Recall Integration:** انتخاب attribute ضعیف‌تر برای Active Recall با حفظ قرارداد backward-compatible فعلی
+- **Session Continuity:** حفظ intent و plan تطبیقی در reload و اتصال آن به lifecycle موجود session
+- **Learning UX:** نمایش attribute در حال تمرین و reason کوتاه و evidence-gated برای readingهای کمتر رایج
+- **Evaluation & Tuning:** اندازه‌گیری accuracy/uncertainty/recovery، مقایسه با baseline پایدار و تولید توصیه‌های tuning فقط پس از کافی‌بودن evidence
+- **Browser coverage:** پوشش E2E برای رفتار adaptive recall و session continuity
 
 ## Release status
 
-Branch `feature/v1.6` is feature-complete and uses the explicit v1.6 release contract and validation workflow.
+**v1.7.0 — release-ready implementation.** P0-A/P0-B/P0-C، P1 و P2 کامل و پس از merge روی `main` اعتبارسنجی شده‌اند. CI مربوط به v1.6 و v1.7 سبز است و نسخهٔ package برابر `1.7.0` است.
+
+Production/vocabulary/context recall modes عمداً تا زمانی که exercise واقعی learner-facing و grader معتبر برای آن‌ها وجود نداشته باشد gated باقی می‌مانند.
 
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
