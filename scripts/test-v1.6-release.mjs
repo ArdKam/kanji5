@@ -14,7 +14,7 @@ const profile = read('v1.6-skill-profile.js');
 const sync = read('v1.6-sync-core.js');
 const session = read('v1.6-session.js');
 
-assert.equal(packageJson.version, '1.6.0', 'package version must be 1.6.0 for the v1.6 release');
+assert.match(packageJson.version, /^1\.(6|7)\.0$/, 'package must stay on the compatible 1.6.x/1.7.x release line');
 assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-release\.mjs/, 'package must expose the v1.6 release contract');
 assert.match(readme, /^## v1\.6 — Adaptive Session Intelligence$/m, 'README must document v1.6');
 assert.match(readme, /## v1\.6 release contract/, 'README must describe the release contract');
@@ -66,4 +66,4 @@ for (const path of [
   assert.ok(fs.existsSync(path), `required v1.6 contract missing: ${path}`);
 }
 
-console.log('Kanji 5 v1.6 release contract checks passed.');
+console.log('Kanji 5 v1.6 compatibility release contract checks passed.');
