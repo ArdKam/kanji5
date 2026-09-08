@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+// P2-B: compare only explicitly persisted adaptive/baseline learner outcomes.
 if(typeof globalThis==='undefined'||globalThis.__KANJI5_V17_BASELINE_EVALUATION__)return;
 const STRATEGIES=Object.freeze(['adaptive','baseline']);
 const ATTRIBUTES=Object.freeze(['meaning','reading','production','vocabulary','context']);
