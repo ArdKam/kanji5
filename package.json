@@ -1,7 +1,7 @@
 {
   "name": "kanji5",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Kanji 5 end-to-end test harness",
   "type": "module",
   "scripts": {
