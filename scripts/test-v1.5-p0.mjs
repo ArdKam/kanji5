@@ -19,13 +19,14 @@ const count = (text, needle) => text.split(needle).length - 1;
 
 const requiredScripts = [
   './v1.3-p0.js', './v1.3-perf.js', './v1.3-storage-bridge.js', './v1.3-settings.js',
-  './v1.4-education-migration.js', './v1.4-education-core.js', './v1.4-education-ui.js', './v1.5-p0.js'
+  './v1.4-education-migration.js', './v1.4-education-core.js', './v1.5-p0.js'
 ];
 for (const src of requiredScripts) assert.equal(count(index, `<script src="${src}"></script>`), 1, `${src} must be wired exactly once`);
 assert.equal(count(index, 'id="v1.2-dataset-bootstrap"'), 1, 'dataset bootstrap must remain singular');
 for (const legacy of [
   './v1.3-p1.js', './v1.3-education-runtime-fix.js', './v1.3-production-ui.js',
   './v1.3-education-v2.js', './v1.3-dont-know.js', './v1.3-smart-distractors.js',
+  './v1.4-education-ui.js', './v1.6-ui-hotfix-safe.js',
   'v1.5-education-choice-enforcer.js'
 ]) assert.ok(!index.includes(legacy), `legacy runtime remains wired: ${legacy}`);
 
@@ -79,6 +80,8 @@ assert.ok(sw.includes('async function filterVocabularyResponse'), 'vocabulary re
 assert.ok(sw.includes('async function staleWhileRevalidate'));
 assert.ok(sw.includes("if(r.mode==='navigate')"));
 assert.ok(!sw.includes("fetch(r).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(r,res.clone()));return res})"));
+assert.ok(!sw.includes('v1.4-education-ui.js'), 'retired v1.4 education UI shim must stay out of offline shell');
+assert.ok(!sw.includes('v1.6-ui-hotfix-safe.js'), 'retired v1.6 UI hotfix shim must stay out of offline shell');
 
 assert.ok(runtime.includes('loading.classList.add("v13-real-error")'), 'startup error panel contract missing');
 assert.ok(index.includes('./vendor/ts-fsrs-5.4.1.mjs'), 'pinned local FSRS vendor missing');
