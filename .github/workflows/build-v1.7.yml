@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'v1.7-*.js'
+      - 'v1.8-*.js'
       - 'v1.4-education-core.js'
       - 'v1.3-storage-bridge.js'
       - 'v1.5-state.js'
@@ -12,16 +13,20 @@ on:
       - 'scripts/test-all.mjs'
       - 'scripts/build-kanji-data.mjs'
       - 'e2e/v1.7-*.mjs'
+      - 'e2e/v1.8-*.mjs'
       - 'V1.7-ROADMAP.md'
+      - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
       - 'README.md'
       - 'package.json'
+      - 'sw.js'
       - '.github/workflows/build-v1.7.yml'
   pull_request:
     branches: [main]
     paths:
       - 'v1.7-*.js'
+      - 'v1.8-*.js'
       - 'v1.4-education-core.js'
       - 'v1.3-storage-bridge.js'
       - 'v1.5-state.js'
@@ -29,11 +34,14 @@ on:
       - 'scripts/test-all.mjs'
       - 'scripts/build-kanji-data.mjs'
       - 'e2e/v1.7-*.mjs'
+      - 'e2e/v1.8-*.mjs'
       - 'ARCHITECTURE.md'
       - 'V1.7-ROADMAP.md'
+      - 'V1.8-ROADMAP.md'
       - 'CHANGELOG.md'
       - 'README.md'
       - 'package.json'
+      - 'sw.js'
       - '.github/workflows/build-v1.7.yml'
 
 permissions:
@@ -56,11 +64,12 @@ jobs:
           node --check v1.7-evaluation-core.js
           node --check v1.7-baseline-evaluation-core.js
           node --check v1.7-tuning-core.js
+          node --check v1.8-production-core.js
           node --check v1.2-enhancements.js
       - name: Run all contract and unit tests
         run: npm test
-      - name: Run v1.7 browser tests
+      - name: Run active release browser tests
         run: |
           npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium
-          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs
+          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs
