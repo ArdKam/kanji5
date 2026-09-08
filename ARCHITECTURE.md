@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document is the living architecture reference for the current release line. It describes the active v1.7 runtime and the boundaries that new work must preserve. Release-specific history belongs in `CHANGELOG.md` and the roadmap, not in this file.
+This document is the living architecture reference for the current release line. It describes the active v1.8 runtime and the boundaries that new work must preserve. Release-specific history belongs in `CHANGELOG.md` and the roadmap, not in this file.
 
 ## Runtime boundaries
 
@@ -10,7 +10,6 @@ The active browser runtime is intentionally split into narrow responsibilities:
 
 - `index.html`: application shell, markup, startup wiring, and canonical application module.
 - `v1.4-education-core.js`: pure education rules, canonical grading, adaptive skill selection, and knowledge recording.
-- `v1.4-education-ui.js`: compatibility shim only; active education UI lives in `v1.5-education-ui.js`.
 - `v1.5-education-ui.js`: education rendering and interaction. It owns no browser storage or remote API endpoints.
 - `v1.5-education-ui.css`: education-specific presentation.
 - `v1.5-network.js`: data transport adapter for KanjiAPI and Tatoeba; browser caching/coalescing remains in the service worker.
@@ -26,6 +25,7 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.6-sync-core.js`: deterministic v1.6 merge/replay primitives.
 - `v1.7-adaptive-recall-core.js`: pure adaptive attribute-recall planning. It selects recall attributes from long-term weakness and supported modes without touching persistence or UI.
 - `v1.7-evaluation-core.js`, `v1.7-baseline-evaluation-core.js`, `v1.7-tuning-core.js`: pure evaluation, baseline comparison, and tuning primitives. They consume data and return deterministic results.
+- `v1.8-production-core.js`: pure deterministic Production Recall grading; it accepts learner-entered Kanji and does not depend on DOM, persistence, or network APIs.
 - `supabase-sync.js`: remote transport, locking, retries, and optimistic concurrency. It does not define planning semantics.
 - `sw.js`: offline shell/data/API caching, request coalescing, and precaching of active runtime dependencies.
 
@@ -57,19 +57,23 @@ The active session boundary owns session identity, plan persistence, resume beha
 
 `v1.6-skill-profile.js` projects completed session history into independent Meaning, Reading, Production, Vocabulary, and Context skills. It tracks lifetime accuracy plus recent-window accuracy and momentum. The profile is persisted as data and passed into pure planning functions; it does not make network calls or directly mutate UI state.
 
-The planner uses weaker accuracy, weaker recent accuracy, and negative momentum as priority signals. This keeps adaptive scheduling deterministic and testable while allowing v1.7 adaptive recall to focus on attribute-level retrieval.
+The planner uses weaker accuracy, weaker recent accuracy, and negative momentum as priority signals. This keeps adaptive scheduling deterministic and testable while allowing v1.8 to consume richer learner-facing outcomes.
 
 ## Adaptive recall
 
 v1.7 adds an adaptive-recall layer that treats recall attributes as independently learnable skills. The adaptive planner receives a knowledge snapshot, supported attributes, and a maximum attribute budget, then deterministically prioritizes weak or unseen attributes. It does not persist its own state and does not bypass the authoritative education/session boundaries.
 
-The v1.7 evaluation and tuning modules are analysis layers over recorded outcomes. They must not mutate learner state or become a second grading engine.
+v1.8 begins by making Production a fully learner-facing supported mode. Production prompts use canonical meaning data, while grading is isolated in `v1.8-production-core.js`. A correct production outcome flows through the same education/session feedback path as Meaning and Reading; no second scheduler is introduced.
+
+The evaluation and tuning modules remain analysis layers over recorded outcomes. They must not mutate learner state or become a second grading engine.
 
 ## Educational integrity
 
 Meaning grading has one canonical implementation in `v1.4-education-core.js`. Exact normalized matches remain exact; partial matches are accepted only when the token-overlap score reaches the defined F1 threshold. A single-token guess no longer receives an automatic pass merely because it is a subset of a multi-token canonical meaning.
 
-This rule is intentionally conservative: the grading system must reward recall of the meaning rather than teach users to exploit answer-token shortcuts.
+Production grading is intentionally stricter: the normalized learner response must exactly match the target Kanji. There is no fuzzy acceptance, generated synonym mapping, or remote dependency in the grader.
+
+These rules are intentionally conservative: grading must reward recall of the requested learning attribute rather than teach users to exploit answer-token shortcuts.
 
 ## Persistence and storage keys
 
@@ -81,7 +85,7 @@ Persistence uses bounded review/session history and graceful degradation when br
 
 Runtime consumes the derived `kanji-data.json`. The large upstream Jōyō source is not committed to this application repository. `scripts/build-kanji-data.mjs` fetches the pinned upstream Jōyō dataset from the documented source and deterministically derives the runtime dataset. Source provenance and license information must remain documented alongside the build script.
 
-## CI and release gates (Testing and release gates)
+## CI and release gates
 
 `npm test` is the single local entry point for every `scripts/test-*.mjs` contract/unit test. CI may add targeted subsets and browser E2E tests, but it must not require contributors to reconstruct the test list from workflow YAML.
 
