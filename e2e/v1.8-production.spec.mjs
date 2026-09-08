@@ -11,6 +11,13 @@ async function cleanStart(page){
   await expect(page.locator('#v16Start')).toBeVisible();
 }
 
+async function seedReviewedCard(page){
+  await page.locator('#revealBtn').click();
+  await expect(page.locator('#ratings')).toHaveClass(/show/);
+  await page.locator('.rate[data-r="Good"]').click();
+  await expect(page.locator('#revealBtn')).toBeVisible();
+}
+
 async function startReview(page){
   await page.locator('#v16Start').click();
   await expect(page.locator('#v16FinishExternal')).toBeVisible();
@@ -44,6 +51,7 @@ async function currentTarget(page){
 
 test('renders Production as a real learner-input exercise and persists the outcome',async({page})=>{
   await cleanStart(page);
+  await seedReviewedCard(page);
   await startReview(page);
   const pane=await openProduction(page);
   const target=await currentTarget(page);
@@ -58,9 +66,11 @@ test('renders Production as a real learner-input exercise and persists the outco
 
 test('grades an exact Production response as correct',async({page})=>{
   await cleanStart(page);
+  await seedReviewedCard(page);
   await startReview(page);
   const pane=await openProduction(page);
   const target=await currentTarget(page);
+  expect(target).toBeTruthy();
   await pane.locator('#v14EduProductionInput').fill(target);
   await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ درست بود');
