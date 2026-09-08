@@ -1,7 +1,8 @@
 (()=>{
   'use strict';
-  const deckKey='kanji5-deck';
-  const stateKey='kanji5-v1';
+  const state=window.__KANJI5_STATE__;
+  if(!state)throw new Error('Kanji 5 state module must load before storage bridge');
+  const {DECK_KEY:deckKey,STORAGE:stateKey}=state;
   const get=Storage.prototype.getItem;
   const set=Storage.prototype.setItem;
   const deck=()=>window.__KANJI5_P0_DATA;
