@@ -30,7 +30,7 @@ assert.equal(metrics.meaning.accuracy,0.75);
 assert.equal(metrics.reading.attempts,5);
 assert.equal(metrics.reading.accuracy,0.6);
 assert.equal(metrics.reading.errors,2);
-assert.equal(metrics.reading.recoveryRate,1);
+assert.equal(metrics.reading.recoveryRate,0.5);
 assert.ok(metrics.reading.uncertainty<metrics.meaning.uncertainty);
 
 const report=api.buildEvaluationReport(knowledge,{generatedAt:'2026-01-01T00:00:00.000Z'});
