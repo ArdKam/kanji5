@@ -2,12 +2,13 @@ name: Build Kanji 5 v1.7
 
 on:
   push:
-    branches: [main, feature/v1.7, feature/v1.7-p0, feature/v1.7-p2-evidence-integrated, feature/v1.7-p2-tuning]
+    branches: [main]
     paths:
       - 'v1.7-*.js'
       - 'v1.2-enhancements.js'
       - 'scripts/test-v1.7-*.mjs'
       - 'e2e/v1.7-*.mjs'
+      - 'V1.7-ROADMAP.md'
       - '.github/workflows/build-v1.7.yml'
   pull_request:
     branches: [main]
@@ -16,7 +17,9 @@ on:
       - 'v1.2-enhancements.js'
       - 'scripts/test-v1.7-*.mjs'
       - 'e2e/v1.7-*.mjs'
+      - 'V1.7-ROADMAP.md'
       - '.github/workflows/build-v1.7.yml'
+      - 'package.json'
 
 permissions:
   contents: read
