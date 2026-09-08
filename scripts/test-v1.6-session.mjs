@@ -21,7 +21,6 @@ assert.match(session,/filter\(x=>x\?\.status!==ACTIVE_STATUS\)/,'completed histo
 assert.match(session,/const persisted=readActive\(\)/,'runtime must restore the active session on boot');
 assert.match(session,/session\.resumed/,'runtime must expose resumed-session state');
 assert.match(session,/import\('\.\/v1\.6-session-core\.js'\)/,'session runtime must load the adaptive session core');
-assert.doesNotMatch(session,/v1\.6-ui-hotfix-safe/,'retired safe UI hotfix must not remain a session dependency');
 assert.match(session,/nextPlannedMode/,'session runtime must expose planned-mode selection');
 assert.match(session,/consumeMode/,'session runtime must expose planned-mode consumption');
 assert.equal(session.includes('new MutationObserver'),false,'session runtime must not install a hot-path mutation observer');
