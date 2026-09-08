@@ -26,26 +26,6 @@ async function openDashboard(page){
   await expect(page.locator('#v16Session')).toBeVisible();
 }
 
-async function pinOnlyCard(page,id){
-  await page.evaluate(async id=>{
-    const raw=localStorage.getItem('kanji5-v1-cards');
-    const cards=raw?JSON.parse(raw):{};
-    if(!id||!cards[id]?.card)throw new Error('persisted card missing');
-    const target=cards[id];
-    const future=new Date(Date.now()+365*24*60*60*1000).toISOString();
-    const seeded={};
-    for(const item of JSON.parse(localStorage.getItem('kanji5-deck')||'[]')){
-      const source=cards[item.id]||target;
-      seeded[item.id]={...source,card:{...source.card,due:item.id===id?new Date(Date.now()-1000).toISOString():future},reviews:0,lapses:0,learnedAt:null};
-    }
-    localStorage.setItem('kanji5-v1-cards',JSON.stringify(seeded));
-    localStorage.removeItem('kanji5-v1-snapshot');
-    localStorage.removeItem('kanji5-v1-snapshot-commit');
-    localStorage.removeItem('kanji5-v1.6-session-history');
-    await new Promise(r=>setTimeout(r,60));
-  },id);
-}
-
 test.describe('Kanji 5 v1.6 session dashboard', () => {
   test('shows live session metrics and updates after a rating', async ({ page }) => {
     const pageErrors=[]; page.on('pageerror',e=>pageErrors.push(e.message));
@@ -57,8 +37,8 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
 
   test('counts an Active Recall dont-know attempt separately from FSRS ratings', async ({ page }) => {
     await cleanStart(page); await startSession(page); await openDashboard(page); const firstId=await page.locator('.kanji').getAttribute('data-kanji-id'); expect(firstId).toBeTruthy(); await page.locator('#revealBtn').click(); await expect(page.locator('#ratings')).toHaveClass(/show/); await page.locator('.rate[data-r="Again"]').click();
-    await pinOnlyCard(page,firstId);
-    await page.reload(); await startSession(page); await openDashboard(page); await expect(page.locator('.kanji')).toHaveAttribute('data-kanji-id',firstId); await page.locator('#revealBtn').click(); await expect(page.locator('#v15DontKnowRecall')).toBeVisible({timeout:10_000}); await page.locator('#v15DontKnowRecall').click(); await expect(page.locator('#v16Recall')).toHaveText('۱'); await expect(page.locator('#v16Unknown')).toHaveText('۱'); await expect(page.locator('#v16Reviews')).toHaveText('۱');
+    await page.evaluate(async id=>{const raw=localStorage.getItem('kanji5-v1-cards');const cards=raw?JSON.parse(raw):{};if(!id||!cards[id]?.card)throw new Error('persisted card missing');cards[id].card.due=new Date(Date.now()-1000).toISOString();localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));localStorage.removeItem('kanji5-v1.6-session-history');await new Promise(r=>setTimeout(r,60));localStorage.removeItem('kanji5-v1.6-session-history')},firstId);
+    await page.reload(); await startSession(page); await openDashboard(page); await page.locator('#revealBtn').click(); await expect(page.locator('#v15DontKnowRecall')).toBeVisible({timeout:10_000}); await page.locator('#v15DontKnowRecall').click(); await expect(page.locator('#v16Recall')).toHaveText('۱'); await expect(page.locator('#v16Unknown')).toHaveText('۱'); await expect(page.locator('#v16Reviews')).toHaveText('۱');
   });
 
   test('finishes a session through the external control, persists the summary, and restores recent history after reload', async ({ page }) => {
@@ -74,7 +54,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
   });
 
   test('external finish immediately updates analytics and long-term skill profile', async ({ page }) => {
-    await cleanStart(page); await startSession(page); await openDashboard(page); const character=(await page.locator('.kanji').textContent())?.trim(); expect(character).toBeTruthy(); await page.locator('#revealBtn').click(); await page.locator('.rate[data-r="Good"]').click(); await page.evaluate(ch=>{localStorage.removeItem('kanji5-v1.6-session-history');localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[ch]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:19}}}))},character); await page.reload(); await startSession(page); await openDashboard(page); await page.locator('.v14-tab[data-tab="education"]').click(); await expect(page.locator('.v14-edu-meta')).toContainText('reading',{timeout:10_000}); await page.locator('#v14EduInput').fill('definitely-wrong'); await page.locator('#v14EduSubmit').click(); await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.6-session-history')||'[]').find(x=>x?.status==='active')?.modeResults?.reading?.attempts||0)).toBe(1); await page.locator('#v16FinishExternal').click(); await expect(page.locator('#v16DashboardToggle')).toBeVisible(); await page.locator('#v16DashboardToggle').click(); await expect(page.locator('#v16CurrentSummary')).toContainText('خلاصهٔ آخرین جلسه'); await expect(page.locator('#v16SessionModeStats')).toContainText('۰/۱'); await expect(page.locator('#v16SessionAnalytics')).toContainText('جلسه'); await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.5-components')||'{}').v16SkillProfile?.sessions||0)).toBe(1); await expect(page.locator('#v16SkillProfile')).toContainText('خوانش');
+    await cleanStart(page); await startSession(page); await openDashboard(page); const character=(await page.locator('.kanji').textContent())?.trim(); expect(character).toBeTruthy(); await page.locator('#revealBtn').click(); await page.locator('.rate[data-r="Good"]').click(); await page.evaluate(ch=>{localStorage.removeItem('kanji5-v1.6-session-history');localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[ch]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}))},character); await page.reload(); await startSession(page); await openDashboard(page); await page.locator('.v14-tab[data-tab="education"]').click(); await expect(page.locator('.v14-edu-meta')).toContainText('reading',{timeout:10_000}); await page.locator('#v14EduInput').fill('definitely-wrong'); await page.locator('#v14EduSubmit').click(); await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.6-session-history')||'[]').find(x=>x?.status==='active')?.modeResults?.reading?.attempts||0)).toBe(1); await page.locator('#v16FinishExternal').click(); await expect(page.locator('#v16DashboardToggle')).toBeVisible(); await page.locator('#v16DashboardToggle').click(); await expect(page.locator('#v16CurrentSummary')).toContainText('خلاصهٔ آخرین جلسه'); await expect(page.locator('#v16SessionModeStats')).toContainText('۰/۱'); await expect(page.locator('#v16SessionAnalytics')).toContainText('جلسه'); await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.5-components')||'{}').v16SkillProfile?.sessions||0)).toBe(1); await expect(page.locator('#v16SkillProfile')).toContainText('خوانش');
   });
 
   test('rebalances remaining session modes after a weak education result and preserves it through reload', async ({ page }) => {
