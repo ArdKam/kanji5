@@ -29,7 +29,7 @@ assert.match(session,/consumeMode/,'session runtime must expose planned-mode con
 assert.equal(session.includes('new MutationObserver'),false,'session runtime must not install a hot-path mutation observer');
 assert.match(session,/timerId=setInterval\(\(\)=>/,'session timer must use a single bounded interval');
 for(const [key,label] of [['meaning','معنی'],['reading','خوانش'],['production','تولید'],['vocabulary','واژگان'],['context','بافت']])assert.match(session,new RegExp(`\\['${key}','${label}'\\]`),`${key} skill metric missing`);
-assert.match(ui,/id='v16Start'/,'session UI runtime must own the session start control');
+assert.match(ui,/id=["']v16Start["']/,'session UI runtime must own the session start control');
 assert.match(ui,/__KANJI5_V16_SESSION_API__/,'session UI runtime must bind through the session API');
 assert.match(ui,/v16DashboardToolbar/,'session UI runtime must own the dashboard toolbar');
 assert.match(core,/export function buildSessionPlan/,'adaptive session planner missing');
