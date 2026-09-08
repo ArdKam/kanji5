@@ -32,7 +32,7 @@ test.describe('Kanji 5 v1.6 session dashboard', () => {
     await cleanStart(page); await startSession(page); await openDashboard(page);
     await expect(page.locator('#v16Due')).toBeVisible(); await expect(page.locator('#v16New')).toBeVisible(); await expect(page.locator('#v16Mastered')).toBeVisible(); await expect(page.locator('#v16Streak')).toBeVisible();
     await expect(page.locator('#v16GoalText')).toContainText('هدف روزانه'); await expect(page.locator('#v16Reviews')).toHaveText('۰'); await expect(page.locator('#v16Recall')).toHaveText('۰'); await expect(page.locator('#v16Unknown')).toHaveText('۰'); await expect(page.locator('#v16Modes .v16-mode')).toHaveCount(5);
-    await page.locator('#revealBtn').click(); await expect(page.locator('#ratings')).toHaveClass(/show/); await page.locator('.rate[data-r="Good"]').click(); await expect(page.locator('#v16Reviews')).toHaveText('۱'); await expect(page.locator('#v16SessionText')).toContainText('۱ مرور');
+    await page.locator('#revealBtn').click(); await expect(page.locator('#ratings')).toHaveClass(/show/); await page.locator('.rate[data-r="Good"]').click(); await expect(page.locator('#v16Reviews')).toHaveText('۱'); await expect(page.locator('#v16SessionText')).toContainText('۱ مرور'); expect(pageErrors).toEqual([]);
   });
 
   test('counts an Active Recall dont-know attempt separately from FSRS ratings', async ({ page }) => {
