@@ -2,7 +2,7 @@ name: Build Kanji 5 v1.7
 
 on:
   push:
-    branches: [main, feature/v1.7, feature/v1.7-p0]
+    branches: [main, feature/v1.7, feature/v1.7-p0, feature/v1.7-p2b-integrated]
     paths:
       - 'v1.7-*.js'
       - 'v1.2-enhancements.js'
