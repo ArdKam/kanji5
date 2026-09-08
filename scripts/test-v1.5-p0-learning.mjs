@@ -8,6 +8,7 @@ const recallCore = read('v1.5-recall-core.js');
 const runtime = read('v1.2-runtime-fixes.js');
 const sw = read('sw.js');
 const ui = read('v1.5-education-ui.js');
+const production = read('v1.8-production-core.js');
 const has = (text, regex) => regex.test(text);
 const assert = (x, m) => { if (!x) throw new Error(m); };
 
@@ -18,9 +19,10 @@ assert(!runtime.includes('observer.observe(document.body'), 'Runtime example enr
 assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall back to the document body');
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('"./v1.5-recall-core.js"'), 'v1.5 recall core is not precached by the service worker');
+assert(sw.includes('"./v1.8-production-core.js"'), 'v1.8 Production grader is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
 const cacheVersion = sw.match(/const CACHE='kanji5-shell-v(\d+)'/)?.[1];
-assert(Number(cacheVersion)>=50, 'Runtime cache version was not bumped for v1.6');
+assert(Number(cacheVersion)>=65, 'Runtime cache version was not bumped for v1.8 Production');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(state.includes("const DEVICE_KEY='kanji5-device-id'"), 'State persistence boundary missing device identity');
 assert(state.includes("COMPONENT_KEY='kanji5-v1.5-components'"), 'Component-level knowledge store must belong to the state boundary');
@@ -32,5 +34,9 @@ assert(p0.includes("import('./v1.5-recall-core.js')"), 'P0 must delegate pure re
 assert(has(recallCore,/stats\.score\s*=\s*Number\(stats\.score\s*\|\|\s*0\)\s*\+\s*0\.25/), 'Unknown recall must carry a smaller educational weight than a correct recall');
 assert(!has(p0,/v15DontKnowReview/), 'Review “don’t know” must not be added');
 assert(!has(p0,/\.rate\.again/), 'Active Recall “don’t know” must not directly trigger FSRS Again');
-assert(ui.includes("else if(edu.mode==='production'){prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';"), 'Production must use a selection prompt');
-assert(ui.includes('${renderChoices(chooseChoices(item))}'), 'Production must render canonical four-choice options');
+assert(ui.includes("else if(edu.mode==='production'){prompt='با دیدن این معنی، کانجی را خودت تولید کن.';"), 'Production must use a learner-production prompt');
+assert(ui.includes('v14EduProductionInput'), 'Production must expose a dedicated learner input');
+assert(ui.includes('v1.8-production-core.js') && ui.includes('gradeProduction'), 'Production submission must use the dedicated deterministic grader');
+assert(production.includes('function gradeProduction') && production.includes('actual===expected'), 'Production grader must require exact normalized Kanji');
+
+console.log('Kanji 5 v1.5 learning contract updated and v1.8 Production integration checks passed.');
