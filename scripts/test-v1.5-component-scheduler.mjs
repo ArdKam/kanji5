@@ -1,12 +1,14 @@
 import fs from 'node:fs';
 const p0=fs.readFileSync('v1.5-p0.js','utf8');
+const state=fs.readFileSync('v1.5-state.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
-assert(p0.includes("KNOWLEDGE_KEY='kanji5-v1.2-knowledge'"),'Component evidence bridge missing knowledge key');
-assert(p0.includes('function componentSignal(entry)'),'Component signal calculation missing');
-assert(p0.includes('target.componentEvidence={...signal'),'Component evidence is not persisted into education knowledge');
+assert(p0.includes('state.readComponents()'),'Component evidence bridge must read component state through the state boundary');
+assert(p0.includes('function ensureComponentEntry(character)'),'Component entry initialization missing');
+assert(p0.includes('target.componentEvidence={...componentSignal(entry)'),'Component evidence is not persisted into education knowledge');
 assert(p0.includes('writeSchedulerComponentEvidence(character)'),'Component result is not forwarded to scheduler evidence');
+assert(state.includes('COMPONENT_KEY=\'kanji5-v1.5-components\''),'Canonical component storage key is missing from state module');
 assert(index.includes('entry.componentEvidence?.[mode]?.weakness'),'Education scheduler does not consume component evidence');
 assert(index.includes('const componentWeakness=componentValues.length?Math.max(...componentValues):0'),'Component weakness aggregation missing');
 assert(index.includes('+componentWeakness*.25'),'Component weakness is not weighted into queue priority');
-console.log('Kanji 5 v1.5 component-to-scheduler integration test passed.');
+console.log('Kanji 5 component-to-scheduler integration test passed.');
