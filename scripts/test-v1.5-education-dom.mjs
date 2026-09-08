@@ -1,11 +1,11 @@
 import fs from 'node:fs';
-const shim=fs.readFileSync('v1.4-education-ui.js','utf8');
 const ui=fs.readFileSync('v1.5-education-ui.js','utf8');
 const core=fs.readFileSync('v1.4-education-core.js','utf8');
+const migration=fs.readFileSync('v1.4-education-migration.js','utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
-assert(shim.includes('window.__KANJI5_EDU_CORE__'),'Compatibility shim must see the canonical education core');
-assert(shim.includes("import('./v1.5-education-ui.js')"),'Compatibility shim must hand active education UI to v1.5');
-assert(!shim.includes('startEducation'),'Retired v1.4 UI behavior must not remain in the compatibility shim');
+assert(migration.includes('window.__KANJI5_EDU_MIGRATION_API__'),'Education migration API must remain available for legacy data compatibility');
+assert(!migration.includes('__KANJI5_EDU_UI_V1_4__'),'Retired v1.4 UI marker must stay removed');
+assert(migration.includes("import('./v1.5-education-ui.js')"),'Migration boundary must hand active education UI to v1.5');
 assert(ui.includes('CORE.selectEducationItem')&&ui.includes('CORE.chooseBestExercise'),'Active education UI must use adaptive item/mode selection');
 assert(ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'Active education UI must use canonical grading');
 assert(ui.includes('CORE.recordKnowledge'),'Active education UI must use canonical knowledge recording');
