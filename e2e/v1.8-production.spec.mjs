@@ -49,7 +49,7 @@ async function currentTarget(page){
   });
 }
 
-test('renders Production as a real learner-input exercise and persists the outcome',async({page})=>{
+test('renders Production as a real learner-input exercise and persists a wrong outcome',async({page})=>{
   await cleanStart(page);
   await seedReviewedCard(page);
   await startReview(page);
@@ -74,4 +74,43 @@ test('grades an exact Production response as correct',async({page})=>{
   await pane.locator('#v14EduProductionInput').fill(target);
   await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ درست بود');
+  const production=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production||null,target);
+  expect(production?.attempts).toBeGreaterThan(0);
+  expect(production?.correct).toBeGreaterThan(0);
+});
+
+test('does not record an empty Production submission',async({page})=>{
+  await cleanStart(page);
+  await seedReviewedCard(page);
+  await startReview(page);
+  const pane=await openProduction(page);
+  const target=await currentTarget(page);
+  expect(target).toBeTruthy();
+  await pane.locator('#v14EduProductionInput').fill('');
+  await pane.locator('#v14EduSubmit').click();
+  await expect(pane.locator('#v14EduProductionInput')).toBeVisible();
+  const production=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production||null,target);
+  expect(production).toBeFalsy();
+});
+
+test('survives reload through the education state boundary',async({page})=>{
+  await cleanStart(page);
+  await seedReviewedCard(page);
+  await startReview(page);
+  let pane=await openProduction(page);
+  const target=await currentTarget(page);
+  expect(target).toBeTruthy();
+  await pane.locator('#v14EduProductionInput').fill('x');
+  await pane.locator('#v14EduSubmit').click();
+  await expect(pane).toContainText('پاسخ نادرست بود');
+  const before=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production?.attempts||0,target);
+  expect(before).toBeGreaterThan(0);
+
+  await page.reload();
+  await expect(page.locator('#app')).toBeVisible({timeout:20_000});
+  await startReview(page);
+  pane=await openProduction(page);
+  const after=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production?.attempts||0,target);
+  expect(after).toBeGreaterThanOrEqual(before);
+  await expect(pane.locator('#v14EduProductionInput')).toBeVisible();
 });
