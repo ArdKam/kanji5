@@ -28,5 +28,5 @@ assert.match(sw,/"\.\/v1\.6-session-analytics\.js"/);
 assert.match(sw,/"\.\/v1\.6-skill-profile\.js"/);
 assert.match(sw,/"\.\/v1\.6-sync-core\.js"/);
 assert.doesNotMatch(sw,/v1\.6-ui-hotfix-safe\.js/,'retired safe UI hotfix shim must stay out of the offline shell');
-assert.match(sw,/const CACHE='kanji5-shell-v64'/);
+assert.match(sw,/const CACHE='kanji5-shell-v65'/);
 console.log('Kanji 5 v1.6 temporal profile/feedback contract checks passed.');
