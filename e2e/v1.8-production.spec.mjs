@@ -25,6 +25,13 @@ async function startReview(page){
   await expect(page.locator('#v16Session')).toBeVisible();
 }
 
+async function resumeReview(page){
+  await expect(page.locator('#v16Start')).toBeHidden();
+  await expect(page.locator('#v16FinishExternal')).toBeVisible();
+  await page.locator('#v16DashboardToggle').click();
+  await expect(page.locator('#v16Session')).toBeVisible();
+}
+
 async function forceProductionMode(page){
   await page.evaluate(async()=>{
     await import('./v1.6-session-feedback.js');
@@ -108,7 +115,7 @@ test('survives reload through the education state boundary',async({page})=>{
 
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20_000});
-  await startReview(page);
+  await resumeReview(page);
   pane=await openProduction(page);
   const after=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.production?.attempts||0,target);
   expect(after).toBeGreaterThanOrEqual(before);
