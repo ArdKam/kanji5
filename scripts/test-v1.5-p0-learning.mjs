@@ -43,7 +43,7 @@ assert(production.includes('function gradeProduction') && production.includes('a
 assert(has(ui,/const check=\(edu\.mode==='meaning'\|\|edu\.mode==='reading'\|\|edu\.mode==='production'\|\|edu\.mode==='vocabulary'\)\?/), 'Production and Vocabulary must render submit controls');
 assert(ui.includes('v14EduVocabularyInput'), 'Vocabulary must expose a dedicated learner input');
 assert(ui.includes('v1.8-vocabulary-core.js') && ui.includes('gradeVocabulary'), 'Vocabulary submission must use the dedicated deterministic grader');
-assert(vocabulary.includes('function gradeVocabulary') && vocabulary.includes('value === answer'), 'Vocabulary grader must compare normalized learner input to canonical expected word');
+assert(vocabulary.includes('function gradeVocabulary') && /value\s*===\s*answer/.test(vocabulary), 'Vocabulary grader must compare normalized learner input to canonical expected word');
 assert(ui.includes("edu.word?.word||''"), 'Vocabulary grading must use external vocabulary only as content support and pass the canonical word into the local grader');
 assert(!ui.includes('placeholder="مثلاً: ${safe(edu.word.word)}"'), 'Vocabulary input placeholder must not leak the answer');
 
