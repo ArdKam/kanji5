@@ -9,6 +9,7 @@ const runtime = read('v1.2-runtime-fixes.js');
 const sw = read('sw.js');
 const ui = read('v1.5-education-ui.js');
 const production = read('v1.8-production-core.js');
+const vocabulary = read('v1.8-vocabulary-core.js');
 const has = (text, regex) => regex.test(text);
 const assert = (x, m) => { if (!x) throw new Error(m); };
 
@@ -20,9 +21,10 @@ assert(!runtime.includes('|| document.body'), 'Runtime observer must not fall ba
 assert(sw.includes('"./v1.5-p0.js"'), 'v1.5 P0 runtime is not precached by the service worker');
 assert(sw.includes('"./v1.5-recall-core.js"'), 'v1.5 recall core is not precached by the service worker');
 assert(sw.includes('"./v1.8-production-core.js"'), 'v1.8 Production grader is not precached by the service worker');
+assert(sw.includes('"./v1.8-vocabulary-core.js"'), 'v1.8 Vocabulary grader is not precached by the service worker');
 assert(!sw.includes('"./v1.5-education-choice-enforcer.js"'), 'Obsolete Production choice enforcer is still precached');
 const cacheVersion = sw.match(/const CACHE='kanji5-shell-v(\d+)'/)?.[1];
-assert(Number(cacheVersion)>=64, 'Runtime cache version must remain compatible with the existing v1.6/v1.7 shell contract');
+assert(Number(cacheVersion)>=65, 'Runtime cache version must include the v1.8 Vocabulary shell update');
 assert(sw.includes('staleWhileRevalidate'), 'Shell navigation lost stale-while-revalidate');
 assert(state.includes("const DEVICE_KEY='kanji5-device-id'"), 'State persistence boundary missing device identity');
 assert(state.includes("COMPONENT_KEY='kanji5-v1.5-components'"), 'Component-level knowledge store must belong to the state boundary');
@@ -38,6 +40,11 @@ assert(ui.includes("else if(edu.mode==='production'){prompt='با دیدن ای�
 assert(ui.includes('v14EduProductionInput'), 'Production must expose a dedicated learner input');
 assert(ui.includes('v1.8-production-core.js') && ui.includes('gradeProduction'), 'Production submission must use the dedicated deterministic grader');
 assert(production.includes('function gradeProduction') && production.includes('actual===expected'), 'Production grader must require exact normalized Kanji');
-assert(ui.includes("const check=(edu.mode==='meaning'||edu.mode==='reading'||edu.mode==='production')?"), 'Production must render a submit control');
+assert(has(ui,/const check=\(edu\.mode==='meaning'\|\|edu\.mode==='reading'\|\|edu\.mode==='production'\|\|edu\.mode==='vocabulary'\)\?/), 'Production and Vocabulary must render submit controls');
+assert(ui.includes('v14EduVocabularyInput'), 'Vocabulary must expose a dedicated learner input');
+assert(ui.includes('v1.8-vocabulary-core.js') && ui.includes('gradeVocabulary'), 'Vocabulary submission must use the dedicated deterministic grader');
+assert(vocabulary.includes('function gradeVocabulary') && /value\s*===\s*answer/.test(vocabulary), 'Vocabulary grader must compare normalized learner input to canonical expected word');
+assert(ui.includes("edu.word?.word||''"), 'Vocabulary grading must use external vocabulary only as content support and pass the canonical word into the local grader');
+assert(!ui.includes('placeholder="مثلاً: ${safe(edu.word.word)}"'), 'Vocabulary input placeholder must not leak the answer');
 
-console.log('Kanji 5 v1.5 learning contract updated and v1.8 Production integration checks passed.');
+console.log('Kanji 5 v1.5 learning contract and v1.8 Production/Vocabulary integration checks passed.');

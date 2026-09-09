@@ -25,7 +25,7 @@ assert.match(architecture, /## (CI and release gates|Testing and release gates)/
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m, 'CI workflow must be named for v1.6');
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/, 'CI must run the explicit v1.6 release contract');
 assert.doesNotMatch(sw, /v1\.6-ui-hotfix-safe\.js/, 'retired safe UI hotfix shim must stay out of the service-worker shell');
-assert.match(sw, /const CACHE='kanji5-shell-v64'/, 'service-worker shell cache must be v64 after shim retirement');
+assert.match(sw, /const CACHE='kanji5-shell-v65'/, 'service-worker shell cache must be v65 for the v1.8 Vocabulary shell update');
 assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false, 'obsolete UI runtime must not remain in the release tree');
 assert.equal(fs.existsSync('v1.6-ui-hotfix-safe.js'), false, 'retired safe UI shim must not remain in the release tree');
 assert.match(session, /kanji5:v1\.6-session-finished/, 'session runtime must emit the v1.6 session-finished lifecycle event');
@@ -40,26 +40,11 @@ assert.match(session, /timerId=setInterval\(\(\)=>/, 'session timer must use a s
 assert.match(session, /clearInterval\(timerId\)/, 'session timer must stop explicitly');
 
 for (const path of [
-  'v1.6-session.js',
-  'v1.6-session-core.js',
-  'v1.6-session-feedback.js',
-  'v1.6-session-analytics.js',
-  'v1.6-skill-profile.js',
-  'v1.6-sync-core.js'
-]) {
-  assert.ok(fs.existsSync(path), `required v1.6 runtime file missing: ${path}`);
-}
+  'v1.6-session.js','v1.6-session-core.js','v1.6-session-feedback.js','v1.6-session-analytics.js','v1.6-skill-profile.js','v1.6-sync-core.js'
+]) assert.ok(fs.existsSync(path), `required v1.6 runtime file missing: ${path}`);
 
 for (const path of [
-  'scripts/test-v1.6-session.mjs',
-  'scripts/test-v1.6-session-core.mjs',
-  'scripts/test-v1.6-profile-planning.mjs',
-  'scripts/test-v1.6-session-feedback.mjs',
-  'scripts/test-v1.6-session-analytics.mjs',
-  'scripts/test-v1.6-skill-profile.mjs',
-  'scripts/test-v1.6-sync.mjs'
-]) {
-  assert.ok(fs.existsSync(path), `required v1.6 contract missing: ${path}`);
-}
+  'scripts/test-v1.6-session.mjs','scripts/test-v1.6-session-core.mjs','scripts/test-v1.6-profile-planning.mjs','scripts/test-v1.6-session-feedback.mjs','scripts/test-v1.6-session-analytics.mjs','scripts/test-v1.6-skill-profile.mjs','scripts/test-v1.6-sync.mjs'
+]) assert.ok(fs.existsSync(path), `required v1.6 contract missing: ${path}`);
 
 console.log('Kanji 5 v1.6 compatibility release contract checks passed.');
