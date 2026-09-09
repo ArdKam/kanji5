@@ -46,5 +46,6 @@ assert.match(education,/consumeMode/,'education UI must consume a planned mode o
 assert.match(education,/kanji5:v1\.6-education-result/,'education UI must emit session feedback outcomes');
 for(const file of ['v1.6-session-ui.js','v1.6-session.js','v1.6-session-core.js','v1.6-session-feedback.js','v1.6-session-analytics.js','v1.6-skill-profile.js','v1.6-sync-core.js'])assert.match(sw,new RegExp(`"\\.\\/${file.replace(/[-/.]/g,'\\$&')}"`),`${file} must be offline-precached`);
 assert.doesNotMatch(sw,/v1\.6-ui-hotfix-safe\.js/,'retired safe UI hotfix must not be offline-precached');
-assert.match(sw,/const CACHE='kanji5-shell-v64'/,'service-worker cache must remain bumped after shim retirement');
+assert.match(sw,/const CACHE='kanji5-shell-v65'/,'service-worker cache must include the v1.8 Vocabulary shell update');
+assert.match(sw,/"\.\/v1\.8-vocabulary-core\.js"/,'Vocabulary grader must be offline-precached');
 console.log('Kanji 5 v1.6 session contract checks passed.');
