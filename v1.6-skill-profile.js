@@ -24,4 +24,5 @@ publish(read());
 update();
 document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(update,0));
 document.addEventListener('kanji5:v1.6-education-result',()=>{publish(read())});
+void import('./v1.9-learner-model.js').catch(()=>{});
 })();
