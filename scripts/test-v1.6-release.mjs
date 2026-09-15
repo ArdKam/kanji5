@@ -13,7 +13,7 @@ const profile = read('v1.6-skill-profile.js');
 const sync = read('v1.6-sync-core.js');
 const session = read('v1.6-session.js');
 
-assert.match(packageJson.version, /^1\.(6|7)\.0$/);
+assert.match(packageJson.version, /^1\.(6|7|8)\.0$/);
 assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-release\.mjs/);
 assert.match(readme, /^## v1\.6 — Adaptive Session Intelligence$/m);
 assert.match(readme, /## v1\.6 release contract/);
@@ -25,7 +25,7 @@ assert.match(architecture, /## (CI and release gates|Testing and release gates)/
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m);
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/);
 assert.doesNotMatch(sw, /v1\.6-ui-hotfix-safe\.js/);
-assert.match(sw, /const CACHE='kanji5-shell-v66'/);
+assert.match(sw, /const CACHE='kanji5-shell-v67'/);
 assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false);
 assert.equal(fs.existsSync('v1.6-ui-hotfix-safe.js'), false);
 assert.match(session, /kanji5:v1\.6-session-finished/);
