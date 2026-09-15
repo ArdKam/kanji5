@@ -5,9 +5,9 @@ import vm from 'node:vm';
 let components={};
 const state={
   readSessionHistory:()=>[
-    {sessionId:'s1',endedAt:'2026-09-10T10:00:00Z',modeResults:{production:{attempts:2,correct:0,lastCorrect:false},meaning:{attempts:2,correct:2}}},
-    {sessionId:'s2',endedAt:'2026-09-11T10:00:00Z',modeResults:{production:{attempts:2,correct:1,lastCorrect:true},meaning:{attempts:2,correct:2}}},
-    {sessionId:'s3',endedAt:'2026-09-12T10:00:00Z',modeResults:{production:{attempts:2,correct:0,lastCorrect:false},meaning:{attempts:2,correct:2}}}
+    {sessionId:'s1',endedAt:'2026-09-10T10:00:00Z',modeResults:{production:{attempts:2,correct:0,lastCorrect:false},reading:{attempts:20,correct:20,lastCorrect:true},meaning:{attempts:2,correct:2}}},
+    {sessionId:'s2',endedAt:'2026-09-11T10:00:00Z',modeResults:{production:{attempts:2,correct:1,lastCorrect:true},reading:{attempts:20,correct:20,lastCorrect:true},meaning:{attempts:2,correct:2}}},
+    {sessionId:'s3',endedAt:'2026-09-12T10:00:00Z',modeResults:{production:{attempts:2,correct:0,lastCorrect:false},reading:{attempts:20,correct:20,lastCorrect:true},meaning:{attempts:2,correct:2}}}
   ],
   readComponents:()=>components,
   writeComponents:value=>{components=value;return true}
@@ -21,10 +21,13 @@ const api=context.window.__KANJI5_V16_SKILL_PROFILE__;
 assert.ok(api);
 assert.ok(api.update());
 const ranked=api.rank();
-assert.equal(ranked[0].mode,'production');
-assert.equal(ranked[0].recentErrors,2);
-assert.equal(ranked[0].recoveryRate,0.5);
 const production=ranked.find(x=>x.mode==='production');
+const reading=ranked.find(x=>x.mode==='reading');
+assert.ok(production);
+assert.ok(reading);
+assert.equal(production.recentErrors,2);
+assert.equal(production.recoveryRate,0.5);
 assert.equal(production.momentum,0);
-assert.ok(production.mastery<1);
+assert.ok(production.mastery<reading.mastery);
+assert.ok(production.accuracy<reading.accuracy);
 console.log('Kanji 5 v1.8 Learner Model contract passed.');
