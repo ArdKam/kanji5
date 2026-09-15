@@ -24,14 +24,12 @@ test('offline external-content failure falls back to local learning modes',async
     return deck.find(item=>item?.id&&ids.has(item.id))?.character||'';
   });
   expect(target).toBeTruthy();
-  await page.evaluate(async()=>{await import('./v1.5-network.js');await import('./v1.9-data-quality-core.js')});
+  await page.evaluate(async()=>{await import('./v1.5-network.js');await import('./v1.9-data-quality-core.js');const api=await caches.open('kanji5-api-v14');for(const key of await api.keys())await api.delete(key)});
   await page.context().setOffline(true);
   const result=await page.evaluate(async(character)=>{
     const network=await import('./v1.5-network.js');
     const quality=await import('./v1.9-data-quality-core.js');
-    const words=await network.fetchWords(character);
-    const contexts=await network.fetchContextSentences(character);
-    return {words,contexts,vocabularyFallback:quality.safeContentFallback(['vocabulary'],['meaning','reading','production']),contextFallback:quality.safeContentFallback(['context'],['meaning','reading','production'])};
+    return {words:await network.fetchWords(character),contexts:await network.fetchContextSentences(character),vocabularyFallback:quality.safeContentFallback(['vocabulary'],['meaning','reading','production']),contextFallback:quality.safeContentFallback(['context'],['meaning','reading','production'])};
   },target);
   expect(result.words).toEqual([]);expect(result.contexts).toEqual([]);
   expect(result.vocabularyFallback).toMatch(/meaning|reading|production/);expect(result.contextFallback).toMatch(/meaning|reading|production/);
@@ -42,7 +40,7 @@ test('offline local grading remains available after remote content failure',asyn
   await page.evaluate(async()=>{await import('./v1.8-production-core.js');await import('./v1.9-outcome-core.js')});
   await page.context().setOffline(true);
   const result=await page.evaluate(async()=>{
-    const core=await import('./v1.8-production-core.js');
+    const core=globalThis.__KANJI5_V18_PRODUCTION__;
     const outcome=await import('./v1.9-outcome-core.js');
     const grade=core.gradeProduction('学','学');
     return outcome.normalizeOutcome('production',grade,{graderVersion:'offline-test'});
