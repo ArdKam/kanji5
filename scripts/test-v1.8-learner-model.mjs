@@ -11,7 +11,7 @@ const state={
   readComponents:()=>({}),
   writeComponents:()=>true
 };
-const document={getElementById:()=>null};
+const document={getElementById:()=>null,addEventListener(){}};
 const context={window:{},globalThis:{},document,Date,JSON,setTimeout,clearTimeout};
 context.window.__KANJI5_STATE__=state;
 vm.createContext(context);
