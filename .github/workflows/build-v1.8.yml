@@ -70,6 +70,8 @@ jobs:
           node --check v1.9-outcome-core.js
           node --check v1.9-learner-model-core.js
           node --check v1.9-learner-model.js
+          node --check v1.9-adaptive-planner-core.js
+          node --check v1.9-adaptive-planner.js
           node --check v1.8-production-core.js
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
@@ -88,4 +90,4 @@ jobs:
         run: |
           npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium
-          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs e2e/v1.9-p0-outcome.spec.mjs e2e/v1.9-p1-learner-model.spec.mjs
+          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs e2e/v1.9-p0-outcome.spec.mjs e2e/v1.9-p1-learner-model.spec.mjs e2e/v1.9-p2-adaptive-planner.spec.mjs

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {buildPlan,nextTask,scoreAttribute,PLANNER_VERSION,BEHAVIORS} from '../v1.9-adaptive-planner-core.js';
+const base={meaning:{state:'mastered',accuracy:.95,confidence:.9,attempts:10},reading:{state:'weak',accuracy:.5,confidence:.5,attempts:6,errorStreak:2,repeatedFailure:true,uncertaintyState:'low'},production:{state:'stable',accuracy:.9,confidence:.7,attempts:8},vocabulary:{state:'unseen',accuracy:0,confidence:0,attempts:0},context:{state:'recovering',accuracy:.7,confidence:.6,attempts:5,momentum:.2}};
+const p=buildPlan({attributes:base,availableModes:Object.keys(base),recentModes:['reading'],budget:6});
+assert.equal(p.version,PLANNER_VERSION);assert.equal(p.plan.length,6);assert.ok(p.counts.reading>=1);assert.ok(BEHAVIORS.includes(p.plan[0].behavior));assert.ok(p.plan[0].reason.length>0);
+assert.ok(scoreAttribute(base.reading,{mode:'reading',lastMode:'context'})>scoreAttribute(base.meaning,{mode:'meaning',lastMode:'context'}));
+const repeat=buildPlan({attributes:{meaning:{state:'learning',accuracy:.75,confidence:.5,attempts:3},reading:{state:'learning',accuracy:.75,confidence:.5,attempts:3}},availableModes:['meaning','reading'],recentModes:['meaning'],budget:4});
+assert.equal(repeat.plan.length,4);assert.equal(repeat.plan[0].mode,'reading');assert.equal(nextTask({attributes:base,availableModes:['meaning','reading'],recentModes:['reading'],remaining:1})?.mode,'reading');
+const empty=buildPlan({attributes:base,availableModes:[],budget:5});assert.equal(empty.plan.length,0);assert.deepEqual(empty.counts,{});
+console.log('Kanji 5 v1.9 adaptive planner fixtures passed.');

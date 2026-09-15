@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {rebalanceSessionPlan} from '../v1.6-session-core.js';
+const feedback=fs.readFileSync('v1.6-session-feedback.js','utf8');
+const plan={version:2,target:6,modes:[{mode:'meaning',plannedCount:3,share:.5,score:1},{mode:'reading',plannedCount:2,share:.333,score:1},{mode:'production',plannedCount:1,share:.167,score:.5},{mode:'vocabulary',plannedCount:0,share:0,score:.2},{mode:'context',plannedCount:0,share:0,score:.2}],priority:['meaning','reading','production']};
+const remaining={meaning:1,reading:2,production:1,vocabulary:0,context:0};
+const results={reading:{attempts:2,correct:0,lastCorrect:false},meaning:{attempts:2,correct:2,lastCorrect:true}};
+const out=rebalanceSessionPlan(plan,remaining,results,{now:Date.now()});
+assert.equal(Object.values(out.remaining).reduce((a,b)=>a+b,0),4);assert.equal(out.remaining.vocabulary,0);assert.equal(out.remaining.context,0);assert.equal(out.remaining.production>=0,true);
+assert.match(feedback,/rebalanceSessionPlan\(latest\.plan,latest\.remainingModes,latest\.modeResults/);assert.match(feedback,/next\.remainingModes=result\.remaining/);
+console.log('Kanji 5 v1.9 adaptive planner rebalance boundary passed.');
