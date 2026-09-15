@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {classifyRecoveryOutcome,createRecoveryState,applyRecoveryOutcome,consumeRetry,canRetry,isRecovered,RECOVERY_VERSION} from '../v1.9-recovery-core.js';
+const wrong=classifyRecoveryOutcome({mode:'reading',outcome:'wrong',correct:false},{mode:'reading',answerEvidence:{expected:'がく'}});
+assert.equal(wrong.version,RECOVERY_VERSION);assert.equal(wrong.feedbackKind,'wrong');assert.equal(wrong.retryable,true);assert.equal(wrong.recoveryEligible,true);
+const unknown=classifyRecoveryOutcome({mode:'meaning',outcome:'unknown',correct:false});assert.equal(unknown.feedbackKind,'did_not_know');assert.equal(unknown.retryable,true);
+const near=classifyRecoveryOutcome({mode:'context',quality:'partial',correct:false});assert.equal(near.outcome,'near_miss');assert.equal(near.retryable,true);
+const state=createRecoveryState('reading',{startedAt:'2026-09-15T00:00:00.000Z'});const pending=applyRecoveryOutcome(state,wrong);assert.equal(pending.state,'pending_retry');assert.equal(canRetry(pending),true);
+const retrying=consumeRetry(pending,'2026-09-15T00:01:00.000Z');assert.equal(retrying.state,'retrying');assert.equal(retrying.retryCount,1);assert.equal(canRetry(retrying),false);
+const recovered=applyRecoveryOutcome(retrying,{mode:'reading',outcome:'correct',correct:true});assert.equal(recovered.state,'recovered');assert.equal(isRecovered(recovered),true);
+const second=applyRecoveryOutcome(pending,{mode:'reading',outcome:'wrong',correct:false});assert.equal(second.state,'pending_retry');const exhausted=consumeRetry(retrying,'2026-09-15T00:02:00.000Z');assert.equal(exhausted.state,'retrying');
+const correct=applyRecoveryOutcome(createRecoveryState('meaning'),{mode:'meaning',outcome:'correct',correct:true});assert.equal(correct.state,'idle');
+console.log('Kanji 5 v1.9 recovery core state machine passed.');
