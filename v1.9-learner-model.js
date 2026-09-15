@@ -20,4 +20,5 @@ document.addEventListener('kanji5:v1.6-education-result',e=>{const d=e?.detail||
 void import('./v1.9-adaptive-planner.js').catch(()=>{});
 void import('./v1.9-recovery.js').catch(()=>{});
 void import('./v1.9-recovery-ui.js').catch(()=>{});
+void import('./v1.9-learning-evaluation.js').catch(()=>{});
 })();
