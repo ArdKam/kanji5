@@ -11,7 +11,8 @@ const state={
   readComponents:()=>({}),
   writeComponents:()=>true
 };
-const context={window:{},globalThis:{},Date,JSON,setTimeout,clearTimeout};
+const document={getElementById:()=>null};
+const context={window:{},globalThis:{},document,Date,JSON,setTimeout,clearTimeout};
 context.window.__KANJI5_STATE__=state;
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('v1.6-skill-profile.js','utf8'),context);
