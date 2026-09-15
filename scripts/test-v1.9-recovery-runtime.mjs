@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const runtime=fs.readFileSync('v1.9-recovery.js','utf8');
+const ui=fs.readFileSync('v1.9-recovery-ui.js','utf8');
+const planner=fs.readFileSync('v1.9-adaptive-planner.js','utf8');
+const learner=fs.readFileSync('v1.9-learner-model.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+assert.match(runtime,/v1\.9-recovery-core\.js/);assert.match(runtime,/sessionStorage/);assert.match(runtime,/v1\.6-education-result/);assert.match(runtime,/v1\.9-feedback/);assert.match(runtime,/retry\(\)/);assert.match(runtime,/consumeRetry/);
+assert.match(ui,/v19RetryBtn/);assert.match(ui,/v1\.9-feedback/);assert.match(ui,/__KANJI5_V19_RECOVERY__/);
+assert.match(planner,/__KANJI5_V19_RECOVERY_NEXT_MODE__/);assert.match(planner,/RECOVERY_NEXT_MODE_USED/);
+assert.match(learner,/v1\.9-recovery\.js/);assert.match(learner,/v1\.9-recovery-ui\.js/);
+assert.match(sw,/v1\.9-recovery-core\.js/);assert.match(sw,/v1\.9-recovery\.js/);assert.match(sw,/v1\.9-recovery-ui\.js/);
+console.log('Kanji 5 v1.9 recovery runtime boundaries passed.');
