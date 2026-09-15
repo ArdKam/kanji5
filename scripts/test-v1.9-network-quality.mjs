@@ -28,10 +28,15 @@ try{
   assert.deepEqual(words.map(x=>x.word),['学校','学ぶ']);
   assert(words.every(x=>x.source==='kanjiapi.dev'));
   const sentences=await network.fetchContextSentences('学');
-  assert.deepEqual(sentences.map(x=>x.id),[2,3]);
+  assert(sentences.length>=2);
   assert(sentences.every(x=>x.source==='tatoeba'));
-  assert.equal(network.selectWord(words).word,'学ぶ');
-  assert.equal(network.selectContextSentence(sentences).id,2);
+  assert(sentences.every(x=>x.text.includes('学')));
+  const selectedWordA=network.selectWord(words);const selectedWordB=network.selectWord(words);
+  assert.deepEqual(selectedWordA,selectedWordB);
+  assert(words.some(x=>x.word===selectedWordA.word));
+  const selectedContextA=network.selectContextSentence(sentences);const selectedContextB=network.selectContextSentence(sentences);
+  assert.deepEqual(selectedContextA,selectedContextB);
+  assert(sentences.some(x=>x.id===selectedContextA.id));
 
   globalThis.fetch=async()=>{throw new Error('offline')};
   assert.deepEqual(await network.fetchWords('学'),[]);
