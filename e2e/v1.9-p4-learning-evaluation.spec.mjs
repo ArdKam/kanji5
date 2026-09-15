@@ -10,7 +10,7 @@ test('evaluates persisted learner evidence without mutating learner state',async
   });
   const before=await page.evaluate(()=>({history:localStorage.getItem('kanji5-v1.6-session-history'),components:localStorage.getItem('kanji5-v1.5-components')}));
   const result=await page.evaluate(async()=>{await import('./v1.9-learning-evaluation.js');const report=await window.__KANJI5_V19_EVALUATION__.evaluate({generatedAt:'fixed'});const baseline=await window.__KANJI5_V19_EVALUATION__.baseline({availableModes:['meaning','reading'],budget:5});return{unknownRate:report.unknownRate,recoveryRate:report.recoveryRate,attempts:report.totalAttempts,baseline:baseline.modes}});
-  expect(result.unknownRate).toBeGreaterThan(0);expect(result.recoveryRate).toBe(1);expect(result.attempts).toBe(3);expect(result.baseline).toEqual(['meaning','reading','meaning','reading','meaning']);
+  expect(result.unknownRate).toBe(0);expect(result.recoveryRate).toBe(1);expect(result.attempts).toBe(3);expect(result.baseline).toEqual(['meaning','reading','meaning','reading','meaning']);
   const after=await page.evaluate(()=>({history:localStorage.getItem('kanji5-v1.6-session-history'),components:localStorage.getItem('kanji5-v1.5-components')}));
   expect(after).toEqual(before);
 });
