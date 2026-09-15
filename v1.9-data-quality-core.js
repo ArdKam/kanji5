@@ -74,10 +74,22 @@ export function validateContextList(items,character=''){
   return {items:dedupeStable(accepted,x=>`${x.id}|${x.text}|${x.english}`),rejected,version:DATA_QUALITY_VERSION};
 }
 
+function codePointCompare(left,right){
+  const a=String(left),b=String(right),length=Math.min(a.length,b.length);
+  for(let i=0;i<length;i++){
+    const ac=a.codePointAt(i),bc=b.codePointAt(i);
+    if(ac<bc)return -1;
+    if(ac>bc)return 1;
+    if(ac>0xffff)i++;
+    if(bc>0xffff)i++;
+  }
+  return a.length-b.length;
+}
+
 export function selectDeterministic(items,keyFn=value=>value){
   const list=Array.isArray(items)?items.filter(Boolean):[];
   if(!list.length)return null;
-  return [...list].sort((a,b)=>normalizeContentKey(keyFn(a)).localeCompare(normalizeContentKey(keyFn(b)))||JSON.stringify(a).localeCompare(JSON.stringify(b)))[0]||null;
+  return [...list].sort((a,b)=>codePointCompare(normalizeContentKey(keyFn(a)),normalizeContentKey(keyFn(b)))||codePointCompare(JSON.stringify(a),JSON.stringify(b)))[0]||null;
 }
 
 export function safeContentFallback(preferredModes,availableModes,fallbackModes=['meaning','reading','production']){
