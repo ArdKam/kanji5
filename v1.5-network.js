@@ -1,3 +1,5 @@
+import { validateVocabularyList, validateContextList, selectDeterministic } from './v1.9-data-quality-core.js';
+
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
 
@@ -19,14 +21,15 @@ export async function fetchWords(character){
     for(const variant of Array.isArray(entry?.variants)?entry.variants:[]){
       const word=String(variant?.written||'');
       const reading=String(variant?.pronounced||'');
-      if(!word.includes(character)||!reading||seen.has(word))continue;
+      const meaning=(Array.isArray(entry?.meanings)?entry.meanings:[]).flatMap(m=>Array.isArray(m?.glosses)?m.glosses:[]).slice(0,2).join('; ');
+      if(!word.includes(character)||!reading||!meaning||seen.has(word))continue;
       seen.add(word);
-      out.push({word,reading,meaning:(Array.isArray(entry?.meanings)?entry.meanings:[]).flatMap(m=>Array.isArray(m?.glosses)?m.glosses:[]).slice(0,2).join('; ')});
-      if(out.length>=12)break;
+      out.push({word,reading,meaning,source:'kanjiapi.dev'});
+      if(out.length>=24)break;
     }
-    if(out.length>=12)break;
+    if(out.length>=24)break;
   }
-  return out;
+  return validateVocabularyList(out,character).items.slice(0,12);
 }
 
 export async function fetchContextSentences(character){
@@ -37,7 +40,7 @@ export async function fetchContextSentences(character){
   url.searchParams.set('trans:is_direct','yes');
   url.searchParams.set('is_orphan','no');
   url.searchParams.set('is_unapproved','no');
-  url.searchParams.set('limit','12');
+  url.searchParams.set('limit','24');
   const payload=await requestJSON(url.toString());
   const rows=Array.isArray(payload?.data)?payload.data:[];
   const out=[],seen=new Set();
@@ -48,8 +51,16 @@ export async function fetchContextSentences(character){
     const english=translations.flatMap(x=>Array.isArray(x)?x:[x]).map(x=>String(x?.text||'').trim()).find(Boolean)||'';
     if(!english)continue;
     seen.add(text);
-    out.push({id:row?.id||'',text,english});
-    if(out.length>=8)break;
+    out.push({id:row?.id||'',text,english,source:'tatoeba'});
+    if(out.length>=16)break;
   }
-  return out;
+  return validateContextList(out,character).items.slice(0,8);
+}
+
+export function selectWord(words){
+  return selectDeterministic(words,x=>`${x?.word||''}|${x?.reading||''}`);
+}
+
+export function selectContextSentence(sentences){
+  return selectDeterministic(sentences,x=>`${x?.text||''}|${x?.english||''}`);
 }
