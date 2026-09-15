@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const wf=fs.readFileSync('.github/workflows/build-v1.8.yml','utf8');
+const all=fs.readFileSync('scripts/test-all.mjs','utf8');
+for(const name of ['test-v1.8-adaptive.mjs','test-v1.8-evaluation.mjs','test-v1.8-learner-model.mjs','test-v1.8-ux-runtime.mjs','test-v1.8-runtime-quality.mjs','test-v1.8-release.mjs','test-v1.8-p0-c.mjs'])assert.ok(fs.existsSync(`scripts/${name}`),`${name} must exist`);
+assert.match(wf,/npm test/);
+assert.match(wf,/playwright test/);
+assert.match(wf,/node --check/);
+assert.match(all,/test-\*\.mjs/);
+console.log('Kanji 5 v1.8 Engineering contract passed.');
