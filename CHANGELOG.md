@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.8.0] — 2026-09-15
+
+### Added
+- Learner-input Production Recall with a deterministic offline grader.
+- Learner-input Vocabulary Recall with a deterministic offline grader.
+- Learner-input Context Recall with a deterministic offline grader and safe network-backed content retrieval.
+- Browser E2E coverage for Production, Vocabulary, and Context recall, including persistence and empty-answer behavior.
+- v1.8 release-gate workflow covering syntax, aggregate contract tests, browser E2E, and runtime/offline contracts.
+
+### Changed
+- Bumped the package version to `1.8.0`.
+- Closed P0-C Context Recall as the final P0 implementation milestone.
+- Kept FSRS unchanged as the card-level scheduler; v1.8 operates through the existing education/session feedback boundary.
+- Added v1.8 roadmap release gates so adaptive milestones are not declared complete without test-backed contracts.
+
+### Compatibility
+- Existing v1.6/v1.7 state and session data remains supported.
+- External vocabulary/context APIs remain content providers only; grading stays deterministic and local.
+- Production, Vocabulary, and Context outcomes continue to use separate education attributes.
+
+### Verification
+- The v1.8 workflow runs all repository contract/unit tests plus active v1.7/v1.8 browser suites.
+- Release publication requires package version, runtime wiring, documentation, and release-contract checks to pass.
+
 ## [1.7.0] — 2026-09-08
 
 ### Added

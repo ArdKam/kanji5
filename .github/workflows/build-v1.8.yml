@@ -1,76 +1,80 @@
-name: Build Kanji 5 v1.7
+# v1.8 final validation gate
+name: Build Kanji 5 v1.8
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'feature/v1.8**'
     paths:
-      - 'v1.7-*.js'
       - 'v1.8-*.js'
-      - 'v1.4-education-core.js'
-      - 'v1.3-storage-bridge.js'
-      - 'v1.5-state.js'
+      - 'v1.7-*.js'
+      - 'v1.6-*.js'
+      - 'v1.5-*.js'
+      - 'v1.4-*.js'
+      - 'v1.3-*.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
-      - 'scripts/build-kanji-data.mjs'
-      - 'e2e/v1.7-*.mjs'
       - 'e2e/v1.8-*.mjs'
-      - 'V1.7-ROADMAP.md'
+      - 'e2e/v1.7-*.mjs'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
       - 'README.md'
       - 'package.json'
       - 'sw.js'
-      - '.github/workflows/build-v1.7.yml'
+      - 'index.html'
+      - '.github/workflows/build-v1.8.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'v1.7-*.js'
       - 'v1.8-*.js'
-      - 'v1.4-education-core.js'
-      - 'v1.3-storage-bridge.js'
-      - 'v1.5-state.js'
+      - 'v1.7-*.js'
+      - 'v1.6-*.js'
+      - 'v1.5-*.js'
+      - 'v1.4-*.js'
+      - 'v1.3-*.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
-      - 'scripts/build-kanji-data.mjs'
-      - 'e2e/v1.7-*.mjs'
       - 'e2e/v1.8-*.mjs'
-      - 'ARCHITECTURE.md'
-      - 'V1.7-ROADMAP.md'
+      - 'e2e/v1.7-*.mjs'
       - 'V1.8-ROADMAP.md'
+      - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
       - 'README.md'
       - 'package.json'
       - 'sw.js'
-      - '.github/workflows/build-v1.7.yml'
+      - 'index.html'
+      - '.github/workflows/build-v1.8.yml'
 
 permissions:
   contents: read
 
 jobs:
-  validate-v1-7:
+  validate-v1-8:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate JavaScript
+      - name: Validate JavaScript syntax
         run: |
-          node --check v1.3-storage-bridge.js
-          node --check v1.4-education-core.js
-          node --check v1.5-state.js
+          node --check v1.8-production-core.js
+          node --check v1.8-vocabulary-core.js
+          node --check v1.8-context-core.js
           node --check v1.7-adaptive-recall-core.js
           node --check v1.7-evaluation-core.js
           node --check v1.7-baseline-evaluation-core.js
           node --check v1.7-tuning-core.js
-          node --check v1.8-production-core.js
-          node --check v1.8-vocabulary-core.js
-          node --check v1.8-context-core.js
-          node --check v1.2-enhancements.js
+          node --check v1.6-session-core.js
+          node --check v1.6-session-feedback.js
+          node --check v1.6-skill-profile.js
+      - name: Validate package and release contract
+        run: node scripts/test-v1.8-release.mjs
       - name: Run all contract and unit tests
         run: npm test
-      - name: Run active release browser tests
+      - name: Run v1.7/v1.8 browser coverage
         run: |
           npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium

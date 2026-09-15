@@ -54,15 +54,6 @@ v1.6 لایهٔ session را از یک dashboard صرف به یک چرخهٔ ada
 - **Durable Sync Core:** merge/replay لایهٔ v1.6 برای session history، component state و profile-aware state بدون انتقال منطق merge به transport
 - **Offline Runtime Contract:** تمام runtimeهای v1.6 در service worker precache شده‌اند و CI عدم mutation در checkout را بررسی می‌کند
 
-### v1.6 release contract
-قبل از اعلام release، این لایه‌ها باید همگی سبز باشند:
-
-1. syntax و pure-core tests
-2. session / feedback / analytics / skill-profile / sync contracts
-3. browser E2E و persistence/resume behavior
-4. committed-tree immutability و runtime wiring
-5. release contract شامل نسخهٔ package، مستندات و CI wiring v1.6
-
 ## v1.7 — Adaptive Attribute Recall
 v1.7 adaptive recall را از سطح card/session به سطح attribute یادگیری ارتقا می‌دهد، بدون جایگزین‌کردن FSRS یا شکستن جریان learning-first.
 
@@ -73,11 +64,25 @@ v1.7 adaptive recall را از سطح card/session به سطح attribute یاد�
 - **Evaluation & Tuning:** اندازه‌گیری accuracy/uncertainty/recovery، مقایسه با baseline پایدار و تولید توصیه‌های tuning فقط پس از کافی‌بودن evidence
 - **Browser coverage:** پوشش E2E برای رفتار adaptive recall و session continuity
 
+## v1.8 — Rich Learner-Facing Recall
+v1.8 سه mode واقعی learner-facing را به جریان آموزشی اضافه می‌کند و adaptive planning را با شواهد عملکردی همان session تقویت می‌کند:
+
+- **Production Recall:** تولید مستقیم Kanji از روی meaning با grader deterministic و آفلاین
+- **Vocabulary Recall:** تولید واژهٔ کامل با grader deterministic؛ API فقط content provider است
+- **Context Recall:** تکمیل Kanji حذف‌شده در جمله با grader deterministic و Tatoeba cache/fallback
+- **Adaptive Recall 2.0:** اولویت‌بندی modeها با weakness، recent errors، recovery evidence و momentum؛ FSRS همچنان scheduler سطح card است
+- **Longitudinal Evaluation:** نگهداری outcomeها به تفکیک attribute و مقایسهٔ adaptive/baseline فقط پس از کافی‌بودن evidence
+- **Learner Model:** mastery، recent accuracy، trend، error و recovery signal برای هدایت planner
+- **Learning UX:** feedback حداقلی و توضیح کوتاه دربارهٔ دلیل انتخاب تمرین، بدون dashboard پیچیده
+- **Offline/runtime quality:** graderهای v1.8 و UX runtime در service worker precache شده‌اند و shell cache نسخه‌بندی شده است
+
 ## Release status
 
-**v1.7.0 — release-ready implementation.** P0-A/P0-B/P0-C، P1 و P2 کامل و پس از merge روی `main` اعتبارسنجی شده‌اند. CI مربوط به v1.6 و v1.7 سبز است و نسخهٔ package برابر `1.7.0` است.
+**v1.8.0 — roadmap complete and all release gates green on `feature/v1.8-p0c-context-final4`.** P0-A through P6 are implemented and covered by the v1.8 release workflow.
 
-Production/vocabulary/context recall modes عمداً تا زمانی که exercise واقعی learner-facing و grader معتبر برای آن‌ها وجود نداشته باشد gated باقی می‌مانند.
+The final validation run passed JavaScript syntax checks, the v1.8 release contract, the full aggregate contract/unit suite (57/57), and browser E2E for v1.7 Adaptive Recall plus v1.8 Production/Vocabulary/Context.
+
+The branch is ready for normal review/merge; it has not been merged automatically.
 
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
