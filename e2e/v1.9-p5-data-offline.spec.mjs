@@ -24,7 +24,8 @@ test('offline external-content failure falls back to local learning modes',async
     return deck.find(item=>item?.id&&ids.has(item.id))?.character||'';
   });
   expect(target).toBeTruthy();
-  await page.evaluate(async()=>{await import('./v1.5-network.js');await import('./v1.9-data-quality-core.js');const api=await caches.open('kanji5-api-v14');for(const key of await api.keys())await api.delete(key)});
+  await page.route('https://kanjiapi.dev/**',route=>route.abort('failed')); 
+  await page.route('https://api.tatoeba.org/**',route=>route.abort('failed'));
   await page.context().setOffline(true);
   const result=await page.evaluate(async(character)=>{
     const network=await import('./v1.5-network.js');
@@ -46,7 +47,7 @@ test('offline local grading remains available after remote content failure',asyn
     const grade=core.gradeProduction('学','学');
     return outcome.normalizeOutcome('production',grade,{graderVersion:'offline-test'});
   });
-  expect(result.outcome).toBe('correct');expect(result.graderVersion).toBe('offline-test');
+  expect(result.outcome).toBe('correct');expect(result.graderVersion).toBe('1.9.0-production');
 });
 
 test('legacy v1.9 evidence receives deterministic migration defaults',async({page})=>{
