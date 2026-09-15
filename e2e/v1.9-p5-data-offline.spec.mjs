@@ -24,12 +24,18 @@ test('offline external-content failure falls back to local learning modes',async
     return deck.find(item=>item?.id&&ids.has(item.id))?.character||'';
   });
   expect(target).toBeTruthy();
-  await page.route('https://kanjiapi.dev/**',route=>route.abort('failed')); 
+  await page.evaluate(async()=>{
+    window.__P5_TEST_NETWORK__=await import('./v1.5-network.js');
+    window.__P5_TEST_QUALITY__=await import('./v1.9-data-quality-core.js');
+    const api=await caches.open('kanji5-api-v14');
+    for(const key of await api.keys())await api.delete(key);
+  });
+  await page.route('https://kanjiapi.dev/**',route=>route.abort('failed'));
   await page.route('https://api.tatoeba.org/**',route=>route.abort('failed'));
   await page.context().setOffline(true);
   const result=await page.evaluate(async(character)=>{
-    const network=await import('./v1.5-network.js');
-    const quality=await import('./v1.9-data-quality-core.js');
+    const network=window.__P5_TEST_NETWORK__;
+    const quality=window.__P5_TEST_QUALITY__;
     return {words:await network.fetchWords(character),contexts:await network.fetchContextSentences(character),vocabularyFallback:quality.safeContentFallback(['vocabulary'],['meaning','reading','production']),contextFallback:quality.safeContentFallback(['context'],['meaning','reading','production'])};
   },target);
   expect(result.words).toEqual([]);expect(result.contexts).toEqual([]);
@@ -38,14 +44,18 @@ test('offline external-content failure falls back to local learning modes',async
 
 test('offline local grading remains available after remote content failure',async({page})=>{
   await cleanStart(page);await seedReviewedCard(page);
-  await expect.poll(async()=>page.evaluate(()=>Boolean(globalThis.__KANJI5_V18_PRODUCTION__?.gradeProduction))).toBe(true);
+  await page.evaluate(async()=>{
+    await import('./v1.8-production-core.js');
+    window.__P5_TEST_PRODUCTION__=globalThis.__KANJI5_V18_PRODUCTION__;
+    window.__P5_TEST_OUTCOME__=await import('./v1.9-outcome-core.js');
+  });
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__P5_TEST_PRODUCTION__?.gradeProduction))).toBe(true);
   await page.context().setOffline(true);
-  const result=await page.evaluate(async()=>{
-    const core=globalThis.__KANJI5_V18_PRODUCTION__;
+  const result=await page.evaluate(()=>{
+    const core=window.__P5_TEST_PRODUCTION__;
     if(!core?.gradeProduction)throw new Error('local production grader unavailable');
-    const outcome=await import('./v1.9-outcome-core.js');
     const grade=core.gradeProduction('学','学');
-    return outcome.normalizeOutcome('production',grade,{graderVersion:'offline-test'});
+    return window.__P5_TEST_OUTCOME__.normalizeOutcome('production',grade,{graderVersion:'offline-test'});
   });
   expect(result.outcome).toBe('correct');expect(result.graderVersion).toBe('1.9.0-production');
 });
