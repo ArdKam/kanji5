@@ -75,6 +75,8 @@ jobs:
           node --check v1.9-recovery-core.js
           node --check v1.9-recovery.js
           node --check v1.9-recovery-ui.js
+          node --check v1.9-learning-evaluation-core.js
+          node --check v1.9-learning-evaluation.js
           node --check v1.8-production-core.js
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
