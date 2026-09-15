@@ -7,6 +7,8 @@ assert.match(runtime,/import\('\.\/v1\.9-learner-model-core\.js'\)/);
 assert.match(runtime,/readSessionHistory/);
 assert.match(runtime,/readKnowledge/);
 assert.match(runtime,/writeComponents/);
+assert.match(runtime,/v19LearnerEvidence/);
+assert.match(runtime,/recordOutcome/);
 assert.match(runtime,/v1\.6-session-finished/);
 assert.match(runtime,/v1\.6-education-result/);
 assert.match(profile,/import\('\.\/v1\.9-learner-model\.js'\)/);
