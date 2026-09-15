@@ -78,9 +78,11 @@ v1.8 سه mode واقعی learner-facing را به جریان آموزشی اض�
 
 ## Release status
 
-**v1.8.0 — roadmap implementation in progress on `feature/v1.8-p0c-context-final4`.** P0-A/P0-B/P0-C implementation is complete, and P1–P6 acceptance contracts have been added. The branch is not declared release-ready until the full v1.8 aggregate test suite, browser E2E, runtime/offline checks, documentation, and CI gates are green.
+**v1.8.0 — roadmap complete and all release gates green on `feature/v1.8-p0c-context-final4`.** P0-A through P6 are implemented and covered by the v1.8 release workflow.
 
-Production, vocabulary, and context recall now have learner-facing inputs and deterministic local graders; adaptive selection remains constrained to modes with test-backed implementations.
+The final validation run passed JavaScript syntax checks, the v1.8 release contract, the full aggregate contract/unit suite (57/57), and browser E2E for v1.7 Adaptive Recall plus v1.8 Production/Vocabulary/Context.
+
+The branch is ready for normal review/merge; it has not been merged automatically.
 
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
