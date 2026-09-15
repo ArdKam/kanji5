@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {projectKanjiAttributes,buildLearnerModel} from '../v1.9-learner-model-core.js';
+const at=n=>`2026-09-${String(n).padStart(2,'0')}T00:00:00.000Z`;
+const knowledge={学:{exposedAt:at(1),meaning:{attempts:4,correct:3,lastAt:at(10),lastOutcome:'wrong',lastCorrect:false},reading:{attempts:1,correct:1,lastAt:at(10),lastOutcome:'correct',lastCorrect:true},production:{attempts:0},vocabulary:{attempts:0},context:{attempts:0}}};
+const evidence={学:{meaning:[{at:at(6),outcome:'wrong',mode:'meaning'},{at:at(7),outcome:'wrong',mode:'meaning'},{at:at(8),outcome:'correct',mode:'meaning'},{at:at(9),outcome:'correct',mode:'meaning'},{at:at(10),outcome:'correct',mode:'meaning'}]}};
+const projected=projectKanjiAttributes(knowledge,'学',{evidenceByMode:evidence.学,now:Date.parse(at(11))});
+const m=projected.attributes.meaning;assert.equal(m.recentAttempts,4);assert.equal(m.recentAccuracy,.75);assert.equal(m.errorStreak,0);assert.equal(m.successStreak,3);assert.equal(m.recoveryCount,1);assert.equal(m.lastAt,at(10));assert.equal(m.state,'learning');assert.equal(m.uncertaintyState,'low');assert.ok(m.recencyDays>=1&&m.recencyDays<2);assert.ok(m.momentum>0);
+const sparse=projectKanjiAttributes({日:{exposedAt:at(1),reading:{attempts:1,correct:0,lastAt:at(2),lastOutcome:'wrong',lastCorrect:false}}},'日',{now:Date.parse(at(3))});assert.equal(sparse.attributes.reading.uncertaintyState,'high');assert.equal(sparse.attributes.reading.state,'learning');
+const repeat=projectKanjiAttributes({月:{exposedAt:at(1),reading:{attempts:3,correct:0,lastAt:at(4),lastOutcome:'wrong',lastCorrect:false}}},'月',{evidenceByMode:{reading:[{at:at(2),outcome:'wrong'},{at:at(3),outcome:'wrong'},{at:at(4),outcome:'wrong'}]},now:Date.parse(at(5))});assert.equal(repeat.attributes.reading.state,'weak');assert.equal(repeat.attributes.reading.errorStreak,3);assert.equal(repeat.attributes.reading.repeatedFailure,true);
+const original=[{sessionId:'legacy',endedAt:at(2),modeResults:{meaning:{attempts:1,correct:1,lastAt:at(2),lastCorrect:true}}}];const cloned=JSON.stringify(original);const projectedModel=buildLearnerModel(original);assert.equal(JSON.stringify(original),cloned);assert.equal(projectedModel.attributes.meaning.attempts,1);
+console.log('Kanji 5 v1.9 learner evidence and migration safety fixtures passed.');

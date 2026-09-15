@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const runtime=fs.readFileSync('v1.9-learner-model.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+const profile=fs.readFileSync('v1.6-skill-profile.js','utf8');
+assert.match(runtime,/import\('\.\/v1\.9-learner-model-core\.js'\)/);
+assert.match(runtime,/readSessionHistory/);
+assert.match(runtime,/readKnowledge/);
+assert.match(runtime,/writeComponents/);
+assert.match(runtime,/v19LearnerEvidence/);
+assert.match(runtime,/recordOutcome/);
+assert.match(runtime,/v1\.6-session-finished/);
+assert.match(runtime,/v1\.6-education-result/);
+assert.match(profile,/import\('\.\/v1\.9-learner-model\.js'\)/);
+assert.match(sw,/"\.\/v1\.9-learner-model-core\.js"/);
+assert.match(sw,/"\.\/v1\.9-learner-model\.js"/);
+console.log('Kanji 5 v1.9 learner model runtime wiring passed.');
