@@ -1,12 +1,14 @@
-# v1.8 final validation gate
-name: Build Kanji 5 v1.8
+# v1.8 compatibility + v1.9 learning-engine validation gate
+name: Build Kanji 5 v1.8/v1.9
 
 on:
   push:
     branches:
       - main
       - 'feature/v1.8**'
+      - 'feature/v1.9**'
     paths:
+      - 'v1.9-*.js'
       - 'v1.8-*.js'
       - 'v1.7-*.js'
       - 'v1.6-*.js'
@@ -15,8 +17,10 @@ on:
       - 'v1.3-*.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
+      - 'e2e/v1.9-*.mjs'
       - 'e2e/v1.8-*.mjs'
       - 'e2e/v1.7-*.mjs'
+      - 'V1.9-ROADMAP.md'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
@@ -28,6 +32,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'v1.9-*.js'
       - 'v1.8-*.js'
       - 'v1.7-*.js'
       - 'v1.6-*.js'
@@ -36,8 +41,10 @@ on:
       - 'v1.3-*.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
+      - 'e2e/v1.9-*.mjs'
       - 'e2e/v1.8-*.mjs'
       - 'e2e/v1.7-*.mjs'
+      - 'V1.9-ROADMAP.md'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
@@ -51,7 +58,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-v1-8:
+  validate-learning-engine:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,6 +67,7 @@ jobs:
           node-version: 24
       - name: Validate JavaScript syntax
         run: |
+          node --check v1.9-outcome-core.js
           node --check v1.8-production-core.js
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
@@ -70,12 +78,12 @@ jobs:
           node --check v1.6-session-core.js
           node --check v1.6-session-feedback.js
           node --check v1.6-skill-profile.js
-      - name: Validate package and release contract
+      - name: Validate v1.8 compatibility contract
         run: node scripts/test-v1.8-release.mjs
       - name: Run all contract and unit tests
         run: npm test
-      - name: Run v1.7/v1.8 browser coverage
+      - name: Run browser coverage
         run: |
           npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium
-          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs
+          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs e2e/v1.9-p0-outcome.spec.mjs
