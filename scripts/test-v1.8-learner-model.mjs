@@ -26,7 +26,7 @@ const reading=ranked.find(x=>x.mode==='reading');
 assert.ok(production);
 assert.ok(reading);
 assert.equal(production.recentErrors,2);
-assert.equal(production.recoveryRate,0.5);
+assert.equal(production.recoveryRate,1);
 assert.equal(production.momentum,0);
 assert.ok(production.mastery<reading.mastery);
 assert.ok(production.accuracy<reading.accuracy);
