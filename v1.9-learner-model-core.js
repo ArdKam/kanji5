@@ -3,6 +3,7 @@ export const ATTRIBUTES=['meaning','reading','production','vocabulary','context'
 export const STATES=['unseen','introduced','learning','weak','recovering','stable','mastered'];
 
 const DEFAULTS=Object.freeze({recentWindow:3,weakAccuracy:0.6,recoveringAccuracy:0.75,stableAccuracy:0.85,masteryAccuracy:0.92,masteryMinAttempts:4,repeatFailureStreak:2,recoveryMinAttempts:2,confidenceFullAttempts:8});
+const STATE_PRIORITY=Object.freeze({weak:1.5,recovering:1.25,learning:1,introduced:.8,unseen:.6,stable:.2,mastered:.05});
 
 function num(v){return Number.isFinite(Number(v))?Number(v):0}
 function clamp(v,min=0,max=1){return Math.max(min,Math.min(max,num(v)))}
@@ -33,15 +34,7 @@ function modeSummary(rows,mode,now=Date.now(),options={}){
   else state='learning';
   return{attempts:lifetime.attempts,correct:lifetime.correct,accuracy,recentAttempts:recent.attempts,recentCorrect:recent.correct,recentAccuracy,errorStreak,successStreak,lastAt:last.lastAt||'',recencyDays:Number.isFinite(recency)?recency:null,momentum,recoveryCount,confidence,state,version:LEARNER_MODEL_VERSION};
 }
-export function buildLearnerModel(rows,options={}){
-  const ordered=orderRows(rows),out={version:LEARNER_MODEL_VERSION,sessions:ordered.length,generatedAt:Date.now(),attributes:{}};
-  for(const mode of ATTRIBUTES)out.attributes[mode]=modeSummary(ordered,mode,options.now??Date.now(),options);
-  return out;
-}
-export function projectKanjiAttributes(knowledge,character,options={}){
-  const entry=knowledge?.[character]||{};const out={character,version:LEARNER_MODEL_VERSION,attributes:{}};
-  for(const mode of ATTRIBUTES){const raw=entry?.[mode];const s=normalizeAttempt(raw);const attempts=s.attempts,accuracy=s.accuracy;const confidence=clamp(attempts/(options.confidenceFullAttempts||DEFAULTS.confidenceFullAttempts));let state='unseen';if(!attempts)state=entry?.exposedAt?'introduced':'unseen';else if(s.lastOutcome==='unknown'||s.lastCorrect===false&&attempts>=2&&accuracy<DEFAULTS.weakAccuracy)state='weak';else if(accuracy>=DEFAULTS.masteryAccuracy&&attempts>=DEFAULTS.masteryMinAttempts)state='mastered';else if(accuracy>=DEFAULTS.stableAccuracy&&attempts>=3)state='stable';else state='learning';out.attributes[mode]={...s,confidence,state,version:LEARNER_MODEL_VERSION};}
-  return out;
-}
-export function attributeWeakness(model,mode){const s=model?.attributes?.[mode];if(!s)return 1;return clamp((1-s.accuracy)*(1+Math.max(0,s.errorStreak-1)*0.25));}
+export function buildLearnerModel(rows,options={}){const ordered=orderRows(rows),out={version:LEARNER_MODEL_VERSION,sessions:ordered.length,generatedAt:Date.now(),attributes:{}};for(const mode of ATTRIBUTES)out.attributes[mode]=modeSummary(ordered,mode,options.now??Date.now(),options);return out;}
+export function projectKanjiAttributes(knowledge,character,options={}){const entry=knowledge?.[character]||{},out={character,version:LEARNER_MODEL_VERSION,attributes:{}};for(const mode of ATTRIBUTES){const raw=entry?.[mode],s=normalizeAttempt(raw),attempts=s.attempts,accuracy=s.accuracy,confidence=clamp(attempts/(options.confidenceFullAttempts||DEFAULTS.confidenceFullAttempts));let state='unseen';if(!attempts)state=entry?.exposedAt?'introduced':'unseen';else if(s.lastOutcome==='unknown'||s.lastCorrect===false&&attempts>=2&&accuracy<DEFAULTS.weakAccuracy)state='weak';else if(accuracy>=DEFAULTS.masteryAccuracy&&attempts>=DEFAULTS.masteryMinAttempts)state='mastered';else if(accuracy>=DEFAULTS.stableAccuracy&&attempts>=3)state='stable';else state='learning';out.attributes[mode]={...s,confidence,state,version:LEARNER_MODEL_VERSION};}return out;}
+export function attributeWeakness(model,mode){const s=model?.attributes?.[mode];if(!s)return 1;const stateMultiplier=STATE_PRIORITY[s.state]??1;return clamp((1-s.accuracy)*stateMultiplier*(1+Math.max(0,s.errorStreak-1)*0.25));}
 export function rankAttributes(model){return ATTRIBUTES.map(mode=>({mode,score:attributeWeakness(model,mode),state:model?.attributes?.[mode]?.state||'unseen',confidence:model?.attributes?.[mode]?.confidence||0})).sort((a,b)=>b.score-a.score||a.mode.localeCompare(b.mode));}
