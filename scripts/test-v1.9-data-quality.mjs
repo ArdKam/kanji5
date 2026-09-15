@@ -14,7 +14,7 @@ assert.equal(v.items.length,2,'valid vocabulary should be retained and exact dup
 assert.equal(v.rejected.length,2,'both malformed candidates should be rejected');
 assert(v.rejected.every(x=>Array.isArray(x.reasons)&&x.reasons.length>0));
 assert.equal(validateVocabularyEntry({word:'学校',reading:'gakkou',meaning:'school'},'学').valid,false,'romaji-only reading is invalid for KanjiAPI content');
-assert.equal(selectDeterministic(v.items,x=>x.word)?.word,'学校');
+assert.equal(selectDeterministic(v.items,x=>x.word)?.word,'学ぶ','selection must follow the documented stable lexical ordering');
 
 const contexts=[
   {id:2,text:'私は学校へ行きます。',english:'I go to school.'},
