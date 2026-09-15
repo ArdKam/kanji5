@@ -7,6 +7,7 @@ const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 const workflow = fs.readFileSync('.github/workflows/build-v1.8.yml', 'utf8');
 const index = fs.readFileSync('index.html', 'utf8');
+const ui = fs.readFileSync('v1.5-education-ui.js', 'utf8');
 
 assert.equal(pkg.version, '1.8.0');
 assert.match(changelog, /## \[1\.8\.0\]/);
@@ -15,7 +16,7 @@ assert.match(roadmap, /### P0-B — Vocabulary Recall ✅/);
 assert.match(roadmap, /### P0-C — Context Recall ✅/);
 for (const file of ['v1.8-production-core.js', 'v1.8-vocabulary-core.js', 'v1.8-context-core.js']) {
   assert.ok(fs.existsSync(file), `${file} must exist`);
-  assert.match(sw, new RegExp(`\\./${file.replace('.', '\\.')}`), `${file} must be precached`);
+  assert.ok(sw.includes(`./${file}`), `${file} must be precached`);
 }
 for (const spec of ['e2e/v1.8-production.spec.mjs', 'e2e/v1.8-vocabulary.spec.mjs', 'e2e/v1.8-context.spec.mjs']) {
   assert.ok(fs.existsSync(spec), `${spec} must exist`);
@@ -24,5 +25,8 @@ assert.match(workflow, /npm test/);
 assert.match(workflow, /e2e\/v1\.8-production\.spec\.mjs/);
 assert.match(workflow, /e2e\/v1\.8-vocabulary\.spec\.mjs/);
 assert.match(workflow, /e2e\/v1\.8-context\.spec\.mjs/);
-assert.match(index, /v1\.5-education-ui\.js/);
+assert.ok(fs.existsSync('v1.5-education-ui.js'));
+assert.match(ui,/v1\.8-production-core\.js/);
+assert.match(ui,/v1\.8-vocabulary-core\.js/);
+assert.match(ui,/v1\.8-context-core\.js/);
 console.log('Kanji 5 v1.8 release contract passed.');
