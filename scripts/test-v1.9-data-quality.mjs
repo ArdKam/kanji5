@@ -11,7 +11,8 @@ const vocabulary=[
 const v=validateVocabularyList(vocabulary,'学');
 assert.equal(v.version,DATA_QUALITY_VERSION);
 assert.equal(v.items.length,2,'valid vocabulary should be retained and exact duplicates removed');
-assert.equal(v.rejected.length,1,'malformed/empty vocabulary should be rejected');
+assert.equal(v.rejected.length,2,'both malformed candidates should be rejected');
+assert(v.rejected.every(x=>Array.isArray(x.reasons)&&x.reasons.length>0));
 assert.equal(validateVocabularyEntry({word:'学校',reading:'gakkou',meaning:'school'},'学').valid,false,'romaji-only reading is invalid for KanjiAPI content');
 assert.equal(selectDeterministic(v.items,x=>x.word)?.word,'学校');
 
