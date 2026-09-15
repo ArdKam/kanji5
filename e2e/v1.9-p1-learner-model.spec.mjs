@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-test('builds and persists learner model from session history',async({page})=>{
+test('builds, persists, and exposes learner model evidence',async({page})=>{
   await page.goto('/');
   await expect(page.locator('#loading')).toBeHidden({timeout:20_000});
   await page.evaluate(()=>{
@@ -11,9 +11,12 @@ test('builds and persists learner model from session history',async({page})=>{
     ]));
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({学:{exposedAt:at,meaning:{attempts:6,correct:6,lastAt:at,lastCorrect:true},reading:{attempts:3,correct:1,lastAt:at,lastOutcome:'wrong',lastCorrect:false},production:{attempts:0},vocabulary:{attempts:0},context:{attempts:0}}}));
   });
-  const result=await page.evaluate(async()=>{await import('./v1.9-learner-model.js');await window.__KANJI5_V19_LEARNER_MODEL__.update();const component=JSON.parse(localStorage.getItem('kanji5-v1.5-components')||'{}').v19LearnerModel;return {version:component?.version,sessions:component?.sessions,reading:component?.kanji?.学?.attributes?.reading?.state,meaning:component?.kanji?.学?.attributes?.meaning?.state};});
+  const result=await page.evaluate(async()=>{await import('./v1.9-learner-model.js');await window.__KANJI5_V19_LEARNER_MODEL__.update();const component=JSON.parse(localStorage.getItem('kanji5-v1.5-components')||'{}').v19LearnerModel;return {version:component?.version,sessions:component?.sessions,reading:component?.kanji?.学?.attributes?.reading?.state,meaning:component?.kanji?.学?.attributes?.meaning?.state,uncertainty:component?.kanji?.学?.attributes?.reading?.uncertaintyState};});
   expect(result.version).toBe('1.9.0-learner-model');
   expect(result.sessions).toBe(2);
   expect(result.reading).toBe('weak');
   expect(result.meaning).toBe('mastered');
+  expect(result.uncertainty).toBe('moderate');
+  const evidence=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.5-components')||'{}').v19LearnerEvidence||{});
+  expect(evidence).toEqual({});
 });
