@@ -28,4 +28,5 @@ exposeAuthoritativeApi();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{exposeAuthoritativeApi();render()},{once:true});else render();
 void import('./v1.6-session-analytics.js').catch(()=>{});
 void import('./v1.6-skill-profile.js').catch(()=>{});
+void import('./v1.8-learning-ux.js').catch(()=>{});
 })();
