@@ -37,10 +37,11 @@ test('offline external-content failure falls back to local learning modes',async
 
 test('offline local grading remains available after remote content failure',async({page})=>{
   await cleanStart(page);await seedReviewedCard(page);
-  await page.evaluate(async()=>{await import('./v1.8-production-core.js');await import('./v1.9-outcome-core.js')});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(globalThis.__KANJI5_V18_PRODUCTION__?.gradeProduction))).toBe(true);
   await page.context().setOffline(true);
   const result=await page.evaluate(async()=>{
     const core=globalThis.__KANJI5_V18_PRODUCTION__;
+    if(!core?.gradeProduction)throw new Error('local production grader unavailable');
     const outcome=await import('./v1.9-outcome-core.js');
     const grade=core.gradeProduction('学','学');
     return outcome.normalizeOutcome('production',grade,{graderVersion:'offline-test'});
