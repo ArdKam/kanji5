@@ -369,7 +369,7 @@ function renderHeader(snapshot) {
   const progress = document.createElement('div');
   progress.className = 'v2-progress';
   progress.setAttribute('role','progressbar');
-  progress.setAttribute('aria-label','Session progress');
+  progress.setAttribute('aria-label','پیشرفت جلسه');
   progress.setAttribute('aria-valuemin','0');
   progress.setAttribute('aria-valuemax','100');
   progress.setAttribute('aria-valuenow',String(Math.round(fraction*100)));
