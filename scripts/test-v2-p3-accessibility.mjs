@@ -23,7 +23,7 @@ assert.ok(css.includes('@media (max-width:600px)'));
 assert.ok(css.includes('grid-template-columns:1fr'));
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'));
 assert.ok(css.includes('animation-duration:.001ms'));
-assert.match(presentation,/className='v2-actions'/);
+assert.match(presentation,/className = 'v2-actions'/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.match(sw,/"\.\/v2-presentation\.js"/);
 assert.match(sw,/"\.\/v2-presentation\.css"/);
