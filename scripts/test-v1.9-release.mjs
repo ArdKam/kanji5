@@ -25,7 +25,7 @@ assert.match(changelog,/## \[1\.9\.0\] — 2026-09-18/);
 assert.match(architecture,/## V2 presentation contracts/);
 assert.match(architecture,/v1\.9-v2-contract-core\.js/);
 assert.match(architecture,/v1\.9-v2-boundary\.js/);
-assert.match(sw,/const CACHE='kanji5-shell-v73'/);
+assert.match(sw,/const CACHE='kanji5-shell-v74'/);
 for(const file of [
   'v1.9-outcome-core.js','v1.9-learner-model-core.js','v1.9-learner-model.js',
   'v1.9-adaptive-planner-core.js','v1.9-adaptive-planner.js',
