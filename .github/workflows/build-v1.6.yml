@@ -20,6 +20,8 @@ jobs:
           node-version: 24
       - name: Validate CI checkout invariant
         run: node scripts/test-ci-workflow.mjs
+      - name: Validate npm lockfile
+        run: node scripts/test-npm-lockfile.mjs
       - name: Validate dataset
         run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('kanji-data.json','utf8'));if(d.count!==2136||!Array.isArray(d.kanji)||d.kanji.length!==2136)throw new Error('Invalid runtime dataset');"
       - name: Validate JavaScript
@@ -33,7 +35,7 @@ jobs:
       - name: Validate v1.6 release contract
         run: node scripts/test-v1.6-release.mjs
       - name: Install browser test dependencies
-        run: npm install --no-audit --no-fund --package-lock=false
+        run: npm ci
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run browser tests
