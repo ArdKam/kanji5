@@ -18,6 +18,7 @@ assert.ok(index.includes('./v2-presentation.js'),'default route must load v2 pre
 assert.ok(index.includes('./v1.5-education-ui.js'),'default route must load the education bridge');
 assert.ok(index.includes('./v1.9-v2-boundary.js'),'default route must load the v2 presentation boundary');
 assert.ok(index.includes('./review-runtime.js'),'default route must load the shared review runtime');
+assert.ok(index.includes('./legacy.css'),'legacy stylesheet must remain available for compatibility');
 assert.ok(sw.includes('"./review-runtime.js"'),'shared review runtime must be in the active shell cache');
 assert.match(js,/openV2Stats/);
 assert.match(js,/openV2Settings/);
