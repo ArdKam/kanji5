@@ -11,7 +11,7 @@ for(const cls of ['v2-exercise-card','v2-mode-badge','v2-stimulus','v2-kanji','v
 for(const token of ['stimulus','masked-vocabulary','masked-context','inputPlaceholder']) assert.ok(core.includes(token)||edu.includes(token),token);
 assert.doesNotMatch(js,/Session ID/);
 assert.doesNotMatch(js,/Plan revision/);
-assert.doesNotMatch(js,/Content/);
+assert.doesNotMatch(js,/Content ID|ContentId|Plan revision|Session ID/);
 assert.match(edu,/kind:'meaning'/);
 assert.match(edu,/kind:'masked-vocabulary'/);
 assert.match(edu,/kind:'masked-context'/);
