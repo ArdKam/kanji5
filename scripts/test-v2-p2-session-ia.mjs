@@ -17,7 +17,7 @@ assert.match(core,/recentOutcomes/);
 assert.match(boundary,/function recentOutcomes/);
 assert.match(boundary,/v19LearnerEvidence/);
 assert.match(boundary,/recentOutcomes\(\)/);
-assert.match(presentation,/Session progress/);
+assert.match(presentation,/پیشرفت جلسه/);
 assert.match(presentation,/نتایج اخیر/);
 assert.match(presentation,/remainingTotal/);
 assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/);
