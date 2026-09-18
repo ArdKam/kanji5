@@ -1,8 +1,6 @@
 # v1.6 validation workflow — deterministic, source-immutable CI
 name: Build Kanji 5 v1.6
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:

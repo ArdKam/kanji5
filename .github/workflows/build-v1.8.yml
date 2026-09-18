@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - main
-      - 'feature/v1.8**'
-      - 'feature/v1.9**'
     paths:
       - 'v1.9-*.js'
       - 'v1.8-*.js'

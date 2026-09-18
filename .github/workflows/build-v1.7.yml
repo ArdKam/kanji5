@@ -1,27 +1,6 @@
 name: Build Kanji 5 v1.7
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'v1.7-*.js'
-      - 'v1.8-*.js'
-      - 'v1.4-education-core.js'
-      - 'v1.3-storage-bridge.js'
-      - 'v1.5-state.js'
-      - 'scripts/test-*.mjs'
-      - 'scripts/test-all.mjs'
-      - 'scripts/build-kanji-data.mjs'
-      - 'e2e/v1.7-*.mjs'
-      - 'e2e/v1.8-*.mjs'
-      - 'V1.7-ROADMAP.md'
-      - 'V1.8-ROADMAP.md'
-      - 'ARCHITECTURE.md'
-      - 'CHANGELOG.md'
-      - 'README.md'
-      - 'package.json'
-      - 'sw.js'
-      - '.github/workflows/build-v1.7.yml'
   pull_request:
     branches: [main]
     paths:
@@ -35,9 +14,9 @@ on:
       - 'scripts/build-kanji-data.mjs'
       - 'e2e/v1.7-*.mjs'
       - 'e2e/v1.8-*.mjs'
-      - 'ARCHITECTURE.md'
       - 'V1.7-ROADMAP.md'
       - 'V1.8-ROADMAP.md'
+      - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
       - 'README.md'
       - 'package.json'

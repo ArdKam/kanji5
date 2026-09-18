@@ -1,9 +1,6 @@
 name: v2 Feature Parity Gate
 
 on:
-  push:
-    branches:
-      - fix/v2-learning-first-production-mcq
   pull_request:
     branches:
       - main
