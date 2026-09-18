@@ -403,8 +403,11 @@ function renderReviewCard(snapshot) {
     section.appendChild(recallHost);
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
-      try { await window.__KANJI5_V19_V2_BOUNDARY__?.openReviewRecall?.(); }
-      finally { reveal.disabled = false; }
+      try {
+        const opener = window.__KANJI5_V12_OPEN_RECALL__;
+        const gate = typeof opener === 'function' ? await opener() : null;
+        if (gate) recallHost.replaceChildren(gate);
+      } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
     return section;
