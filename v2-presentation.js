@@ -604,11 +604,6 @@ async function init(){
     if(!bootstrapped){
       bootstrapped=true;
       const snapshot=await boundary.snapshot();
-      if(!snapshot.exercise?.mode && !externallyPublishedExercise){
-        await new Promise(resolve=>queueMicrotask(resolve));
-        const beforeStart=await boundary.snapshot();
-        if(!beforeStart.exercise?.mode && !externallyPublishedExercise)await bridge.start();
-      }
       render(await boundary.snapshot());
     }
   }catch(error){
