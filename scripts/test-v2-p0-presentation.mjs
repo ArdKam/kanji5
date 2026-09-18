@@ -16,7 +16,7 @@ assert.doesNotMatch(presentation,/localStorage|sessionStorage|v1\.9-adaptive-pla
 assert.match(presentation,/textContent/);
 assert.match(index,/v2-presentation\.js/);
 assert.match(sw,/v2-presentation\.js/);
-assert.match(sw,/const CACHE='kanji5-shell-v74'/);
+assert.match(sw,/const CACHE='kanji5-shell-v75'/);
 assert.match(roadmap,/### P0 — Presentation Shell & Contract Consumer ✅/);
 assert.match(workflow,/v2-presentation\.js/);
 assert.match(workflow,/test-v2-p0-presentation\.mjs/);
