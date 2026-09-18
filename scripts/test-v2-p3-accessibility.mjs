@@ -8,7 +8,7 @@ const sw=read('sw.js');
 const roadmap=read('V2-ROADMAP.md');
 
 assert.match(presentation,/v2-skip-link/);
-assert.match(presentation,/href='#v2Exercise'/);
+assert.match(presentation,/setAttribute\('href','#v2Exercise'\)/);
 assert.ok(presentation.includes('target.focus({preventScroll:true})'));
 assert.match(presentation,/exercise\.tabIndex=-1/);
 assert.match(presentation,/aria-live/);
