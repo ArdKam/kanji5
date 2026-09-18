@@ -91,11 +91,11 @@ The active session boundary owns session identity, plan persistence, resume beha
 
 ## Adaptive recall
 
-Adaptive planning treats recall attributes as independently learnable skills. The planner receives deterministic learner evidence and supported attributes and chooses among the existing five skills. Recovery can override the next attribute once for the bounded retry path; it never becomes a second scheduler.
+Adaptive planning treats recall attributes as independently learnable skills. The planner receives deterministic learner evidence and supported attributes and chooses among the existing five skills. Recovery can override the next attribute once for the bounded retry path; it never becomes a second scheduler. Recovery state carries task identity (`taskId`, character, content identity), and learner/evaluation recovery metrics require explicit same-task retry linkage.
 
 ## Educational integrity
 
-Meaning, Reading, Production, Vocabulary, and Context grading remain deterministic and offline-capable. v1.9 standardizes their recorded outcome shape without making the shared outcome contract a replacement for mode-specific grading rules.
+Meaning, Reading, Production, Vocabulary, and Context grading remain deterministic and offline-capable. External Vocabulary/Context content is selected deterministically and can be targeted to learner evidence through structural content-difficulty heuristics. v1.9 standardizes their recorded outcome shape without making the shared outcome contract a replacement for mode-specific grading rules.
 
 ## Persistence and storage keys
 
