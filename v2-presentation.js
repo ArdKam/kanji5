@@ -179,12 +179,10 @@ function render(snapshot) {
 
 let subscribed=false;
 let bootstrapped=false;
+let boundaryReadyListener=false;
 async function init() {
   const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
-  if (!boundary) {
-    setTimeout(init, 50);
-    return;
-  }
+  if (!boundary) return;
   try {
     if (!subscribed) {
       document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
@@ -206,6 +204,10 @@ async function init() {
     render({});
     console.error(error);
   }
+}
+if (!boundaryReadyListener) {
+  boundaryReadyListener=true;
+  document.addEventListener('kanji5:v1.9-v2-boundary-ready', () => { void init(); });
 }
 void init();
 })();
