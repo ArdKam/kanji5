@@ -31,7 +31,7 @@ assert.match(roadmap,/### P5 — v2 Release Readiness/);
 assert.match(readme,/## v2 — Presentation Layer/);
 assert.match(readme,/\*\*v2\.0\.0 — release-ready\*\*/);
 assert.match(changelog,/## \[2\.0\.0\] — 2026-09-18/);
-assert.match(architecture,/v2 is the default presentation/);
+assert.match(architecture,/The default browser route is the v2 presentation/);
 assert.match(architecture,/legacy=1/);
 assert.match(workflow,/scripts\/test-v2-p5-release\.mjs/);
 assert.match(workflow,/e2e\/v2-p5-release\.spec\.mjs/);
