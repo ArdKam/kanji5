@@ -21,3 +21,33 @@ test('recovery state survives reload before retry',async({page})=>{
  await page.reload();await expect(page.locator('#app')).toBeVisible({timeout:20000});await page.locator('#v16DashboardToggle').click();await page.locator('[data-tab="education"]').click();await expect(page.locator('#v14EducationPane')).toBeVisible();
  const persisted=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null'));expect(persisted?.state).toBe('pending_retry');expect(persisted?.retryCount).toBe(0);
 });
+
+
+test('retry stays on the exact Kanji task when multiple reviewed cards exist',async({page})=>{
+ await cleanStart(page);
+ await seedReviewedCard(page);
+ await page.locator('#revealBtn').click();
+ await expect(page.locator('#ratings')).toHaveClass(/show/);
+ await page.locator('.rate[data-r="Good"]').click();
+ await expect(page.locator('#revealBtn')).toBeVisible();
+ await startReview(page);
+ await forceMeaning(page);
+ await page.locator('[data-tab="education"]').click();
+ const pane=page.locator('#v14EducationPane');
+ await expect(pane.locator('#v14EduInput')).toBeVisible({timeout:10000});
+ const firstCharacter=(await pane.locator('.v14-edu-kanji').textContent())?.trim()||'';
+ expect(firstCharacter).toBeTruthy();
+ await pane.locator('#v14EduInput').fill('definitely-wrong');
+ await pane.locator('#v14EduSubmit').click();
+ await expect(pane.locator('#v19RetryBtn')).toBeVisible({timeout:10000});
+ const pending=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null'));
+ expect(pending?.character).toBe(firstCharacter);
+ expect(pending?.taskId).toContain(firstCharacter);
+ await pane.locator('#v19RetryBtn').click();
+ await expect(pane.locator('#v14EduInput')).toBeVisible({timeout:10000});
+ const retriedCharacter=(await pane.locator('.v14-edu-kanji').textContent())?.trim()||'';
+ expect(retriedCharacter).toBe(firstCharacter);
+ const retryState=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null'));
+ expect(retryState?.state).toBe('retrying');
+ expect(retryState?.character).toBe(firstCharacter);
+});
