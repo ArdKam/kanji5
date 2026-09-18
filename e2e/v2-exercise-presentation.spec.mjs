@@ -17,7 +17,7 @@ test('v2 renders the correct learner-facing stimulus for all five skills',async(
     await page.evaluate(async payload=>{
       await window.__KANJI5_V19_V2_BOUNDARY__.setExercise(payload);
     },item);
-    const label={meaning:'Meaning',reading:'Reading',production:'Production',vocabulary:'Vocabulary',context:'Context'}[item.mode];
+    const label={meaning:'معنی',reading:'خوانش',production:'تولید',vocabulary:'واژگان',context:'بافت'}[item.mode];
     await expect(page.locator('.v2-mode-badge')).toHaveText(label);
     await expect(page.locator('.v2-prompt')).toHaveText(item.prompt);
     await expect(page.locator('.v2-stimulus')).toContainText(item.stimulus.primary);
