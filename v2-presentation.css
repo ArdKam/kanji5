@@ -51,7 +51,7 @@ body:has(#v2App){margin:0;background:var(--v2-bg);color:var(--v2-text)}
 .v2-stimulus-detail{margin:-6px auto 14px;max-width:760px;text-align:center;color:#475467;font-size:14px;line-height:1.7}
 .v2-answer-hint{margin:0 0 13px;padding:10px 12px;border:1px dashed var(--v2-border-strong);border-radius:12px;background:var(--v2-surface-soft);color:var(--v2-muted);font-size:12px}
 .v2-field-label{display:block;margin-bottom:7px;font-size:13px;font-weight:800}
-.v2-input{width:100%;min-height:54px;padding:13px 15px;border:1px solid var(--v2-border-strong);border-radius:15px;background:#fff;color:var(--v2-text);font:inherit;font-size:16px;direction:auto;transition:border-color .16s ease,box-shadow .16s ease}
+.v2-input{width:100%;direction:ltr;text-align:left;min-height:54px;padding:13px 15px;border:1px solid var(--v2-border-strong);border-radius:15px;background:#fff;color:var(--v2-text);font:inherit;font-size:16px;direction:auto;transition:border-color .16s ease,box-shadow .16s ease}
 .v2-input::placeholder{color:var(--v2-subtle)}
 .v2-input:hover{border-color:#98a2b3}
 .v2-input:focus{border-color:var(--v2-accent);box-shadow:0 0 0 4px var(--v2-accent-soft);outline:0}
