@@ -600,6 +600,10 @@ function renderReviewCard(snapshot) {
           while (Date.now() < deadline && typeof window.__KANJI5_V12_OPEN_RECALL__ !== 'function') await new Promise(resolve => setTimeout(resolve,50));
           opener = window.__KANJI5_V12_OPEN_RECALL__;
         }
+        window.__KANJI5_V12_RECALL_CONTEXT__ = {
+          character: String(card.character || '').trim(),
+          contentId: String(card.contentId || card.character || '').trim()
+        };
         const gate = typeof opener === 'function' ? await opener() : null;
         if (gate) recallHost.replaceChildren(gate);
       } finally { reveal.disabled = false; }
