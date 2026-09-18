@@ -108,6 +108,8 @@ jobs:
           node --check review-runtime.js
       - name: Validate v1.9 release contract
         run: node scripts/test-v1.9-release.mjs
+      - name: Run learner model regression suite
+        run: node scripts/test-v1.9-learner-model.mjs && node scripts/test-v1.9-learner-model-evidence.mjs
       - name: Run v2 P0 presentation contract
         run: node scripts/test-v2-p0-presentation.mjs
       - name: Run v2 localization contract

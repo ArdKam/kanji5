@@ -14,10 +14,10 @@ function orderRows(rows){return(Array.isArray(rows)?rows:[]).filter(x=>x&&typeof
 function deriveMomentum(recentAccuracy,baselineAccuracy){return baselineAccuracy===null?0:clamp(recentAccuracy-baselineAccuracy,-1,1)}
 function deriveState({attempts,accuracy,confidence,errorStreak,successStreak=0,recentAccuracy,momentum,exposed=false},cfg=DEFAULTS){
   if(!attempts)return exposed?'introduced':'unseen';
-  if(errorStreak>=cfg.repeatFailureStreak||accuracy<cfg.weakAccuracy)return'weak';
+  if(errorStreak>=cfg.repeatFailureStreak||(attempts>=2&&accuracy<cfg.weakAccuracy))return'weak';
   if(momentum>0&&recentAccuracy<cfg.recoveringAccuracy&&attempts>=cfg.recoveryMinAttempts)return'recovering';
   if(attempts>=cfg.masteryMinAttempts&&accuracy>=cfg.masteryAccuracy&&confidence>=.5)return'mastered';
-  if(accuracy>=cfg.stableAccuracy&&attempts>=3&&successStreakForState>=2&&confidence>=.375&&successStreak>=2)return'stable';
+  if(accuracy>=cfg.stableAccuracy&&attempts>=3&&successStreak>=2&&confidence>=.375)return'stable';
   return'learning';
 }
 function modeSummary(rows,mode,now=Date.now(),options={}){
