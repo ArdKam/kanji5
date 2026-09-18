@@ -93,7 +93,7 @@ function stableSerialize(value){
 export function selectDeterministic(items,keyFn=value=>value){
   const list=Array.isArray(items)?items.filter(Boolean):[];
   if(!list.length)return null;
-  return [...list].sort((a,b)=>codePointCompare(normalizeContentKey(keyFn(a)),normalizeContentKey(keyFn(b)))||codePointCompare(JSON.stringify(a),JSON.stringify(b)))[0]||null;
+  return [...list].sort((a,b)=>codePointCompare(normalizeContentKey(keyFn(a)),normalizeContentKey(keyFn(b)))||codePointCompare(stableSerialize(a),stableSerialize(b)))[0]||null;
 }
 
 function kanjiComplexity(value,target=''){
