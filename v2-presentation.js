@@ -929,7 +929,15 @@ function renderInsights(snapshot) {
   reason.appendChild(heading('تمرکز تطبیقی','v2ReasonTitle'));
   row(reason,'مهارت',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
   row(reason,'عمل',localizeAction(snapshot?.adaptiveReason?.action));
-  if (snapshot?.adaptiveReason?.action) row(reason,'دلیل',localizedReason(snapshot.adaptiveReason.action));
+  const concreteReasons=Array.isArray(snapshot?.adaptiveReason?.reasons)?snapshot.adaptiveReason.reasons.filter(Boolean):[];
+  if(concreteReasons.length){
+    const list=document.createElement('div');
+    list.className='v2-reason-list';
+    for(const item of concreteReasons){const p=document.createElement('p');p.textContent=text(item);list.appendChild(p);}
+    reason.appendChild(list);
+  }else if(snapshot?.adaptiveReason?.action){
+    row(reason,'دلیل',localizedReason(snapshot.adaptiveReason.action));
+  }
 
   const summaryPanel = document.createElement('section');
   summaryPanel.className = 'v2-insight-panel';
