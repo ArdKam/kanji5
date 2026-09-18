@@ -92,12 +92,12 @@ sessionBar.append(progressCopy,progress,progressMeta);
 root.appendChild(sessionBar);
 
 const layout=document.createElement('div');
-layout.id='v2Layout';
-layout.className='v2-layout';
+layout.id='v2Grid';
+layout.className='v2-layout v2-grid';
 
 const content=document.createElement('div');
-content.id='v2Grid';
-content.className='v2-content v2-grid';
+content.id='v2Content';
+content.className='v2-content';
 layout.appendChild(content);
 
 const insights=document.createElement('details');
@@ -577,6 +577,7 @@ function render(snapshot){
 
 let subscribed=false;
 let bootstrapped=false;
+let externallyPublishedExercise=false;
 
 async function init(){
   const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
@@ -586,7 +587,11 @@ async function init(){
       if(typeof boundary.subscribe==='function'){
         await boundary.subscribe(snapshot=>render(snapshot));
       }else{
-        document.addEventListener('kanji5:v1.9-v2-view-models',event=>render(event?.detail||{}));
+        document.addEventListener('kanji5:v1.9-v2-view-models',event=>{
+          const snapshot=event?.detail||{};
+          if(snapshot?.exercise?.mode)externallyPublishedExercise=true;
+          render(snapshot);
+        });
         render(await boundary.snapshot());
       }
       subscribed=true;
@@ -599,7 +604,11 @@ async function init(){
     if(!bootstrapped){
       bootstrapped=true;
       const snapshot=await boundary.snapshot();
-      if(!snapshot.exercise?.mode)await bridge.start();
+      if(!snapshot.exercise?.mode && !externallyPublishedExercise){
+        await new Promise(resolve=>queueMicrotask(resolve));
+        const beforeStart=await boundary.snapshot();
+        if(!beforeStart.exercise?.mode && !externallyPublishedExercise)await bridge.start();
+      }
       render(await boundary.snapshot());
     }
   }catch(error){
