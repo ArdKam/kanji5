@@ -108,8 +108,6 @@ jobs:
         run: node scripts/test-v2-p2-session-ia.mjs
       - name: Run v2 P3 accessibility contract
         run: node scripts/test-v2-p3-accessibility.mjs
-      - name: Run v2 P3 accessibility contract
-        run: node scripts/test-v2-p3-accessibility.mjs
       - name: Run all contract and unit tests
         run: npm test
       - name: Run browser coverage
