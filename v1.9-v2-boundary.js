@@ -17,6 +17,7 @@ async function setAdaptiveReason(input){const core=await load();adaptiveReason=c
 async function clearTransient(){exercise=null;feedback=null;adaptiveReason=null;await publish();return true}
 window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,setExercise,setFeedback,setAdaptiveReason,clearTransient});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
+document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 document.addEventListener('kanji5:v1.6-education-result',e=>{void setFeedback(e?.detail||{})});
 document.addEventListener('kanji5:v1.9-feedback',e=>{void setFeedback(e?.detail||{})});
 document.addEventListener('kanji5:v1.6-session-finished',()=>{setTimeout(()=>{clearTransient()},0)});
