@@ -106,10 +106,12 @@ jobs:
         run: node scripts/test-v2-p0-presentation.mjs
       - name: Run v2 P2 session information architecture contract
         run: node scripts/test-v2-p2-session-ia.mjs
+      - name: Run v2 P3 accessibility contract
+        run: node scripts/test-v2-p3-accessibility.mjs
       - name: Run all contract and unit tests
         run: npm test
       - name: Run browser coverage
         run: |
           npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium
-          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs e2e/v1.9-p0-outcome.spec.mjs e2e/v1.9-p1-learner-model.spec.mjs e2e/v1.9-p2-adaptive-planner.spec.mjs e2e/v1.9-p3-recovery.spec.mjs e2e/v1.9-p4-learning-evaluation.spec.mjs e2e/v1.9-p5-data-offline.spec.mjs e2e/v1.9-p6-v2-boundary.spec.mjs e2e/v2-p0-presentation.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-p2-session-ia.spec.mjs
+          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs e2e/v1.9-p0-outcome.spec.mjs e2e/v1.9-p1-learner-model.spec.mjs e2e/v1.9-p2-adaptive-planner.spec.mjs e2e/v1.9-p3-recovery.spec.mjs e2e/v1.9-p4-learning-evaluation.spec.mjs e2e/v1.9-p5-data-offline.spec.mjs e2e/v1.9-p6-v2-boundary.spec.mjs e2e/v2-p0-presentation.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-p2-session-ia.spec.mjs e2e/v2-p3-accessibility.spec.mjs
