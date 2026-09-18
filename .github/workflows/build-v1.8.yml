@@ -102,6 +102,8 @@ jobs:
           node --check v2-presentation.js
       - name: Validate v1.9 release contract
         run: node scripts/test-v1.9-release.mjs
+      - name: Run v2 P0 presentation contract
+        run: node scripts/test-v2-p0-presentation.mjs
       - name: Run all contract and unit tests
         run: npm test
       - name: Run browser coverage
