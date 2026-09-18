@@ -15,10 +15,10 @@ function runtimePresentationData(now=Date.now()){
   const masteredCount=deck.filter(item=>{const card=cards[item.id]?.card;return Boolean(card&&card.state===2&&(Number(card.scheduled_days)||0)>=21)}).length;
   const upcoming=deck.map(item=>{const due=cards[item.id]?.card?.due;const t=due?Date.parse(due):NaN;return Number.isFinite(t)&&t>now?{character:item.character,dueAt:new Date(t).toISOString()}:null}).filter(Boolean).sort((a,b)=>Date.parse(a.dueAt)-Date.parse(b.dueAt)).slice(0,6);
   const totalReviews=reviews.length;
-  const correctReviews=reviews.filter(item=>String(item.rating||'')!=='Again').length;
+  const nonAgainReviews=reviews.filter(item=>String(item.rating||'')!=='Again').length;
   const days=[];
   for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const key=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);days.push({label:new Intl.DateTimeFormat('fa-IR',{weekday:'short'}).format(d),count:reviews.filter(item=>String(item.at||'').slice(0,10)===key).length})}
-  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming,settings,stats:{totalReviews,accuracy:totalReviews?correctReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:Object.values(cards).filter(item=>item?.leech).length,last7:days}};
+  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming,settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:Object.values(cards).filter(item=>item?.leech).length,last7:days}};
 }
 
 function activeSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
