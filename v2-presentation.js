@@ -177,21 +177,31 @@ function render(snapshot) {
   grid.appendChild(reason);
 }
 
+let subscribed=false;
+let bootstrapped=false;
 async function init() {
   const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
-  const bridge = window.__KANJI5_EDU_BRIDGE__;
-  if (!boundary || !bridge) {
+  if (!boundary) {
     setTimeout(init, 50);
     return;
   }
   try {
-    document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
-    let snapshot = await boundary.snapshot();
-    if (!snapshot.exercise?.mode) {
-      await bridge.start();
-      snapshot = await boundary.snapshot();
+    if (!subscribed) {
+      document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
+      subscribed=true;
+      render(await boundary.snapshot());
     }
-    render(snapshot);
+    const bridge = window.__KANJI5_EDU_BRIDGE__;
+    if (!bridge) {
+      setTimeout(init, 50);
+      return;
+    }
+    if (!bootstrapped) {
+      bootstrapped=true;
+      const snapshot = await boundary.snapshot();
+      if (!snapshot.exercise?.mode) await bridge.start();
+      render(await boundary.snapshot());
+    }
   } catch (error) {
     render({});
     console.error(error);
