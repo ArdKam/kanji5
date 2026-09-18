@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('builds and restores the long-term skill profile from completed sessions', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?legacy=1');
   await page.evaluate(() => {
     localStorage.clear();
     const history = [
