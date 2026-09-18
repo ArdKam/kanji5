@@ -1011,10 +1011,31 @@ function render(snapshot) {
 let subscribed=false;
 let bootstrapped=false;
 let boundaryReadyListener=false;
+let initStartedAt=Date.now();
+let fatalRendered=false;
+function renderFatal(message='بارگذاری رابط آموزشی کامل نشد.'){
+  if(fatalRendered)return;
+  fatalRendered=true;
+  content.textContent='';
+  const section=document.createElement('section');
+  section.className='v2-exercise-card v2-empty-state';
+  section.setAttribute('role','alert');
+  section.setAttribute('aria-live','assertive');
+  const title=heading('خطا در بارگذاری','v2FatalTitle');
+  const detail=document.createElement('p');
+  detail.className='v2-empty';
+  detail.textContent=message;
+  const retry=document.createElement('button');
+  retry.type='button';retry.className='v2-btn v2-btn-primary';
+  retry.textContent='تلاش دوباره';
+  retry.addEventListener('click',()=>location.reload());
+  section.append(title,detail,retry);
+  content.appendChild(section);
+}
 
 async function init() {
   const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
-  if (!boundary) return;
+  if (!boundary) { if(Date.now()-initStartedAt>10000)renderFatal('اتصال به هستهٔ یادگیری برقرار نشد.'); else setTimeout(init,50); return; }
   try {
     if (!subscribed) {
       document.addEventListener('kanji5:v1.9-v2-view-models',event=>render(event?.detail||{}));
@@ -1022,7 +1043,7 @@ async function init() {
       subscribed=true;
     }
     const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge) { setTimeout(init,50); return; }
+    if (!bridge) { if(Date.now()-initStartedAt>10000)renderFatal('رابط تمرین‌های آموزشی آماده نشد.'); else setTimeout(init,50); return; }
     if (!bootstrapped) {
       bootstrapped=true;
       await boundary.refreshLearning?.();
@@ -1030,7 +1051,7 @@ async function init() {
       render(snapshot);
     }
   } catch(error) {
-    render({});
+    renderFatal('در آماده‌سازی محتوای آموزشی خطایی رخ داد. صفحه را دوباره بارگذاری کن.');
     console.error(error);
   }
 }
