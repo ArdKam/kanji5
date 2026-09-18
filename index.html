@@ -8,6 +8,14 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Kanji 5 — پنج کانجی در روز</title>
+<link rel='stylesheet' href='./legacy.css' media='not all' id='legacyStylesheet'>
+<script>
+if(new URLSearchParams(location.search).get('legacy')==='1'){
+  const legacy=document.getElementById('legacyStylesheet');
+  if(legacy) legacy.media='all';
+}
+</script>
+<script id="v1.2-dataset-bootstrap">(()=>{const DATA_VERSION="v1.2-dataset-2136";const DECK_KEY="kanji5-deck";const VERSION_KEY="kanji5-deck-version";try{if(localStorage.getItem(VERSION_KEY)!==DATA_VERSION){localStorage.removeItem(DECK_KEY);localStorage.setItem(VERSION_KEY,DATA_VERSION)}}catch(_){}})();</script>
 </head>
 <body>
 <script src="./app-bootstrap.js"></script>
