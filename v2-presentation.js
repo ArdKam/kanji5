@@ -548,6 +548,60 @@ function renderLearning(snapshot) {
   return section;
 }
 
+function buildFallbackReviewRecall(card, host) {
+  const gate = document.createElement('div');
+  gate.className = 'v12-recall-gate';
+  gate.dataset.v17Attribute = card.meanings?.length ? 'meaning' : 'reading';
+  gate.dataset.v17Adaptive = '1';
+
+  const prompt = document.createElement('p');
+  prompt.className = 'v2-learning-hint';
+  prompt.textContent = card.meanings?.length ? 'معنی این کانجی را از حافظه به یاد بیاور.' : 'یک خوانش این کانجی را از حافظه به یاد بیاور.';
+
+  const input = document.createElement('input');
+  input.id = 'v12RecallInput';
+  input.type = 'text';
+  input.className = 'v2-input';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  input.setAttribute('aria-label','پاسخ یادآوری فعال');
+
+  const result = document.createElement('div');
+  result.className = 'v12-recall-result';
+  result.setAttribute('aria-live','polite');
+
+  const submit = document.createElement('button');
+  submit.id = 'v12SubmitRecall';
+  submit.type = 'button';
+  submit.className = 'v2-btn v2-btn-primary';
+  submit.textContent = 'بررسی پاسخ';
+
+  const normalize = value => String(value ?? '').trim().toLowerCase().normalize('NFKC').replace(/[\\s\\u3000]+/g,'');
+  submit.addEventListener('click', async () => {
+    const core = window.__KANJI5_EDU_CORE__;
+    const answer = String(input.value || '');
+    const mode = gate.dataset.v17Attribute;
+    const expected = mode === 'meaning' ? (card.meanings || []) : [...(card.on || []), ...(card.kun || [])];
+    const checked = mode === 'meaning'
+      ? core?.gradeMeaning?.(answer, expected)
+      : core?.gradeReading?.(answer, expected);
+    const correct = Boolean(checked?.correct);
+    result.className = 'v12-recall-result ' + (correct ? 'good' : 'bad');
+    result.textContent = correct ? '✅ پاسخ درست بود' : '❌ پاسخ درست نبود';
+    if (!correct) return;
+    submit.disabled = true;
+    input.disabled = true;
+    await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(true);
+    document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-revealed'));
+    host.replaceChildren();
+  });
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter') { event.preventDefault(); submit.click(); }
+  });
+  gate.append(prompt,input,result,submit);
+  return gate;
+}
+
 function renderReviewCard(snapshot) {
   const card = snapshot?.learning || {};
   const section = document.createElement('section');
@@ -605,7 +659,7 @@ function renderReviewCard(snapshot) {
           contentId: String(card.contentId || card.character || '').trim()
         };
         const gate = typeof opener === 'function' ? await opener() : null;
-        if (gate) recallHost.replaceChildren(gate);
+        recallHost.replaceChildren(gate || buildFallbackReviewRecall(card, recallHost));
       } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
