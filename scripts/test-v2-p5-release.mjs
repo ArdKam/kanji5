@@ -25,8 +25,8 @@ assert.ok(index.includes('./v2-presentation.js'),'v2 presentation script must re
 assert.ok(index.includes('./review-runtime.js'),'shared review runtime must remain wired');
 assert.match(bootstrap,/legacy\.css/,'legacy stylesheet must remain available for the compatibility route');
 assert.doesNotMatch(index,/<script type="module">/,'review runtime must not remain inline');
-assert.match(index,/kanji5-v2-default/);
-assert.match(index,/\.kanji5-v2-default #app\{display:none!important\}/);
+assert.match(bootstrap,/kanji5-v2-default/);
+assert.match(bootstrap,/\.kanji5-v2-default #app\{display:none!important\}/);
 assert.ok(index.includes('<main id="app" hidden>'),'legacy app is retained only as hidden compatibility substrate');
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(sw.includes('"./review-runtime.js"'),'review runtime must be offline-precached');
