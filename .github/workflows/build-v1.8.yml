@@ -52,6 +52,7 @@ on:
       - 'V1.9-ROADMAP.md'
       - 'V2-ROADMAP.md'
       - 'v2-*.js'
+      - 'v2-*.css'
       - 'e2e/v2-*.mjs'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
