@@ -41,8 +41,9 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
   expect(await primary.evaluate(el=>getComputedStyle(el).backgroundColor)).not.toBe('');
 
   await input.focus();
-  const focus=await input.evaluate(el=>{const c=getComputedStyle(el);return {outline:c.outlineStyle,boxShadow:c.boxShadow};});
-  expect(focus.outline).toBe('0px');
+  const focus=await input.evaluate(el=>{const c=getComputedStyle(el);return {outlineStyle:c.outlineStyle,outlineWidth:c.outlineWidth,boxShadow:c.boxShadow};});
+  expect(focus.outlineStyle).toBe('solid');
+  expect(parseFloat(focus.outlineWidth)).toBeGreaterThanOrEqual(2);
   expect(focus.boxShadow).not.toBe('none');
 
   await page.emulateMedia({reducedMotion:'reduce'});
