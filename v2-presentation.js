@@ -105,7 +105,7 @@ function renderHeader(snapshot) {
 
   const meta = document.createElement('div');
   meta.className = 'v2-progress-meta';
-  meta.textContent = total > 0 ? Math.min(done,total) + ' / ' + total : 'Ready to learn';
+  meta.textContent = total > 0 ? 'Progress ' + Math.min(done,total) + ' / ' + total : 'Progress 0 / 0';
   sessionProgress.append(progress,meta);
 }
 
