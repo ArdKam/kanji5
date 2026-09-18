@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] — post-release hardening
+
+### Fixed
+- Enforced explicit invalid educational outcomes instead of silently treating malformed grader results as wrong.
+- Bound recovery state and recovery evaluation to the exact task and retry identity.
+- Ensured v2 practice starts a planner-backed authoritative session and completes finite sessions after the final correct task.
+- Removed v2 dependency on legacy Stats/Settings DOM and routed those surfaces through versioned view models.
+- Decoupled v2 Active Recall from legacy review DOM and made review/content selection deterministic.
+- Restricted the legacy Storage prototype shim, legacy session dashboard, and legacy stylesheet to the compatibility route.
+- Added real service-worker offline browser coverage, runtime-separation contracts, settings round-trip coverage, and recovery/linkage regressions.
+
+### Changed
+- Pinned @playwright/test to 1.59.0.
+- Added deterministic learner-aware Vocabulary/Context content difficulty targeting.
+- Added semantic v2 accessibility tokens, high-contrast support, localized progress semantics, and an accessible startup failure state.
+
+
 ## [2.0.0] — 2026-09-18
 
 ### Added
