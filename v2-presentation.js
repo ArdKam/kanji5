@@ -59,7 +59,12 @@ practiceButton.addEventListener('click', async () => {
   if (!bridge?.start) return;
   presentationMode = 'exercise';
   practiceButton.disabled = true;
-  try { await bridge.start(); } finally { practiceButton.disabled = false; }
+  try {
+    const sessionApi = window.__KANJI5_V16_SESSION_API__;
+    const current = sessionApi?.getSession?.();
+    if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
+    await bridge.start();
+  } finally { practiceButton.disabled = false; }
 });
 const statsButton = document.createElement('button');
 statsButton.type = 'button';
