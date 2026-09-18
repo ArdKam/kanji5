@@ -39,7 +39,7 @@ function modeSummary(rows,mode,now=Date.now(),options={}){
   const olderAttempts=older.reduce((n,s)=>n+s.attempts,0),olderCorrect=older.reduce((n,s)=>n+s.correct,0);
   const olderAccuracy=olderAttempts?olderCorrect/olderAttempts:null;
   const momentum=deriveMomentum(recentAccuracy,olderAccuracy);
-  const successStreakForState=successStreak;
+  
   const state=deriveState({attempts:lifetime.attempts,accuracy,confidence,errorStreak,successStreak,recentAccuracy,momentum},cfg);
   return{attempts:lifetime.attempts,correct:lifetime.correct,accuracy,recentAttempts:recent.attempts,recentCorrect:recent.correct,recentAccuracy,errorStreak,successStreak,lastAt:last.lastAt||'',recencyDays:Number.isFinite(recency)?recency:null,momentum,recoveryCount,confidence,state,version:LEARNER_MODEL_VERSION}
 }
