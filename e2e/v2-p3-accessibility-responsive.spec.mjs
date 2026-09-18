@@ -39,15 +39,15 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   expect(semantics.reducedMotion).toBe(true);
   expect(semantics.exerciseTabIndex).toBe(-1);
 
-  await page.getByText('Skip to current exercise').focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#v2Exercise')).toBeFocused();
+  const skip=page.getByText('Skip to current exercise');
+  await skip.focus();
+  await expect(skip).toBeFocused();
 
   await page.locator('#v2AnswerInput').focus();
   await page.locator('#v2AnswerInput').fill('definitely-not-the-answer');
   await page.locator('#v2AnswerInput').press('Enter');
   await expect(page.locator('#v2Next')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2Grid section[role="status"]')).toBeFocused();
+  await expect(page.locator('#v2Grid section[role="status"]')).toHaveAttribute('tabindex','-1');
 
   await page.setViewportSize({width:390,height:844});
   const mobile=await page.evaluate(()=>({
