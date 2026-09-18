@@ -24,6 +24,7 @@ function writeKnowledge(value){const next=value&&typeof value==='object'&&!Array
 function readSettings(){return{...educationDefaults,...readObject(SETTINGS_KEY,{})}}
 function writeSettings(value){const next={...educationDefaults,...(value&&typeof value==='object'?value:{})};return writeObject(SETTINGS_KEY,next)}
 function readAppState(){return safeObject(safeParse(readValue(STORAGE,null)))||{}}
+function readReviews(){const value=safeParse(readValue(REVIEWS_STORAGE,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object'):[]}
 function readComponents(){return readObject(COMPONENT_KEY,{})}
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
@@ -50,5 +51,5 @@ function reset(defaultsValue,deck=[]){const next=createInitial({settings:{...def
 function loadState(defaultsValue=defaults){return loadSaved(createInitial({today:todayKey()}),defaultsValue)}
 function saveState(state){save(state);return state}
 function transaction(mutator){if(typeof mutator!=='function')throw new TypeError('transaction requires a function');const current=loadState();const draft=structuredClone(current);const result=mutator(draft)??draft;save(result);return result}
-window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,writeSettings,readAppState,readComponents,writeComponents,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
+window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
 })();
