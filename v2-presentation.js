@@ -62,7 +62,7 @@ practiceButton.addEventListener('click', async () => {
   try {
     const sessionApi = window.__KANJI5_V16_SESSION_API__;
     const current = sessionApi?.getSession?.();
-    if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
+    if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady(); else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
     await bridge.start();
   } finally { practiceButton.disabled = false; }
 });
