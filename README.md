@@ -76,6 +76,25 @@ v1.8 سه mode واقعی learner-facing را به جریان آموزشی اض�
 - **Learning UX:** feedback حداقلی و توضیح کوتاه دربارهٔ دلیل انتخاب تمرین، بدون dashboard پیچیده
 - **Offline/runtime quality:** graderهای v1.8 و UX runtime در service worker precache شده‌اند و shell cache نسخه‌بندی شده است
 
+## v2 — Presentation Layer
+
+v2.0 replaces the legacy v1 presentation as the default browser experience while keeping the v1.9 learning engine authoritative.
+
+### v2 highlights
+- **Default v2 shell:** the root route renders the v2 presentation without a query-string opt-in.
+- **Five-skill parity:** Meaning, Reading, Production, Vocabulary, and Context continue to use the existing deterministic graders and session/recovery boundaries.
+- **Stable presentation boundary:** v2 consumes structured view models from the v1.9 boundary rather than storage or planner internals.
+- **Accessibility & responsive UI:** keyboard-first interaction, semantic live regions, visible focus states, reduced-motion handling, and mobile/tablet/desktop layouts.
+- **Offline release path:** the active v2 presentation modules are precached and the existing v1.9 offline/runtime contracts remain part of the release gate.
+
+### Release status
+
+**v2.0.0 — release-ready**
+
+The v2 release gate requires syntax validation, the full contract/unit suite, legacy v1.7/v1.8/v1.9 compatibility coverage, v2 browser coverage, accessibility/responsive checks, offline/runtime checks, architecture boundaries, and the v2 release contract.
+
+The legacy v1 presentation is retained only behind the explicit `?legacy=1` compatibility path for regression and migration verification; it is not the default user-facing experience.
+
 ## v1.9 — Learning Engine
 
 v1.9 is the final pre-v2 learning-engine release. It keeps the five-skill model and FSRS while adding a versioned educational outcome contract, evidence-aware learner modeling, adaptive planning, bounded recovery, deterministic evaluation, content/data integrity, stronger offline reliability, and an explicit presentation boundary for v2.
