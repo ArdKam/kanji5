@@ -12,8 +12,8 @@ for (const cls of ['v2-shell','v2-title','v2-header','v2-session-progress','v2-c
 assert.ok(css.includes(':hover'));
 assert.ok(css.includes(':focus'));
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'));
-assert.ok(css.includes('@media (max-width:900px)'));
-assert.ok(css.includes('@media (max-width:600px)'));
+assert.ok(css.includes('@media (max-width:960px)'));
+assert.ok(css.includes('@media (max-width:640px)'));
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(sw.includes('"./v2-presentation.css"'));
 assert.ok(roadmap.includes('### P4 — Visual System & Polish'));
