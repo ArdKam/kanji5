@@ -14,8 +14,8 @@ test('v2 P2 session information architecture exposes progress and recent outcome
   expect(snapshot.session).toHaveProperty('completionFraction');
   expect(snapshot.session).toHaveProperty('remainingTotal');
   expect(Array.isArray(snapshot.recentOutcomes)).toBe(true);
-  await expect(page.locator('#v2App')).toContainText('Recent outcomes');
-  await expect(page.locator('#v2App')).toContainText('Adaptive focus');
-  await expect(page.locator('#v2App')).toContainText('Progress');
-  await expect(page.locator('#v2App')).toContainText('recent failure');
+  await expect(page.locator('#v2App')).toContainText('نتایج اخیر');
+  await expect(page.locator('#v2App')).toContainText('تمرکز تطبیقی');
+  await expect(page.locator('#v2App')).toContainText('پیشرفت');
+  await expect(page.locator('#v2App')).toContainText('به دلیل خطاهای اخیر');
 });
