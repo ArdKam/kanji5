@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const p=fs.readFileSync('v2-presentation.js','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
+assert.match(p,/focus-visible/);
+assert.match(p,/prefers-reduced-motion/);
+assert.match(p,/aria-describedby/);
+assert.match(p,/aria-live/);
+assert.match(p,/role','status/);
+assert.match(p,/grid\.id='v2Grid'/);
+assert.match(sw,/const CACHE='kanji5-shell-v78'/);
+assert.match(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
+console.log('Kanji 5 v2 P3 accessibility/responsive contract passed.');
