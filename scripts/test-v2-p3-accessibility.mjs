@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=path=>fs.readFileSync(path,'utf8');
+const presentation=read('v2-presentation.js');
+const sw=read('sw.js');
+const roadmap=read('V2-ROADMAP.md');
+
+assert.match(presentation,/v2-skip-link/);
+assert.match(presentation,/href='#v2Exercise'/);
+assert.match(presentation,/target\.focus\(\{preventScroll:true\}\)/);
+assert.match(presentation,/exercise\.tabIndex=-1/);
+assert.match(presentation,/aria-live/);
+assert.match(presentation,/aria-atomic/);
+assert.match(presentation,/role','status/);
+assert.match(presentation,/htmlFor='v2AnswerInput'/);
+assert.match(presentation,/aria-describedby/);
+assert.match(presentation,/event\.key==='Enter'/);
+assert.match(presentation,/min-height:44px/);
+assert.match(presentation,/focus-visible/);
+assert.match(presentation,/@media\(max-width:760px\)/);
+assert.match(presentation,/grid-template-columns:1fr/);
+assert.match(presentation,/prefers-reduced-motion:reduce/);
+assert.match(presentation,/animation:none/);
+assert.match(presentation,/className='v2-actions'/);
+assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
+assert.match(sw,/"\.\/v2-presentation\.js"/);
+assert.match(roadmap,/### P3 — Accessibility & Responsive Completion/);
+assert.doesNotMatch(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
+console.log('Kanji 5 v2 P3 accessibility/responsive contract passed.');
