@@ -80,10 +80,14 @@ function codePointCompare(left,right){
     const ac=a.codePointAt(i),bc=b.codePointAt(i);
     if(ac<bc)return -1;
     if(ac>bc)return 1;
-    if(ac>0xffff)i++;
-    if(bc>0xffff)i++;
+    if(ac>0xffff||bc>0xffff)i++;
   }
   return a.length-b.length;
+}
+function stableSerialize(value){
+  if(Array.isArray(value))return '['+value.map(stableSerialize).join(',')+']';
+  if(value&&typeof value==='object')return '{'+Object.keys(value).sort(codePointCompare).map(key=>JSON.stringify(key)+':'+stableSerialize(value[key])).join(',')+'}';
+  return JSON.stringify(value);
 }
 
 export function selectDeterministic(items,keyFn=value=>value){
@@ -112,7 +116,7 @@ export function selectAdaptiveContent(items,target='',options={}){
   return [...list].sort((a,b)=>Math.abs(contentDifficulty(a,target,kind)-targetDifficulty)-Math.abs(contentDifficulty(b,target,kind)-targetDifficulty)
     || contentDifficulty(a,target,kind)-contentDifficulty(b,target,kind)
     || codePointCompare(normalizeContentKey(kind==='context'?a?.text:a?.word),normalizeContentKey(kind==='context'?b?.text:b?.word))
-    || codePointCompare(JSON.stringify(a),JSON.stringify(b)))[0]||null;
+    || codePointCompare(stableSerialize(a),stableSerialize(b)))[0]||null;
 }
 export function safeContentFallback(preferredModes,availableModes,fallbackModes=['meaning','reading','production']){
   const supported=new Set(Array.isArray(availableModes)?availableModes:[]);
