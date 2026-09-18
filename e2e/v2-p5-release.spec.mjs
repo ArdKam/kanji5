@@ -34,7 +34,7 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
   });
   await page.evaluate(async()=>{await window.__KANJI5_EDU_BRIDGE__.start();});
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2App')).toContainText('Production');
+  await expect(page.locator('#v2App')).toContainText('تولید');
 
   await page.locator('#v2AnswerInput').fill('x');
   await page.locator('#v2Submit').click();
