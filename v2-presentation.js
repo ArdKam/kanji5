@@ -212,10 +212,12 @@ function ensureV2Dialogs(){
   const statsDialog=document.createElement('dialog');
   statsDialog.id='v2StatsDialog';
   statsDialog.className='v2-dialog';
+  statsDialog.setAttribute('aria-labelledby','v2StatsTitle');
   statsDialog.innerHTML='<div class="v2-dialog-body"></div>';
   const settingsDialog=document.createElement('dialog');
   settingsDialog.id='v2SettingsDialog';
   settingsDialog.className='v2-dialog';
+  settingsDialog.setAttribute('aria-labelledby','v2SettingsTitle');
   settingsDialog.innerHTML='<div class="v2-dialog-body"></div>';
   root.append(statsDialog,settingsDialog);
 }
