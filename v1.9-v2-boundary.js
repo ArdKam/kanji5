@@ -9,7 +9,8 @@ let publishRevision=0;
 function activeSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
 function completedSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>!x?.status&&x?.modeResults)||null}
 function learner(){return window.__KANJI5_V19_LEARNER_MODEL__?.read?.()||null}
-async function snapshot(){const core=await load(),session=activeSession()||completedSession();return core.buildBoundarySnapshot({session,exercise,feedback,learner:learner(),adaptiveReason})}
+function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
+async function snapshot(){const core=await load(),session=activeSession()||completedSession();return core.buildBoundarySnapshot({session,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason})}
 async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
 async function setExercise(input){const core=await load();exercise=core.buildExerciseViewModel(input);await publish();return exercise}
 async function setFeedback(input){const core=await load();feedback=core.buildFeedbackViewModel(input);await publish();return feedback}

@@ -10,7 +10,11 @@ export function buildSessionViewModel(session){
   const source=session&&typeof session==='object'?session:{};
   const remainingModes={};for(const mode of MODES)remainingModes[mode]=Math.max(0,finite(source.remainingModes?.[mode],0));
   const modeResults={};for(const mode of MODES){const s=source.modeResults?.[mode]||{};modeResults[mode]={attempts:Math.max(0,finite(s.attempts,0)),correct:Math.max(0,finite(s.correct,0)),lastOutcome:OUTCOMES.includes(s.lastOutcome)?s.lastOutcome:null,lastAt:text(s.lastAt,80),graderVersion:text(s.graderVersion,80)}}
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session',sessionId:text(source.sessionId,120),status:text(source.status,40)||'unknown',resumed:bool(source.resumed),planRevision:Math.max(0,finite(source.planRevision,0)),remainingModes,modeResults,completed:source.status!=='active',updatedAt:text(source.updatedAt||source.endedAt,80)})
+  const plannedTotal=Math.max(0,finite((source.plan?.modes||[]).reduce((sum,item)=>sum+finite(item?.plannedCount,0),0),0));
+  const remainingTotal=MODES.reduce((sum,mode)=>sum+remainingModes[mode],0);
+  const effectivePlanned=plannedTotal||remainingTotal;
+  const completionFraction=source.status==='active'&&effectivePlanned>0?Math.max(0,Math.min(1,(effectivePlanned-remainingTotal)/effectivePlanned)):source.status==='active'?0:1;
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session',sessionId:text(source.sessionId,120),status:text(source.status,40)||'unknown',resumed:bool(source.resumed),planRevision:Math.max(0,finite(source.planRevision,0)),remainingModes,modeResults,plannedTotal:effectivePlanned,remainingTotal,completionFraction,completed:source.status!=='active',updatedAt:text(source.updatedAt||source.endedAt,80)})
 }
 
 export function buildExerciseViewModel(input={}){
@@ -33,6 +37,11 @@ export function buildSessionSummary(session){
   return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session-summary',sessionId:text(source.sessionId,120),attempts,correct,accuracy:attempts?Math.max(0,Math.min(1,correct/attempts)):0,completionStatus:source.status==='active'?'active':'complete'})
 }
 
+export function buildRecentOutcomesViewModel(input=[]){
+  const rows=Array.isArray(input)?input:[];
+  return rows.slice(0,8).map(source=>Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'recent-outcome',character:text(source?.character,16),mode:MODES.includes(source?.mode)?source.mode:null,outcome:OUTCOMES.includes(source?.outcome)?source.outcome:null,correct:bool(source?.correct),quality:text(source?.quality,80),score:Math.max(0,Math.min(1,finite(source?.score,0))),at:text(source?.at,80)}));
+}
+
 export function buildAdaptiveReasonViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;
   const reasons=Array.isArray(source.reasons)?source.reasons.filter(v=>typeof v==='string').map(v=>text(v,160)).filter(Boolean).slice(0,5):[];
@@ -41,8 +50,8 @@ export function buildAdaptiveReasonViewModel(input={}){
 
 export function buildBoundarySnapshot(input={}){
   const source=input&&typeof input==='object'?input:{};
-  const snapshot={contractVersion:V2_BOUNDARY_VERSION,session:buildSessionViewModel(source.session),exercise:buildExerciseViewModel(source.exercise),feedback:buildFeedbackViewModel(source.feedback),learner:buildLearnerSkillSummary(source.learner),sessionSummary:buildSessionSummary(source.session),adaptiveReason:buildAdaptiveReasonViewModel(source.adaptiveReason)};
+  const snapshot={contractVersion:V2_BOUNDARY_VERSION,session:buildSessionViewModel(source.session),exercise:buildExerciseViewModel(source.exercise),feedback:buildFeedbackViewModel(source.feedback),learner:buildLearnerSkillSummary(source.learner),sessionSummary:buildSessionSummary(source.session),recentOutcomes:buildRecentOutcomesViewModel(source.recentOutcomes),adaptiveReason:buildAdaptiveReasonViewModel(source.adaptiveReason)};
   return Object.freeze(clone(snapshot));
 }
 
-export function isV2BoundarySnapshot(value){return Boolean(value&&value.contractVersion===V2_BOUNDARY_VERSION&&value.session?.kind==='session'&&value.exercise?.kind==='exercise'&&value.feedback?.kind==='feedback'&&value.learner?.kind==='learner-skill-summary'&&value.sessionSummary?.kind==='session-summary'&&value.adaptiveReason?.kind==='adaptive-reason')}
+export function isV2BoundarySnapshot(value){return Boolean(value&&value.contractVersion===V2_BOUNDARY_VERSION&&value.session?.kind==='session'&&value.exercise?.kind==='exercise'&&value.feedback?.kind==='feedback'&&value.learner?.kind==='learner-skill-summary'&&value.sessionSummary?.kind==='session-summary'&&Array.isArray(value.recentOutcomes)&&value.adaptiveReason?.kind==='adaptive-reason')}

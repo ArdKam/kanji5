@@ -57,6 +57,15 @@ function render(snapshot) {
   grid.textContent = '';
 
   const session = card('Session');
+  const fraction=Number(snapshot?.session?.completionFraction)||0;
+  const progress=document.createElement('div');
+  progress.setAttribute('role','progressbar');
+  progress.setAttribute('aria-label','Session progress');
+  progress.setAttribute('aria-valuemin','0');progress.setAttribute('aria-valuemax','100');progress.setAttribute('aria-valuenow',String(Math.round(fraction*100)));
+  progress.style.cssText='height:10px;background:#eef0f2;border-radius:99px;overflow:hidden;margin:10px 0 7px;';
+  const fill=document.createElement('div');fill.style.cssText='height:100%;background:#111827;border-radius:99px;width:'+Math.round(fraction*100)+'%;';
+  progress.appendChild(fill);session.appendChild(progress);
+  const progressMeta=document.createElement('p');progressMeta.textContent='Progress '+Math.round(fraction*100)+'% · '+String(snapshot?.session?.remainingTotal??0)+' remaining';progressMeta.style.cssText='margin:0 0 8px;color:#6b7280;font-size:12px;';session.appendChild(progressMeta);
   row(session,'Status',snapshot?.session?.status);
   row(session,'Session ID',snapshot?.session?.sessionId);
   row(session,'Plan revision',snapshot?.session?.planRevision);
@@ -170,11 +179,26 @@ function render(snapshot) {
   }
   grid.appendChild(learner);
 
-  const reason = card('Adaptive reason');
+  const reason = card('Adaptive focus');
   row(reason,'Skill',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
   row(reason,'Action',snapshot?.adaptiveReason?.action);
   if (Array.isArray(snapshot?.adaptiveReason?.reasons)) row(reason,'Reasons',snapshot.adaptiveReason.reasons.join(' · '));
   grid.appendChild(reason);
+
+  const recent = card('Recent outcomes');
+  const outcomes=Array.isArray(snapshot?.recentOutcomes)?snapshot.recentOutcomes:[];
+  if(!outcomes.length){
+    const empty=document.createElement('p');empty.textContent='No recent outcomes yet.';empty.style.color='#6b7280';recent.appendChild(empty);
+  }else{
+    for(const item of outcomes){
+      const rowNode=document.createElement('div');rowNode.style.cssText='display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f1f3;';
+      const kanji=document.createElement('strong');kanji.textContent=item.character||'—';
+      const detail=document.createElement('span');detail.textContent=(labels[item.mode]||item.mode||'—')+' · '+(item.quality||item.outcome||'—');detail.style.color='#4b5563';detail.style.fontSize='12px';
+      const result=document.createElement('strong');result.textContent=item.correct?'✓':(item.outcome||'—');result.setAttribute('aria-label',item.correct?'Correct':'Incorrect');
+      rowNode.append(kanji,detail,result);recent.appendChild(rowNode);
+    }
+  }
+  grid.appendChild(recent);
 }
 
 let subscribed=false;
