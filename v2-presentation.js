@@ -229,7 +229,7 @@ async function openV2Stats(){
   body.appendChild(heading('آمار','v2StatsTitle'));
   const grid=document.createElement('div');
   grid.className='v2-stats-grid';
-  for(const [labelText,value] of [['کل مرورها',stats.totalReviews],['دقت',Math.round((Number(stats.accuracy)||0)*100)+'٪'],['کانجی مطالعه‌شده',(stats.studiedCount||0)+' / '+(stats.deckSize||0)],['رشتهٔ فعلی',(stats.currentStreak||0)+' 🔥'],['طولانی‌ترین رشته',(stats.longestStreak||0)+' 🔥'],['Leech',stats.leechCount]]) row(grid,labelText,value);
+  for(const [labelText,value] of [['کل مرورها',stats.totalReviews],['مرورهای غیر Again',Math.round((Number(stats.nonAgainRate)||0)*100)+'٪'],['کانجی مطالعه‌شده',(stats.studiedCount||0)+' / '+(stats.deckSize||0)],['رشتهٔ فعلی',(stats.currentStreak||0)+' 🔥'],['طولانی‌ترین رشته',(stats.longestStreak||0)+' 🔥'],['Leech',stats.leechCount]]) row(grid,labelText,value);
   body.appendChild(grid);
   const title=document.createElement('h3');
   title.className='v2-dialog-subtitle';
