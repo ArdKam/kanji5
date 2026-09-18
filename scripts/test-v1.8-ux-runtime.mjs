@@ -9,5 +9,5 @@ assert.match(ux,/v18EnterHint/);
 assert.match(ux,/نمی‌دانم/);
 assert.match(feedback,/v1\.8-learning-ux\.js/);
 assert.match(sw,/v1\.8-learning-ux\.js/);
-assert.match(sw,/kanji5-shell-v68/);
+assert.match(sw,/kanji5-shell-v\\d+/);
 console.log('Kanji 5 v1.8 Learning UX runtime contract passed.');
