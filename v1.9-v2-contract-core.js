@@ -20,20 +20,20 @@ export function buildSessionViewModel(session){
 export function buildExerciseViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};
   const mode=MODES.includes(source.mode)?source.mode:null;
-  const stimulus=source.stimulus&&typeof source.stimulus==='object'?source.stimulus:{};
+  const raw=source.stimulus&&typeof source.stimulus==='object'?source.stimulus:{};
+  const fallbackKind=mode==='vocabulary'?'masked-vocabulary':mode==='context'?'masked-context':mode==='production'?'meaning':'kanji';
+  const kind=['kanji','meaning','masked-vocabulary','masked-context'].includes(raw.kind)?raw.kind:fallbackKind;
+  const primary=text(raw.primary??raw.text,text(source.character,''));
+  const secondary=text(raw.secondary??raw.detail,'');
+  const translation=text(raw.translation,'');
+  const inputPlaceholder=text(raw.inputPlaceholder,mode==='production'||mode==='context'?'Type the Kanji':'Type your answer');
+  const stimulus=Object.freeze({kind,primary,secondary,translation,inputPlaceholder});
   return Object.freeze({
-    contractVersion:V2_BOUNDARY_VERSION,
-    kind:'exercise',
-    mode,
-    prompt:text(source.prompt),
-    character:text(source.character,16),
-    stimulus:text(stimulus.text,240),
-    stimulusDetail:text(stimulus.detail,240),
-    answerHint:text(source.answerHint,240),
-    contentId:text(source.contentId,120),
-    contentVersion:text(source.contentVersion,80),
-    provenance:text(source.provenance,120)
-  })
+    contractVersion:V2_BOUNDARY_VERSION,kind:'exercise',mode,
+    prompt:text(source.prompt),character:text(source.character,16),stimulus,
+    answerHint:text(source.answerHint,240),contentId:text(source.contentId,120),
+    contentVersion:text(source.contentVersion,80),provenance:text(source.provenance,120)
+  });
 }
 export function buildFeedbackViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;const outcome=OUTCOMES.includes(source.outcome)?source.outcome:null;

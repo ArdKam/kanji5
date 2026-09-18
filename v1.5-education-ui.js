@@ -30,25 +30,29 @@ async function publishV2Exercise(){
   if(!boundary)return;
   let contentId=edu.item.id||edu.item.character;
   let provenance='local';
-  let stimulus={text:edu.item.character,detail:''};
+  let stimulus;
   let answerHint='';
   if(edu.mode==='meaning'){
-    answerHint='به چند معنی انگلیسی که برای این کانجی می‌شناسی فکر کن.';
+    stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'مثلاً: school'};
+    answerHint='یادآوری فعال: چند معنی انگلیسی برای این کانجی را از حافظه بازیابی کن.';
   }else if(edu.mode==='reading'){
-    answerHint='Hiragana یا Romaji قابل قبول است.';
+    stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'مثلاً: gaku یا がく'};
+    answerHint='یادآوری فعال: Hiragana یا Romaji قابل قبول است.';
   }else if(edu.mode==='production'){
-    stimulus={text:(edu.item.meaning||[]).join(' · ')||'—',detail:'معنی کانجی را ببین و خودِ کانجی را از حافظه تولید کن.'};
-    answerHint='قبل از ارسال، شکل کانجی را در ذهن بازسازی کن.';
+    stimulus={kind:'meaning',primary:(edu.item.meaning||[]).join(' · ')||'—',inputPlaceholder:'Type the Kanji'};
+    answerHint='معنی را ببین و خودِ کانجی را از حافظه تولید کن.';
   }else if(edu.mode==='vocabulary'&&edu.word){
     contentId=edu.item.character+':'+edu.word.word;
     provenance='kanjiapi';
-    stimulus={text:String(edu.word.word||'').replaceAll(edu.item.character,'＿'),detail:[edu.word.reading,edu.word.meaning].filter(Boolean).join(' · ')};
+    stimulus={kind:'masked-vocabulary',primary:String(edu.word.word||'').replaceAll(edu.item.character,'＿'),secondary:String(edu.word.reading||''),translation:String(edu.word.meaning||''),inputPlaceholder:'Type the full word'};
     answerHint='واژهٔ کامل را به ژاپنی وارد کن.';
   }else if(edu.mode==='context'&&edu.sentence){
     contentId=edu.item.character+':'+edu.sentence.text;
     provenance='tatoeba';
-    stimulus={text:String(edu.sentence.text||'').replaceAll(edu.item.character,'＿'),detail:String(edu.sentence.english||'')};
+    stimulus={kind:'masked-context',primary:String(edu.sentence.text||'').replaceAll(edu.item.character,'＿'),translation:String(edu.sentence.english||''),inputPlaceholder:'Type the missing Kanji'};
     answerHint='فقط کانجیِ حذف‌شده را وارد کن.';
+  }else{
+    stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'Type your answer'};
   }
   await boundary.setExercise({mode:edu.mode,prompt:exercisePrompt(),character:edu.item.character,stimulus,answerHint,contentId,contentVersion:'1',provenance});
 }
