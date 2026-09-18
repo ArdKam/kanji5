@@ -40,7 +40,7 @@ test('v2 renders distinct vocabulary and context stimuli',async({page})=>{
     await b.setExercise({mode:'context',prompt:'کانجی حذف‌شده را کامل کن',character:'学',stimulus:{text:'私は＿校へ行く。',detail:'I go to school.'},answerHint:'فقط کانجی حذف‌شده را وارد کن.',contentId:'context-1',provenance:'tatoeba'});
   });
   await expect(page.locator('#v2ModePill')).toHaveText('بافت');
-  await expect(page.locator('#v2Stimulus')).toHaveText('من به مدرسه می‌روم.').or(page.locator('#v2Stimulus')).toHaveText('私は＿校へ行く。');
+  await expect(page.locator('#v2Stimulus')).toHaveText('私は＿校へ行く。');
   await expect(page.locator('#v2StimulusDetail')).toHaveText('I go to school.');
   await boundary.dispose();
 });
