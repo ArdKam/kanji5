@@ -12,6 +12,8 @@ if (loading) loading.hidden = true;
 const root = document.createElement('main');
 root.id = 'v2App';
 root.className = 'v2-shell';
+root.lang = 'fa';
+root.dir = 'rtl';
 root.setAttribute('aria-labelledby', 'v2Title');
 
 const stylesheet = document.createElement('link');
@@ -22,7 +24,7 @@ document.head.appendChild(stylesheet);
 const skip = document.createElement('a');
 skip.className = 'v2-skip-link';
 skip.setAttribute('href','#v2Exercise');
-skip.textContent = 'Skip to current exercise';
+skip.textContent = 'رفتن به تمرین فعلی';
 skip.addEventListener('click', event => {
   const target = document.getElementById('v2Exercise');
   if (!target) return;
@@ -40,7 +42,7 @@ header.className = 'v2-header';
 const title = document.createElement('h1');
 title.id = 'v2Title';
 title.className = 'v2-title';
-title.textContent = 'Kanji 5';
+title.textContent = 'کانجی ۵';
 header.appendChild(title);
 
 const headerMeta = document.createElement('div');
@@ -56,9 +58,10 @@ content.className = 'v2-content';
 root.appendChild(content);
 document.body.appendChild(root);
 
+const toFaDigits = value => String(value).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 const text = value => String(value ?? '').trim() || '—';
-const labels = {meaning:'Meaning',reading:'Reading',production:'Production',vocabulary:'Vocabulary',context:'Context'};
-const outcomes = {correct:'Correct',wrong:'Wrong',unknown:"Don't know",near_miss:'Almost',empty:'Empty',invalid:'Unavailable'};
+const labels = {meaning:'معنی',reading:'خوانش',production:'تولید',vocabulary:'واژگان',context:'بافت'};
+const outcomes = {correct:'درست',wrong:'نادرست',unknown:'نمی‌دانم',near_miss:'نزدیک بود',empty:'خالی',invalid:'در دسترس نیست'};
 
 let lastFeedbackFocusKey = '';
 
@@ -105,7 +108,7 @@ function renderHeader(snapshot) {
 
   const meta = document.createElement('div');
   meta.className = 'v2-progress-meta';
-  meta.textContent = total > 0 ? 'Progress ' + Math.min(done,total) + ' / ' + total : 'Progress 0 / 0';
+  meta.textContent = total > 0 ? 'پیشرفت ' + toFaDigits(Math.min(done,total)) + ' از ' + toFaDigits(total) : 'پیشرفت ۰ از ۰';
   sessionProgress.append(progress,meta);
 }
 
@@ -122,7 +125,7 @@ function renderStimulus(parent, ex) {
   if (kind === 'meaning') {
     const caption = document.createElement('div');
     caption.className = 'v2-stimulus-caption';
-    caption.textContent = 'Meaning cue';
+    caption.textContent = 'راهنمای معنا';
     const value = document.createElement('div');
     value.className = 'v2-stimulus-meaning';
     value.textContent = primary;
@@ -185,11 +188,11 @@ function renderExercise(snapshot) {
 
   const step = document.createElement('span');
   step.className = 'v2-exercise-step';
-  step.textContent = 'Active recall';
+  step.textContent = 'یادآوری فعال';
   top.append(mode,step);
 
   section.appendChild(top);
-  section.appendChild(heading('Current exercise','v2ExerciseTitle'));
+  section.appendChild(heading('تمرین فعلی','v2ExerciseTitle'));
 
   const prompt = document.createElement('p');
   prompt.id = 'v2Prompt';
@@ -201,12 +204,12 @@ function renderExercise(snapshot) {
     const empty = document.createElement('div');
     empty.className = 'v2-empty-state';
     const p = document.createElement('p');
-    p.textContent = 'No exercise is ready yet.';
+    p.textContent = 'هنوز تمرینی آماده نیست.';
     const start = document.createElement('button');
     start.type = 'button';
     start.id = 'v2StartExercise';
     start.className = 'v2-btn v2-btn-primary';
-    start.textContent = 'Start exercise';
+    start.textContent = 'شروع تمرین';
     start.addEventListener('click', async () => { await window.__KANJI5_EDU_BRIDGE__?.start?.(); });
     empty.append(p,start);
     section.appendChild(empty);
@@ -221,7 +224,7 @@ function renderExercise(snapshot) {
   const label = document.createElement('label');
   label.className = 'v2-field-label';
   label.htmlFor = 'v2AnswerInput';
-  label.textContent = 'Your answer';
+  label.textContent = 'پاسخ شما';
 
   const input = document.createElement('input');
   input.id = 'v2AnswerInput';
@@ -230,7 +233,7 @@ function renderExercise(snapshot) {
   input.autocomplete = 'off';
   input.spellcheck = false;
   input.setAttribute('aria-describedby','v2Prompt');
-  input.placeholder = ex.stimulus?.inputPlaceholder || 'Type your answer';
+  input.placeholder = ex.stimulus?.inputPlaceholder || 'پاسخ را وارد کنید';
 
   const actions = document.createElement('div');
   actions.className = 'v2-actions';
@@ -239,7 +242,7 @@ function renderExercise(snapshot) {
   submit.type = 'button';
   submit.id = 'v2Submit';
   submit.className = 'v2-btn v2-btn-primary';
-  submit.textContent = 'Check answer';
+  submit.textContent = 'بررسی پاسخ';
   submit.addEventListener('click',async()=>{
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge) return;
@@ -252,7 +255,7 @@ function renderExercise(snapshot) {
   unknown.type = 'button';
   unknown.id = 'v2DontKnow';
   unknown.className = 'v2-btn v2-btn-secondary';
-  unknown.textContent = "Don't know";
+  unknown.textContent = 'نمی‌دانم';
   unknown.addEventListener('click',async()=>{
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge) return;
@@ -297,14 +300,14 @@ function renderFeedback(snapshot) {
 
   const detail = document.createElement('p');
   detail.className = 'v2-feedback-detail';
-  detail.textContent = feedback.correct ? 'Good retrieval.' : (feedback.reason || 'Review the answer and try again.');
+  detail.textContent = feedback.correct ? 'بازیابی درست بود.' : (feedback.reason || 'پاسخ را مرور کنید و دوباره تلاش کنید.');
 
   body.append(title,detail);
 
   if (!feedback.correct && snapshot?.exercise?.answerHint) {
     const answer = document.createElement('div');
     answer.className = 'v2-feedback-answer';
-    answer.textContent = 'Answer: ' + snapshot.exercise.answerHint;
+    answer.textContent = 'پاسخ درست: ' + snapshot.exercise.answerHint;
     body.appendChild(answer);
   }
 
@@ -316,7 +319,7 @@ function renderFeedback(snapshot) {
     retry.type = 'button';
     retry.id = 'v2Retry';
     retry.className = 'v2-btn v2-btn-secondary';
-    retry.textContent = 'Retry same skill';
+    retry.textContent = 'تکرار همین مهارت';
     retry.addEventListener('click',async()=>{
       const bridge = window.__KANJI5_EDU_BRIDGE__;
       if (!bridge?.retry) return;
@@ -330,7 +333,7 @@ function renderFeedback(snapshot) {
   next.type = 'button';
   next.id = 'v2Next';
   next.className = 'v2-btn v2-btn-primary';
-  next.textContent = 'Next exercise';
+  next.textContent = 'تمرین بعدی';
   next.addEventListener('click',async()=>{await window.__KANJI5_EDU_BRIDGE__?.next?.();});
   actions.appendChild(next);
 
@@ -343,7 +346,7 @@ function renderInsights(snapshot) {
   const details = document.createElement('details');
   details.className = 'v2-insights';
   const summary = document.createElement('summary');
-  summary.textContent = 'Session insights';
+  summary.textContent = 'جزئیات جلسه';
   details.appendChild(summary);
 
   const grid = document.createElement('div');
@@ -351,34 +354,34 @@ function renderInsights(snapshot) {
 
   const skills = document.createElement('section');
   skills.className = 'v2-insight-panel';
-  skills.appendChild(heading('Learner skills','v2LearnerTitle'));
+  skills.appendChild(heading('مهارت‌های یادگیرنده','v2LearnerTitle'));
   for (const mode of Object.keys(labels)) {
     const item = snapshot?.learner?.attributes?.[mode] || {};
-    row(skills,labels[mode],text(item.state)+' · recent '+Math.round((Number(item.recentAccuracy)||0)*100)+'%');
+    row(skills,labels[mode],text(item.state)+' · اخیر '+toFaDigits(Math.round((Number(item.recentAccuracy)||0)*100))+'٪');
   }
 
   const reason = document.createElement('section');
   reason.className = 'v2-insight-panel';
-  reason.appendChild(heading('Adaptive focus','v2ReasonTitle'));
-  row(reason,'Skill',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
-  row(reason,'Action',snapshot?.adaptiveReason?.action);
-  if (Array.isArray(snapshot?.adaptiveReason?.reasons) && snapshot.adaptiveReason.reasons.length) row(reason,'Why',snapshot.adaptiveReason.reasons.join(' · '));
+  reason.appendChild(heading('تمرکز تطبیقی','v2ReasonTitle'));
+  row(reason,'مهارت',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
+  row(reason,'عمل',snapshot?.adaptiveReason?.action);
+  if (Array.isArray(snapshot?.adaptiveReason?.reasons) && snapshot.adaptiveReason.reasons.length) row(reason,'دلیل',snapshot.adaptiveReason.reasons.join(' · '));
 
   const summaryPanel = document.createElement('section');
   summaryPanel.className = 'v2-insight-panel';
-  summaryPanel.appendChild(heading('Session summary','v2SummaryTitle'));
-  row(summaryPanel,'Attempts',snapshot?.sessionSummary?.attempts);
-  row(summaryPanel,'Correct',snapshot?.sessionSummary?.correct);
-  row(summaryPanel,'Accuracy',Math.round((Number(snapshot?.sessionSummary?.accuracy)||0)*100)+'%');
+  summaryPanel.appendChild(heading('خلاصه جلسه','v2SummaryTitle'));
+  row(summaryPanel,'تلاش‌ها',snapshot?.sessionSummary?.attempts);
+  row(summaryPanel,'درست',snapshot?.sessionSummary?.correct);
+  row(summaryPanel,'دقت',Math.round((Number(snapshot?.sessionSummary?.accuracy)||0)*100)+'٪');
 
   const recent = document.createElement('section');
   recent.className = 'v2-insight-panel';
-  recent.appendChild(heading('Recent outcomes','v2RecentTitle'));
+  recent.appendChild(heading('نتایج اخیر','v2RecentTitle'));
   const list = Array.isArray(snapshot?.recentOutcomes) ? snapshot.recentOutcomes : [];
   if (!list.length) {
     const empty = document.createElement('p');
     empty.className = 'v2-empty';
-    empty.textContent = 'No recent outcomes yet.';
+    empty.textContent = 'هنوز نتیجه‌ای ثبت نشده است.';
     recent.appendChild(empty);
   } else {
     for (const item of list) {
