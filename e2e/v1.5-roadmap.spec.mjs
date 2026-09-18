@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 async function cleanStart(page){
-  await page.goto('/');
+  await page.goto('/?legacy=1');
   await page.evaluate(() => {
     for (const key of Object.keys(localStorage)) {
       if (key.startsWith('kanji5-')) localStorage.removeItem(key);

@@ -9,7 +9,7 @@ const roadmap=read('V2-ROADMAP.md');
 const workflow=read('.github/workflows/build-v1.8.yml');
 
 assert.match(presentation,/URLSearchParams/);
-assert.match(presentation,/params\.get\('v2'\) !== '1'/);
+assert.match(presentation,/params\.get\('legacy'\) === '1'/);
 assert.match(presentation,/__KANJI5_V19_V2_BOUNDARY__/);
 assert.match(presentation,/kanji5:v1\.9-v2-view-models/);
 assert.doesNotMatch(presentation,/localStorage|sessionStorage|v1\.9-adaptive-planner|v1\.9-learner-model/);

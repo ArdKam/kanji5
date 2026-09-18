@@ -17,5 +17,5 @@ assert.ok(css.includes('@media (max-width:600px)'));
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(sw.includes('"./v2-presentation.css"'));
 assert.ok(roadmap.includes('### P4 — Visual System & Polish'));
-assert.ok(!roadmap.includes('### P4 — Visual System & Polish ✅'));
+assert.match(roadmap,/### P4 — Visual System & Polish ✅/);
 console.log('Kanji 5 v2 P4 visual contract passed.');

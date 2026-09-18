@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0] — 2026-09-18
+
+### Added
+- v2 presentation layer with a dedicated visual system, responsive layout, accessibility semantics, and reduced-motion support.
+- Stable consumption of the v1.9 presentation boundary for session, exercise, feedback, learner-skill, session-summary, recent-outcome, and adaptive-reason data.
+- Default-route v2 release smoke coverage and release contract checks.
+- Continued full compatibility, offline, and browser coverage for the v1.9 learning engine.
+
+### Changed
+- The v2 presentation is now the default browser experience; the legacy v1 presentation requires the explicit `?legacy=1` compatibility path.
+- Bumped the package version to `2.0.0`.
+- Kept the v1.9 learning engine, grading authority, learner model, recovery engine, and FSRS scheduling semantics unchanged.
+- Extended the release workflow with the v2 P5 release contract and default-route browser gate.
+
+### Compatibility
+- Existing v1.6/v1.7/v1.8/v1.9 learner and session data remains supported.
+- The legacy presentation remains available only for compatibility/regression verification; it is not part of the default user-facing flow.
+
+### Verification
+- Release validation covers syntax, `npm test`, v1.7/v1.8/v1.9 browser regressions, v2 presentation/accessibility/visual coverage, offline/runtime contracts, and architecture boundaries.
+
+
 ## [1.9.0] — 2026-09-18
 
 ### Added

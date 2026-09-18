@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 async function cleanStart(page){
-  await page.goto('/');
+  await page.goto('/?legacy=1');
   await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear()});
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
@@ -61,7 +61,7 @@ test('offline local grading remains available after remote content failure',asyn
 });
 
 test('legacy v1.9 evidence receives deterministic migration defaults',async({page})=>{
-  await page.goto('/');
+  await page.goto('/?legacy=1');
   await page.evaluate(()=>{localStorage.setItem('kanji5-v1.5-components',JSON.stringify({v19LearnerModel:{kanji:{}},v19LearnerEvidence:{学:[{mode:'meaning',correct:false,quality:'unknown'}]}}))});
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});

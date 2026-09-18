@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document is the living architecture reference for the current release line. It describes the active v1.9 runtime boundaries and the interfaces intended to remain stable when v2 replaces the presentation layer. Release-specific history belongs in `CHANGELOG.md` and the roadmap, not in this file.
+This document is the living architecture reference for the current release line. It describes the active v2 presentation over the v1.9 learning-engine boundaries. Release-specific history belongs in `CHANGELOG.md` and the roadmap, not in this file.
 
 ## Runtime boundaries
 
@@ -34,6 +34,7 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.9-data-integrity-core.js`: pure deterministic migration helpers for persisted learner/session records.
 - `v1.9-v2-contract-core.js`: pure contracts for the future presentation layer: session, exercise, feedback, learner summary, session summary, and adaptive-reason view models.
 - `v1.9-v2-boundary.js`: browser orchestration boundary that reads authoritative runtime state and emits only structured v2 view-model data. It does not render DOM or expose storage primitives.
+- `v2-presentation.js`, `v2-presentation.css`: default presentation layer consuming only the v1.9 view-model boundary; the legacy presentation is compatibility-only behind `?legacy=1`.
 - `supabase-sync.js`: remote transport, locking, retries, and optimistic concurrency. It does not define planning semantics.
 - `sw.js`: offline shell/data/API caching, request coalescing, and precaching of active runtime dependencies.
 
@@ -119,3 +120,11 @@ A release should pass:
 7. A clean working tree after validation; CI must not generate or commit application changes.
 
 These contracts make the architecture executable rather than aspirational.
+
+## V2 release mode
+
+The default browser route is the v2 presentation. `v2-presentation.js` hides the legacy application shell before rendering the v2 surface, and `v1.5-education-ui.js` treats the default route as v2 so it does not construct the legacy education presentation.
+
+`?legacy=1` is retained only as an explicit compatibility/test path for regression and migration verification. It is not the production default and must not be used by the v2 presentation.
+
+A v2 release must pass the full existing learning-engine regression suite plus the v2 presentation, accessibility, visual, default-route, offline, and architecture gates. The v1.9 engine remains authoritative for grading, adaptive planning, recovery, persistence, and FSRS scheduling.

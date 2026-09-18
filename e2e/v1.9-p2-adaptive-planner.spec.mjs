@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 test('routes next recall toward the weaker attribute without repeating unnecessarily',async({page})=>{
-  await page.goto('/');
+  await page.goto('/?legacy=1');
   await expect(page.locator('#loading')).toBeHidden({timeout:20_000});
   await page.evaluate(()=>{
     const at='2026-09-15T00:00:00.000Z';

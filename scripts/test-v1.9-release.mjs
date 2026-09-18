@@ -12,7 +12,7 @@ const workflow=read('.github/workflows/build-v1.8.yml');
 const index=read('index.html');
 const learnerRuntime=read('v1.9-learner-model.js');
 
-assert.equal(pkg.version,'1.9.0');
+assert.match(pkg.version,/^(1\.9\.0|2\.0\.0)$/);
 assert.match(pkg.scripts?.test??'',/scripts\/test-all\.mjs/);
 assert.match(pkg.scripts?.['test:v1.9:release']??'',/test-v1\.9-release\.mjs/);
 

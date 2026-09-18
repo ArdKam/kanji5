@@ -13,7 +13,7 @@ const profile = read('v1.6-skill-profile.js');
 const sync = read('v1.6-sync-core.js');
 const session = read('v1.6-session.js');
 
-assert.match(packageJson.version, /^1\.(6|7|8|9)\.0$/);
+assert.match(packageJson.version, /^(1\.(6|7|8|9)|2\.0)\.0$/);
 assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-release\.mjs/);
 assert.match(readme, /^## v1\.6 — Adaptive Session Intelligence$/m);
 assert.match(readme, /## v1\.8 — Rich Learner-Facing Recall/);
