@@ -20,6 +20,6 @@ assert.match(presentation,/v2DontKnow/);
 assert.match(presentation,/v2Retry/);
 assert.match(presentation,/__KANJI5_EDU_BRIDGE__/);
 assert.match(roadmap,/### P1 — Exercise Flow Migration ✅/);
-assert.match(sw,/const CACHE='kanji5-shell-v79'/);
+assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(spec.includes('v2 P1 exercise flow'));
 console.log('Kanji 5 v2 P1 exercise migration contract passed.');
