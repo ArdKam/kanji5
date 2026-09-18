@@ -8,11 +8,15 @@ const edu=read('v1.5-education-ui.js');
 
 assert.match(js,/function renderStimulus/);
 for(const cls of ['v2-exercise-card','v2-mode-badge','v2-stimulus','v2-kanji','v2-feedback-card','v2-insights']) assert.ok(js.includes(cls),cls);
-for(const token of ['stimulus','masked-vocabulary','masked-context','inputPlaceholder']) assert.ok(core.includes(token)||edu.includes(token),token);
+for(const token of ['stimulus','masked-vocabulary','masked-context','inputPlaceholder','choices']) assert.ok(core.includes(token)||edu.includes(token),token);
 assert.doesNotMatch(js,/Session ID/);
 assert.doesNotMatch(js,/Plan revision/);
 assert.doesNotMatch(js,/Content ID|ContentId|Plan revision|Session ID/);
 assert.match(edu,/kind:'meaning'/);
 assert.match(edu,/kind:'masked-vocabulary'/);
 assert.match(edu,/kind:'masked-context'/);
+assert.match(edu,/kind:'learning'/);
+assert.match(edu,/choices=chooseChoices\(edu\.item\)/);
+assert.match(js,/v2StartExercise/);
+assert.match(js,/v2-choice-grid/);
 console.log('Kanji 5 v2 exercise-first presentation contract passed.');
