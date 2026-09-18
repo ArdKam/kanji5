@@ -16,7 +16,7 @@ assert.match(presentation,/role','status/);
 assert.match(presentation,/htmlFor='v2AnswerInput'/);
 assert.match(presentation,/aria-describedby/);
 assert.match(presentation,/event\.key==='Enter'/);
-assert.match(presentation,/min-height:44px/);
+assert.ok(/min-height:44px/.test(css));
 assert.match(presentation,/focus-visible/);
 assert.match(presentation,/@media\(max-width:760px\)/);
 assert.match(presentation,/grid-template-columns:1fr/);
