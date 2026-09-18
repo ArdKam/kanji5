@@ -2,7 +2,8 @@
 'use strict';
 
 const params = new URLSearchParams(location.search);
-if (params.get('v2') !== '1') return;
+// v2 is now the default presentation. The legacy UI is retained only behind an explicit compatibility flag.
+if (params.get('legacy') === '1') return;
 
 const oldApp = document.getElementById('app');
 const loading = document.getElementById('loading');
