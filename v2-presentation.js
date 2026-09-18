@@ -133,7 +133,8 @@ function render(snapshot) {
     });
     actions.append(submit,unknown);
     exercise.append(input,actions);
-    queueMicrotask(()=>{if(document.activeElement!==input)input.focus()});
+    queueMicrotask(()=>{input.focus()});
+    setTimeout(()=>{if(document.contains(input)&&document.activeElement!==input)input.focus()},0);
   } else {
     const p=document.createElement('p');
     p.textContent='No exercise is currently exposed by the learning boundary.';
@@ -233,9 +234,13 @@ async function init() {
   if (!boundary) return;
   try {
     if (!subscribed) {
-      document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
+      if(typeof boundary.subscribe==='function'){
+        await boundary.subscribe(snapshot=>render(snapshot));
+      }else{
+        document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
+        render(await boundary.snapshot());
+      }
       subscribed=true;
-      render(await boundary.snapshot());
     }
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge) {
