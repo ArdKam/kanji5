@@ -6,17 +6,19 @@ if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 let corePromise=null;const load=()=>corePromise||(corePromise=import('./v1.9-v2-contract-core.js'));
 let exercise=null,feedback=null,adaptiveReason=null;
 let publishRevision=0;
+const subscribers=new Set();
 function activeSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
 function completedSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>!x?.status&&x?.modeResults)||null}
 function learner(){return window.__KANJI5_V19_LEARNER_MODEL__?.read?.()||null}
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
 async function snapshot(){const core=await load(),session=activeSession()||completedSession();return core.buildBoundarySnapshot({session,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason})}
-async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
+async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;for(const listener of subscribers){try{listener(viewModel)}catch(_){}}document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
+async function subscribe(listener){if(typeof listener!=='function')return()=>{};subscribers.add(listener);try{listener(await snapshot())}catch(_){ }return()=>subscribers.delete(listener)}
 async function setExercise(input){const core=await load();exercise=core.buildExerciseViewModel(input);await publish();return exercise}
 async function setFeedback(input){const core=await load();feedback=core.buildFeedbackViewModel(input);await publish();return feedback}
 async function setAdaptiveReason(input){const core=await load();adaptiveReason=core.buildAdaptiveReasonViewModel(input);await publish();return adaptiveReason}
 async function clearTransient(){exercise=null;feedback=null;adaptiveReason=null;await publish();return true}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,setExercise,setFeedback,setAdaptiveReason,clearTransient});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,subscribe,setExercise,setFeedback,setAdaptiveReason,clearTransient});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 document.addEventListener('kanji5:v1.6-education-result',e=>{void setFeedback(e?.detail||{})});
