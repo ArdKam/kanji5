@@ -35,7 +35,8 @@ test('first-time learner sees the learning card before exercises',async({page})=
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V16_SESSION_API__?.getSession?.().started))).toBe(true);
   await expect.poll(async()=>page.evaluate(()=>{
     const history=JSON.parse(localStorage.getItem('kanji5-v1.6-session-history')||'[]');
-    return history.some(row=>row?.status==='active');
+    const active=[...history].reverse().find(row=>row?.status==='active');
+    return Boolean(active?.plan && Object.values(active?.remainingModes||{}).some(value=>Number(value)>0));
   })).toBe(true);
   await expect(page.locator('#v2ProductionChoices')).toBeVisible({timeout:10000});
   await expect(page.locator('.v2-production-choice')).toHaveCount(4);
