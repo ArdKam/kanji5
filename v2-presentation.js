@@ -275,6 +275,7 @@ function render(snapshot){
 
   if(feedback?.outcome){
     const feedbackCard=makeCard('بازخورد','v2-feedback v2-feedback-filled');
+    feedbackCard.id='v2Feedback';
     feedbackCard.setAttribute('role','status');
     feedbackCard.setAttribute('aria-live','polite');
     feedbackCard.setAttribute('aria-atomic','true');
