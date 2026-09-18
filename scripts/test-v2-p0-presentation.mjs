@@ -14,7 +14,7 @@ assert.match(presentation,/__KANJI5_V19_V2_BOUNDARY__/);
 assert.match(presentation,/kanji5:v1\.9-v2-view-models/);
 assert.doesNotMatch(presentation,/localStorage|sessionStorage|v1\.9-adaptive-planner|v1\.9-learner-model/);
 assert.match(presentation,/textContent/);
-assert.match(index,/v2-presentation\.js/);
+assert.match(index,/v1\.5-education-ui\.js/);assert.match(index,/v1\.9-learner-model\.js/);assert.match(index,/v2-presentation\.js/);
 assert.match(sw,/v2-presentation\.js/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.match(roadmap,/### P0 — Presentation Shell & Contract Consumer ✅/);
