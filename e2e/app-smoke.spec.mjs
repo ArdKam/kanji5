@@ -4,7 +4,7 @@ test.describe('Kanji 5 browser smoke', () => {
   test('loads the real app into the study screen', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-    await page.goto('/');
+    await page.goto('/?legacy=1');
     await expect(page).toHaveTitle(/Kanji 5/);
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('#studyPanel')).toBeVisible();
@@ -14,7 +14,7 @@ test.describe('Kanji 5 browser smoke', () => {
   test('persisted cards can enter active recall and use don\'t know', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-    await page.goto('/');
+    await page.goto('/?legacy=1');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
     const firstCard = page.locator('.kanji');
@@ -117,7 +117,7 @@ test.describe('Kanji 5 browser smoke', () => {
   test('active recall Enter submits the current answer instead of advancing prompt', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-    await page.goto('/');
+    await page.goto('/?legacy=1');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
     const firstCard = page.locator('.kanji');
@@ -178,7 +178,7 @@ test.describe('Kanji 5 browser smoke', () => {
   test('rating advances the queue and persists a review', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-    await page.goto('/');
+    await page.goto('/?legacy=1');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     const firstKanji = await page.locator('.kanji').textContent();
     await page.locator('#revealBtn').click();
@@ -198,7 +198,7 @@ test.describe('Kanji 5 browser smoke', () => {
   test('education UI uses the state/network boundaries without leaking into review controls', async ({ page }) => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
-    await page.goto('/');
+    await page.goto('/?legacy=1');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
     await page.locator('#revealBtn').click();
     await expect(page.locator('#ratings')).toHaveClass(/show/);
