@@ -658,7 +658,17 @@ function renderReviewCard(snapshot) {
           character: String(card.character || '').trim(),
           contentId: String(card.contentId || card.character || '').trim()
         };
-        const gate = typeof opener === 'function' ? await opener() : null;
+        let gate = null;
+        if (typeof opener === 'function') {
+          try {
+            gate = await Promise.race([
+              Promise.resolve(opener()),
+              new Promise(resolve => setTimeout(() => resolve(null), 1500))
+            ]);
+          } catch (_) {
+            gate = null;
+          }
+        }
         recallHost.replaceChildren(gate || buildFallbackReviewRecall(card, recallHost));
       } finally { reveal.disabled = false; }
     });
