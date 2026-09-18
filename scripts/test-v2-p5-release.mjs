@@ -19,6 +19,8 @@ assert.match(presentation,/params\.get\('legacy'\) === '1'/);
 assert.doesNotMatch(presentation,/params\.get\('v2'\) !== '1'/);
 assert.match(education,/get\('legacy'\)!=='1'/);
 assert.ok(index.includes('./v2-presentation.js'),'v2 presentation script must remain wired');
+assert.match(index,/kanji5-v2-default/);
+assert.match(index,/\.kanji5-v2-default #app\{display:none!important\}/);
 assert.ok(index.includes('<main id="app" hidden>'),'legacy app is retained only as hidden compatibility substrate');
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(sw.includes('"./v2-presentation.css"'),'v2 stylesheet must be offline-precached');
