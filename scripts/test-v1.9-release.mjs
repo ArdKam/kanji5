@@ -10,6 +10,7 @@ const architecture=read('ARCHITECTURE.md');
 const sw=read('sw.js');
 const workflow=read('.github/workflows/build-v1.8.yml');
 const index=read('index.html');
+const learnerRuntime=read('v1.9-learner-model.js');
 
 assert.equal(pkg.version,'1.9.0');
 assert.match(pkg.scripts?.test??'',/scripts\/test-all\.mjs/);
@@ -24,7 +25,7 @@ assert.match(changelog,/## \[1\.9\.0\] — 2026-09-18/);
 assert.match(architecture,/## V2 presentation contracts/);
 assert.match(architecture,/v1\.9-v2-contract-core\.js/);
 assert.match(architecture,/v1\.9-v2-boundary\.js/);
-assert.match(sw,/const CACHE='kanji5-shell-v69'/);
+assert.match(sw,/const CACHE='kanji5-shell-v76'/);
 for(const file of [
   'v1.9-outcome-core.js','v1.9-learner-model-core.js','v1.9-learner-model.js',
   'v1.9-adaptive-planner-core.js','v1.9-adaptive-planner.js',
@@ -43,5 +44,5 @@ assert.match(workflow,/name: Build Kanji 5 v1\.8\/v1\.9/);
 assert.match(workflow,/scripts\/test-v1\.9-release\.mjs/);
 assert.match(workflow,/e2e\/v1\.9-p6-v2-boundary\.spec\.mjs/);
 assert.match(workflow,/workflow_dispatch:/);
-assert.ok(index.includes('./v1.9-v2-boundary.js'),'v2 boundary must be wired into the app shell');
+assert.ok(index.includes('./v1.9-v2-boundary.js')||learnerRuntime.includes("import('./v1.9-v2-boundary.js')"),'v2 boundary must be wired into the runtime');
 console.log('Kanji 5 v1.9 release contract passed.');
