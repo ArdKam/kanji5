@@ -28,6 +28,10 @@ jobs:
           done
       - name: Install dependencies
         run: npm install --no-audit --no-fund --package-lock=false
+
+      - name: Validate v2 release contract
+        run: node scripts/test-v2-p5-release.mjs
+
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run focused v2 parity browser coverage

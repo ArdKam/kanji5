@@ -773,3 +773,5 @@ body:has(#v2App){
   #v2App .v2-btn,#v2App .v2-input,#v2App .v2-feedback-card,#v2App .v2-exercise-card,#v2App .v2-learning-card,#v2App .v2-dialog{border-width:2px}
   #v2App button:focus-visible,#v2App input:focus-visible,#v2App a:focus-visible,#v2App summary:focus-visible{outline-width:3px;outline-offset:3px}
 }
+
+.v2-answer-area[hidden]{display:none!important}

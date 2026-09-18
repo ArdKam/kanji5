@@ -332,35 +332,6 @@ function row(parent, label, value) {
   parent.appendChild(p);
 }
 
-function readLegacyMetric(id) {
-  const node = document.getElementById(id);
-  return node ? String(node.textContent || '').trim() : '';
-}
-
-function renderDailySummary(parent) {
-  const section = document.createElement('section');
-  section.className = 'v2-daily-summary';
-  section.setAttribute('aria-label','خلاصهٔ امروز');
-  const items = [
-    ['due', 'مرورهای امروز', readLegacyMetric('dueCount')],
-    ['new', 'کانجی جدید امروز', readLegacyMetric('newCount')],
-    ['mastered', 'یادگرفته‌شده', readLegacyMetric('masteredCount')],
-    ['streak', 'روز پیاپی', readLegacyMetric('streakCount')]
-  ];
-  for (const [kind,label,value] of items) {
-    const card = document.createElement('div');
-    card.className = 'v2-daily-stat v2-daily-stat-' + kind;
-    const number = document.createElement('strong');
-    number.className = 'v2-daily-stat-value';
-    number.textContent = value || '۰';
-    const caption = document.createElement('span');
-    caption.textContent = label;
-    card.append(number,caption);
-    section.appendChild(card);
-  }
-  parent.appendChild(section);
-}
-
 function renderHeader(snapshot) {
   sessionProgress.textContent = '';
   const fraction = Math.max(0, Math.min(1, Number(snapshot?.session?.completionFraction) || 0));
@@ -577,6 +548,60 @@ function renderLearning(snapshot) {
   return section;
 }
 
+function buildFallbackReviewRecall(card, host) {
+  const gate = document.createElement('div');
+  gate.className = 'v12-recall-gate';
+  gate.dataset.v17Attribute = card.meanings?.length ? 'meaning' : 'reading';
+  gate.dataset.v17Adaptive = '1';
+
+  const prompt = document.createElement('p');
+  prompt.className = 'v2-learning-hint';
+  prompt.textContent = card.meanings?.length ? 'معنی این کانجی را از حافظه به یاد بیاور.' : 'یک خوانش این کانجی را از حافظه به یاد بیاور.';
+
+  const input = document.createElement('input');
+  input.id = 'v12RecallInput';
+  input.type = 'text';
+  input.className = 'v2-input';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  input.setAttribute('aria-label','پاسخ یادآوری فعال');
+
+  const result = document.createElement('div');
+  result.className = 'v12-recall-result';
+  result.setAttribute('aria-live','polite');
+
+  const submit = document.createElement('button');
+  submit.id = 'v12SubmitRecall';
+  submit.type = 'button';
+  submit.className = 'v2-btn v2-btn-primary';
+  submit.textContent = 'بررسی پاسخ';
+
+  const normalize = value => String(value ?? '').trim().toLowerCase().normalize('NFKC').replace(/[\\s\\u3000]+/g,'');
+  submit.addEventListener('click', async () => {
+    const core = window.__KANJI5_EDU_CORE__;
+    const answer = String(input.value || '');
+    const mode = gate.dataset.v17Attribute;
+    const expected = mode === 'meaning' ? (card.meanings || []) : [...(card.on || []), ...(card.kun || [])];
+    const checked = mode === 'meaning'
+      ? core?.gradeMeaning?.(answer, expected)
+      : core?.gradeReading?.(answer, expected);
+    const correct = Boolean(checked?.correct);
+    result.className = 'v12-recall-result ' + (correct ? 'good' : 'bad');
+    result.textContent = correct ? '✅ پاسخ درست بود' : '❌ پاسخ درست نبود';
+    if (!correct) return;
+    submit.disabled = true;
+    input.disabled = true;
+    await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(true);
+    document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-revealed'));
+    host.replaceChildren();
+  });
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter') { event.preventDefault(); submit.click(); }
+  });
+  gate.append(prompt,input,result,submit);
+  return gate;
+}
+
 function renderReviewCard(snapshot) {
   const card = snapshot?.learning || {};
   const section = document.createElement('section');
@@ -623,9 +648,29 @@ function renderReviewCard(snapshot) {
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
       try {
-        const opener = window.__KANJI5_V12_OPEN_RECALL__;
-        const gate = typeof opener === 'function' ? await opener() : null;
-        if (gate) recallHost.replaceChildren(gate);
+        let opener = window.__KANJI5_V12_OPEN_RECALL__;
+        if (typeof opener !== 'function') {
+          const deadline = Date.now() + 3000;
+          while (Date.now() < deadline && typeof window.__KANJI5_V12_OPEN_RECALL__ !== 'function') await new Promise(resolve => setTimeout(resolve,50));
+          opener = window.__KANJI5_V12_OPEN_RECALL__;
+        }
+        window.__KANJI5_V12_RECALL_CONTEXT__ = {
+          character: String(card.character || '').trim(),
+          contentId: String(card.contentId || card.character || '').trim()
+        };
+        let gate = null;
+        if (typeof opener === 'function') {
+          try {
+            gate = await Promise.race([
+              Promise.resolve(opener()),
+              new Promise(resolve => setTimeout(() => resolve(null), 1500))
+            ]);
+          } catch (_) {
+            gate = null;
+          }
+        }
+        const usableGate = gate?.querySelector?.('#v12RecallInput') ? gate : null;
+        recallHost.replaceChildren(usableGate || buildFallbackReviewRecall(card, recallHost));
       } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);

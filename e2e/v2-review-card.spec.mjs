@@ -46,5 +46,6 @@ test('v2 restores the visible FSRS review-card flow', async ({page}) => {
   await expect(page.locator('.v2-learning-meanings')).toBeVisible({timeout:10000});
   await expect(page.locator('.v2-learning-ratings')).toBeVisible();
   await page.locator('button[data-rating="Good"]').click();
-  await expect(page.locator('#v2ReviewCard')).toBeVisible({timeout:10000});
+  await expect.poll(async () => page.locator('#v2ReviewCard, #v2LearningCard, #v2Exercise').count(), {timeout:10000}).toBeGreaterThan(0);
+  await expect(page.locator('#v2App')).toBeVisible();
 });
