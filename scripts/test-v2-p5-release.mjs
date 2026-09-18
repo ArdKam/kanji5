@@ -49,4 +49,7 @@ assert.equal((presentation.match(/function renderDailySummary\(/g)||[]).length,1
 assert.doesNotMatch(presentation,/localStorage|sessionStorage|__KANJI5_STATE__|v1\.9-adaptive-planner|buildLearnerModel|projectKanjiAttributes/);
 assert.match(boundary,/runtimePresentationData/);
 assert.match(boundary,/buildBoundarySnapshot/);
+assert.match(presentation,/function buildFallbackReviewRecall/);
+assert.match(presentation,/v12RecallInput/);
+assert.match(presentation,/gradeMeaning|gradeReading/);
 console.log('Kanji 5 v2 P5 release contract passed.');
