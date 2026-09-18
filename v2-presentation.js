@@ -397,9 +397,13 @@ function renderReviewCard(snapshot) {
     reveal.id = 'v2ReviewReveal';
     reveal.className = 'v2-btn v2-btn-primary v2-learning-reveal';
     reveal.textContent = 'نمایش پاسخ';
+    const recallHost = document.createElement('div');
+    recallHost.id = 'v2ReviewRecallHost';
+    recallHost.className = 'v2-review-recall-host';
+    section.appendChild(recallHost);
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
-      try { await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(true); }
+      try { await window.__KANJI5_V19_V2_BOUNDARY__?.openReviewRecall?.(); }
       finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
