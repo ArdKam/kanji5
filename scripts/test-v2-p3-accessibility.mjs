@@ -3,12 +3,13 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(path,'utf8');
 const presentation=read('v2-presentation.js');
+const css=read('v2-presentation.css');
 const sw=read('sw.js');
 const roadmap=read('V2-ROADMAP.md');
 
 assert.match(presentation,/v2-skip-link/);
 assert.match(presentation,/href='#v2Exercise'/);
-assert.ok(presentation.includes('target.focus({preventScroll:true})') || presentation.includes('target.focus({preventScroll:true})'));
+assert.ok(presentation.includes('target.focus({preventScroll:true})'));
 assert.match(presentation,/exercise\.tabIndex=-1/);
 assert.match(presentation,/aria-live/);
 assert.match(presentation,/aria-atomic/);
@@ -25,6 +26,6 @@ assert.ok(css.includes('animation-duration:.001ms'));
 assert.match(presentation,/className='v2-actions'/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.match(sw,/"\.\/v2-presentation\.js"/);
-assert.match(roadmap,/### P3 — Accessibility & Responsive Completion/);
-assert.doesNotMatch(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
+assert.match(sw,/"\.\/v2-presentation\.css"/);
+assert.match(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
 console.log('Kanji 5 v2 P3 accessibility/responsive contract passed.');
