@@ -70,10 +70,59 @@ function render(snapshot) {
     row(exercise,'Prompt',ex.prompt);
     if (ex.character) row(exercise,'Kanji',ex.character);
     row(exercise,'Content',ex.contentId);
+
+    const input = document.createElement('input');
+    input.id = 'v2AnswerInput';
+    input.type = 'text';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.setAttribute('aria-label','Your answer');
+    input.placeholder = ex.mode === 'production' || ex.mode === 'context' ? 'Type the Kanji' : 'Type your answer';
+    input.style.cssText = 'width:100%;margin-top:12px;padding:12px;border:1px solid #d1d5db;border-radius:12px;font:inherit;direction:ltr;';
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;';
+
+    const submit = document.createElement('button');
+    submit.type = 'button';
+    submit.id = 'v2Submit';
+    submit.textContent = 'Check answer';
+    submit.style.cssText = 'border:0;background:#111827;color:#fff;padding:11px 14px;border-radius:12px;font-weight:800;cursor:pointer;';
+
+    const unknown = document.createElement('button');
+    unknown.type = 'button';
+    unknown.id = 'v2DontKnow';
+    unknown.textContent = "Don't know";
+    unknown.style.cssText = 'border:1px solid #d1d5db;background:#fff;color:#111827;padding:11px 14px;border-radius:12px;font-weight:750;cursor:pointer;';
+
+    submit.addEventListener('click',async()=>{
+      const bridge=window.__KANJI5_EDU_BRIDGE__;
+      if(!bridge)return;
+      submit.disabled=true;
+      await bridge.submitValue(input.value);
+    });
+    unknown.addEventListener('click',async()=>{
+      const bridge=window.__KANJI5_EDU_BRIDGE__;
+      if(!bridge)return;
+      unknown.disabled=true;
+      await bridge.dontKnow();
+    });
+    input.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){event.preventDefault();submit.click();}
+    });
+    actions.append(submit,unknown);
+    exercise.append(input,actions);
   } else {
     const p=document.createElement('p');
     p.textContent='No exercise is currently exposed by the learning boundary.';
     exercise.appendChild(p);
+    const start=document.createElement('button');
+    start.type='button';
+    start.id='v2StartExercise';
+    start.textContent='Start exercise';
+    start.style.cssText = 'border:0;background:#111827;color:#fff;padding:11px 14px;border-radius:12px;font-weight:800;cursor:pointer;';
+    start.addEventListener('click',async()=>{await window.__KANJI5_EDU_BRIDGE__?.start?.();});
+    exercise.appendChild(start);
   }
   grid.appendChild(exercise);
 
@@ -83,6 +132,28 @@ function render(snapshot) {
   row(feedback,'Retry count',snapshot?.feedback?.retryCount);
   row(feedback,'Recovered',snapshot?.feedback?.recovered ? 'yes' : 'no');
   if (snapshot?.feedback?.reason) row(feedback,'Reason',snapshot.feedback.reason);
+  const feedbackActions=document.createElement('div');
+  feedbackActions.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;';
+  if (snapshot?.feedback?.state==='pending_retry') {
+    const retry=document.createElement('button');
+    retry.type='button';retry.id='v2Retry';retry.textContent='Retry same skill';
+    retry.style.cssText='border:1px solid #d1d5db;background:#fff;padding:10px 13px;border-radius:12px;font-weight:750;cursor:pointer;';
+    retry.addEventListener('click',async()=>{const bridge=window.__KANJI5_EDU_BRIDGE__;if(!bridge?.retry)return;retry.disabled=true;await bridge.retry()});
+    feedbackActions.appendChild(retry);
+  }
+  if (snapshot?.feedback?.outcome) {
+    const next=document.createElement('button');
+    next.type='button';next.id='v2Next';next.textContent='Next exercise';
+    next.style.cssText='border:0;background:#111827;color:#fff;padding:10px 13px;border-radius:12px;font-weight:800;cursor:pointer;';
+    next.addEventListener('click',async()=>{await window.__KANJI5_EDU_BRIDGE__?.next?.();});
+    feedbackActions.appendChild(next);
+  }
+  const back=document.createElement('button');
+  back.type='button';back.id='v2BackToReview';back.textContent='Back to review';
+  back.style.cssText='border:1px solid #d1d5db;background:#fff;padding:10px 13px;border-radius:12px;font-weight:750;cursor:pointer;';
+  back.addEventListener('click',()=>window.__KANJI5_EDU_BRIDGE__?.backToReview?.());
+  feedbackActions.appendChild(back);
+  feedback.appendChild(feedbackActions);
   grid.appendChild(feedback);
 
   const summary = card('Session summary');
@@ -108,13 +179,19 @@ function render(snapshot) {
 
 async function init() {
   const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
-  if (!boundary) {
+  const bridge = window.__KANJI5_EDU_BRIDGE__;
+  if (!boundary || !bridge) {
     setTimeout(init, 50);
     return;
   }
   try {
-    render(await boundary.snapshot());
     document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
+    let snapshot = await boundary.snapshot();
+    if (!snapshot.exercise?.mode) {
+      await bridge.start();
+      snapshot = await boundary.snapshot();
+    }
+    render(snapshot);
   } catch (error) {
     render({});
     console.error(error);
