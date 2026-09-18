@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(path,'utf8');
 const pkg=JSON.parse(read('package.json'));
+assert.equal(pkg.devDependencies?.['@playwright/test'],'1.59.0');
 const index=read('index.html');
 const presentation=read('v2-presentation.js');
 const education=read('v1.5-education-ui.js');
