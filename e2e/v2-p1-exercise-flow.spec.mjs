@@ -49,12 +49,12 @@ test('v2 P1 exercise flow renders, grades, and recovers through the existing lea
 
   await page.locator('#v2AnswerInput').fill('x');
   await page.locator('#v2Submit').click();
-  await expect(page.locator('#v2App')).toContainText('wrong',{timeout:10000});
+  await expect(page.locator('#v2App')).toContainText(/wrong/i,{timeout:10000});
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
 
   await page.locator('#v2Retry').click();
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
   await page.locator('#v2AnswerInput').fill(target);
   await page.locator('#v2Submit').click();
-  await expect(page.locator('#v2App')).toContainText('correct',{timeout:10000});
+  await expect(page.locator('#v2App')).toContainText(/correct/i,{timeout:10000});
 });
