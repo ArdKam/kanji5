@@ -6,7 +6,7 @@ test('evaluates persisted learner evidence without mutating learner state',async
   await page.evaluate(()=>{
     const at='2026-09-15T00:00:00.000Z';
     localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify([{sessionId:'ev1',endedAt:at,modeResults:{meaning:{attempts:2,correct:1,lastCorrect:false},reading:{attempts:1,correct:1,lastCorrect:true}}}]));
-    localStorage.setItem('kanji5-v1.5-components',JSON.stringify({v19LearnerEvidence:{学:[{at:'2026-09-14T00:00:00.000Z',mode:'meaning',outcome:'wrong'},{at:'2026-09-15T00:00:00.000Z',mode:'meaning',outcome:'correct'}]}}));
+    localStorage.setItem('kanji5-v1.5-components',JSON.stringify({v19LearnerEvidence:{学:[{at:'2026-09-14T00:00:00.000Z',mode:'meaning',outcome:'wrong',taskId:'学:meaning:card-1'},{at:'2026-09-15T00:00:00.000Z',mode:'meaning',outcome:'correct',taskId:'学:meaning:card-1',retryOf:'学:meaning:card-1',recovery:true,recoveryAttempt:1}]}}));
   });
   await page.reload();
   await expect(page.locator('#loading')).toBeHidden({timeout:20000});
