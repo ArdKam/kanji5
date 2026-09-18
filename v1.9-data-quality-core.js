@@ -106,7 +106,7 @@ export function contentDifficulty(entry,target='',kind='vocabulary'){
 export function selectAdaptiveContent(items,target='',options={}){
   const list=Array.isArray(items)?items.filter(Boolean):[];
   if(!list.length)return null;
-  const attempts=Math.max(0,Number(options.attempts)||0),accuracy=Math.max(0,Math.min(1,Number(options.accuracy)===''?0.5:Number(options.accuracy)));
+  const attempts=Math.max(0,Number(options.attempts)||0);const rawAccuracy=Number(options.accuracy);const accuracy=Number.isFinite(rawAccuracy)?Math.max(0,Math.min(1,rawAccuracy)):0.5;
   const targetDifficulty=attempts<2?0.25:accuracy<0.6?0.25:accuracy>0.9?0.7:0.45;
   const kind=options.kind==='context'?'context':'vocabulary';
   return [...list].sort((a,b)=>Math.abs(contentDifficulty(a,target,kind)-targetDifficulty)-Math.abs(contentDifficulty(b,target,kind)-targetDifficulty)
