@@ -23,7 +23,7 @@ assert.match(presentation,/grid-template-columns:1fr/);
 assert.match(presentation,/prefers-reduced-motion:reduce/);
 assert.match(presentation,/animation:none/);
 assert.match(presentation,/className='v2-actions'/);
-assert.match(sw,/const CACHE='kanji5-shell-v81'/);
+assert.match(sw,/const CACHE='kanji5-shell-v82'/);
 assert.match(sw,/"\.\/v2-presentation\.js"/);
 assert.match(roadmap,/### P3 — Accessibility & Responsive Completion/);
 assert.doesNotMatch(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
