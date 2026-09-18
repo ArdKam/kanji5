@@ -28,6 +28,14 @@ test('v2 restores the v1.8 settings and statistics surface', async ({page}) => {
   await expect(page.locator('#v2StatsDialog')).toContainText('کل مرورها');
   await page.locator('#v2StatsDialog').locator('button').filter({hasText:'بستن'}).click();
   await expect(page.locator('#v2StatsDialog')).toBeHidden();
+  await page.locator('#v2Settings').click();
+  await expect(page.locator('#v2SettingsDialog')).toBeVisible();
+  await page.locator('#v2DailyNew').fill('7');
+  await page.locator('#v2SettingsDialog button[type="submit"]').click();
+  await expect(page.locator('#v2SettingsDialog')).toBeHidden();
+  await page.locator('#v2Settings').click();
+  await expect(page.locator('#v2DailyNew')).toHaveValue('7');
+  await page.locator('#v2SettingsDialog').locator('button').filter({hasText:'بستن'}).click();
 
   await expect(page.locator('#v2LearningCard')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2LearningReveal')).toBeVisible();
