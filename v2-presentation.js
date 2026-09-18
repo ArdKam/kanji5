@@ -530,8 +530,11 @@ function renderLearning(snapshot) {
     reveal.textContent = card.revealLabel || 'نمایش اطلاعات کانجی';
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
-      try { await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(); }
-      finally { reveal.disabled = false; }
+      try {
+        await runBusy('در حال نمایش پاسخ…',
+          async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(),
+          'نمایش پاسخ انجام نشد. دوباره تلاش کن.');
+      } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
     return section;
