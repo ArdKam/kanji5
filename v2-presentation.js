@@ -62,6 +62,7 @@ function row(parent, label, value) {
 
 function render(snapshot) {
   grid.textContent = '';
+  let postRenderFocus=null;
 
   const session = card('Session');
   const fraction=Number(snapshot?.session?.completionFraction)||0;
@@ -133,8 +134,7 @@ function render(snapshot) {
     });
     actions.append(submit,unknown);
     exercise.append(input,actions);
-    queueMicrotask(()=>{input.focus()});
-    setTimeout(()=>{if(document.contains(input)&&document.activeElement!==input)input.focus()},0);
+    if(!snapshot?.feedback?.outcome)postRenderFocus=input;
   } else {
     const p=document.createElement('p');
     p.textContent='No exercise is currently exposed by the learning boundary.';
@@ -154,6 +154,7 @@ function render(snapshot) {
   feedback.setAttribute('aria-atomic','true');
   feedback.setAttribute('role','status');
   feedback.tabIndex=-1;
+  if(snapshot?.feedback?.outcome)postRenderFocus=feedback;
   row(feedback,'Outcome',snapshot?.feedback?.outcome);
   row(feedback,'Score',snapshot?.feedback?.score);
   row(feedback,'Retry count',snapshot?.feedback?.retryCount);
