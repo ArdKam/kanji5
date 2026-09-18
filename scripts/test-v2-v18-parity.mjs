@@ -14,6 +14,10 @@ for(const token of ['v2-daily-summary','v2-daily-stat','v2-header-tool']){
   assert.ok(css.includes(token), 'v2 presentation CSS must style '+token);
 }
 assert.ok(index.includes('./v2-presentation.js'),'default route must load v2 presentation');
+assert.ok(index.includes('./v1.5-education-ui.js'),'default route must load the education bridge');
+assert.ok(index.includes('./v1.9-v2-boundary.js'),'default route must load the v2 presentation boundary');
+const sw=read('sw.js');
+assert.ok(sw.includes("kanji5-shell-v92"),'PWA shell cache must be bumped after entrypoint changes');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
 assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
 for(const token of ['speechSynthesis','audioButton','renderUpcomingReviews','v2-upcoming-reviews']){
