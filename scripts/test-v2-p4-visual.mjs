@@ -16,6 +16,6 @@ assert.ok(css.includes('@media (max-width:900px)'));
 assert.ok(css.includes('@media (max-width:600px)'));
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(sw.includes('"./v2-presentation.css"'));
-assert.ok(roadmap.includes('### P4 — Visual System & Polish'));
+assert.ok(js.includes('تمرین فعلی'));\nassert.ok(js.includes('پاسخ شما'));\nassert.doesNotMatch(js,/Session ID|Plan revision|Content ID/);\nassert.ok(roadmap.includes('### P4 — Visual System & Polish'));
 assert.match(roadmap,/### P4 — Visual System & Polish ✅/);
 console.log('Kanji 5 v2 P4 visual contract passed.');
