@@ -41,7 +41,8 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   expect(semantics.reducedMotion).toBe(true);
   expect(semantics.exerciseTabIndex).toBe(-1);
 
-  await page.getByText('Skip to current exercise').click();
+  await page.getByText('Skip to current exercise').focus();
+  await page.keyboard.press('Enter');
   await expect(page.locator('#v2Exercise')).toBeFocused();
 
   await page.locator('#v2AnswerInput').focus();
