@@ -30,7 +30,7 @@ skip.addEventListener('click',event=>{
   event.preventDefault();
   requestAnimationFrame(()=>{
     target.focus({preventScroll:true});
-    target.scrollIntoView({block:'start',behavior:'smooth'});
+    target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   });
 });
 root.appendChild(skip);
@@ -102,7 +102,7 @@ layout.appendChild(content);
 
 const insights=document.createElement('details');
 insights.id='v2Insights';
-insights.className='v2-insights';
+insights.className='v2-insights v2-side-grid';
 insights.open=true;
 const summary=document.createElement('summary');
 summary.textContent='جزئیات جلسه';
