@@ -29,7 +29,7 @@ test('v2 P3 supports keyboard focus, live feedback semantics, mobile layout, and
 
   await page.setViewportSize({width:390,height:844});
   await expect(page.locator('.v2-content')).toBeVisible();
-  const columns=await page.locator('#v2Grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns);
+  const columns=await page.locator('.v2-content').evaluate(el=>getComputedStyle(el).gridTemplateColumns);
   expect(columns.split(' ').length).toBe(1);
 
   await page.emulateMedia({reducedMotion:'reduce'});
