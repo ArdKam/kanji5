@@ -6,6 +6,7 @@ const js=read('v2-presentation.js');
 const css=read('v2-presentation.css');
 const index=read('index.html');
 const contract=read('v1.9-v2-contract-core.js');
+const sw=read('sw.js');
 
 for(const token of ['v2Stats','v2Settings','statsBtn','settingsBtn','renderDailySummary','dueCount','newCount','masteredCount','streakCount']){
   assert.ok(js.includes(token), 'v2 presentation must expose/consume '+token);
@@ -20,7 +21,6 @@ assert.ok(index.includes('./review-runtime.js'),'default route must load the sha
 assert.ok(sw.includes('"./review-runtime.js"'),'shared review runtime must be in the active shell cache');
 assert.match(js,/openV2Stats/);
 assert.match(js,/openV2Settings/);
-const sw=read('sw.js');
 assert.ok(sw.includes("kanji5-shell-v93"),'PWA shell cache must be bumped after entrypoint changes');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
 assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
