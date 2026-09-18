@@ -36,8 +36,8 @@ The v2 presentation layer consumes only the stable v1.9 view-model boundary. It 
 - Establish the final v2 visual hierarchy, typography, spacing, component system, and interaction polish.
 - Keep visual decisions independent from learning-engine contracts.
 
-### P5 — v2 Release Readiness
-- Remove the v1 presentation path when v2 parity is proven.
+### P5 — v2 Release Readiness ✅
+- Remove the v1 presentation path from the default user-facing runtime; retain only an explicit `?legacy=1` compatibility path for regression/migration verification.
 - Run complete regression, offline, accessibility, and browser gates.
 - Publish the v2 release contract and documentation.
 
