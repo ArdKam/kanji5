@@ -24,7 +24,6 @@ assert.match(v2,/openV2Settings/);
 assert.doesNotMatch(v2,/getElementById\(['"]statsBtn['"]\)/);
 assert.doesNotMatch(v2,/getElementById\(['"]settingsBtn['"]\)/);
 assert.match(boundary,/runtimePresentationData/);
-assert.match(boundary,/dailySummary/);
-assert.match(boundary,/dailyGoal/);
+assert.match(boundary,/buildDailySummaryViewModel/);
 
 console.log('v2 runtime separation contract passed.');

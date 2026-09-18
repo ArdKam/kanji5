@@ -332,34 +332,6 @@ function row(parent, label, value) {
   parent.appendChild(p);
 }
 
-function readLegacyMetric(id) {
-  const node = document.getElementById(id);
-  return node ? String(node.textContent || '').trim() : '';
-}
-
-function renderDailySummary(parent) {
-  const section = document.createElement('section');
-  section.className = 'v2-daily-summary';
-  section.setAttribute('aria-label','خلاصهٔ امروز');
-  const items = [
-    ['due', 'مرورهای امروز', readLegacyMetric('dueCount')],
-    ['new', 'کانجی جدید امروز', readLegacyMetric('newCount')],
-    ['mastered', 'یادگرفته‌شده', readLegacyMetric('masteredCount')],
-    ['streak', 'روز پیاپی', readLegacyMetric('streakCount')]
-  ];
-  for (const [kind,label,value] of items) {
-    const card = document.createElement('div');
-    card.className = 'v2-daily-stat v2-daily-stat-' + kind;
-    const number = document.createElement('strong');
-    number.className = 'v2-daily-stat-value';
-    number.textContent = value || '۰';
-    const caption = document.createElement('span');
-    caption.textContent = label;
-    card.append(number,caption);
-    section.appendChild(card);
-  }
-  parent.appendChild(section);
-}
 
 function renderHeader(snapshot) {
   sessionProgress.textContent = '';

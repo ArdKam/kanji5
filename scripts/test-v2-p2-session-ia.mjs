@@ -24,7 +24,7 @@ assert.match(boundary,/v19LearnerEvidence/);
 assert.match(boundary,/recentOutcomes\(\)/);
 assert.match(boundary,/runtimePresentationData/);
 assert.match(boundary,/updateSettings/);
-assert.match(presentation,/پیشرفت جلسه/);
+assert.match(presentation,/Session progress/);
 assert.match(presentation,/نتایج اخیر/);
 assert.match(presentation,/remainingTotal/);
 assert.match(presentation,/openV2Settings/);
