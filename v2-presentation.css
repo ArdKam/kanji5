@@ -36,7 +36,7 @@
   --v2-shadow-hover:rgba(28,26,23,.12);
   --v2-shadow-soft:rgba(28,26,23,.06);
   --v2-shadow-strong:rgba(28,26,23,.22);
-  --v2-overlay:var(--v2-overlay);
+  --v2-overlay:rgba(0,0,0,.18);
   --v2-radius:28px;
   --v2-radius-sm:16px;
   --v2-space-1:4px;
