@@ -1,7 +1,6 @@
 export const V2_BOUNDARY_VERSION='1.9.0-v2-boundary-contract';
 export const MODES=Object.freeze(['meaning','reading','production','vocabulary','context']);
 export const OUTCOMES=Object.freeze(['correct','wrong','unknown','near_miss','empty','invalid']);
-const STRINGS=new Set(['string','number','boolean']);
 function text(value,max=240){const s=String(value??'').trim();return s.slice(0,max)}
 function finite(value,fallback=0){const n=Number(value);return Number.isFinite(n)?n:fallback}
 function bool(value){return value===true}
@@ -9,7 +8,7 @@ function clone(value){return JSON.parse(JSON.stringify(value))}
 
 export function buildSessionViewModel(session){
   const source=session&&typeof session==='object'?session:{};
-  const remaining={};for(const mode of MODES)remaining[mode]=Math.max(0,finite(source.remainingModes?.[mode],0));
+  const remainingModes={};for(const mode of MODES)remainingModes[mode]=Math.max(0,finite(source.remainingModes?.[mode],0));
   const modeResults={};for(const mode of MODES){const s=source.modeResults?.[mode]||{};modeResults[mode]={attempts:Math.max(0,finite(s.attempts,0)),correct:Math.max(0,finite(s.correct,0)),lastOutcome:OUTCOMES.includes(s.lastOutcome)?s.lastOutcome:null,lastAt:text(s.lastAt,80),graderVersion:text(s.graderVersion,80)}}
   return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session',sessionId:text(source.sessionId,120),status:text(source.status,40)||'unknown',resumed:bool(source.resumed),planRevision:Math.max(0,finite(source.planRevision,0)),remainingModes,modeResults,completed:source.status!=='active',updatedAt:text(source.updatedAt||source.endedAt,80)})
 }
