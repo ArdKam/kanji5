@@ -23,6 +23,7 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#app')).toBeHidden();
   await expect(page.locator('#loading')).toBeHidden();
+  await expect(page.locator('.wrap > header')).toBeHidden();
   await expect(page.locator('#v14EduTabs')).toHaveCount(0);
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
   expect(pageErrors).toEqual([]);
