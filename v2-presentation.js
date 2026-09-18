@@ -122,6 +122,31 @@ function audioButton(value, label) {
   return button;
 }
 
+function renderDailyGoal(parent) {
+  const labelNode = document.getElementById('goalLabel');
+  const barNode = document.getElementById('goalBar');
+  if (!labelNode || !barNode) return;
+  const section = document.createElement('section');
+  section.className = 'v2-daily-goal';
+  const top = document.createElement('div');
+  top.className = 'v2-daily-goal-top';
+  const label = document.createElement('strong');
+  label.textContent = String(labelNode.textContent || 'هدف روزانه');
+  const done = document.getElementById('goalDone');
+  const badge = document.createElement('span');
+  badge.textContent = done?.textContent?.trim() || '';
+  top.append(label,badge);
+  const track = document.createElement('div');
+  track.className = 'v2-daily-goal-track';
+  const fill = document.createElement('div');
+  fill.className = 'v2-daily-goal-fill';
+  const width = String(barNode.style.width || '0%');
+  fill.style.width = /^\d+(?:\.\d+)?%$/.test(width) ? width : '0%';
+  track.appendChild(fill);
+  section.append(top,track);
+  parent.appendChild(section);
+}
+
 function renderUpcomingReviews(parent) {
   const legacyBody = document.getElementById('upcomingReviewsBody');
   if (!legacyBody) return;
@@ -817,6 +842,7 @@ function render(snapshot) {
   content.textContent = '';
   renderHeader(snapshot);
   renderDailySummary(content);
+  renderDailyGoal(content);
   renderUpcomingReviews(content);
   const showLearning = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && snapshot.learning.isNew;
   const showReview = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && !snapshot.learning.isNew;
