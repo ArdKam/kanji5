@@ -50,7 +50,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await expect.poll(async()=>page.evaluate(()=>window.__P3_SUBMITTED__)).toBe(true);
   await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'recent failure'});});
   await expect(page.locator('#v2Next')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2Grid section[role="status"]')).toHaveAttribute('tabindex','-1');
+  await expect(page.locator('#v2Feedback')).toHaveAttribute('tabindex','-1');
 
   await page.setViewportSize({width:390,height:844});
   const mobile=await page.evaluate(()=>({
