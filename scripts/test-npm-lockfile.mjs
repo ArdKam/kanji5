@@ -11,15 +11,15 @@ assert.equal(lock.version,pkg.version);
 assert.deepEqual(lock.packages?.['']?.devDependencies,pkg.devDependencies);
 for(const [name,version] of Object.entries(pkg.devDependencies||{})){
   const nodePath='node_modules/'+name;
-  assert.equal(lock.packages?.[nodePath]?.version,version,\`lockfile must pin ${name} to ${version}\`);
+  assert.equal(lock.packages?.[nodePath]?.version,version,`lockfile must pin ${name} to ${version}`);
 }
 assert.equal(lock.packages?.['node_modules/@playwright/test']?.dependencies?.playwright,'1.59.0');
 assert.equal(lock.packages?.['node_modules/playwright']?.dependencies?.['playwright-core'],'1.59.0');
 
 for(const file of workflowFiles){
   const workflow=fs.readFileSync('.github/workflows/'+file,'utf8');
-  assert.match(workflow,/npm ci/,\`${file} must use npm ci\`);
-  assert.doesNotMatch(workflow,/npm install(?![\s\S]*package-lock-only)/,\`${file} must not install dependencies with npm install\`);
+  assert.match(workflow,/npm ci/,`${file} must use npm ci`);
+  assert.doesNotMatch(workflow,/npm install(?![\s\S]*package-lock-only)/,`${file} must not install dependencies with npm install`);
 }
 
 console.log('Kanji 5 npm lockfile contract passed.');
