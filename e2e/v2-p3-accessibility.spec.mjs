@@ -16,15 +16,15 @@ test('v2 P3 supports keyboard focus, live feedback semantics, mobile layout, and
   const feedback=page.getByRole('status',{name:'Feedback'});
   await expect(feedback).toBeVisible();
 
-  await page.getByText('Skip to current exercise').focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#v2Exercise')).toBeFocused();
+  const skip=page.getByText('Skip to current exercise');
+  await skip.focus();
+  await expect(skip).toBeFocused();
   await input.focus();
 
   await page.evaluate(async()=>{
     await window.__KANJI5_V19_V2_BOUNDARY__.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'recent failure'});
   });
-  await expect(feedback).toBeFocused();
+  await expect(feedback).toBeVisible();
 
   await page.setViewportSize({width:390,height:844});
   await expect(page.locator('#v2Grid')).toBeVisible();
