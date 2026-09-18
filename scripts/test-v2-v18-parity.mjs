@@ -16,5 +16,8 @@ for(const token of ['v2-daily-summary','v2-daily-stat','v2-header-tool']){
 assert.ok(index.includes('./v2-presentation.js'),'default route must load v2 presentation');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
 assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
+for(const token of ['speechSynthesis','audioButton','renderUpcomingReviews','v2-upcoming-reviews']){
+  assert.ok(js.includes(token)||css.includes(token), 'v2 presentation parity must preserve '+token);
+}
 
 console.log('Kanji 5 v2/v1.8 presentation parity contract passed.');
