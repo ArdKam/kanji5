@@ -11,9 +11,15 @@ const contexts=[
   {id:'1',text:'学ぶことは大切です。',english:'Learning is important.',source:'tatoeba'}
 ];
 
-assert.deepEqual(network.selectWord(words),words[0]);
-assert.deepEqual(network.selectWord(words),words[0]);
+assert.deepEqual(network.selectWord(words),words[1]);
+assert.deepEqual(network.selectWord(words),words[1]);
+assert.deepEqual(network.selectWord([...words].reverse()),words[1]);
 assert.deepEqual(network.selectContextSentence(contexts),contexts[1]);
 assert.deepEqual(network.selectContextSentence(contexts),contexts[1]);
+assert.deepEqual(network.selectContextSentence([...contexts].reverse()),contexts[1]);
+
+const tieA={word:'学習',reading:'がくしゅう',meaning:'learning',source:'kanjiapi.dev'};
+const tieB={word:'学習',reading:'がくしゅう',meaning:'learning',source:'kanjiapi.dev'};
+assert.deepEqual(network.selectWord([tieB,tieA]),network.selectWord([tieA,tieB]));
 
 console.log('deterministic content selection tests passed.');
