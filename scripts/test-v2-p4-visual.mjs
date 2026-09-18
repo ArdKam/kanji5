@@ -6,7 +6,7 @@ const css=fs.readFileSync('v2-presentation.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
 
-assert.ok(js.includes("href='./v2-presentation.css'"));
+assert.ok(js.includes("stylesheet.href = './v2-presentation.css'"));
 for (const token of ['--v2-accent:','--v2-space-6:','--v2-radius:','--v2-shadow:']) assert.ok(css.includes(token),token);
 for (const cls of ['v2-shell','v2-title','v2-header','v2-session-progress','v2-content','v2-exercise-card','v2-card-title','v2-input','v2-btn-primary','v2-btn-secondary','v2-progress','v2-progress-fill','v2-feedback-card','v2-insights','v2-outcome-row']) assert.ok(css.includes('.'+cls),cls);
 assert.ok(css.includes(':hover'));
