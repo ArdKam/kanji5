@@ -14,7 +14,7 @@ assert.match(presentation,/section\.tabIndex = -1/);
 assert.match(presentation,/aria-live/);
 assert.match(presentation,/aria-atomic/);
 assert.match(presentation,/role','status/);
-assert.match(presentation,/htmlFor='v2AnswerInput'/);
+assert.match(presentation,/label\.htmlFor = 'v2AnswerInput'/);
 assert.match(presentation,/aria-describedby/);
 assert.ok(presentation.includes("event.key==='Enter'"));
 assert.ok(/min-height:48px/.test(css));
