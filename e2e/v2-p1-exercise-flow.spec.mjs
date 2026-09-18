@@ -27,34 +27,37 @@ async function currentTarget(page){
   });
 }
 
-test('v2 P1 exercise flow renders, grades, and recovers through the existing learning engine',async({page})=>{
+test('v2 P1 exercise flow renders, grades, and recovers through Production MCQ',async({page})=>{
   await cleanStart(page);
   await seedReviewedCard(page);
   const target=await currentTarget(page);
   expect(target).toBeTruthy();
 
-  await page.goto('/?v2=1');
+  await page.goto('/');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
 
   await page.evaluate(()=>{
-    window.__KANJI5_V19_RECOVERY_NEXT_MODE__='production';
-    window.__KANJI5_V19_RECOVERY_NEXT_MODE_USED__=false;
     window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
   });
+  await page.locator('#v2StartPractice').click();
+  await expect(page.locator('.v2-mode-badge')).toHaveText('تولید');
+  await expect(page.locator('#v2ProductionChoices')).toBeVisible({timeout:10000});
+  await expect(page.locator('.v2-production-choice')).toHaveCount(4);
+  await expect(page.locator('#v2AnswerInput')).toBeHidden();
 
-  await page.evaluate(async()=>{ await window.__KANJI5_EDU_BRIDGE__.start(); });
-  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2App')).toContainText('تولید');
+  const choiceCharacters=await page.locator('.v2-production-choice').allTextContents();
+  expect(choiceCharacters).toContain(target);
+  const wrong=choiceCharacters.find(value=>value!==target);
+  expect(wrong).toBeTruthy();
 
-  await page.locator('#v2AnswerInput').fill('x');
-  await page.locator('#v2Submit').click();
+  await page.locator('.v2-production-choice').filter({hasText:wrong}).click();
   await expect(page.locator('#v2App')).toContainText('نادرست',{timeout:10000});
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
 
   await page.locator('#v2Retry').click();
-  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  await page.locator('#v2AnswerInput').fill(target);
-  await page.locator('#v2Submit').click();
+  await expect(page.locator('#v2ProductionChoices')).toBeVisible({timeout:10000});
+  await expect(page.locator('.v2-production-choice')).toHaveCount(4);
+  await page.locator('.v2-production-choice').filter({hasText:target}).click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 });
