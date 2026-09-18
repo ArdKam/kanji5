@@ -1,0 +1,37 @@
+name: v2 Feature Parity Gate
+
+on:
+  push:
+    branches:
+      - fix/v2-learning-first-production-mcq
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: kanji5-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  v2-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate JavaScript syntax
+        run: |
+          for f in v1.2-enhancements.js v1.5-education-ui.js v1.9-v2-boundary.js v2-presentation.js sw.js; do
+            node --check "$f"
+          done
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --package-lock=false
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Run focused v2 parity browser coverage
+        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-review-card.spec.mjs e2e/v2-v18-parity.spec.mjs

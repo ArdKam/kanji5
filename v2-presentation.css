@@ -506,6 +506,139 @@ body:has(#v2App){
   .v2-exercise-card:hover{box-shadow:var(--v2-shadow-hover)}
 }
 
+
+.v2-header-meta{
+  display:grid;
+  gap:10px;
+}
+.v2-header-practice{
+  justify-self:end;
+  min-width:150px;
+}
+.v2-learning-card{
+  background:var(--v2-surface);
+  border:1px solid var(--v2-border);
+  border-radius:var(--v2-radius);
+  padding:clamp(24px,5vw,44px);
+  box-shadow:var(--v2-shadow);
+  text-align:center;
+}
+.v2-learning-badge{
+  background:#ecfdf3;
+  border-color:#bbf7d0;
+  color:#166534;
+}
+.v2-learning-kanji{
+  margin:8px 0 10px;
+  font-family:"Noto Serif JP","Yu Mincho","Hiragino Mincho ProN",serif;
+  font-size:clamp(96px,16vw,168px);
+  line-height:1;
+  font-weight:700;
+  letter-spacing:0;
+}
+.v2-learning-first-readings{
+  direction:ltr;
+  font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+  color:var(--v2-muted);
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:16px;
+}
+.v2-learning-hint{
+  margin:0 auto 22px;
+  max-width:620px;
+  color:var(--v2-muted);
+  line-height:1.9;
+}
+.v2-learning-reveal{
+  width:min(100%,520px);
+}
+.v2-learning-info{
+  display:grid;
+  gap:16px;
+  text-align:start;
+}
+.v2-learning-meanings{
+  padding:18px;
+  border:1px solid #dbe4ff;
+  border-radius:16px;
+  background:var(--v2-accent-soft);
+  font-size:24px;
+  font-weight:850;
+  text-align:center;
+}
+.v2-learning-readings{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.v2-learning-reading-box{
+  display:grid;
+  gap:8px;
+  padding:14px;
+  border:1px solid #edf0f4;
+  border-radius:16px;
+  background:var(--v2-surface-soft);
+}
+.v2-learning-reading-label{
+  color:var(--v2-muted);
+  font-size:12px;
+  font-weight:800;
+}
+.v2-learning-reading-value{
+  direction:ltr;
+  font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+  font-size:18px;
+  font-weight:750;
+}
+.v2-learning-examples{
+  padding-top:4px;
+}
+.v2-learning-examples h3{
+  margin:0 0 10px;
+  font-size:14px;
+  color:var(--v2-muted);
+}
+.v2-learning-example{
+  direction:ltr;
+  padding:9px 0;
+  border-bottom:1px solid #f0f2f5;
+  font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+}
+.v2-learning-rating-title{
+  margin:22px 0 10px;
+  color:var(--v2-muted);
+  font-size:13px;
+  font-weight:750;
+  text-align:center;
+}
+.v2-learning-ratings{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.v2-learning-rating{
+  border-color:var(--v2-border);
+}
+.v2-learning-rating[data-rating="Again"]{border-color:#fecaca}
+.v2-learning-rating[data-rating="Hard"]{border-color:#fde68a}
+.v2-learning-rating[data-rating="Good"]{border-color:#bbf7d0}
+.v2-learning-rating[data-rating="Easy"]{border-color:#bfdbfe}
+.v2-production-choice-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:0 0 20px;
+}
+.v2-production-choice{
+  min-height:92px;
+  font-family:"Noto Serif JP","Yu Mincho","Hiragino Mincho ProN",serif;
+  font-size:42px;
+}
+.v2-back-learning{
+  width:100%;
+  margin-top:4px;
+}
 @media (max-width:900px){
   #v2App.v2-shell{padding:22px 18px 36px}
   .v2-header{align-items:flex-start}
@@ -523,6 +656,14 @@ body:has(#v2App){
   .v2-title{font-size:28px}
   .v2-header-meta{min-width:0;width:100%}
   .v2-content{gap:14px}
+  .v2-header-practice{justify-self:stretch}
+  .v2-learning-card{padding:20px 16px;border-radius:20px}
+  .v2-learning-kanji{font-size:92px}
+  .v2-learning-readings{grid-template-columns:1fr}
+  .v2-learning-meanings{font-size:21px}
+  .v2-learning-ratings{grid-template-columns:1fr 1fr}
+  .v2-production-choice-grid{grid-template-columns:1fr 1fr}
+  .v2-production-choice{min-height:84px;font-size:36px}
   .v2-exercise-card{padding:20px 16px;border-radius:20px}
   .v2-exercise-top{align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
   .v2-card-title{font-size:17px}
@@ -547,4 +688,41 @@ body:has(#v2App){
     animation-duration:.001ms!important;
     animation-iteration-count:1!important;
   }
+}
+.v2-header-meta{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.v2-header-tool{white-space:nowrap}
+.v2-daily-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.v2-daily-stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--v2-border);border-radius:16px;background:var(--v2-surface)}
+.v2-daily-stat-value{font-size:22px;line-height:1.1}
+.v2-daily-stat span{font-size:11px;color:var(--v2-muted)}
+@media(max-width:700px){.v2-daily-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.v2-header-tool{flex:1 1 auto}}
+
+.v2-review-recall-host{margin-top:18px;display:grid;gap:10px}
+.v2-review-recall-host .v12-recall-gate{margin-top:0!important}
+.v2-review-recall-host input{font:inherit}
+
+.v2-learning-kanji-row{display:flex;align-items:center;justify-content:center;gap:10px}
+.v2-audio-button{
+  width:38px;height:38px;border:1px solid var(--v2-border);border-radius:12px;
+  background:var(--v2-surface);color:var(--v2-text);cursor:pointer;display:inline-grid;place-items:center;
+}
+.v2-audio-button:hover{background:var(--v2-surface-soft)}
+.v2-audio-button:focus-visible{outline:3px solid var(--v2-accent-soft);outline-offset:2px}
+.v2-daily-goal{
+  border:1px solid var(--v2-border);border-radius:18px;background:var(--v2-surface);
+  padding:13px 15px;box-shadow:var(--v2-shadow)
+}
+.v2-daily-goal-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--v2-muted);margin-bottom:8px}
+.v2-daily-goal-top strong{color:var(--v2-text)}
+.v2-daily-goal-track{height:8px;border-radius:99px;background:#e9edf4;overflow:hidden}
+.v2-daily-goal-fill{height:100%;background:linear-gradient(90deg,var(--v2-accent),#7c3aed);border-radius:99px;transition:width .22s ease}
+.v2-upcoming-reviews{border:1px solid var(--v2-border);border-radius:18px;background:var(--v2-surface);box-shadow:var(--v2-shadow);padding:0}
+.v2-upcoming-reviews>summary{cursor:pointer;list-style:none;padding:14px 16px;font-weight:800}
+.v2-upcoming-reviews>summary::-webkit-details-marker{display:none}
+.v2-upcoming-reviews-body{padding:0 16px 14px;color:var(--v2-muted);font-size:12px}
+.v2-upcoming-row{padding:8px 0;border-top:1px solid var(--v2-border)}
+.v2-learning-example{display:flex;align-items:center;justify-content:space-between;gap:8px}
+@media(max-width:600px){
+  .v2-header-tool{flex:1 1 calc(50% - 4px)}
+  .v2-daily-goal{border-radius:16px}
 }

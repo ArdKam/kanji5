@@ -49,7 +49,33 @@ const headerMeta = document.createElement('div');
 headerMeta.className = 'v2-header-meta';
 const sessionProgress = document.createElement('div');
 sessionProgress.className = 'v2-session-progress';
-headerMeta.appendChild(sessionProgress);
+const practiceButton = document.createElement('button');
+practiceButton.type = 'button';
+practiceButton.id = 'v2StartPractice';
+practiceButton.className = 'v2-btn v2-btn-secondary v2-header-practice';
+practiceButton.textContent = 'تمرین آموزشی';
+practiceButton.addEventListener('click', async () => {
+  const bridge = window.__KANJI5_EDU_BRIDGE__;
+  if (!bridge?.start) return;
+  presentationMode = 'exercise';
+  practiceButton.disabled = true;
+  try { await bridge.start(); } finally { practiceButton.disabled = false; }
+});
+const statsButton = document.createElement('button');
+statsButton.type = 'button';
+statsButton.id = 'v2Stats';
+statsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
+statsButton.textContent = 'آمار';
+statsButton.addEventListener('click', () => document.getElementById('statsBtn')?.click());
+
+const settingsButton = document.createElement('button');
+settingsButton.type = 'button';
+settingsButton.id = 'v2Settings';
+settingsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
+settingsButton.textContent = 'تنظیمات';
+settingsButton.addEventListener('click', () => document.getElementById('settingsBtn')?.click());
+
+headerMeta.append(sessionProgress,practiceButton,statsButton,settingsButton);
 header.appendChild(headerMeta);
 root.appendChild(header);
 
@@ -72,6 +98,83 @@ const localizeOutcome = value => outcomes[String(value || '')] || text(value);
 const localizeQuality = value => qualities[String(value || '')] || text(value);
 
 let lastFeedbackFocusKey = '';
+let presentationMode = 'auto';
+
+function speakJapanese(value) {
+  const textValue = String(value || '').trim();
+  if (!textValue || !('speechSynthesis' in window)) return;
+  try {
+    const utterance = new SpeechSynthesisUtterance(textValue);
+    utterance.lang = 'ja-JP';
+    utterance.rate = 0.85;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+  } catch (_) {}
+}
+
+function audioButton(value, label) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'v2-audio-button';
+  button.textContent = '🔊';
+  button.setAttribute('aria-label', label || 'پخش تلفظ');
+  button.addEventListener('click', () => speakJapanese(value));
+  return button;
+}
+
+function renderDailyGoal(parent) {
+  const labelNode = document.getElementById('goalLabel');
+  const barNode = document.getElementById('goalBar');
+  if (!labelNode || !barNode) return;
+  const section = document.createElement('section');
+  section.className = 'v2-daily-goal';
+  const top = document.createElement('div');
+  top.className = 'v2-daily-goal-top';
+  const label = document.createElement('strong');
+  label.textContent = String(labelNode.textContent || 'هدف روزانه');
+  const done = document.getElementById('goalDone');
+  const badge = document.createElement('span');
+  badge.textContent = done && done.style.display !== 'none' ? String(done.textContent || '').trim() : '';
+  top.append(label,badge);
+  const track = document.createElement('div');
+  track.className = 'v2-daily-goal-track';
+  const fill = document.createElement('div');
+  fill.className = 'v2-daily-goal-fill';
+  const width = String(barNode.style.width || '0%');
+  fill.style.width = /^\d+(?:\.\d+)?%$/.test(width) ? width : '0%';
+  track.appendChild(fill);
+  section.append(top,track);
+  parent.appendChild(section);
+}
+
+function renderUpcomingReviews(parent) {
+  const legacyBody = document.getElementById('upcomingReviewsBody');
+  if (!legacyBody) return;
+  const sourceText = String(legacyBody.textContent || '').trim();
+  const section = document.createElement('details');
+  section.className = 'v2-upcoming-reviews';
+  const summary = document.createElement('summary');
+  summary.textContent = 'مرورهای پیش‌رو';
+  const body = document.createElement('div');
+  body.className = 'v2-upcoming-reviews-body';
+  if (legacyBody.childNodes.length) {
+    const rows = [...legacyBody.children];
+    if (rows.length) {
+      for (const legacyRow of rows) {
+        const row = document.createElement('div');
+        row.className = 'v2-upcoming-row';
+        row.textContent = String(legacyRow.textContent || '').trim();
+        body.appendChild(row);
+      }
+    } else {
+      body.textContent = sourceText || 'فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';
+    }
+  } else {
+    body.textContent = sourceText || 'فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';
+  }
+  section.append(summary,body);
+  parent.appendChild(section);
+}
 
 function heading(textValue, id) {
   const h = document.createElement('h2');
@@ -92,6 +195,35 @@ function row(parent, label, value) {
   b.textContent = text(value);
   p.append(a,b);
   parent.appendChild(p);
+}
+
+function readLegacyMetric(id) {
+  const node = document.getElementById(id);
+  return node ? String(node.textContent || '').trim() : '';
+}
+
+function renderDailySummary(parent) {
+  const section = document.createElement('section');
+  section.className = 'v2-daily-summary';
+  section.setAttribute('aria-label','خلاصهٔ امروز');
+  const items = [
+    ['due', 'مرورهای امروز', readLegacyMetric('dueCount')],
+    ['new', 'کانجی جدید امروز', readLegacyMetric('newCount')],
+    ['mastered', 'یادگرفته‌شده', readLegacyMetric('masteredCount')],
+    ['streak', 'روز پیاپی', readLegacyMetric('streakCount')]
+  ];
+  for (const [kind,label,value] of items) {
+    const card = document.createElement('div');
+    card.className = 'v2-daily-stat v2-daily-stat-' + kind;
+    const number = document.createElement('strong');
+    number.className = 'v2-daily-stat-value';
+    number.textContent = value || '۰';
+    const caption = document.createElement('span');
+    caption.textContent = label;
+    card.append(number,caption);
+    section.appendChild(card);
+  }
+  parent.appendChild(section);
 }
 
 function renderHeader(snapshot) {
@@ -179,6 +311,261 @@ function renderStimulus(parent, ex) {
   parent.appendChild(wrap);
 }
 
+function renderLearning(snapshot) {
+  const card = snapshot?.learning || {};
+  const section = document.createElement('section');
+  section.id = 'v2LearningCard';
+  section.className = 'v2-learning-card';
+  section.setAttribute('aria-labelledby','v2LearningTitle');
+
+  const top = document.createElement('div');
+  top.className = 'v2-exercise-top';
+
+  const mode = document.createElement('span');
+  mode.className = 'v2-mode-badge v2-learning-badge';
+  mode.textContent = 'یادگیری';
+
+  const stage = document.createElement('span');
+  stage.className = 'v2-exercise-step';
+  stage.textContent = card.isNew ? 'آشنایی با کانجی' : 'مرور یادگیری';
+  top.append(mode,stage);
+  section.appendChild(top);
+  section.appendChild(heading('کارت یادگیری','v2LearningTitle'));
+
+  const kanji = document.createElement('div');
+  kanji.id = 'v2LearningKanji';
+  kanji.className = 'v2-learning-kanji';
+  kanji.lang = 'ja';
+  kanji.textContent = text(card.character);
+  const kanjiRow = document.createElement('div');
+  kanjiRow.className = 'v2-learning-kanji-row';
+  kanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
+  section.appendChild(kanjiRow);
+
+  if (!card.revealed) {
+    const firstReading = [...(card.on || []), ...(card.kun || [])].slice(0,3);
+    if (firstReading.length) {
+      const readings = document.createElement('div');
+      readings.className = 'v2-learning-first-readings';
+      readings.lang = 'ja';
+      readings.textContent = firstReading.join(' · ');
+      section.appendChild(readings);
+    }
+    const hint = document.createElement('p');
+    hint.className = 'v2-learning-hint';
+    hint.textContent = card.hint || 'این اولین آشنایی تو با این کانجی است؛ فعلاً آن را یاد بگیر و بعد پاسخ را ببین.';
+    section.appendChild(hint);
+
+    const reveal = document.createElement('button');
+    reveal.type = 'button';
+    reveal.id = 'v2LearningReveal';
+    reveal.className = 'v2-btn v2-btn-primary v2-learning-reveal';
+    reveal.textContent = card.revealLabel || 'نمایش اطلاعات کانجی';
+    reveal.addEventListener('click', async () => {
+      reveal.disabled = true;
+      try { await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(); }
+      finally { reveal.disabled = false; }
+    });
+    section.appendChild(reveal);
+    return section;
+  }
+
+  const info = document.createElement('div');
+  info.className = 'v2-learning-info';
+
+  if (card.meanings?.length) {
+    const meanings = document.createElement('div');
+    meanings.className = 'v2-learning-meanings';
+    meanings.textContent = card.meanings.join(' · ');
+    info.appendChild(meanings);
+  }
+
+  const readingsGrid = document.createElement('div');
+  readingsGrid.className = 'v2-learning-readings';
+  for (const [labelText,values] of [['On’yomi',card.on || []],['Kun’yomi',card.kun || []]]) {
+    const box = document.createElement('div');
+    box.className = 'v2-learning-reading-box';
+    const label = document.createElement('span');
+    label.className = 'v2-learning-reading-label';
+    label.textContent = labelText;
+    const value = document.createElement('span');
+    value.className = 'v2-learning-reading-value';
+    value.lang = 'ja';
+    value.textContent = values.length ? values.join(' · ') : '—';
+    if (values.length) box.append(label,value,audioButton(values[0],'پخش اولین خوانش'));
+    else box.append(label,value);
+    readingsGrid.appendChild(box);
+  }
+  info.appendChild(readingsGrid);
+
+  if (card.examples?.length) {
+    const examples = document.createElement('div');
+    examples.className = 'v2-learning-examples';
+    const exampleTitle = document.createElement('h3');
+    exampleTitle.textContent = 'نمونهٔ واژگانی';
+    examples.appendChild(exampleTitle);
+    for (const example of card.examples) {
+      const row = document.createElement('div');
+      row.className = 'v2-learning-example';
+      row.lang = 'ja';
+      row.textContent = [example.word,example.reading].filter(Boolean).join(' · ');
+      if (example.reading) row.appendChild(audioButton(example.reading,'پخش تلفظ واژه'));
+      examples.appendChild(row);
+    }
+    info.appendChild(examples);
+  }
+
+  section.appendChild(info);
+
+  const ratingTitle = document.createElement('p');
+  ratingTitle.className = 'v2-learning-rating-title';
+  ratingTitle.textContent = 'بعد از یادگیری، کیفیت مرور را انتخاب کن.';
+  section.appendChild(ratingTitle);
+
+  const ratings = document.createElement('div');
+  ratings.className = 'v2-learning-ratings';
+  for (const [rating,labelText] of [['Again','دوباره'],['Hard','سخت'],['Good','خوب'],['Easy','آسان']]) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'v2-btn v2-learning-rating';
+    button.dataset.rating = rating;
+    button.textContent = labelText;
+    button.addEventListener('click', async () => {
+      buttonsDisable(ratings);
+      presentationMode = 'auto';
+      try { await window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating); }
+      finally { buttonsEnable(ratings); }
+    });
+    ratings.appendChild(button);
+  }
+  section.appendChild(ratings);
+  return section;
+}
+
+function renderReviewCard(snapshot) {
+  const card = snapshot?.learning || {};
+  const section = document.createElement('section');
+  section.id = 'v2ReviewCard';
+  section.className = 'v2-learning-card v2-review-card';
+  section.setAttribute('aria-labelledby','v2ReviewTitle');
+
+  const top = document.createElement('div');
+  top.className = 'v2-exercise-top';
+  const mode = document.createElement('span');
+  mode.className = 'v2-mode-badge';
+  mode.textContent = 'مرور';
+  const step = document.createElement('span');
+  step.className = 'v2-exercise-step';
+  step.textContent = 'مرور فاصله‌دار';
+  top.append(mode,step);
+  section.appendChild(top);
+  section.appendChild(heading('کارت مرور','v2ReviewTitle'));
+
+  const kanji = document.createElement('div');
+  kanji.id = 'v2ReviewKanji';
+  kanji.className = 'v2-learning-kanji';
+  kanji.lang = 'ja';
+  kanji.textContent = text(card.character);
+  const reviewKanjiRow = document.createElement('div');
+  reviewKanjiRow.className = 'v2-learning-kanji-row';
+  reviewKanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
+  section.appendChild(reviewKanjiRow);
+
+  if (!card.revealed) {
+    const hint = document.createElement('p');
+    hint.className = 'v2-learning-hint';
+    hint.textContent = card.hint || 'اول معنی یا خوانش را از حافظه به یاد بیاور.';
+    section.appendChild(hint);
+    const reveal = document.createElement('button');
+    reveal.type = 'button';
+    reveal.id = 'v2ReviewReveal';
+    reveal.className = 'v2-btn v2-btn-primary v2-learning-reveal';
+    reveal.textContent = 'نمایش پاسخ';
+    const recallHost = document.createElement('div');
+    recallHost.id = 'v2ReviewRecallHost';
+    recallHost.className = 'v2-review-recall-host';
+    section.appendChild(recallHost);
+    reveal.addEventListener('click', async () => {
+      reveal.disabled = true;
+      try {
+        const opener = window.__KANJI5_V12_OPEN_RECALL__;
+        const gate = typeof opener === 'function' ? await opener() : null;
+        if (gate) recallHost.replaceChildren(gate);
+      } finally { reveal.disabled = false; }
+    });
+    section.appendChild(reveal);
+    return section;
+  }
+
+  const info = document.createElement('div');
+  info.className = 'v2-learning-info';
+  if (card.meanings?.length) {
+    const meanings = document.createElement('div');
+    meanings.className = 'v2-learning-meanings';
+    meanings.textContent = card.meanings.join(' · ');
+    info.appendChild(meanings);
+  }
+  const readingsGrid = document.createElement('div');
+  readingsGrid.className = 'v2-learning-readings';
+  for (const [labelText,values] of [['On’yomi',card.on || []],['Kun’yomi',card.kun || []]]) {
+    const box = document.createElement('div');
+    box.className = 'v2-learning-reading-box';
+    const label = document.createElement('span');
+    label.className = 'v2-learning-reading-label';
+    label.textContent = labelText;
+    const value = document.createElement('span');
+    value.className = 'v2-learning-reading-value';
+    value.lang = 'ja';
+    value.textContent = values.length ? values.join(' · ') : '—';
+    if (values.length) box.append(label,value,audioButton(values[0],'پخش اولین خوانش'));
+    else box.append(label,value);
+    readingsGrid.appendChild(box);
+  }
+  info.appendChild(readingsGrid);
+  if (card.examples?.length) {
+    const examples = document.createElement('div');
+    examples.className = 'v2-learning-examples';
+    const exampleTitle = document.createElement('h3');
+    exampleTitle.textContent = 'نمونهٔ واژگانی';
+    examples.appendChild(exampleTitle);
+    for (const example of card.examples) {
+      const row = document.createElement('div');
+      row.className = 'v2-learning-example';
+      row.lang = 'ja';
+      row.textContent = [example.word,example.reading].filter(Boolean).join(' · ');
+      if (example.reading) row.appendChild(audioButton(example.reading,'پخش تلفظ واژه'));
+      examples.appendChild(row);
+    }
+    info.appendChild(examples);
+  }
+  section.appendChild(info);
+
+  const ratingTitle = document.createElement('p');
+  ratingTitle.className = 'v2-learning-rating-title';
+  ratingTitle.textContent = 'زمان‌بندی مرور بعدی را با یکی از این چهار پاسخ ثبت کن.';
+  section.appendChild(ratingTitle);
+  const ratings = document.createElement('div');
+  ratings.className = 'v2-learning-ratings';
+  for (const [rating,labelText] of [['Again','دوباره'],['Hard','سخت'],['Good','خوب'],['Easy','آسان']]) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'v2-btn v2-learning-rating';
+    button.dataset.rating = rating;
+    button.textContent = labelText;
+    button.addEventListener('click', async () => {
+      buttonsDisable(ratings);
+      try { await window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating); }
+      finally { buttonsEnable(ratings); }
+    });
+    ratings.appendChild(button);
+  }
+  section.appendChild(ratings);
+  return section;
+}
+
+function buttonsDisable(container){container?.querySelectorAll('button').forEach(button=>{button.disabled=true})}
+function buttonsEnable(container){container?.querySelectorAll('button').forEach(button=>{button.disabled=false})}
+
 function renderExercise(snapshot) {
   const ex = snapshot?.exercise || {};
   const section = document.createElement('section');
@@ -226,7 +613,32 @@ function renderExercise(snapshot) {
 
   renderStimulus(section,ex);
 
+  const choices = Array.isArray(ex.choices) ? ex.choices.filter(Boolean).slice(0,4) : [];
+  const productionChoiceMode = ex.mode === 'production' && choices.length >= 4;
+  if (productionChoiceMode) {
+    const group = document.createElement('div');
+    group.id = 'v2ProductionChoices';
+    group.className = 'v2-production-choice-grid';
+    group.setAttribute('role','group');
+    group.setAttribute('aria-label','انتخاب کانجی');
+    for (const choice of choices) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'v2-btn v2-production-choice';
+      button.lang = 'ja';
+      button.textContent = choice;
+      button.addEventListener('click', async () => {
+        buttonsDisable(group);
+        unknown.disabled = true;
+        await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
+      });
+      group.appendChild(button);
+    }
+    section.appendChild(group);
+  }
+
   const field = document.createElement('div');
+  if (productionChoiceMode) field.hidden = true;
   field.className = 'v2-answer-area';
 
   const label = document.createElement('label');
@@ -279,6 +691,17 @@ function renderExercise(snapshot) {
   actions.append(submit,unknown);
   field.append(label,input,actions);
   section.appendChild(field);
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.id = 'v2BackToLearning';
+  back.className = 'v2-btn v2-btn-secondary v2-back-learning';
+  back.textContent = 'بازگشت به کارت یادگیری';
+  back.addEventListener('click', async () => {
+    presentationMode = 'auto';
+    await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
+    await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
+  });
+  section.appendChild(back);
   return section;
 }
 
@@ -418,9 +841,20 @@ function renderInsights(snapshot) {
 function render(snapshot) {
   content.textContent = '';
   renderHeader(snapshot);
-  content.appendChild(renderExercise(snapshot));
-  const feedback = renderFeedback(snapshot);
-  if (feedback) content.appendChild(feedback);
+  renderDailySummary(content);
+  renderDailyGoal(content);
+  renderUpcomingReviews(content);
+  const showLearning = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && snapshot.learning.isNew;
+  const showReview = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && !snapshot.learning.isNew;
+  if (showLearning) {
+    content.appendChild(renderLearning(snapshot));
+  } else if (showReview) {
+    content.appendChild(renderReviewCard(snapshot));
+  } else {
+    content.appendChild(renderExercise(snapshot));
+    const feedback = renderFeedback(snapshot);
+    if (feedback) content.appendChild(feedback);
+  }
   content.appendChild(renderInsights(snapshot));
 
   const feedbackKey = [snapshot?.feedback?.outcome,snapshot?.feedback?.retryCount,snapshot?.feedback?.recovered,snapshot?.feedback?.reason].join('|');
@@ -450,15 +884,20 @@ async function init() {
     if (!bridge) { setTimeout(init,50); return; }
     if (!bootstrapped) {
       bootstrapped=true;
+      await boundary.refreshLearning?.();
       const snapshot=await boundary.snapshot();
-      if (!snapshot.exercise?.mode) await bridge.start();
-      render(await boundary.snapshot());
+      render(snapshot);
     }
   } catch(error) {
     render({});
     console.error(error);
   }
 }
+
+document.addEventListener('click',event=>{
+  const id=event.target?.closest?.('#saveSettings,#resetBtn')?.id;
+  if(id) setTimeout(()=>{void window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.()},100);
+},true);
 
 if (!boundaryReadyListener) {
   boundaryReadyListener=true;
