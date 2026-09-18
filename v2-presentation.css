@@ -689,3 +689,10 @@ body:has(#v2App){
     animation-iteration-count:1!important;
   }
 }
+.v2-header-meta{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.v2-header-tool{white-space:nowrap}
+.v2-daily-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.v2-daily-stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--v2-border);border-radius:16px;background:var(--v2-surface)}
+.v2-daily-stat-value{font-size:22px;line-height:1.1}
+.v2-daily-stat span{font-size:11px;color:var(--v2-muted)}
+@media(max-width:700px){.v2-daily-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.v2-header-tool{flex:1 1 auto}}
