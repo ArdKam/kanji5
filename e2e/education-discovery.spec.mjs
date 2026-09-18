@@ -5,7 +5,7 @@ test.describe('Kanji 5 educational discovery', () => {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.goto('/');
+    await page.goto('/?legacy=1');
     await expect(page.locator('#app')).toBeVisible({ timeout: 20_000 });
 
     const firstCard = page.locator('.kanji');
