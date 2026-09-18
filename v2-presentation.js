@@ -194,6 +194,7 @@ function renderStimulus(stimulus,mode,character){
     kanji.textContent=s.primary;
     box.appendChild(kanji);
   }else{
+    box.classList.add('v2-stimulus-text');
     box.classList.add(
       s.kind==='masked-context'?'v2-stimulus-context':
       s.kind==='masked-vocabulary'?'v2-stimulus-vocabulary':
@@ -264,7 +265,7 @@ function render(snapshot){
   exHead.className='v2-exercise-head';
 
   const modeBadge=document.createElement('span');
-  modeBadge.id='v2ModeBadge';
+  modeBadge.id='v2ModePill';
   modeBadge.className='v2-mode-badge v2-mode-pill';
   modeBadge.textContent=ex.mode?modeLabel(ex.mode):'آماده‌سازی';
 
@@ -296,7 +297,8 @@ function render(snapshot){
     const inputLabel=document.createElement('label');
     inputLabel.className='v2-field-label';
     inputLabel.htmlFor='v2AnswerInput';
-    inputLabel.textContent='پاسخ شما';
+    inputLabel.textContent='پاسخ خود را بنویسید';
+    inputLabel.setAttribute('aria-label','پاسخ شما');
     field.appendChild(inputLabel);
 
     const input=document.createElement('input');

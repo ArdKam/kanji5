@@ -70,7 +70,7 @@ test('v2 presentation keeps the exercise surface answer-safe for production',asy
       mode:'production',
       prompt:'با دیدن معنی، کانجی را تولید کن.',
       character:'学',
-      stimulus:{text:'school',detail:'معنی را ببین و کانجی را از حافظه تولید کن.'},
+      stimulus:{kind:'meaning',primary:'school'},
       contentId:'fixture-production-safe',
       provenance:'local'
     });
