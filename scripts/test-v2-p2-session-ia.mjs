@@ -18,7 +18,7 @@ assert.match(boundary,/function recentOutcomes/);
 assert.match(boundary,/v19LearnerEvidence/);
 assert.match(boundary,/recentOutcomes\(\)/);
 assert.match(presentation,/Session progress/);
-assert.match(presentation,/Recent outcomes/);
+assert.match(presentation,/نتایج اخیر/);
 assert.match(presentation,/remainingTotal/);
 assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
