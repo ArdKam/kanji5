@@ -594,7 +594,12 @@ function renderReviewCard(snapshot) {
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
       try {
-        const opener = window.__KANJI5_V12_OPEN_RECALL__;
+        let opener = window.__KANJI5_V12_OPEN_RECALL__;
+        if (typeof opener !== 'function') {
+          const deadline = Date.now() + 3000;
+          while (Date.now() < deadline && typeof window.__KANJI5_V12_OPEN_RECALL__ !== 'function') await new Promise(resolve => setTimeout(resolve,50));
+          opener = window.__KANJI5_V12_OPEN_RECALL__;
+        }
         const gate = typeof opener === 'function' ? await opener() : null;
         if (gate) recallHost.replaceChildren(gate);
       } finally { reveal.disabled = false; }
