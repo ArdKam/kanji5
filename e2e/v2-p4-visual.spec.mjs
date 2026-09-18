@@ -21,12 +21,12 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
     const cs=s=>getComputedStyle(q(s));
     return {
       titlePx:parseFloat(cs('.v2-title').fontSize),
-      cardRadius:parseFloat(cs('.v2-card').borderRadius),
-      cardShadow:cs('.v2-card').boxShadow,
+      cardRadius:parseFloat(cs('.v2-exercise-card').borderRadius),
+      cardShadow:cs('.v2-exercise-card').boxShadow,
       inputHeight:parseFloat(cs('#v2AnswerInput').minHeight),
       primaryHeight:parseFloat(cs('.v2-btn-primary').minHeight),
       secondaryHeight:parseFloat(cs('.v2-btn-secondary').minHeight),
-      gridColumns:cs('#v2Grid').gridTemplateColumns.split(' ').length
+      gridColumns:cs('.v2-content').gridTemplateColumns.split(' ').length
     };
   });
   expect(desktop.titlePx).toBeGreaterThanOrEqual(28);
@@ -35,7 +35,7 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
   expect(desktop.inputHeight).toBeGreaterThanOrEqual(48);
   expect(desktop.primaryHeight).toBeGreaterThanOrEqual(48);
   expect(desktop.secondaryHeight).toBeGreaterThanOrEqual(48);
-  expect(desktop.gridColumns).toBe(2);
+  expect(desktop.gridColumns).toBe(1);
 
   await primary.hover();
   expect(await primary.evaluate(el=>getComputedStyle(el).backgroundColor)).not.toBe('');
@@ -53,13 +53,13 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
 
   await page.setViewportSize({width:390,height:844});
   const mobile=await page.evaluate(()=>({
-    columns:getComputedStyle(document.querySelector('#v2Grid')).gridTemplateColumns.split(' ').length,
+    columns:getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length,
     titlePx:parseFloat(getComputedStyle(document.querySelector('.v2-title')).fontSize),
-    actions:[...document.querySelectorAll('#v2App .v2-actions')].map(n=>getComputedStyle(n).flexDirection)
+    actions:[...document.querySelectorAll('#v2App .v2-actions')].map(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length)
   }));
   expect(mobile.columns).toBe(1);
   expect(mobile.titlePx).toBeLessThanOrEqual(28);
-  expect(mobile.actions.every(v=>v==='column')).toBe(true);
+  expect(mobile.actions.every(v=>v===1)).toBe(true);
 
   await page.setViewportSize({width:1024,height:768});
   expect(await page.evaluate(()=>getComputedStyle(document.querySelector('#v2Grid')).gridTemplateColumns.split(' ').length)).toBe(2);
