@@ -1,5 +1,6 @@
 (()=>{
   'use strict';
+  if(new URLSearchParams(location.search).get('legacy')!=='1')return;
   const state=window.__KANJI5_STATE__;
   if(!state)throw new Error('Kanji 5 state module must load before storage bridge');
   const {DECK_KEY:deckKey,STORAGE:stateKey}=state;
