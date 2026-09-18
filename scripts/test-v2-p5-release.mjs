@@ -52,4 +52,6 @@ assert.match(boundary,/buildBoundarySnapshot/);
 assert.match(presentation,/function buildFallbackReviewRecall/);
 assert.match(presentation,/v12RecallInput/);
 assert.match(presentation,/gradeMeaning|gradeReading/);
+assert.match(presentation,/Promise\.race/);
+assert.match(presentation,/1500/);
 console.log('Kanji 5 v2 P5 release contract passed.');
