@@ -21,7 +21,7 @@ document.head.appendChild(stylesheet);
 
 const skip = document.createElement('a');
 skip.className = 'v2-skip-link';
-skip.href = '#v2Exercise';
+skip.setAttribute('href','#v2Exercise');
 skip.textContent = 'Skip to current exercise';
 skip.addEventListener('click', event => {
   const target = document.getElementById('v2Exercise');
