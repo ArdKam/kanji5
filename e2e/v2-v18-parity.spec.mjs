@@ -17,17 +17,17 @@ test('v2 restores the v1.8 settings and statistics surface', async ({page}) => {
   await expect(page.locator('.v2-daily-stat')).toHaveCount(4);
 
   await page.locator('#v2Settings').click();
-  await expect(page.locator('#settingsDialog')).toBeVisible();
-  await expect(page.locator('#dailyNew')).toBeVisible();
-  await page.locator('#closeSettings').click();
-  await expect(page.locator('#settingsDialog')).toBeHidden();
+  await expect(page.locator('#v2SettingsDialog')).toBeVisible();
+  await expect(page.locator('#v2DailyNew')).toBeVisible();
+  await expect(page.locator('#v2DailyGoal')).toBeVisible();
+  await page.locator('.v2-dialog').locator('button').filter({hasText:'بستن'}).click();
+  await expect(page.locator('#v2SettingsDialog')).toBeHidden();
 
   await page.locator('#v2Stats').click();
-  await expect(page.locator('#statsDialog')).toBeVisible();
-  await expect(page.locator('#statsBody')).toContainText('کل مرورها');
-  await expect(page.locator('#statsBody')).toContainText('وضعیت کارت‌ها');
-  await page.locator('#closeStats').click();
-  await expect(page.locator('#statsDialog')).toBeHidden();
+  await expect(page.locator('#v2StatsDialog')).toBeVisible();
+  await expect(page.locator('#v2StatsDialog')).toContainText('کل مرورها');
+  await page.locator('#v2StatsDialog').locator('button').filter({hasText:'بستن'}).click();
+  await expect(page.locator('#v2StatsDialog')).toBeHidden();
 
   await expect(page.locator('#v2LearningCard')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2LearningReveal')).toBeVisible();
