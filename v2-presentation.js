@@ -894,6 +894,11 @@ async function init() {
   }
 }
 
+document.addEventListener('click',event=>{
+  const id=event.target?.closest?.('#saveSettings,#resetBtn')?.id;
+  if(id) setTimeout(()=>{void window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.()},100);
+},true);
+
 if (!boundaryReadyListener) {
   boundaryReadyListener=true;
   document.addEventListener('kanji5:v1.9-v2-boundary-ready',()=>{void init();});
