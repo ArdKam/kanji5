@@ -4,6 +4,8 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await page.evaluate(async()=>{ await window.__KANJI5_V19_V2_BOUNDARY__.setExercise({mode:'production',prompt:'Write the Kanji',character:'学',contentId:'fixture-1',provenance:'local'}); });
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
 
   const semantics=await page.evaluate(()=>{
@@ -20,6 +22,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
       feedbackRole:feedback?.getAttribute('role'),
       feedbackLive:feedback?.getAttribute('aria-live'),
       feedbackAtomic:feedback?.getAttribute('aria-atomic'),
+      exerciseTabIndex:document.querySelector('#v2Exercise')?.tabIndex,
       progressLabel:progress?.getAttribute('aria-label'),
       skipHref:skip?.getAttribute('href'),
       buttonMinHeights:buttons.map(b=>parseFloat(getComputedStyle(b).minHeight)),
@@ -36,6 +39,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   expect(semantics.skipHref).toBe('#v2Exercise');
   expect(semantics.buttonMinHeights.every(v=>v>=44)).toBe(true);
   expect(semantics.reducedMotion).toBe(true);
+  expect(semantics.exerciseTabIndex).toBe(-1);
 
   await page.getByText('Skip to current exercise').click();
   await expect(page.locator('#v2Exercise')).toBeFocused();
