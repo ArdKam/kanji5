@@ -2,8 +2,10 @@
 'use strict';
 if(window.__KANJI5_EDU_UI_V1_5__)return;
 window.__KANJI5_EDU_UI_V1_5__=true;
-const state=window.__KANJI5_STATE__;
-const CORE=window.__KANJI5_EDU_CORE__;
+const runtime=window.__KANJI5_RUNTIME__;
+if(!runtime)throw new Error('KANJI5_RUNTIME_REQUIRED');
+const state=runtime.get('state')||window.__KANJI5_STATE__;
+const CORE=runtime.get('education.core')||window.__KANJI5_EDU_CORE__;
 const isV2=()=>new URLSearchParams(location.search).get('legacy')!=='1';
 if(!state||!CORE)return;
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -36,7 +38,9 @@ function choose(character){if(!edu.item||edu.answered)return;const correct=chara
 function dontKnow(){if(!edu.item||edu.answered)return;return finish({correct:false,outcome:'unknown',quality:'unknown',score:0})}
 async function submitValue(value){return submit(String(value??''))}
 async function retry(){const api=window.__KANJI5_V19_RECOVERY__;if(!(await api?.retry?.()))return false;const target=api.read?.();if(target?.taskId)window.__KANJI5_V19_RECOVERY_TARGET__={taskId:target.taskId,character:target.character,mode:target.mode,contentId:target.contentId};await start();return true}
-window.__KANJI5_EDU_BRIDGE__=Object.freeze({start,submitValue,dontKnow,retry,next:start,backToReview:()=>{location.href=location.pathname}});
+const educationBridge=Object.freeze({start,submitValue,dontKnow,retry,next:start,backToReview:()=>{location.href=location.pathname}});
+window.__KANJI5_EDU_BRIDGE__=educationBridge;
+runtime.register('education.bridge',educationBridge);
 function loadStyles(){if(document.querySelector('link[data-kanji5-education-style]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='./v1.5-education-ui.css';link.dataset.kanji5EducationStyle='true';document.head.appendChild(link)}
 function build(){const panel=$('#studyPanel'),study=$('#study');if(!panel||!study||$('#v14EduTabs'))return false;loadStyles();const reviewPane=document.createElement('div');reviewPane.id='v13ReviewPane';study.parentNode.insertBefore(reviewPane,study);reviewPane.appendChild(study);const tabs=document.createElement('div');tabs.id='v14EduTabs';tabs.innerHTML='<button type="button" class="v14-tab active" data-tab="review">مرور کانجی</button><button type="button" class="v14-tab" data-tab="education">تمرین آموزشی</button>';panel.insertBefore(tabs,reviewPane);const educationPane=document.createElement('div');educationPane.id='v14EducationPane';educationPane.hidden=true;panel.appendChild(educationPane);tabs.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;const tab=b.dataset.tab;$$('.v14-tab',tabs).forEach(x=>x.classList.toggle('active',x===b));reviewPane.hidden=tab!=='review';educationPane.hidden=tab!=='education';if(tab==='education')start()});document.addEventListener('click',e=>{const t=e.target.closest?.('button');if(!t)return;if(t.id==='v14EduSubmit'){e.preventDefault();void submit()}else if(t.id==='v14EduDontKnow'){e.preventDefault();void finish({correct:false,outcome:'unknown',quality:'unknown',score:0})}else if(t.id==='v14EduNext'){e.preventDefault();start()}else if(t.id==='v14EduReview'){e.preventDefault();$('.v14-tab[data-tab="review"]')?.click()}else if(t.dataset.choice){e.preventDefault();choose(t.dataset.choice)}},true);document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.code==='NumpadEnter')&&pane()&&!edu.answered&&(edu.mode==='meaning'||edu.mode==='reading'||edu.mode==='production'||edu.mode==='vocabulary'||edu.mode==='context')){e.preventDefault();void submit()}},true);return true}
 function boot(){if(isV2())return;if(build())return;const observer=new MutationObserver(()=>{if(build())observer.disconnect()});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),15000)}
