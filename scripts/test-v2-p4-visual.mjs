@@ -6,9 +6,11 @@ const css=fs.readFileSync('v2-presentation.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
 
-assert.ok(js.includes("stylesheet.href = './v2-presentation.css'"));
-for (const token of ['--v2-accent:','--v2-space-6:','--v2-radius:','--v2-shadow:']) assert.ok(css.includes(token),token);
-for (const cls of ['v2-shell','v2-title','v2-header','v2-session-progress','v2-content','v2-exercise-card','v2-card-title','v2-input','v2-btn-primary','v2-btn-secondary','v2-progress','v2-progress-fill','v2-feedback-card','v2-insights','v2-outcome-row']) assert.ok(css.includes('.'+cls),cls);
+assert.ok(js.includes("stylesheet.href='./v2-presentation.css'"));
+for(const token of ['--v2-accent:','--v2-bg:','--v2-radius:','--v2-shadow:'])assert.ok(css.includes(token),token);
+for(const cls of ['v2-shell','v2-title','v2-header','v2-session-bar','v2-grid','v2-exercise-card','v2-mode-pill','v2-stimulus','v2-input','v2-btn-primary','v2-btn-secondary','v2-feedback','v2-skill-grid','v2-reason-card','v2-recent-card'])assert.ok(css.includes('.'+cls),cls);
+assert.ok(js.includes('v2Stimulus'));
+assert.ok(js.includes('پیشرفت جلسه'));
 assert.ok(css.includes(':hover'));
 assert.ok(css.includes(':focus'));
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'));
