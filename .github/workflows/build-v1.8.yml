@@ -124,7 +124,10 @@ jobs:
       - name: Run all contract and unit tests
         run: npm test
       - name: Generate v2 visual baselines
-        run: npx playwright test e2e/v2-visual-regression.spec.mjs --update-snapshots --workers=1
+        run: |
+          npm install --no-audit --no-fund --package-lock=false
+          npx playwright install chromium
+          npx playwright test e2e/v2-visual-regression.spec.mjs --update-snapshots --workers=1
       - name: Upload v2 visual baseline candidate
         if: always()
         uses: actions/upload-artifact@v4
