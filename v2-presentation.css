@@ -179,7 +179,7 @@ body:has(#v2App){
 
 .v2-kanji{
   direction:ltr;
-  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
+  font-family:"Noto Sans CJK JP","Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
   font-size:clamp(72px,12vw,112px);
   line-height:1;
   font-weight:500;
