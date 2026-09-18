@@ -54,6 +54,8 @@ on:
       - 'index.html'
       - '.github/workflows/build-v1.8.yml'
 
+  workflow_dispatch:
+
 permissions:
   contents: read
 
@@ -91,8 +93,8 @@ jobs:
           node --check v1.6-session-core.js
           node --check v1.6-session-feedback.js
           node --check v1.6-skill-profile.js
-      - name: Validate v1.8 compatibility contract
-        run: node scripts/test-v1.8-release.mjs
+      - name: Validate v1.9 release contract
+        run: node scripts/test-v1.9-release.mjs
       - name: Run all contract and unit tests
         run: npm test
       - name: Run browser coverage

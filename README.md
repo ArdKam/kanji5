@@ -76,13 +76,24 @@ v1.8 سه mode واقعی learner-facing را به جریان آموزشی اض�
 - **Learning UX:** feedback حداقلی و توضیح کوتاه دربارهٔ دلیل انتخاب تمرین، بدون dashboard پیچیده
 - **Offline/runtime quality:** graderهای v1.8 و UX runtime در service worker precache شده‌اند و shell cache نسخه‌بندی شده است
 
+## v1.9 — Learning Engine
+
+v1.9 is the final pre-v2 learning-engine release. It keeps the five-skill model and FSRS while adding a versioned educational outcome contract, evidence-aware learner modeling, adaptive planning, bounded recovery, deterministic evaluation, content/data integrity, stronger offline reliability, and an explicit presentation boundary for v2.
+
+### v1.9 highlights
+- **Outcome Contract:** standardized, versioned outcomes across Meaning, Reading, Production, Vocabulary, and Context, including explicit `unknown` and recovery-aware metadata.
+- **Learner Model 2.0:** per-attribute evidence, recency, momentum, confidence, mastery/weakness signals, and migration-safe persistence.
+- **Adaptive Planner 3.0:** deterministic repair/reinforce/recover/maintain/explore planning with bounded anti-repetition behavior.
+- **Recovery Engine:** bounded wrong/unknown/near-miss retry flows without turning recovery into a second scheduler.
+- **Learning Evaluation 2.0:** deterministic metrics and baseline comparison without mutating learner state.
+- **Data & Offline Reliability:** validation/deduplication/fallback for Vocabulary and Context plus offline-first grading and runtime hardening.
+- **v2 Boundary:** stable view-model contracts separating the learning engine from the future presentation layer.
+
 ## Release status
 
-**v1.8.0 — roadmap complete and all release gates green on `feature/v1.8-p0c-context-final4`.** P0-A through P6 are implemented and covered by the v1.8 release workflow.
+**v1.9.0 — implementation P0 through P7 is complete on `main`.** The package version, documentation, release contract, v2 boundary, and active v1.9 workflow are aligned.
 
-The final validation run passed JavaScript syntax checks, the v1.8 release contract, the full aggregate contract/unit suite (57/57), and browser E2E for v1.7 Adaptive Recall plus v1.8 Production/Vocabulary/Context.
-
-The branch is ready for normal review/merge; it has not been merged automatically.
+The release gate is defined by syntax validation, `npm test`, v1.7/v1.8 regressions, v1.9 browser flows, offline/runtime checks, architecture checks, and the v1.9 release contract.
 
 ## منابع
 - Jōyō/KANJIDIC2 dataset: jkindrix/japanese-language-data
