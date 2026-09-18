@@ -8,10 +8,8 @@ const DECK_KEY='kanji5-deck';
 const VERSION_KEY='kanji5-deck-version';
 
 if(IS_LEGACY){
-  const link=document.createElement('link');
-  link.rel='stylesheet';
-  link.href='./legacy.css';
-  document.head.appendChild(link);
+  const link=document.getElementById('legacyStylesheet');
+  if(link)link.media='all';
 }else{
   document.documentElement.classList.add('kanji5-v2-default');
 }
