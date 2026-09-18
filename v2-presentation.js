@@ -453,6 +453,7 @@ function renderExercise(snapshot) {
   back.textContent = 'بازگشت به کارت یادگیری';
   back.addEventListener('click', async () => {
     presentationMode = 'auto';
+    await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
     await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
   });
   section.appendChild(back);
@@ -595,7 +596,7 @@ function renderInsights(snapshot) {
 function render(snapshot) {
   content.textContent = '';
   renderHeader(snapshot);
-  const showLearning = presentationMode !== 'exercise' && snapshot?.learning?.active && snapshot.learning.isNew;
+  const showLearning = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && snapshot.learning.isNew;
   if (showLearning) {
     content.appendChild(renderLearning(snapshot));
   } else {
