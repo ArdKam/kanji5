@@ -26,7 +26,7 @@ The v2 presentation layer consumes only the stable v1.9 view-model boundary. It 
 - Build the v2 session dashboard from stable session and learner view models.
 - Expose progress, adaptive reason, recent outcomes, and learner-skill summaries without duplicating planner logic.
 
-### P3 — Accessibility & Responsive Completion ✅
+### P3 — Accessibility & Responsive Completion
 - Keyboard-first interaction.
 - Screen-reader semantics and focus management.
 - Responsive layouts for mobile/tablet/desktop.
