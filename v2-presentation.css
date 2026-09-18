@@ -759,3 +759,5 @@ body:has(#v2App){
   .v2-stats-grid{grid-template-columns:1fr}
   .v2-setting-row{align-items:flex-start}
 }
+
+.v2-reason-list{margin-top:8px;padding:8px 10px;border:1px solid #edf0f4;border-radius:12px;background:#fafbfc}.v2-reason-list p{margin:0 0 5px;color:var(--v2-muted);font-size:12px;line-height:1.6}.v2-reason-list p:last-child{margin-bottom:0}
