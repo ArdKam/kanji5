@@ -9,8 +9,8 @@ test('v2 P0 shell consumes the v1.9 presentation boundary',async({page})=>{
   await page.evaluate(async()=>{
     const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
     await boundary.setExercise({mode:'production',prompt:'Write the Kanji',character:'学',contentId:'fixture-1',provenance:'local'});
-    await boundary.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'expected target: 学'});
-    await boundary.setAdaptiveReason({mode:'production',action:'repair',reasons:['recent failure'],score:4});
+    await boundary.setFeedback({mode:'production',outcome:'نادرست',correct:false,score:0,graderVersion:'1.9.0-production',reason:'expected target: 学'});
+    await boundary.setAdaptiveReason({mode:'production',action:'ترمیم',reasons:['recent failure'],score:4});
   });
 
   await expect(page.locator('#v2App')).toContainText('Write the Kanji');
