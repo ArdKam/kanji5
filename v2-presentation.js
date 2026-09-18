@@ -13,6 +13,9 @@ const root = document.createElement('main');
 root.id = 'v2App';
 root.setAttribute('aria-labelledby', 'v2Title');
 root.style.cssText = 'max-width:1040px;margin:0 auto;padding:20px;min-height:100vh;color:#111827;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+const media=document.createElement('style');
+media.textContent='@media(max-width:760px){#v2App{padding:14px}#v2Grid{grid-template-columns:1fr!important}}@media(prefers-reduced-motion:reduce){#v2App *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}#v2App button:focus-visible,#v2App input:focus-visible{outline:3px solid currentColor;outline-offset:2px}';
+document.head.appendChild(media);
 const title = document.createElement('h1');
 title.id = 'v2Title';
 title.textContent = 'Kanji 5 · v2 Learning Session';
@@ -76,7 +79,7 @@ function render(snapshot) {
   const ex = snapshot?.exercise;
   if (ex?.mode) {
     row(exercise,'Skill',labels[ex.mode] || ex.mode);
-    row(exercise,'Prompt',ex.prompt);
+    const prompt=document.createElement('p');prompt.id='v2Prompt';prompt.textContent=ex.prompt||'Exercise';prompt.style.cssText='margin:8px 0;color:#4b5563;';exercise.appendChild(prompt);
     if (ex.character) row(exercise,'Kanji',ex.character);
     row(exercise,'Content',ex.contentId);
 
@@ -86,6 +89,7 @@ function render(snapshot) {
     input.autocomplete = 'off';
     input.spellcheck = false;
     input.setAttribute('aria-label','Your answer');
+    input.setAttribute('aria-describedby','v2Prompt');
     input.placeholder = ex.mode === 'production' || ex.mode === 'context' ? 'Type the Kanji' : 'Type your answer';
     input.style.cssText = 'width:100%;margin-top:12px;padding:12px;border:1px solid #d1d5db;border-radius:12px;font:inherit;direction:ltr;';
 
@@ -121,6 +125,7 @@ function render(snapshot) {
     });
     actions.append(submit,unknown);
     exercise.append(input,actions);
+    queueMicrotask(()=>{if(document.activeElement!==input)input.focus()});
   } else {
     const p=document.createElement('p');
     p.textContent='No exercise is currently exposed by the learning boundary.';
@@ -136,6 +141,8 @@ function render(snapshot) {
   grid.appendChild(exercise);
 
   const feedback = card('Feedback');
+  feedback.setAttribute('aria-live','polite');
+  feedback.setAttribute('role','status');
   row(feedback,'Outcome',snapshot?.feedback?.outcome);
   row(feedback,'Score',snapshot?.feedback?.score);
   row(feedback,'Retry count',snapshot?.feedback?.retryCount);
