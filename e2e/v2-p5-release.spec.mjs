@@ -38,14 +38,14 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
 
   await page.locator('#v2AnswerInput').fill('x');
   await page.locator('#v2Submit').click();
-  await expect(page.locator('#v2App')).toContainText(/wrong/i,{timeout:10000});
+  await expect(page.locator('#v2App')).toContainText('نادرست',{timeout:10000});
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
 
   await page.locator('#v2Retry').click();
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
   await page.locator('#v2AnswerInput').fill(target);
   await page.locator('#v2Submit').click();
-  await expect(page.locator('#v2App')).toContainText(/correct/i,{timeout:10000});
+  await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 
   const attempts=await page.evaluate(ch=>{
     const k=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
