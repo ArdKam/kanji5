@@ -17,7 +17,7 @@ assert.match(presentation,/role','status/);
 assert.match(presentation,/label\.htmlFor = 'v2AnswerInput'/);
 assert.match(presentation,/aria-describedby/);
 assert.ok(presentation.includes("event.key==='Enter'"));
-assert.ok(/min-height:48px/.test(css));
+assert.ok(/min-height:50px/.test(css));
 assert.ok(css.includes('focus-visible'));
 assert.ok(css.includes('@media (max-width:600px)'));
 assert.ok(css.includes('grid-template-columns:1fr'));
