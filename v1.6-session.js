@@ -2,7 +2,9 @@ const IS_LEGACY = new URLSearchParams(location.search).get('legacy') === '1';
 (()=>{
 'use strict';
 if(window.__KANJI5_V16_SESSION__)return;
-const state=window.__KANJI5_STATE__;
+const runtime=window.__KANJI5_RUNTIME__;
+if(!runtime)throw new Error('KANJI5_RUNTIME_REQUIRED');
+const state=runtime.get('state')||window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 window.__KANJI5_V16_SESSION__=true;
 const planPromise=import('./v1.6-session-core.js');
@@ -37,6 +39,8 @@ function update(){const p=ensurePanel();if(!p)return;const text=s=>String($(s)?.
 function bind(){document.addEventListener('click',e=>{if(!session.started&&!e.target?.closest?.('#v16Start'))return;const t=e.target?.closest?.('.rate[data-r]');if(t&&session.started){const r=t.getAttribute('data-r');session.reviews++;if(session.ratings[r]!==undefined)session.ratings[r]++;schedulePersist()}if(e.target?.closest?.('#v12SubmitRecall')&&session.started){session.recall++;schedulePersist()}if(e.target?.closest?.('#v15DontKnowRecall')&&session.started){session.recall++;session.unknown++;schedulePersist()}update()},true)}
 function start(){injectStyle();const ready=()=>{ensurePanel();if(IS_LEGACY){void import('./v1.6-session-ui.js');bind();}update();if(session.started)ensureTimer();void planPromise.then(api=>{planApi=api;if(session.started&&!planInitialized)ensurePlan();else if(session.started)update()}).catch(err=>console.error('KANJI5_V16_SESSION_PLAN_LOAD_FAILED',err))};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready()}
 /* 'v16Finish' is retained only as a legacy contract marker; the real control lives outside the dashboard as #v16FinishExternal. */
-window.__KANJI5_V16_SESSION_API__=Object.freeze({refresh:update,getSession:()=>({...session,ratings:{...session.ratings}}),start:startSession,startReady:startSessionReady,finish:finishSession,getPlan:()=>{ensurePlan();return plan},nextMode:nextMode,consumeMode:consumePlannedMode});
+const sessionApi=Object.freeze({refresh:update,getSession:()=>({...session,ratings:{...session.ratings}}),start:startSession,startReady:startSessionReady,finish:finishSession,getPlan:()=>{ensurePlan();return plan},nextMode:nextMode,consumeMode:consumePlannedMode});
+window.__KANJI5_V16_SESSION_API__=sessionApi;
+runtime.register('session.api',sessionApi);
 start();
 })();
