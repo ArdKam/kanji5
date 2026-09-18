@@ -13,6 +13,11 @@ const root = document.createElement('main');
 root.id = 'v2App';
 root.setAttribute('aria-labelledby', 'v2Title');
 root.style.cssText = 'max-width:1040px;margin:0 auto;padding:20px;min-height:100vh;color:#111827;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+const media=document.createElement('style');
+media.textContent='@media(max-width:760px){#v2App{padding:14px}#v2Grid{grid-template-columns:1fr!important}#v2App h1{font-size:24px}#v2App .v2-actions{flex-direction:column}#v2App .v2-actions button{width:100%}}@media(prefers-reduced-motion:reduce){#v2App *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}#v2App button,#v2App input{min-height:44px}#v2App button:focus-visible,#v2App input:focus-visible,#v2App a:focus-visible{outline:3px solid currentColor;outline-offset:2px}.v2-skip-link{position:absolute;left:10px;top:-100px;padding:10px 14px;background:#111827;color:#fff;border-radius:10px;z-index:100}.v2-skip-link:focus{top:10px}';
+document.head.appendChild(media);
+const skip=document.createElement('a');
+skip.className='v2-skip-link';skip.href='#v2Exercise';skip.textContent='Skip to current exercise';skip.addEventListener('click',event=>{const target=document.getElementById('v2Exercise');if(!target)return;event.preventDefault();requestAnimationFrame(()=>{target.focus({preventScroll:true});target.scrollIntoView({block:'start'});});});root.appendChild(skip);
 const title = document.createElement('h1');
 title.id = 'v2Title';
 title.textContent = 'Kanji 5 · v2 Learning Session';
@@ -25,6 +30,7 @@ subtitle.style.cssText = 'margin:0 0 18px;color:#6b7280;';
 root.appendChild(subtitle);
 
 const grid = document.createElement('div');
+grid.id='v2Grid';
 grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;';
 root.appendChild(grid);
 document.body.appendChild(root);
@@ -32,11 +38,13 @@ document.body.appendChild(root);
 const text = value => String(value ?? '').trim() || '—';
 const labels = {meaning:'Meaning',reading:'Reading',production:'Production',vocabulary:'Vocabulary',context:'Context'};
 
+let sectionCounter=0;
 function card(titleText) {
   const section = document.createElement('section');
-  section.setAttribute('aria-label', titleText);
-  section.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;';
   const heading = document.createElement('h2');
+  heading.id='v2SectionHeading'+(++sectionCounter);
+  section.setAttribute('aria-labelledby', heading.id);
+  section.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:16px;';
   heading.textContent = titleText;
   heading.style.cssText = 'font-size:15px;margin:0 0 10px;';
   section.appendChild(heading);
@@ -55,6 +63,7 @@ function row(parent, label, value) {
 
 function render(snapshot) {
   grid.textContent = '';
+  let postRenderFocus=null;
 
   const session = card('Session');
   const fraction=Number(snapshot?.session?.completionFraction)||0;
@@ -73,23 +82,28 @@ function render(snapshot) {
   grid.appendChild(session);
 
   const exercise = card('Current exercise');
+  exercise.id='v2Exercise';exercise.tabIndex=-1;
   const ex = snapshot?.exercise;
   if (ex?.mode) {
     row(exercise,'Skill',labels[ex.mode] || ex.mode);
-    row(exercise,'Prompt',ex.prompt);
+    const prompt=document.createElement('p');prompt.id='v2Prompt';prompt.textContent=ex.prompt||'Exercise';prompt.style.cssText='margin:8px 0;color:#4b5563;';exercise.appendChild(prompt);
     if (ex.character) row(exercise,'Kanji',ex.character);
     row(exercise,'Content',ex.contentId);
 
+    const inputLabel=document.createElement('label');
+    inputLabel.htmlFor='v2AnswerInput';inputLabel.textContent='Your answer';inputLabel.style.cssText='display:block;margin-top:10px;font-weight:700;';
+    exercise.appendChild(inputLabel);
     const input = document.createElement('input');
     input.id = 'v2AnswerInput';
     input.type = 'text';
     input.autocomplete = 'off';
     input.spellcheck = false;
-    input.setAttribute('aria-label','Your answer');
+    input.setAttribute('aria-describedby','v2Prompt');
     input.placeholder = ex.mode === 'production' || ex.mode === 'context' ? 'Type the Kanji' : 'Type your answer';
     input.style.cssText = 'width:100%;margin-top:12px;padding:12px;border:1px solid #d1d5db;border-radius:12px;font:inherit;direction:ltr;';
 
     const actions = document.createElement('div');
+    actions.className='v2-actions';
     actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;';
 
     const submit = document.createElement('button');
@@ -136,12 +150,18 @@ function render(snapshot) {
   grid.appendChild(exercise);
 
   const feedback = card('Feedback');
+  feedback.setAttribute('aria-live','polite');
+  feedback.setAttribute('aria-atomic','true');
+  feedback.setAttribute('role','status');
+  feedback.tabIndex=-1;
+  if(snapshot?.feedback?.outcome)postRenderFocus=feedback;
   row(feedback,'Outcome',snapshot?.feedback?.outcome);
   row(feedback,'Score',snapshot?.feedback?.score);
   row(feedback,'Retry count',snapshot?.feedback?.retryCount);
   row(feedback,'Recovered',snapshot?.feedback?.recovered ? 'yes' : 'no');
   if (snapshot?.feedback?.reason) row(feedback,'Reason',snapshot.feedback.reason);
   const feedbackActions=document.createElement('div');
+  feedbackActions.className='v2-actions';
   feedbackActions.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;';
   if (snapshot?.feedback?.state==='pending_retry') {
     const retry=document.createElement('button');
@@ -199,19 +219,30 @@ function render(snapshot) {
     }
   }
   grid.appendChild(recent);
+  if(postRenderFocus)queueMicrotask(()=>{if(document.contains(postRenderFocus))postRenderFocus.focus({preventScroll:true});});
+  const feedbackKey=[snapshot?.feedback?.outcome,snapshot?.feedback?.retryCount,snapshot?.feedback?.recovered,snapshot?.feedback?.reason].join('|');
+  if(snapshot?.feedback?.outcome && feedbackKey!==lastFeedbackFocusKey){
+    lastFeedbackFocusKey=feedbackKey;
+    queueMicrotask(()=>feedback.focus({preventScroll:true}));
+  }
 }
 
 let subscribed=false;
 let bootstrapped=false;
 let boundaryReadyListener=false;
+let lastFeedbackFocusKey='';
 async function init() {
   const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
   if (!boundary) return;
   try {
     if (!subscribed) {
-      document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
+      if(typeof boundary.subscribe==='function'){
+        await boundary.subscribe(snapshot=>render(snapshot));
+      }else{
+        document.addEventListener('kanji5:v1.9-v2-view-models', event => render(event?.detail || {}));
+        render(await boundary.snapshot());
+      }
       subscribed=true;
-      render(await boundary.snapshot());
     }
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge) {
