@@ -24,7 +24,7 @@ export function buildSettingsViewModel(input={}){
 }
 export function buildStatsViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',totalReviews:Math.max(0,finite(source.totalReviews,0)),accuracy:Math.max(0,Math.min(1,finite(source.accuracy,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[])});
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',totalReviews:Math.max(0,finite(source.totalReviews,0)),nonAgainRate:Math.max(0,Math.min(1,finite(source.nonAgainRate,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[])});
 }
 
 export function buildSessionViewModel(session){
