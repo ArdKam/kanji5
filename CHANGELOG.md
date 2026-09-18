@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.9.0] — 2026-09-18
+
+### Added
+- Standardized, versioned educational outcomes across the five supported learning attributes.
+- Evidence-aware learner model with attribute-level mastery, weakness, confidence, recency, momentum, and repeated-failure signals.
+- Deterministic Adaptive Planner 3.0 with repair, reinforce, recover, maintain, and explore behaviors.
+- Bounded recall recovery engine with wrong/unknown/near-miss feedback and one-retry recovery semantics.
+- Learning Evaluation 2.0 with deterministic metrics, baseline comparison, and evidence sufficiency guards.
+- Vocabulary/Context data-quality validation, deterministic selection/fallback, migration safeguards, and offline reliability coverage.
+- v2 presentation contracts and a browser orchestration boundary for session, exercise, feedback, learner summary, session summary, and adaptive-reason view models.
+- Extended service-worker precaching and browser/architecture coverage through the v1.9 P6 boundary.
+
+### Changed
+- Bumped the package version to `1.9.0`.
+- Kept FSRS as the authoritative card-level scheduler; v1.9 attribute intelligence does not replace card scheduling.
+- Preserved local-first persistence and deterministic migration behavior.
+- Extended the active learning-engine workflow to validate v1.9 syntax, contracts, browser flows, and release gates.
+- Updated documentation to describe v1.9 as the active pre-v2 learning-engine line.
+
+### Compatibility
+- Existing v1.6/v1.7/v1.8 learning and session data remains supported by the existing migration/session boundaries.
+- Production, Vocabulary, and Context grading remains deterministic and does not delegate grading authority to external APIs.
+- v2 presentation code can consume stable view-model contracts without importing persistence or planner internals.
+
+### Verification
+- Release gates require syntax validation, `npm test`, v1.7/v1.8 regressions, v1.9 browser flows, offline/runtime checks, architecture checks, and the v1.9 release contract.
+- The repository keeps `npm test` as the single local aggregate entry point for `scripts/test-*.mjs`.
+
 ## [1.8.0] — 2026-09-15
 
 ### Added
