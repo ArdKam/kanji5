@@ -32,9 +32,9 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
   expect(desktop.titlePx).toBeGreaterThanOrEqual(28);
   expect(desktop.cardRadius).toBeGreaterThanOrEqual(20);
   expect(desktop.cardShadow).not.toBe('none');
-  expect(desktop.inputHeight).toBeGreaterThanOrEqual(48);
-  expect(desktop.primaryHeight).toBeGreaterThanOrEqual(48);
-  expect(desktop.secondaryHeight).toBeGreaterThanOrEqual(48);
+  expect(desktop.inputHeight).toBeGreaterThanOrEqual(54);
+  expect(desktop.primaryHeight).toBeGreaterThanOrEqual(50);
+  expect(desktop.secondaryHeight).toBeGreaterThanOrEqual(50);
   expect(desktop.gridColumns).toBe(1);
 
   await primary.hover();
