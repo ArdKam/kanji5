@@ -17,7 +17,7 @@ The v2 presentation layer consumes only the stable v1.9 view-model boundary. It 
 - Add browser and contract coverage for the presentation boundary.
 - Keep the shell accessible, responsive, semantic, and free of presentation-side business logic.
 
-### P1 — Exercise Flow Migration
+### P1 — Exercise Flow Migration ✅
 - Move the learner-facing exercise presentation from the v1 DOM handlers to v2.
 - Wire all five supported skills through the existing v1.9 exercise/feedback contracts.
 - Preserve grading, FSRS scheduling, session persistence, recovery, and offline semantics.
