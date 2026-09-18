@@ -29,7 +29,7 @@ assert.match(roadmap,/### P1 — Exercise Flow Migration ✅/);
 assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/);
 assert.match(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
 assert.match(roadmap,/### P4 — Visual System & Polish ✅/);
-assert.match(roadmap,/### P5 — v2 Release Readiness/);
+assert.match(roadmap,/### P5 — v2 Release Readiness ✅/);
 assert.match(readme,/## v2 — Presentation Layer/);
 assert.match(readme,/\*\*v2\.0\.0 — release-ready\*\*/);
 assert.match(changelog,/## \[2\.0\.0\] — 2026-09-18/);
