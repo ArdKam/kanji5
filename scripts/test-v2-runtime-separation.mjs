@@ -12,6 +12,7 @@ const boundary=read('v1.9-v2-boundary.js');
 
 assert.ok(index.includes('<script type="module" src="./review-runtime.js"></script>'));
 assert.doesNotMatch(index,/<script type="module">/);
+assert.match(index,/href='\.\/legacy\.css'/);
 assert.match(review,/const IS_LEGACY = .*legacy.*=== '1'/);
 assert.match(review,/if\(IS_LEGACY\)\{/);
 assert.match(storage,/if\(new URLSearchParams\(location\.search\)\.get\('legacy'\)!=='1'\)return;/);
