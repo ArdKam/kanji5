@@ -224,6 +224,9 @@ function renderStimulus(stimulus,mode,character){
 }
 
 function render(snapshot){
+  const revision=Number(snapshot?.viewRevision)||0;
+  if(revision<lastViewRevision)return;
+  lastViewRevision=revision;
   content.textContent='';
   insightsGrid.textContent='';
 
@@ -577,6 +580,7 @@ function render(snapshot){
 
 let subscribed=false;
 let bootstrapped=false;
+let lastViewRevision=-1;
 let externallyPublishedExercise=false;
 
 async function init(){
