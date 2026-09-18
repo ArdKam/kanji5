@@ -30,6 +30,7 @@ subtitle.style.cssText = 'margin:0 0 18px;color:#6b7280;';
 root.appendChild(subtitle);
 
 const grid = document.createElement('div');
+grid.id='v2Grid';
 grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;';
 root.appendChild(grid);
 document.body.appendChild(root);
@@ -134,7 +135,6 @@ function render(snapshot) {
     });
     actions.append(submit,unknown);
     exercise.append(input,actions);
-    if(!snapshot?.feedback?.outcome)postRenderFocus=input;
   } else {
     const p=document.createElement('p');
     p.textContent='No exercise is currently exposed by the learning boundary.';
