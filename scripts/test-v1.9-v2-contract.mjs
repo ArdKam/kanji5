@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { V2_BOUNDARY_VERSION, MODES, OUTCOMES, buildSessionViewModel, buildExerciseViewModel, buildFeedbackViewModel, buildLearnerSkillSummary, buildSessionSummary, buildAdaptiveReasonViewModel, buildBoundarySnapshot, isV2BoundarySnapshot } from '../v1.9-v2-contract-core.js';
+import { V2_BOUNDARY_VERSION, MODES, OUTCOMES, buildSessionViewModel, buildExerciseViewModel, buildFeedbackViewModel, buildLearnerSkillSummary, buildSessionSummary, buildAdaptiveReasonViewModel, buildLearningCardViewModel, buildBoundarySnapshot, isV2BoundarySnapshot } from '../v1.9-v2-contract-core.js';
 
 assert.equal(V2_BOUNDARY_VERSION,'1.9.0-v2-boundary-contract');
 assert.deepEqual(MODES,['meaning','reading','production','vocabulary','context']);
@@ -8,8 +8,10 @@ const session=buildSessionViewModel({sessionId:'s1',status:'active',resumed:true
 assert.deepEqual(session.remainingModes,{meaning:1,reading:2,production:0,vocabulary:0,context:0});
 assert.equal(session.modeResults.meaning.lastOutcome,'wrong');
 assert.equal(session.resumed,true);
-const exercise=buildExerciseViewModel({mode:'context',prompt:'Fill the missing Kanji',character:'学',contentId:42,provenance:'tatoeba'});
-assert.equal(exercise.mode,'context');assert.equal(exercise.character,'学');assert.equal(exercise.contentId,'42');
+const exercise=buildExerciseViewModel({mode:'production',prompt:'Select the Kanji',character:'学',choices:['学','字','校','字'],contentId:42,provenance:'local'});
+assert.equal(exercise.mode,'production');assert.equal(exercise.character,'学');assert.equal(exercise.contentId,'42');assert.deepEqual(exercise.choices,['学','字','校','字']);
+const learning=buildLearningCardViewModel({active:true,character:'学',isNew:true,revealed:false,meanings:['study','learning'],on:['ガク'],kun:['まなぶ'],hint:'Learn this kanji'});
+assert.equal(learning.kind,'learning-card');assert.equal(learning.character,'学');assert.equal(learning.isNew,true);assert.equal(learning.revealed,false);assert.deepEqual(learning.meanings,['study','learning']);
 const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:0.7,retryCount:1,recovered:true});
 assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
 const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,repeatedFailure:true}}});
@@ -18,7 +20,8 @@ const summary=buildSessionSummary({sessionId:'s1',status:'complete',modeResults:
 assert.equal(summary.attempts,3);assert.equal(summary.correct,2);assert.equal(summary.completionStatus,'complete');
 const reason=buildAdaptiveReasonViewModel({mode:'reading',action:'repair',reasons:['recent failure','weak recent accuracy'],score:3});
 assert.equal(reason.reasons.length,2);
-const snapshot=buildBoundarySnapshot({session,exercise,feedback,learner,adaptiveReason:reason});
+const snapshot=buildBoundarySnapshot({session,learning,exercise,feedback,learner,adaptiveReason:reason});
 assert.equal(isV2BoundarySnapshot(snapshot),true);
+assert.equal(snapshot.learning.kind,'learning-card');
 assert.equal(Object.prototype.hasOwnProperty.call(snapshot.session,'rawStorage'),false);
 console.log('Kanji 5 v1.9 v2 boundary contract passed.');
