@@ -775,3 +775,50 @@ body:has(#v2App){
 }
 
 .v2-answer-area[hidden]{display:none!important}
+
+.v2-operation-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:min(100%,760px);
+  min-height:38px;
+  margin:0 auto 10px;
+  padding:9px 12px;
+  border:1px solid var(--v2-border);
+  border-radius:12px;
+  background:var(--v2-surface-soft);
+  color:var(--v2-muted);
+  font-size:12px;
+  font-weight:750;
+}
+.v2-operation-status[data-state="busy"]::before{
+  content:'';
+  width:12px;
+  height:12px;
+  flex:none;
+  border:2px solid var(--v2-border-strong);
+  border-top-color:var(--v2-accent);
+  border-radius:50%;
+  animation:v2-spin .75s linear infinite;
+}
+.v2-operation-status[data-state="error"]{
+  border-color:#fecaca;
+  background:var(--v2-danger-soft);
+  color:var(--v2-danger);
+}
+.v2-operation-status[hidden]{display:none!important}
+.v2-btn:disabled{cursor:wait}
+.v2-card-title,.v2-prompt,.v2-learning-hint,.v2-feedback-title{text-wrap:balance}
+#v2App.v2-shell{
+  text-rendering:optimizeLegibility;
+  font-kerning:normal;
+}
+.v2-daily-stat-value,.v2-progress-meta{font-variant-numeric:tabular-nums}
+.v2-audio-button:disabled{
+  cursor:not-allowed;
+  opacity:.48;
+}
+@keyframes v2-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){
+  .v2-operation-status[data-state="busy"]::before{animation:none}
+}

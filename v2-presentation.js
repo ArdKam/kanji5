@@ -58,13 +58,12 @@ practiceButton.addEventListener('click', async () => {
   const bridge = window.__KANJI5_EDU_BRIDGE__;
   if (!bridge?.start) return;
   presentationMode = 'exercise';
-  practiceButton.disabled = true;
-  try {
+  await runBusy('در حال آماده‌سازی تمرین…', async () => {
     const sessionApi = window.__KANJI5_V16_SESSION_API__;
     const current = sessionApi?.getSession?.();
     if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady(); else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
     await bridge.start();
-  } finally { practiceButton.disabled = false; }
+  },'آماده‌سازی تمرین انجام نشد. دوباره تلاش کن.');
 });
 const statsButton = document.createElement('button');
 statsButton.type = 'button';
@@ -87,6 +86,46 @@ root.appendChild(header);
 const content = document.createElement('div');
 content.className = 'v2-content';
 root.appendChild(content);
+
+const operationStatus = document.createElement('div');
+operationStatus.id = 'v2OperationStatus';
+operationStatus.className = 'v2-operation-status';
+operationStatus.setAttribute('role','status');
+operationStatus.setAttribute('aria-live','polite');
+operationStatus.hidden = true;
+root.insertBefore(operationStatus,content);
+
+let busyDepth = 0;
+let statusRevision = 0;
+function showOperationStatus(message,state='info'){
+  statusRevision += 1;
+  const revision = statusRevision;
+  operationStatus.hidden = false;
+  operationStatus.dataset.state = state;
+  operationStatus.textContent = message;
+  if(state === 'error') setTimeout(() => {
+    if(statusRevision === revision){ operationStatus.hidden = true; operationStatus.textContent = ''; }
+  },6000);
+}
+function beginBusy(message){
+  busyDepth += 1;
+  content.setAttribute('aria-busy','true');
+  showOperationStatus(message,'busy');
+}
+function endBusy(){
+  busyDepth = Math.max(0,busyDepth-1);
+  if(busyDepth === 0) {
+    content.setAttribute('aria-busy','false');
+    if(operationStatus.dataset.state === 'busy'){ operationStatus.hidden = true; operationStatus.textContent = ''; }
+  }
+}
+async function runBusy(message,action,errorMessage='عملیات انجام نشد. دوباره تلاش کن.'){
+  beginBusy(message);
+  try { return await action(); }
+  catch(error){ showOperationStatus(errorMessage,'error'); console.error(error); return null; }
+  finally { endBusy(); }
+}
+
 document.body.appendChild(root);
 ensureV2Dialogs();
 
@@ -106,25 +145,47 @@ const localizeQuality = value => qualities[String(value || '')] || text(value);
 let lastFeedbackFocusKey = '';
 let presentationMode = 'auto';
 
-function speakJapanese(value) {
-  const textValue = String(value || '').trim();
-  if (!textValue || !('speechSynthesis' in window)) return;
-  try {
-    const utterance = new SpeechSynthesisUtterance(textValue);
-    utterance.lang = 'ja-JP';
-    utterance.rate = 0.85;
+function speechAvailable(){
+  return typeof window.speechSynthesis?.speak === 'function' && typeof window.SpeechSynthesisUtterance === 'function';
+}
+function speakJapanese(value,button){
+  const textValue=String(value||'').trim();
+  if(!textValue)return false;
+  if(!speechAvailable()){
+    if(button){
+      button.disabled=true;
+      button.setAttribute('aria-disabled','true');
+      button.setAttribute('aria-label','صدا در این مرورگر در دسترس نیست');
+    }
+    showOperationStatus('پخش صدا در این مرورگر در دسترس نیست.','error');
+    return false;
+  }
+  try{
+    const utterance=new SpeechSynthesisUtterance(textValue);
+    utterance.lang='ja-JP';
+    utterance.rate=.85;
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
-  } catch (_) {}
+    return true;
+  }catch(error){
+    showOperationStatus('پخش صدا ممکن نشد.','error');
+    console.error(error);
+    return false;
+  }
 }
-
-function audioButton(value, label) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'v2-audio-button';
-  button.textContent = '🔊';
-  button.setAttribute('aria-label', label || 'پخش تلفظ');
-  button.addEventListener('click', () => speakJapanese(value));
+function audioButton(value,label){
+  const button=document.createElement('button');
+  button.type='button';
+  button.className='v2-audio-button';
+  button.textContent='🔊';
+  button.setAttribute('aria-label',label||'پخش تلفظ');
+  if(!speechAvailable()){
+    button.disabled=true;
+    button.setAttribute('aria-disabled','true');
+    button.setAttribute('aria-label','صدا در این مرورگر در دسترس نیست');
+    button.title='صدا در این مرورگر در دسترس نیست';
+  }
+  button.addEventListener('click',()=>speakJapanese(value,button));
   return button;
 }
 
@@ -469,8 +530,11 @@ function renderLearning(snapshot) {
     reveal.textContent = card.revealLabel || 'نمایش اطلاعات کانجی';
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
-      try { await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(); }
-      finally { reveal.disabled = false; }
+      try {
+        await runBusy('در حال نمایش پاسخ…',
+          async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(),
+          'نمایش پاسخ انجام نشد. دوباره تلاش کن.');
+      } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
     return section;
@@ -539,7 +603,7 @@ function renderLearning(snapshot) {
     button.addEventListener('click', async () => {
       buttonsDisable(ratings);
       presentationMode = 'auto';
-      try { await window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating); }
+      try { await runBusy('در حال ثبت مرور…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
       finally { buttonsEnable(ratings); }
     });
     ratings.appendChild(button);
@@ -591,7 +655,7 @@ function buildFallbackReviewRecall(card, host) {
     if (!correct) return;
     submit.disabled = true;
     input.disabled = true;
-    await window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(true);
+    await runBusy('در حال ثبت بازیابی…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(true), 'ثبت بازیابی انجام نشد. دوباره تلاش کن.');
     document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-revealed'));
     host.replaceChildren();
   });
@@ -648,6 +712,7 @@ function renderReviewCard(snapshot) {
     reveal.addEventListener('click', async () => {
       reveal.disabled = true;
       try {
+        await runBusy('در حال آماده‌سازی پاسخ…', async () => {
         let opener = window.__KANJI5_V12_OPEN_RECALL__;
         if (typeof opener !== 'function') {
           const deadline = Date.now() + 3000;
@@ -671,6 +736,7 @@ function renderReviewCard(snapshot) {
         }
         const usableGate = gate?.querySelector?.('#v12RecallInput') ? gate : null;
         recallHost.replaceChildren(usableGate || buildFallbackReviewRecall(card, recallHost));
+        });
       } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
@@ -848,7 +914,7 @@ function renderExercise(snapshot) {
     if (!bridge) return;
     submit.disabled = true;
     unknown.disabled = true;
-    await bridge.submitValue(input.value);
+    await runBusy('در حال بررسی پاسخ…', async () => bridge.submitValue(input.value), 'بررسی پاسخ انجام نشد. دوباره تلاش کن.');
   });
 
   const unknown = document.createElement('button');
@@ -861,7 +927,7 @@ function renderExercise(snapshot) {
     if (!bridge) return;
     submit.disabled = true;
     unknown.disabled = true;
-    await bridge.dontKnow();
+    await runBusy('در حال ثبت نتیجه…', async () => bridge.dontKnow(), 'ثبت نتیجه انجام نشد. دوباره تلاش کن.');
   });
 
   input.addEventListener('keydown',event=>{
@@ -945,7 +1011,7 @@ function renderFeedback(snapshot) {
   next.id = 'v2Next';
   next.className = 'v2-btn v2-btn-primary';
   next.textContent = 'تمرین بعدی';
-  next.addEventListener('click',async()=>{await window.__KANJI5_EDU_BRIDGE__?.next?.();});
+  next.addEventListener('click',async()=>{await runBusy('در حال آماده‌سازی تمرین بعدی…', async () => window.__KANJI5_EDU_BRIDGE__?.next?.(), 'تمرین بعدی آماده نشد. دوباره تلاش کن.');});
   actions.appendChild(next);
 
   body.appendChild(actions);
