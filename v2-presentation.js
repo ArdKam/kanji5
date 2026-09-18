@@ -60,8 +60,16 @@ document.body.appendChild(root);
 
 const toFaDigits = value => String(value).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 const text = value => String(value ?? '').trim() || '—';
+const localizedReason = value => ({repair:'به دلیل خطاهای اخیر، این مهارت دوباره تمرین می‌شود.',reinforce:'برای تثبیت این مهارت انتخاب شده است.',recover:'برای بررسی بازیابی پس از خطا انتخاب شده است.',maintain:'برای حفظ این مهارت انتخاب شده است.',explore:'برای تکمیل شواهد یادگیری انتخاب شده است.'})[String(value || '')] || 'بر اساس عملکرد اخیر انتخاب شده است.';
 const labels = {meaning:'معنی',reading:'خوانش',production:'تولید',vocabulary:'واژگان',context:'بافت'};
 const outcomes = {correct:'درست',wrong:'نادرست',unknown:'نمی‌دانم',near_miss:'نزدیک بود',empty:'خالی',invalid:'در دسترس نیست'};
+const states = {unseen:'دیده نشده',introduced:'معرفی شده',learning:'در حال یادگیری',weak:'ضعیف',recovering:'در حال بازیابی',stable:'پایدار',mastered:'مسلط'};
+const actions = {repair:'ترمیم',reinforce:'تقویت',recover:'بازیابی',maintain:'حفظ',explore:'اکتشاف'};
+const qualities = {exact:'دقیق',partial:'نسبی',unknown:'نمی‌دانم',wrong:'نادرست',empty:'خالی',invalid:'نامعتبر'};
+const localizeState = value => states[String(value || '')] || text(value);
+const localizeAction = value => actions[String(value || '')] || text(value);
+const localizeOutcome = value => outcomes[String(value || '')] || text(value);
+const localizeQuality = value => qualities[String(value || '')] || text(value);
 
 let lastFeedbackFocusKey = '';
 
@@ -296,7 +304,7 @@ function renderFeedback(snapshot) {
 
   const title = document.createElement('h2');
   title.className = 'v2-feedback-title';
-  title.textContent = outcomes[feedback.outcome] || feedback.outcome;
+  title.textContent = localizeOutcome(feedback.outcome);
 
   const detail = document.createElement('p');
   detail.className = 'v2-feedback-detail';
@@ -357,15 +365,15 @@ function renderInsights(snapshot) {
   skills.appendChild(heading('مهارت‌های یادگیرنده','v2LearnerTitle'));
   for (const mode of Object.keys(labels)) {
     const item = snapshot?.learner?.attributes?.[mode] || {};
-    row(skills,labels[mode],text(item.state)+' · اخیر '+toFaDigits(Math.round((Number(item.recentAccuracy)||0)*100))+'٪');
+    row(skills,labels[mode],localizeState(item.state)+' · اخیر '+toFaDigits(Math.round((Number(item.recentAccuracy)||0)*100))+'٪');
   }
 
   const reason = document.createElement('section');
   reason.className = 'v2-insight-panel';
   reason.appendChild(heading('تمرکز تطبیقی','v2ReasonTitle'));
   row(reason,'مهارت',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
-  row(reason,'عمل',snapshot?.adaptiveReason?.action);
-  if (Array.isArray(snapshot?.adaptiveReason?.reasons) && snapshot.adaptiveReason.reasons.length) row(reason,'دلیل',snapshot.adaptiveReason.reasons.join(' · '));
+  row(reason,'عمل',localizeAction(snapshot?.adaptiveReason?.action));
+  if (snapshot?.adaptiveReason?.action) row(reason,'دلیل',localizedReason(snapshot.adaptiveReason.action));
 
   const summaryPanel = document.createElement('section');
   summaryPanel.className = 'v2-insight-panel';
@@ -393,7 +401,7 @@ function renderInsights(snapshot) {
       kanji.textContent = item.character || '—';
       const detail = document.createElement('span');
       detail.className = 'v2-outcome-detail';
-      detail.textContent = (labels[item.mode]||item.mode||'—')+' · '+(item.quality||item.outcome||'—');
+      detail.textContent = (labels[item.mode]||item.mode||'—')+' · '+(localizeQuality(item.quality)||localizeOutcome(item.outcome)||'—');
       const result = document.createElement('strong');
       result.className = 'v2-outcome-result';
       result.textContent = item.correct ? '✓' : (outcomes[item.outcome]||item.outcome||'—');
