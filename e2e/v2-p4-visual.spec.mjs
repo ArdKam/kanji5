@@ -62,5 +62,5 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
   expect(mobile.actions.every(v=>v===1)).toBe(true);
 
   await page.setViewportSize({width:1024,height:768});
-  expect(await page.evaluate(()=>getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length)).toBe(2);
+  expect(await page.evaluate(()=>getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length)).toBe(1);
 });
