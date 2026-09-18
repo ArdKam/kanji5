@@ -17,8 +17,24 @@ export function buildSessionViewModel(session){
   return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session',sessionId:text(source.sessionId,120),status:text(source.status,40)||'unknown',resumed:bool(source.resumed),planRevision:Math.max(0,finite(source.planRevision,0)),remainingModes,modeResults,plannedTotal:effectivePlanned,remainingTotal,completionFraction,completed:source.status!=='active',updatedAt:text(source.updatedAt||source.endedAt,80)})
 }
 
-export function buildExerciseViewModel(input={}){const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;const stimulus=source.stimulus&&typeof source.stimulus==='object'?source.stimulus:{};return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'exercise',mode,prompt:text(source.prompt),character:text(source.character,16),stimulus:Object.freeze({kind:text(stimulus.kind,40),primary:text(stimulus.primary,2400),secondary:text(stimulus.secondary,1200),translation:text(stimulus.translation,1200),inputPlaceholder:text(stimulus.inputPlaceholder,160)}),answerHint:text(source.answerHint,2400),contentId:text(source.contentId,120),contentVersion:text(source.contentVersion,80),provenance:text(source.provenance,120)})}
-
+export function buildExerciseViewModel(input={}){
+  const source=input&&typeof input==='object'?input:{};
+  const mode=MODES.includes(source.mode)?source.mode:null;
+  const stimulus=source.stimulus&&typeof source.stimulus==='object'?source.stimulus:{};
+  return Object.freeze({
+    contractVersion:V2_BOUNDARY_VERSION,
+    kind:'exercise',
+    mode,
+    prompt:text(source.prompt),
+    character:text(source.character,16),
+    stimulus:text(stimulus.text,240),
+    stimulusDetail:text(stimulus.detail,240),
+    answerHint:text(source.answerHint,240),
+    contentId:text(source.contentId,120),
+    contentVersion:text(source.contentVersion,80),
+    provenance:text(source.provenance,120)
+  })
+}
 export function buildFeedbackViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;const outcome=OUTCOMES.includes(source.outcome)?source.outcome:null;
   return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'feedback',mode,outcome,correct:bool(source.correct),quality:text(source.quality,80),score:Math.max(0,Math.min(1,finite(source.score,0))),graderVersion:text(source.graderVersion,80),schemaVersion:Math.max(0,finite(source.schemaVersion,0)),reason:text(source.reason,240),recovered:bool(source.recovered),retryCount:Math.max(0,finite(source.retryCount,0)),state:text(source.state,60)})
