@@ -22,7 +22,7 @@ The v2 presentation layer consumes only the stable v1.9 view-model boundary. It 
 - Wire all five supported skills through the existing v1.9 exercise/feedback contracts.
 - Preserve grading, FSRS scheduling, session persistence, recovery, and offline semantics.
 
-### P2 — Session & Learner Information Architecture
+### P2 — Session & Learner Information Architecture ✅
 - Build the v2 session dashboard from stable session and learner view models.
 - Expose progress, adaptive reason, recent outcomes, and learner-skill summaries without duplicating planner logic.
 
