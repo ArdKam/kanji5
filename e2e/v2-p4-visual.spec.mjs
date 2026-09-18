@@ -6,7 +6,7 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
   await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setExercise({mode:'production',prompt:'Write the Kanji',character:'学',contentId:'fixture-1',provenance:'local'});});
   const title=page.locator('.v2-title');
-  const card=page.locator('.v2-card').first();
+  const card=page.locator('.v2-exercise-card').first();
   const input=page.locator('#v2AnswerInput');
   const primary=page.locator('.v2-btn-primary').first();
   const secondary=page.locator('.v2-btn-secondary').first();
@@ -62,5 +62,5 @@ test('v2 P4 visual system renders consistent hierarchy, controls, states, and re
   expect(mobile.actions.every(v=>v===1)).toBe(true);
 
   await page.setViewportSize({width:1024,height:768});
-  expect(await page.evaluate(()=>getComputedStyle(document.querySelector('#v2Grid')).gridTemplateColumns.split(' ').length)).toBe(2);
+  expect(await page.evaluate(()=>getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length)).toBe(2);
 });
