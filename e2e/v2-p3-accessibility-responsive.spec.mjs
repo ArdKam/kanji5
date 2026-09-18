@@ -10,7 +10,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
 
   const semantics=await page.evaluate(()=>{
     const input=document.querySelector('#v2AnswerInput');
-    const feedback=document.querySelector('#v2Grid section[role="status"]');
+    const feedback=document.querySelector('#v2Feedback');
     const progress=document.querySelector('[role="progressbar"]');
     const skip=document.querySelector('.v2-skip-link');
     const label=document.querySelector('label[for="v2AnswerInput"]');
@@ -54,13 +54,15 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
 
   await page.setViewportSize({width:390,height:844});
   const mobile=await page.evaluate(()=>({
-    columns:getComputedStyle(document.querySelector('#v2Grid')).gridTemplateColumns.split(' ').length,
-    actionDirections:[...document.querySelectorAll('#v2App .v2-actions')].map(n=>getComputedStyle(n).flexDirection)
+    columns:getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length,
+    insightColumns:getComputedStyle(document.querySelector('.v2-insights-grid')).gridTemplateColumns.split(' ').length,
+    actionColumns:getComputedStyle(document.querySelector('.v2-actions')).gridTemplateColumns.split(' ').length
   }));
   expect(mobile.columns).toBe(1);
-  expect(mobile.actionDirections.every(v=>v==='column')).toBe(true);
+  expect(mobile.insightColumns).toBe(1);
+  expect(mobile.actionColumns).toBe(1);
 
   await page.setViewportSize({width:1024,height:768});
-  const desktop=await page.evaluate(()=>getComputedStyle(document.querySelector('#v2Grid')).gridTemplateColumns.split(' ').length);
-  expect(desktop).toBe(2);
+  const desktop=await page.evaluate(()=>getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length);
+  expect(desktop).toBe(1);
 });
