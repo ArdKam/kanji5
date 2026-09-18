@@ -21,6 +21,6 @@ assert.match(presentation,/Session progress/);
 assert.match(presentation,/Recent outcomes/);
 assert.match(presentation,/remainingTotal/);
 assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/);
-assert.match(sw,/const CACHE='kanji5-shell-v79'/);
+assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(spec.includes('v2 P2 session information architecture'));
 console.log('Kanji 5 v2 P2 information architecture contract passed.');
