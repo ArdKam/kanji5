@@ -1,4 +1,4 @@
-import { validateVocabularyList, validateContextList, selectDeterministic } from './v1.9-data-quality-core.js';
+import { validateVocabularyList, validateContextList, selectDeterministic, selectAdaptiveContent } from './v1.9-data-quality-core.js';
 
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
@@ -57,10 +57,14 @@ export async function fetchContextSentences(character){
   return validateContextList(out,character).items.slice(0,8);
 }
 
-export function selectWord(words){
+export function selectWord(words,options={}){
+  const target=String(options.target||'');
+  if(options.adaptive)return selectAdaptiveContent(words,target,{kind:'vocabulary',attempts:options.attempts,accuracy:options.accuracy});
   return selectDeterministic(words,x=>`${x?.word||''}|${x?.reading||''}`);
 }
 
-export function selectContextSentence(sentences){
+export function selectContextSentence(sentences,options={}){
+  const target=String(options.target||'');
+  if(options.adaptive)return selectAdaptiveContent(sentences,target,{kind:'context',attempts:options.attempts,accuracy:options.accuracy});
   return selectDeterministic(sentences,x=>`${x?.text||''}|${x?.english||''}`);
 }

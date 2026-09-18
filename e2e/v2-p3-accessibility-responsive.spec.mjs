@@ -33,7 +33,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   expect(semantics.feedbackRole).toBe('status');
   expect(semantics.feedbackLive).toBe('polite');
   expect(semantics.feedbackAtomic).toBe('true');
-  expect(semantics.progressLabel).toBe('Session progress');
+  expect(semantics.progressLabel).toBe('پیشرفت جلسه');
   expect(semantics.skipHref).toBe('#v2Exercise');
   expect(semantics.buttonMinHeights.every(v=>v>=44)).toBe(true);
   expect(semantics.reducedMotion).toBe(true);

@@ -13,12 +13,16 @@ function normalizeScore(value) {
 }
 
 function resolveOutcome(result) {
-  const source = result && typeof result === 'object' ? result : {};
+  const source = result && typeof result === 'object' ? result : null;
+  if (!source) return 'invalid';
   if (OUTCOMES.includes(source.outcome)) return source.outcome;
   if (source.quality === 'empty') return 'empty';
   if (source.quality === 'invalid') return 'invalid';
   if (source.quality === 'unknown') return 'unknown';
-  return source.correct === true ? 'correct' : 'wrong';
+  if (source.quality === 'wrong') return 'wrong';
+  if (source.correct === true) return 'correct';
+  if (source.correct === false) return 'wrong';
+  return 'invalid';
 }
 
 function normalizeOutcome(mode, result, meta = {}) {
@@ -51,7 +55,9 @@ function normalizeOutcome(mode, result, meta = {}) {
   }
   return Object.freeze({
     schemaVersion: OUTCOME_SCHEMA_VERSION,
-    graderVersion: `${GRADER_VERSION}-${normalizedMode}`,
+    graderVersion: typeof meta?.graderVersion === 'string' && meta.graderVersion.trim()
+      ? String(meta.graderVersion)
+      : `${GRADER_VERSION}-${normalizedMode}`,
     mode: normalizedMode,
     outcome,
     correct,

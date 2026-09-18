@@ -8,7 +8,9 @@ This document is the living architecture reference for the current release line.
 
 The active browser runtime is intentionally split into narrow responsibilities:
 
-- `index.html`: application shell, markup, startup wiring, and canonical application module.
+- `index.html`: application shell, markup, route bootstrap, and runtime wiring.
+- `review-runtime.js`: shared review/scheduling runtime; v2 consumes its structured review snapshot/actions, while legacy DOM rendering remains compatibility-only.
+- `legacy.css`: legacy presentation styles loaded only for `?legacy=1`.
 - `v1.4-education-core.js`: pure education rules, canonical grading, adaptive skill selection, and knowledge recording.
 - `v1.5-education-ui.js`: education rendering and interaction. It owns no browser storage or remote API endpoints.
 - `v1.5-network.js`: data transport adapter for KanjiAPI and Tatoeba; browser caching/coalescing remains in the service worker.
@@ -18,7 +20,7 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.5-education-sync-core.js`, `v1.5-fsrs-sync-core.js`, `v1.5-sync-core.js`: deterministic sync/merge/replay primitives.
 - `v1.6-session-core.js`: pure session planning.
 - `v1.6-session-feedback.js`: authoritative session feedback boundary.
-- `v1.6-session.js`: session lifecycle, resume state, plan consumption, summary/history rendering, and orchestration.
+- `v1.6-session.js`: session lifecycle, resume state, plan consumption, and orchestration; the legacy dashboard renderer is suppressed on the v2 route, but the authoritative session API remains available.
 - `v1.6-session-analytics.js`: session aggregation and trend/summary primitives.
 - `v1.6-skill-profile.js`: long-term skill projection from completed session history.
 - `v1.6-sync-core.js`: deterministic v1.6 merge/replay primitives.
@@ -33,7 +35,7 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.9-data-quality-core.js`: pure content validation, deduplication, deterministic selection, and fallback helpers.
 - `v1.9-data-integrity-core.js`: pure deterministic migration helpers for persisted learner/session records.
 - `v1.9-v2-contract-core.js`: pure contracts for the future presentation layer: session, exercise, feedback, learner summary, session summary, and adaptive-reason view models.
-- `v1.9-v2-boundary.js`: browser orchestration boundary that reads authoritative runtime state and emits only structured v2 view-model data. It does not render DOM or expose storage primitives.
+- `v1.9-v2-boundary.js`: browser orchestration boundary that reads authoritative runtime state and emits only structured v2 view-model data, including daily summary, daily goal, upcoming reviews, stats, and settings. It does not render DOM or expose storage primitives.
 - `v2-presentation.js`, `v2-presentation.css`: default presentation layer consuming only the v1.9 view-model boundary; the legacy presentation is compatibility-only behind `?legacy=1`.
 - `supabase-sync.js`: remote transport, locking, retries, and optimistic concurrency. It does not define planning semantics.
 - `sw.js`: offline shell/data/API caching, request coalescing, and precaching of active runtime dependencies.
@@ -50,7 +52,7 @@ with persistence and transport kept behind their adapters:
 
 Pure cores must not depend on DOM, `window`, localStorage, sessionStorage, or network APIs. UI/orchestration consumes pure modules and routes durable state through `v1.5-state.js`. Supabase owns transport only.
 
-The v2 presentation layer must depend on `v1.9-v2-contract-core.js`-shaped data, not on persistence details or internal planner/learner-model objects. `v1.9-v2-boundary.js` is the adapter that translates those internal runtime snapshots into stable view models.
+The v2 presentation layer must depend on `v1.9-v2-contract-core.js`-shaped data, not on persistence details or internal planner/learner-model objects. Stats, settings, daily-goal, and upcoming-review surfaces are boundary-owned; v2 must not scrape the legacy DOM. `v1.9-v2-boundary.js` is the adapter that translates those internal runtime snapshots into stable view models.
 
 Compatibility shims are migration boundaries, not permanent homes for business logic. A shim may remain only while an active consumer depends on it; once migration is verified by tests and runtime wiring, it should be retired.
 
@@ -89,11 +91,11 @@ The active session boundary owns session identity, plan persistence, resume beha
 
 ## Adaptive recall
 
-Adaptive planning treats recall attributes as independently learnable skills. The planner receives deterministic learner evidence and supported attributes and chooses among the existing five skills. Recovery can override the next attribute once for the bounded retry path; it never becomes a second scheduler.
+Adaptive planning treats recall attributes as independently learnable skills. The planner receives deterministic learner evidence and supported attributes and chooses among the existing five skills. Recovery can override the next attribute once for the bounded retry path; it never becomes a second scheduler. Recovery state carries task identity (`taskId`, character, content identity), and learner/evaluation recovery metrics require explicit same-task retry linkage.
 
 ## Educational integrity
 
-Meaning, Reading, Production, Vocabulary, and Context grading remain deterministic and offline-capable. v1.9 standardizes their recorded outcome shape without making the shared outcome contract a replacement for mode-specific grading rules.
+Meaning, Reading, Production, Vocabulary, and Context grading remain deterministic and offline-capable. External Vocabulary/Context content is selected deterministically and can be targeted to learner evidence through structural content-difficulty heuristics. v1.9 standardizes their recorded outcome shape without making the shared outcome contract a replacement for mode-specific grading rules.
 
 ## Persistence and storage keys
 
@@ -123,7 +125,7 @@ These contracts make the architecture executable rather than aspirational.
 
 ## V2 release mode
 
-The default browser route is the v2 presentation. `v2-presentation.js` hides the legacy application shell before rendering the v2 surface, and `v1.5-education-ui.js` treats the default route as v2 so it does not construct the legacy education presentation.
+The default browser route is the v2 presentation. The shared review runtime remains available to provide authoritative scheduling/actions, but its legacy renderer is route-gated. `legacy.css`, the legacy storage bridge, and the legacy session dashboard are compatibility-only on `?legacy=1`.
 
 `?legacy=1` is retained only as an explicit compatibility/test path for regression and migration verification. It is not the production default and must not be used by the v2 presentation.
 

@@ -6,6 +6,27 @@ function finite(value,fallback=0){const n=Number(value);return Number.isFinite(n
 function bool(value){return value===true}
 function clone(value){return JSON.parse(JSON.stringify(value))}
 
+export function buildDailySummaryViewModel(input={}){
+  const source=input&&typeof input==='object'?input:{};
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'daily-summary',dueCount:Math.max(0,finite(source.dueCount,0)),newCount:Math.max(0,finite(source.newCount,0)),masteredCount:Math.max(0,finite(source.masteredCount,0)),streak:Math.max(0,finite(source.streak,0))});
+}
+export function buildDailyGoalViewModel(input={}){
+  const source=input&&typeof input==='object'?input:{};
+  const target=Math.max(1,finite(source.target,1)),completed=Math.max(0,finite(source.completed,0));
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'daily-goal',completed,target,progress:Math.max(0,Math.min(1,completed/target)),celebrated:bool(source.celebrated)});
+}
+export function buildUpcomingReviewsViewModel(input=[]){
+  return Object.freeze((Array.isArray(input)?input:[]).slice(0,6).map(source=>Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'upcoming-review',character:text(source?.character,16),dueAt:text(source?.dueAt,80)})));
+}
+export function buildSettingsViewModel(input={}){
+  const source=input&&typeof input==='object'?input:{};
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'settings',dailyNew:Math.max(1,Math.min(30,finite(source.dailyNew,5))),dailyGoal:Math.max(1,Math.min(500,finite(source.dailyGoal,20))),leechThreshold:Math.max(2,Math.min(30,finite(source.leechThreshold,8))),retention:Math.max(0,Math.min(1,finite(source.retention,.9))),maxInterval:Math.max(1,finite(source.maxInterval,36500)),production:source.production!==false,vocabulary:source.vocabulary!==false,context:source.context!==false});
+}
+export function buildStatsViewModel(input={}){
+  const source=input&&typeof input==='object'?input:{};
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',totalReviews:Math.max(0,finite(source.totalReviews,0)),nonAgainRate:Math.max(0,Math.min(1,finite(source.nonAgainRate,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[])});
+}
+
 export function buildSessionViewModel(session){
   const source=session&&typeof session==='object'?session:{};
   const remainingModes={};for(const mode of MODES)remainingModes[mode]=Math.max(0,finite(source.remainingModes?.[mode],0));
@@ -49,8 +70,8 @@ export function buildAdaptiveReasonViewModel(input={}){
 
 export function buildBoundarySnapshot(input={}){
   const source=input&&typeof input==='object'?input:{};
-  const snapshot={contractVersion:V2_BOUNDARY_VERSION,session:buildSessionViewModel(source.session),learning:buildLearningCardViewModel(source.learning),exercise:buildExerciseViewModel(source.exercise),feedback:buildFeedbackViewModel(source.feedback),learner:buildLearnerSkillSummary(source.learner),sessionSummary:buildSessionSummary(source.session),recentOutcomes:buildRecentOutcomesViewModel(source.recentOutcomes),adaptiveReason:buildAdaptiveReasonViewModel(source.adaptiveReason)};
+  const snapshot={contractVersion:V2_BOUNDARY_VERSION,session:buildSessionViewModel(source.session),learning:buildLearningCardViewModel(source.learning),exercise:buildExerciseViewModel(source.exercise),feedback:buildFeedbackViewModel(source.feedback),learner:buildLearnerSkillSummary(source.learner),sessionSummary:buildSessionSummary(source.session),recentOutcomes:buildRecentOutcomesViewModel(source.recentOutcomes),adaptiveReason:buildAdaptiveReasonViewModel(source.adaptiveReason),dailySummary:buildDailySummaryViewModel(source.dailySummary),dailyGoal:buildDailyGoalViewModel(source.dailyGoal),upcomingReviews:buildUpcomingReviewsViewModel(source.upcomingReviews),settings:buildSettingsViewModel(source.settings),stats:buildStatsViewModel(source.stats)};
   return Object.freeze(clone(snapshot));
 }
 
-export function isV2BoundarySnapshot(value){return Boolean(value&&value.contractVersion===V2_BOUNDARY_VERSION&&value.session?.kind==='session'&&value.learning?.kind==='learning-card'&&value.exercise?.kind==='exercise'&&value.feedback?.kind==='feedback'&&value.learner?.kind==='learner-skill-summary'&&value.sessionSummary?.kind==='session-summary'&&Array.isArray(value.recentOutcomes)&&value.adaptiveReason?.kind==='adaptive-reason')}
+export function isV2BoundarySnapshot(value){return Boolean(value&&value.contractVersion===V2_BOUNDARY_VERSION&&value.session?.kind==='session'&&value.learning?.kind==='learning-card'&&value.exercise?.kind==='exercise'&&value.feedback?.kind==='feedback'&&value.learner?.kind==='learner-skill-summary'&&value.sessionSummary?.kind==='session-summary'&&Array.isArray(value.recentOutcomes)&&value.adaptiveReason?.kind==='adaptive-reason'&&value.dailySummary?.kind==='daily-summary'&&value.dailyGoal?.kind==='daily-goal'&&Array.isArray(value.upcomingReviews)&&value.settings?.kind==='settings'&&value.stats?.kind==='stats')}

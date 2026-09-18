@@ -32,7 +32,7 @@ for(const file of [
   'v1.9-recovery-core.js','v1.9-recovery.js','v1.9-recovery-ui.js',
   'v1.9-learning-evaluation-core.js','v1.9-learning-evaluation.js',
   'v1.9-data-quality-core.js','v1.9-data-integrity-core.js',
-  'v1.9-v2-contract-core.js','v1.9-v2-boundary.js'
+  'v1.9-v2-contract-core.js','v1.9-v2-boundary.js','review-runtime.js'
 ]) assert.ok(fs.existsSync(file),'required v1.9 runtime file missing: '+file);
 for(const spec of [
   'e2e/v1.9-p0-outcome.spec.mjs','e2e/v1.9-p1-learner-model.spec.mjs',
