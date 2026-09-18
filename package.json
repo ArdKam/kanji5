@@ -13,6 +13,6 @@
     "test:v1.9:release": "node scripts/test-v1.9-release.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.59.0"
+    "@playwright/test": "1.59.0"
   }
 }
