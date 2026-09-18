@@ -29,6 +29,11 @@
   --v2-space-6:24px;
   --v2-space-7:32px;
   --v2-space-8:40px;
+  --v2-track:#e9edf4;
+  --v2-stimulus-border:#eceff4;
+  --v2-translation:#475467;
+  --v2-panel-border:#edf0f4;
+  --v2-white:#ffffff;
 }
 
 body:has(#v2App){
@@ -78,7 +83,7 @@ body:has(#v2App){
 
 .v2-progress{
   height:8px;
-  background:#e9edf4;
+  background:var(--v2-track);
   border-radius:999px;
   overflow:hidden;
 }
@@ -171,7 +176,7 @@ body:has(#v2App){
   min-height:190px;
   margin:0 0 var(--v2-space-6);
   padding:var(--v2-space-7) var(--v2-space-6);
-  border:1px solid #eceff4;
+  border:1px solid var(--v2-stimulus-border);
   border-radius:20px;
   background:linear-gradient(180deg,#fbfcfe,#f8fafc);
   text-align:center;
@@ -233,7 +238,7 @@ body:has(#v2App){
 }
 
 .v2-stimulus-translation{
-  color:#475467;
+  color:var(--v2-translation);
   font-size:14px;
   line-height:1.6;
 }
@@ -410,7 +415,7 @@ body:has(#v2App){
 .v2-insight-panel{
   min-width:0;
   padding:16px;
-  border:1px solid #edf0f4;
+  border:1px solid var(--v2-panel-border);
   border-radius:16px;
   background:#fff;
 }
@@ -761,3 +766,10 @@ body:has(#v2App){
 }
 
 .v2-reason-list{margin-top:8px;padding:8px 10px;border:1px solid #edf0f4;border-radius:12px;background:#fafbfc}.v2-reason-list p{margin:0 0 5px;color:var(--v2-muted);font-size:12px;line-height:1.6}.v2-reason-list p:last-child{margin-bottom:0}
+
+
+@media (prefers-contrast:more){
+  #v2App.v2-shell{--v2-border:#98a2b3;--v2-border-strong:#667085;--v2-muted:#475467;--v2-subtle:#344054;}
+  #v2App .v2-btn,#v2App .v2-input,#v2App .v2-feedback-card,#v2App .v2-exercise-card,#v2App .v2-learning-card,#v2App .v2-dialog{border-width:2px}
+  #v2App button:focus-visible,#v2App input:focus-visible,#v2App a:focus-visible,#v2App summary:focus-visible{outline-width:3px;outline-offset:3px}
+}
