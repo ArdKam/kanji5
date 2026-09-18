@@ -70,7 +70,7 @@ export function buildAdaptiveReasonViewModel(input={}){
 
 export function buildBoundarySnapshot(input={}){
   const source=input&&typeof input==='object'?input:{};
-  const snapshot={contractVersion:V2_BOUNDARY_VERSION,session:buildSessionViewModel(source.session),learning:buildLearningCardViewModel(source.learning),exercise:buildExerciseViewModel(source.exercise),feedback:buildFeedbackViewModel(source.feedback),learner:buildLearnerSkillSummary(source.learner),sessionSummary:buildSessionSummary(source.session),recentOutcomes:buildRecentOutcomesViewModel(source.recentOutcomes),adaptiveReason:buildAdaptiveReasonViewModel(source.adaptiveReason)};
+  const snapshot={contractVersion:V2_BOUNDARY_VERSION,session:buildSessionViewModel(source.session),learning:buildLearningCardViewModel(source.learning),exercise:buildExerciseViewModel(source.exercise),feedback:buildFeedbackViewModel(source.feedback),learner:buildLearnerSkillSummary(source.learner),sessionSummary:buildSessionSummary(source.session),recentOutcomes:buildRecentOutcomesViewModel(source.recentOutcomes),adaptiveReason:buildAdaptiveReasonViewModel(source.adaptiveReason),dailySummary:buildDailySummaryViewModel(source.dailySummary),dailyGoal:buildDailyGoalViewModel(source.dailyGoal),upcomingReviews:buildUpcomingReviewsViewModel(source.upcomingReviews),settings:buildSettingsViewModel(source.settings),stats:buildStatsViewModel(source.stats)};
   return Object.freeze(clone(snapshot));
 }
 
