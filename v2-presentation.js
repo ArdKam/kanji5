@@ -669,7 +669,8 @@ function renderReviewCard(snapshot) {
             gate = null;
           }
         }
-        recallHost.replaceChildren(gate || buildFallbackReviewRecall(card, recallHost));
+        const usableGate = gate?.querySelector?.('#v12RecallInput') ? gate : null;
+        recallHost.replaceChildren(usableGate || buildFallbackReviewRecall(card, recallHost));
       } finally { reveal.disabled = false; }
     });
     section.appendChild(reveal);
