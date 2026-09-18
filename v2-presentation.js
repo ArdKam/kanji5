@@ -134,7 +134,7 @@ function renderDailyGoal(parent) {
   label.textContent = String(labelNode.textContent || 'هدف روزانه');
   const done = document.getElementById('goalDone');
   const badge = document.createElement('span');
-  badge.textContent = done?.textContent?.trim() || '';
+  badge.textContent = done && done.style.display !== 'none' ? String(done.textContent || '').trim() : '';
   top.append(label,badge);
   const track = document.createElement('div');
   track.className = 'v2-daily-goal-track';
