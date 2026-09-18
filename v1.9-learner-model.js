@@ -24,4 +24,5 @@ void import('./v1.9-adaptive-planner.js').catch(()=>{});
 void import('./v1.9-recovery.js').catch(()=>{});
 void import('./v1.9-recovery-ui.js').catch(()=>{});
 void import('./v1.9-learning-evaluation.js').catch(()=>{});
+void import('./v1.9-v2-boundary.js').catch(()=>{});
 })();

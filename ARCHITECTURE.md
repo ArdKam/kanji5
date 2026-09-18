@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document is the living architecture reference for the current release line. It describes the active v1.8 runtime and the boundaries that new work must preserve. Release-specific history belongs in `CHANGELOG.md` and the roadmap, not in this file.
+This document is the living architecture reference for the current release line. It describes the active v1.9 runtime boundaries and the interfaces intended to remain stable when v2 replaces the presentation layer. Release-specific history belongs in `CHANGELOG.md` and the roadmap, not in this file.
 
 ## Runtime boundaries
 
@@ -11,7 +11,6 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `index.html`: application shell, markup, startup wiring, and canonical application module.
 - `v1.4-education-core.js`: pure education rules, canonical grading, adaptive skill selection, and knowledge recording.
 - `v1.5-education-ui.js`: education rendering and interaction. It owns no browser storage or remote API endpoints.
-- `v1.5-education-ui.css`: education-specific presentation.
 - `v1.5-network.js`: data transport adapter for KanjiAPI and Tatoeba; browser caching/coalescing remains in the service worker.
 - `v1.5-recall-core.js`: pure Active Recall/component-learning primitives; no DOM, `window`, or `localStorage` access.
 - `v1.5-p0.js`: Active Recall UI/orchestration overlay; delegates pure calculations to recall core.
@@ -23,9 +22,18 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.6-session-analytics.js`: session aggregation and trend/summary primitives.
 - `v1.6-skill-profile.js`: long-term skill projection from completed session history.
 - `v1.6-sync-core.js`: deterministic v1.6 merge/replay primitives.
-- `v1.7-adaptive-recall-core.js`: pure adaptive attribute-recall planning. It selects recall attributes from long-term weakness and supported modes without touching persistence or UI.
-- `v1.7-evaluation-core.js`, `v1.7-baseline-evaluation-core.js`, `v1.7-tuning-core.js`: pure evaluation, baseline comparison, and tuning primitives. They consume data and return deterministic results.
-- `v1.8-production-core.js`: pure deterministic Production Recall grading; it accepts learner-entered Kanji and does not depend on DOM, persistence, or network APIs.
+- `v1.7-adaptive-recall-core.js`: pure adaptive attribute-recall planning.
+- `v1.7-evaluation-core.js`, `v1.7-baseline-evaluation-core.js`, `v1.7-tuning-core.js`: pure evaluation, baseline comparison, and tuning primitives.
+- `v1.8-production-core.js`, `v1.8-vocabulary-core.js`, `v1.8-context-core.js`: pure deterministic grading for the learner-facing recall modes.
+- `v1.9-outcome-core.js`: versioned shared educational outcome contract.
+- `v1.9-learner-model-core.js`: pure evidence-aware learner model calculations.
+- `v1.9-adaptive-planner-core.js`: pure adaptive planner.
+- `v1.9-recovery-core.js`: pure recovery state machine.
+- `v1.9-learning-evaluation-core.js`: pure evaluation/baseline metrics.
+- `v1.9-data-quality-core.js`: pure content validation, deduplication, deterministic selection, and fallback helpers.
+- `v1.9-data-integrity-core.js`: pure deterministic migration helpers for persisted learner/session records.
+- `v1.9-v2-contract-core.js`: pure contracts for the future presentation layer: session, exercise, feedback, learner summary, session summary, and adaptive-reason view models.
+- `v1.9-v2-boundary.js`: browser orchestration boundary that reads authoritative runtime state and emits only structured v2 view-model data. It does not render DOM or expose storage primitives.
 - `supabase-sync.js`: remote transport, locking, retries, and optimistic concurrency. It does not define planning semantics.
 - `sw.js`: offline shell/data/API caching, request coalescing, and precaching of active runtime dependencies.
 
@@ -33,11 +41,32 @@ The active browser runtime is intentionally split into narrow responsibilities:
 
 The intended direction is:
 
-`pure rules → orchestration/UI → persistence/sync adapters → remote transport`
+`pure rules → orchestration → structured view-model boundary → presentation`
 
-Pure cores must not depend on DOM, `window`, localStorage, or network APIs. UI/orchestration consumes pure modules and routes durable state through `v1.5-state.js`. Supabase owns transport only.
+with persistence and transport kept behind their adapters:
+
+`orchestration → v1.5-state / sync adapters → remote transport`
+
+Pure cores must not depend on DOM, `window`, localStorage, sessionStorage, or network APIs. UI/orchestration consumes pure modules and routes durable state through `v1.5-state.js`. Supabase owns transport only.
+
+The v2 presentation layer must depend on `v1.9-v2-contract-core.js`-shaped data, not on persistence details or internal planner/learner-model objects. `v1.9-v2-boundary.js` is the adapter that translates those internal runtime snapshots into stable view models.
 
 Compatibility shims are migration boundaries, not permanent homes for business logic. A shim may remain only while an active consumer depends on it; once migration is verified by tests and runtime wiring, it should be retired.
+
+## V2 presentation contracts
+
+`v1.9-v2-contract-core.js` defines `V2_BOUNDARY_VERSION=1.9.0-v2-boundary-contract` and the following stable contracts:
+
+- `session`: identity, lifecycle status, remaining skill budget, mode-result summaries, resume state, and plan revision.
+- `exercise`: selected skill, prompt, Kanji target, content identity/version, and provenance.
+- `feedback`: outcome, correctness, score/quality, grader version, recovery state, and retry count.
+- `learner-skill-summary`: independent five-skill state, recent accuracy, confidence, momentum, and repeated-failure signal.
+- `session-summary`: aggregate attempt/correct/accuracy and completion status.
+- `adaptive-reason`: selected skill, planner action, bounded reason strings, and score.
+
+These contracts deliberately avoid DOM nodes, storage keys, network response objects, CSS assumptions, and internal planner data structures. They are data contracts, not visual designs.
+
+The runtime boundary exposes `snapshot()`, `setExercise()`, `setFeedback()`, `setAdaptiveReason()`, and `clearTransient()`, and emits `kanji5:v1.9-v2-view-models` whenever view-model state changes. This gives v2 a stable integration point without importing the current visual layer.
 
 ## Session lifecycle
 
@@ -55,31 +84,19 @@ The active session boundary owns session identity, plan persistence, resume beha
 
 ## Long-term skill profile
 
-`v1.6-skill-profile.js` projects completed session history into independent Meaning, Reading, Production, Vocabulary, and Context skills. It tracks lifetime accuracy plus recent-window accuracy and momentum. The profile is persisted as data and passed into pure planning functions; it does not make network calls or directly mutate UI state.
-
-The planner uses weaker accuracy, weaker recent accuracy, and negative momentum as priority signals. This keeps adaptive scheduling deterministic and testable while allowing v1.8 to consume richer learner-facing outcomes.
+`v1.6-skill-profile.js` projects completed session history into independent Meaning, Reading, Production, Vocabulary, and Context skills. v1.9 augments those signals with the evidence-aware learner model while retaining FSRS as the authoritative card scheduler.
 
 ## Adaptive recall
 
-v1.7 adds an adaptive-recall layer that treats recall attributes as independently learnable skills. The adaptive planner receives a knowledge snapshot, supported attributes, and a maximum attribute budget, then deterministically prioritizes weak or unseen attributes. It does not persist its own state and does not bypass the authoritative education/session boundaries.
-
-v1.8 begins by making Production a fully learner-facing supported mode. Production prompts use canonical meaning data, while grading is isolated in `v1.8-production-core.js`. A correct production outcome flows through the same education/session feedback path as Meaning and Reading; no second scheduler is introduced.
-
-The evaluation and tuning modules remain analysis layers over recorded outcomes. They must not mutate learner state or become a second grading engine.
+Adaptive planning treats recall attributes as independently learnable skills. The planner receives deterministic learner evidence and supported attributes and chooses among the existing five skills. Recovery can override the next attribute once for the bounded retry path; it never becomes a second scheduler.
 
 ## Educational integrity
 
-Meaning grading has one canonical implementation in `v1.4-education-core.js`. Exact normalized matches remain exact; partial matches are accepted only when the token-overlap score reaches the defined F1 threshold. A single-token guess no longer receives an automatic pass merely because it is a subset of a multi-token canonical meaning.
-
-Production grading is intentionally stricter: the normalized learner response must exactly match the target Kanji. There is no fuzzy acceptance, generated synonym mapping, or remote dependency in the grader.
-
-These rules are intentionally conservative: grading must reward recall of the requested learning attribute rather than teach users to exploit answer-token shortcuts.
+Meaning, Reading, Production, Vocabulary, and Context grading remain deterministic and offline-capable. v1.9 standardizes their recorded outcome shape without making the shared outcome contract a replacement for mode-specific grading rules.
 
 ## Persistence and storage keys
 
-`v1.5-state.js` is the source of truth for application storage keys such as `STORAGE` and `DECK_KEY`. Compatibility layers consume those exported runtime constants instead of duplicating string literals. This prevents silent desynchronization when a key changes.
-
-Persistence uses bounded review/session history and graceful degradation when browser quota is exhausted. Snapshot validation and reconciliation remain deterministic.
+`v1.5-state.js` is the source of truth for application storage keys. v1.9 migration helpers may transform persisted records but do not create competing storage-key ownership. Learner evidence remains bounded per Kanji and receives explicit schema/default migrations.
 
 ## Data build
 
@@ -89,13 +106,16 @@ Runtime consumes the derived `kanji-data.json`. The large upstream Jōyō source
 
 `npm test` is the single local entry point for every `scripts/test-*.mjs` contract/unit test. CI may add targeted subsets and browser E2E tests, but it must not require contributors to reconstruct the test list from workflow YAML.
 
+Architecture tests enforce browser-free pure cores and validate that the v2 boundary is presentation-agnostic. Browser smoke tests verify the boundary can be loaded and consumed without exposing persistence internals.
+
 A release should pass:
 
 1. JavaScript syntax validation for active runtime and test modules.
-2. All `scripts/test-*.mjs` contract/unit tests through `npm test`.
-3. Browser E2E coverage for the active release features.
+2. All contract/unit tests through `npm test`.
+3. Browser E2E coverage for the active release features and compatibility regressions.
 4. Service-worker/runtime wiring checks.
-5. Release-contract checks for package version, documentation, and required runtime files.
-6. A clean working tree after validation; CI must not generate or commit application changes.
+5. Architecture/dependency boundary checks.
+6. Release-contract checks for package version, documentation, and required runtime files.
+7. A clean working tree after validation; CI must not generate or commit application changes.
 
 These contracts make the architecture executable rather than aspirational.

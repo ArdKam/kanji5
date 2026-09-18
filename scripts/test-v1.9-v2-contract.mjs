@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { V2_BOUNDARY_VERSION, MODES, OUTCOMES, buildSessionViewModel, buildExerciseViewModel, buildFeedbackViewModel, buildLearnerSkillSummary, buildSessionSummary, buildAdaptiveReasonViewModel, buildBoundarySnapshot, isV2BoundarySnapshot } from '../v1.9-v2-contract-core.js';
+
+assert.equal(V2_BOUNDARY_VERSION,'1.9.0-v2-boundary-contract');
+assert.deepEqual(MODES,['meaning','reading','production','vocabulary','context']);
+assert.ok(OUTCOMES.includes('unknown')&&OUTCOMES.includes('near_miss'));
+const session=buildSessionViewModel({sessionId:'s1',status:'active',resumed:true,remainingModes:{meaning:1,reading:2},modeResults:{meaning:{attempts:2,correct:1,lastOutcome:'wrong',lastAt:'2026-09-15T00:00:00Z',graderVersion:'1.9.0-production'}}});
+assert.deepEqual(session.remainingModes,{meaning:1,reading:2,production:0,vocabulary:0,context:0});
+assert.equal(session.modeResults.meaning.lastOutcome,'wrong');
+assert.equal(session.resumed,true);
+const exercise=buildExerciseViewModel({mode:'context',prompt:'Fill the missing Kanji',character:'学',contentId:42,provenance:'tatoeba'});
+assert.equal(exercise.mode,'context');assert.equal(exercise.character,'学');assert.equal(exercise.contentId,'42');
+const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:0.7,retryCount:1,recovered:true});
+assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
+const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,repeatedFailure:true}}});
+assert.equal(learner.modelVersion,'1.9.0-learner-model');assert.equal(learner.attributes.reading.state,'weak');
+const summary=buildSessionSummary({sessionId:'s1',status:'complete',modeResults:{meaning:{attempts:2,correct:1},reading:{attempts:1,correct:1}}});
+assert.equal(summary.attempts,3);assert.equal(summary.correct,2);assert.equal(summary.completionStatus,'complete');
+const reason=buildAdaptiveReasonViewModel({mode:'reading',action:'repair',reasons:['recent failure','weak recent accuracy'],score:3});
+assert.equal(reason.reasons.length,2);
+const snapshot=buildBoundarySnapshot({session,exercise,feedback,learner,adaptiveReason:reason});
+assert.equal(isV2BoundarySnapshot(snapshot),true);
+assert.equal(Object.prototype.hasOwnProperty.call(snapshot.session,'rawStorage'),false);
+console.log('Kanji 5 v1.9 v2 boundary contract passed.');
