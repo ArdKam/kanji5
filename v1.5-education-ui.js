@@ -30,6 +30,7 @@ function selectLearningItem(k,modes,excludeCharacters=[]){
   return CORE.selectEducationItem(pool,k,modes,{now:Date.now(),excludeCharacters})||pool[0]||null;
 }
 function learningPrompt(){return'این کانجی جدید است؛ ابتدا معنی و خوانش آن را یاد بگیر، سپس تمرینش کن.'}
+async function waitForDeck(timeoutMs=10000){const started=Date.now();while(Date.now()-started<timeoutMs){if(deck().length)return true;await new Promise(resolve=>setTimeout(resolve,100))}return Boolean(deck().length)}
 async function publishV2LearningCard(){
   if(!isV2()||!edu.item)return;
   const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
@@ -62,7 +63,7 @@ function render(){
   p.innerHTML=`<div class="v14-edu-wrap"><div class="v14-edu-title">🧠 تمرین آموزشی</div><div class="v14-edu-meta">${stageLabel(CORE.getStage(knowledge()[item.character]))} · ${safe(edu.mode)}</div><div class="v14-edu-prompt">${safe(prompt)}</div>${body}<div class="v14-edu-actions">${check}<button type="button" class="secondary" id="v14EduDontKnow">نمی‌دانم</button></div></div>`;
   if(check)setTimeout(()=>{const input=edu.mode==='vocabulary'?$('#v14EduVocabularyInput'):$('#v14EduInput');input?.focus()},0)
 }
-async function start(){const v2=isV2();if(!pane()&&!v2)return;if(edu.item&&!edu.mode)return startExercise();return showLearningCard()}
+async function start(){const v2=isV2();if(!pane()&&!v2)return;if(!(await waitForDeck())){if(pane())pane().innerHTML='<div class="v14-edu-empty">دادهٔ کانجی هنوز آماده نیست؛ لطفاً دوباره تلاش کن.</div>';if(v2)await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();return}if(edu.item&&!edu.mode)return startExercise();return showLearningCard()}
 async function showLearningCard(){
   const settings=state.readSettings(),modes=CORE.getAvailableModes({...DEFAULTS,...settings},true),k=knowledge();
   const item=selectLearningItem(k,modes,[]);
