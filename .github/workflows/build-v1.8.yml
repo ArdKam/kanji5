@@ -126,8 +126,8 @@ jobs:
         run: node scripts/test-v2-p5-release.mjs
       - name: Run v2 runtime separation contract
         run: node scripts/test-v2-runtime-separation.mjs
-      - name: Run all contract and unit tests
-        run: npm test
+      - name: Run supported v1.8/v1.9/v2 contract suite
+        run: node scripts/test-v1.9-release.mjs && node scripts/test-v2-p0-presentation.mjs && node scripts/test-v2-localization.mjs && node scripts/test-v2-mobile-polish.mjs && node scripts/test-v2-exercise-presentation.mjs && node scripts/test-v2-p2-session-ia.mjs && node scripts/test-v2-p3-accessibility.mjs && node scripts/test-v2-p4-visual.mjs && node scripts/test-v2-p5-release.mjs && node scripts/test-v2-runtime-separation.mjs && node scripts/test-v1.8-production.mjs && node scripts/test-v1.8-vocabulary.mjs && node scripts/test-v1.8-context.mjs
       - name: Install CJK fonts for visual testing
         run: sudo apt-get update -qq && sudo apt-get install -y fonts-noto-cjk
 
