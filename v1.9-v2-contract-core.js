@@ -20,7 +20,7 @@ export function buildUpcomingReviewsViewModel(input=[]){
 }
 export function buildSettingsViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'settings',dailyNew:Math.max(1,Math.min(30,finite(source.dailyNew,5))),dailyGoal:Math.max(1,Math.min(500,finite(source.dailyGoal,20))),leechThreshold:Math.max(2,Math.min(30,finite(source.leechThreshold,8))),retention:Math.max(0,Math.min(1,finite(source.retention,.9))),maxInterval:Math.max(1,finite(source.maxInterval,36500))});
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'settings',dailyNew:Math.max(1,Math.min(30,finite(source.dailyNew,5))),dailyGoal:Math.max(1,Math.min(500,finite(source.dailyGoal,20))),leechThreshold:Math.max(2,Math.min(30,finite(source.leechThreshold,8))),retention:Math.max(0,Math.min(1,finite(source.retention,.9))),maxInterval:Math.max(1,finite(source.maxInterval,36500)),production:source.production!==false,vocabulary:source.vocabulary!==false,context:source.context!==false});
 }
 export function buildStatsViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};
