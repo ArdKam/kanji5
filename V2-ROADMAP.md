@@ -32,7 +32,7 @@ The v2 presentation layer consumes only the stable v1.9 view-model boundary. It 
 - Responsive layouts for mobile/tablet/desktop.
 - Reduced-motion support.
 
-### P4 — Visual System & Polish
+### P4 — Visual System & Polish ✅
 - Establish the final v2 visual hierarchy, typography, spacing, component system, and interaction polish.
 - Keep visual decisions independent from learning-engine contracts.
 
