@@ -100,6 +100,57 @@ const localizeQuality = value => qualities[String(value || '')] || text(value);
 let lastFeedbackFocusKey = '';
 let presentationMode = 'auto';
 
+function speakJapanese(value) {
+  const textValue = String(value || '').trim();
+  if (!textValue || !('speechSynthesis' in window)) return;
+  try {
+    const utterance = new SpeechSynthesisUtterance(textValue);
+    utterance.lang = 'ja-JP';
+    utterance.rate = 0.85;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+  } catch (_) {}
+}
+
+function audioButton(value, label) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'v2-audio-button';
+  button.textContent = '🔊';
+  button.setAttribute('aria-label', label || 'پخش تلفظ');
+  button.addEventListener('click', () => speakJapanese(value));
+  return button;
+}
+
+function renderUpcomingReviews(parent) {
+  const legacyBody = document.getElementById('upcomingReviewsBody');
+  if (!legacyBody) return;
+  const sourceText = String(legacyBody.textContent || '').trim();
+  const section = document.createElement('details');
+  section.className = 'v2-upcoming-reviews';
+  const summary = document.createElement('summary');
+  summary.textContent = 'مرورهای پیش‌رو';
+  const body = document.createElement('div');
+  body.className = 'v2-upcoming-reviews-body';
+  if (legacyBody.childNodes.length) {
+    const rows = [...legacyBody.children];
+    if (rows.length) {
+      for (const legacyRow of rows) {
+        const row = document.createElement('div');
+        row.className = 'v2-upcoming-row';
+        row.textContent = String(legacyRow.textContent || '').trim();
+        body.appendChild(row);
+      }
+    } else {
+      body.textContent = sourceText || 'فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';
+    }
+  } else {
+    body.textContent = sourceText || 'فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';
+  }
+  section.append(summary,body);
+  parent.appendChild(section);
+}
+
 function heading(textValue, id) {
   const h = document.createElement('h2');
   h.id = id;
@@ -261,7 +312,10 @@ function renderLearning(snapshot) {
   kanji.className = 'v2-learning-kanji';
   kanji.lang = 'ja';
   kanji.textContent = text(card.character);
-  section.appendChild(kanji);
+  const kanjiRow = document.createElement('div');
+  kanjiRow.className = 'v2-learning-kanji-row';
+  kanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
+  section.appendChild(kanjiRow);
 
   if (!card.revealed) {
     const firstReading = [...(card.on || []), ...(card.kun || [])].slice(0,3);
@@ -313,7 +367,8 @@ function renderLearning(snapshot) {
     value.className = 'v2-learning-reading-value';
     value.lang = 'ja';
     value.textContent = values.length ? values.join(' · ') : '—';
-    box.append(label,value);
+    if (values.length) box.append(label,value,audioButton(values[0],'پخش اولین خوانش'));
+    else box.append(label,value);
     readingsGrid.appendChild(box);
   }
   info.appendChild(readingsGrid);
@@ -329,6 +384,7 @@ function renderLearning(snapshot) {
       row.className = 'v2-learning-example';
       row.lang = 'ja';
       row.textContent = [example.word,example.reading].filter(Boolean).join(' · ');
+      if (example.reading) row.appendChild(audioButton(example.reading,'پخش تلفظ واژه'));
       examples.appendChild(row);
     }
     info.appendChild(examples);
@@ -385,7 +441,10 @@ function renderReviewCard(snapshot) {
   kanji.className = 'v2-learning-kanji';
   kanji.lang = 'ja';
   kanji.textContent = text(card.character);
-  section.appendChild(kanji);
+  const reviewKanjiRow = document.createElement('div');
+  reviewKanjiRow.className = 'v2-learning-kanji-row';
+  reviewKanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
+  section.appendChild(reviewKanjiRow);
 
   if (!card.revealed) {
     const hint = document.createElement('p');
@@ -433,7 +492,8 @@ function renderReviewCard(snapshot) {
     value.className = 'v2-learning-reading-value';
     value.lang = 'ja';
     value.textContent = values.length ? values.join(' · ') : '—';
-    box.append(label,value);
+    if (values.length) box.append(label,value,audioButton(values[0],'پخش اولین خوانش'));
+    else box.append(label,value);
     readingsGrid.appendChild(box);
   }
   info.appendChild(readingsGrid);
@@ -448,6 +508,7 @@ function renderReviewCard(snapshot) {
       row.className = 'v2-learning-example';
       row.lang = 'ja';
       row.textContent = [example.word,example.reading].filter(Boolean).join(' · ');
+      if (example.reading) row.appendChild(audioButton(example.reading,'پخش تلفظ واژه'));
       examples.appendChild(row);
     }
     info.appendChild(examples);
@@ -756,6 +817,7 @@ function render(snapshot) {
   content.textContent = '';
   renderHeader(snapshot);
   renderDailySummary(content);
+  renderUpcomingReviews(content);
   const showLearning = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && snapshot.learning.isNew;
   const showReview = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && !snapshot.learning.isNew;
   if (showLearning) {
