@@ -69,6 +69,7 @@ body:has(#v2App){margin:0;background:var(--v2-bg);color:var(--v2-text)}
 .v2-btn-tertiary:hover:not(:disabled){background:var(--v2-surface-soft);color:var(--v2-text)}
 .v2-exercise-micro{margin-top:11px;color:var(--v2-subtle);font-size:11px}
 .v2-side-grid{grid-column:2;display:grid;gap:18px}
+.v2-summary-card,.v2-skills-card,.v2-reason-card,.v2-recent-card{min-width:0}
 .v2-row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:7px 0}
 .v2-row-label{color:var(--v2-muted);font-size:12px}
 .v2-row-value{font-size:14px;text-align:end;overflow-wrap:anywhere}
