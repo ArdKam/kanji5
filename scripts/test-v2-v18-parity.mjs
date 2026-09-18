@@ -21,6 +21,7 @@ assert.ok(index.includes('./review-runtime.js'),'default route must load the sha
 assert.ok(index.includes('./legacy.css'),'legacy stylesheet must remain available for compatibility');
 assert.ok(sw.includes('"./review-runtime.js"'),'shared review runtime must be in the active shell cache');
 assert.match(js,/openV2Stats/);
+assert.match(js,/nonAgainRate/);
 assert.match(js,/openV2Settings/);
 assert.ok(sw.includes("kanji5-shell-v94"),'PWA shell cache must be bumped after entrypoint changes');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
