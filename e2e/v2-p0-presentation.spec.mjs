@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 test('v2 P0 shell consumes the v1.9 presentation boundary',async({page})=>{
   await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
-  await expect(page.locator('#v2Title')).toHaveText('Kanji 5');
+  await expect(page.locator('#v2Title')).toHaveText('کانجی ۵');
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
 
   await page.evaluate(async()=>{
@@ -15,6 +15,6 @@ test('v2 P0 shell consumes the v1.9 presentation boundary',async({page})=>{
 
   await expect(page.locator('#v2App')).toContainText('Write the Kanji');
   await expect(page.locator('#v2App')).toContainText('学');
-  await expect(page.locator('#v2App')).toContainText(/wrong/i);
+  await expect(page.locator('#v2App')).toContainText('نادرست');
   await expect(page.locator('#v2App')).toContainText('ترمیم');
 });
