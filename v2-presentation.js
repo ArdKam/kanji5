@@ -130,7 +130,29 @@ function renderStimulus(parent, ex) {
   const wrap = document.createElement('div');
   wrap.className = 'v2-stimulus v2-stimulus-' + kind;
 
-  if (kind === 'meaning') {
+  if (kind === 'learning') {
+    const caption = document.createElement('div');
+    caption.className = 'v2-stimulus-caption';
+    caption.textContent = 'آشنایی با کانجی';
+    const kanji = document.createElement('div');
+    kanji.className = 'v2-kanji';
+    kanji.lang = 'ja';
+    kanji.textContent = primary;
+    wrap.append(caption,kanji);
+    if (secondary !== '—') {
+      const reading = document.createElement('div');
+      reading.className = 'v2-stimulus-secondary v2-learning-readings';
+      reading.lang = 'ja';
+      reading.textContent = secondary;
+      wrap.appendChild(reading);
+    }
+    if (translation !== '—') {
+      const meaning = document.createElement('div');
+      meaning.className = 'v2-stimulus-translation v2-learning-meaning';
+      meaning.textContent = translation;
+      wrap.appendChild(meaning);
+    }
+  } else if (kind === 'meaning') {
     const caption = document.createElement('div');
     caption.className = 'v2-stimulus-caption';
     caption.textContent = 'راهنمای معنا';
@@ -181,10 +203,11 @@ function renderStimulus(parent, ex) {
 
 function renderExercise(snapshot) {
   const ex = snapshot?.exercise || {};
+  const isLearning = !ex?.mode && ex?.stimulus?.kind === 'learning';
   const section = document.createElement('section');
   section.id = 'v2Exercise';
   section.tabIndex = -1;
-  section.className = 'v2-exercise-card';
+  section.className = 'v2-exercise-card' + (isLearning ? ' v2-learning-card' : '');
   section.setAttribute('aria-labelledby','v2ExerciseTitle');
 
   const top = document.createElement('div');
@@ -192,21 +215,35 @@ function renderExercise(snapshot) {
 
   const mode = document.createElement('span');
   mode.className = 'v2-mode-badge';
-  mode.textContent = labels[ex.mode] || 'Practice';
+  mode.textContent = isLearning ? 'یادگیری' : (labels[ex.mode] || 'Practice');
 
   const step = document.createElement('span');
   step.className = 'v2-exercise-step';
-  step.textContent = 'یادآوری فعال';
+  step.textContent = isLearning ? 'آشنایی اولیه' : 'یادآوری فعال';
   top.append(mode,step);
-
   section.appendChild(top);
-  section.appendChild(heading('تمرین فعلی','v2ExerciseTitle'));
+  section.appendChild(heading(isLearning ? 'کارت یادگیری' : 'تمرین فعلی','v2ExerciseTitle'));
 
   const prompt = document.createElement('p');
   prompt.id = 'v2Prompt';
   prompt.className = 'v2-prompt';
-  prompt.textContent = ex.prompt || 'Exercise';
+  prompt.textContent = ex.prompt || (isLearning ? 'ابتدا این کانجی را یاد بگیر.' : 'Exercise');
   section.appendChild(prompt);
+
+  if (isLearning) {
+    renderStimulus(section,ex);
+    const actions = document.createElement('div');
+    actions.className = 'v2-actions v2-learning-actions';
+    const start = document.createElement('button');
+    start.type = 'button';
+    start.id = 'v2StartExercise';
+    start.className = 'v2-btn v2-btn-primary';
+    start.textContent = 'شروع تمرین';
+    start.addEventListener('click',async()=>{await window.__KANJI5_EDU_BRIDGE__?.startExercise?.();});
+    actions.appendChild(start);
+    section.appendChild(actions);
+    return section;
+  }
 
   if (!ex?.mode) {
     const empty = document.createElement('div');
@@ -229,59 +266,110 @@ function renderExercise(snapshot) {
   const field = document.createElement('div');
   field.className = 'v2-answer-area';
 
-  const label = document.createElement('label');
-  label.className = 'v2-field-label';
-  label.htmlFor = 'v2AnswerInput';
-  label.textContent = 'پاسخ شما';
+  const hasChoices = Array.isArray(ex.choices) && ex.choices.length > 0;
+  if (hasChoices) {
+    const label = document.createElement('div');
+    label.className = 'v2-field-label';
+    label.textContent = 'گزینه را انتخاب کن';
+    field.appendChild(label);
 
-  const input = document.createElement('input');
-  input.id = 'v2AnswerInput';
-  input.className = 'v2-input';
-  input.type = 'text';
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-  input.setAttribute('aria-describedby','v2Prompt');
-  input.placeholder = ex.stimulus?.inputPlaceholder || 'پاسخ را وارد کنید';
+    const grid = document.createElement('div');
+    grid.className = 'v2-choice-grid';
+    for (const choice of ex.choices) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'v2-btn v2-btn-choice';
+      button.dataset.choice = choice;
+      button.lang = 'ja';
+      button.textContent = choice;
+      button.disabled = Boolean(snapshot?.feedback?.outcome);
+      button.addEventListener('click',async()=>{
+        const bridge = window.__KANJI5_EDU_BRIDGE__;
+        if (!bridge?.submitChoice) return;
+        [...grid.querySelectorAll('button')].forEach(item=>item.disabled=true);
+        await bridge.submitChoice(choice);
+      });
+      grid.appendChild(button);
+    }
+    field.appendChild(grid);
+  } else {
+    const label = document.createElement('label');
+    label.className = 'v2-field-label';
+    label.htmlFor = 'v2AnswerInput';
+    label.textContent = 'پاسخ شما';
 
-  const actions = document.createElement('div');
-  actions.className = 'v2-actions';
+    const input = document.createElement('input');
+    input.id = 'v2AnswerInput';
+    input.className = 'v2-input';
+    input.type = 'text';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.setAttribute('aria-describedby','v2Prompt');
+    input.placeholder = ex.stimulus?.inputPlaceholder || 'پاسخ را وارد کنید';
+    input.disabled = Boolean(snapshot?.feedback?.outcome);
 
-  const submit = document.createElement('button');
-  submit.type = 'button';
-  submit.id = 'v2Submit';
-  submit.className = 'v2-btn v2-btn-primary';
-  submit.textContent = 'بررسی پاسخ';
-  submit.addEventListener('click',async()=>{
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge) return;
-    submit.disabled = true;
-    unknown.disabled = true;
-    await bridge.submitValue(input.value);
-  });
+    const actions = document.createElement('div');
+    actions.className = 'v2-actions';
 
-  const unknown = document.createElement('button');
-  unknown.type = 'button';
-  unknown.id = 'v2DontKnow';
-  unknown.className = 'v2-btn v2-btn-secondary';
-  unknown.textContent = 'نمی‌دانم';
-  unknown.addEventListener('click',async()=>{
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge) return;
-    submit.disabled = true;
-    unknown.disabled = true;
-    await bridge.dontKnow();
-  });
+    const submit = document.createElement('button');
+    submit.type = 'button';
+    submit.id = 'v2Submit';
+    submit.className = 'v2-btn v2-btn-primary';
+    submit.textContent = 'بررسی پاسخ';
+    submit.disabled = Boolean(snapshot?.feedback?.outcome);
+    submit.addEventListener('click',async()=>{
+      const bridge = window.__KANJI5_EDU_BRIDGE__;
+      if (!bridge) return;
+      submit.disabled = true;
+      unknown.disabled = true;
+      await bridge.submitValue(input.value);
+    });
 
-  input.addEventListener('keydown',event=>{
-    if(event.key==='Enter'){event.preventDefault();submit.click();}
-  });
+    const unknown = document.createElement('button');
+    unknown.type = 'button';
+    unknown.id = 'v2DontKnow';
+    unknown.className = 'v2-btn v2-btn-secondary';
+    unknown.textContent = 'نمی‌دانم';
+    unknown.disabled = Boolean(snapshot?.feedback?.outcome);
+    unknown.addEventListener('click',async()=>{
+      const bridge = window.__KANJI5_EDU_BRIDGE__;
+      if (!bridge) return;
+      submit.disabled = true;
+      unknown.disabled = true;
+      await bridge.dontKnow();
+    });
 
-  actions.append(submit,unknown);
-  field.append(label,input,actions);
+    input.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){event.preventDefault();submit.click();}
+    });
+
+    actions.append(submit,unknown);
+    field.append(label,input,actions);
+  }
+
+  if (hasChoices) {
+    const actions = document.createElement('div');
+    actions.className = 'v2-actions v2-choice-actions';
+    const unknown = document.createElement('button');
+    unknown.type = 'button';
+    unknown.id = 'v2DontKnow';
+    unknown.className = 'v2-btn v2-btn-secondary';
+    unknown.textContent = 'نمی‌دانم';
+    unknown.disabled = Boolean(snapshot?.feedback?.outcome);
+    unknown.addEventListener('click',async()=>{
+      const bridge = window.__KANJI5_EDU_BRIDGE__;
+      if (!bridge) return;
+      unknown.disabled = true;
+      field.querySelectorAll('button').forEach(item=>{item.disabled=true;});
+      await bridge.dontKnow();
+    });
+    actions.appendChild(unknown);
+    field.appendChild(actions);
+  }
+
   section.appendChild(field);
   return section;
 }
-
 function renderFeedback(snapshot) {
   const feedback = snapshot?.feedback || {};
   if (!feedback.outcome) return null;
