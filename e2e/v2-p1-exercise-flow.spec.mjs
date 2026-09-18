@@ -45,6 +45,7 @@ test('v2 P1 exercise flow renders, grades, and recovers through the existing lea
 
   await page.evaluate(async()=>{ await window.__KANJI5_EDU_BRIDGE__.start(); });
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  await expect(page.locator('#v2Stimulus')).toHaveClass(/v2-stimulus-text/);
   await expect(page.locator('#v2App')).toContainText('تولید');
 
   await page.locator('#v2AnswerInput').fill('x');
@@ -57,4 +58,23 @@ test('v2 P1 exercise flow renders, grades, and recovers through the existing lea
   await page.locator('#v2AnswerInput').fill(target);
   await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
+});
+
+
+test('v2 presentation keeps the exercise surface answer-safe for production',async({page})=>{
+  await page.goto('/?v2=1');
+  await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await page.evaluate(async()=>{
+    await window.__KANJI5_V19_V2_BOUNDARY__.setExercise({
+      mode:'production',
+      prompt:'با دیدن معنی، کانجی را تولید کن.',
+      character:'学',
+      stimulus:{text:'school',detail:'معنی را ببین و کانجی را از حافظه تولید کن.'},
+      contentId:'fixture-production-safe',
+      provenance:'local'
+    });
+  });
+  await expect(page.locator('#v2Stimulus')).toHaveText('school');
+  await expect(page.locator('#v2Stimulus')).not.toHaveText('学');
 });
