@@ -15,7 +15,8 @@ test('v2 P3 supports keyboard focus, live feedback semantics, mobile layout, and
   const feedback=page.getByRole('status',{name:'Feedback'});
   await expect(feedback).toBeVisible();
 
-  await page.getByText('Skip to current exercise').click();
+  await page.getByText('Skip to current exercise').focus();
+  await page.keyboard.press('Enter');
   await expect(page.locator('#v2Exercise')).toBeFocused();
   await input.focus();
 
