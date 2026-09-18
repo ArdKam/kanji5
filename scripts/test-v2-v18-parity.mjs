@@ -16,10 +16,12 @@ for(const token of ['v2-daily-summary','v2-daily-stat','v2-header-tool']){
 assert.ok(index.includes('./v2-presentation.js'),'default route must load v2 presentation');
 assert.ok(index.includes('./v1.5-education-ui.js'),'default route must load the education bridge');
 assert.ok(index.includes('./v1.9-v2-boundary.js'),'default route must load the v2 presentation boundary');
+assert.ok(index.includes('./review-runtime.js'),'default route must load the shared review runtime');
+assert.ok(sw.includes('"./review-runtime.js"'),'shared review runtime must be in the active shell cache');
 assert.match(js,/openV2Stats/);
 assert.match(js,/openV2Settings/);
 const sw=read('sw.js');
-assert.ok(sw.includes("kanji5-shell-v92"),'PWA shell cache must be bumped after entrypoint changes');
+assert.ok(sw.includes("kanji5-shell-v93"),'PWA shell cache must be bumped after entrypoint changes');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
 assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
 assert.doesNotMatch(js,/getElementById\(['"]statsBtn['"]\)/,'v2 must not proxy Stats through legacy DOM');
