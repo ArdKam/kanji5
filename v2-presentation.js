@@ -61,7 +61,21 @@ practiceButton.addEventListener('click', async () => {
   practiceButton.disabled = true;
   try { await bridge.start(); } finally { practiceButton.disabled = false; }
 });
-headerMeta.append(sessionProgress,practiceButton);
+const statsButton = document.createElement('button');
+statsButton.type = 'button';
+statsButton.id = 'v2Stats';
+statsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
+statsButton.textContent = 'آمار';
+statsButton.addEventListener('click', () => document.getElementById('statsBtn')?.click());
+
+const settingsButton = document.createElement('button');
+settingsButton.type = 'button';
+settingsButton.id = 'v2Settings';
+settingsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
+settingsButton.textContent = 'تنظیمات';
+settingsButton.addEventListener('click', () => document.getElementById('settingsBtn')?.click());
+
+headerMeta.append(sessionProgress,practiceButton,statsButton,settingsButton);
 header.appendChild(headerMeta);
 root.appendChild(header);
 
@@ -105,6 +119,35 @@ function row(parent, label, value) {
   b.textContent = text(value);
   p.append(a,b);
   parent.appendChild(p);
+}
+
+function readLegacyMetric(id) {
+  const node = document.getElementById(id);
+  return node ? String(node.textContent || '').trim() : '';
+}
+
+function renderDailySummary(parent) {
+  const section = document.createElement('section');
+  section.className = 'v2-daily-summary';
+  section.setAttribute('aria-label','خلاصهٔ امروز');
+  const items = [
+    ['due', 'مرورهای امروز', readLegacyMetric('dueCount')],
+    ['new', 'کانجی جدید امروز', readLegacyMetric('newCount')],
+    ['mastered', 'یادگرفته‌شده', readLegacyMetric('masteredCount')],
+    ['streak', 'روز پیاپی', readLegacyMetric('streakCount')]
+  ];
+  for (const [kind,label,value] of items) {
+    const card = document.createElement('div');
+    card.className = 'v2-daily-stat v2-daily-stat-' + kind;
+    const number = document.createElement('strong');
+    number.className = 'v2-daily-stat-value';
+    number.textContent = value || '۰';
+    const caption = document.createElement('span');
+    caption.textContent = label;
+    card.append(number,caption);
+    section.appendChild(card);
+  }
+  parent.appendChild(section);
 }
 
 function renderHeader(snapshot) {
@@ -596,6 +639,7 @@ function renderInsights(snapshot) {
 function render(snapshot) {
   content.textContent = '';
   renderHeader(snapshot);
+  renderDailySummary(content);
   const showLearning = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && snapshot.learning.isNew;
   if (showLearning) {
     content.appendChild(renderLearning(snapshot));
