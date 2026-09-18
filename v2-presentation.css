@@ -1,26 +1,44 @@
 :root{
-  --v2-bg:var(--v2-bg);
-  --v2-surface:var(--v2-surface);
-  --v2-surface-soft:var(--v2-surface-soft);
-  --v2-text:var(--v2-text);
-  --v2-muted:var(--v2-muted);
-  --v2-subtle:var(--v2-subtle);
-  --v2-border:var(--v2-border);
-  --v2-border-strong:var(--v2-border-strong);
-  --v2-accent:var(--v2-accent);
-  --v2-accent-hover:var(--v2-accent-hover);
-  --v2-accent-soft:var(--v2-accent-soft);
-  --v2-focus:var(--v2-accent-deep);
-  --v2-success:var(--v2-success-strong);
-  --v2-success-soft:var(--v2-success-soft);
-  --v2-danger:var(--v2-danger-strong);
-  --v2-danger-soft:var(--v2-danger-soft);
-  --v2-warning:var(--v2-warning);
-  --v2-warning-soft:var(--v2-warning-soft);
-  --v2-shadow:0 16px 42px rgba(16,24,40,.08);
-  --v2-shadow-hover:0 20px 52px rgba(16,24,40,.12);
-  --v2-radius:24px;
-  --v2-radius-sm:14px;
+  /* Semantic design tokens — Sumi Play derived from Lovable Kanjis Bloom */
+  --v2-bg:#f4efe3;
+  --v2-surface:#fbf8f0;
+  --v2-surface-soft:#f8f4ea;
+  --v2-text:#1c1a17;
+  --v2-muted:#948d7e;
+  --v2-subtle:#948d7e;
+  --v2-border:#e3dcc9;
+  --v2-border-strong:#d2c8b5;
+  --v2-accent:#c0392b;
+  --v2-accent-hover:#a93226;
+  --v2-accent-soft:#f6e9e5;
+  --v2-accent-deep:#8f2b21;
+  --v2-focus:#26406b;
+  --v2-focus-soft:#e9edf6;
+  --v2-ai:#26406b;
+  --v2-success:#7e8c5a;
+  --v2-success-strong:#56643c;
+  --v2-success-soft:#eef2e7;
+  --v2-danger:#c0392b;
+  --v2-danger-strong:#8f2b21;
+  --v2-danger-soft:#f6e9e5;
+  --v2-warning:#9a6518;
+  --v2-warning-soft:#fbf2df;
+  --v2-warning-border:#e6c980;
+  --v2-info:#355b8c;
+  --v2-info-soft:#edf3fa;
+  --v2-info-border:#bfd3e8;
+  --v2-track:#ece5d6;
+  --v2-stimulus-border:#e9e1d2;
+  --v2-translation:#4a463f;
+  --v2-panel-border:#e9e1d2;
+  --v2-white:#fbf8f0;
+  --v2-shadow:rgba(28,26,23,.08);
+  --v2-shadow-hover:rgba(28,26,23,.12);
+  --v2-shadow-soft:rgba(28,26,23,.06);
+  --v2-shadow-strong:rgba(28,26,23,.22);
+  --v2-overlay:var(--v2-overlay);
+  --v2-radius:28px;
+  --v2-radius-sm:16px;
   --v2-space-1:4px;
   --v2-space-2:8px;
   --v2-space-3:12px;
@@ -29,11 +47,8 @@
   --v2-space-6:24px;
   --v2-space-7:32px;
   --v2-space-8:40px;
-  --v2-track:var(--v2-track);
-  --v2-stimulus-border:var(--v2-stimulus-border);
-  --v2-translation:var(--v2-translation);
-  --v2-panel-border:var(--v2-panel-border);
-  --v2-white:var(--v2-surface);
+  --v2-font-sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --v2-font-kanji:"Noto Serif JP","Noto Sans CJK JP","Hiragino Mincho ProN","Yu Mincho",serif;
 }
 
 body:has(#v2App){
@@ -299,7 +314,7 @@ body:has(#v2App){
 
 .v2-btn:hover:not(:disabled){
   transform:translateY(-1px);
-  box-shadow:0 8px 18px rgba(16,24,40,.10);
+  box-shadow:0 8px 18px var(--v2-shadow-soft);
 }
 
 .v2-btn:active:not(:disabled){transform:translateY(0)}
@@ -332,11 +347,11 @@ body:has(#v2App){
   border:1px solid var(--v2-border);
   border-radius:20px;
   outline:none;
-  box-shadow:0 10px 28px rgba(16,24,40,.06);
+  box-shadow:0 10px 28px var(--v2-shadow-soft);
 }
 
 .v2-feedback-card:focus-visible{
-  box-shadow:0 0 0 4px var(--v2-accent-soft),0 10px 28px rgba(16,24,40,.06);
+  box-shadow:0 0 0 4px var(--v2-accent-soft),0 10px 28px var(--v2-shadow-soft);
 }
 
 .v2-feedback-success{
@@ -494,7 +509,7 @@ body:has(#v2App){
   color:var(--v2-white);
   text-decoration:none;
   font-weight:800;
-  box-shadow:0 8px 18px rgba(0,0,0,.18);
+  box-shadow:0 8px 18px var(--v2-overlay);
 }
 
 .v2-skip-link:focus{top:12px}
@@ -742,9 +757,9 @@ body:has(#v2App){
   padding:0;
   background:var(--v2-surface);
   color:var(--v2-text);
-  box-shadow:0 28px 80px rgba(16,24,40,.22);
+  box-shadow:0 28px 80px var(--v2-shadow-strong);
 }
-.v2-dialog::backdrop{background:rgba(16,24,40,.46)}
+.v2-dialog::backdrop{background:var(--v2-shadow-strong)}
 .v2-dialog-body{padding:22px}
 .v2-dialog-subtitle{margin:22px 0 10px;font-size:14px}
 .v2-stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 18px}
