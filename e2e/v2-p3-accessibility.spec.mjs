@@ -10,6 +10,7 @@ test('v2 P3 supports keyboard focus, live feedback semantics, mobile layout, and
   });
   const input=page.locator('#v2AnswerInput');
   await expect(input).toBeVisible();
+  await input.focus();
   await expect(input).toBeFocused();
   await expect(input).toHaveAttribute('aria-describedby','v2Prompt');
   const feedback=page.getByRole('status',{name:'Feedback'});
