@@ -65,6 +65,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: kanji5-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
