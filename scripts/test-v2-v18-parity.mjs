@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=p=>fs.readFileSync(p,'utf8');
+const js=read('v2-presentation.js');
+const css=read('v2-presentation.css');
+const index=read('index.html');
+const contract=read('v1.9-v2-contract-core.js');
+
+for(const token of ['v2Stats','v2Settings','statsBtn','settingsBtn','renderDailySummary','dueCount','newCount','masteredCount','streakCount']){
+  assert.ok(js.includes(token), 'v2 presentation must expose/consume '+token);
+}
+for(const token of ['v2-daily-summary','v2-daily-stat','v2-header-tool']){
+  assert.ok(css.includes(token), 'v2 presentation CSS must style '+token);
+}
+assert.ok(index.includes('./v2-presentation.js'),'default route must load v2 presentation');
+assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
+assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
+
+console.log('Kanji 5 v2/v1.8 presentation parity contract passed.');
