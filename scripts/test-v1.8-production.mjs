@@ -39,7 +39,7 @@ assert.match(ui,/edu\.mode==='production'/,'education UI must contain a producti
 assert.match(ui,/renderChoices\(chooseChoices\(item\)\)/,'production mode must use the canonical smart choice renderer');
 assert.match(ui,/v1\.8-production-core\.js/,'production submission must use the dedicated v1.8 grader');
 assert.match(ui,/gradeProduction/,'education UI must call the production grader');
-assert.match(ui,/const check=\(edu\.mode==='meaning'\|\|edu\.mode==='reading'\)\?,'production must not require a free-text submit button');
+assert.match(ui,/const check=\(edu\.mode==='meaning'\|\|edu\.mode==='reading'\)\?/, 'production must not require a free-text submit button');
 assert.match(ui,/CORE\.recordKnowledge/,'production outcomes must use the existing education knowledge boundary');
 assert.match(ui,/kanji5:v1\.6-education-result/,'production outcomes must emit the existing session education event');
 assert.match(roadmap,/### P0-A — Production Recall/,'v1.8 roadmap must retain the P0-A production milestone');
