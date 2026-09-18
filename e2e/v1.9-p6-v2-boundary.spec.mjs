@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 test('v2 boundary exposes stable structured view models without exposing persistence internals',async({page})=>{
-  await page.goto('/');
+  await page.goto('/?legacy=1');
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(async()=>{await import('./v1.9-v2-boundary.js');return Boolean(window.__KANJI5_V19_V2_BOUNDARY__)})).toBe(true);
   const snapshot=await page.evaluate(async()=>{
