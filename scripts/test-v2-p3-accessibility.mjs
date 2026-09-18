@@ -26,6 +26,8 @@ assert.ok(css.includes('@media (prefers-contrast:more)'));
 assert.match(presentation,/aria-label','پیشرفت جلسه/);
 assert.ok(css.includes('animation-duration:.001ms'));
 assert.match(presentation,/className = 'v2-actions'/);
+assert.match(presentation,/function renderFatal/);
+assert.match(presentation,/role','alert/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.match(sw,/"\.\/v2-presentation\.js"/);
 assert.match(sw,/"\.\/v2-presentation\.css"/);
