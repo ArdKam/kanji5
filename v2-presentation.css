@@ -237,6 +237,36 @@ body:has(#v2App){
   font-size:14px;
   line-height:1.6;
 }
+.v2-learning-card .v2-stimulus{min-height:320px}
+.v2-learning-readings{
+  direction:ltr;
+  font-size:18px;
+  text-align:center;
+}
+.v2-learning-meaning{
+  max-width:90%;
+  font-size:16px;
+  font-weight:750;
+}
+.v2-choice-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:var(--v2-space-3);
+  width:100%;
+}
+.v2-btn-choice{
+  min-height:96px;
+  font-family:"Noto Sans CJK JP","Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
+  font-size:clamp(38px,7vw,56px);
+  font-weight:500;
+  background:var(--v2-surface);
+  border-color:var(--v2-border-strong);
+}
+.v2-btn-choice:hover:not(:disabled){
+  background:var(--v2-accent-soft);
+  border-color:var(--v2-accent);
+}
+.v2-choice-actions{grid-template-columns:1fr;margin-top:var(--v2-space-3)}
 
 .v2-answer-area{
   display:grid;
@@ -532,6 +562,9 @@ body:has(#v2App){
   .v2-stimulus-meaning{font-size:30px}
   .v2-stimulus-text{font-size:34px}
   .v2-stimulus-context{font-size:24px;line-height:1.9}
+  .v2-learning-card .v2-stimulus{min-height:280px}
+  .v2-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .v2-btn-choice{min-height:88px;font-size:42px}
   .v2-actions{grid-template-columns:1fr}
   .v2-btn{width:100%}
   .v2-feedback-card{grid-template-columns:auto 1fr;padding:18px 16px}
