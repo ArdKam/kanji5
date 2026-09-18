@@ -17,7 +17,7 @@ const media=document.createElement('style');
 media.textContent='@media(max-width:760px){#v2App{padding:14px}#v2Grid{grid-template-columns:1fr!important}#v2App h1{font-size:24px}#v2App .v2-actions{flex-direction:column}#v2App .v2-actions button{width:100%}}@media(prefers-reduced-motion:reduce){#v2App *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}#v2App button,#v2App input{min-height:44px}#v2App button:focus-visible,#v2App input:focus-visible,#v2App a:focus-visible{outline:3px solid currentColor;outline-offset:2px}.v2-skip-link{position:absolute;left:10px;top:-100px;padding:10px 14px;background:#111827;color:#fff;border-radius:10px;z-index:100}.v2-skip-link:focus{top:10px}';
 document.head.appendChild(media);
 const skip=document.createElement('a');
-skip.className='v2-skip-link';skip.href='#v2Exercise';skip.textContent='Skip to current exercise';root.appendChild(skip);
+skip.className='v2-skip-link';skip.href='#v2Exercise';skip.textContent='Skip to current exercise';skip.addEventListener('click',event=>{const target=document.getElementById('v2Exercise');if(!target)return;event.preventDefault();target.focus({preventScroll:true});target.scrollIntoView({block:'start'});});root.appendChild(skip);
 const title = document.createElement('h1');
 title.id = 'v2Title';
 title.textContent = 'Kanji 5 · v2 Learning Session';
@@ -80,7 +80,7 @@ function render(snapshot) {
   grid.appendChild(session);
 
   const exercise = card('Current exercise');
-  exercise.id='v2Exercise';
+  exercise.id='v2Exercise';exercise.tabIndex=-1;
   const ex = snapshot?.exercise;
   if (ex?.mode) {
     row(exercise,'Skill',labels[ex.mode] || ex.mode);
@@ -159,6 +159,7 @@ function render(snapshot) {
   row(feedback,'Recovered',snapshot?.feedback?.recovered ? 'yes' : 'no');
   if (snapshot?.feedback?.reason) row(feedback,'Reason',snapshot.feedback.reason);
   const feedbackActions=document.createElement('div');
+  feedbackActions.className='v2-actions';
   feedbackActions.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;';
   if (snapshot?.feedback?.state==='pending_retry') {
     const retry=document.createElement('button');
