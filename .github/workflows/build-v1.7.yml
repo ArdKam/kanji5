@@ -44,6 +44,10 @@ on:
       - 'sw.js'
       - '.github/workflows/build-v1.7.yml'
 
+concurrency:
+  group: kanji5-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
