@@ -29,7 +29,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
     };
   });
   expect(semantics.describedBy).toBe('v2Prompt');
-  expect(semantics.labelText).toBe('Your answer');
+  expect(semantics.labelText).toBe('پاسخ شما');
   expect(semantics.feedbackRole).toBe('status');
   expect(semantics.feedbackLive).toBe('polite');
   expect(semantics.feedbackAtomic).toBe('true');
@@ -39,7 +39,7 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   expect(semantics.reducedMotion).toBe(true);
   expect(semantics.exerciseTabIndex).toBe(-1);
 
-  const skip=page.getByText('Skip to current exercise');
+  const skip=page.getByText('رفتن به تمرین فعلی');
   await skip.focus();
   await expect(skip).toBeFocused();
 
