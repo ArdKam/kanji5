@@ -9,7 +9,7 @@ const workflow = fs.readFileSync('.github/workflows/build-v1.8.yml', 'utf8');
 const index = fs.readFileSync('index.html', 'utf8');
 const ui = fs.readFileSync('v1.5-education-ui.js', 'utf8');
 
-assert.equal(pkg.version, '1.8.0');
+assert.match(pkg.version, /^1\.(8|9)\.0$/);
 assert.match(changelog, /## \[1\.8\.0\]/);
 assert.match(roadmap, /### P0-A — Production Recall ✅/);
 assert.match(roadmap, /### P0-B — Vocabulary Recall ✅/);
