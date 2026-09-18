@@ -23,7 +23,7 @@ assert.ok(sw.includes('"./review-runtime.js"'),'shared review runtime must be in
 assert.match(js,/openV2Stats/);
 assert.match(js,/nonAgainRate/);
 assert.match(js,/openV2Settings/);
-assert.ok(sw.includes("kanji5-shell-v95"),'PWA shell cache must be bumped after entrypoint changes');
+assert.ok(sw.includes("kanji5-shell-v96"),'PWA shell cache must be bumped after entrypoint changes');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
 assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
 assert.doesNotMatch(js,/getElementById\(['"]statsBtn['"]\)/,'v2 must not proxy Stats through legacy DOM');
