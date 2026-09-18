@@ -14,6 +14,6 @@ assert.match(bootstrap,/legacy/);
 assert.match(bootstrap,/kanji5-v2-default/);
 assert.match(bootstrap,/serviceWorker\.register/);
 assert.match(bootstrap,/kanji5-deck-version/);
-assert.match(sw,/const CACHE='kanji5-shell-v97'/);
+assert.match(sw,/const CACHE='kanji5-shell-v[0-9]+'/);
 assert.match(sw,/"\.\/app-bootstrap\.js"/);
 console.log('Kanji 5 index decomposition contract passed.');

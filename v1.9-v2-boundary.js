@@ -1,7 +1,9 @@
 (()=>{
 'use strict';
-if(window.__KANJI5_V19_V2_BOUNDARY__)return;
-const state=window.__KANJI5_STATE__;
+const runtime=window.__KANJI5_RUNTIME__;
+if(!runtime)throw new Error('KANJI5_RUNTIME_REQUIRED');
+if(runtime.has('v2.boundary')||window.__KANJI5_V19_V2_BOUNDARY__)return;
+const state=runtime.get('state')||window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 let corePromise=null;const load=()=>corePromise||(corePromise=import('./v1.9-v2-contract-core.js'));
 let learning=null,exercise=null,feedback=null,adaptiveReason=null;
@@ -23,14 +25,15 @@ function runtimePresentationData(now=Date.now()){
 
 function activeSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
 function completedSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>!x?.status&&x?.modeResults)||null}
-function learner(){return window.__KANJI5_V19_LEARNER_MODEL__?.read?.()||null}
+function learner(){return runtime.get('learner.model')?.read?.()||null}
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
 async function snapshot(){const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData();return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime})}
 async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
-async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
-async function rateLearning(rating){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
+async function revealLearning(direct=false){const bridge=runtime.get('review.bridge')||window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
+async function rateLearning(rating){const bridge=runtime.get('review.bridge');const ok=Boolean(bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 
-async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
+async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;runtime.register('v2.lastSnapshot',viewModel);
+window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
 async function setExercise(input){const core=await load();exercise=core.buildExerciseViewModel(input);await publish();return exercise}
 async function setFeedback(input){const core=await load();feedback=core.buildFeedbackViewModel(input);await publish();return feedback}
 async function setAdaptiveReason(input){const core=await load();adaptiveReason=core.buildAdaptiveReasonViewModel(input);await publish();return adaptiveReason}
@@ -39,8 +42,8 @@ async function updateSettings(nextValue={}){
   const requested=nextValue&&typeof nextValue==='object'?nextValue:{};
   const current=runtimePresentationData().settings;
   const next={...current,...requested,production:Boolean(requested.production??current.production),vocabulary:Boolean(requested.vocabulary??current.vocabulary),context:Boolean(requested.context??current.context)};
-  const runtime=window.__KANJI5_REVIEW_RUNTIME__;
-  if(runtime?.updateSettings)runtime.updateSettings({dailyNew:next.dailyNew,dailyGoal:next.dailyGoal,leechThreshold:next.leechThreshold});
+  const reviewRuntime=runtime.get('review.runtime')||window.__KANJI5_REVIEW_RUNTIME__;
+  if(reviewRuntime?.updateSettings)reviewRuntime.updateSettings({dailyNew:next.dailyNew,dailyGoal:next.dailyGoal,leechThreshold:next.leechThreshold});
   else state.transaction?.(draft=>{draft.settings={...draft.settings, dailyNew:Math.min(30,Math.max(1,Number(next.dailyNew)||5)),dailyGoal:Math.min(500,Math.max(1,Number(next.dailyGoal)||20)),leechThreshold:Math.min(30,Math.max(2,Number(next.leechThreshold)||8))}});
   state.writeSettings?.({production:next.production,vocabulary:next.vocabulary,context:next.context});
   document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-settings-changed'));
@@ -48,7 +51,9 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 function resetProgress(){state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]);try{sessionStorage.removeItem('v19RecoveryState')}catch(_){};location.reload();return true}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress});
+const boundaryApi=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress});
+window.__KANJI5_V19_V2_BOUNDARY__=boundaryApi;
+runtime.register('v2.boundary',boundaryApi);
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);

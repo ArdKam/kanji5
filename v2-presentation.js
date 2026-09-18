@@ -1,6 +1,9 @@
 (()=> {
 'use strict';
 
+const runtime = window.__KANJI5_RUNTIME__;
+if (!runtime) throw new Error('KANJI5_RUNTIME_REQUIRED');
+
 const params = new URLSearchParams(location.search);
 if (params.get('legacy') === '1') return;
 
@@ -55,11 +58,11 @@ practiceButton.id = 'v2StartPractice';
 practiceButton.className = 'v2-btn v2-btn-secondary v2-header-practice';
 practiceButton.textContent = 'تمرین آموزشی';
 practiceButton.addEventListener('click', async () => {
-  const bridge = window.__KANJI5_EDU_BRIDGE__;
+  const bridge = runtime.get('education.bridge');
   if (!bridge?.start) return;
   presentationMode = 'exercise';
   await runBusy('در حال آماده‌سازی تمرین…', async () => {
-    const sessionApi = window.__KANJI5_V16_SESSION_API__;
+    const sessionApi = runtime.get('session.api');
     const current = sessionApi?.getSession?.();
     if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady(); else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
     await bridge.start();
@@ -283,7 +286,7 @@ function ensureV2Dialogs(){
   root.append(statsDialog,settingsDialog);
 }
 async function openV2Stats(){
-  const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+  const boundary=runtime.get('v2.boundary');
   if(!boundary)return;
   const snapshot=await boundary.snapshot(),stats=snapshot?.stats||{};
   const dialog=openV2Dialog('v2StatsDialog'),body=dialog?.querySelector('.v2-dialog-body');
@@ -320,7 +323,7 @@ async function openV2Stats(){
   body.appendChild(close);
 }
 async function openV2Settings(){
-  const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+  const boundary=runtime.get('v2.boundary');
   if(!boundary)return;
   const snapshot=await boundary.snapshot(),settings=snapshot?.settings||{};
   const dialog=openV2Dialog('v2SettingsDialog'),body=dialog?.querySelector('.v2-dialog-body');
@@ -532,7 +535,7 @@ function renderLearning(snapshot) {
       reveal.disabled = true;
       try {
         await runBusy('در حال نمایش پاسخ…',
-          async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(),
+          async () => runtime.get('v2.boundary')?.revealLearning?.(),
           'نمایش پاسخ انجام نشد. دوباره تلاش کن.');
       } finally { reveal.disabled = false; }
     });
@@ -603,7 +606,7 @@ function renderLearning(snapshot) {
     button.addEventListener('click', async () => {
       buttonsDisable(ratings);
       presentationMode = 'auto';
-      try { await runBusy('در حال ثبت مرور…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
+      try { await runBusy('در حال ثبت مرور…', async () => runtime.get('v2.boundary')?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
       finally { buttonsEnable(ratings); }
     });
     ratings.appendChild(button);
@@ -642,7 +645,7 @@ function buildFallbackReviewRecall(card, host) {
 
   const normalize = value => String(value ?? '').trim().toLowerCase().normalize('NFKC').replace(/[\\s\\u3000]+/g,'');
   submit.addEventListener('click', async () => {
-    const core = window.__KANJI5_EDU_CORE__;
+    const core = runtime.get('education.core');
     const answer = String(input.value || '');
     const mode = gate.dataset.v17Attribute;
     const expected = mode === 'meaning' ? (card.meanings || []) : [...(card.on || []), ...(card.kun || [])];
@@ -655,7 +658,7 @@ function buildFallbackReviewRecall(card, host) {
     if (!correct) return;
     submit.disabled = true;
     input.disabled = true;
-    await runBusy('در حال ثبت بازیابی…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(true), 'ثبت بازیابی انجام نشد. دوباره تلاش کن.');
+    await runBusy('در حال ثبت بازیابی…', async () => runtime.get('v2.boundary')?.revealLearning?.(true), 'ثبت بازیابی انجام نشد. دوباره تلاش کن.');
     document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-revealed'));
     host.replaceChildren();
   });
@@ -713,16 +716,16 @@ function renderReviewCard(snapshot) {
       reveal.disabled = true;
       try {
         await runBusy('در حال آماده‌سازی پاسخ…', async () => {
-        let opener = window.__KANJI5_V12_OPEN_RECALL__;
+        let opener = runtime.get('recall.open');
         if (typeof opener !== 'function') {
           const deadline = Date.now() + 3000;
-          while (Date.now() < deadline && typeof window.__KANJI5_V12_OPEN_RECALL__ !== 'function') await new Promise(resolve => setTimeout(resolve,50));
-          opener = window.__KANJI5_V12_OPEN_RECALL__;
+          while (Date.now() < deadline && typeof runtime.get('recall.open') !== 'function') await new Promise(resolve => setTimeout(resolve,50));
+          opener = runtime.get('recall.open');
         }
-        window.__KANJI5_V12_RECALL_CONTEXT__ = {
+        runtime.register('recall.context', {
           character: String(card.character || '').trim(),
           contentId: String(card.contentId || card.character || '').trim()
-        };
+        });
         let gate = null;
         if (typeof opener === 'function') {
           try {
@@ -800,7 +803,7 @@ function renderReviewCard(snapshot) {
     button.textContent = labelText;
     button.addEventListener('click', async () => {
       buttonsDisable(ratings);
-      try { await window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating); }
+      try { await runtime.get('v2.boundary')?.rateLearning?.(rating); }
       finally { buttonsEnable(ratings); }
     });
     ratings.appendChild(button);
@@ -851,7 +854,7 @@ function renderExercise(snapshot) {
     start.id = 'v2StartExercise';
     start.className = 'v2-btn v2-btn-primary';
     start.textContent = 'شروع تمرین';
-    start.addEventListener('click', async () => { await window.__KANJI5_EDU_BRIDGE__?.start?.(); });
+    start.addEventListener('click', async () => { await runtime.get('education.bridge')?.start?.(); });
     empty.append(p,start);
     section.appendChild(empty);
     return section;
@@ -876,7 +879,7 @@ function renderExercise(snapshot) {
       button.addEventListener('click', async () => {
         buttonsDisable(group);
         unknown.disabled = true;
-        await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
+        await runtime.get('education.bridge')?.submitValue?.(choice);
       });
       group.appendChild(button);
     }
@@ -910,7 +913,7 @@ function renderExercise(snapshot) {
   submit.className = 'v2-btn v2-btn-primary';
   submit.textContent = 'بررسی پاسخ';
   submit.addEventListener('click',async()=>{
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
+    const bridge = runtime.get('education.bridge');
     if (!bridge) return;
     submit.disabled = true;
     unknown.disabled = true;
@@ -923,7 +926,7 @@ function renderExercise(snapshot) {
   unknown.className = 'v2-btn v2-btn-secondary';
   unknown.textContent = 'نمی‌دانم';
   unknown.addEventListener('click',async()=>{
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
+    const bridge = runtime.get('education.bridge');
     if (!bridge) return;
     submit.disabled = true;
     unknown.disabled = true;
@@ -944,8 +947,8 @@ function renderExercise(snapshot) {
   back.textContent = 'بازگشت به کارت یادگیری';
   back.addEventListener('click', async () => {
     presentationMode = 'auto';
-    await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
-    await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
+    await runtime.get('v2.boundary')?.clearTransient?.();
+    await runtime.get('v2.boundary')?.refreshLearning?.();
   });
   section.appendChild(back);
   return section;
@@ -998,7 +1001,7 @@ function renderFeedback(snapshot) {
     retry.className = 'v2-btn v2-btn-secondary';
     retry.textContent = 'تکرار همین مهارت';
     retry.addEventListener('click',async()=>{
-      const bridge = window.__KANJI5_EDU_BRIDGE__;
+      const bridge = runtime.get('education.bridge');
       if (!bridge?.retry) return;
       retry.disabled = true;
       await bridge.retry();
@@ -1011,7 +1014,7 @@ function renderFeedback(snapshot) {
   next.id = 'v2Next';
   next.className = 'v2-btn v2-btn-primary';
   next.textContent = 'تمرین بعدی';
-  next.addEventListener('click',async()=>{await runBusy('در حال آماده‌سازی تمرین بعدی…', async () => window.__KANJI5_EDU_BRIDGE__?.next?.(), 'تمرین بعدی آماده نشد. دوباره تلاش کن.');});
+  next.addEventListener('click',async()=>{await runBusy('در حال آماده‌سازی تمرین بعدی…', async () => runtime.get('education.bridge')?.next?.(), 'تمرین بعدی آماده نشد. دوباره تلاش کن.');});
   actions.appendChild(next);
 
   body.appendChild(actions);
@@ -1147,7 +1150,7 @@ function renderFatal(message='بارگذاری رابط آموزشی کامل ن
 }
 
 async function init() {
-  const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
+  const boundary = runtime.get('v2.boundary');
   if (!boundary) { if(Date.now()-initStartedAt>10000)renderFatal('اتصال به هستهٔ یادگیری برقرار نشد.'); else setTimeout(init,50); return; }
   try {
     if (!subscribed) {
@@ -1155,8 +1158,8 @@ async function init() {
       render(await boundary.snapshot());
       subscribed=true;
     }
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
-    const sessionApi = window.__KANJI5_V16_SESSION_API__;
+    const bridge = runtime.get('education.bridge');
+    const sessionApi = runtime.get('session.api');
     if (!bridge || !sessionApi) { if(Date.now()-initStartedAt>10000)renderFatal('رابط تمرین‌های آموزشی آماده نشد.'); else setTimeout(init,50); return; }
     if (!bootstrapped) {
       bootstrapped=true;
@@ -1172,7 +1175,7 @@ async function init() {
 
 document.addEventListener('click',event=>{
   const id=event.target?.closest?.('#saveSettings,#resetBtn')?.id;
-  if(id) setTimeout(()=>{void window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.()},100);
+  if(id) setTimeout(()=>{void runtime.get('v2.boundary')?.refreshLearning?.()},100);
 },true);
 
 if (!boundaryReadyListener) {

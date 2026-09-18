@@ -1,6 +1,8 @@
 (()=>{
 'use strict';
-if(window.__KANJI5_EDU_CORE__)return;
+const runtime=window.__KANJI5_RUNTIME__;
+if(!runtime)throw new Error('KANJI5_RUNTIME_REQUIRED');
+if(runtime.has('education.core')||window.__KANJI5_EDU_CORE__)return;
 const MODES=['meaning','reading','production','vocabulary','context'];
 const MODES_RECALL=['meaning','reading'];
 const PRIORITY={meaning:1,reading:1,production:1.2,vocabulary:1.05,context:1};
@@ -43,5 +45,7 @@ function normalizeKnowledgeEntry(entry){const source=entry&&typeof entry==='obje
 function recordKnowledge(knowledge,ch,mode,correct,wrong='',deviceId='legacy'){const out=structuredClone(knowledge&&typeof knowledge==='object'?knowledge:{}),now=new Date().toISOString(),entry=normalizeKnowledgeEntry(out[ch]),existing=safeStats(entry[mode]),buckets=entry[mode]?.byDevice&&typeof entry[mode].byDevice==='object'?Object.fromEntries(Object.entries(entry[mode].byDevice).map(([id,v])=>[id,safeStats(v)])):{};if(!Object.keys(buckets).length&&(existing.attempts||existing.correct||existing.lastAt))buckets.legacy=existing;const id=String(deviceId||'legacy');const bucketStats=buckets[id]||{attempts:0,correct:0,lastAt:''};bucketStats.attempts+=1;if(correct)bucketStats.correct+=1;bucketStats.lastAt=now;buckets[id]=bucketStats;let attempts=0,correctCount=0,lastAt='';for(const value of Object.values(buckets)){const s=safeStats(value);attempts+=s.attempts;correctCount+=s.correct;if(s.lastAt>lastAt)lastAt=s.lastAt}entry[mode]={attempts,correct:correctCount,lastAt,byDevice:buckets};if(!entry.createdAt)entry.createdAt=now;if(!entry.exposedAt)entry.exposedAt=now;entry.stage=getStage(entry);const stageAt=`${entry.stage}At`;if(!entry[stageAt])entry[stageAt]=now;if(!entry.educationEvidence)entry.educationEvidence={};entry.educationEvidence.lastMode=mode;entry.educationEvidence.lastCorrect=!!correct;entry.educationEvidence.updatedAt=now;entry.educationEvidence.scheduler=educationSchedulerSignal(entry);if(wrong)entry.distractors[wrong]=(Number(entry.distractors[wrong])||0)+1;out[ch]=entry;return out}
 function ensureEntry(knowledge,ch,exposed=false){const out=structuredClone(knowledge&&typeof knowledge==='object'?knowledge:{}),now=new Date().toISOString(),entry=normalizeKnowledgeEntry(out[ch]);if(!entry.createdAt)entry.createdAt=now;if(exposed&&!entry.exposedAt)entry.exposedAt=now;entry.stage=getStage(entry);out[ch]=entry;return out}
 const registry=Object.freeze(MODES.reduce((out,mode)=>{out[mode]=Object.freeze({id:mode,group:mode==='meaning'||mode==='reading'?'recall':'reinforcement'});return out},{}));
-window.__KANJI5_EDU_CORE__=Object.freeze({version:'1.5-ready.8',modes:Object.freeze([...MODES]),stages:Object.freeze([...STAGES]),registry,mastery,weakness,normalize,meaningTokens,meaningSimilarity,gradeMeaning,gradeReading,toRomaji,normalizeRomaji,getAvailableModes,getStage,recencyBoost,selectExercise,chooseBestExercise,scoreEducationItem,selectEducationItem,readingSet,meaningSet,scoreDistractor,distractorAmbiguous,buildDistractorIndex,candidatePool,chooseDistractors,educationSchedulerSignal,recordKnowledge,ensureEntry,normalizeKnowledgeEntry});
+const educationCore=Object.freeze({version:'1.5-ready.8',modes:Object.freeze([...MODES]),stages:Object.freeze([...STAGES]),registry,mastery,weakness,normalize,meaningTokens,meaningSimilarity,gradeMeaning,gradeReading,toRomaji,normalizeRomaji,getAvailableModes,getStage,recencyBoost,selectExercise,chooseBestExercise,scoreEducationItem,selectEducationItem,readingSet,meaningSet,scoreDistractor,distractorAmbiguous,buildDistractorIndex,candidatePool,chooseDistractors,educationSchedulerSignal,recordKnowledge,ensureEntry,normalizeKnowledgeEntry});
+window.__KANJI5_EDU_CORE__=educationCore;
+runtime.register('education.core',educationCore);
 })();

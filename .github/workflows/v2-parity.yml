@@ -25,7 +25,7 @@ jobs:
         run: node scripts/test-npm-lockfile.mjs
       - name: Validate JavaScript syntax
         run: |
-          for f in v1.2-enhancements.js v1.5-education-ui.js v1.5-p0.js v1.6-session.js v1.9-v2-boundary.js review-runtime.js v2-presentation.js sw.js; do
+          for f in v1.2-enhancements.js v1.5-education-ui.js v1.5-p0.js v1.6-session.js v1.9-v2-boundary.js review-runtime.js v2-runtime-registry.js v2-presentation.js sw.js; do
             node --check "$f"
           done
       - name: Install dependencies
@@ -37,8 +37,10 @@ jobs:
         run: node scripts/test-v2-p6-index-boundary.mjs
       - name: Validate v2 polish and async UX contract
         run: node scripts/test-v2-p7-polish.mjs
+      - name: Validate v2 runtime registry contract
+        run: node scripts/test-v2-p8-runtime-registry.mjs
 
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run focused v2 parity browser coverage
-        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-review-card.spec.mjs e2e/v2-v18-parity.spec.mjs e2e/v2-session-completion.spec.mjs e2e/v2-service-worker-offline.spec.mjs e2e/v2-p7-polish.spec.mjs
+        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-review-card.spec.mjs e2e/v2-v18-parity.spec.mjs e2e/v2-session-completion.spec.mjs e2e/v2-service-worker-offline.spec.mjs e2e/v2-p7-polish.spec.mjs e2e/v2-p8-runtime-registry.spec.mjs

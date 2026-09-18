@@ -1,6 +1,8 @@
 (()=>{
 'use strict';
-if(window.__KANJI5_V19_LEARNER_MODEL__)return;
+const runtime=window.__KANJI5_RUNTIME__;
+if(!runtime)throw new Error('KANJI5_RUNTIME_REQUIRED');
+if(runtime.has('learner.model')||window.__KANJI5_V19_LEARNER_MODEL__)return;
 const state=window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 const KEY='v19LearnerModel',EVIDENCE_KEY='v19LearnerEvidence',SCHEMA=1,EVIDENCE_LIMIT=32;
@@ -15,7 +17,9 @@ async function updateCore(){await migratePersistedData();const core=await api(),
 async function project(character){const core=await api();return core.projectKanjiAttributes(state.readKnowledge?.()||{},character,{now:Date.now(),evidenceByMode:evidenceByModeFor(character)})}
 async function rank(character){const core=await api();return core.rankAttributes(await project(character))}
 const stableApi={update:updateCore,read:()=>state.readComponents?.()?.[KEY]||null,project,rank,recordOutcome:detail=>{const character=String(detail?.character||'');if(writeEvidence(character,detail)){return updateCore()}return Promise.resolve(false)}};
-window.__KANJI5_V19_LEARNER_MODEL__=Object.freeze(stableApi);
+const learnerModel=Object.freeze(stableApi);
+window.__KANJI5_V19_LEARNER_MODEL__=learnerModel;
+runtime.register('learner.model',learnerModel);
 void migratePersistedData();
 void updateCore();
 document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(()=>{void updateCore()},0));
