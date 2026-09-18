@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=path=>fs.readFileSync(path,'utf8');
+const pkg=JSON.parse(read('package.json'));
+const index=read('index.html');
+const presentation=read('v2-presentation.js');
+const education=read('v1.5-education-ui.js');
+const roadmap=read('V2-ROADMAP.md');
+const readme=read('README.md');
+const changelog=read('CHANGELOG.md');
+const architecture=read('ARCHITECTURE.md');
+const sw=read('sw.js');
+const workflow=read('.github/workflows/build-v1.8.yml');
+
+assert.equal(pkg.version,'2.0.0');
+assert.match(presentation,/const params = new URLSearchParams\(location\.search\)/);
+assert.match(presentation,/params\.get\('legacy'\) === '1'/);
+assert.doesNotMatch(presentation,/params\.get\('v2'\) !== '1'/);
+assert.match(education,/get\('legacy'\)!=='1'/);
+assert.ok(index.includes('./v2-presentation.js'),'v2 presentation script must remain wired');
+assert.ok(index.includes('<main id="app" hidden>'),'legacy app is retained only as hidden compatibility substrate');
+assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
+assert.ok(sw.includes('"./v2-presentation.css"'),'v2 stylesheet must be offline-precached');
+assert.match(roadmap,/### P0 — Presentation Shell & Contract Consumer ✅/);
+assert.match(roadmap,/### P1 — Exercise Flow Migration ✅/);
+assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/);
+assert.match(roadmap,/### P3 — Accessibility & Responsive Completion ✅/);
+assert.match(roadmap,/### P4 — Visual System & Polish ✅/);
+assert.match(roadmap,/### P5 — v2 Release Readiness/);
+assert.match(readme,/## v2 — Presentation Layer/);
+assert.match(readme,/\*\*v2\.0\.0 — release-ready\*\*/);
+assert.match(changelog,/## \[2\.0\.0\] — 2026-09-18/);
+assert.match(architecture,/v2 is the default presentation/);
+assert.match(architecture,/legacy=1/);
+assert.match(workflow,/scripts\/test-v2-p5-release\.mjs/);
+assert.match(workflow,/e2e\/v2-p5-release\.spec\.mjs/);
+console.log('Kanji 5 v2 P5 release contract passed.');
