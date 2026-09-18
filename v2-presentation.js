@@ -1045,7 +1045,8 @@ async function init() {
       subscribed=true;
     }
     const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge) { if(Date.now()-initStartedAt>10000)renderFatal('رابط تمرین‌های آموزشی آماده نشد.'); else setTimeout(init,50); return; }
+    const sessionApi = window.__KANJI5_V16_SESSION_API__;
+    if (!bridge || !sessionApi) { if(Date.now()-initStartedAt>10000)renderFatal('رابط تمرین‌های آموزشی آماده نشد.'); else setTimeout(init,50); return; }
     if (!bootstrapped) {
       bootstrapped=true;
       await boundary.refreshLearning?.();
