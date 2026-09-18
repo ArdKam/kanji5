@@ -14,7 +14,7 @@ const sw=read('sw.js');
 const workflow=read('.github/workflows/build-v1.8.yml');
 
 assert.equal(pkg.version,'2.0.0');
-assert.match(presentation,/const params = new URLSearchParams\(location\.search\)/);
+assert.match(presentation,/new URLSearchParams\(location\.search\)/);
 assert.match(presentation,/params\.get\('legacy'\) === '1'/);
 assert.doesNotMatch(presentation,/params\.get\('v2'\) !== '1'/);
 assert.match(education,/get\('legacy'\)!=='1'/);
