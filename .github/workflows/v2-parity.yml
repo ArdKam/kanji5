@@ -21,13 +21,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Validate npm lockfile
+        run: node scripts/test-npm-lockfile.mjs
       - name: Validate JavaScript syntax
         run: |
           for f in v1.2-enhancements.js v1.5-education-ui.js v1.5-p0.js v1.6-session.js v1.9-v2-boundary.js review-runtime.js v2-presentation.js sw.js; do
             node --check "$f"
           done
       - name: Install dependencies
-        run: npm install --no-audit --no-fund --package-lock=false
+        run: npm ci
 
       - name: Validate v2 release contract
         run: node scripts/test-v2-p5-release.mjs
