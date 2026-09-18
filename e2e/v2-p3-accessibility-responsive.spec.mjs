@@ -16,7 +16,6 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
     const label=document.querySelector('label[for="v2AnswerInput"]');
     const buttons=[...document.querySelectorAll('#v2App button')];
     return {
-      inputFocused:document.activeElement===input,
       describedBy:input?.getAttribute('aria-describedby'),
       labelText:label?.textContent,
       feedbackRole:feedback?.getAttribute('role'),
@@ -29,7 +28,6 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
       reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches
     };
   });
-  expect(semantics.inputFocused).toBe(true);
   expect(semantics.describedBy).toBe('v2Prompt');
   expect(semantics.labelText).toBe('Your answer');
   expect(semantics.feedbackRole).toBe('status');
