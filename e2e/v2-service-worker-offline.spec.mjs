@@ -26,6 +26,7 @@ test('v2 boots through the real service worker and continues offline', async ({ 
   console.log('KANJI5_SW_COUNT', workers.length);
   for (const worker of workers) {
     console.log('KANJI5_SW_SCRIPT', worker.url());
+    try { console.log('KANJI5_SW_CACHE_NAME', await worker.evaluate(() => typeof CACHE === 'string' ? CACHE : null)); } catch (error) { console.log('KANJI5_SW_CACHE_NAME_ERROR', String(error)); }
     try { console.log('KANJI5_WORKER_CACHES', JSON.stringify(await worker.evaluate(async () => {
       const rows = [];
       for (const name of await caches.keys()) {
