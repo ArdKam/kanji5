@@ -41,8 +41,6 @@ test('v2 restores the visible FSRS review-card flow', async ({page}) => {
     return item?.meaning?.[0] || '';
   });
   expect(recallAnswer).toBeTruthy();
-  console.log('KANJI5_RECALL_HOST', await page.locator('#v2ReviewRecallHost').innerHTML());
-  console.log('KANJI5_RECALL_BUTTONS', await page.locator('#v2ReviewRecallHost button').evaluateAll(btns => btns.map(b => ({id:b.id, text:b.textContent, disabled:b.disabled, html:b.outerHTML}))));
   await page.locator('#v2ReviewRecallHost #v12RecallInput').fill(recallAnswer);
   await page.locator('#v2ReviewRecallHost #v12SubmitRecall').click();
   await expect(page.locator('.v2-learning-meanings')).toBeVisible({timeout:10000});
