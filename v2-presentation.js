@@ -785,18 +785,15 @@ function buttonsEnable(container){container?.querySelectorAll('button').forEach(
 
 function renderExercise(snapshot) {
   const ex = snapshot?.exercise || {};
-  const section = document.createElement('section');
+  const section = ui.card({ className: 'v2-exercise-card' });
   section.id = 'v2Exercise';
   section.tabIndex = -1;
-  section.className = 'v2-exercise-card';
   section.setAttribute('aria-labelledby','v2ExerciseTitle');
 
   const top = document.createElement('div');
   top.className = 'v2-exercise-top';
 
-  const mode = document.createElement('span');
-  mode.className = 'v2-mode-badge';
-  mode.textContent = labels[ex.mode] || 'Practice';
+  const mode = ui.badge(labels[ex.mode] || 'Practice', 'v2-mode-badge');
 
   const step = document.createElement('span');
   step.className = 'v2-exercise-step';
@@ -839,16 +836,15 @@ function renderExercise(snapshot) {
     group.setAttribute('role','group');
     group.setAttribute('aria-label','انتخاب کانجی');
     for (const choice of choices) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'v2-btn v2-production-choice';
-      button.lang = 'ja';
-      button.textContent = choice;
-      button.addEventListener('click', async () => {
-        buttonsDisable(group);
-        unknown.disabled = true;
-        await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
+      const button = ui.choice(choice, {
+        className: 'v2-btn v2-production-choice',
+        onClick: async () => {
+          buttonsDisable(group);
+          unknown.disabled = true;
+          await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
+        }
       });
+      button.lang = 'ja';
       group.appendChild(button);
     }
     section.appendChild(group);
@@ -875,12 +871,11 @@ function renderExercise(snapshot) {
   const actions = document.createElement('div');
   actions.className = 'v2-actions';
 
-  const submit = document.createElement('button');
-  submit.type = 'button';
-  submit.id = 'v2Submit';
-  submit.className = 'v2-btn v2-btn-primary';
-  submit.textContent = 'بررسی پاسخ';
-  submit.addEventListener('click',async()=>{
+  const submit = ui.button({
+    id: 'v2Submit',
+    className: 'v2-btn v2-btn-primary',
+    label: 'بررسی پاسخ',
+    onClick: async () => {
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge) return;
     submit.disabled = true;
@@ -888,12 +883,11 @@ function renderExercise(snapshot) {
     await runBusy('در حال بررسی پاسخ…', async () => bridge.submitValue(input.value), 'بررسی پاسخ انجام نشد. دوباره تلاش کن.');
   });
 
-  const unknown = document.createElement('button');
-  unknown.type = 'button';
-  unknown.id = 'v2DontKnow';
-  unknown.className = 'v2-btn v2-btn-secondary';
-  unknown.textContent = 'نمی‌دانم';
-  unknown.addEventListener('click',async()=>{
+  const unknown = ui.button({
+    id: 'v2DontKnow',
+    className: 'v2-btn v2-btn-secondary',
+    label: 'نمی‌دانم',
+    onClick: async () => {
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge) return;
     submit.disabled = true;
@@ -908,12 +902,11 @@ function renderExercise(snapshot) {
   actions.append(submit,unknown);
   field.append(label,input,actions);
   section.appendChild(field);
-  const back = document.createElement('button');
-  back.type = 'button';
-  back.id = 'v2BackToLearning';
-  back.className = 'v2-btn v2-btn-secondary v2-back-learning';
-  back.textContent = 'بازگشت به کارت یادگیری';
-  back.addEventListener('click', async () => {
+  const back = ui.button({
+    id: 'v2BackToLearning',
+    className: 'v2-btn v2-btn-secondary v2-back-learning',
+    label: 'بازگشت به کارت یادگیری',
+    onClick: async () => {
     presentationMode = 'auto';
     await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
     await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
