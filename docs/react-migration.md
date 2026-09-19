@@ -1,11 +1,37 @@
-# React/TypeScript presentation migration
+## React/TypeScript presentation migration
 
-This slice introduces a real React 19 + TypeScript presentation package for Kanji 5, using the Sumi Play visual language extracted from Kanjis Bloom.
+This PR completes the React/TypeScript presentation migration into the existing Kanji 5 static shell while keeping the existing learning/runtime boundaries authoritative.
 
-The React layer is presentation-only. Kanji 5 remains authoritative for scheduling, grading, learner modeling, recovery, persistence, offline behavior and session state.
+### Completed
+- React 19 + TypeScript + Vite frontend under `frontend/`
+- Typed presentation adapter over the existing Kanji 5 v1.9/v2 boundaries
+- Learning / Review / Exercise / Feedback / Insights / Stats / Settings implemented in React
+- Sumi Play / Kanjis Bloom visual language, responsive layout, accessibility, and reduced-motion support
+- React production bundle tracked under `react-dist/`
+- Static-shell integration through `app-bootstrap.js`
+- React is now the default `/` renderer
+- Explicit rollback routes:
+  - `?v2=1` or `?react=0` → existing v2 DOM renderer
+  - `?legacy=1` → legacy v1 runtime
+- Service-worker cache includes the React bundle
+- Migration boundary, React E2E, authoritative snapshot parity, offline boot, current-v2 compatibility, and legacy release-suite verification
 
-Excluded from this slice: Supabase auth, Lovable persistence/server functions, Lovable known/review timing semantics, and Lovable's separate quiz scheduler.
+### Architecture invariant
+React remains presentation-only. Scheduling, grading, learner modeling, recovery, persistence, session state, and offline authority remain in the existing Kanji 5 runtime/boundaries. The frontend does not directly access `localStorage`, FSRS, or learner internals.
 
-Boundary rule: React components call the learning system through frontend/src/app/engine.ts and must not directly access browser persistence or FSRS/learner internals.
+### Verification
+Latest verified branch head: `2683b6ab7c0470de2fa220ef5e240e76ef64d1ff`
 
-Stage 2 complete: the React bundle is built in CI, wired into the existing static shell, cached by the service worker, and verified through React E2E, authoritative snapshot parity, offline boot, and current-v2 compatibility gates. The root route now uses React by default; the former v2 DOM renderer remains available only through `?v2=1` or `?react=0` as an explicit rollback path. The legacy `?legacy=1` path remains available for the v1 runtime. Full removal of the duplicate v2 renderer is intentionally deferred until the remaining legacy release-suite regressions are cleared.
+- React typecheck: PASS
+- Production build: PASS
+- Migration boundary contract: PASS
+- React presentation E2E: PASS
+- React authoritative snapshot parity: PASS
+- React offline boot: PASS
+- Current-v2 compatibility: PASS
+- v1.6 browser suite: 13/13 PASS
+- v1.7 active-release browser suite: PASS
+- v1.8/v1.9 contract + browser coverage: PASS
+
+### Renderer transition
+The old `v2-presentation.js` is no longer on the default route and is retained only behind the explicit `?v2=1` / `?react=0` rollback path. Physical deletion is intentionally a separate cleanup step after the rollback path is retired; the React layer does not duplicate learning-engine authority.
