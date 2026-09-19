@@ -37,9 +37,17 @@ async function prepareWeakReading(page){
     const raw=localStorage.getItem('kanji5-v1-cards');
     const cards=raw?JSON.parse(raw):{};
     if(!cards[id]?.card)throw new Error('persisted card missing');
+    const deckRaw=localStorage.getItem('kanji5-deck');
+    const deck=deckRaw?JSON.parse(deckRaw):[];
+    const template=structuredClone(cards[id]);
     const future=new Date(Date.now()+365*24*60*60*1000).toISOString();
-    for(const [key,value] of Object.entries(cards)) if(key!==id&&value?.card) value.card.due=future;
-    cards[id].card.due=new Date(Date.now()-1000).toISOString();
+    const past=new Date(Date.now()-1000).toISOString();
+    for(const item of Array.isArray(deck)?deck:[]){
+      if(!item?.id)continue;
+      if(!cards[item.id]?.card)cards[item.id]=structuredClone(template);
+      if(cards[item.id]?.card)cards[item.id].card.due=item.id===id?past:future;
+    }
+    cards[id].card.due=past;
     localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
     localStorage.removeItem('kanji5-v1.6-session-history');
