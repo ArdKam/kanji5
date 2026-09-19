@@ -463,17 +463,14 @@ function renderStimulus(parent, ex) {
 
 function renderLearning(snapshot) {
   const card = snapshot?.learning || {};
-  const section = document.createElement('section');
+  const section = ui.card({ className: 'v2-learning-card' });
   section.id = 'v2LearningCard';
-  section.className = 'v2-learning-card';
   section.setAttribute('aria-labelledby','v2LearningTitle');
 
   const top = document.createElement('div');
   top.className = 'v2-exercise-top';
 
-  const mode = document.createElement('span');
-  mode.className = 'v2-mode-badge v2-learning-badge';
-  mode.textContent = 'یادگیری';
+  const mode = ui.badge('یادگیری', 'v2-mode-badge v2-learning-badge');
 
   const stage = document.createElement('span');
   stage.className = 'v2-exercise-step';
@@ -482,11 +479,8 @@ function renderLearning(snapshot) {
   section.appendChild(top);
   section.appendChild(heading('کارت یادگیری','v2LearningTitle'));
 
-  const kanji = document.createElement('div');
+  const kanji = ui.kanji(text(card.character), 'v2-learning-kanji');
   kanji.id = 'v2LearningKanji';
-  kanji.className = 'v2-learning-kanji';
-  kanji.lang = 'ja';
-  kanji.textContent = text(card.character);
   const kanjiRow = document.createElement('div');
   kanjiRow.className = 'v2-learning-kanji-row';
   kanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
@@ -506,18 +500,18 @@ function renderLearning(snapshot) {
     hint.textContent = card.hint || 'این اولین آشنایی تو با این کانجی است؛ فعلاً آن را یاد بگیر و بعد پاسخ را ببین.';
     section.appendChild(hint);
 
-    const reveal = document.createElement('button');
-    reveal.type = 'button';
-    reveal.id = 'v2LearningReveal';
-    reveal.className = 'v2-btn v2-btn-primary v2-learning-reveal';
-    reveal.textContent = card.revealLabel || 'نمایش اطلاعات کانجی';
-    reveal.addEventListener('click', async () => {
+    const reveal = ui.button({
+      id: 'v2LearningReveal',
+      className: 'v2-btn v2-btn-primary v2-learning-reveal',
+      label: card.revealLabel || 'نمایش اطلاعات کانجی',
+      onClick: async () => {
       reveal.disabled = true;
       try {
         await runBusy('در حال نمایش پاسخ…',
           async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(),
           'نمایش پاسخ انجام نشد. دوباره تلاش کن.');
       } finally { reveal.disabled = false; }
+      }
     });
     section.appendChild(reveal);
     return section;
@@ -578,17 +572,17 @@ function renderLearning(snapshot) {
   const ratings = document.createElement('div');
   ratings.className = 'v2-learning-ratings';
   for (const [rating,labelText] of [['Again','دوباره'],['Hard','سخت'],['Good','خوب'],['Easy','آسان']]) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'v2-btn v2-learning-rating';
-    button.dataset.rating = rating;
-    button.textContent = labelText;
-    button.addEventListener('click', async () => {
-      buttonsDisable(ratings);
-      presentationMode = 'auto';
-      try { await runBusy('در حال ثبت مرور…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
-      finally { buttonsEnable(ratings); }
+    const button = ui.button({
+      label: labelText,
+      className: 'v2-btn v2-learning-rating',
+      onClick: async () => {
+        buttonsDisable(ratings);
+        presentationMode = 'auto';
+        try { await runBusy('در حال ثبت مرور…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
+        finally { buttonsEnable(ratings); }
+      }
     });
+    button.dataset.rating = rating;
     ratings.appendChild(button);
   }
   section.appendChild(ratings);
@@ -651,16 +645,13 @@ function buildFallbackReviewRecall(card, host) {
 
 function renderReviewCard(snapshot) {
   const card = snapshot?.learning || {};
-  const section = document.createElement('section');
+  const section = ui.card({ className: 'v2-learning-card v2-review-card' });
   section.id = 'v2ReviewCard';
-  section.className = 'v2-learning-card v2-review-card';
   section.setAttribute('aria-labelledby','v2ReviewTitle');
 
   const top = document.createElement('div');
   top.className = 'v2-exercise-top';
-  const mode = document.createElement('span');
-  mode.className = 'v2-mode-badge';
-  mode.textContent = 'مرور';
+  const mode = ui.badge('مرور', 'v2-mode-badge');
   const step = document.createElement('span');
   step.className = 'v2-exercise-step';
   step.textContent = 'مرور فاصله‌دار';
@@ -668,11 +659,8 @@ function renderReviewCard(snapshot) {
   section.appendChild(top);
   section.appendChild(heading('کارت مرور','v2ReviewTitle'));
 
-  const kanji = document.createElement('div');
+  const kanji = ui.kanji(text(card.character), 'v2-learning-kanji');
   kanji.id = 'v2ReviewKanji';
-  kanji.className = 'v2-learning-kanji';
-  kanji.lang = 'ja';
-  kanji.textContent = text(card.character);
   const reviewKanjiRow = document.createElement('div');
   reviewKanjiRow.className = 'v2-learning-kanji-row';
   reviewKanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
