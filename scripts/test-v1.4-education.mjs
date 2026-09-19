@@ -65,7 +65,7 @@ assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&
 assert(ui.includes('CORE.recordKnowledge'),'Active UI is not using canonical knowledge recording');
 console.log('Kanji 5 v1.4 education tests passed.');
 const canonicalItem=core.canonicalizeItemReadings({character:'食',on:['ショク'],kun:['た.べる']});
-assert.equal(canonicalItem.readingModel.on[0].fullKana,'しょく','Canonical on-yomi must normalize Katakana to Hiragana');
+assert(canonicalItem.readingModel.on[0].fullKana==='しょく','Canonical on-yomi must normalize Katakana to Hiragana');
 assert(canonicalItem.readingModel.on[0].readingType==='on','Canonical on-yomi must preserve type');
 assert(canonicalItem.readingModel.kun[0].stemKana==='た','Canonical kun-yomi must expose stem');
 assert(canonicalItem.readingModel.kun[0].okurigana==='べる','Canonical kun-yomi must expose okurigana');
