@@ -140,13 +140,13 @@ background:var(--v2-surface);
   border:1px solid var(--v2-border);
   border-radius:var(--v2-radius);
   padding:clamp(24px,5vw,44px);
-  box-shadow:var(--v2-shadow);
+  box-shadow:0 10px 28px var(--v2-shadow);
   min-width:0;
   outline:none;
 }
 
 .v2-exercise-card:focus-visible{
-box-shadow:0 0 0 4px var(--v2-accent-soft),var(--v2-shadow);
+box-shadow:0 0 0 4px var(--v2-accent-soft),0 10px 28px var(--v2-shadow);
 }
 
 .v2-exercise-top{
@@ -563,7 +563,7 @@ outline:3px solid var(--v2-focus);
 
 @media (hover:hover){
 .v2-exercise-card:hover{
-box-shadow:var(--v2-shadow-hover)
+box-shadow:0 12px 28px var(--v2-shadow-hover)
 }
 }
 
@@ -577,7 +577,7 @@ background:var(--v2-surface);
   border:1px solid var(--v2-border);
   border-radius:var(--v2-radius);
   padding:clamp(24px,5vw,44px);
-  box-shadow:var(--v2-shadow);
+  box-shadow:0 10px 28px var(--v2-shadow);
   text-align:center;
 }
 
@@ -968,7 +968,7 @@ outline:3px solid var(--v2-accent-soft);outline-offset:2px
 border:1px solid var(--v2-border);
 border-radius:18px;
 padding:13px 15px;
-box-shadow:var(--v2-shadow);
+box-shadow:0 10px 28px var(--v2-shadow);
 background:linear-gradient(180deg,var(--v2-surface),var(--v2-surface-soft))
 }
 
@@ -996,7 +996,7 @@ height:100%;background:linear-gradient(90deg,var(--v2-accent),var(--v2-accent-de
 .v2-upcoming-reviews{
 border:1px solid var(--v2-border);
 border-radius:18px;
-box-shadow:var(--v2-shadow);
+box-shadow:0 10px 28px var(--v2-shadow);
 padding:0;
 overflow:hidden;
 background:linear-gradient(180deg,var(--v2-surface),var(--v2-surface-soft))
