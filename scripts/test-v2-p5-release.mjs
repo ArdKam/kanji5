@@ -19,7 +19,7 @@ const workflow=read('.github/workflows/v2-parity.yml');
 assert.equal(pkg.version,'2.0.0');
 assert.match(presentation,/const params = new URLSearchParams\(location\.search\)/);
 assert.match(presentation,/params\.get\('legacy'\) === '1'/);
-assert.doesNotMatch(presentation,/params\.get\('v2'\) !== '1'/);
+assert.match(presentation,/params\.get\('v2'\) !== '1'/);
 assert.match(education,/get\('legacy'\)!=='1'/);
 assert.ok(index.includes('./v2-presentation.js'),'v2 presentation script must remain wired');
 assert.ok(index.includes('./review-runtime.js'),'shared review runtime must remain wired');

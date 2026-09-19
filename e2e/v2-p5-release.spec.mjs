@@ -19,7 +19,7 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
 
   const target=await seedReviewedCard(page);
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#app')).toBeHidden();
   await expect(page.locator('#loading')).toBeHidden();

@@ -9,7 +9,7 @@ test('v2 restores the v1.8 settings and statistics surface', async ({page}) => {
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#v2Stats')).toBeVisible();
   await expect(page.locator('#v2Settings')).toBeVisible();

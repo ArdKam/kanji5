@@ -29,7 +29,7 @@ test('v2 completes a finite session after the final correct task', async ({ page
     localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify(history));
   });
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({ timeout: 20000 });
   await expect(page.locator('#v2StartPractice')).toBeVisible();
 
