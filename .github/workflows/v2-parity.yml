@@ -47,6 +47,8 @@ jobs:
         run: node scripts/test-v2-progress-visual-contract.mjs
       - name: Validate Settings visual primitive contract
         run: node scripts/test-v2-settings-visual-contract.mjs
+      - name: Validate Lovable/Sumi Play visual fidelity contract
+        run: node scripts/test-v2-lovable-visual-contract.mjs
       - name: Validate shared motion contract
         run: node scripts/test-v2-motion-contract.mjs
       - name: Validate Lovable migration regression guard
