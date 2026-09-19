@@ -14,7 +14,7 @@ assert.match(bootstrap,/legacy/);
 assert.match(bootstrap,/kanji5-v2-default/);
 assert.match(bootstrap,/serviceWorker\.register/);
 assert.match(bootstrap,/kanji5-deck-version/);
-assert.match(sw,/const CACHE='kanji5-shell-v99'/);
+assert.match(sw,/const CACHE='kanji5-shell-v100'/);
 assert.match(sw,/"\.\/app-bootstrap\.js"/);
 assert.match(bootstrap,/import\('\.\/v1\.6-session\.js'\)/);
 assert.match(sw,/"\.\/v1\.6-session\.js"/);
