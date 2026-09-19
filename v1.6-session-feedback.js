@@ -2,6 +2,7 @@ const IS_LEGACY = new URLSearchParams(location.search).get('legacy') === '1';
 (()=>{
 'use strict';
 if(window.__KANJI5_V16_SESSION_FEEDBACK__)return;
+window.__KANJI5_V16_SESSION_FEEDBACK__=true;
 const state=window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 const KEY_SCHEMA=3,ACTIVE='active';
