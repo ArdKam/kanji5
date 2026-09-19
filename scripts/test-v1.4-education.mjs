@@ -64,3 +64,11 @@ assert(ui.includes('__KANJI5_EDU_CORE__'),'Active UI is not connected to educati
 assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'Active UI is not using canonical selection/grading');
 assert(ui.includes('CORE.recordKnowledge'),'Active UI is not using canonical knowledge recording');
 console.log('Kanji 5 v1.4 education tests passed.');
+const canonicalItem=core.canonicalizeItemReadings({character:'食',on:['ショク'],kun:['た.べる']});
+assert.equal(canonicalItem.readingModel.on[0].fullKana,'しょく','Canonical on-yomi must normalize Katakana to Hiragana');
+assert.equal(canonicalItem.readingModel.on[0].readingType,'on','Canonical on-yomi must preserve type');
+assert.equal(canonicalItem.readingModel.kun[0].stemKana,'た','Canonical kun-yomi must expose stem');
+assert.equal(canonicalItem.readingModel.kun[0].okurigana,'べる','Canonical kun-yomi must expose okurigana');
+assert.equal(canonicalItem.readingModel.kun[0].fullKana,'たべる','Canonical kun-yomi must expose full kana');
+assert.ok(core.canonicalizeItemReadings && /canonicalizeItemReadings/.test(core.canonicalizeItemReadings.toString()),'Canonical reading model must be exposed by the education core');
+console.log('Kanji 5 canonical reading-model contract passed.');
