@@ -881,6 +881,7 @@ function renderExercise(snapshot) {
     submit.disabled = true;
     unknown.disabled = true;
     await runBusy('در حال بررسی پاسخ…', async () => bridge.submitValue(input.value), 'بررسی پاسخ انجام نشد. دوباره تلاش کن.');
+    }
   });
 
   const unknown = ui.button({
@@ -893,6 +894,7 @@ function renderExercise(snapshot) {
     submit.disabled = true;
     unknown.disabled = true;
     await runBusy('در حال ثبت نتیجه…', async () => bridge.dontKnow(), 'ثبت نتیجه انجام نشد. دوباره تلاش کن.');
+    }
   });
 
   input.addEventListener('keydown',event=>{
