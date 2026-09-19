@@ -13,6 +13,28 @@ test('v2 boots through the real service worker and continues offline', async ({ 
   await expect(page.locator('#v2App')).toBeVisible({ timeout: 20000 });
   await expect(page.locator('#v2LearningCard')).toBeVisible({ timeout: 10000 });
   await expect.poll(async () => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  const swCacheState = await page.evaluate(async () => {
+    const rows = [];
+    for (const name of await caches.keys()) {
+      const cache = await caches.open(name);
+      rows.push({ name, urls: (await cache.keys()).map(request => request.url) });
+    }
+    return rows;
+  });
+  const workers = context.serviceWorkers();
+  console.log('KANJI5_WINDOW_CACHES', JSON.stringify(swCacheState));
+  console.log('KANJI5_SW_COUNT', workers.length);
+  for (const worker of workers) {
+    console.log('KANJI5_SW_SCRIPT', worker.url());
+    try { console.log('KANJI5_WORKER_CACHES', JSON.stringify(await worker.evaluate(async () => {
+      const rows = [];
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        rows.push({ name, urls: (await cache.keys()).map(request => request.url) });
+      }
+      return rows;
+    }))); } catch (error) { console.log('KANJI5_WORKER_CACHE_ERROR', String(error)); }
+  }
 
   await context.setOffline(true);
   await page.reload();
