@@ -14,7 +14,7 @@ const readme=read('README.md');
 const changelog=read('CHANGELOG.md');
 const architecture=read('ARCHITECTURE.md');
 const sw=read('sw.js');
-const workflow=read('.github/workflows/build-v1.8.yml');
+const workflow=read('.github/workflows/v2-parity.yml');
 
 assert.equal(pkg.version,'2.0.0');
 assert.match(presentation,/const params = new URLSearchParams\(location\.search\)/);
