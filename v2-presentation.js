@@ -284,7 +284,14 @@ async function openV2Stats(){
   body.appendChild(heading('آمار','v2StatsTitle'));
   const grid=document.createElement('div');
   grid.className='v2-stats-grid';
-  for(const [labelText,value] of [['کل مرورها',stats.totalReviews],['مرورهای غیر Again',Math.round((Number(stats.nonAgainRate)||0)*100)+'٪'],['کانجی مطالعه‌شده',(stats.studiedCount||0)+' / '+(stats.deckSize||0)],['رشتهٔ فعلی',(stats.currentStreak||0)+' 🔥'],['طولانی‌ترین رشته',(stats.longestStreak||0)+' 🔥'],['Leech',stats.leechCount]]) row(grid,labelText,value);
+  for(const [kind,labelText,value] of [
+    ['reviews','کل مرورها',stats.totalReviews],
+    ['retention','مرورهای غیر Again',Math.round((Number(stats.nonAgainRate)||0)*100)+'٪'],
+    ['studied','کانجی مطالعه‌شده',(stats.studiedCount||0)+' / '+(stats.deckSize||0)],
+    ['streak','رشتهٔ فعلی',(stats.currentStreak||0)+' 🔥'],
+    ['longest','طولانی‌ترین رشته',(stats.longestStreak||0)+' 🔥'],
+    ['leech','Leech',stats.leechCount]
+  ]) grid.appendChild(ui.stat(labelText,toFaDigits(value??0),kind));
   body.appendChild(grid);
   const title=document.createElement('h3');
   title.className='v2-dialog-subtitle';
@@ -1002,16 +1009,14 @@ function renderInsights(snapshot) {
   const grid = document.createElement('div');
   grid.className = 'v2-insights-grid';
 
-  const skills = document.createElement('section');
-  skills.className = 'v2-insight-panel';
+  const skills = ui.card({className:'v2-insight-panel'});
   skills.appendChild(heading('مهارت‌های یادگیرنده','v2LearnerTitle'));
   for (const mode of Object.keys(labels)) {
     const item = snapshot?.learner?.attributes?.[mode] || {};
     row(skills,labels[mode],localizeState(item.state)+' · اخیر '+toFaDigits(Math.round((Number(item.recentAccuracy)||0)*100))+'٪');
   }
 
-  const reason = document.createElement('section');
-  reason.className = 'v2-insight-panel';
+  const reason = ui.card({className:'v2-insight-panel'});
   reason.appendChild(heading('تمرکز تطبیقی','v2ReasonTitle'));
   row(reason,'مهارت',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
   row(reason,'عمل',localizeAction(snapshot?.adaptiveReason?.action));
@@ -1025,15 +1030,13 @@ function renderInsights(snapshot) {
     row(reason,'دلیل',localizedReason(snapshot.adaptiveReason.action));
   }
 
-  const summaryPanel = document.createElement('section');
-  summaryPanel.className = 'v2-insight-panel';
+  const summaryPanel = ui.card({className:'v2-insight-panel'});
   summaryPanel.appendChild(heading('خلاصه جلسه','v2SummaryTitle'));
   row(summaryPanel,'تلاش‌ها',snapshot?.sessionSummary?.attempts);
   row(summaryPanel,'درست',snapshot?.sessionSummary?.correct);
   row(summaryPanel,'دقت',Math.round((Number(snapshot?.sessionSummary?.accuracy)||0)*100)+'٪');
 
-  const recent = document.createElement('section');
-  recent.className = 'v2-insight-panel';
+  const recent = ui.card({className:'v2-insight-panel'});
   recent.appendChild(heading('نتایج اخیر','v2RecentTitle'));
   const list = Array.isArray(snapshot?.recentOutcomes) ? snapshot.recentOutcomes : [];
   if (!list.length) {
