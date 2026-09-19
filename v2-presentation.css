@@ -1007,3 +1007,31 @@ body:has(#v2App){
   .v2-daily-summary{gap:8px}
   .v2-daily-stat{min-height:74px}
 }
+
+
+/* Progress/statistics Sumi Play adaptation. */
+.v2-stats-grid .v2-daily-stat{
+  min-height:86px;
+  padding:14px;
+  background:linear-gradient(180deg,var(--v2-surface),var(--v2-surface-soft));
+}
+.v2-stats-grid .v2-daily-stat-value{
+  font-size:23px;
+}
+.v2-insight-panel{
+  background:linear-gradient(180deg,var(--v2-surface),var(--v2-surface-soft));
+  box-shadow:0 8px 18px var(--v2-shadow-soft);
+}
+.v2-dialog-bars{
+  padding:14px 12px 0;
+  border:1px solid var(--v2-border);
+  border-radius:18px;
+  background:var(--v2-surface-soft);
+}
+.v2-dialog-bar-fill{
+  background:linear-gradient(180deg,var(--v2-accent),var(--v2-accent-deep));
+  border-radius:8px 8px 3px 3px;
+}
+.v2-dialog-bar-col span{
+  color:var(--v2-muted);
+}
