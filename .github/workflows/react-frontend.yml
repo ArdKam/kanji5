@@ -7,10 +7,14 @@ on:
       - "docs/react-migration.md"
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
+      - "e2e/react-presentation-migration.spec.mjs"
+      - "index.html"
+      - "app-bootstrap.js"
+      - "v2-presentation.js"
+      - "sw.js"
   push:
     branches:
       - main
-      - feature/react-ts-presentation
     paths:
       - "frontend/**"
       - "docs/react-migration.md"
@@ -50,7 +54,7 @@ jobs:
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
       - name: Commit built static bundle
-        if: github.ref == 'refs/heads/feature/react-ts-presentation' || (github.event_name == 'pull_request' && github.head_ref == 'feature/react-ts-presentation')
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/react-ts-presentation'
         working-directory: .
         run: |
           git config user.name "github-actions[bot]"
