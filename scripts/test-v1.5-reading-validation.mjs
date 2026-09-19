@@ -31,9 +31,9 @@ for(const item of items){
 
 // Compound/example readings must remain source-provided rather than being inferred
 // from individual Kanji readings. The runtime example pipeline stores `word` + `reading`.
-const index=fs.readFileSync('index.html','utf8');
-assert(index.includes("v.pronounced||''"),'Example readings must come from the dictionary/API pronunciation field');
-assert(index.includes('candidates.push({word:term,reading})'),'Example pipeline must preserve the source pronunciation');
-assert(index.includes("seen.has(term+'|'+reading)"),'Example words/readings must be deduplicated by the pair');
+const runtime=fs.readFileSync('review-runtime.js','utf8');
+assert(runtime.includes("v.pronounced||''"),'Example readings must come from the dictionary/API pronunciation field');
+assert(runtime.includes('candidates.push({word:term,reading})'),'Example pipeline must preserve the source pronunciation');
+assert(runtime.includes("seen.has(term+'|'+reading)"),'Example words/readings must be deduplicated by the pair');
 
 console.log('Kanji 5 v1.5 canonical reading validation passed.');

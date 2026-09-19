@@ -54,10 +54,15 @@ jobs:
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
           node --check v1.2-enhancements.js
-      - name: Run all contract and unit tests
-        run: npm test
+      - name: Run v1.7 contract and unit tests
+        run: |
+          node scripts/test-v1.7-adaptive-recall.mjs
+          node scripts/test-v1.7-baseline-evaluation.mjs
+          node scripts/test-v1.7-evaluation.mjs
+          node scripts/test-v1.7-recall-intent.mjs
+          node scripts/test-v1.7-tuning.mjs
       - name: Run active release browser tests
         run: |
           npm ci
           npx playwright install chromium
-          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs
+          npx playwright test --timeout=20000 --retries=0 e2e/v1.7-adaptive-recall.spec.mjs

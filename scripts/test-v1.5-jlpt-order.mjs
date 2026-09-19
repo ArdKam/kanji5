@@ -2,14 +2,14 @@ import fs from 'node:fs';
 
 const data = JSON.parse(fs.readFileSync('kanji-data.json', 'utf8'));
 const items = Array.isArray(data) ? data : data.kanji || [];
-const index = fs.readFileSync('index.html', 'utf8');
+const runtime = fs.readFileSync('review-runtime.js', 'utf8');
 const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
 
 assert(items.length === 2136, `Expected 2136 runtime cards, got ${items.length}`);
 const levels = new Set(items.map(item => item?.jlpt).filter(Boolean));
 for (const level of ['N5', 'N4', 'N3', 'N2', 'N1']) assert(levels.has(level), `Runtime dataset is missing ${level}`);
-assert(index.includes('function jlptRank(item)'), 'JLPT queue rank helper missing');
-assert(index.includes('const level=jlptRank(a)-jlptRank(b)'), 'New-card queue does not sort by JLPT level');
+assert(runtime.includes('function jlptRank(item)'), 'JLPT queue rank helper missing');
+assert(runtime.includes('const level=jlptRank(a)-jlptRank(b)'), 'New-card queue does not sort by JLPT level');
 
 const rank = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
 const synthetic = [

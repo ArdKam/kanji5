@@ -31,14 +31,45 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate service worker shell manifest
+        run: node scripts/test-service-worker-shell.mjs
+      - name: Validate v2 P0 presentation contract
+        run: node scripts/test-v2-p0-presentation.mjs
       - name: Validate v2 release contract
         run: node scripts/test-v2-p5-release.mjs
       - name: Validate index decomposition contract
         run: node scripts/test-v2-p6-index-boundary.mjs
       - name: Validate v2 polish and async UX contract
         run: node scripts/test-v2-p7-polish.mjs
-
+      - name: Validate Study visual primitive contract
+        run: node scripts/test-v2-study-visual-contract.mjs
+      - name: Validate Test visual primitive contract
+        run: node scripts/test-v2-test-visual-contract.mjs
+      - name: Validate Home visual primitive contract
+        run: node scripts/test-v2-home-visual-contract.mjs
+      - name: Validate Progress visual primitive contract
+        run: node scripts/test-v2-progress-visual-contract.mjs
+      - name: Validate Settings visual primitive contract
+        run: node scripts/test-v2-settings-visual-contract.mjs
+      - name: Validate Lovable/Sumi Play visual fidelity contract
+        run: node scripts/test-v2-lovable-visual-contract.mjs
+      - name: Validate shared motion contract
+        run: node scripts/test-v2-motion-contract.mjs
+      - name: Validate Lovable migration regression guard
+        run: node scripts/test-v2-migration-regression.mjs
       - name: Install Chromium
         run: npx playwright install chromium
+      - name: Run responsive v2 browser checks
+        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-responsive.spec.mjs
       - name: Run focused v2 parity browser coverage
-        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-review-card.spec.mjs e2e/v2-v18-parity.spec.mjs e2e/v2-session-completion.spec.mjs e2e/v2-service-worker-offline.spec.mjs e2e/v2-p7-polish.spec.mjs
+      - name: Upload v2 browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-playwright-diagnostics-${{ github.run_id }}
+          path: |
+            test-results/
+            e2e/v2-visual-regression.spec.mjs-snapshots/
+          if-no-files-found: ignore
+
+        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-p0-presentation.spec.mjs e2e/v2-localization.spec.mjs e2e/v2-mobile-polish.spec.mjs e2e/v2-visual-regression.spec.mjs e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-review-card.spec.mjs e2e/v2-v18-parity.spec.mjs e2e/v2-exercise-presentation.spec.mjs e2e/v2-p2-session-ia.spec.mjs e2e/v2-p3-accessibility-responsive.spec.mjs e2e/v2-p3-accessibility.spec.mjs e2e/v2-p4-visual.spec.mjs e2e/v2-p5-release.spec.mjs e2e/v2-service-worker-offline.spec.mjs e2e/v2-session-completion.spec.mjs e2e/v2-p7-polish.spec.mjs

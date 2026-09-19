@@ -23,7 +23,7 @@ assert.ok(css.includes('@media (max-width:600px)'));
 assert.ok(css.includes('grid-template-columns:1fr'));
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'));
 assert.ok(css.includes('@media (prefers-contrast:more)'));
-assert.match(presentation,/aria-label','پیشرفت جلسه/);
+assert.match(presentation,/ui\.progress\([^\n]*label:\s*'پیشرفت جلسه'/);
 assert.ok(css.includes('animation-duration:.001ms'));
 assert.match(presentation,/className = 'v2-actions'/);
 assert.match(presentation,/function renderFatal/);

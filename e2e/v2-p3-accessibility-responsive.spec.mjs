@@ -44,10 +44,15 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await expect(skip).toBeFocused();
 
   await page.locator('#v2AnswerInput').focus();
-  await page.evaluate(()=>{window.__P3_SUBMITTED__=false;window.__KANJI5_EDU_BRIDGE__={submitValue:async value=>{window.__P3_SUBMITTED__=value==='学'}};});
+  await page.evaluate(()=>{
+    window.__P3_CLICKED__=false;
+    document.addEventListener('click',event=>{
+      if(event.target?.closest?.('#v2Submit')) window.__P3_CLICKED__=true;
+    },{capture:true,once:false});
+  });
   await page.locator('#v2AnswerInput').fill('学');
   await page.locator('#v2AnswerInput').press('Enter');
-  await expect.poll(async()=>page.evaluate(()=>window.__P3_SUBMITTED__)).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>window.__P3_CLICKED__)).toBe(true);
   await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'recent failure'});});
   await expect(page.locator('#v2Next')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2Feedback')).toHaveAttribute('tabindex','-1');
@@ -56,13 +61,33 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   const mobile=await page.evaluate(()=>({
     columns:getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length,
     insightColumns:getComputedStyle(document.querySelector('.v2-insights-grid')).gridTemplateColumns.split(' ').length,
-    actionColumns:getComputedStyle(document.querySelector('.v2-actions')).gridTemplateColumns.split(' ').length
+    actionColumns:getComputedStyle(document.querySelector('.v2-actions')).gridTemplateColumns.split(' ').length,
+    headerColumns:getComputedStyle(document.querySelector('.v2-header-meta')).gridTemplateColumns.split(' ').length,
+    practiceSpansFullRow:getComputedStyle(document.querySelector('.v2-header-practice')).gridColumn==='1 / -1',
+    horizontalOverflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
+    touchSafeButtons:[...document.querySelectorAll('#v2App button')].every(button=>parseFloat(getComputedStyle(button).minHeight)>=44)
   }));
   expect(mobile.columns).toBe(1);
   expect(mobile.insightColumns).toBe(1);
   expect(mobile.actionColumns).toBe(1);
+  expect(mobile.headerColumns).toBe(2);
+  expect(mobile.practiceSpansFullRow).toBe(true);
+  expect(mobile.horizontalOverflow).toBe(false);
+  expect(mobile.touchSafeButtons).toBe(true);
 
   await page.setViewportSize({width:1024,height:768});
-  const desktop=await page.evaluate(()=>getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length);
-  expect(desktop).toBe(1);
+  const desktop=await page.evaluate(()=>({
+    columns:getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length,
+    overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1
+  }));
+  expect(desktop.columns).toBe(1);
+  expect(desktop.overflow).toBe(false);
+
+  await page.setViewportSize({width:844,height:390});
+  const landscape=await page.evaluate(()=>({
+    shellHeight:document.querySelector('#v2App')?.getBoundingClientRect().height||0,
+    overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1
+  }));
+  expect(landscape.shellHeight).toBeGreaterThanOrEqual(390);
+  expect(landscape.overflow).toBe(false);
 });

@@ -6,12 +6,11 @@ const IS_LEGACY=params.get('legacy')==='1';
 const DATA_VERSION='v1.2-dataset-2136';
 const DECK_KEY='kanji5-deck';
 const VERSION_KEY='kanji5-deck-version';
+const LEGACY_STYLESHEET='./legacy.css';
 
 if(IS_LEGACY){
-  const link=document.createElement('link');
-  link.rel='stylesheet';
-  link.href='./legacy.css';
-  document.head.appendChild(link);
+  const link=document.getElementById('legacyStylesheet');
+  if(link)link.media='all';
 }else{
   document.documentElement.classList.add('kanji5-v2-default');
 }
@@ -63,6 +62,8 @@ observer.observe(document.documentElement,{childList:true,subtree:true,attribute
 window.addEventListener('error',()=>setTimeout(showFallback,0),true);
 window.addEventListener('unhandledrejection',()=>setTimeout(showFallback,0),true);
 setTimeout(showFallback,7000);
+
+if(!IS_LEGACY)import('./v1.6-session.js').catch(()=>{});
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 

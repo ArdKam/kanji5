@@ -8,6 +8,6 @@ function render(){const pane=document.getElementById('v14EducationPane');if(!pan
 if(latest.retryable&&!latest.recovered&&!pane.querySelector('#v19RetryBtn')){const b=document.createElement('button');b.type='button';b.className='secondary';b.id='v19RetryBtn';b.textContent='یک بار دیگر همین مهارت را تمرین کن';result.prepend(b)}else if(latest.recovered){pane.querySelector('#v19RetryBtn')?.remove()}}
 
 document.addEventListener('kanji5:v1.9-feedback',e=>{latest=e?.detail||null;setTimeout(render,0)});
-document.addEventListener('click',async e=>{const b=e.target.closest?.('#v19RetryBtn');if(!b)return;const api=window.__KANJI5_V19_RECOVERY__;if(await api?.retry?.()){b.disabled=true;document.getElementById('v14EduNext')?.click()}});
+document.addEventListener('click',async e=>{const b=e.target.closest?.('#v19RetryBtn');if(!b)return;b.disabled=true;const bridge=window.__KANJI5_EDU_BRIDGE__;const ok=Boolean(await bridge?.retry?.());if(!ok)b.disabled=false});
 const observer=new MutationObserver(render);observer.observe(document.documentElement,{childList:true,subtree:true});
 })();
