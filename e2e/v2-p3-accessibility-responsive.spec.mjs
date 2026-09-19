@@ -44,7 +44,11 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await expect(skip).toBeFocused();
 
   await page.locator('#v2AnswerInput').focus();
-  await page.evaluate(()=>{window.__P3_SUBMITTED__=false;window.__KANJI5_EDU_BRIDGE__={submitValue:async value=>{window.__P3_SUBMITTED__=value==='学'}};});
+  await page.evaluate(()=>{
+    window.__P3_SUBMITTED__=false;
+    const fixtureBridge={submitValue:async value=>{window.__P3_SUBMITTED__=value==='学'}};
+    Object.defineProperty(window,'__KANJI5_EDU_BRIDGE__',{configurable:true,get:()=>fixtureBridge,set:()=>{}});
+  });
   await page.locator('#v2AnswerInput').fill('学');
   await page.locator('#v2AnswerInput').press('Enter');
   await expect.poll(async()=>page.evaluate(()=>window.__P3_SUBMITTED__)).toBe(true);
