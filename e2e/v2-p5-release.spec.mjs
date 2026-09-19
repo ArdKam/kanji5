@@ -1,4 +1,4 @@
-import {test,expect} from 'playwright/test';
+import {test,expect} from '@playwright/test';
 
 async function seedReviewedCard(page){
   await page.goto('/?legacy=1');
@@ -36,7 +36,7 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
   await page.evaluate(async()=>{await window.__KANJI5_EDU_BRIDGE__.start();});
   const choices=page.locator('#v2ProductionChoices button');
   await expect(choices).toHaveCount(4,{timeout:10000});
-  await expect(page.locator('#v2AnswerInput')).toBeVisible();
+  await expect(page.locator('#v2AnswerInput')).toBeHidden();
 
   const values=await choices.evaluateAll(nodes=>nodes.map(node=>node.textContent?.trim()||''));
   expect(values).toContain(target);
