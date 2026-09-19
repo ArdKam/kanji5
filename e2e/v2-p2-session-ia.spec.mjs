@@ -4,6 +4,7 @@ test('v2 P2 session information architecture exposes progress and recent outcome
   await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V2_PRESENTATION_READY__))).toBe(true);
   const snapshot=await page.evaluate(async()=>{
     const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
     await boundary.setExercise({mode:'production',prompt:'Write the Kanji',character:'学',contentId:'fixture-1',provenance:'local'});
