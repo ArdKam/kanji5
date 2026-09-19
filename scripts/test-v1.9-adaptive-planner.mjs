@@ -19,3 +19,9 @@ const taskFresh=scoreAttribute(
 );
 assert.ok(taskRepeat<taskFresh,'Planner must penalize immediate repetition of the same task identity');
 console.log('Kanji 5 planner task-identity anti-repetition contract passed.');
+
+const uncertain={state:'stable',accuracy:.9,confidence:.9,attempts:1,errorStreak:0,uncertaintyState:'high'};
+const certain={state:'stable',accuracy:.9,confidence:.9,attempts:8,errorStreak:0,uncertaintyState:'low'};
+assert.equal(explainAttribute(uncertain,{mode:'reading'}).behavior,'explore','High uncertainty must trigger evidence-seeking exploration');
+assert.ok(scoreAttribute(uncertain,{mode:'reading'})>scoreAttribute(certain,{mode:'reading'}),'High uncertainty must increase evidence-seeking priority rather than act as a penalty');
+console.log('Kanji 5 uncertainty evidence-seeking contract passed.');
