@@ -34,22 +34,19 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
     window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
   });
   await page.evaluate(async()=>{await window.__KANJI5_EDU_BRIDGE__.start();});
-  const choices=page.locator('#v2AnswerInput button');
-  await expect(choices).toHaveCount(4,{timeout:10000});
-  await expect(page.locator('#v2AnswerInput')).toBeHidden();
-
-  const values=await choices.evaluateAll(nodes=>nodes.map(node=>node.textContent?.trim()||''));
-  expect(values).toContain(target);
-  const wrong=values.find(value=>value!==target);
-  expect(wrong).toBeTruthy();
-
-  await choices.filter({hasText:wrong}).click();
+  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  const wrong=await page.evaluate(target=>{
+    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
+    return deck.find(item=>item?.character&&item.character!==target)?.character||'日';
+  },target);
+  await page.locator('#v2AnswerInput').fill(wrong);
+  await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('نادرست',{timeout:10000});
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
-
   await page.locator('#v2Retry').click();
-  await expect(page.locator('#v2AnswerInput button')).toHaveCount(4,{timeout:10000});
-  await page.locator('#v2AnswerInput button').filter({hasText:target}).click();
+  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  await page.locator('#v2AnswerInput').fill(target);
+  await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 
   const attempts=await page.evaluate(ch=>{
