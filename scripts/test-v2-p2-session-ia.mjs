@@ -44,3 +44,10 @@ assert.match(presentation,/presentationMode='practice'/,'Practice must have an i
 assert.match(presentation,/showLearning=snapshot\?\.learning\?\.active/,'Review route must not inject a mandatory pre-card exercise');
 assert.match(css,/\.v2-experience-nav/,'Experience navigation styling missing');
 console.log('Kanji 5 Review/Practice separation contract passed.');
+
+const sessionSource=fs.readFileSync('v1.6-session.js','utf8');
+assert.match(sessionSource,/experience:String\(persisted\?\.experience\|\|'review'\)/,'Session must persist an explicit experience type');
+assert.match(sessionSource,/startExperience/,'Session API must expose explicit experience switching');
+assert.match(sessionSource,/experience:session\.experience/,'Session history must retain the experience type');
+assert.match(sessionSource,/startExperience\('practice'\)/,'Practice route must start a practice session');
+assert.match(sessionSource,/startExperience\('review'\)/,'Review route must start a review session');
