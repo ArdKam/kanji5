@@ -46,7 +46,9 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await page.locator('#v2AnswerInput').focus();
   await page.evaluate(()=>{
     window.__P3_CLICKED__=false;
-    document.getElementById('v2Submit')?.addEventListener('click',()=>{window.__P3_CLICKED__=true;},{once:true});
+    document.addEventListener('click',event=>{
+      if(event.target?.closest?.('#v2Submit')) window.__P3_CLICKED__=true;
+    },{capture:true,once:false});
   });
   await page.locator('#v2AnswerInput').fill('学');
   await page.locator('#v2AnswerInput').press('Enter');
