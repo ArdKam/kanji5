@@ -228,6 +228,7 @@ function renderExperienceNav(parent){
     return b;
   };
   nav.append(make('v2HomeNav','خانه','home'),make('v2ReviewNav','مرور','review'),make('v2PracticeNav','تمرین','practice'));
+  for(const b of nav.querySelectorAll('[data-experience]'))b.setAttribute('aria-current',b.dataset.experience===presentationMode?'page':'false');
   parent.appendChild(nav);
 }
 function renderExperienceHome(parent,snapshot){
