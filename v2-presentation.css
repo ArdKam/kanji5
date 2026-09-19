@@ -1229,3 +1229,41 @@ body:has(#v2App){
     border-radius:18px;
   }
 }
+
+/* Shared motion tokens and restrained entrance/feedback choreography. */
+:root{
+  --v2-motion-fast:.14s;
+  --v2-motion-base:.24s;
+  --v2-motion-rise:.36s;
+  --v2-motion-stamp:.48s;
+  --v2-motion-ease:cubic-bezier(.2,.75,.25,1);
+}
+.v2-learning-card,
+.v2-exercise-card{
+  animation:v2-rise var(--v2-motion-rise) var(--v2-motion-ease) both;
+}
+.v2-feedback-card{
+  animation:v2-stamp var(--v2-motion-stamp) var(--v2-motion-ease) both;
+  transform-origin:center top;
+}
+.v2-feedback-icon{
+  animation:v2-stamp var(--v2-motion-stamp) var(--v2-motion-ease) both;
+}
+@keyframes v2-rise{
+  from{opacity:0;transform:translate3d(0,8px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes v2-stamp{
+  0%{opacity:0;transform:translate3d(0,4px,0) scale(.97)}
+  70%{opacity:1;transform:translate3d(0,0,0) scale(1.012)}
+  100%{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+@media (prefers-reduced-motion:reduce){
+  .v2-learning-card,
+  .v2-exercise-card,
+  .v2-feedback-card,
+  .v2-feedback-icon{
+    animation:none!important;
+    transform:none!important;
+  }
+}
