@@ -17,6 +17,11 @@ assert(core.weakness({attempts:8,correct:6})>0,'Weakness must remain positive fo
 assert(core.gradeMeaning('school',['school']).quality==='exact','Exact meaning grading failed');
 assert(core.gradeMeaning('high school',['high school']).quality==='exact','Normalized exact meaning failed');
 assert(core.gradeMeaning('school work',['school work']).correct===true,'Two-token exact meaning failed');
+assert(core.gradeMeaning('school-work',['school work']).correct===true,'Hyphenated meaning should normalize to the same token sequence');
+assert(core.gradeMeaning('school/work',['school work']).correct===true,'Punctuation-separated meaning should normalize safely');
+assert(core.gradeMeaning('school  work',['school work']).correct===true,'Repeated spaces should not change meaning grading');
+assert(core.gradeMeaning('SCHOOL WORK',['school work']).correct===true,'Case normalization should preserve meaning grading');
+assert(core.gradeMeaning('school',['school system']).correct===false,'Single-token subset must not auto-pass after punctuation normalization');
 assert(core.gradeMeaning('school',['school system']).correct===false,'Single-token subset must not auto-pass a multi-token meaning');
 assert(core.gradeMeaning('system',['school system']).correct===false,'Wrong token from a multi-token meaning must not pass');
 assert(core.gradeMeaning('school',['school system']).quality==='wrong','Single-token subset must be graded wrong');
