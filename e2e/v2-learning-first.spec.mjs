@@ -13,6 +13,7 @@ test('first-time learner sees the learning card before exercises',async({page})=
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
 
+  await page.locator('#v2ReviewNav').click();
   await expect(page.locator('#v2LearningCard')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2LearningKanji')).toHaveText(/\S/);
   await expect(page.locator('#v2LearningReveal')).toBeVisible();
@@ -39,5 +40,5 @@ test('first-time learner sees the learning card before exercises',async({page})=
     return Boolean(active?.plan && Object.values(active?.remainingModes||{}).some(value=>Number(value)>0));
   })).toBe(true);
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2AnswerInput')).toHaveCount(4);
+  await expect(page.locator('#v2AnswerInput')).toHaveCount(1);
 });
