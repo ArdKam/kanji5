@@ -27,14 +27,6 @@ test('v2 restores the visible FSRS review-card flow', async ({page}) => {
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
 
   await page.goto('/');
-  await page.waitForTimeout(500);
-  console.log('KANJI5_V2_MODE', await page.locator('#v2App').evaluate(root => ({
-    review: Boolean(root.querySelector('#v2ReviewCard')),
-    learning: Boolean(root.querySelector('#v2LearningCard')),
-    exercise: Boolean(root.querySelector('#v2Exercise')),
-    fatal: root.querySelector('#v2FatalTitle')?.textContent || null,
-    body: root.textContent?.slice(0,600) || ''
-  })));
   await expect(page.locator('#v2ReviewCard')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2ReviewKanji')).toHaveText(target);
   await expect(page.locator('#v2ReviewReveal')).toBeVisible();
