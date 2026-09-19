@@ -8,9 +8,11 @@ const index=read('index.html');
 const contract=read('v1.9-v2-contract-core.js');
 const sw=read('sw.js');
 
-for(const token of ['v2Stats','v2Settings','renderDailySummary','dueCount','newCount','masteredCount','streakCount']){
+for(const token of ['v2Stats','v2Settings','renderDailySummary','dueCount','newCount','masteredCount']){
   assert.ok(js.includes(token), 'v2 presentation must expose/consume '+token);
 }
+assert.match(js,/['"]streak['"]\s*,\s*summary\.streak/);
+assert.ok(js.includes('currentStreak'),'v2 stats must consume the current streak value');
 for(const token of ['v2-daily-summary','v2-daily-stat','v2-header-tool']){
   assert.ok(css.includes(token), 'v2 presentation CSS must style '+token);
 }
