@@ -6,7 +6,7 @@ const presentation=read('v2-presentation.js');
 const index=read('index.html');
 const sw=read('sw.js');
 const roadmap=read('V2-ROADMAP.md');
-const workflow=read('.github/workflows/build-v1.8.yml');
+const workflow=read('.github/workflows/v2-parity.yml');
 
 assert.match(presentation,/URLSearchParams/);
 assert.match(presentation,/params\.get\('legacy'\) === '1'/);
