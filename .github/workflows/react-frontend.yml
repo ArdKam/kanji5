@@ -1,0 +1,34 @@
+name: React presentation build
+
+on:
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "docs/react-migration.md"
+      - ".github/workflows/react-frontend.yml"
+      - "scripts/test-react-migration.mjs"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - "docs/react-migration.md"
+      - ".github/workflows/react-frontend.yml"
+      - "scripts/test-react-migration.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
