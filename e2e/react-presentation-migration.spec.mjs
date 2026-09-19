@@ -51,10 +51,10 @@ test('React exercise path can start, submit and display boundary-backed feedback
 
   await page.goto('/?react=1');
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
-  await page.evaluate(()=>{
-    window.__KANJI5_V19_RECOVERY_NEXT_MODE__='production';
-    window.__KANJI5_V19_RECOVERY_NEXT_MODE_USED__=false;
-  });
+  const reactCharacter=await page.locator('#root .kanji-display').innerText();
+  await page.evaluate(character=>{
+    window.__KANJI5_V19_RECOVERY_TARGET__={mode:'production',character};
+  },reactCharacter);
   await page.getByRole('button',{name:'تمرین آموزشی'}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.evaluate(()=>window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.().then(s=>s.exercise?.mode))).toBe('production',{timeout:10000});
