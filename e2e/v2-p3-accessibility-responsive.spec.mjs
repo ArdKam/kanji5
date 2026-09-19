@@ -45,13 +45,12 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
 
   await page.locator('#v2AnswerInput').focus();
   await page.evaluate(()=>{
-    window.__P3_SUBMITTED__=false;
-    const fixtureBridge={submitValue:async value=>{window.__P3_SUBMITTED__=value==='学'}};
-    Object.defineProperty(window,'__KANJI5_EDU_BRIDGE__',{configurable:true,get:()=>fixtureBridge,set:()=>{}});
+    window.__P3_CLICKED__=false;
+    document.getElementById('v2Submit')?.addEventListener('click',()=>{window.__P3_CLICKED__=true;},{once:true});
   });
   await page.locator('#v2AnswerInput').fill('学');
   await page.locator('#v2AnswerInput').press('Enter');
-  await expect.poll(async()=>page.evaluate(()=>window.__P3_SUBMITTED__)).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>window.__P3_CLICKED__)).toBe(true);
   await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'recent failure'});});
   await expect(page.locator('#v2Next')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2Feedback')).toHaveAttribute('tabindex','-1');
