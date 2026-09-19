@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - feature/react-ts-presentation
     paths:
       - "frontend/**"
       - "docs/react-migration.md"
