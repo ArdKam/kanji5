@@ -42,6 +42,11 @@ assert.match(bootstrap, /IS_REACT/);
 assert.match(bootstrap, /react-dist\/kanji5-react\.js/);
 const presentation=fs.readFileSync("v2-presentation.js","utf8");
 assert.match(presentation, /params\.get\('react'\) === '1'/);
+const sw=fs.readFileSync("sw.js","utf8");
+assert.match(sw, /kanji5-shell-v100/);
+assert.match(sw, /\.\/react-dist\/kanji5-react\.js/);
+assert.match(sw, /\.\/react-dist\/kanji5-react\.css/);
+
 
 
 console.log("Kanji 5 React migration boundary contract passed.");
