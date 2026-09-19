@@ -47,6 +47,8 @@ jobs:
         run: node scripts/test-v2-progress-visual-contract.mjs
       - name: Validate Settings visual primitive contract
         run: node scripts/test-v2-settings-visual-contract.mjs
+      - name: Validate shared motion contract
+        run: node scripts/test-v2-motion-contract.mjs
       - name: Run responsive v2 browser checks
         run: npx playwright test --timeout=20000 --retries=0 e2e/v2-responsive.spec.mjs
 
