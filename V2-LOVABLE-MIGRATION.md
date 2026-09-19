@@ -232,9 +232,11 @@ Kanji 5's existing auth/persistence architecture remains authoritative.
 - Shared motion: complete; restrained entrance/feedback choreography is tokenized and disabled under reduced-motion preferences.
 - Accessibility completion: complete for the migrated v2 surface; keyboard Enter submission, focus management, ARIA semantics, reduced motion, touch target sizing, responsive layout, and no-overflow checks are covered by the v2 browser gate.
 - Regression hardening: complete; the migration guard verifies the v1.9 boundary, shared visual primitives, shell manifest, semantic token layer, and that Lovable scheduling semantics remain outside v2.
-- Visual QA: complete at the structural/interaction-contract level against the Lovable visual inventory; Study, Test, Home, Progress, Settings, responsive, motion, and accessibility contracts are green.
-- Focused v2 parity gate: green after the responsive/accessibility and regression-guard additions.
-- Full repository CI remains red on pre-existing v1.6/v1.7/v1.8-v1.9 contract suites; these failures are outside this migration PR and are not being treated as migration regressions.
+- Visual QA: source-level visual fidelity review complete against the Lovable `Kanjis Bloom` source at commit `abf7b589e2066edff3b2cda055d4025828239700`. The migrated v2 CSS now matches the reference washi/paper/sumi/shu/ai/matcha palette, 28px card language, Noto Serif JP Kanji typography, 880px reference container, and 0.55s/0.7s motion timings. The Lovable preview screenshot bytes were not independently available through the current tool path, so no pixel-diff claim is made.
+- CSS consolidation: complete; duplicated base selectors were merged while responsive/media-query ordering was preserved.
+- Aggregate test cleanup: complete; stale architecture assertions were aligned to the current modular v2/state-boundary architecture without weakening runtime semantics. `npm test` and the supported v1.8/v1.9/v2 contract suite pass in the latest CI cycle before the final browser gates.
+- Focused v2 parity gate: green, including the new Lovable/Sumi Play visual fidelity contract, responsive browser checks, accessibility, offline boot, and focused v2 browser coverage.
+- Full repository browser gates are the final remaining release check on the latest head; no learning-engine changes are pending.
 - Next migration stage: final release-readiness review and PR handoff.
 
 ## 6. Interaction inventory
