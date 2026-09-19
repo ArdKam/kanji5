@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(p,'utf8');
@@ -8,10 +9,10 @@ const contract=read('v1.9-v2-contract-core.js');
 const sw=read('sw.js');
 
 for(const token of ['v2Stats','v2Settings','renderDailySummary','dueCount','newCount','masteredCount','streakCount']){
-  assert.includes(js,token);
+  assert.ok(js.includes(token), 'v2 presentation must expose/consume '+token);
 }
 for(const token of ['v2-daily-summary','v2-daily-stat','v2-header-tool']){
-  assert.includes(css,token);
+  assert.ok(css.includes(token), 'v2 presentation CSS must style '+token);
 }
 assert.ok(index.includes('./v2-presentation.js'),'default route must load v2 presentation');
 assert.ok(index.includes('./v1.5-education-ui.js'),'default route must load the education bridge');
@@ -33,9 +34,3 @@ for(const token of ['speechSynthesis','audioButton','renderUpcomingReviews','v2-
 }
 
 console.log('Kanji 5 v2/v1.8 presentation parity contract passed.');
-
-const assert={
-  ok(condition,message){if(!condition)throw new Error(message)},
-  includes(haystack,needle){if(!haystack.includes(needle))throw new Error('Missing required token: '+needle)},
-  match(haystack,re){if(!re.test(haystack))throw new Error('Expected pattern '+re)}
-};
