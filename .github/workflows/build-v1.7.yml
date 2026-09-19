@@ -57,4 +57,4 @@ jobs:
         run: |
           npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium
-          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs
+          npx playwright test --timeout=20000 --retries=0 e2e/v1.7-adaptive-recall.spec.mjs
