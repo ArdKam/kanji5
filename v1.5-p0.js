@@ -38,7 +38,6 @@ if(typeof document!=='undefined'){
  installRecallKeyboard();
  installAccessibilityEnhancements();
  document.addEventListener('click',guardBusyEducationClicks,true);
- installAppRecallGateObserver();
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startTargetedObservers,{once:true});else startTargetedObservers();
 }
 void import('./v1.6-session.js').catch(error=>console.error('KANJI5_V16_SESSION_LOAD_FAILED',error));
