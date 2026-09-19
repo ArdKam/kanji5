@@ -8,3 +8,14 @@ const repeat=buildPlan({attributes:{meaning:{state:'learning',accuracy:.75,confi
 assert.equal(repeat.plan.length,4);assert.equal(repeat.plan[0].mode,'reading');assert.equal(nextTask({attributes:base,availableModes:['meaning','reading'],recentModes:['reading'],remaining:1})?.mode,'reading');
 const empty=buildPlan({attributes:base,availableModes:[],budget:5});assert.equal(empty.plan.length,0);assert.deepEqual(empty.counts,{});
 console.log('Kanji 5 v1.9 adaptive planner fixtures passed.');
+
+const taskRepeat=scoreAttribute(
+  {state:'weak',accuracy:.5,confidence:.5,attempts:4,errorStreak:1,taskId:'same-task'},
+  {mode:'reading',lastMode:'meaning',recentTaskIds:['same-task']}
+);
+const taskFresh=scoreAttribute(
+  {state:'weak',accuracy:.5,confidence:.5,attempts:4,errorStreak:1,taskId:'fresh-task'},
+  {mode:'reading',lastMode:'meaning',recentTaskIds:['same-task']}
+);
+assert.ok(taskRepeat<taskFresh,'Planner must penalize immediate repetition of the same task identity');
+console.log('Kanji 5 planner task-identity anti-repetition contract passed.');
