@@ -7,7 +7,7 @@ test('v2 exposes graceful audio fallback when speech synthesis is unavailable',a
       Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,value:undefined});
     }catch(_){}
   });
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#v2LearningCard, #v2ReviewCard, #v2Exercise')).toHaveCount(1,{timeout:10000});
   const audio=page.locator('.v2-audio-button').first();
