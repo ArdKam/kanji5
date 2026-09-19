@@ -2,7 +2,7 @@
 'use strict';
 
 const params = new URLSearchParams(location.search);
-if (params.get('legacy') === '1') return;
+if (params.get('legacy') === '1' || params.get('react') === '1') return;
 
 const oldApp = document.getElementById('app');
 const loading = document.getElementById('loading');
