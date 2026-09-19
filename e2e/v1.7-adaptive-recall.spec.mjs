@@ -48,7 +48,7 @@ async function prepareWeakReading(page){
         if(draft.cards[item.id]?.card)draft.cards[item.id].card.due=item.id===id?past:future;
       }
       draft.cards[id].card.due=past;
-      draft.knowledge={...draft.knowledge,[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}};
+      draft.knowledge={...draft.knowledge,[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2,variants:{}},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}};
       return draft;
     });
     localStorage.removeItem('kanji5-v1.6-session-history');
