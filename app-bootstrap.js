@@ -63,6 +63,8 @@ window.addEventListener('error',()=>setTimeout(showFallback,0),true);
 window.addEventListener('unhandledrejection',()=>setTimeout(showFallback,0),true);
 setTimeout(showFallback,7000);
 
+if(!IS_LEGACY)import('./v1.6-session.js').catch(()=>{});
+
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 setTimeout(()=>{
