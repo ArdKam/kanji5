@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 test('v2 learner-facing chrome is localized and Japanese stimulus direction is preserved',async({page})=>{
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#v2Title')).toHaveText('کانجی ۵');
   await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setExercise({mode:'production',prompt:'با دیدن این معنی، کانجی را خودت تولید کن.',character:'学',stimulus:{kind:'meaning',primary:'school',inputPlaceholder:'Type the Kanji'},answerHint:'学'});});
