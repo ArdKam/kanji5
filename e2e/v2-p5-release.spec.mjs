@@ -34,7 +34,7 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
     window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
   });
   await page.evaluate(async()=>{await window.__KANJI5_EDU_BRIDGE__.start();});
-  const choices=page.locator('#v2ProductionChoices button');
+  const choices=page.locator('#v2AnswerInput button');
   await expect(choices).toHaveCount(4,{timeout:10000});
   await expect(page.locator('#v2AnswerInput')).toBeHidden();
 
@@ -48,8 +48,8 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
 
   await page.locator('#v2Retry').click();
-  await expect(page.locator('#v2ProductionChoices button')).toHaveCount(4,{timeout:10000});
-  await page.locator('#v2ProductionChoices button').filter({hasText:target}).click();
+  await expect(page.locator('#v2AnswerInput button')).toHaveCount(4,{timeout:10000});
+  await page.locator('#v2AnswerInput button').filter({hasText:target}).click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 
   const attempts=await page.evaluate(ch=>{
