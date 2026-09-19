@@ -4,7 +4,7 @@ if(window.__KANJI5_EDU_UI_V1_5__)return;
 window.__KANJI5_EDU_UI_V1_5__=true;
 const state=window.__KANJI5_STATE__;
 const CORE=window.__KANJI5_EDU_CORE__;
-const isV2=()=>window.__KANJI5_RUNTIME_MODE__?'v2'===window.__KANJI5_RUNTIME_MODE__:new URLSearchParams(location.search).get('legacy')!=='1';
+const isV2=()=>new URLSearchParams(location.search).get('legacy')!=='1';
 if(!state||!CORE)return;
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const safe=v=>String(v??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
