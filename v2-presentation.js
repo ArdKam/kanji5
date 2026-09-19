@@ -211,8 +211,7 @@ function renderDailyGoal(parent,snapshot){
   const badge=document.createElement('span');
   badge.textContent=goal.celebrated?'🎉 تکمیل شد':'';
   top.append(label,badge);
-  const track=ui.progress((Number(goal.progress)||0)*100,{label:'پیشرفت هدف روزانه',className:'v2-daily-goal-track'});
-  top.appendChild(badge);
+  const track=ui.progress((Number(goal.progress)||0)*100,{label:'پیشرفت هدف روزانه',className:'v2-progress v2-daily-goal-track'});
   section.append(top,track);
   parent.appendChild(section);
 }
