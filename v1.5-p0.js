@@ -7,7 +7,7 @@ if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 window.__KANJI5_V15_P0__=true;
 let coreApi=null;
 const $=(selector,root=document)=>root?.querySelector?.(selector)||null;
-const isV2=()=>window.__KANJI5_RUNTIME_MODE__?'v2'===window.__KANJI5_RUNTIME_MODE__:new URLSearchParams(location.search).get('legacy')!=='1';
+const isV2=()=>new URLSearchParams(location.search).get('legacy')!=='1';
 const currentReviewCharacter=()=>{if(isV2()){try{return String(window.__KANJI5_REVIEW_RUNTIME__?.snapshot?.()?.character||'').trim()}catch(_){return ''}}return String($('.kanji')?.textContent||'').trim()};
 async function ensureCore(){return coreApi||(coreApi=await corePromise)}
 function getDeck(){const prefetched=window.__KANJI5_P0_DATA;if(Array.isArray(prefetched)&&prefetched.length)return prefetched;return state.readDeck()}
