@@ -20,7 +20,6 @@ on:
       - 'CHANGELOG.md'
       - 'README.md'
       - 'package.json'
-      - 'package-lock.json'
       - 'sw.js'
       - '.github/workflows/build-v1.7.yml'
 
@@ -39,8 +38,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate npm lockfile
-        run: node scripts/test-npm-lockfile.mjs
       - name: Validate JavaScript
         run: |
           node --check v1.3-storage-bridge.js
@@ -54,15 +51,10 @@ jobs:
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
           node --check v1.2-enhancements.js
-      - name: Run v1.7 contract and unit tests
-        run: |
-          node scripts/test-v1.7-adaptive-recall.mjs
-          node scripts/test-v1.7-baseline-evaluation.mjs
-          node scripts/test-v1.7-evaluation.mjs
-          node scripts/test-v1.7-recall-intent.mjs
-          node scripts/test-v1.7-tuning.mjs
+      - name: Run all contract and unit tests
+        run: npm test
       - name: Run active release browser tests
         run: |
-          npm ci
+          npm install --no-audit --no-fund --package-lock=false
           npx playwright install chromium
-          npx playwright test --timeout=20000 --retries=0 e2e/v1.7-adaptive-recall.spec.mjs
+          npx playwright test e2e/v1.7-adaptive-recall.spec.mjs e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs

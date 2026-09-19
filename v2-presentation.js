@@ -9,8 +9,6 @@ const loading = document.getElementById('loading');
 if (oldApp) oldApp.hidden = true;
 if (loading) loading.hidden = true;
 
-const ui = window.__KANJI5_V2_COMPONENTS__;
-if(!ui) throw new Error('Kanji 5 v2 presentation primitives are unavailable.');
 const root = document.createElement('main');
 root.id = 'v2App';
 root.className = 'v2-shell';
@@ -51,39 +49,35 @@ const headerMeta = document.createElement('div');
 headerMeta.className = 'v2-header-meta';
 const sessionProgress = document.createElement('div');
 sessionProgress.className = 'v2-session-progress';
-const practiceButton = ui.button({
-  id: 'v2StartPractice',
-  className: 'v2-btn v2-btn-secondary v2-header-practice',
-  label: 'تمرین آموزشی',
-  onClick: async () => {
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge?.start) return;
-    presentationMode = 'exercise';
-    await runBusy(
-      'در حال آماده‌سازی تمرین…',
-      async () => {
-        const sessionApi = window.__KANJI5_V16_SESSION_API__;
-        const current = sessionApi?.getSession?.();
-        if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady();
-        else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
-        await bridge.start();
-      },
-      'آماده‌سازی تمرین انجام نشد. دوباره تلاش کن.'
-    );
-  }
+const practiceButton = document.createElement('button');
+practiceButton.type = 'button';
+practiceButton.id = 'v2StartPractice';
+practiceButton.className = 'v2-btn v2-btn-secondary v2-header-practice';
+practiceButton.textContent = 'تمرین آموزشی';
+practiceButton.addEventListener('click', async () => {
+  const bridge = window.__KANJI5_EDU_BRIDGE__;
+  if (!bridge?.start) return;
+  presentationMode = 'exercise';
+  await runBusy('در حال آماده‌سازی تمرین…', async () => {
+    const sessionApi = window.__KANJI5_V16_SESSION_API__;
+    const current = sessionApi?.getSession?.();
+    if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady(); else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
+    await bridge.start();
+  },'آماده‌سازی تمرین انجام نشد. دوباره تلاش کن.');
 });
-const statsButton = ui.button({
-  id: 'v2Stats',
-  className: 'v2-btn v2-btn-secondary v2-header-tool',
-  label: 'آمار',
-  onClick: () => { void openV2Stats(); }
-});
-const settingsButton = ui.button({
-  id: 'v2Settings',
-  className: 'v2-btn v2-btn-secondary v2-header-tool',
-  label: 'تنظیمات',
-  onClick: () => { void openV2Settings(); }
-});
+const statsButton = document.createElement('button');
+statsButton.type = 'button';
+statsButton.id = 'v2Stats';
+statsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
+statsButton.textContent = 'آمار';
+statsButton.addEventListener('click', () => { void openV2Stats(); });
+
+const settingsButton = document.createElement('button');
+settingsButton.type = 'button';
+settingsButton.id = 'v2Settings';
+settingsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
+settingsButton.textContent = 'تنظیمات';
+settingsButton.addEventListener('click', () => { void openV2Settings(); });
 
 headerMeta.append(sessionProgress,practiceButton,statsButton,settingsButton);
 header.appendChild(headerMeta);
@@ -137,7 +131,7 @@ ensureV2Dialogs();
 
 const toFaDigits = value => String(value).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 const text = value => String(value ?? '').trim() || '—';
-const localizedReason = value => ({repair:'به دلیل خطاهای اخیر، این مهارت دوباره تمرین می‌شود.',reinforce:'برای تثبیت این مهارت انتخاب شده است.',recover:'برای بررسی بازیابی پس از خطا انتخاب شده است.',maintain:'برای حفظ این مهارت انتخاب شده است.',explore:'برای تکمیل شواهد یادگیری انتخاب شده است.','recent failure':'به دلیل خطاهای اخیر'})[String(value || '')] || text(value);
+const localizedReason = value => ({repair:'به دلیل خطاهای اخیر، این مهارت دوباره تمرین می‌شود.',reinforce:'برای تثبیت این مهارت انتخاب شده است.',recover:'برای بررسی بازیابی پس از خطا انتخاب شده است.',maintain:'برای حفظ این مهارت انتخاب شده است.',explore:'برای تکمیل شواهد یادگیری انتخاب شده است.'})[String(value || '')] || 'بر اساس عملکرد اخیر انتخاب شده است.';
 const labels = {meaning:'معنی',reading:'خوانش',production:'تولید',vocabulary:'واژگان',context:'بافت'};
 const outcomes = {correct:'درست',wrong:'نادرست',unknown:'نمی‌دانم',near_miss:'نزدیک بود',empty:'خالی',invalid:'در دسترس نیست'};
 const states = {unseen:'دیده نشده',introduced:'معرفی شده',learning:'در حال یادگیری',weak:'ضعیف',recovering:'در حال بازیابی',stable:'پایدار',mastered:'مسلط'};
@@ -203,7 +197,8 @@ function relativeDue(dueAt){
 }
 function renderDailyGoal(parent,snapshot){
   const goal=snapshot?.dailyGoal||{};
-  const section=ui.card({className:'v2-daily-goal'});
+  const section=document.createElement('section');
+  section.className='v2-daily-goal';
   const top=document.createElement('div');
   top.className='v2-daily-goal-top';
   const label=document.createElement('strong');
@@ -211,7 +206,12 @@ function renderDailyGoal(parent,snapshot){
   const badge=document.createElement('span');
   badge.textContent=goal.celebrated?'🎉 تکمیل شد':'';
   top.append(label,badge);
-  const track=ui.progress((Number(goal.progress)||0)*100,{label:'پیشرفت هدف روزانه',className:'v2-progress v2-daily-goal-track'});
+  const track=document.createElement('div');
+  track.className='v2-daily-goal-track';
+  const fill=document.createElement('div');
+  fill.className='v2-daily-goal-fill';
+  fill.style.width=Math.round((Number(goal.progress)||0)*100)+'%';
+  track.appendChild(fill);
   section.append(top,track);
   parent.appendChild(section);
 }
@@ -250,7 +250,15 @@ function renderDailySummary(parent,snapshot){
     ['streak','روز پیاپی',summary.streak]
   ];
   for(const [kind,labelText,value] of items){
-    section.appendChild(ui.stat(labelText,toFaDigits(value||0),kind));
+    const card=document.createElement('div');
+    card.className='v2-daily-stat v2-daily-stat-'+kind;
+    const number=document.createElement('strong');
+    number.className='v2-daily-stat-value';
+    number.textContent=toFaDigits(value||0);
+    const caption=document.createElement('span');
+    caption.textContent=labelText;
+    card.append(number,caption);
+    section.appendChild(card);
   }
   parent.appendChild(section);
 }
@@ -284,14 +292,7 @@ async function openV2Stats(){
   body.appendChild(heading('آمار','v2StatsTitle'));
   const grid=document.createElement('div');
   grid.className='v2-stats-grid';
-  for(const [kind,labelText,value] of [
-    ['reviews','کل مرورها',stats.totalReviews],
-    ['retention','مرورهای غیر Again',Math.round((Number(stats.nonAgainRate)||0)*100)+'٪'],
-    ['studied','کانجی مطالعه‌شده',(stats.studiedCount||0)+' / '+(stats.deckSize||0)],
-    ['streak','رشتهٔ فعلی',(stats.currentStreak||0)+' 🔥'],
-    ['longest','طولانی‌ترین رشته',(stats.longestStreak||0)+' 🔥'],
-    ['leech','Leech',stats.leechCount]
-  ]) grid.appendChild(ui.stat(labelText,toFaDigits(value??0),kind));
+  for(const [labelText,value] of [['کل مرورها',stats.totalReviews],['مرورهای غیر Again',Math.round((Number(stats.nonAgainRate)||0)*100)+'٪'],['کانجی مطالعه‌شده',(stats.studiedCount||0)+' / '+(stats.deckSize||0)],['رشتهٔ فعلی',(stats.currentStreak||0)+' 🔥'],['طولانی‌ترین رشته',(stats.longestStreak||0)+' 🔥'],['Leech',stats.leechCount]]) row(grid,labelText,value);
   body.appendChild(grid);
   const title=document.createElement('h3');
   title.className='v2-dialog-subtitle';
@@ -325,8 +326,7 @@ async function openV2Settings(){
   const dialog=openV2Dialog('v2SettingsDialog'),body=dialog?.querySelector('.v2-dialog-body');
   if(!dialog||!body)return;
   body.textContent='';
-  const surface=ui.card({className:'v2-settings-surface'});
-  surface.appendChild(heading('تنظیمات','v2SettingsTitle'));
+  body.appendChild(heading('تنظیمات','v2SettingsTitle'));
   const form=document.createElement('form');
   form.className='v2-settings-form';
   for(const [id,labelText,value,min,max] of [['v2DailyNew','کانجی جدید در روز',settings.dailyNew,1,30],['v2DailyGoal','هدف تعداد مرور روزانه',settings.dailyGoal,1,500],['v2LeechThreshold','آستانهٔ Leech (تعداد خطا)',settings.leechThreshold,2,30]]){
@@ -348,10 +348,15 @@ async function openV2Settings(){
   }
   const actions=document.createElement('div');
   actions.className='v2-actions';
-  const save=ui.button({id:'v2SaveSettings',type:'submit',className:'v2-btn v2-btn-primary',label:'ذخیره'});
-  const close=ui.button({id:'v2CloseSettings',className:'v2-btn v2-btn-secondary',label:'بستن',onClick:()=>dialog.close()});
-  const reset=ui.button({id:'v2ResetProgress',className:'v2-btn v2-btn-secondary',label:'پاک کردن تمام پیشرفت',onClick:()=>boundary.resetProgress?.()});
-  actions.append(save,close,reset);form.appendChild(actions);surface.appendChild(form);body.appendChild(surface);
+  const save=document.createElement('button');
+  save.type='submit';save.className='v2-btn v2-btn-primary';save.textContent='ذخیره';
+  const close=document.createElement('button');
+  close.type='button';close.className='v2-btn v2-btn-secondary';close.textContent='بستن';
+  const reset=document.createElement('button');
+  reset.type='button';reset.className='v2-btn v2-btn-secondary';reset.textContent='پاک کردن تمام پیشرفت';
+  close.addEventListener('click',()=>dialog.close());
+  reset.addEventListener('click',()=>boundary.resetProgress?.());
+  actions.append(save,close,reset);form.appendChild(actions);body.appendChild(form);
   form.addEventListener('submit',async event=>{
     event.preventDefault();save.disabled=true;
     try{
@@ -395,7 +400,18 @@ function renderHeader(snapshot) {
   const remaining = Number(snapshot?.session?.remainingTotal) || 0;
   const done = total > 0 ? Math.max(0, total - remaining) : 0;
 
-  const progress = ui.progress(fraction * 100, { label: 'پیشرفت جلسه' });
+  const progress = document.createElement('div');
+  progress.className = 'v2-progress';
+  progress.setAttribute('role','progressbar');
+  progress.setAttribute('aria-label','پیشرفت جلسه');
+  progress.setAttribute('aria-valuemin','0');
+  progress.setAttribute('aria-valuemax','100');
+  progress.setAttribute('aria-valuenow',String(Math.round(fraction*100)));
+
+  const fill = document.createElement('div');
+  fill.className = 'v2-progress-fill';
+  fill.style.width = Math.round(fraction*100) + '%';
+  progress.appendChild(fill);
 
   const meta = document.createElement('div');
   meta.className = 'v2-progress-meta';
@@ -444,7 +460,6 @@ function renderStimulus(parent, ex) {
     const sentence = document.createElement('div');
     sentence.className = 'v2-stimulus-context';
     sentence.lang = 'ja';
-     sentence.dir = 'ltr';
     sentence.textContent = primary;
     wrap.appendChild(sentence);
     if (translation !== '—') {
@@ -465,14 +480,17 @@ function renderStimulus(parent, ex) {
 
 function renderLearning(snapshot) {
   const card = snapshot?.learning || {};
-  const section = ui.card({ className: 'v2-learning-card' });
+  const section = document.createElement('section');
   section.id = 'v2LearningCard';
+  section.className = 'v2-learning-card';
   section.setAttribute('aria-labelledby','v2LearningTitle');
 
   const top = document.createElement('div');
   top.className = 'v2-exercise-top';
 
-  const mode = ui.badge('یادگیری', 'v2-mode-badge v2-learning-badge');
+  const mode = document.createElement('span');
+  mode.className = 'v2-mode-badge v2-learning-badge';
+  mode.textContent = 'یادگیری';
 
   const stage = document.createElement('span');
   stage.className = 'v2-exercise-step';
@@ -481,8 +499,11 @@ function renderLearning(snapshot) {
   section.appendChild(top);
   section.appendChild(heading('کارت یادگیری','v2LearningTitle'));
 
-  const kanji = ui.kanji(text(card.character), 'v2-learning-kanji');
+  const kanji = document.createElement('div');
   kanji.id = 'v2LearningKanji';
+  kanji.className = 'v2-learning-kanji';
+  kanji.lang = 'ja';
+  kanji.textContent = text(card.character);
   const kanjiRow = document.createElement('div');
   kanjiRow.className = 'v2-learning-kanji-row';
   kanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
@@ -502,18 +523,18 @@ function renderLearning(snapshot) {
     hint.textContent = card.hint || 'این اولین آشنایی تو با این کانجی است؛ فعلاً آن را یاد بگیر و بعد پاسخ را ببین.';
     section.appendChild(hint);
 
-    const reveal = ui.button({
-      id: 'v2LearningReveal',
-      className: 'v2-btn v2-btn-primary v2-learning-reveal',
-      label: card.revealLabel || 'نمایش اطلاعات کانجی',
-      onClick: async () => {
+    const reveal = document.createElement('button');
+    reveal.type = 'button';
+    reveal.id = 'v2LearningReveal';
+    reveal.className = 'v2-btn v2-btn-primary v2-learning-reveal';
+    reveal.textContent = card.revealLabel || 'نمایش اطلاعات کانجی';
+    reveal.addEventListener('click', async () => {
       reveal.disabled = true;
       try {
         await runBusy('در حال نمایش پاسخ…',
           async () => window.__KANJI5_V19_V2_BOUNDARY__?.revealLearning?.(),
           'نمایش پاسخ انجام نشد. دوباره تلاش کن.');
       } finally { reveal.disabled = false; }
-      }
     });
     section.appendChild(reveal);
     return section;
@@ -574,17 +595,17 @@ function renderLearning(snapshot) {
   const ratings = document.createElement('div');
   ratings.className = 'v2-learning-ratings';
   for (const [rating,labelText] of [['Again','دوباره'],['Hard','سخت'],['Good','خوب'],['Easy','آسان']]) {
-    const button = ui.button({
-      label: labelText,
-      className: 'v2-btn v2-learning-rating',
-      onClick: async () => {
-        buttonsDisable(ratings);
-        presentationMode = 'auto';
-        try { await runBusy('در حال ثبت مرور…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
-        finally { buttonsEnable(ratings); }
-      }
-    });
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'v2-btn v2-learning-rating';
     button.dataset.rating = rating;
+    button.textContent = labelText;
+    button.addEventListener('click', async () => {
+      buttonsDisable(ratings);
+      presentationMode = 'auto';
+      try { await runBusy('در حال ثبت مرور…', async () => window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.(rating), 'ثبت مرور انجام نشد. دوباره تلاش کن.'); }
+      finally { buttonsEnable(ratings); }
+    });
     ratings.appendChild(button);
   }
   section.appendChild(ratings);
@@ -647,13 +668,16 @@ function buildFallbackReviewRecall(card, host) {
 
 function renderReviewCard(snapshot) {
   const card = snapshot?.learning || {};
-  const section = ui.card({ className: 'v2-learning-card v2-review-card' });
+  const section = document.createElement('section');
   section.id = 'v2ReviewCard';
+  section.className = 'v2-learning-card v2-review-card';
   section.setAttribute('aria-labelledby','v2ReviewTitle');
 
   const top = document.createElement('div');
   top.className = 'v2-exercise-top';
-  const mode = ui.badge('مرور', 'v2-mode-badge');
+  const mode = document.createElement('span');
+  mode.className = 'v2-mode-badge';
+  mode.textContent = 'مرور';
   const step = document.createElement('span');
   step.className = 'v2-exercise-step';
   step.textContent = 'مرور فاصله‌دار';
@@ -661,8 +685,11 @@ function renderReviewCard(snapshot) {
   section.appendChild(top);
   section.appendChild(heading('کارت مرور','v2ReviewTitle'));
 
-  const kanji = ui.kanji(text(card.character), 'v2-learning-kanji');
+  const kanji = document.createElement('div');
   kanji.id = 'v2ReviewKanji';
+  kanji.className = 'v2-learning-kanji';
+  kanji.lang = 'ja';
+  kanji.textContent = text(card.character);
   const reviewKanjiRow = document.createElement('div');
   reviewKanjiRow.className = 'v2-learning-kanji-row';
   reviewKanjiRow.append(kanji,audioButton(card.character,'پخش تلفظ کانجی'));
@@ -787,15 +814,18 @@ function buttonsEnable(container){container?.querySelectorAll('button').forEach(
 
 function renderExercise(snapshot) {
   const ex = snapshot?.exercise || {};
-  const section = ui.card({ className: 'v2-exercise-card' });
+  const section = document.createElement('section');
   section.id = 'v2Exercise';
   section.tabIndex = -1;
+  section.className = 'v2-exercise-card';
   section.setAttribute('aria-labelledby','v2ExerciseTitle');
 
   const top = document.createElement('div');
   top.className = 'v2-exercise-top';
 
-  const mode = ui.badge(labels[ex.mode] || 'Practice', 'v2-mode-badge');
+  const mode = document.createElement('span');
+  mode.className = 'v2-mode-badge';
+  mode.textContent = labels[ex.mode] || 'Practice';
 
   const step = document.createElement('span');
   step.className = 'v2-exercise-step';
@@ -838,15 +868,16 @@ function renderExercise(snapshot) {
     group.setAttribute('role','group');
     group.setAttribute('aria-label','انتخاب کانجی');
     for (const choice of choices) {
-      const button = ui.choice(choice, {
-        className: 'v2-btn v2-production-choice',
-        onClick: async () => {
-          buttonsDisable(group);
-          unknown.disabled = true;
-          await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
-        }
-      });
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'v2-btn v2-production-choice';
       button.lang = 'ja';
+      button.textContent = choice;
+      button.addEventListener('click', async () => {
+        buttonsDisable(group);
+        unknown.disabled = true;
+        await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
+      });
       group.appendChild(button);
     }
     section.appendChild(group);
@@ -873,38 +904,30 @@ function renderExercise(snapshot) {
   const actions = document.createElement('div');
   actions.className = 'v2-actions';
 
-  const submit = ui.button({
-    id: 'v2Submit',
-    className: 'v2-btn v2-btn-primary',
-    label: 'بررسی پاسخ',
-    onClick: async () => {
-      const bridge = window.__KANJI5_EDU_BRIDGE__;
-      if (!bridge) return;
-      submit.disabled = true;
-      unknown.disabled = true;
-      await runBusy(
-        'در حال بررسی پاسخ…',
-        async () => bridge.submitValue(input.value),
-        'بررسی پاسخ انجام نشد. دوباره تلاش کن.'
-      );
-    }
+  const submit = document.createElement('button');
+  submit.type = 'button';
+  submit.id = 'v2Submit';
+  submit.className = 'v2-btn v2-btn-primary';
+  submit.textContent = 'بررسی پاسخ';
+  submit.addEventListener('click',async()=>{
+    const bridge = window.__KANJI5_EDU_BRIDGE__;
+    if (!bridge) return;
+    submit.disabled = true;
+    unknown.disabled = true;
+    await runBusy('در حال بررسی پاسخ…', async () => bridge.submitValue(input.value), 'بررسی پاسخ انجام نشد. دوباره تلاش کن.');
   });
 
-  const unknown = ui.button({
-    id: 'v2DontKnow',
-    className: 'v2-btn v2-btn-secondary',
-    label: 'نمی‌دانم',
-    onClick: async () => {
-      const bridge = window.__KANJI5_EDU_BRIDGE__;
-      if (!bridge) return;
-      submit.disabled = true;
-      unknown.disabled = true;
-      await runBusy(
-        'در حال ثبت نتیجه…',
-        async () => bridge.dontKnow(),
-        'ثبت نتیجه انجام نشد. دوباره تلاش کن.'
-      );
-    }
+  const unknown = document.createElement('button');
+  unknown.type = 'button';
+  unknown.id = 'v2DontKnow';
+  unknown.className = 'v2-btn v2-btn-secondary';
+  unknown.textContent = 'نمی‌دانم';
+  unknown.addEventListener('click',async()=>{
+    const bridge = window.__KANJI5_EDU_BRIDGE__;
+    if (!bridge) return;
+    submit.disabled = true;
+    unknown.disabled = true;
+    await runBusy('در حال ثبت نتیجه…', async () => bridge.dontKnow(), 'ثبت نتیجه انجام نشد. دوباره تلاش کن.');
   });
 
   input.addEventListener('keydown',event=>{
@@ -914,15 +937,15 @@ function renderExercise(snapshot) {
   actions.append(submit,unknown);
   field.append(label,input,actions);
   section.appendChild(field);
-  const back = ui.button({
-    id: 'v2BackToLearning',
-    className: 'v2-btn v2-btn-secondary v2-back-learning',
-    label: 'بازگشت به کارت یادگیری',
-    onClick: async () => {
-      presentationMode = 'auto';
-      await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
-      await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
-    }
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.id = 'v2BackToLearning';
+  back.className = 'v2-btn v2-btn-secondary v2-back-learning';
+  back.textContent = 'بازگشت به کارت یادگیری';
+  back.addEventListener('click', async () => {
+    presentationMode = 'auto';
+    await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
+    await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
   });
   section.appendChild(back);
   return section;
@@ -1006,14 +1029,16 @@ function renderInsights(snapshot) {
   const grid = document.createElement('div');
   grid.className = 'v2-insights-grid';
 
-  const skills = ui.card({className:'v2-insight-panel'});
+  const skills = document.createElement('section');
+  skills.className = 'v2-insight-panel';
   skills.appendChild(heading('مهارت‌های یادگیرنده','v2LearnerTitle'));
   for (const mode of Object.keys(labels)) {
     const item = snapshot?.learner?.attributes?.[mode] || {};
     row(skills,labels[mode],localizeState(item.state)+' · اخیر '+toFaDigits(Math.round((Number(item.recentAccuracy)||0)*100))+'٪');
   }
 
-  const reason = ui.card({className:'v2-insight-panel'});
+  const reason = document.createElement('section');
+  reason.className = 'v2-insight-panel';
   reason.appendChild(heading('تمرکز تطبیقی','v2ReasonTitle'));
   row(reason,'مهارت',labels[snapshot?.adaptiveReason?.mode] || snapshot?.adaptiveReason?.mode);
   row(reason,'عمل',localizeAction(snapshot?.adaptiveReason?.action));
@@ -1021,19 +1046,21 @@ function renderInsights(snapshot) {
   if(concreteReasons.length){
     const list=document.createElement('div');
     list.className='v2-reason-list';
-    for(const item of concreteReasons){const p=document.createElement('p');p.textContent=localizedReason(item);list.appendChild(p);}
+    for(const item of concreteReasons){const p=document.createElement('p');p.textContent=text(item);list.appendChild(p);}
     reason.appendChild(list);
   }else if(snapshot?.adaptiveReason?.action){
     row(reason,'دلیل',localizedReason(snapshot.adaptiveReason.action));
   }
 
-  const summaryPanel = ui.card({className:'v2-insight-panel'});
+  const summaryPanel = document.createElement('section');
+  summaryPanel.className = 'v2-insight-panel';
   summaryPanel.appendChild(heading('خلاصه جلسه','v2SummaryTitle'));
   row(summaryPanel,'تلاش‌ها',snapshot?.sessionSummary?.attempts);
   row(summaryPanel,'درست',snapshot?.sessionSummary?.correct);
   row(summaryPanel,'دقت',Math.round((Number(snapshot?.sessionSummary?.accuracy)||0)*100)+'٪');
 
-  const recent = ui.card({className:'v2-insight-panel'});
+  const recent = document.createElement('section');
+  recent.className = 'v2-insight-panel';
   recent.appendChild(heading('نتایج اخیر','v2RecentTitle'));
   const list = Array.isArray(snapshot?.recentOutcomes) ? snapshot.recentOutcomes : [];
   if (!list.length) {
@@ -1127,7 +1154,6 @@ async function init() {
       document.addEventListener('kanji5:v1.9-v2-view-models',event=>render(event?.detail||{}));
       render(await boundary.snapshot());
       subscribed=true;
-       window.__KANJI5_V2_PRESENTATION_READY__=true;
     }
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     const sessionApi = window.__KANJI5_V16_SESSION_API__;

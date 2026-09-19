@@ -63,7 +63,7 @@ test('renders Context as a real learner-input exercise and persists a wrong outc
   const {pane,target}=await openContext(page);
   await expect(pane.locator('.v14-edu-word')).toContainText('＿');
   await pane.locator('#v14EduContextInput').fill('校');
-  await pane.locator('#v14EduContextInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ نادرست بود');
   const context=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.context||null,target);
   expect(context?.attempts).toBeGreaterThan(0);
@@ -74,7 +74,7 @@ test('grades an exact Context response as correct',async({page})=>{
   await cleanStart(page); await seedReviewedCard(page); await startReview(page);
   const {pane,target}=await openContext(page);
   await pane.locator('#v14EduContextInput').fill(target);
-  await pane.locator('#v14EduContextInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ درست بود');
   const context=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.context||null,target);
   expect(context?.attempts).toBeGreaterThan(0);
@@ -85,7 +85,7 @@ test('does not record an empty Context submission',async({page})=>{
   await cleanStart(page); await seedReviewedCard(page); await startReview(page);
   const {pane,target}=await openContext(page);
   await pane.locator('#v14EduContextInput').fill('');
-  await pane.locator('#v14EduContextInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane.locator('#v14EduContextInput')).toBeVisible();
   const context=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.context||null,target);
   expect(context).toBeFalsy();
@@ -95,7 +95,7 @@ test('preserves Context outcome after reload',async({page})=>{
   await cleanStart(page); await seedReviewedCard(page); await startReview(page);
   const {pane,target}=await openContext(page);
   await pane.locator('#v14EduContextInput').fill(target);
-  await pane.locator('#v14EduContextInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ درست بود');
   const before=await page.evaluate(character=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[character]?.context?.attempts||0,target);
   expect(before).toBeGreaterThan(0);

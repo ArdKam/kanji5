@@ -16,15 +16,12 @@ test('v2 restores the visible FSRS review-card flow', async ({page}) => {
   await page.locator('.rate[data-r="Good"]').click();
   await expect(page.locator('#revealBtn')).toBeVisible();
   await page.evaluate((character) => {
-    const state = window.__KANJI5_STATE__;
-    if (!state?.transaction || !state?.readDeck) throw new Error('canonical state persistence API unavailable');
-    const item = state.readDeck().find(x => x?.character === character);
-    if (!item) throw new Error('seeded deck item not found');
-    state.transaction(draft => {
-      if (!draft.cards?.[item.id]?.card) throw new Error('seeded card not found');
-      draft.cards[item.id].card.due = new Date(Date.now() - 60_000).toISOString();
-      return draft;
-    });
+    const deck = JSON.parse(localStorage.getItem('kanji5-deck') || '[]');
+    const cards = JSON.parse(localStorage.getItem('kanji5-v1-cards') || '{}');
+    const item = deck.find(x => x?.character === character);
+    if (!item || !cards[item.id]) throw new Error('seeded card not found');
+    cards[item.id].card.due = new Date(Date.now() - 60_000).toISOString();
+    localStorage.setItem('kanji5-v1-cards', JSON.stringify(cards));
   }, target);
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});

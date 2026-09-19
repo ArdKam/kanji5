@@ -55,7 +55,7 @@ test('renders Vocabulary Recall without leaking the answer and persists wrong ou
   const {pane,character,word}=await openVocabulary(page);
   await expect(pane.locator('#v14EduVocabularyInput')).not.toHaveAttribute('placeholder',new RegExp(word));
   await pane.locator('#v14EduVocabularyInput').fill('学校');
-  await pane.locator('#v14EduVocabularyInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ نادرست بود');
   const vocabulary=await page.evaluate(ch=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[ch]?.vocabulary||null,character);
   expect(vocabulary?.attempts).toBeGreaterThan(0);
@@ -68,7 +68,7 @@ test('grades an exact Vocabulary response as correct',async({page})=>{
   await startReview(page);
   const {pane,character,word}=await openVocabulary(page);
   await pane.locator('#v14EduVocabularyInput').fill(word);
-  await pane.locator('#v14EduVocabularyInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ درست بود');
   const vocabulary=await page.evaluate(ch=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[ch]?.vocabulary||null,character);
   expect(vocabulary?.attempts).toBeGreaterThan(0);
@@ -81,7 +81,7 @@ test('does not record an empty Vocabulary submission',async({page})=>{
   await startReview(page);
   const {pane,character}=await openVocabulary(page);
   await pane.locator('#v14EduVocabularyInput').fill('');
-  await pane.locator('#v14EduVocabularyInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane.locator('#v14EduVocabularyInput')).toBeVisible();
   const vocabulary=await page.evaluate(ch=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[ch]?.vocabulary||null,character);
   expect(vocabulary).toBeFalsy();
@@ -93,7 +93,7 @@ test('survives reload through the education state boundary',async({page})=>{
   await startReview(page);
   const {pane,character,word}=await openVocabulary(page);
   await pane.locator('#v14EduVocabularyInput').fill(word);
-  await pane.locator('#v14EduVocabularyInput').press('Enter');
+  await pane.locator('#v14EduSubmit').click();
   await expect(pane).toContainText('پاسخ درست بود');
   const before=await page.evaluate(ch=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')[ch]?.vocabulary?.attempts||0,character);
   expect(before).toBeGreaterThan(0);

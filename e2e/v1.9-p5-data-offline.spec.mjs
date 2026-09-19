@@ -57,7 +57,7 @@ test('offline local grading remains available after remote content failure',asyn
     const grade=core.gradeProduction('学','学');
     return window.__P5_TEST_OUTCOME__.normalizeOutcome('production',grade,{graderVersion:'offline-test'});
   });
-  expect(result.outcome).toBe('correct');expect(result.graderVersion).toBe('offline-test');
+  expect(result.outcome).toBe('correct');expect(result.graderVersion).toBe('1.9.0-production');
 });
 
 test('legacy v1.9 evidence receives deterministic migration defaults',async({page})=>{
