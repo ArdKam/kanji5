@@ -20,7 +20,7 @@ function safeStats(value){const s=value&&typeof value==='object'?value:{};return
 function mastery(stats){const s=safeStats(stats);return(s.correct+1)/(s.attempts+2)}
 function weakness(stats){return 1-mastery(stats)}
 function normalize(value){return String(value??'').trim().toLowerCase().normalize('NFKC').replace(/[\s\u3000]+/g,'')}
-function normalizeMeaningText(value){return String(value??'').normalize('NFKC').toLowerCase().replace(/[’‘]/g,"'").replace(/[–—−]/g,'-').replace(/[._/\\-]+/g,' ').replace(/[^a-z0-9'\\s]+/g,' ').replace(/[\\s\\u3000]+/g,' ').trim()}
+function normalizeMeaningText(value){return String(value??'').normalize('NFKC').toLowerCase().replace(/[’‘]/g,"'").replace(/[–—−]/g,'-').replace(/[._\/-]+/g,' ').replace(/[^a-z0-9'\s]+/g,' ').replace(/[\s\u3000]+/g,' ').trim()}
 function meaningTokens(value){return normalizeMeaningText(value).split(/[^a-z0-9]+/).filter(token=>token.length>1)}
 function normalizeMeaning(value){return new Set(meaningTokens(value))}
 function meaningSimilarity(input,meaning){const a=normalizeMeaning(input),b=normalizeMeaning(meaning);if(!a.size||!b.size)return 0;let shared=0;for(const token of a)if(b.has(token))shared++;return shared/Math.max(1,Math.max(a.size,b.size))}
