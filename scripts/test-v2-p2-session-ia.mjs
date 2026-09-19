@@ -34,7 +34,6 @@ assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(spec.includes('v2 P2 session information architecture'));
 console.log('Kanji 5 v2 P2 information architecture contract passed.');
 
-const presentation=fs.readFileSync('v2-presentation.js','utf8');
 const css=fs.readFileSync('v2-presentation.css','utf8');
 assert.match(presentation,/presentationMode = 'home'/,'V2 must start on the home experience');
 assert.match(presentation,/v2ReviewNav/,'Dedicated Review navigation is missing');
