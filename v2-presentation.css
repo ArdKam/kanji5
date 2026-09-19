@@ -837,3 +837,60 @@ body:has(#v2App){
 @media (prefers-reduced-motion:reduce){
   .v2-operation-status[data-state="busy"]::before{animation:none}
 }
+
+/* Lovable/Sumi Play study-surface adaptation: preserve v1.9 semantics, elevate the presentation layer. */
+.v2-learning-card{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(180deg,var(--v2-surface),var(--v2-surface-soft));
+  isolation:isolate;
+}
+.v2-learning-card::before{
+  content:"";
+  display:block;
+  width:52px;
+  height:4px;
+  margin:0 auto 18px;
+  border-radius:999px;
+  background:var(--v2-accent);
+  opacity:.9;
+}
+.v2-review-card::before{background:var(--v2-accent-deep)}
+.v2-learning-kanji{
+  text-shadow:0 8px 28px var(--v2-shadow-soft);
+  transform:translateZ(0);
+}
+.v2-learning-reveal{
+  box-shadow:0 10px 24px var(--v2-shadow-soft);
+}
+.v2-learning-reveal:hover:not(:disabled){box-shadow:0 14px 28px var(--v2-shadow)}
+.v2-learning-reading-box{
+  transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;
+}
+@media (hover:hover){
+  .v2-learning-reading-box:hover{
+    transform:translateY(-1px);
+    border-color:var(--v2-border-strong);
+    background:var(--v2-surface);
+    box-shadow:0 8px 18px var(--v2-shadow-soft);
+  }
+}
+.v2-learning-example{
+  margin-bottom:8px;
+  padding:11px 12px;
+  border:1px solid var(--v2-border);
+  border-radius:14px;
+  background:var(--v2-surface-soft);
+}
+.v2-learning-example:last-child{margin-bottom:0}
+.v2-learning-ratings{margin-top:4px}
+.v2-learning-rating[data-rating="Again"]{background:var(--v2-danger-soft)}
+.v2-learning-rating[data-rating="Hard"]{background:var(--v2-warning-soft)}
+.v2-learning-rating[data-rating="Good"]{background:var(--v2-success-soft)}
+.v2-learning-rating[data-rating="Easy"]{background:var(--v2-info-soft)}
+.v2-learning-rating[data-rating="Good"]{font-weight:900}
+@media(max-width:600px){
+  .v2-learning-card{padding:20px 16px}
+  .v2-learning-card::before{margin-bottom:14px}
+  .v2-learning-kanji{margin-top:4px}
+}
