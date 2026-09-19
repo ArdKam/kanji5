@@ -225,7 +225,7 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   await openDashboard(page);
   await page.goto('/?legacy=1');
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
-  await page.locator('#revealBtn').click();
+  await page.evaluate(async()=>{await window.__KANJI5_V12_OPEN_RECALL__?.()});
   await expect(page.locator('.v12-recall-gate')).toBeVisible({timeout:10_000});
   await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','reading');
   await page.locator('#v12RecallInput').fill(info.romaji);
