@@ -1,16 +1,23 @@
 import {test,expect} from '@playwright/test';
 
-test('React presentation boots through the static shell without starting the legacy renderer',async({page})=>{
+test('React presentation is the default static-shell renderer without starting the legacy renderer',async({page})=>{
   await page.goto('/?legacy=1');
   await page.evaluate(()=>{
     for(const key of Object.keys(localStorage)) if(key.startsWith('kanji5-')) localStorage.removeItem(key);
     sessionStorage.clear();
   });
-  await page.goto('/?react=1');
+  await page.goto('/');
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   await expect(page.locator('#v2App')).toHaveCount(0);
   await expect(page.locator('#root .daily-summary')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
+});
+
+test('explicit v2 fallback remains available after the default switch',async({page})=>{
+  await page.goto('/?v2=1');
+  await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
+  await expect(page.locator('#root .app-shell')).toHaveCount(0);
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
 });
 
 test('React learning and review actions stay behind the v1.9/v2 boundary',async({page})=>{
