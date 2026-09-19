@@ -1035,3 +1035,61 @@ body:has(#v2App){
 .v2-dialog-bar-col span{
   color:var(--v2-muted);
 }
+
+
+/* Settings Sumi Play adaptation. */
+.v2-settings-surface{
+  background:linear-gradient(180deg,var(--v2-surface),var(--v2-surface-soft));
+}
+.v2-settings-form{
+  display:grid;
+  gap:12px;
+  margin-top:18px;
+}
+.v2-setting-row{
+  display:grid;
+  grid-template-columns:1fr minmax(84px,140px);
+  align-items:center;
+  gap:14px;
+  min-height:52px;
+  padding:12px 14px;
+  border:1px solid var(--v2-border);
+  border-radius:16px;
+  background:var(--v2-surface-soft);
+  color:var(--v2-text);
+  font-size:13px;
+  font-weight:750;
+}
+.v2-setting-row input[type="number"]{
+  width:100%;
+  min-height:40px;
+  padding:8px 10px;
+  border:1px solid var(--v2-border-strong);
+  border-radius:12px;
+  background:var(--v2-surface);
+  color:var(--v2-text);
+  font:inherit;
+  text-align:center;
+}
+.v2-setting-row input[type="checkbox"]{
+  width:20px;
+  height:20px;
+  justify-self:end;
+  accent-color:var(--v2-accent);
+}
+.v2-setting-row:focus-within{
+  border-color:var(--v2-accent);
+  box-shadow:0 0 0 3px var(--v2-accent-soft);
+}
+.v2-settings-form .v2-actions{
+  grid-template-columns:1fr 1fr 1fr;
+  margin-top:6px;
+}
+@media(max-width:600px){
+  .v2-setting-row{
+    grid-template-columns:1fr auto;
+  }
+  .v2-settings-form .v2-actions{
+    grid-template-columns:1fr;
+  }
+}
