@@ -188,6 +188,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     stats.attempts=3;
     stats.correct=3;
     const key=reading.normalize('NFKC').trim().toLowerCase();
+    stats.variants=stats.variants||{};
     stats.variants[key]={reading,attempts:1,correct:1};
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
     localStorage.removeItem('kanji5-v1.6-session-history');
