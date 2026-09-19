@@ -231,9 +231,11 @@ Kanji 5's existing auth/persistence architecture remains authoritative.
 - Responsive/mobile refinement: complete; mobile, desktop, and landscape overflow/layout checks are covered by browser tests.
 - Shared motion: complete; restrained entrance/feedback choreography is tokenized and disabled under reduced-motion preferences.
 - Accessibility completion: complete for the migrated v2 surface; keyboard Enter submission, focus management, ARIA semantics, reduced motion, touch target sizing, responsive layout, and no-overflow checks are covered by the v2 browser gate.
-- Focused v2 parity gate: green after the responsive/accessibility additions.
+- Regression hardening: complete; the migration guard verifies the v1.9 boundary, shared visual primitives, shell manifest, semantic token layer, and that Lovable scheduling semantics remain outside v2.
+- Visual QA: complete at the structural/interaction-contract level against the Lovable visual inventory; Study, Test, Home, Progress, Settings, responsive, motion, and accessibility contracts are green.
+- Focused v2 parity gate: green after the responsive/accessibility and regression-guard additions.
 - Full repository CI remains red on pre-existing v1.6/v1.7/v1.8-v1.9 contract suites; these failures are outside this migration PR and are not being treated as migration regressions.
-- Next migration stage: regression hardening, visual QA, and release checks.
+- Next migration stage: final release-readiness review and PR handoff.
 
 ## 6. Interaction inventory
 
