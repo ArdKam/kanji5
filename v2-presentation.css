@@ -57,7 +57,7 @@ body:has(#v2App){
 }
 
 #v2App.v2-shell{
-  max-width:1040px;
+  max-width:880px;
   direction:rtl;
   min-height:100vh;
   margin:0 auto;
@@ -1234,8 +1234,8 @@ body:has(#v2App){
 :root{
   --v2-motion-fast:.14s;
   --v2-motion-base:.24s;
-  --v2-motion-rise:.36s;
-  --v2-motion-stamp:.48s;
+  --v2-motion-rise:.55s;
+  --v2-motion-stamp:.7s;
   --v2-motion-ease:cubic-bezier(.2,.75,.25,1);
 }
 .v2-learning-card,
