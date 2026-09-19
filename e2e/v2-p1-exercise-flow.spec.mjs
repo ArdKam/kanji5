@@ -27,7 +27,7 @@ async function currentTarget(page){
   });
 }
 
-test('v2 P1 exercise flow renders, grades, and recovers through Production MCQ',async({page})=>{
+test('v2 P1 exercise flow renders, grades, and recovers through Production retrieval',async({page})=>{
   await cleanStart(page);
   await seedReviewedCard(page);
   const target=await currentTarget(page);
@@ -42,22 +42,18 @@ test('v2 P1 exercise flow renders, grades, and recovers through Production MCQ',
   });
   await page.locator('#v2StartPractice').click();
   await expect(page.locator('.v2-mode-badge')).toHaveText('تولید');
-  await expect(page.locator('#v2ProductionChoices')).toBeVisible({timeout:10000});
-  await expect(page.locator('.v2-production-choice')).toHaveCount(4);
-  await expect(page.locator('#v2AnswerInput')).toBeHidden();
-
-  const choiceCharacters=await page.locator('.v2-production-choice').allTextContents();
-  expect(choiceCharacters).toContain(target);
-  const wrong=choiceCharacters.find(value=>value!==target);
-  expect(wrong).toBeTruthy();
-
-  await page.locator('.v2-production-choice').filter({hasText:wrong}).click();
+  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  const wrong=await page.evaluate(target=>{
+    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
+    return deck.find(item=>item?.character&&item.character!==target)?.character||'日';
+  },target);
+  await page.locator('#v2AnswerInput').fill(wrong);
+  await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('نادرست',{timeout:10000});
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
-
   await page.locator('#v2Retry').click();
-  await expect(page.locator('#v2ProductionChoices')).toBeVisible({timeout:10000});
-  await expect(page.locator('.v2-production-choice')).toHaveCount(4);
-  await page.locator('.v2-production-choice').filter({hasText:target}).click();
+  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  await page.locator('#v2AnswerInput').fill(target);
+  await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 });
