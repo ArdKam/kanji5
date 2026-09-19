@@ -42,3 +42,15 @@ assert.equal(recovered.state,'recovered');
 assert.equal(recovered.recovered,true);
 
 console.log('v1.9 recovery task-identity regression tests passed.');
+
+const characterMismatch=core.applyRecoveryOutcome(
+  {state:'pending_retry',mode:'reading',taskId:'学:reading:1',character:'学',contentId:'c1',retryCount:0,maxRetries:1},
+  {mode:'reading',taskId:'学:reading:1',character:'日',contentId:'c1',outcome:'correct',retryable:false}
+);
+assert.notEqual(characterMismatch.state,'recovered','Recovery must not cross Kanji targets');
+const contentMismatch=core.applyRecoveryOutcome(
+  {state:'pending_retry',mode:'reading',taskId:'学:reading:1',character:'学',contentId:'c1',retryCount:0,maxRetries:1},
+  {mode:'reading',taskId:'学:reading:1',character:'学',contentId:'c2',outcome:'correct',retryable:false}
+);
+assert.notEqual(contentMismatch.state,'recovered','Recovery must not cross content identities');
+console.log('Kanji 5 recovery target-identity contract passed.');
