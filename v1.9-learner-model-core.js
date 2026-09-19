@@ -12,6 +12,20 @@ function normalizeEvidence(source){return(Array.isArray(source)?source:[]).filte
 function deriveEvidence(evidence,now=Date.now(),windowSize=DEFAULTS.recentWindow){const source=normalizeEvidence(evidence),recent=source.slice(-Math.max(1,windowSize));let errorStreak=0,successStreak=0,recoveries=0;for(let i=source.length-1;i>=0;i--){const o=source[i]?.outcome;if(o==='wrong'||o==='unknown'){if(successStreak===0)errorStreak++;else break}else if(o==='correct'){if(errorStreak===0)successStreak++;else break}else break}for(let i=1;i<source.length;i++){const previous=source[i-1],current=source[i];if((previous.outcome==='wrong'||previous.outcome==='unknown')&&current.outcome==='correct'&&previous.taskId&&current.taskId===previous.taskId&&current.recovery===true&&current.retryOf===previous.taskId)recoveries++;}const attempts=recent.length,correct=recent.filter(x=>x.outcome==='correct').length,recentAccuracy=attempts?correct/attempts:0,l=source[source.length-1],lastMs=l?.at?Date.parse(l.at):NaN,recencyDays=Number.isFinite(lastMs)?Math.max(0,(now-lastMs)/86400000):null;const older=source.length>recent.length?source.slice(0,source.length-recent.length):[];const olderCorrect=older.filter(x=>x.outcome==='correct').length,olderAccuracy=older.length?olderCorrect/older.length:null;const momentum=olderAccuracy===null?0:recentAccuracy-olderAccuracy;const repeatedFailure=errorStreak>=DEFAULTS.repeatFailureStreak;const uncertaintyState=attempts<DEFAULTS.sparseAttempts?'high':attempts<4?'moderate':'low';return{recentAttempts:attempts,recentAccuracy,errorStreak,successStreak,recoveryCount:recoveries,lastAt:l?.at||'',recencyDays,momentum,repeatedFailure,uncertaintyState}}
 function orderRows(rows){return(Array.isArray(rows)?rows:[]).filter(x=>x&&typeof x==='object').slice().sort((a,b)=>String(a.endedAt||a.createdAt||'').localeCompare(String(b.endedAt||b.createdAt||'')))}
 function deriveMomentum(recentAccuracy,baselineAccuracy){return baselineAccuracy===null?0:clamp(recentAccuracy-baselineAccuracy,-1,1)}
+function semanticSkillState({attempts,correct,recentAttempts,recentCorrect,confidence,state,lastAt,recencyDays,recoveryCount,errorStreak}){
+  const performanceAccuracy=attempts?correct/attempts:0;
+  const recentAccuracy=recentAttempts?recentCorrect/recentAttempts:0;
+  const mastery=(correct+1)/(attempts+2);
+  const retention=null;
+  return Object.freeze({
+    performance:Object.freeze({attempts,correct,accuracy:performanceAccuracy,recentAttempts,recentCorrect,recentAccuracy,lastAt,recencyDays,recoveryCount,errorStreak}),
+    confidence,
+    state,
+    mastery,
+    retention,
+    retentionVerified:false
+  });
+}
 function deriveState({attempts,accuracy,confidence,errorStreak,successStreak=0,recentAccuracy,momentum,exposed=false},cfg=DEFAULTS){
   if(!attempts)return exposed?'introduced':'unseen';
   if(errorStreak>=cfg.repeatFailureStreak||(attempts>=2&&accuracy<cfg.weakAccuracy))return'weak';
@@ -41,7 +55,7 @@ function modeSummary(rows,mode,now=Date.now(),options={}){
   const momentum=deriveMomentum(recentAccuracy,olderAccuracy);
   
   const state=deriveState({attempts:lifetime.attempts,accuracy,confidence,errorStreak,successStreak,recentAccuracy,momentum},cfg);
-  return{attempts:lifetime.attempts,correct:lifetime.correct,accuracy,recentAttempts:recent.attempts,recentCorrect:recent.correct,recentAccuracy,errorStreak,successStreak,lastAt:last.lastAt||'',recencyDays:Number.isFinite(recency)?recency:null,momentum,recoveryCount,confidence,state,version:LEARNER_MODEL_VERSION}
+  const base={attempts:lifetime.attempts,correct:lifetime.correct,accuracy,recentAttempts:recent.attempts,recentCorrect:recent.correct,recentAccuracy,errorStreak,successStreak,lastAt:last.lastAt||'',recencyDays:Number.isFinite(recency)?recency:null,momentum,recoveryCount,confidence,state,version:LEARNER_MODEL_VERSION};return{...base,...semanticSkillState(base)}
 }
 export function buildLearnerModel(rows,options={}){const ordered=orderRows(rows),out={version:LEARNER_MODEL_VERSION,sessions:ordered.length,generatedAt:Date.now(),attributes:{}};for(const mode of ATTRIBUTES)out.attributes[mode]=modeSummary(ordered,mode,options.now??Date.now(),options);return out}
 export function projectKanjiAttributes(knowledge,character,options={}){
@@ -59,7 +73,7 @@ export function projectKanjiAttributes(knowledge,character,options={}){
       momentum:evidence.momentum,
       exposed:Boolean(entry?.exposedAt)
     },DEFAULTS);
-    out.attributes[mode]={...s,...evidence,confidence,state,version:LEARNER_MODEL_VERSION};
+    const base={...s,...evidence,confidence,state,version:LEARNER_MODEL_VERSION};out.attributes[mode]={...base,...semanticSkillState(base)};
   }
   return out;
 }
