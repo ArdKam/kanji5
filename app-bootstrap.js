@@ -3,6 +3,7 @@
 
 const params=new URLSearchParams(location.search);
 const IS_LEGACY=params.get('legacy')==='1';
+const IS_REACT=params.get('react')==='1';
 const DATA_VERSION='v1.2-dataset-2136';
 const DECK_KEY='kanji5-deck';
 const VERSION_KEY='kanji5-deck-version';
@@ -11,12 +12,14 @@ const LEGACY_STYLESHEET='./legacy.css';
 if(IS_LEGACY){
   const link=document.getElementById('legacyStylesheet');
   if(link)link.media='all';
+}else if(IS_REACT){
+  document.documentElement.classList.add('kanji5-react-default');
 }else{
   document.documentElement.classList.add('kanji5-v2-default');
 }
 
 const style=document.createElement('style');
-style.textContent='.kanji5-v2-default .wrap>header{display:none!important}.kanji5-v2-default #app{display:none!important}.kanji5-v2-default #loading{display:none!important}';
+style.textContent='.kanji5-v2-default .wrap>header{display:none!important}.kanji5-v2-default #app{display:none!important}.kanji5-v2-default #loading{display:none!important}.kanji5-react-default .wrap>header{display:none!important}.kanji5-react-default #app{display:none!important}.kanji5-react-default #loading{display:none!important}.kanji5-react-default #root{display:block!important;min-height:100vh}';
 document.head.appendChild(style);
 
 try{
@@ -64,6 +67,7 @@ window.addEventListener('unhandledrejection',()=>setTimeout(showFallback,0),true
 setTimeout(showFallback,7000);
 
 if(!IS_LEGACY)import('./v1.6-session.js').catch(()=>{});
+if(IS_REACT)import('./react-dist/kanji5-react.js').catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
