@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const state=fs.readFileSync('v1.5-state.js','utf8');
-const runtime=fs.readFileSync('review-runtime.js','utf8');\nconst boundary=fs.readFileSync('v1.9-v2-boundary.js','utf8');
+const runtime=fs.readFileSync('review-runtime.js','utf8');
+const boundary=fs.readFileSync('v1.9-v2-boundary.js','utf8');
 const sync=fs.readFileSync('supabase-sync.js','utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 assert(state.includes("CARDS_STORAGE='kanji5-v1-cards'"),'Persistent cards slice key missing');
