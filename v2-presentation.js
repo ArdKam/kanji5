@@ -51,35 +51,39 @@ const headerMeta = document.createElement('div');
 headerMeta.className = 'v2-header-meta';
 const sessionProgress = document.createElement('div');
 sessionProgress.className = 'v2-session-progress';
-const practiceButton = document.createElement('button');
-practiceButton.type = 'button';
-practiceButton.id = 'v2StartPractice';
-practiceButton.className = 'v2-btn v2-btn-secondary v2-header-practice';
-practiceButton.textContent = 'تمرین آموزشی';
-practiceButton.addEventListener('click', async () => {
-  const bridge = window.__KANJI5_EDU_BRIDGE__;
-  if (!bridge?.start) return;
-  presentationMode = 'exercise';
-  await runBusy('در حال آماده‌سازی تمرین…', async () => {
-    const sessionApi = window.__KANJI5_V16_SESSION_API__;
-    const current = sessionApi?.getSession?.();
-    if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady(); else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
-    await bridge.start();
-  },'آماده‌سازی تمرین انجام نشد. دوباره تلاش کن.');
+const practiceButton = ui.button({
+  id: 'v2StartPractice',
+  className: 'v2-btn v2-btn-secondary v2-header-practice',
+  label: 'تمرین آموزشی',
+  onClick: async () => {
+    const bridge = window.__KANJI5_EDU_BRIDGE__;
+    if (!bridge?.start) return;
+    presentationMode = 'exercise';
+    await runBusy(
+      'در حال آماده‌سازی تمرین…',
+      async () => {
+        const sessionApi = window.__KANJI5_V16_SESSION_API__;
+        const current = sessionApi?.getSession?.();
+        if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady();
+        else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
+        await bridge.start();
+      },
+      'آماده‌سازی تمرین انجام نشد. دوباره تلاش کن.'
+    );
+  }
 });
-const statsButton = document.createElement('button');
-statsButton.type = 'button';
-statsButton.id = 'v2Stats';
-statsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
-statsButton.textContent = 'آمار';
-statsButton.addEventListener('click', () => { void openV2Stats(); });
-
-const settingsButton = document.createElement('button');
-settingsButton.type = 'button';
-settingsButton.id = 'v2Settings';
-settingsButton.className = 'v2-btn v2-btn-secondary v2-header-tool';
-settingsButton.textContent = 'تنظیمات';
-settingsButton.addEventListener('click', () => { void openV2Settings(); });
+const statsButton = ui.button({
+  id: 'v2Stats',
+  className: 'v2-btn v2-btn-secondary v2-header-tool',
+  label: 'آمار',
+  onClick: () => { void openV2Stats(); }
+});
+const settingsButton = ui.button({
+  id: 'v2Settings',
+  className: 'v2-btn v2-btn-secondary v2-header-tool',
+  label: 'تنظیمات',
+  onClick: () => { void openV2Settings(); }
+});
 
 headerMeta.append(sessionProgress,practiceButton,statsButton,settingsButton);
 header.appendChild(headerMeta);
@@ -199,8 +203,7 @@ function relativeDue(dueAt){
 }
 function renderDailyGoal(parent,snapshot){
   const goal=snapshot?.dailyGoal||{};
-  const section=document.createElement('section');
-  section.className='v2-daily-goal';
+  const section=ui.card({className:'v2-daily-goal'});
   const top=document.createElement('div');
   top.className='v2-daily-goal-top';
   const label=document.createElement('strong');
@@ -208,12 +211,8 @@ function renderDailyGoal(parent,snapshot){
   const badge=document.createElement('span');
   badge.textContent=goal.celebrated?'🎉 تکمیل شد':'';
   top.append(label,badge);
-  const track=document.createElement('div');
-  track.className='v2-daily-goal-track';
-  const fill=document.createElement('div');
-  fill.className='v2-daily-goal-fill';
-  fill.style.width=Math.round((Number(goal.progress)||0)*100)+'%';
-  track.appendChild(fill);
+  const track=ui.progress((Number(goal.progress)||0)*100,{label:'پیشرفت هدف روزانه',className:'v2-daily-goal-track'});
+  top.appendChild(badge);
   section.append(top,track);
   parent.appendChild(section);
 }
