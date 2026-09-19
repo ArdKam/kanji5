@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const state=fs.readFileSync('v1.5-state.js','utf8');
-const index=fs.readFileSync('index.html','utf8');
+const runtime=fs.readFileSync('review-runtime.js','utf8');\nconst boundary=fs.readFileSync('v1.9-v2-boundary.js','utf8');
 const sync=fs.readFileSync('supabase-sync.js','utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 assert(state.includes("CARDS_STORAGE='kanji5-v1-cards'"),'Persistent cards slice key missing');
@@ -11,7 +11,7 @@ assert(state.includes('localStorage.setItem(CARDS_STORAGE,JSON.stringify(p.cards
 assert(state.includes('localStorage.setItem(REVIEWS_STORAGE,JSON.stringify(p.reviews||[]))'),'Reviews slice is not persisted separately');
 assert(state.includes('const cards=parts.cards??x.cards??{}'),'Legacy cards slice reconciliation is missing');
 assert(state.includes('const reviews=parts.reviews??x.reviews??[]'),'Legacy reviews slice reconciliation is missing');
-assert(index.includes('window.__KANJI5_STATE__.createInitial'),'Application controller must use the extracted state module');
-assert(index.includes('window.__KANJI5_STATE__.reset'),'Reset must use the extracted state module');
+assert(runtime.includes('window.__KANJI5_STATE__.createInitial'),'Application runtime must use the extracted state module');
+assert(boundary.includes('state.reset?.('),'V2 reset path must use the extracted state module');
 assert(sync.includes("from './v1.5-sync-core.js'"),'Remote sync must use the canonical sync core');
 console.log('Kanji 5 persistence-slice contract: PASS');
