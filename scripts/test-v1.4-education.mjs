@@ -29,6 +29,13 @@ assert(core.toRomaji('きょう')==='kyou','拗音 sequence きょう must map t
 assert(core.gradeReading('gaku',['がく']).correct===true,'Hiragana reading grading failed');
 assert(core.gradeReading('gaku',['がく'],v=>v==='がく'?'gaku':v).correct===true,'Romaji reading grading failed');
 assert(core.gradeReading('mo',['も']).correct===true,'Romaji grading regressed for も');
+assert(core.gradeReading('タベル',['た.べる']).correct===true,'Katakana must match a dotted kun-yomi reading');
+assert(core.gradeReading('taberu',['た.べる']).correct===true,'Romaji must match a dotted kun-yomi reading');
+assert(core.gradeReading('たべる',['た.べる']).correct===true,'Separator-free kana must match a dotted kun-yomi reading');
+assert(core.gradeReading('た-べる',['た.べる']).correct===true,'Reading separators must not cause a false negative');
+assert(core.canonicalReading('た.べる','kun').fullKana==='たべる','Kun-yomi canonical model must reconstruct full kana');
+assert(core.canonicalReading('がく','on').readingType==='on','On-yomi canonical model must preserve reading type');
+assert(core.canonicalReading('た.べる','kun').stemKana==='た'&&core.canonicalReading('た.べる','kun').okurigana==='べる','Kun-yomi canonical model must split stem and okurigana');
 const available=core.getAvailableModes({production:true,vocabulary:true,context:true},true);
 assert(available.length===5,'All education modes should be available when enabled');
 assert(!core.getAvailableModes({production:false,vocabulary:false,context:false},false).includes('production'),'Disabled production leaked into mode list');
