@@ -39,7 +39,8 @@ function renderExamples(){const el=$("examples");if(!el||!state.current)return;c
 function next(){if(state.queue.length===0){state.current=null;state.revealed=false;if(IS_LEGACY){renderEmpty();updateStats();}notifyV2Learning();return}state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats();}notifyV2Learning()}
 function learningBridgeSnapshot(){return reviewSnapshot();}
 
-window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:directReveal,rate:directRate,updateSettings:updateRuntimeSettings});
+function resetRuntime(){state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
+window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:directReveal,rate:directRate,updateSettings:updateRuntimeSettings,reset:resetRuntime});
 window.__KANJI5_V19_REVIEW_BRIDGE__=Object.freeze({snapshot:reviewSnapshot,reveal:(direct=false)=>{if(!IS_LEGACY||direct)return directReveal();const button=document.getElementById('revealBtn');if(!button)return false;window.__KANJI5_CANONICAL_REVEAL__=true;button.click();setTimeout(()=>{delete window.__KANJI5_CANONICAL_REVEAL__},0);setTimeout(notifyV2Learning,0);return true;},rate:(rating)=>{if(!IS_LEGACY)return directRate(rating);const button=document.querySelector(`.rate[data-r="${String(rating||'')}"]`);if(!button)return false;button.click();setTimeout(notifyV2Learning,0);return true;}});
 
 function updateStreak(){const t=todayKey(),s=state.streak;if(s.lastActiveDate===t)return;const y=new Date();y.setDate(y.getDate()-1);const yesterday=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(y);s.current=s.lastActiveDate===yesterday?(s.current||0)+1:1;s.longest=Math.max(s.longest||0,s.current);s.lastActiveDate=t}
