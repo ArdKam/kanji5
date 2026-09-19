@@ -149,7 +149,7 @@ const localizeOutcome = value => outcomes[String(value || '')] || text(value);
 const localizeQuality = value => qualities[String(value || '')] || text(value);
 
 let lastFeedbackFocusKey = '';
-let presentationMode = 'auto';
+let presentationMode = 'home';
 
 function speechAvailable(){
   return typeof window.speechSynthesis?.speak === 'function' && typeof window.SpeechSynthesisUtterance === 'function';
@@ -200,6 +200,50 @@ function relativeDue(dueAt){
   if(mins<60)return toFaDigits(mins)+' دقیقهٔ دیگر';
   if(mins<1440)return toFaDigits(Math.round(mins/60))+' ساعتٔ دیگر';
   return toFaDigits(Math.round(mins/1440))+' روزٔ دیگر';
+}
+function renderExperienceNav(parent){
+  const nav=document.createElement('nav');
+  nav.className='v2-experience-nav';
+  nav.setAttribute('aria-label','مسیر یادگیری');
+  const make=(id,label,mode)=>{
+    const b=ui.button({id,className:'v2-btn v2-btn-secondary',label,onClick:async()=>{
+      if(mode==='review'){
+        presentationMode='review';
+        await runBusy('در حال آماده‌سازی مرور…',async()=>{
+          const api=window.__KANJI5_V16_SESSION_API__,current=api?.getSession?.();
+          if(api?.startReady&&!current?.started&&!current?.finished)await api.startReady();
+          else if(api?.start&&!current?.started&&!current?.finished)api.start();
+          await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
+        });
+      }else if(mode==='practice'){
+        presentationMode='practice';
+        const bridge=window.__KANJI5_EDU_BRIDGE__;
+        if(bridge?.start)await runBusy('در حال آماده‌سازی تمرین…',()=>bridge.start());
+      }else{
+        presentationMode='home';
+        await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
+      }
+    }});
+    b.dataset.experience=mode;
+    return b;
+  };
+  nav.append(make('v2HomeNav','خانه','home'),make('v2ReviewNav','مرور','review'),make('v2PracticeNav','تمرین','practice'));
+  parent.appendChild(nav);
+}
+function renderExperienceHome(parent,snapshot){
+  const section=document.createElement('section');
+  section.className='v2-experience-actions';
+  const review=ui.card({className:'v2-experience-action'});
+  const reviewTitle=heading('مرور','v2ReviewActionTitle');
+  const reviewMeta=document.createElement('p');reviewMeta.textContent=toFaDigits(snapshot?.dailySummary?.dueCount||0)+' کارت آمادهٔ مرور';
+  const reviewBtn=ui.button({id:'v2HomeReview',className:'v2-btn v2-btn-primary',label:'شروع مرور',onClick:()=>document.getElementById('v2ReviewNav')?.click()});
+  review.append(reviewTitle,reviewMeta,reviewBtn);
+  const practice=ui.card({className:'v2-experience-action'});
+  const practiceTitle=heading('تمرین','v2PracticeActionTitle');
+  const practiceMeta=document.createElement('p');practiceMeta.textContent='تمرین فعال روی مهارت‌های ضعیف';
+  const practiceBtn=ui.button({id:'v2HomePractice',className:'v2-btn v2-btn-secondary',label:'شروع تمرین',onClick:()=>document.getElementById('v2PracticeNav')?.click()});
+  practice.append(practiceTitle,practiceMeta,practiceBtn);
+  section.append(review,practice);parent.appendChild(section);
 }
 function renderDailyGoal(parent,snapshot){
   const goal=snapshot?.dailyGoal||{};
@@ -1068,21 +1112,26 @@ function renderInsights(snapshot) {
 function render(snapshot) {
   content.textContent = '';
   renderHeader(snapshot);
+  renderExperienceNav(content);
   renderDailySummary(content,snapshot);
   renderDailyGoal(content,snapshot);
-  renderUpcomingReviews(content,snapshot);
-  const showLearning = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && snapshot.learning.isNew;
-  const showReview = presentationMode !== 'exercise' && !snapshot?.exercise?.mode && snapshot?.learning?.active && !snapshot.learning.isNew;
-  if (showLearning) {
-    content.appendChild(renderLearning(snapshot));
-  } else if (showReview) {
-    content.appendChild(renderReviewCard(snapshot));
-  } else {
-    content.appendChild(renderExercise(snapshot));
-    const feedback = renderFeedback(snapshot);
-    if (feedback) content.appendChild(feedback);
+  if(presentationMode==='home'){
+    renderUpcomingReviews(content,snapshot);
+    renderExperienceHome(content,snapshot);
+    content.appendChild(renderInsights(snapshot));
+    return;
   }
-  content.appendChild(renderInsights(snapshot));
+  if(presentationMode==='review'){
+    const showLearning=snapshot?.learning?.active&&snapshot.learning.isNew;
+    if(showLearning)content.appendChild(renderLearning(snapshot));
+    else if(snapshot?.learning?.active)content.appendChild(renderReviewCard(snapshot));
+    else renderExperienceHome(content,snapshot);
+    return;
+  }
+  renderUpcomingReviews(content,snapshot);
+  content.appendChild(renderExercise(snapshot));
+  const feedback=renderFeedback(snapshot);
+  if(feedback)content.appendChild(feedback);
 
   const feedbackKey = [snapshot?.feedback?.outcome,snapshot?.feedback?.retryCount,snapshot?.feedback?.recovered,snapshot?.feedback?.reason].join('|');
   if (snapshot?.feedback?.outcome && feedbackKey !== lastFeedbackFocusKey) {
