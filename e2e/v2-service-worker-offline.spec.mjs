@@ -9,7 +9,9 @@ test('v2 boots through the real service worker and continues offline', async ({ 
 
   await page.reload();
   await expect(page.locator('#v2App')).toBeVisible({ timeout: 20000 });
-  await expect.poll(async () => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await expect.poll(async () => page.evaluate(async () => Boolean(await caches.match('./v2-components.js')))).toBe(true);
+  await expect.poll(async () => page.evaluate(async () => Boolean(await caches.match('./v2-presentation.js')))).toBe(true);
+  await expect.poll(async () => page.evaluate(async () => Boolean(await caches.match('./v1.9-v2-boundary.js')))).toBe(true);
 
   await context.setOffline(true);
   await page.reload();
