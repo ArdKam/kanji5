@@ -35,7 +35,5 @@ document.addEventListener('kanji5:v1.6-education-result',onResult);
 document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(()=>{if(lastSessionId&&lastResults)migrateCompletedModeResults(lastSessionId,lastResults);window.__KANJI5_V16_SKILL_PROFILE__?.update?.();render()},0));
 exposeAuthoritativeApi();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{exposeAuthoritativeApi();render()},{once:true});else render();
-void import('./v1.6-session-analytics.js').catch(()=>{});
-void import('./v1.6-skill-profile.js').catch(()=>{});
-void import('./v1.8-learning-ux.js').catch(()=>{});
+
 })();
