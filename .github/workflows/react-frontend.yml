@@ -8,7 +8,9 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/react-ts-presentation
     paths:
       - "frontend/**"
       - "docs/react-migration.md"
