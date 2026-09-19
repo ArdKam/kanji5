@@ -43,6 +43,8 @@ jobs:
         run: node scripts/test-v2-test-visual-contract.mjs
       - name: Validate Home visual primitive contract
         run: node scripts/test-v2-home-visual-contract.mjs
+      - name: Validate Progress visual primitive contract
+        run: node scripts/test-v2-progress-visual-contract.mjs
 
       - name: Install Chromium
         run: npx playwright install chromium
