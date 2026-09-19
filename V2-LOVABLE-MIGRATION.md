@@ -217,6 +217,20 @@ Kanji 5's existing auth/persistence architecture remains authoritative.
 | Dialog | ADAPT | Preserve native/accessible dialog behavior |
 | shadcn/Radix primitives | SELECTIVE REUSE | Reimplement behavior, not framework wholesale |
 
+## 0. Implementation status
+
+- P0 inventory: complete.
+- P1 semantic Sumi Play token consolidation: complete.
+- P2 shared presentation primitives: complete (v2-components.js).
+- Service-worker offline regression introduced during the migration: fixed by restoring the full sw.js runtime and adding the migrated visual dependencies to the shell manifest.
+- Study visual migration: complete and verified by the v2 parity gate.
+- Test visual migration: complete and verified by the v2 parity gate; grading/outcome dispatch remains on the existing education/v1.9 bridge.
+- Home/dashboard visual migration: complete and verified by the v2 parity gate.
+- Progress/statistics visual migration: complete and verified by the v2 parity gate.
+- Settings visual migration: complete; the v2 parity gate passed with the implementation present. A subsequent cleanup-only test commit was cancelled by Actions before a second clean run.
+- Full repository CI remains red on pre-existing v1.6/v1.7/v1.8-v1.9 contract suites; these failures are outside this migration PR and are not being treated as migration regressions.
+- Next migration stage: responsive/mobile refinement, followed by shared motion, accessibility, regression, visual QA, and release checks.
+
 ## 6. Interaction inventory
 
 ### Flashcard state machine
