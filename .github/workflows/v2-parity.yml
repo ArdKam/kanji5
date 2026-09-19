@@ -49,6 +49,8 @@ jobs:
         run: node scripts/test-v2-settings-visual-contract.mjs
       - name: Validate shared motion contract
         run: node scripts/test-v2-motion-contract.mjs
+      - name: Validate Lovable migration regression guard
+        run: node scripts/test-v2-migration-regression.mjs
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run responsive v2 browser checks
