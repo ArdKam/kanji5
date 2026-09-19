@@ -165,6 +165,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await page.reload();
   await startSession(page);
   await openDashboard(page);
+  await page.evaluate(async()=>{await import('./v1.6-session-feedback.js');window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'reading',consumeMode:()=>{}}});
   await page.locator('#revealBtn').click();
   const preThreshold=page.locator('.v12-recall-gate');
   await expect(preThreshold).toBeVisible({timeout:10_000});
@@ -184,6 +185,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await page.reload();
   await startSession(page);
   await openDashboard(page);
+  await page.evaluate(async()=>{await import('./v1.6-session-feedback.js');window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'reading',consumeMode:()=>{}}});
   await page.locator('#revealBtn').click();
   const postThreshold=page.locator('.v12-recall-gate');
   await expect(postThreshold).toBeVisible({timeout:10_000});
