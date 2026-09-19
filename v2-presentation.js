@@ -876,11 +876,15 @@ function renderExercise(snapshot) {
     className: 'v2-btn v2-btn-primary',
     label: 'بررسی پاسخ',
     onClick: async () => {
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge) return;
-    submit.disabled = true;
-    unknown.disabled = true;
-    await runBusy('در حال بررسی پاسخ…', async () => bridge.submitValue(input.value), 'بررسی پاسخ انجام نشد. دوباره تلاش کن.');
+      const bridge = window.__KANJI5_EDU_BRIDGE__;
+      if (!bridge) return;
+      submit.disabled = true;
+      unknown.disabled = true;
+      await runBusy(
+        'در حال بررسی پاسخ…',
+        async () => bridge.submitValue(input.value),
+        'بررسی پاسخ انجام نشد. دوباره تلاش کن.'
+      );
     }
   });
 
@@ -889,11 +893,15 @@ function renderExercise(snapshot) {
     className: 'v2-btn v2-btn-secondary',
     label: 'نمی‌دانم',
     onClick: async () => {
-    const bridge = window.__KANJI5_EDU_BRIDGE__;
-    if (!bridge) return;
-    submit.disabled = true;
-    unknown.disabled = true;
-    await runBusy('در حال ثبت نتیجه…', async () => bridge.dontKnow(), 'ثبت نتیجه انجام نشد. دوباره تلاش کن.');
+      const bridge = window.__KANJI5_EDU_BRIDGE__;
+      if (!bridge) return;
+      submit.disabled = true;
+      unknown.disabled = true;
+      await runBusy(
+        'در حال ثبت نتیجه…',
+        async () => bridge.dontKnow(),
+        'ثبت نتیجه انجام نشد. دوباره تلاش کن.'
+      );
     }
   });
 
@@ -909,9 +917,10 @@ function renderExercise(snapshot) {
     className: 'v2-btn v2-btn-secondary v2-back-learning',
     label: 'بازگشت به کارت یادگیری',
     onClick: async () => {
-    presentationMode = 'auto';
-    await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
-    await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
+      presentationMode = 'auto';
+      await window.__KANJI5_V19_V2_BOUNDARY__?.clearTransient?.();
+      await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
+    }
   });
   section.appendChild(back);
   return section;
