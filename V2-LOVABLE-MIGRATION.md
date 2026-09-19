@@ -228,8 +228,12 @@ Kanji 5's existing auth/persistence architecture remains authoritative.
 - Home/dashboard visual migration: complete and verified by the v2 parity gate.
 - Progress/statistics visual migration: complete and verified by the v2 parity gate.
 - Settings visual migration: complete; the v2 parity gate passed with the implementation present. A subsequent cleanup-only test commit was cancelled by Actions before a second clean run.
+- Responsive/mobile refinement: complete; mobile, desktop, and landscape overflow/layout checks are covered by browser tests.
+- Shared motion: complete; restrained entrance/feedback choreography is tokenized and disabled under reduced-motion preferences.
+- Accessibility completion: complete for the migrated v2 surface; keyboard Enter submission, focus management, ARIA semantics, reduced motion, touch target sizing, responsive layout, and no-overflow checks are covered by the v2 browser gate.
+- Focused v2 parity gate: green after the responsive/accessibility additions.
 - Full repository CI remains red on pre-existing v1.6/v1.7/v1.8-v1.9 contract suites; these failures are outside this migration PR and are not being treated as migration regressions.
-- Next migration stage: responsive/mobile refinement, followed by shared motion, accessibility, regression, visual QA, and release checks.
+- Next migration stage: regression hardening, visual QA, and release checks.
 
 ## 6. Interaction inventory
 
