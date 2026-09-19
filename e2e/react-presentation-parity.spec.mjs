@@ -42,4 +42,4 @@ test('React and current v2 consume the same authoritative presentation snapshot'
   const reactSnapshot=await boundarySubset(page);
   expect(reactSnapshot).toEqual(v2Snapshot);
   await expect(page.locator('#root .kanji-display')).toHaveText(v2Snapshot.learning.character || '');
-}
+});
