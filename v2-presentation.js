@@ -1021,7 +1021,7 @@ function renderInsights(snapshot) {
   if(concreteReasons.length){
     const list=document.createElement('div');
     list.className='v2-reason-list';
-    for(const item of concreteReasons){const p=document.createElement('p');p.textContent=text(item);list.appendChild(p);}
+    for(const item of concreteReasons){const p=document.createElement('p');p.textContent=localizedReason(item);list.appendChild(p);}
     reason.appendChild(list);
   }else if(snapshot?.adaptiveReason?.action){
     row(reason,'دلیل',localizedReason(snapshot.adaptiveReason.action));
