@@ -58,7 +58,7 @@ const practiceButton = ui.button({
   onClick: async () => {
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     if (!bridge?.start) return;
-    presentationMode = 'exercise';
+    presentationMode = 'practice';
     await runBusy(
       'در حال آماده‌سازی تمرین…',
       async () => {
