@@ -3,7 +3,7 @@
   const KNOWLEDGE_KEY = `${V12}-knowledge`;
   const RECALL_INTENT_KEY = "kanji5-v1.7-recall-intent";
   const SUPPORTED_RECALL_ATTRIBUTES = Object.freeze(["meaning","reading"]);
-  const isV2=()=>window.__KANJI5_RUNTIME_MODE__?'v2'===window.__KANJI5_RUNTIME_MODE__:new URLSearchParams(location.search).get('legacy')!=='1';
+  const isV2=()=>new URLSearchParams(location.search).get('legacy')!=='1';
   const currentReviewCharacter=()=>{if(isV2()){try{return String(window.__KANJI5_REVIEW_RUNTIME__?.snapshot?.()?.character||window.__KANJI5_V12_RECALL_CONTEXT__?.character||'').trim()}catch(_){return String(window.__KANJI5_V12_RECALL_CONTEXT__?.character||'').trim()}}return String($('.kanji')?.textContent||'').trim()};
   const $ = (sel, root = document) => root.querySelector(sel);
   let activePrompt = null, activeCharacter = null, activeRecallPlan = [], activeReadingAlternate = false, activeReadingTarget = null, deckIndex = null, originalRevealButton = null, allowNativeReveal = false;
