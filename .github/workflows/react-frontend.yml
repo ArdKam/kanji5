@@ -28,6 +28,8 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -48,7 +50,7 @@ jobs:
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
       - name: Commit built static bundle
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/react-ts-presentation'
+        if: github.ref == 'refs/heads/feature/react-ts-presentation' || (github.event_name == 'pull_request' && github.head_ref == 'feature/react-ts-presentation')
         working-directory: .
         run: |
           git config user.name "github-actions[bot]"
@@ -58,5 +60,5 @@ jobs:
             echo "No React bundle changes to commit."
           else
             git commit -m "build(react): sync static presentation bundle"
-            git push
+            git push origin HEAD:${{ github.head_ref || github.ref_name }}
           fi
