@@ -64,7 +64,8 @@ const practiceButton = ui.button({
       async () => {
         const sessionApi = window.__KANJI5_V16_SESSION_API__;
         const current = sessionApi?.getSession?.();
-        if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady();
+        if (sessionApi?.startExperience) await sessionApi.startExperience('practice');
+        else if (sessionApi?.startReady && !current?.started && !current?.finished) await sessionApi.startReady();
         else if (sessionApi?.start && !current?.started && !current?.finished) sessionApi.start();
         await bridge.start();
       },
@@ -211,14 +212,15 @@ function renderExperienceNav(parent){
         presentationMode='review';
         await runBusy('در حال آماده‌سازی مرور…',async()=>{
           const api=window.__KANJI5_V16_SESSION_API__,current=api?.getSession?.();
-          if(api?.startReady&&!current?.started&&!current?.finished)await api.startReady();
+          if(api?.startExperience)await api.startExperience('review');
+          else if(api?.startReady&&!current?.started&&!current?.finished)await api.startReady();
           else if(api?.start&&!current?.started&&!current?.finished)api.start();
           await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
         });
       }else if(mode==='practice'){
         presentationMode='practice';
         const bridge=window.__KANJI5_EDU_BRIDGE__;
-        if(bridge?.start)await runBusy('در حال آماده‌سازی تمرین…',()=>bridge.start());
+        if(bridge?.start)await runBusy('در حال آماده‌سازی تمرین…',async()=>{await window.__KANJI5_V16_SESSION_API__?.startExperience?.('practice');await bridge.start();});
       }else{
         presentationMode='home';
         await window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.();
