@@ -33,7 +33,7 @@ test('v2 is the default presentation and the v1 presentation is no longer user-f
     window.__KANJI5_V19_RECOVERY_NEXT_MODE_USED__=false;
     window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
   });
-  await page.evaluate(async()=>{await window.__KANJI5_EDU_BRIDGE__.start();});
+  await page.locator('#v2PracticeNav').click();
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
   const wrong=await page.evaluate(target=>{
     const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
