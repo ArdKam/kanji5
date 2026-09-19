@@ -29,6 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund --package-lock=false
 
+      - name: Validate service worker shell manifest
+        run: node scripts/test-service-worker-shell.mjs
       - name: Validate v2 release contract
         run: node scripts/test-v2-p5-release.mjs
       - name: Validate index decomposition contract
