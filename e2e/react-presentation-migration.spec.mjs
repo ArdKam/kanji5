@@ -35,17 +35,22 @@ test('React exercise path can start, submit and display boundary-backed feedback
     for(const key of Object.keys(localStorage)) if(key.startsWith('kanji5-')) localStorage.removeItem(key);
     sessionStorage.clear();
   });
+  await page.reload();
+  await expect(page.locator('#app')).toBeVisible({timeout:20000});
+  await page.locator('#revealBtn').click();
+  await expect(page.locator('#ratings')).toHaveClass(/show/);
+  await page.locator('.rate[data-r="Good"]').click();
+  await expect(page.locator('#revealBtn')).toBeVisible();
+
   await page.goto('/?react=1');
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  await page.evaluate(()=>{
+    window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
+  });
   await page.getByRole('button',{name:'تمرین آموزشی'}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
-  await expect(page.locator('#root input[placeholder="پاسخ را وارد کنید"], #root .production-grid').first()).toBeVisible({timeout:10000});
-  const input=page.locator('#root input[placeholder="پاسخ را وارد کنید"]').first();
-  if(await input.count()){
-    await input.fill('x');
-    await page.getByRole('button',{name:'بررسی پاسخ'}).click();
-  }else{
-    await page.getByRole('button',{name:'نمی‌دانم'}).click();
-  }
+  await expect.poll(async()=>page.locator('#root .production-grid').count()).toBe(1,{timeout:10000});
+  await expect(page.locator('#root .production-choice')).toHaveCount(4,{timeout:10000});
+  await page.locator('#root .production-choice').first().click();
   await expect(page.locator('#root .feedback')).toBeVisible({timeout:10000});
 });
