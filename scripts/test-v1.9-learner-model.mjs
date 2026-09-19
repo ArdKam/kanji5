@@ -14,3 +14,13 @@ const sparse=projectKanjiAttributes({日:{exposedAt:t,reading:{attempts:1,correc
 const unknown=projectKanjiAttributes({月:{exposedAt:t,reading:{attempts:2,correct:0,lastAt:t,lastOutcome:'unknown',lastCorrect:false}}},'月');assert.equal(unknown.attributes.reading.state,'weak');
 const repeat=buildLearnerModel([{sessionId:'x',endedAt:'2026-09-10T00:00:00.000Z',modeResults:{reading:{attempts:1,correct:0,lastAt:t,lastCorrect:false}}},{sessionId:'y',endedAt:'2026-09-11T00:00:00.000Z',modeResults:{reading:{attempts:1,correct:0,lastAt:t,lastCorrect:false}}}]);assert.equal(repeat.attributes.reading.state,'weak');assert.equal(repeat.attributes.reading.errorStreak,2);
 console.log('Kanji 5 v1.9 learner model fixtures passed.');
+
+const semantic=projectKanjiAttributes({学:{reading:{attempts:4,correct:3,lastAt:'2026-09-15T00:00:00.000Z'}}},'学',{now:Date.parse('2026-09-16T00:00:00.000Z')}).attributes.reading;
+assert.ok(semantic.performance,'Skill state must expose performance separately from mastery');
+assert.equal(semantic.performance.accuracy,.75,'Performance accuracy mismatch');
+assert.equal(semantic.mastery,(3+1)/(4+2),'Mastery must not be aliased to raw performance');
+assert.equal(semantic.retention,null,'Retention must remain unverified until delayed evidence exists');
+assert.equal(semantic.retentionVerified,false,'Retention verification must be explicit');
+assert.equal(typeof semantic.confidence,'number','Confidence must remain distinct from mastery');
+assert.equal(typeof semantic.state,'string','State must remain distinct from performance');
+console.log('Kanji 5 semantic skill-state contract passed.');
