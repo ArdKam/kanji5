@@ -5,6 +5,7 @@ const params=new URLSearchParams(location.search);
 const IS_LEGACY=params.get('legacy')==='1';
 const FORCE_V2=params.get('v2')==='1'||params.get('react')==='0';
 const IS_REACT=!IS_LEGACY&&!FORCE_V2;
+window.__KANJI5_RUNTIME_MODE__=IS_LEGACY?'legacy':IS_REACT?'react':'v2';
 const DATA_VERSION='v1.2-dataset-2136';
 const DECK_KEY='kanji5-deck';
 const VERSION_KEY='kanji5-deck-version';
