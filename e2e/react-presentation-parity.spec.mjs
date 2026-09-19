@@ -33,7 +33,7 @@ async function boundarySubset(page){
 
 test('React and current v2 consume the same authoritative presentation snapshot',async({page})=>{
   await cleanStart(page);
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
   const v2Snapshot=await boundarySubset(page);
