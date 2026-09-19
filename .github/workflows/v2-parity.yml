@@ -49,10 +49,9 @@ jobs:
         run: node scripts/test-v2-settings-visual-contract.mjs
       - name: Validate shared motion contract
         run: node scripts/test-v2-motion-contract.mjs
-      - name: Run responsive v2 browser checks
-        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-responsive.spec.mjs
-
       - name: Install Chromium
         run: npx playwright install chromium
+      - name: Run responsive v2 browser checks
+        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-responsive.spec.mjs
       - name: Run focused v2 parity browser coverage
         run: npx playwright test --timeout=20000 --retries=0 e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-review-card.spec.mjs e2e/v2-v18-parity.spec.mjs e2e/v2-session-completion.spec.mjs e2e/v2-service-worker-offline.spec.mjs e2e/v2-p7-polish.spec.mjs e2e/v2-p3-accessibility-responsive.spec.mjs
