@@ -1093,3 +1093,80 @@ body:has(#v2App){
     grid-template-columns:1fr;
   }
 }
+
+/* Responsive refinement: compact, touch-safe layouts inspired by the Lovable mobile composition. */
+#v2App.v2-shell{
+  overflow-x:clip;
+  overscroll-behavior-inline:contain;
+}
+#v2App .v2-audio-button{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+}
+@media(max-width:600px){
+  .v2-header-meta{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:stretch;
+    justify-content:stretch;
+    gap:8px;
+  }
+  .v2-session-progress,
+  .v2-header-practice{
+    grid-column:1 / -1;
+    width:100%;
+    min-width:0;
+  }
+  .v2-header-tool{
+    flex:none;
+    width:100%;
+    min-width:0;
+  }
+  .v2-content{
+    width:100%;
+  }
+  .v2-learning-ratings,
+  .v2-production-choice-grid{
+    gap:8px;
+  }
+  .v2-learning-rating,
+  .v2-production-choice{
+    min-width:0;
+  }
+  .v2-learning-example{
+    align-items:flex-start;
+  }
+}
+@media(max-width:360px){
+  #v2App.v2-shell{
+    padding-inline:10px;
+    padding-top:12px;
+  }
+  .v2-title{font-size:26px}
+  .v2-learning-card,
+  .v2-exercise-card{padding-inline:13px}
+  .v2-learning-kanji{font-size:82px}
+  .v2-kanji{font-size:72px}
+  .v2-production-choice{font-size:34px}
+  .v2-daily-stat{padding-inline:10px}
+  .v2-btn{padding-inline:12px}
+}
+@media(max-height:560px) and (orientation:landscape){
+  #v2App.v2-shell{
+    min-height:100dvh;
+    padding-top:12px;
+    padding-bottom:20px;
+  }
+  .v2-header{
+    margin-bottom:14px;
+  }
+  .v2-learning-card,
+  .v2-exercise-card{
+    padding-top:18px;
+    padding-bottom:18px;
+  }
+  .v2-learning-kanji{font-size:82px}
+  .v2-stimulus{min-height:138px;padding-block:18px}
+}
