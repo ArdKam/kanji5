@@ -874,31 +874,7 @@ function renderExercise(snapshot) {
 
   renderStimulus(section,ex);
 
-  const choices = Array.isArray(ex.choices) ? ex.choices.filter(Boolean).slice(0,4) : [];
-  const productionChoiceMode = ex.mode === 'production' && choices.length >= 4;
-  if (productionChoiceMode) {
-    const group = document.createElement('div');
-    group.id = 'v2ProductionChoices';
-    group.className = 'v2-production-choice-grid';
-    group.setAttribute('role','group');
-    group.setAttribute('aria-label','انتخاب کانجی');
-    for (const choice of choices) {
-      const button = ui.choice(choice, {
-        className: 'v2-btn v2-production-choice',
-        onClick: async () => {
-          buttonsDisable(group);
-          unknown.disabled = true;
-          await window.__KANJI5_EDU_BRIDGE__?.submitValue?.(choice);
-        }
-      });
-      button.lang = 'ja';
-      group.appendChild(button);
-    }
-    section.appendChild(group);
-  }
-
   const field = document.createElement('div');
-  if (productionChoiceMode) field.hidden = true;
   field.className = 'v2-answer-area';
 
   const label = document.createElement('label');
