@@ -162,7 +162,8 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
   },{character,reading:readingInfo.readings[0]});
   await persistReadingIntent(page,character);
-  await page.reload();
+  await page.goto('/?legacy=1');
+  await expect(page.locator('#app')).toBeVisible({timeout:20000});
   await startSession(page);
   await openDashboard(page);
   await page.evaluate(async()=>{await import('./v1.6-session-feedback.js');window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'reading',consumeMode:()=>{}}});
@@ -222,6 +223,8 @@ test('accepts romaji for a katakana on-reading and records that reading variant'
   await page.reload();
   await startSession(page);
   await openDashboard(page);
+  await page.goto('/?legacy=1');
+  await expect(page.locator('#app')).toBeVisible({timeout:20000});
   await page.locator('#revealBtn').click();
   await expect(page.locator('.v12-recall-gate')).toBeVisible({timeout:10_000});
   await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','reading');
