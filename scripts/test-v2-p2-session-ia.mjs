@@ -33,3 +33,15 @@ assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(spec.includes('v2 P2 session information architecture'));
 console.log('Kanji 5 v2 P2 information architecture contract passed.');
+
+const presentation=fs.readFileSync('v2-presentation.js','utf8');
+const css=fs.readFileSync('v2-presentation.css','utf8');
+assert.match(presentation,/presentationMode = 'home'/,'V2 must start on the home experience');
+assert.match(presentation,/v2ReviewNav/,'Dedicated Review navigation is missing');
+assert.match(presentation,/v2PracticeNav/,'Dedicated Practice navigation is missing');
+assert.match(presentation,/function renderExperienceHome/,'Home must expose explicit Review and Practice actions');
+assert.match(presentation,/presentationMode==='review'/,'Review must have an independent presentation route');
+assert.match(presentation,/presentationMode==='practice'/,'Practice must have an independent presentation route');
+assert.match(presentation,/showLearning=snapshot\?\.learning\?\.active/,'Review route must not inject a mandatory pre-card exercise');
+assert.match(css,/\.v2-experience-nav/,'Experience navigation styling missing');
+console.log('Kanji 5 Review/Practice separation contract passed.');
