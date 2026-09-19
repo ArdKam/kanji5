@@ -444,6 +444,7 @@ function renderStimulus(parent, ex) {
     const sentence = document.createElement('div');
     sentence.className = 'v2-stimulus-context';
     sentence.lang = 'ja';
+     sentence.dir = 'ltr';
     sentence.textContent = primary;
     wrap.appendChild(sentence);
     if (translation !== '—') {
@@ -1126,6 +1127,7 @@ async function init() {
       document.addEventListener('kanji5:v1.9-v2-view-models',event=>render(event?.detail||{}));
       render(await boundary.snapshot());
       subscribed=true;
+       window.__KANJI5_V2_PRESENTATION_READY__=true;
     }
     const bridge = window.__KANJI5_EDU_BRIDGE__;
     const sessionApi = window.__KANJI5_V16_SESSION_API__;
