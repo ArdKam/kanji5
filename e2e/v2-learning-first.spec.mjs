@@ -38,6 +38,6 @@ test('first-time learner sees the learning card before exercises',async({page})=
     const active=[...history].reverse().find(row=>row?.status==='active');
     return Boolean(active?.plan && Object.values(active?.remainingModes||{}).some(value=>Number(value)>0));
   })).toBe(true);
-  await expect(page.locator('#v2ProductionChoices')).toBeVisible({timeout:10000});
-  await expect(page.locator('.v2-production-choice')).toHaveCount(4);
+  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  await expect(page.locator('#v2AnswerInput')).toHaveCount(4);
 });
