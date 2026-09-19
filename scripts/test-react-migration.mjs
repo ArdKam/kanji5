@@ -49,4 +49,10 @@ assert.match(sw, /\.\/react-dist\/kanji5-react\.css/);
 
 
 
+assert.match(sw, /\.\/react-dist\/kanji5-react\.js/);
+assert.match(sw, /\.\/react-dist\/kanji5-react\.css/);
+for (const file of ["e2e/react-presentation-migration.spec.mjs","e2e/react-presentation-parity.spec.mjs","e2e/react-presentation-offline.spec.mjs"]) {
+  assert.ok(fs.existsSync(file), "Missing React verification test: " + file);
+}
+
 console.log("Kanji 5 React migration boundary contract passed.");
