@@ -325,7 +325,8 @@ async function openV2Settings(){
   const dialog=openV2Dialog('v2SettingsDialog'),body=dialog?.querySelector('.v2-dialog-body');
   if(!dialog||!body)return;
   body.textContent='';
-  body.appendChild(heading('تنظیمات','v2SettingsTitle'));
+  const surface=ui.card({className:'v2-settings-surface'});
+  surface.appendChild(heading('تنظیمات','v2SettingsTitle'));
   const form=document.createElement('form');
   form.className='v2-settings-form';
   for(const [id,labelText,value,min,max] of [['v2DailyNew','کانجی جدید در روز',settings.dailyNew,1,30],['v2DailyGoal','هدف تعداد مرور روزانه',settings.dailyGoal,1,500],['v2LeechThreshold','آستانهٔ Leech (تعداد خطا)',settings.leechThreshold,2,30]]){
@@ -347,15 +348,10 @@ async function openV2Settings(){
   }
   const actions=document.createElement('div');
   actions.className='v2-actions';
-  const save=document.createElement('button');
-  save.type='submit';save.className='v2-btn v2-btn-primary';save.textContent='ذخیره';
-  const close=document.createElement('button');
-  close.type='button';close.className='v2-btn v2-btn-secondary';close.textContent='بستن';
-  const reset=document.createElement('button');
-  reset.type='button';reset.className='v2-btn v2-btn-secondary';reset.textContent='پاک کردن تمام پیشرفت';
-  close.addEventListener('click',()=>dialog.close());
-  reset.addEventListener('click',()=>boundary.resetProgress?.());
-  actions.append(save,close,reset);form.appendChild(actions);body.appendChild(form);
+  const save=ui.button({id:'v2SaveSettings',type:'submit',className:'v2-btn v2-btn-primary',label:'ذخیره'});
+  const close=ui.button({id:'v2CloseSettings',className:'v2-btn v2-btn-secondary',label:'بستن',onClick:()=>dialog.close()});
+  const reset=ui.button({id:'v2ResetProgress',className:'v2-btn v2-btn-secondary',label:'پاک کردن تمام پیشرفت',onClick:()=>boundary.resetProgress?.()});
+  actions.append(save,close,reset);form.appendChild(actions);surface.appendChild(form);body.appendChild(surface);
   form.addEventListener('submit',async event=>{
     event.preventDefault();save.disabled=true;
     try{
