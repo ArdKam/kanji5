@@ -31,5 +31,17 @@ assert.match(engine, /rateLearning/);
 assert.match(engine, /startExercise/);
 assert.match(engine, /updateSettings/);
 assert.match(docs, /presentation-only/);
+assert.match(engine, /__KANJI5_V19_V2_BOUNDARY__/);
+assert.match(engine, /__KANJI5_EDU_BRIDGE__/);
+assert.match(app, /<div className="app-shell"/);
+const shell=fs.readFileSync("index.html","utf8");
+assert.match(shell, /id="root"/);
+assert.match(shell, /app-bootstrap\.js/);
+const bootstrap=fs.readFileSync("app-bootstrap.js","utf8");
+assert.match(bootstrap, /IS_REACT/);
+assert.match(bootstrap, /react-dist\/kanji5-react\.js/);
+const presentation=fs.readFileSync("v2-presentation.js","utf8");
+assert.match(presentation, /params\.get\('react'\) === '1'/);
+
 
 console.log("Kanji 5 React migration boundary contract passed.");
