@@ -17,14 +17,12 @@ test('v2 restores the visible FSRS review-card flow', async ({page}) => {
   await expect(page.locator('#revealBtn')).toBeVisible();
   await page.evaluate((character) => {
     const state = window.__KANJI5_STATE__;
-    if (!state?.transaction) throw new Error('canonical state transaction API unavailable');
+    if (!state?.transaction || !state?.readDeck) throw new Error('canonical state persistence API unavailable');
+    const item = state.readDeck().find(x => x?.character === character);
+    if (!item) throw new Error('seeded deck item not found');
     state.transaction(draft => {
-      const item = draft.deck.find(x => x?.character === character);
-      if (!item || !draft.cards?.[item.id]?.card) throw new Error('seeded card not found');
+      if (!draft.cards?.[item.id]?.card) throw new Error('seeded card not found');
       draft.cards[item.id].card.due = new Date(Date.now() - 60_000).toISOString();
-      draft.current = item.id;
-      draft.revealed = false;
-      draft.queue = [item.id, ...(draft.queue || []).filter(id => id !== item.id)];
       return draft;
     });
   }, target);
