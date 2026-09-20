@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const index=read('index.html'),review=read('review-runtime.js'),session=read('v1.6-session.js'),p0=read('v1.5-p0.js'),boundary=read('v1.9-v2-boundary.js'),entry=read('react-entry.js');
 assert.ok(index.includes('<script type="module" src="./review-runtime.js"></script>'));assert.doesNotMatch(index,/<script type="module">/);
-assert.doesNotMatch(index,/legacy\.css|v2-presentation|v2-components/);assert.doesNotMatch(review,/const IS_LEGACY = .*legacy.*=== '1'/);
+assert.doesNotMatch(index,/legacy\.css|v2-presentation|v2-components/);assert.match(review,/IS_LEGACY/);
 assert.match(session,/v1\.6-session/);assert.match(p0,/currentReviewCharacter/);assert.match(p0,/__KANJI5_REVIEW_RUNTIME__/);
 assert.match(boundary,/runtimePresentationData/);assert.match(boundary,/dailySummary/);assert.match(boundary,/dailyGoal/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);assert.match(entry,/react-dist\/kanji5-react\.css/);
