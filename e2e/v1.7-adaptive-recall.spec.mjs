@@ -219,6 +219,8 @@ test('accepts romaji for a katakana on-reading in Practice and records that read
   await page.reload();
   await startSession(page);
   await openDashboard(page);
+  await page.goto('/');
+  await expect(page.locator('#v2PracticeNav')).toBeVisible({timeout:10_000});
   await page.locator('#v2PracticeNav').click();
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10_000});
   await page.locator('#v2AnswerInput').fill(info.romaji);
