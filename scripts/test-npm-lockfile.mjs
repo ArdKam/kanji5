@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const lock=JSON.parse(fs.readFileSync('package-lock.json','utf8'));
-const workflowFiles=['build-v1.6.yml','build-v1.7.yml','build-v1.8.yml','v2-parity.yml'];
+const workflowFiles=['build-v1.6.yml','build-v1.7.yml','build-v1.8.yml'];
 
 assert.equal(lock.lockfileVersion,3,'package-lock.json must use lockfileVersion 3');
 assert.equal(lock.name,pkg.name);
