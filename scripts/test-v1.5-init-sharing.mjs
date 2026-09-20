@@ -5,7 +5,7 @@ const runtime=read('review-runtime.js');
 const p0=read('v1.3-p0.js');
 assert(runtime.includes('window.__KANJI5_P0_DATA_PROMISE'),'Main app does not consume the shared dataset promise');
 assert(runtime.includes('const prefetched=window.__KANJI5_P0_DATA_PROMISE'),'Dataset loader does not read the P0 promise');
-assert(runtime.includes('if(Array.isArray(all)&&all.length===2136){state.deck=all;'),'Dataset promise result is not used as the primary deck source');
+assert(runtime.includes('if(Array.isArray(all)&&all.length===2136){state.deck=canonicalizeDeckReadings(all);'),'Dataset promise result is not used as the primary deck source');
 assert(runtime.includes('window.__KANJI5_P0_FSRS_PROMISE'),'Main app does not consume the shared FSRS promise');
 assert(runtime.includes('const shared=window.__KANJI5_P0_FSRS_PROMISE'),'FSRS loader does not read the P0 promise');
 assert(runtime.includes('const loadPromise=shared?shared.then(mod=>'),'FSRS shared promise is not the normal initialization path');

@@ -30,6 +30,8 @@ test('v2 restores the visible FSRS review-card flow', async ({page}) => {
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
 
   await page.goto('/');
+  await expect(page.locator('#v2ReviewNav')).toBeVisible({timeout:10000});
+  await page.locator('#v2ReviewNav').click();
   await expect(page.locator('#v2ReviewCard')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2ReviewKanji')).toHaveText(target);
   await expect(page.locator('#v2ReviewReveal')).toBeVisible();

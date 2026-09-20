@@ -17,6 +17,11 @@ assert(core.weakness({attempts:8,correct:6})>0,'Weakness must remain positive fo
 assert(core.gradeMeaning('school',['school']).quality==='exact','Exact meaning grading failed');
 assert(core.gradeMeaning('high school',['high school']).quality==='exact','Normalized exact meaning failed');
 assert(core.gradeMeaning('school work',['school work']).correct===true,'Two-token exact meaning failed');
+assert(core.gradeMeaning('school-work',['school work']).correct===true,'Hyphenated meaning should normalize to the same token sequence');
+assert(core.gradeMeaning('school/work',['school work']).correct===true,'Punctuation-separated meaning should normalize safely');
+assert(core.gradeMeaning('school  work',['school work']).correct===true,'Repeated spaces should not change meaning grading');
+assert(core.gradeMeaning('SCHOOL WORK',['school work']).correct===true,'Case normalization should preserve meaning grading');
+assert(core.gradeMeaning('school',['school system']).correct===false,'Single-token subset must not auto-pass after punctuation normalization');
 assert(core.gradeMeaning('school',['school system']).correct===false,'Single-token subset must not auto-pass a multi-token meaning');
 assert(core.gradeMeaning('system',['school system']).correct===false,'Wrong token from a multi-token meaning must not pass');
 assert(core.gradeMeaning('school',['school system']).quality==='wrong','Single-token subset must be graded wrong');
@@ -29,6 +34,13 @@ assert(core.toRomaji('きょう')==='kyou','拗音 sequence きょう must map t
 assert(core.gradeReading('gaku',['がく']).correct===true,'Hiragana reading grading failed');
 assert(core.gradeReading('gaku',['がく'],v=>v==='がく'?'gaku':v).correct===true,'Romaji reading grading failed');
 assert(core.gradeReading('mo',['も']).correct===true,'Romaji grading regressed for も');
+assert(core.gradeReading('タベル',['た.べる']).correct===true,'Katakana must match a dotted kun-yomi reading');
+assert(core.gradeReading('taberu',['た.べる']).correct===true,'Romaji must match a dotted kun-yomi reading');
+assert(core.gradeReading('たべる',['た.べる']).correct===true,'Separator-free kana must match a dotted kun-yomi reading');
+assert(core.gradeReading('た-べる',['た.べる']).correct===true,'Reading separators must not cause a false negative');
+assert(core.canonicalReading('た.べる','kun').fullKana==='たべる','Kun-yomi canonical model must reconstruct full kana');
+assert(core.canonicalReading('がく','on').readingType==='on','On-yomi canonical model must preserve reading type');
+assert(core.canonicalReading('た.べる','kun').stemKana==='た'&&core.canonicalReading('た.べる','kun').okurigana==='べる','Kun-yomi canonical model must split stem and okurigana');
 const available=core.getAvailableModes({production:true,vocabulary:true,context:true},true);
 assert(available.length===5,'All education modes should be available when enabled');
 assert(!core.getAvailableModes({production:false,vocabulary:false,context:false},false).includes('production'),'Disabled production leaked into mode list');
@@ -52,3 +64,11 @@ assert(ui.includes('__KANJI5_EDU_CORE__'),'Active UI is not connected to educati
 assert(ui.includes('CORE.chooseBestExercise')&&ui.includes('CORE.gradeMeaning')&&ui.includes('CORE.gradeReading'),'Active UI is not using canonical selection/grading');
 assert(ui.includes('CORE.recordKnowledge'),'Active UI is not using canonical knowledge recording');
 console.log('Kanji 5 v1.4 education tests passed.');
+const canonicalItem=core.canonicalizeItemReadings({character:'食',on:['ショク'],kun:['た.べる']});
+assert(canonicalItem.readingModel.on[0].fullKana==='しょく','Canonical on-yomi must normalize Katakana to Hiragana');
+assert(canonicalItem.readingModel.on[0].readingType==='on','Canonical on-yomi must preserve type');
+assert(canonicalItem.readingModel.kun[0].stemKana==='た','Canonical kun-yomi must expose stem');
+assert(canonicalItem.readingModel.kun[0].okurigana==='べる','Canonical kun-yomi must expose okurigana');
+assert(canonicalItem.readingModel.kun[0].fullKana==='たべる','Canonical kun-yomi must expose full kana');
+assert(Boolean(core.canonicalizeItemReadings),'Canonical reading model must be exposed by the education core');
+console.log('Kanji 5 canonical reading-model contract passed.');
