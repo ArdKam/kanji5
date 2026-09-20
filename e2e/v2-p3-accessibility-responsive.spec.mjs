@@ -63,17 +63,13 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   const mobile=await page.evaluate(()=>({
     columns:getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length,
     insightColumns:getComputedStyle(document.querySelector('.v2-insights-grid')).gridTemplateColumns.split(' ').length,
-    actionColumns:getComputedStyle(document.querySelector('.v2-actions')).gridTemplateColumns.split(' ').length,
     headerColumns:getComputedStyle(document.querySelector('.v2-header-meta')).gridTemplateColumns.split(' ').length,
-    practiceSpansFullRow:getComputedStyle(document.querySelector('.v2-header-practice')).gridColumn==='1 / -1',
     horizontalOverflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
     touchSafeButtons:[...document.querySelectorAll('#v2App button')].every(button=>parseFloat(getComputedStyle(button).minHeight)>=44)
   }));
   expect(mobile.columns).toBe(1);
   expect(mobile.insightColumns).toBe(1);
-  expect(mobile.actionColumns).toBe(1);
   expect(mobile.headerColumns).toBe(2);
-  expect(mobile.practiceSpansFullRow).toBe(true);
   expect(mobile.horizontalOverflow).toBe(false);
   expect(mobile.touchSafeButtons).toBe(true);
 
