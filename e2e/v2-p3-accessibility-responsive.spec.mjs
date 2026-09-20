@@ -62,8 +62,8 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   const mobile=await page.evaluate(()=>({
     columns:getComputedStyle(document.querySelector('.v2-content')).gridTemplateColumns.split(' ').length,
-    insightColumns:getComputedStyle(document.querySelector('.v2-insights-grid')).gridTemplateColumns.split(' ').length,
-    headerColumns:getComputedStyle(document.querySelector('.v2-header-meta')).gridTemplateColumns.split(' ').length,
+    insightColumns:document.querySelector('.v2-insights-grid')?getComputedStyle(document.querySelector('.v2-insights-grid')).gridTemplateColumns.split(' ').length:null,
+    headerColumns:document.querySelector('.v2-header-meta')?getComputedStyle(document.querySelector('.v2-header-meta')).gridTemplateColumns.split(' ').length:null,
     horizontalOverflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
     touchSafeButtons:[...document.querySelectorAll('#v2App button')].every(button=>parseFloat(getComputedStyle(button).minHeight)>=44)
   }));
