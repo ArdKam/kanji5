@@ -6,8 +6,9 @@ test('v2 P3 is keyboard-first and screen-reader structured',async({page})=>{
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
   await page.locator('#v2PracticeNav').click();
-  await page.evaluate(async()=>{ const b=window.__KANJI5_V19_V2_BOUNDARY__; await b.setExercise({mode:'production',prompt:'Write the Kanji',character:'学',contentId:'fixture-1',provenance:'local'}); await b.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'recent failure'}); });
+  await page.evaluate(async()=>{ const b=window.__KANJI5_V19_V2_BOUNDARY__; await b.setExercise({mode:'production',prompt:'Write the Kanji',character:'学',contentId:'fixture-1',provenance:'local'}); });
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
+  await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'recent failure'});});
 
   const semantics=await page.evaluate(()=>{
     const input=document.querySelector('#v2AnswerInput');
