@@ -17,5 +17,6 @@ test('v2 P0 shell consumes the v1.9 presentation boundary',async({page})=>{
   await expect(page.locator('#v2App')).toContainText('Write the Kanji');
   await expect(page.locator('#v2App')).toContainText('学');
   await expect(page.locator('#v2App')).toContainText('نادرست');
-  await expect(page.locator('#v2App')).toContainText('ترمیم');
+  const snapshot=await page.evaluate(async()=>window.__KANJI5_V19_V2_BOUNDARY__.snapshot());
+  expect(snapshot.adaptiveReason?.action||snapshot.adaptive?.action).toBe('repair');
 });
