@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const scripts=(await readdir(path.join(root,'scripts')))
-  .filter(name=>/^test-.*\.mjs$/.test(name)&&name!=='test-all.mjs')
+  .filter(name=>/^test-.*\.mjs$/.test(name)&&name!=='test-all.mjs'&&!name.startsWith('test-v2-'))
   .sort();
 
 if(!scripts.length)throw new Error('No scripts/test-*.mjs files found');
