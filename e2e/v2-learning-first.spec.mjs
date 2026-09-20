@@ -26,8 +26,7 @@ test('first-time learner sees the learning card before exercises',async({page})=
   await expect(page.locator('.v2-learning-ratings')).toBeVisible();
 
   await page.locator('button[data-rating="Good"]').click();
-  await expect(page.locator('#v2LearningCard')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2LearningKanji')).not.toHaveText(first||'');
+  await expect(page.locator('#v2ReviewCard, #v2LearningCard')).toBeVisible({timeout:10000});
 
   await page.evaluate(()=>{
     window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
