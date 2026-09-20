@@ -43,6 +43,18 @@ Pure cores must not depend on DOM, `window`, localStorage, sessionStorage, or ne
 
 `v1.9-v2-boundary.js` exposes `snapshot()`, `setExercise()`, `setFeedback()`, `setAdaptiveReason()`, and transient-state operations. The historical "v2" name is retained for the contract namespace; it is not a second presentation runtime.
 
+## Session lifecycle
+
+The active session boundary owns session identity, plan persistence, resume behavior, feedback consumption, and completion history. React consumes this state through the typed presentation adapter.
+
+## Long-term skill profile
+
+`v1.6-skill-profile.js` projects completed session history into independent Meaning, Reading, Production, Vocabulary, and Context skills. v1.9 augments those signals with the evidence-aware learner model while retaining FSRS as the authoritative scheduler.
+
+## Adaptive recall
+
+Adaptive planning treats recall attributes as independently learnable skills. Recovery can override the next attribute once for the bounded retry path; it never becomes a second scheduler.
+
 ## Educational integrity
 
 Meaning, Reading, Production, Vocabulary, and Context grading remain deterministic and offline-capable. FSRS remains the authoritative card scheduler.
