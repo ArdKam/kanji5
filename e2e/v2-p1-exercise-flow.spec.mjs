@@ -33,7 +33,7 @@ test('v2 P1 exercise flow renders, grades, and recovers through Production retri
   const target=await currentTarget(page);
   expect(target).toBeTruthy();
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
 
