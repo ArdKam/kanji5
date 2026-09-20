@@ -5,7 +5,7 @@ const css=fs.readFileSync('react-dist/kanji5-react.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
 assert.match(app,/aria-/);assert.match(app,/focus/);assert.match(app,/button/);
-assert.ok(css.includes('focus-visible'));assert.ok(css.includes('prefers-reduced-motion:reduce'));assert.ok(css.includes('prefers-contrast:more'));assert.ok(css.includes('@media (width<=760px)');assert.ok(css.includes('min-height:46px'));
+assert.ok(css.includes('focus-visible'));assert.ok(css.includes('prefers-reduced-motion:reduce'));assert.ok(css.includes('prefers-contrast:more'));assert.ok(css.includes('@media (width<=760px)'));assert.ok(css.includes('min-height:46px'));
 assert.doesNotMatch(sw,/v2-presentation\.js|v2-presentation\.css/);assert.match(sw,/react-dist\/kanji5-react\.css/);
 assert.match(roadmap,/P3 — Accessibility & Responsive Completion/);
 console.log('Kanji 5 React accessibility/responsive contract passed.');
