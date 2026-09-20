@@ -20,7 +20,7 @@ This PR completes the React/TypeScript presentation migration into the existing 
 React remains presentation-only. Scheduling, grading, learner modeling, recovery, persistence, session state, and offline authority remain in the existing Kanji 5 runtime/boundaries. The frontend does not directly access `localStorage`, FSRS, or learner internals.
 
 ### Verification
-Latest verified branch head: `2683b6ab7c0470de2fa220ef5e240e76ef64d1ff`
+Latest verified branch head: `b5779e9188578ec3a902334f1fc5d05821032e11`
 
 - React typecheck: PASS
 - Production build: PASS
