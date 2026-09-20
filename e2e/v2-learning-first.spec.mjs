@@ -9,7 +9,7 @@ test('first-time learner sees the learning card before exercises',async({page})=
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
 
