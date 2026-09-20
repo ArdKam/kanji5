@@ -200,7 +200,7 @@ test('surfaces an alternate reading only after stable reading evidence', async (
 });
 
 test('canonical reading model accepts Katakana and Romaji for an on-reading', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20_000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_CORE__))).toBe(true);
   const result=await page.evaluate(()=>{
