@@ -1,21 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-
-const js=fs.readFileSync('v2-presentation.js','utf8');
-const css=fs.readFileSync('v2-presentation.css','utf8');
+const app=fs.readFileSync('frontend/src/app/App.tsx','utf8');
+const css=fs.readFileSync('react-dist/kanji5-react.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
-
-assert.ok(js.includes("stylesheet.href = './v2-presentation.css'"));
-for (const token of ['--v2-accent:','--v2-space-6:','--v2-radius:','--v2-shadow:']) assert.ok(css.includes(token),token);
-for (const cls of ['v2-shell','v2-title','v2-header','v2-session-progress','v2-content','v2-exercise-card','v2-card-title','v2-input','v2-btn-primary','v2-btn-secondary','v2-progress','v2-progress-fill','v2-feedback-card','v2-insights','v2-outcome-row']) assert.ok(css.includes('.'+cls),cls);
-assert.ok(css.includes(':hover'));
-assert.ok(css.includes(':focus'));
-assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'));
-assert.ok(css.includes('@media (max-width:900px)'));
-assert.ok(css.includes('@media (max-width:600px)'));
-assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
-assert.ok(sw.includes('"./v2-presentation.css"'));
-assert.ok(roadmap.includes('### P4 — Visual System & Polish'));
-assert.match(roadmap,/### P4 — Visual System & Polish ✅/);
-console.log('Kanji 5 v2 P4 visual contract passed.');
+assert.match(app,/app-shell/);assert.match(app,/daily-summary/);assert.match(app,/learning-card/);
+for(const token of ['--washi:','--paper:','--sumi:','--ink:','--mute:','--shu:','--ai:','--matcha:','--line:'])assert.ok(css.includes(token),token);
+for(const cls of ['.app-shell','.surface','.card','.daily-summary','.stat-card','.progress','.button','.feedback','.dialog'])assert.ok(css.includes(cls),cls);
+assert.ok(css.includes('focus-visible'));assert.ok(css.includes('prefers-reduced-motion:reduce'));assert.ok(css.includes('@media (width<=760px)'));
+assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);assert.ok(sw.includes('./react-dist/kanji5-react.css'));assert.doesNotMatch(sw,/v2-presentation\.css/);
+assert.match(roadmap,/P4 — Visual System & Polish/);
+console.log('Kanji 5 React visual-system contract passed.');
