@@ -6,7 +6,7 @@ for (const viewport of [
 ]) {
   test('v2 layout remains usable without horizontal overflow on ' + viewport.name, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto('/');
+    await page.goto('/?v2=1');
     await expect(page.locator('#v2App')).toBeVisible({ timeout: 20000 });
     await expect(page.locator('#v2LearningCard, #v2ReviewCard, #v2Exercise')).toHaveCount(1, { timeout: 10000 });
     await expect.poll(async () => page.evaluate(() => ({

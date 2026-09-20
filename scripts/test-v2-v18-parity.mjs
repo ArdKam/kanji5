@@ -25,7 +25,7 @@ assert.ok(sw.includes('"./review-runtime.js"'),'shared review runtime must be in
 assert.match(js,/openV2Stats/);
 assert.match(js,/nonAgainRate/);
 assert.match(js,/openV2Settings/);
-assert.ok(sw.includes("kanji5-shell-v99"),'PWA shell cache must be v99 after the current entrypoint changes');
+assert.ok(sw.includes("kanji5-shell-v100"),'PWA shell cache must be v100 after the current entrypoint changes');
 assert.ok(contract.includes("kind:'learning-card'"),'learning card contract must remain available');
 assert.ok(contract.includes('choices'),'exercise contract must carry MCQ choices');
 assert.ok(index.includes('id="statsBtn"')&&index.includes('id="settingsBtn"'),'legacy Stats/Settings controls must remain available for legacy mode');

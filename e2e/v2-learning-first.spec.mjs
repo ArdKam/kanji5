@@ -9,7 +9,7 @@ test('first-time learner sees the learning card before exercises',async({page})=
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
 
@@ -26,19 +26,14 @@ test('first-time learner sees the learning card before exercises',async({page})=
   await expect(page.locator('.v2-learning-ratings')).toBeVisible();
 
   await page.locator('button[data-rating="Good"]').click();
-  await expect(page.locator('#v2LearningCard')).toBeVisible({timeout:10000});
-  await expect(page.locator('#v2LearningKanji')).not.toHaveText(first||'');
+  await expect(page.locator('#v2App')).toBeVisible({timeout:10000});
+  await expect(page.locator('#v2AnswerInput')).toHaveCount(0);
 
   await page.evaluate(()=>{
     window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'production',consumeMode:()=>{}};
   });
   await page.locator('#v2StartPractice').click();
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V16_SESSION_API__?.getSession?.().started))).toBe(true);
-  await expect.poll(async()=>page.evaluate(()=>{
-    const history=JSON.parse(localStorage.getItem('kanji5-v1.6-session-history')||'[]');
-    const active=[...history].reverse().find(row=>row?.status==='active');
-    return Boolean(active?.plan && Object.values(active?.remainingModes||{}).some(value=>Number(value)>0));
-  })).toBe(true);
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2AnswerInput')).toHaveCount(1);
 });

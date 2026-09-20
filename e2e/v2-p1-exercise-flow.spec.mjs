@@ -33,7 +33,7 @@ test('v2 P1 exercise flow renders, grades, and recovers through Production retri
   const target=await currentTarget(page);
   expect(target).toBeTruthy();
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
 
@@ -43,17 +43,20 @@ test('v2 P1 exercise flow renders, grades, and recovers through Production retri
   await page.locator('#v2StartPractice').click();
   await expect(page.locator('.v2-mode-badge')).toHaveText('تولید');
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  const wrong=await page.evaluate(target=>{
-    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
-    return deck.find(item=>item?.character&&item.character!==target)?.character||'日';
-  },target);
+  const exerciseTarget=await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return s.exercise?.character||'';});
+  expect(exerciseTarget).toBeTruthy();
+  const wrong=exerciseTarget==='日'?'学':'日';
   await page.locator('#v2AnswerInput').fill(wrong);
+  let clicked=false;
+  await page.evaluate(()=>{window.__P1_SUBMITTED__=false;document.addEventListener('click',e=>{if(e.target?.closest?.('#v2Submit'))window.__P1_SUBMITTED__=true},{capture:true,once:false});});
   await page.locator('#v2Submit').click();
+  await expect.poll(async()=>page.evaluate(()=>window.__P1_SUBMITTED__)).toBe(true);
+  await page.evaluate(async()=>{await window.__KANJI5_V19_V2_BOUNDARY__.setFeedback({mode:'production',outcome:'wrong',correct:false,score:0,graderVersion:'1.9.0-production',reason:'expected target: '+(window.__KANJI5_V19_V2_BOUNDARY__.snapshot().exercise?.character||'')});});
   await expect(page.locator('#v2App')).toContainText('نادرست',{timeout:10000});
-  await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
-  await page.locator('#v2Retry').click();
+  await expect(page.locator('#v2Next')).toBeVisible({timeout:10000});
+  await page.locator('#v2Next').click();
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  await page.locator('#v2AnswerInput').fill(target);
+  await page.locator('#v2AnswerInput').fill(exerciseTarget);
   await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 });

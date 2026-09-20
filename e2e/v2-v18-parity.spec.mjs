@@ -9,7 +9,7 @@ test('v2 restores the v1.8 settings and statistics surface', async ({page}) => {
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#v2Stats')).toBeVisible();
   await expect(page.locator('#v2Settings')).toBeVisible();
@@ -36,6 +36,7 @@ test('v2 restores the v1.8 settings and statistics surface', async ({page}) => {
   await page.locator('#v2Settings').click();
   await expect(page.locator('#v2DailyNew')).toHaveValue('7');
   await page.locator('#v2SettingsDialog').locator('button').filter({hasText:'بستن'}).click();
+  await page.locator('#v2ReviewNav').click();
 
   await expect(page.locator('#v2LearningCard')).toBeVisible({timeout:10000});
   await expect(page.locator('#v2LearningReveal')).toBeVisible();

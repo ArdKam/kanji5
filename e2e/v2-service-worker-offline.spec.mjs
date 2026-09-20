@@ -8,7 +8,7 @@ test('v2 boots through the real service worker and continues offline', async ({ 
     return Boolean(await caches.match(target));
   }, path);
 
-  await page.goto('/');
+  await page.goto('/?v2=1');
   await expect(page.locator('#v2App')).toBeVisible({ timeout: 20000 });
   await expect(page.locator('#v2LearningCard')).toBeVisible({ timeout: 10000 });
   await expect.poll(async () => page.evaluate(() => Boolean(window.__KANJI5_V16_SESSION_API__))).toBe(true);
