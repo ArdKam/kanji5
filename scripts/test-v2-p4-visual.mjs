@@ -4,7 +4,7 @@ const app=fs.readFileSync('frontend/src/app/App.tsx','utf8');
 const css=fs.readFileSync('react-dist/kanji5-react.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
-assert.match(app,/app-shell/);assert.match(app,/daily-summary/);assert.match(app,/learning-card/);
+assert.match(app,/app-shell/);assert.match(app,/daily-summary/);assert.match(app,/function Learning/);
 for(const token of ['--washi:','--paper:','--sumi:','--ink:','--mute:','--shu:','--ai:','--matcha:','--line:'])assert.ok(css.includes(token),token);
 for(const cls of ['.app-shell','.surface','.card','.daily-summary','.stat-card','.progress','.button','.feedback','.dialog'])assert.ok(css.includes(cls),cls);
 assert.ok(css.includes('focus-visible'));assert.ok(css.includes('prefers-reduced-motion:reduce'));assert.ok(css.includes('@media (width<=760px)'));
