@@ -7,5 +7,5 @@ assert.match(index,/id="root"/);assert.doesNotMatch(index,/v2-presentation|v2-co
 assert.match(entry,/react-dist\/kanji5-react\.js/);assert.match(entry,/react-dist\/kanji5-react\.css/);assert.doesNotMatch(entry,/URLSearchParams|legacy|v2=1|react=0/);
 assert.doesNotMatch(bootstrap,/legacy|kanji5-v2-default/);assert.match(education,/__KANJI5_EDU_BRIDGE__/);assert.match(boundary,/runtimePresentationData/);assert.match(boundary,/buildBoundarySnapshot/);
 assert.match(sw,/react-dist\/kanji5-react\.js/);assert.match(sw,/react-dist\/kanji5-react\.css/);
-assert.match(readme,/v2\.0\.0/);assert.match(architecture,/React/);
+assert.match(readme,/v2\.0\.0/);assert.match(architecture,/presentation/);
 console.log('Kanji 5 React presentation release contract passed.');
