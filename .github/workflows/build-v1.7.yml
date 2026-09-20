@@ -7,7 +7,6 @@ on:
       - 'v1.7-*.js'
       - 'v1.8-*.js'
       - 'v1.4-education-core.js'
-      - 'v1.3-storage-bridge.js'
       - 'v1.5-state.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
@@ -43,7 +42,6 @@ jobs:
         run: node scripts/test-npm-lockfile.mjs
       - name: Validate JavaScript
         run: |
-          node --check v1.3-storage-bridge.js
           node --check v1.4-education-core.js
           node --check v1.5-state.js
           node --check v1.7-adaptive-recall-core.js
