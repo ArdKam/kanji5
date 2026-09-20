@@ -43,17 +43,16 @@ test('v2 P1 exercise flow renders, grades, and recovers through Production retri
   await page.locator('#v2StartPractice').click();
   await expect(page.locator('.v2-mode-badge')).toHaveText('تولید');
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  const wrong=await page.evaluate(target=>{
-    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
-    return deck.find(item=>item?.character&&item.character!==target)?.character||'日';
-  },target);
+  const exerciseTarget=await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return s.exercise?.character||'';});
+  expect(exerciseTarget).toBeTruthy();
+  const wrong='not-a-kanji-answer';
   await page.locator('#v2AnswerInput').fill(wrong);
   await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('نادرست',{timeout:10000});
   await expect(page.locator('#v2Retry')).toBeVisible({timeout:10000});
   await page.locator('#v2Retry').click();
   await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10000});
-  await page.locator('#v2AnswerInput').fill(target);
+  await page.locator('#v2AnswerInput').fill(exerciseTarget);
   await page.locator('#v2Submit').click();
   await expect(page.locator('#v2App')).toContainText('درست',{timeout:10000});
 });
