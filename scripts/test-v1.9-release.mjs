@@ -22,7 +22,7 @@ for(const stage of ['P0','P1','P2','P3','P4','P5','P6','P7']) {
 assert.match(readme,/## v1\.9 — Learning Engine/);
 assert.match(readme,/\*\*v1\.9\.0 — implementation P0 through P7 is complete on `main`\.\*\*/);
 assert.match(changelog,/## \[1\.9\.0\] — 2026-09-18/);
-assert.match(architecture,/## V2 presentation contracts/);
+assert.match(architecture,/## Presentation contracts/);
 assert.match(architecture,/v1\.9-v2-contract-core\.js/);
 assert.match(architecture,/v1\.9-v2-boundary\.js/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
