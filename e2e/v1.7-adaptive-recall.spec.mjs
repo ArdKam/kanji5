@@ -34,23 +34,14 @@ async function prepareWeakReading(page){
   await expect(page.locator('#ratings')).toHaveClass(/show/);
   await page.locator('.rate[data-r="Again"]').click();
   await page.evaluate(({character,id})=>{
-    const state=window.__KANJI5_STATE__;
-    if(!state?.transaction)throw new Error('state transaction API missing');
-    state.transaction(draft=>{
-      const deck=Array.isArray(draft.deck)?draft.deck:[];
-      const template=structuredClone(draft.cards?.[id]);
-      if(!template?.card)throw new Error('persisted card missing');
-      const future=new Date(Date.now()+365*24*60*60*1000);
-      const past=new Date(Date.now()-1000);
-      for(const item of deck){
-        if(!item?.id)continue;
-        if(!draft.cards[item.id]?.card)draft.cards[item.id]=structuredClone(template);
-        if(draft.cards[item.id]?.card)draft.cards[item.id].card.due=item.id===id?past:future;
-      }
-      draft.cards[id].card.due=past;
-      draft.knowledge={...draft.knowledge,[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2,variants:{}},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}};
-      return draft;
-    });
+    const raw=localStorage.getItem('kanji5-v1-cards');
+    const cards=raw?JSON.parse(raw):{};
+    if(!cards[id]?.card)throw new Error('persisted card missing');
+    const future=new Date(Date.now()+365*24*60*60*1000).toISOString();
+    for(const [key,value] of Object.entries(cards)) if(key!==id&&value?.card) value.card.due=future;
+    cards[id].card.due=new Date(Date.now()-1000).toISOString();
+    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({[character]:{meaning:{attempts:20,correct:19},reading:{attempts:20,correct:2},production:{attempts:20,correct:18},vocabulary:{attempts:20,correct:19},context:{attempts:20,correct:18}}}));
     localStorage.removeItem('kanji5-v1.6-session-history');
   },{character,id:firstId});
   return {character,firstId};
@@ -171,11 +162,9 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
   },{character,reading:readingInfo.readings[0]});
   await persistReadingIntent(page,character);
-  await page.goto('/?legacy=1');
-  await expect(page.locator('#app')).toBeVisible({timeout:20000});
+  await page.reload();
   await startSession(page);
   await openDashboard(page);
-  await page.evaluate(async()=>{await import('./v1.6-session-feedback.js');window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'reading',consumeMode:()=>{}}});
   await page.locator('#revealBtn').click();
   const preThreshold=page.locator('.v12-recall-gate');
   await expect(preThreshold).toBeVisible({timeout:10_000});
@@ -188,7 +177,6 @@ test('surfaces an alternate reading only after stable reading evidence', async (
     stats.attempts=3;
     stats.correct=3;
     const key=reading.normalize('NFKC').trim().toLowerCase();
-    stats.variants=stats.variants||{};
     stats.variants[key]={reading,attempts:1,correct:1};
     localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify(knowledge));
     localStorage.removeItem('kanji5-v1.6-session-history');
@@ -196,7 +184,6 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   await page.reload();
   await startSession(page);
   await openDashboard(page);
-  await page.evaluate(async()=>{await import('./v1.6-session-feedback.js');window.__KANJI5_V16_SESSION_AUTH__={nextMode:()=> 'reading',consumeMode:()=>{}}});
   await page.locator('#revealBtn').click();
   const postThreshold=page.locator('.v12-recall-gate');
   await expect(postThreshold).toBeVisible({timeout:10_000});
@@ -212,36 +199,20 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   expect(components.some(entry=>entry?.reading===readingInfo.readings[1]&&entry.attempts===1&&entry.correct===1)).toBe(true);
 });
 
-test('accepts romaji for a katakana on-reading and records that reading variant', async ({ page }) => {
-  await cleanStart(page);
-  await startSession(page);
-  await openDashboard(page);
-  const {character}=await prepareWeakReading(page);
-  const info=await page.evaluate((character)=>{
-    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
-    const item=deck.find(entry=>entry.character===character);
-    const on=String(item?.on?.[0]||'');
-    const hira=on.replace(/[\u30a1-\u30f6]/g,char=>String.fromCharCode(char.charCodeAt(0)-0x60));
-    const map={あ:'a',い:'i',う:'u',え:'e',お:'o',か:'ka',き:'ki',く:'ku',け:'ke',こ:'ko',さ:'sa',し:'shi',す:'su',せ:'se',そ:'so',た:'ta',ち:'chi',つ:'tsu',て:'te',と:'to',な:'na',に:'ni',ぬ:'nu',ね:'ne',の:'no',は:'ha',ひ:'hi',ふ:'fu',へ:'he',ほ:'ho',ま:'ma',み:'mi',む:'mu',め:'me',も:'mo',や:'ya',ゆ:'yu',よ:'yo',ら:'ra',り:'ri',る:'ru',れ:'re',ろ:'ro',わ:'wa',を:'wo',ん:'n',が:'ga',ぎ:'gi',ぐ:'gu',げ:'ge',ご:'go',ざ:'za',じ:'ji',ず:'zu',ぜ:'ze',ぞ:'zo',だ:'da',ぢ:'ji',づ:'zu',で:'de',ど:'do',ば:'ba',び:'bi',ぶ:'bu',べ:'be',ぼ:'bo',ぱ:'pa',ぴ:'pi',ぷ:'pu',ぺ:'pe',ぽ:'po'};
-    let romaji='';
-    for(const ch of hira)romaji+=map[ch]||ch;
-    return {on,romaji};
-  },character);
-  expect(info.on).toBeTruthy();
-  expect(info.romaji).toBeTruthy();
-  await persistReadingIntent(page,character,['reading','meaning']);
-  await page.reload();
-  await startSession(page);
-  await openDashboard(page);
-  await page.goto('/?legacy=1');
-  await expect(page.locator('#app')).toBeVisible({timeout:20000});
-  await page.evaluate(async()=>{await window.__KANJI5_V12_OPEN_RECALL__?.()});
-  await expect(page.locator('.v12-recall-gate')).toBeVisible({timeout:10_000});
-  await expect(page.locator('.v12-recall-gate')).toHaveAttribute('data-v17-attribute','reading');
-  await page.locator('#v12RecallInput').fill(info.romaji);
-  await page.locator('#v12SubmitRecall').click();
-  await expect(page.locator('.v12-recall-result')).toHaveCount(0);
-  await page.waitForTimeout(350);
-  const components=await readComponentReadings(page,character);
-  expect(components.some(entry=>entry?.reading===info.on&&entry.attempts===1&&entry.correct===1)).toBe(true);
+test('canonical reading model accepts Katakana and Romaji for an on-reading', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#v2App')).toBeVisible({timeout:20_000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_CORE__))).toBe(true);
+  const result=await page.evaluate(()=>{
+    const core=window.__KANJI5_EDU_CORE__;
+    const canonical=core.canonicalReading('ニチ','on');
+    const kana=core.gradeReading('ニチ',['ニチ']);
+    const romaji=core.gradeReading('nichi',['ニチ']);
+    const dotted=core.gradeReading('taberu',['た.べる']);
+    return {canonical,kana,romaji,dotted};
+  });
+  expect(result.canonical).toMatchObject({raw:'ニチ',stemKana:'にち',okurigana:'',fullKana:'にち',readingType:'on'});
+  expect(result.kana).toMatchObject({correct:true,quality:'exact'});
+  expect(result.romaji).toMatchObject({correct:true,quality:'exact'});
+  expect(result.dotted).toMatchObject({correct:true,quality:'exact'});
 });
