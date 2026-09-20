@@ -5,6 +5,7 @@ test('v2 P0 shell consumes the v1.9 presentation boundary',async({page})=>{
   await expect(page.locator('#v2App')).toBeVisible({timeout:20000});
   await expect(page.locator('#v2Title')).toHaveText('کانجی ۵');
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await page.locator('#v2PracticeNav').click();
 
   await page.evaluate(async()=>{
     const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
