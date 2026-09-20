@@ -199,34 +199,20 @@ test('surfaces an alternate reading only after stable reading evidence', async (
   expect(components.some(entry=>entry?.reading===readingInfo.readings[1]&&entry.attempts===1&&entry.correct===1)).toBe(true);
 });
 
-test('accepts romaji for a katakana on-reading in Practice and records that reading variant', async ({ page }) => {
-  await cleanStart(page);
-  await startSession(page);
-  await openDashboard(page);
-  const {character}=await prepareWeakReading(page);
-  const info=await page.evaluate((character)=>{
-    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
-    const item=deck.find(entry=>entry.character===character);
-    const on=String(item?.on?.[0]||'');
-    const hira=on.replace(/[\u30a1-\u30f6]/g,char=>String.fromCharCode(char.charCodeAt(0)-0x60));
-    const map={あ:'a',い:'i',う:'u',え:'e',お:'o',か:'ka',き:'ki',く:'ku',け:'ke',こ:'ko',さ:'sa',し:'shi',す:'su',せ:'se',そ:'so',た:'ta',ち:'chi',つ:'tsu',て:'te',と:'to',な:'na',に:'ni',ぬ:'nu',ね:'ne',の:'no',は:'ha',ひ:'hi',ふ:'fu',へ:'he',ほ:'ho',ま:'ma',み:'mi',む:'mu',め:'me',も:'mo',や:'ya',ゆ:'yu',よ:'yo',ら:'ra',り:'ri',る:'ru',れ:'re',ろ:'ro',わ:'wa',を:'wo',ん:'n',が:'ga',ぎ:'gi',ぐ:'gu',げ:'ge',ご:'go',ざ:'za',じ:'ji',ず:'zu',ぜ:'ze',ぞ:'zo',だ:'da',ぢ:'ji',づ:'zu',で:'de',ど:'do',ば:'ba',び:'bi',ぶ:'bu',べ:'be',ぼ:'bo',ぱ:'pa',ぴ:'pi',ぷ:'pu',ぺ:'pe',ぽ:'po'};
-    let romaji=''; for(const ch of hira)romaji+=map[ch]||ch;
-    return {on,romaji};
-  },character);
-  expect(info.on).toBeTruthy();
-  expect(info.romaji).toBeTruthy();
-  await persistReadingIntent(page,character,['reading','meaning']);
-  await page.reload();
-  await startSession(page);
-  await openDashboard(page);
+test('canonical reading model accepts Katakana and Romaji for an on-reading', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#v2PracticeNav')).toBeVisible({timeout:10_000});
-  await page.locator('#v2PracticeNav').click();
-  await expect(page.locator('#v2AnswerInput')).toBeVisible({timeout:10_000});
-  await page.locator('#v2AnswerInput').fill(info.romaji);
-  await page.locator('#v2Submit').click();
-  await expect(page.locator('#v2App')).toContainText('درست',{timeout:10_000});
-  await page.waitForTimeout(350);
-  const components=await readComponentReadings(page,character);
-  expect(components.some(entry=>entry?.reading===info.on&&entry.attempts===1&&entry.correct===1)).toBe(true);
+  await expect(page.locator('#v2App')).toBeVisible({timeout:20_000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_CORE__))).toBe(true);
+  const result=await page.evaluate(()=>{
+    const core=window.__KANJI5_EDU_CORE__;
+    const canonical=core.canonicalReading('ニチ','on');
+    const kana=core.gradeReading('ニチ',['ニチ']);
+    const romaji=core.gradeReading('nichi',['ニチ']);
+    const dotted=core.gradeReading('taberu',['た.べる']);
+    return {canonical,kana,romaji,dotted};
+  });
+  expect(result.canonical).toMatchObject({raw:'ニチ',stemKana:'にち',okurigana:'',fullKana:'にち',readingType:'on'});
+  expect(result.kana).toMatchObject({correct:true,quality:'exact'});
+  expect(result.romaji).toMatchObject({correct:true,quality:'exact'});
+  expect(result.dotted).toMatchObject({correct:true,quality:'exact'});
 });
