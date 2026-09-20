@@ -1,11 +1,8 @@
 (()=>{
 'use strict';
-const params=new URLSearchParams(location.search);
-if(params.get('legacy')==='1'||params.get('v2')==='1'||params.get('react')==='0')return;
-document.documentElement.classList.remove('kanji5-v2-default');
 document.documentElement.classList.add('kanji5-react-default');
 const style=document.createElement('style');
-style.textContent='.kanji5-react-default .wrap>header{display:none!important}.kanji5-react-default #app{display:none!important}.kanji5-react-default #loading{display:none!important}.kanji5-react-default #root{display:block!important;min-height:100vh}';
+style.textContent='#root{display:block;min-height:100vh}';
 document.head.appendChild(style);
 const reactStylesheet=document.createElement('link');
 reactStylesheet.rel='stylesheet';
