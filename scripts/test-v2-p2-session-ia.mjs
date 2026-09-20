@@ -33,3 +33,21 @@ assert.match(roadmap,/### P2 — Session & Learner Information Architecture ✅/
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 assert.ok(spec.includes('v2 P2 session information architecture'));
 console.log('Kanji 5 v2 P2 information architecture contract passed.');
+
+const css=fs.readFileSync('v2-presentation.css','utf8');
+assert.match(presentation,/presentationMode = 'home'/,'V2 must start on the home experience');
+assert.match(presentation,/v2ReviewNav/,'Dedicated Review navigation is missing');
+assert.match(presentation,/v2PracticeNav/,'Dedicated Practice navigation is missing');
+assert.match(presentation,/function renderExperienceHome/,'Home must expose explicit Review and Practice actions');
+assert.match(presentation,/presentationMode='review'/,'Review must have an independent presentation route');
+assert.match(presentation,/presentationMode='practice'/,'Practice must have an independent presentation route');
+assert.match(presentation,/showLearning=snapshot\?\.learning\?\.active/,'Review route must not inject a mandatory pre-card exercise');
+assert.match(css,/\.v2-experience-nav/,'Experience navigation styling missing');
+console.log('Kanji 5 Review/Practice separation contract passed.');
+
+const sessionSource=fs.readFileSync('v1.6-session.js','utf8');
+assert.match(sessionSource,/experience:String\(persisted\?\.experience\|\|'review'\)/,'Session must persist an explicit experience type');
+assert.match(sessionSource,/startExperience/,'Session API must expose explicit experience switching');
+assert.match(sessionSource,/experience:session\.experience/,'Session history must retain the experience type');
+assert.match(presentation,/startExperience\('practice'\)/,'Practice route must start a practice session');
+assert.match(presentation,/startExperience\('review'\)/,'Review route must start a review session');
