@@ -20,6 +20,8 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await expect(review).not.toHaveAttribute('aria-current','page');
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect(page.locator('#root section.card:not(#exercise)')).toHaveCount(0);
+  await expect(page.locator('#root .daily-summary')).toHaveCount(0);
+  await expect(page.locator('#root .insights')).toHaveCount(0);
   await review.click();
   await expect(review).toHaveAttribute('aria-current','page');
   await expect(practice).not.toHaveAttribute('aria-current','page');
