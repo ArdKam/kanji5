@@ -10,6 +10,7 @@ on:
       - "e2e/react-presentation-migration.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
+      - "e2e/react-review-practice.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
@@ -62,3 +63,6 @@ jobs:
       - name: Run React offline gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-offline.spec.mjs
+      - name: Run Review/Practice separation gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
