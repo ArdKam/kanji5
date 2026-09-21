@@ -16,14 +16,8 @@ on:
       - 'v1.3-*.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
-      - 'e2e/v1.9-*.mjs'
-      - 'e2e/v1.8-*.mjs'
-      - 'e2e/v1.7-*.mjs'
       - 'V1.9-ROADMAP.md'
       - 'V2-ROADMAP.md'
-      - 'v2-*.js'
-      - 'v2-*.css'
-      - 'e2e/v2-*.mjs'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
@@ -50,9 +44,6 @@ on:
       - 'e2e/v1.7-*.mjs'
       - 'V1.9-ROADMAP.md'
       - 'V2-ROADMAP.md'
-      - 'v2-*.js'
-      - 'v2-*.css'
-      - 'e2e/v2-*.mjs'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
       - 'CHANGELOG.md'
@@ -107,8 +98,9 @@ jobs:
           node --check v1.6-session-core.js
           node --check v1.6-session-feedback.js
           node --check v1.6-skill-profile.js
-          node --check v2-presentation.js
           node --check review-runtime.js
+      - name: Install root dependencies for lockfile verification
+        run: npm ci --ignore-scripts
       - name: Validate v1.9 release contract
         run: node scripts/test-v1.9-release.mjs
       - name: Run learner model regression suite
@@ -117,31 +109,8 @@ jobs:
         run: node scripts/test-v1.9-deterministic-content-selection.mjs
       - name: Run aggregate contract and unit tests
         run: npm test
-      - name: Run v2 P0 presentation contract
-        run: node scripts/test-v2-p0-presentation.mjs
-      - name: Run v2 localization contract
-        run: node scripts/test-v2-localization.mjs
-      - name: Run v2 mobile polish contract
-        run: node scripts/test-v2-mobile-polish.mjs
-      - name: Run v2 exercise-first presentation contract
-        run: node scripts/test-v2-exercise-presentation.mjs
-      - name: Run v2 P2 session information architecture contract
-        run: node scripts/test-v2-p2-session-ia.mjs
-      - name: Run v2 P3 accessibility contract
-        run: node scripts/test-v2-p3-accessibility.mjs
-      - name: Run v2 P4 visual contract
-        run: node scripts/test-v2-p4-visual.mjs
-      - name: Run v2 P5 release contract
-        run: node scripts/test-v2-p5-release.mjs
-      - name: Run v2 runtime separation contract
-        run: node scripts/test-v2-runtime-separation.mjs
-      - name: Run supported v1.8/v1.9/v2 contract suite
-        run: node scripts/test-v1.9-release.mjs && node scripts/test-v2-p0-presentation.mjs && node scripts/test-v2-localization.mjs && node scripts/test-v2-mobile-polish.mjs && node scripts/test-v2-exercise-presentation.mjs && node scripts/test-v2-p2-session-ia.mjs && node scripts/test-v2-p3-accessibility.mjs && node scripts/test-v2-p4-visual.mjs && node scripts/test-v2-p5-release.mjs && node scripts/test-v2-runtime-separation.mjs && node scripts/test-v1.8-production.mjs && node scripts/test-v1.8-vocabulary.mjs && node scripts/test-v1.8-context.mjs
-      - name: Install CJK fonts for visual testing
-        run: sudo apt-get update -qq && sudo apt-get install -y fonts-noto-cjk
+      - name: Run React presentation contract gate
+        run: node scripts/test-react-migration.mjs
 
-      - name: Run browser coverage
-        run: |
-          npm ci
-          npx playwright install chromium
-          npx playwright test --timeout=20000 --retries=0 e2e/v1.8-production.spec.mjs e2e/v1.8-vocabulary.spec.mjs e2e/v1.8-context.spec.mjs e2e/v1.9-p0-outcome.spec.mjs e2e/v1.9-p1-learner-model.spec.mjs e2e/v1.9-p2-adaptive-planner.spec.mjs e2e/v1.9-p3-recovery.spec.mjs e2e/v1.9-p4-learning-evaluation.spec.mjs e2e/v1.9-p5-data-offline.spec.mjs e2e/v1.9-p6-v2-boundary.spec.mjs
+      # Legacy DOM browser suites are retired with the legacy presentation shell.
+      # Engine contracts are covered above; browser/presentation coverage is authoritative in react-frontend.yml.

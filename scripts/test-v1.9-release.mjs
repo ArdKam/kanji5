@@ -22,7 +22,7 @@ for(const stage of ['P0','P1','P2','P3','P4','P5','P6','P7']) {
 assert.match(readme,/## v1\.9 — Learning Engine/);
 assert.match(readme,/\*\*v1\.9\.0 — implementation P0 through P7 is complete on `main`\.\*\*/);
 assert.match(changelog,/## \[1\.9\.0\] — 2026-09-18/);
-assert.match(architecture,/## V2 presentation contracts/);
+assert.match(architecture,/## Presentation contracts/);
 assert.match(architecture,/v1\.9-v2-contract-core\.js/);
 assert.match(architecture,/v1\.9-v2-boundary\.js/);
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
@@ -42,7 +42,8 @@ for(const spec of [
 ]) assert.ok(fs.existsSync(spec),'required v1.9 browser spec missing: '+spec);
 assert.match(workflow,/name: Build Kanji 5 v1\.8\/v1\.9/);
 assert.match(workflow,/scripts\/test-v1\.9-release\.mjs/);
-assert.match(workflow,/e2e\/v1\.9-p6-v2-boundary\.spec\.mjs/);
+assert.match(workflow,/test-react-migration\.mjs/);
+assert.match(workflow,/Legacy DOM browser suites are retired/);
 assert.match(workflow,/workflow_dispatch:/);
 assert.ok(index.includes('./v1.9-v2-boundary.js')||learnerRuntime.includes("import('./v1.9-v2-boundary.js')"),'v2 boundary must be wired into the runtime');
 console.log('Kanji 5 v1.9 release contract passed.');

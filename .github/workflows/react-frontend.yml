@@ -12,7 +12,8 @@ on:
       - "e2e/react-presentation-offline.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
-      - "v2-presentation.js"
+      - "react-entry.js"
+      - "react-dist/**"
       - "sw.js"
   push:
     branches:
@@ -43,7 +44,6 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
-
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
@@ -56,26 +56,9 @@ jobs:
       - name: Run React presentation E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
-
       - name: Run React authoritative parity gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-parity.spec.mjs
       - name: Run React offline gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-offline.spec.mjs
-      - name: Run current v2 compatibility gate
-        working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/v2-p0-presentation.spec.mjs e2e/v2-learning-first.spec.mjs e2e/v2-p1-exercise-flow.spec.mjs e2e/v2-p3-accessibility-responsive.spec.mjs e2e/v2-v18-parity.spec.mjs
-      - name: Commit built static bundle
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/react-ts-presentation'
-        working-directory: .
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add react-dist/
-          if git diff --cached --quiet; then
-            echo "No React bundle changes to commit."
-          else
-            git commit -m "build(react): sync static presentation bundle"
-            git push origin HEAD:${{ github.head_ref || github.ref_name }}
-          fi

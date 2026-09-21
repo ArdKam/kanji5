@@ -7,13 +7,10 @@ on:
       - 'v1.7-*.js'
       - 'v1.8-*.js'
       - 'v1.4-education-core.js'
-      - 'v1.3-storage-bridge.js'
       - 'v1.5-state.js'
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
       - 'scripts/build-kanji-data.mjs'
-      - 'e2e/v1.7-*.mjs'
-      - 'e2e/v1.8-*.mjs'
       - 'V1.7-ROADMAP.md'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
@@ -43,7 +40,6 @@ jobs:
         run: node scripts/test-npm-lockfile.mjs
       - name: Validate JavaScript
         run: |
-          node --check v1.3-storage-bridge.js
           node --check v1.4-education-core.js
           node --check v1.5-state.js
           node --check v1.7-adaptive-recall-core.js
@@ -54,6 +50,8 @@ jobs:
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
           node --check v1.2-enhancements.js
+      - name: Install root dependencies for lockfile verification
+        run: npm ci --ignore-scripts
       - name: Run v1.7 contract and unit tests
         run: |
           node scripts/test-v1.7-adaptive-recall.mjs
@@ -61,8 +59,5 @@ jobs:
           node scripts/test-v1.7-evaluation.mjs
           node scripts/test-v1.7-recall-intent.mjs
           node scripts/test-v1.7-tuning.mjs
-      - name: Run active release browser tests
-        run: |
-          npm ci
-          npx playwright install chromium
-          npx playwright test --timeout=20000 --retries=0 e2e/v1.7-adaptive-recall.spec.mjs
+      # Browser presentation coverage moved to the React presentation workflow.
+      # The v1.7 contract/unit suite above remains authoritative for adaptive recall.
