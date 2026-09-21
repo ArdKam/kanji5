@@ -161,6 +161,7 @@ export function resetProgress(): boolean {
 }
 
 export async function startLearningExperience(): Promise<void> {
+  await waitForEngine();
   const session = window.__KANJI5_V16_SESSION_API__;
   if (session?.startExperience) await session.startExperience("review");
 }
