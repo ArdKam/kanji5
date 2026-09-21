@@ -112,7 +112,8 @@ type EducationBridge = {
 };
 
 type SessionApi = {
-  getSession?: () => { started?: boolean; finished?: boolean } | null;
+  getSession?: () => { started?: boolean; finished?: boolean; experience?: "review" | "practice" } | null;
+  startExperience?: (experience: "review" | "practice") => Promise<unknown> | unknown;
   startReady?: () => Promise<unknown> | unknown;
   start?: () => Promise<unknown> | unknown;
 };
@@ -159,15 +160,21 @@ export function resetProgress(): boolean {
   return Boolean(window.__KANJI5_V19_V2_BOUNDARY__?.resetProgress?.());
 }
 
+export async function startLearningExperience(): Promise<void> {
+  await waitForEngine();
+  const session = window.__KANJI5_V16_SESSION_API__;
+  if (session?.startExperience) await session.startExperience("review");
+}
+
 export async function startExercise(): Promise<void> {
   const bridge = window.__KANJI5_EDU_BRIDGE__;
   if (!bridge?.start) throw new Error("KANJI5_EDU_BRIDGE_UNAVAILABLE");
   const session = window.__KANJI5_V16_SESSION_API__;
-  const current = session?.getSession?.();
-  if (session?.startReady && !current?.started && !current?.finished) {
-    await session.startReady();
-  } else if (session?.start && !current?.started && !current?.finished) {
-    await session.start();
+  if (session?.startExperience) await session.startExperience("practice");
+  else {
+    const current = session?.getSession?.();
+    if (session?.startReady && !current?.started && !current?.finished) await session.startReady();
+    else if (session?.start && !current?.started && !current?.finished) await session.start();
   }
   await bridge.start();
 }

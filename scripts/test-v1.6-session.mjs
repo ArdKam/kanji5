@@ -18,8 +18,11 @@ assert.match(session,/schemaVersion:ACTIVE_SCHEMA/,'active session schema versio
 assert.match(session,/sessionId:session\.sessionId/,'stable session id must survive reload');
 assert.match(session,/remainingModes/,'adaptive plan remainder must survive reload');
 assert.match(session,/plan:plan/,'adaptive plan snapshot must survive reload');
-assert.match(session,/filter\(x=>x\?\.status!==ACTIVE_STATUS\)/,'completed history must exclude the active session record');
-assert.match(session,/const persisted=readActive\(\)/,'runtime must restore the active session on boot');
+assert.match(session,/status===ACTIVE_STATUS&&String\(x\.experience\|\|'review'\)===session\.experience/,'active session persistence must be scoped to the current experience');
+assert.match(session,/function readActive\(experience\)/,'active session lookup must be experience-scoped');
+assert.match(session,/loadExperience\(next\)/,'switching experiences must load the matching persisted session');
+assert.match(session,/startExperience/,'session API must expose explicit experience switching');
+assert.match(session,/const persisted=readActive\(currentExperience\)/,'runtime must restore the current experience session on boot');
 assert.match(session,/session\.resumed/,'runtime must expose resumed-session state');
 assert.match(session,/import\('\.\/v1\.6-session-core\.js'\)/,'session runtime must load the adaptive session core');
 assert.match(session,/import\('\.\/v1\.6-session-ui\.js'\)/,'session runtime must load the active session UI runtime');
