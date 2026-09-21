@@ -22,9 +22,8 @@ for (const spec of ['e2e/v1.8-production.spec.mjs', 'e2e/v1.8-vocabulary.spec.mj
   assert.ok(fs.existsSync(spec), `${spec} must exist`);
 }
 assert.match(workflow, /npm test/);
-assert.match(workflow, /e2e\/v1\.8-production\.spec\.mjs/);
-assert.match(workflow, /e2e\/v1\.8-vocabulary\.spec\.mjs/);
-assert.match(workflow, /e2e\/v1\.8-context\.spec\.mjs/);
+assert.match(workflow, /test-react-migration\.mjs/);
+assert.match(workflow, /Legacy DOM browser suites are retired/);
 assert.ok(fs.existsSync('v1.5-education-ui.js'));
 assert.match(ui,/v1\.8-production-core\.js/);
 assert.match(ui,/v1\.8-vocabulary-core\.js/);
