@@ -27,4 +27,4 @@ The React presentation exposes Review and Practice as explicit, independent user
 
 ## Learner-facing polish
 
-The production shell keeps implementation details out of the learner-facing copy and presents Review/Practice as the primary navigation choices.
+The production shell keeps implementation details out of the learner-facing copy and presents Learning/Active Recall as the primary navigation choices.
