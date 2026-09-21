@@ -34,12 +34,8 @@ jobs:
         run: node scripts/test-v1.6-session.mjs && node scripts/test-v1.6-session-core.mjs && node scripts/test-v1.6-profile-planning.mjs && node scripts/test-v1.6-session-feedback.mjs && node scripts/test-v1.6-session-analytics.mjs && node scripts/test-v1.6-skill-profile.mjs && node scripts/test-v1.6-sync.mjs
       - name: Validate v1.6 release contract
         run: node scripts/test-v1.6-release.mjs
-      - name: Install browser test dependencies
-        run: npm ci
-      - name: Install Chromium
-        run: npx playwright install chromium
-      - name: Run v1.6 browser tests
-        run: npx playwright test --timeout=20000 --retries=0 e2e/v1.6-session.spec.mjs e2e/v1.6-session-analytics.spec.mjs e2e/v1.6-skill-profile.spec.mjs e2e/v1.6-ux.spec.mjs
+      # Browser presentation coverage moved to the React presentation workflow.
+      # The v1.6 contract/unit suite above remains authoritative for the engine.
       - name: Verify checked-out tree is committed and immutable
         shell: bash
         run: |
