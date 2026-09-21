@@ -42,7 +42,7 @@ for(const spec of [
 ]) assert.ok(fs.existsSync(spec),'required v1.9 browser spec missing: '+spec);
 assert.match(workflow,/name: Build Kanji 5 v1\.8\/v1\.9/);
 assert.match(workflow,/scripts\/test-v1\.9-release\.mjs/);
-assert.match(workflow,/e2e\/v1\.9-p6-v2-boundary\.spec\.mjs/);
+assert.match(workflow,/test-react-migration\.mjs/);\nassert.match(workflow,/Legacy DOM browser suites are retired/);
 assert.match(workflow,/workflow_dispatch:/);
 assert.ok(index.includes('./v1.9-v2-boundary.js')||learnerRuntime.includes("import('./v1.9-v2-boundary.js')"),'v2 boundary must be wired into the runtime');
 console.log('Kanji 5 v1.9 release contract passed.');
