@@ -84,7 +84,7 @@ function App(){
   if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>رابط هستهٔ یادگیری آماده نشد</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>تلاش دوباره</button></section></div>;
   return <div className="app-shell">
     <a className="skip-link" href="#primary-content">رفتن به محتوای اصلی</a>
-    <header className="header"><div><p className="eyebrow red">常用漢字 · 2,136</p><h1>کانجی ۵</h1><p className="subtitle">Sumi Play presentation · v1.9 engine authoritative</p></div>
+    <header className="header"><div><p className="eyebrow red">常用漢字 · 2,136</p><h1>کانجی ۵</h1><p className="subtitle">پنج کانجی مهم ژاپنی در روز، با مرور تطبیقی</p></div>
       <div className="header-actions"><div className="session-progress"><Progress value={progress} label="پیشرفت جلسه"/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} از {fa(snapshot?.session?.plannedTotal??0)}</span></div>
       <button className="button secondary" type="button" disabled={busy} onClick={()=>setStatsOpen(true)}>آمار</button><button className="button secondary" type="button" disabled={busy} onClick={()=>setSettingsOpen(true)}>تنظیمات</button></div>
     </header>
@@ -95,7 +95,7 @@ function App(){
       {showExercise?<><Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>void action(()=>submitExercise(v))} onDontKnow={()=>void action(dontKnow)} onRetry={()=>void action(retryExercise)} onNext={()=>void action(nextExercise)} onBack={()=>void action(async()=>{await clearTransient();setExperience("review")})}/><Feedback snapshot={snapshot??{}}/></>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:<section className="surface empty-state"><h2>جلسه‌ای برای نمایش وجود ندارد</h2><p>برای شروع تمرین آموزشی از دکمهٔ بالای صفحه استفاده کن.</p><button className="button primary" type="button" onClick={()=>void action(async()=>{await startExercise();setExperience("practice")})}>شروع تمرین</button></section>}
       {snapshot?<Insights snapshot={snapshot}/>:null}
     </main>
-    <footer className="footer">Sumi Play visual language migrated from Kanjis Bloom; the Kanji5 learning engine remains the only source of truth.</footer>
+    <footer className="footer">یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.</footer>
     {statsOpen?<dialog open className="dialog" aria-labelledby="stats-title"><button className="dialog-close" type="button" aria-label="بستن" onClick={()=>setStatsOpen(false)}>×</button><h2 id="stats-title">آمار</h2><div className="dialog-grid"><StatRow label="کل مرورها" value={fa(snapshot?.stats?.totalReviews??0)}/><StatRow label="مرورهای غیر Again" value={fa(pct(snapshot?.stats?.nonAgainRate))+"٪"}/><StatRow label="کانجی مطالعه‌شده" value={fa(snapshot?.stats?.studiedCount??0)+" / "+fa(snapshot?.stats?.deckSize??0)}/><StatRow label="رشتهٔ فعلی" value={fa(snapshot?.stats?.currentStreak??0)+" 🔥"}/><StatRow label="طولانی‌ترین رشته" value={fa(snapshot?.stats?.longestStreak??0)+" 🔥"}/><StatRow label="Leech" value={fa(snapshot?.stats?.leechCount??0)}/></div></dialog>:null}
     <SettingsDialog open={settingsOpen} snapshot={snapshot??{}} busy={busy} onClose={()=>setSettingsOpen(false)} onSave={s=>void action(async()=>{await updateSettings(s);setSettingsOpen(false)})} onReset={()=>void action(async()=>{resetProgress()})}/>
   </div>
