@@ -34,6 +34,8 @@ jobs:
         run: node scripts/test-v1.6-session.mjs && node scripts/test-v1.6-session-core.mjs && node scripts/test-v1.6-profile-planning.mjs && node scripts/test-v1.6-session-feedback.mjs && node scripts/test-v1.6-session-analytics.mjs && node scripts/test-v1.6-skill-profile.mjs && node scripts/test-v1.6-sync.mjs
       - name: Validate v1.6 release contract
         run: node scripts/test-v1.6-release.mjs
+      - name: Install root dependencies for lockfile verification
+        run: npm ci --ignore-scripts
       # Browser presentation coverage moved to the React presentation workflow.
       # The v1.6 contract/unit suite above remains authoritative for the engine.
       - name: Verify checked-out tree is committed and immutable
