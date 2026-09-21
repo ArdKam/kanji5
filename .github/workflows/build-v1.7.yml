@@ -50,6 +50,8 @@ jobs:
           node --check v1.8-vocabulary-core.js
           node --check v1.8-context-core.js
           node --check v1.2-enhancements.js
+      - name: Install root dependencies for lockfile verification
+        run: npm ci --ignore-scripts
       - name: Run v1.7 contract and unit tests
         run: |
           node scripts/test-v1.7-adaptive-recall.mjs
