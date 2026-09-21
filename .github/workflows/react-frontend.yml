@@ -12,6 +12,7 @@ on:
       - "e2e/react-presentation-offline.spec.mjs"
       - "e2e/react-review-practice.spec.mjs"
       - "e2e/react-accessibility.spec.mjs"
+      - "e2e/react-pwa-release.spec.mjs"
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
@@ -71,6 +72,9 @@ jobs:
       - name: Run React accessibility gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-accessibility.spec.mjs
+      - name: Run React PWA release gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs
       - name: Run Review/Practice separation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
