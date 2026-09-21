@@ -29,13 +29,14 @@ export function buildStatsViewModel(input={}){
 
 export function buildSessionViewModel(session){
   const source=session&&typeof session==='object'?session:{};
+  const experience=source.experience==='practice'?'practice':'review';
   const remainingModes={};for(const mode of MODES)remainingModes[mode]=Math.max(0,finite(source.remainingModes?.[mode],0));
   const modeResults={};for(const mode of MODES){const s=source.modeResults?.[mode]||{};modeResults[mode]={attempts:Math.max(0,finite(s.attempts,0)),correct:Math.max(0,finite(s.correct,0)),lastOutcome:OUTCOMES.includes(s.lastOutcome)?s.lastOutcome:null,lastAt:text(s.lastAt,80),graderVersion:text(s.graderVersion,80)}}
   const plannedTotal=Math.max(0,finite((source.plan?.modes||[]).reduce((sum,item)=>sum+finite(item?.plannedCount,0),0),0));
   const remainingTotal=MODES.reduce((sum,mode)=>sum+remainingModes[mode],0);
   const effectivePlanned=plannedTotal||remainingTotal;
   const completionFraction=source.status==='active'&&effectivePlanned>0?Math.max(0,Math.min(1,(effectivePlanned-remainingTotal)/effectivePlanned)):source.status==='active'?0:1;
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session',sessionId:text(source.sessionId,120),status:text(source.status,40)||'unknown',resumed:bool(source.resumed),planRevision:Math.max(0,finite(source.planRevision,0)),remainingModes,modeResults,plannedTotal:effectivePlanned,remainingTotal,completionFraction,completed:source.status!=='active',updatedAt:text(source.updatedAt||source.endedAt,80)})
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'session',experience,sessionId:text(source.sessionId,120),status:text(source.status,40)||'unknown',resumed:bool(source.resumed),planRevision:Math.max(0,finite(source.planRevision,0)),remainingModes,modeResults,plannedTotal:effectivePlanned,remainingTotal,completionFraction,completed:source.status!=='active',updatedAt:text(source.updatedAt||source.endedAt,80)})
 }
 
 export function buildExerciseViewModel(input={}){const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;const stimulus=source.stimulus&&typeof source.stimulus==='object'?source.stimulus:{};const choices=Array.isArray(source.choices)?source.choices.map(value=>text(value,16)).filter(Boolean).slice(0,4):[];return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'exercise',mode,prompt:text(source.prompt),character:text(source.character,16),stimulus:Object.freeze({kind:text(stimulus.kind,40),primary:text(stimulus.primary,2400),secondary:text(stimulus.secondary,1200),translation:text(stimulus.translation,1200),inputPlaceholder:text(stimulus.inputPlaceholder,160)}),choices,answerHint:text(source.answerHint,2400),contentId:text(source.contentId,120),contentVersion:text(source.contentVersion,80),provenance:text(source.provenance,120)})}
