@@ -11,8 +11,6 @@ on:
       - 'scripts/test-*.mjs'
       - 'scripts/test-all.mjs'
       - 'scripts/build-kanji-data.mjs'
-      - 'e2e/v1.7-*.mjs'
-      - 'e2e/v1.8-*.mjs'
       - 'V1.7-ROADMAP.md'
       - 'V1.8-ROADMAP.md'
       - 'ARCHITECTURE.md'
@@ -59,8 +57,5 @@ jobs:
           node scripts/test-v1.7-evaluation.mjs
           node scripts/test-v1.7-recall-intent.mjs
           node scripts/test-v1.7-tuning.mjs
-      - name: Run active release browser tests
-        run: |
-          npm ci
-          npx playwright install chromium
-          npx playwright test --timeout=20000 --retries=0 e2e/v1.7-adaptive-recall.spec.mjs
+      # Browser presentation coverage moved to the React presentation workflow.
+      # The v1.7 contract/unit suite above remains authoritative for adaptive recall.
