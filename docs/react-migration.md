@@ -18,3 +18,8 @@ React remains presentation-only. Scheduling, grading, learner modeling, recovery
 
 ### Renderer transition
 The former `v2-presentation.js`, `v2-components.js`, `v2-presentation.css`, and legacy presentation shell have been retired. The React layer consumes the existing structured v1.9 boundary; it does not duplicate learning-engine authority.
+
+
+## Current experience navigation
+
+The React presentation exposes Review and Practice as explicit, independent user-facing experiences. Review is the fast retention loop; Practice is the active-learning loop. Both consume the same authoritative v1.9 engine through the typed presentation boundary.
