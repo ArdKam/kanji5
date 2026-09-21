@@ -23,3 +23,8 @@ The former `v2-presentation.js`, `v2-components.js`, `v2-presentation.css`, and 
 ## Current experience navigation
 
 The React presentation exposes Review and Practice as explicit, independent user-facing experiences. Review is the fast retention loop; Practice is the active-learning loop. Both consume the same authoritative v1.9 engine through the typed presentation boundary.
+
+
+## Learner-facing polish
+
+The production shell keeps implementation details out of the learner-facing copy and presents Review/Practice as the primary navigation choices.
