@@ -117,3 +117,4 @@ function App(){
 function DailySummary({snapshot}:{snapshot:Snapshot}){const s=snapshot.dailySummary??{};return <section className="daily-summary" aria-label="خلاصهٔ امروز">{([["مرورهای امروز",s.dueCount],["کانجی جدید امروز",s.newCount],["یادگرفته‌شده",s.masteredCount],["روز پیاپی",s.streak]] as const).map(([label,value])=><div className="stat-card" key={label}><strong>{fa(Number(value)||0)}</strong><span>{label}</span></div>)}</section>}
 function StatRow({label,value}:{label:string;value:string}){return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>}
 export { App };
+// Production presentation: learning card reveal uses the flip interaction.
