@@ -1,4 +1,5 @@
 name: React presentation build
+# Bilingual UI gate verification run
 
 on:
   pull_request:
