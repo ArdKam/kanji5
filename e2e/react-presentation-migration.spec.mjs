@@ -43,7 +43,9 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(page.getByRole('button',{name:'Stats',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Learning',exact:true})).toHaveAttribute('aria-current','page');
+  console.log("LANGUAGE NAV DEBUG", await page.locator(".experience-nav .experience-tab").evaluateAll(nodes => nodes.map(node => ({ text: node.textContent, aria: node.getAttribute("aria-current"), disabled: node.hasAttribute("disabled") }))));
+  await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveText("Learning");
+  await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveAttribute('aria-current','page');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('html')).toHaveAttribute('dir','ltr');
