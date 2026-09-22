@@ -17,5 +17,5 @@ test("learning card flips to a compact back face without card overflow", async (
     return { top: r.top, bottom: r.bottom, height: r.height, viewport: window.innerHeight, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
   });
   expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 2);
-  expect(metrics.height).toBeLessThanOrEqual(window.innerHeight);
+  expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 });
