@@ -32,10 +32,6 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   await page.keyboard.press('Tab');
   await expect(page.locator('.skip-link')).toBeFocused();
 
-  await page.getByRole('button',{name:'یادآوری فعال'}).click();
-  await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
-  await expect(page.locator('#exercise')).toHaveAttribute('tabindex','-1');
-
   await page.emulateMedia({reducedMotion:'reduce'});
   const motion=await page.evaluate(()=>({
     matches:matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -43,4 +39,8 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   }));
   expect(motion.matches).toBe(true);
   expect(parseFloat(motion.progressTransition)).toBeLessThanOrEqual(0.01);
+
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
+  await expect(page.locator('#exercise')).toHaveAttribute('tabindex','-1');
 });
