@@ -11,6 +11,7 @@
 .learning-card.is-revealed .learning-card-flip{transform:rotateY(180deg);}
 .learning-card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
 .learning-card-back{transform:rotateY(180deg);justify-content:flex-start;}
+.learning-card-front .button.wide{transform:translateY(-3rem);}
 .learning-back-kanji{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:clamp(38px,7vw,62px);line-height:.95;font-weight:650;text-align:center;direction:ltr;}
 .learning-card-back .meanings{font-size:clamp(20px,4vw,28px);line-height:1.2;}
 .learning-card-back .readings{gap:8px;}
