@@ -10,7 +10,12 @@ test("learning card flips to a compact back face without card overflow", async (
   await page.getByRole("button", { name: /نمایش (پاسخ|اطلاعات کانجی)/ }).dispatchEvent("click");
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await expect(card.locator(".learning-card-back")).toBeVisible();
+  await expect(card.locator(".learning-back-kanji")).toBeVisible();
+  await expect(card.locator(".meanings")).toBeVisible();
+  await expect(card.locator(".readings")).toBeVisible();
   await expect(card.locator(".rating-grid")).toBeVisible();
+  const exampleCount = await card.locator(".example-row").count();
+  expect(exampleCount).toBeLessThanOrEqual(2);
 
   const metrics = await card.evaluate((el) => {
     const r = el.getBoundingClientRect();
