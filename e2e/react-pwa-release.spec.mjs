@@ -25,7 +25,7 @@ test('PWA shell survives offline reload and preserves local learning state', asy
   expect(Object.values(requiredCaches).every(Boolean)).toBe(true);
 
   await context.setOffline(true);
-  await page.reload();
+  await page.goto(page.url(), { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   await expect(page.locator('#root .daily-summary')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.evaluate(()=>localStorage.getItem('kanji5-pwa-smoke-marker'))).toBe('persisted');
