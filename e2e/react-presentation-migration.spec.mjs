@@ -31,3 +31,24 @@ test('React exercise path can start and expose a boundary-backed exercise',async
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.())?.exercise))).toBe(true);
 });
+
+test('React presentation can switch between Persian and English and persist the choice',async({page})=>{
+  await clean(page);
+  await expect(page.locator('html')).toHaveAttribute('lang','fa');
+  await expect(page.locator('html')).toHaveAttribute('dir','rtl');
+  await expect(page.getByRole('button',{name:'فارسی',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'English',exact:true}).click();
+  await expect(page.locator('html')).toHaveAttribute('lang','en');
+  await expect(page.locator('html')).toHaveAttribute('dir','ltr');
+  await expect(page.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(page.getByRole('button',{name:'Stats',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Learning',exact:true})).toHaveAttribute('aria-current','page');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang','en');
+  await expect(page.locator('html')).toHaveAttribute('dir','ltr');
+  await expect(page.getByRole('button',{name:'Stats',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'فارسی',exact:true}).click();
+  await expect(page.locator('html')).toHaveAttribute('lang','fa');
+  await expect(page.locator('html')).toHaveAttribute('dir','rtl');
+});
