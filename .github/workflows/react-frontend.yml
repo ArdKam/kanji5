@@ -111,3 +111,6 @@ jobs:
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
+      - name: Run React language gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-language.spec.mjs
