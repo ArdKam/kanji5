@@ -70,7 +70,7 @@ test('English learning rating buttons are ordered Easy, Good, Hard, Again',async
   await clean(page);
   await page.getByRole('button',{name:'تنظیمات',exact:true}).click();
   await page.getByRole('dialog').getByRole('button',{name:'English',exact:true}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByRole('dialog').getByLabel('Close').click();
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Show Kanji information',exact:true}).click();
   await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
