@@ -13,7 +13,10 @@ test("learning card flips to a compact back face without card overflow", async (
       ]),
     });
   });
-  await page.goto("/");
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 10000 });
@@ -58,4 +61,5 @@ test("learning card flips to a compact back face without card overflow", async (
   });
   expect(metrics.overflow).toBe("hidden");
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
+  }
 });
