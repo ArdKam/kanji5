@@ -48,7 +48,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
         <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>
         {card.meanings?.length?<div className="meanings">{card.meanings.join(" · ")}</div>:null}
         <div className="readings"><Reading title="On’yomi" values={card.on??[]}/><Reading title="Kun’yomi" values={card.kun??[]}/></div>
-        {card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.slice(0,2).map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span>{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
+        {card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.slice(0,2).map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
         <p className="rating-title">{t("reviewQuality")}</p>
         <div className="rating-grid">{([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
       </div>
