@@ -9,5 +9,12 @@ reactStylesheet.rel='stylesheet';
 reactStylesheet.href='./react-dist/kanji5-react.css';
 reactStylesheet.dataset.kanji5React='true';
 document.head.appendChild(reactStylesheet);
-import('./react-dist/kanji5-react.js').catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
+const flipStylesheet=document.createElement('link');
+flipStylesheet.rel='stylesheet';
+flipStylesheet.href='./learning-card-flip-runtime.css';
+flipStylesheet.dataset.kanji5LearningFlip='true';
+document.head.appendChild(flipStylesheet);
+import('./react-dist/kanji5-react.js')
+  .then(()=>import('./learning-card-flip-runtime.js'))
+  .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 })();
