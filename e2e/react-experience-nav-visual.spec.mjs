@@ -20,6 +20,7 @@ test('Learning and Active Recall use a persistent Lovable-style bottom switcher'
       left: rect.left,
       right: window.innerWidth - rect.right,
       width: rect.width,
+      viewportHeight: window.innerHeight,
     };
   });
   expect(geometry.position).toBe('fixed');
