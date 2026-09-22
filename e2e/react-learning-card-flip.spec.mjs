@@ -1,6 +1,18 @@
 import { test, expect } from "@playwright/test";
 
 test("learning card flips to a compact back face without card overflow", async ({ page }) => {
+  await page.route("https://kanjiapi.dev/v1/words/**", async (route) => {
+    const url = new URL(route.request().url());
+    const character = decodeURIComponent(url.pathname.split("/").pop() || "学");
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        { variants: [{ written: character + "生", pronounced: "がくせい" }], meanings: [{ glosses: ["student"] }] },
+        { variants: [{ written: character + "校", pronounced: "がっこう" }], meanings: [{ glosses: ["school"] }] }
+      ]),
+    });
+  });
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
@@ -16,6 +28,10 @@ test("learning card flips to a compact back face without card overflow", async (
   await expect(card.locator(".rating-grid")).toBeVisible();
   const exampleCount = await card.locator(".example-row").count();
   expect(exampleCount).toBeLessThanOrEqual(2);
+  if (exampleCount > 0) {
+    await expect(card.locator(".example-meaning").first()).toBeVisible();
+    await expect(card.locator(".example-meaning").first()).toHaveText("student");
+  }
 
   const metrics = await card.evaluate((el) => {
     const r = el.getBoundingClientRect();
