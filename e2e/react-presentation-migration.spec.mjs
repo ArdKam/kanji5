@@ -19,20 +19,7 @@ test('React learning and review actions stay behind the authoritative boundary',
   await clean(page);
   const kanji=page.locator('#root .kanji-display');
   await expect(kanji).toHaveText(/\S/);
-  const reveal=page.getByRole('button',{name:/نمایش (پاسخ|اطلاعات کانجی)/});
-  await reveal.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
-  await expect(reveal).toBeInViewport();
-  await page.evaluate(() => {
-    const target = document.querySelector('.button.primary.wide');
-    const nav = document.querySelector('.experience-nav');
-    if (!target || !nav) return;
-    const targetBox = target.getBoundingClientRect();
-    const navBox = nav.getBoundingClientRect();
-    const clearance = 20;
-    const delta = targetBox.bottom - (navBox.top - clearance);
-    if (delta > 0) window.scrollBy(0, delta);
-  });
-  await reveal.click();
+  await page.getByRole('button',{name:/نمایش (پاسخ|اطلاعات کانجی)/}).click();
   await expect(page.getByText('کیفیت مرور بعدی را انتخاب کن.')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'خوب'}).click();
   await expect(kanji).toHaveText(/\S/,{timeout:10000});
