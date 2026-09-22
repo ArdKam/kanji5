@@ -3,3 +3,22 @@
 /* Lovable-style floating experience switcher — shipped artifact. */
 .experience-nav{position:fixed;left:50%;bottom:max(1rem,env(safe-area-inset-bottom));z-index:40;width:min(calc(100% - 2rem),880px);transform:translateX(-50%);display:grid;grid-template-columns:1fr 1fr;gap:.25rem;padding:.35rem;border:1px solid var(--line);border-radius:24px;background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:0 10px 30px -18px rgb(0 0 0 / .5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .experience-tab{position:relative;min-height:54px;border:0;border-radius:19px;background:transparent;color:var(--mute);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:background-color .18s ease,color .18s ease,transform .18s ease}.experience-tab:before{display:block;margin-bottom:2px;font-family:inherit;font-size:1.05rem;line-height:1.1;color:currentColor}.experience-tab:nth-child(1):before{content:"学"}.experience-tab:nth-child(2):before{content:"想"}.experience-tab.active{background:var(--washi);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.experience-tab.active:after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--shu);transform:translateX(-50%)}.experience-tab:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 45%,transparent);outline-offset:2px}.experience-tab:active{transform:scale(.985)}.experience-tab:disabled{cursor:wait;opacity:.55}.content{min-height:calc(100dvh + 12rem);padding-bottom:12rem;scroll-padding-bottom:12rem}.content button{scroll-margin-bottom:7.5rem}html{scroll-padding-bottom:12rem}@media (max-width:520px){.experience-nav{width:calc(100% - 1.25rem);bottom:max(.625rem,env(safe-area-inset-bottom));border-radius:22px}.experience-tab{min-height:52px;border-radius:17px}.content{min-height:calc(100dvh + 11rem);padding-bottom:11rem;scroll-padding-bottom:11rem}.content button{scroll-margin-bottom:7rem}html{scroll-padding-bottom:11rem}}@media (prefers-reduced-motion:reduce){.experience-tab{transition:none}}
+
+/* Learning card flip — shipped artifact */
+.learning-card{overflow:hidden;perspective:1200px;padding:0;min-height:clamp(500px,70dvh,590px);margin-bottom:7rem;}
+.learning-card-flip{position:relative;min-height:inherit;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.7,.2,1);}
+.learning-card.is-revealed .learning-card-flip{transform:rotateY(180deg);}
+.learning-card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:16px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
+.learning-card-back{transform:rotateY(180deg);justify-content:flex-start;}
+.learning-card-front .button.wide{transform:translateY(-3rem);}
+.learning-card-back .compact-examples{display:none;}
+.learning-back-kanji{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:clamp(38px,7vw,62px);line-height:.95;font-weight:650;text-align:center;direction:ltr;}
+.learning-card-back .meanings{font-size:clamp(20px,4vw,28px);line-height:1.2;}
+.learning-card-back .readings{gap:8px;}
+.learning-card-back .reading{min-height:68px;padding:10px;}
+.learning-card-back .reading>strong{font-size:16px;}
+.learning-card-back .rating-title{margin-top:auto;}
+.learning-card-back .rating-grid{gap:8px;}
+.learning-card-back .rating{min-height:44px;padding:8px 10px;}
+@media(max-width:760px){.learning-card{min-height:clamp(500px,70dvh,590px);}.learning-card-face{padding:14px 16px;gap:7px;}.learning-card-front .kanji-row{min-height:125px;}.learning-card-front .kanji-display{font-size:92px;}.learning-card-back .readings{gap:6px;}.learning-card-back .reading{min-height:60px;padding:8px;}}
+@media(prefers-reduced-motion:reduce){.learning-card-flip{transition:none;}}
