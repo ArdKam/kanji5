@@ -139,7 +139,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
   }
 };
 
-let currentLanguage: Language = "fa";
+let currentLanguage: Language = typeof window === "undefined" ? "fa" : getLanguage();
 
 export function getLanguage(): Language {
   if (typeof window === "undefined") return "fa";
