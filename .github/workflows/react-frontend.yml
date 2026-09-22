@@ -1,5 +1,7 @@
 name: React presentation build
 
+# CI release gate for the React Pages shell.
+
 on:
   pull_request:
     paths:
