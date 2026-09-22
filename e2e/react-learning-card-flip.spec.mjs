@@ -15,20 +15,23 @@ test("learning card flips to a compact back face without card overflow", async (
   const metrics = await card.evaluate((el) => {
     const r = el.getBoundingClientRect();
     const back = el.querySelector(".learning-card-back");
-    const br = back?.getBoundingClientRect();
+    const backStyle = back ? getComputedStyle(back) : null;
     return {
-      top: r.top,
-      bottom: r.bottom,
       height: r.height,
       viewport: window.innerHeight,
-      pageScrollHeight: document.scrollingElement?.scrollHeight ?? document.body.scrollHeight,
-      backTop: br?.top ?? 0,
-      backBottom: br?.bottom ?? 0,
       overflow: getComputedStyle(el).overflow,
+      backPosition: backStyle?.position ?? "",
+      backTop: backStyle?.top ?? "",
+      backRight: backStyle?.right ?? "",
+      backBottom: backStyle?.bottom ?? "",
+      backLeft: backStyle?.left ?? "",
     };
   });
   expect(metrics.overflow).toBe("hidden");
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
-  expect(metrics.backTop).toBeGreaterThanOrEqual(metrics.top - 2);
-  expect(metrics.backBottom).toBeLessThanOrEqual(metrics.bottom + 2);
+  expect(metrics.backPosition).toBe("absolute");
+  expect(metrics.backTop).toBe("0px");
+  expect(metrics.backRight).toBe("0px");
+  expect(metrics.backBottom).toBe("0px");
+  expect(metrics.backLeft).toBe("0px");
 });
