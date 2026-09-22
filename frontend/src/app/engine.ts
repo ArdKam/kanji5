@@ -24,7 +24,6 @@ export type Snapshot = {
   };
   upcomingReviews?: { character: string; dueAt: string }[];
   session?: {
-    status?: string;
     completionFraction?: number;
     plannedTotal?: number;
     remainingTotal?: number;
@@ -37,7 +36,7 @@ export type Snapshot = {
     meanings?: string[];
     on?: string[];
     kun?: string[];
-    examples?: { word?: string; reading?: string }[];
+    examples?: { word?: string; reading?: string; meaning?: string }[];
     hint?: string;
     revealLabel?: string;
   };
