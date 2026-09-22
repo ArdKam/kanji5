@@ -2,6 +2,8 @@
 
 ## Scope
 
+The educational intent and target pedagogy are defined in [`EDUCATIONAL-MODEL-2.0.md`](./EDUCATIONAL-MODEL-2.0.md). This architecture document defines runtime ownership and dependency direction; it does not replace the educational specification.
+
 This document is the living architecture reference for the current release line. It describes the React presentation over the v1.9 learning-engine boundaries.
 
 ## Runtime boundaries
