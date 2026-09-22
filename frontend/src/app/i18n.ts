@@ -190,6 +190,12 @@ const dynamicTranslations: Record<string, string> = {
 };
 
 const dynamicEn: Record<string,string> = {
+  showCardHint:"First look at the kanji, then reveal its information.",
+  showKanjiInfo:"Show kanji information",
+  answerPlaceholder:"Enter your answer",
+  exerciseReady:"No exercise is ready yet.",
+  correctRecall:"Recall was correct.",
+  correctAnswer:"Correct answer",
   unseen:"Not seen", introduced:"Introduced", learningState:"Learning", weak:"Weak",
   recovering:"Recovering", stable:"Stable", mastered:"Mastered", repair:"Repair",
   reinforce:"Reinforce", recover:"Recover", maintain:"Maintain", explore:"Explore"
