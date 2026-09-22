@@ -1,5 +1,7 @@
 # Kanji 5
 
+> **Canonical educational model:** [`EDUCATIONAL-MODEL-2.0.md`](./EDUCATIONAL-MODEL-2.0.md) — source of truth for target pedagogy and future learning-engine work; it explicitly separates implemented behavior from target behavior.
+
 یک PWA شخصی برای یادگیری ۲۱۳۶ کانجی Jōyō ژاپنی، روزانه ۵ کانجی جدید، با مرور فاصله‌دار تطبیقی بر پایهٔ FSRS.
 
 ## ویژگی‌ها
