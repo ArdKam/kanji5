@@ -24,7 +24,7 @@ test('Learning and Active Recall use a persistent Lovable-style bottom switcher'
   });
   expect(geometry.position).toBe('fixed');
   expect(geometry.bottom).toBeGreaterThanOrEqual(8);
-  expect(geometry.top).toBeGreaterThan(window.innerHeight / 2);
+  expect(geometry.top).toBeGreaterThan(geometry.viewportHeight / 2);
   expect(geometry.height).toBeLessThan(120);
   expect(geometry.left).toBeGreaterThanOrEqual(8);
   expect(geometry.right).toBeGreaterThanOrEqual(8);
