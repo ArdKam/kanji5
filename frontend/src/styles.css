@@ -5,3 +5,34 @@
 @media(max-width:760px){.header-actions{grid-template-columns:1fr}.header-actions .button{width:100%}.header-actions .session-progress{grid-column:auto}.app-shell{padding:18px 14px 34px}.header{display:grid;align-items:start}.header-actions{width:100%;min-width:0;justify-items:stretch}.daily-summary{grid-template-columns:1fr 1fr}.readings,.insights-grid{grid-template-columns:1fr}.rating-grid{grid-template-columns:1fr 1fr}.production-grid{grid-template-columns:1fr 1fr}.card{padding:19px 16px;border-radius:22px}.kanji-display{font-size:96px}.stimulus{min-height:180px}.kanji-stimulus{font-size:80px}.context-stimulus strong{font-size:23px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media(prefers-contrast:more){:root{--line:#8d8577;--mute:#4a463f}.surface,.stat-card,.button,.reading,.dialog,.upcoming,.insights{border-width:2px}}
+/* Learning-card flip: reveal switches to a compact back face so the card can be read without scrolling. */
+.learning-card{overflow:hidden;perspective:1200px;padding:0;min-height:clamp(500px,70dvh,590px);margin-bottom:7rem;}
+.learning-card-flip{position:relative;min-height:inherit;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.7,.2,1);}
+.learning-card.is-revealed .learning-card-flip{transform:rotateY(180deg);}
+.learning-card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:16px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
+.learning-card-back{transform:rotateY(180deg);justify-content:flex-start;}
+.learning-card-front .button.wide{transform:translateY(-3rem);}
+.learning-back-kanji{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:clamp(38px,7vw,62px);line-height:.95;font-weight:650;text-align:center;direction:ltr;}
+.learning-card-back .meanings{font-size:clamp(20px,4vw,28px);line-height:1.2;}
+.learning-card-back .readings{gap:8px;}
+.learning-card-back .reading{min-height:68px;padding:10px;}
+.learning-card-back .reading>strong{font-size:16px;}
+.learning-card-back .examples{margin-top:0;}
+.learning-card-back .example-row{padding:6px 0;}
+.compact-examples{display:none;}
+.compact-examples h3{margin-bottom:2px;}
+.learning-card-back .rating-title{margin-top:auto;}
+.learning-card-back .rating-grid{gap:8px;}
+.learning-card-back .rating{min-height:44px;padding:8px 10px;}
+@media(max-width:760px){
+  .learning-card{min-height:clamp(500px,70dvh,590px);}
+  .learning-card-face{padding:14px 16px;gap:7px;}
+  .learning-card-front .kanji-row{min-height:125px;}
+  .learning-card-front .kanji-display{font-size:92px;}
+  .learning-card-back .readings{gap:6px;}
+  .learning-card-back .reading{min-height:60px;padding:8px;}
+  .learning-card-back .example-row{padding:5px 0;}
+}
+@media(prefers-reduced-motion:reduce){
+  .learning-card-flip{transition:none;}
+}

@@ -30,14 +30,27 @@ function Progress({value,label}:{value:number;label:string}){return <div classNa
 function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?"صدا در این مرورگر در دسترس نیست":label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}>🔊</button>}
 
 function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;onReveal:()=>void;onRate:(r:Rating)=>void}){
-  return <section className="surface card"><div className="card-topline"><span className="badge badge-red">学習</span><span>{card.isNew?"آشنایی با کانجی":"مرور یادگیری"}</span></div><h2>کارت یادگیری</h2>
-    <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label="پخش تلفظ کانجی"/>:null}</div>
-    {!card.revealed?<><div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div><p className="hint">{text(card.hint,"اول کانجی را ببین و بعد اطلاعات آن را باز کن.")}</p><button className="button primary wide" type="button" onClick={onReveal}>{text(card.revealLabel,"نمایش اطلاعات کانجی")}</button></>:<>
-      {card.meanings?.length?<div className="meanings">{card.meanings.join(" · ")}</div>:null}
-      <div className="readings"><Reading title="On’yomi" values={card.on??[]}/><Reading title="Kun’yomi" values={card.kun??[]}/></div>
-      {card.examples?.length?<div className="examples"><h3>نمونهٔ واژگانی</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span>{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.reading?<Audio value={e.reading} label="پخش تلفظ واژه"/>:null}</div>)}</div>:null}
-      <p className="rating-title">کیفیت مرور بعدی را انتخاب کن.</p><div className="rating-grid">{([["Again","دوباره"],["Hard","سخت"],["Good","خوب"],["Easy","آسان"]] as const).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
-    </>}
+  const revealed=Boolean(card.revealed);
+  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} aria-label="کارت یادگیری">
+    <div className="learning-card-flip" aria-live="polite">
+      <div className="learning-card-face learning-card-front" aria-hidden={revealed}>
+        <div className="card-topline"><span className="badge badge-red">学習</span><span>{card.isNew?"آشنایی با کانجی":"مرور یادگیری"}</span></div>
+        <h2>کارت یادگیری</h2>
+        <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label="پخش تلفظ کانجی"/>:null}</div>
+        <div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div>
+        <p className="hint">{text(card.hint,"اول کانجی را ببین و بعد اطلاعات آن را باز کن.")}</p>
+        <button className="button primary wide" type="button" onClick={onReveal} disabled={revealed}>{text(card.revealLabel,"نمایش اطلاعات کانجی")}</button>
+      </div>
+      <div className="learning-card-face learning-card-back" aria-hidden={!revealed}>
+        <div className="card-topline"><span className="badge badge-red">学習</span><span>پشت کارت</span></div>
+        <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>
+        {card.meanings?.length?<div className="meanings">{card.meanings.join(" · ")}</div>:null}
+        <div className="readings"><Reading title="On’yomi" values={card.on??[]}/><Reading title="Kun’yomi" values={card.kun??[]}/></div>
+        {card.examples?.length?<div className="examples compact-examples"><h3>نمونهٔ واژگانی</h3>{card.examples.slice(0,3).map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span>{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.reading?<Audio value={e.reading} label="پخش تلفظ واژه"/>:null}</div>)}</div>:null}
+        <p className="rating-title">کیفیت مرور بعدی را انتخاب کن.</p>
+        <div className="rating-grid">{([["Again","دوباره"],["Hard","سخت"],["Good","خوب"],["Easy","آسان"]] as const).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
+      </div>
+    </div>
   </section>
 }
 function Reading({title,values}:{title:string;values:string[]}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={"پخش "+title}/>:null}</div>}
