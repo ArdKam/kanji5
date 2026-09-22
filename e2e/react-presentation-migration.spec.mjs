@@ -64,3 +64,15 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
 });
+
+
+test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'تنظیمات',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'English',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  await page.getByRole('button',{name:'Show Kanji information',exact:true}).click();
+  await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
+  await expect(page.locator('.rating-grid .rating')).toHaveText(['Easy','Good','Hard','Again']);
+});
