@@ -26,12 +26,12 @@
 .experience-tab:focus-visible{outline:3px solid color-mix(in srgb, var(--shu) 45%, transparent);outline-offset:2px;}
 .experience-tab:active{transform:scale(.985);}
 .experience-tab:disabled{cursor:wait;opacity:.55;}
-.content{padding-bottom:7.5rem;scroll-padding-bottom:7.5rem;}
+ .content{padding-bottom:7.5rem;scroll-padding-bottom:7.5rem;}\n.content button{scroll-margin-bottom:7.5rem;}
 html{scroll-padding-bottom:7.5rem;}
 @media (max-width:520px){
   .experience-nav{width:calc(100% - 1.25rem);bottom:max(.625rem, env(safe-area-inset-bottom));border-radius:22px;}
   .experience-tab{min-height:52px;border-radius:17px;}
-  .content{padding-bottom:7rem;scroll-padding-bottom:7rem;}
+  .content{padding-bottom:7rem;scroll-padding-bottom:7rem;}\n  .content button{scroll-margin-bottom:7rem;}
   html{scroll-padding-bottom:7rem;}
 }
 @media (prefers-reduced-motion:reduce){.experience-tab{transition:none;}}
