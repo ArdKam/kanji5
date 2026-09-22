@@ -7,6 +7,7 @@ on:
       - "docs/react-migration.md"
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
+      - "scripts/test-react-shipped-artifact.mjs"
       - "e2e/react-presentation-migration.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
@@ -49,6 +50,9 @@ jobs:
           node-version: 24
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
+      - name: Validate shipped React artifact
+        working-directory: .
+        run: node scripts/test-react-shipped-artifact.mjs
       - run: npm run build
       - name: Install root test dependencies
         working-directory: .
