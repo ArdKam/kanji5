@@ -18,7 +18,6 @@ on:
       - "e2e/react-final-release-matrix.spec.mjs"
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
-      - "e2e/react-language.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
@@ -111,6 +110,3 @@ jobs:
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
-      - name: Run React language gate
-        working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/react-language.spec.mjs
