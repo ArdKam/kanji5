@@ -33,3 +33,43 @@ test("learning card flips to a compact back face without card overflow", async (
   expect(metrics.overflow).toBe("hidden");
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 });
+
+test("empty session progress indicator is hidden until a session has planned work", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  await page.waitForTimeout(1500);
+
+  await page.evaluate(() => {
+    const base = window.__KANJI5_V19_V2_LAST_SNAPSHOT__ || {};
+    document.dispatchEvent(new CustomEvent("kanji5:v1.9-v2-view-models", {
+      detail: {
+        ...base,
+        session: {
+          ...(base.session || {}),
+          status: "active",
+          plannedTotal: 0,
+          remainingTotal: 0,
+          completionFraction: 0,
+        },
+      },
+    }));
+  });
+  await expect(page.locator(".session-progress")).toHaveCount(0);
+
+  await page.evaluate(() => {
+    const base = window.__KANJI5_V19_V2_LAST_SNAPSHOT__ || {};
+    document.dispatchEvent(new CustomEvent("kanji5:v1.9-v2-view-models", {
+      detail: {
+        ...base,
+        session: {
+          ...(base.session || {}),
+          status: "active",
+          plannedTotal: 5,
+          remainingTotal: 4,
+          completionFraction: 0.2,
+        },
+      },
+    }));
+  });
+  await expect(page.locator(".session-progress")).toBeVisible();
+});
