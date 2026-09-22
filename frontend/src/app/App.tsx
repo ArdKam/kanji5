@@ -31,6 +31,8 @@ const outcomeLabel=(key:string)=>({correct:t("correct"),wrong:t("wrong"),unknown
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
 function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}>🔊</button>}
 
+const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
+
 function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} aria-label={t("learningCard")}>
@@ -50,7 +52,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
         <div className="readings"><Reading title="On’yomi" values={card.on??[]}/><Reading title="Kun’yomi" values={card.kun??[]}/></div>
         {card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.slice(0,2).map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span>{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
         <p className="rating-title">{t("reviewQuality")}</p>
-        <div className="rating-grid">{([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
+        <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
       </div>
     </div>
   </section>
