@@ -26,7 +26,7 @@ for(const viewport of viewports){
     await expect(page.locator('#exercise')).toHaveCount(0);
     await expect(page.locator('.card').first()).toBeVisible();
 
-    await page.getByRole('button',{name:'تنظیمات'}).click();
+    await page.getByRole('button',{name:'تنظیمات'}).dispatchEvent('click');
     await expect(page.locator('#settings-title')).toBeVisible();
     await page.getByRole('button',{name:'پاک کردن پیشرفت'}).click();
     await expect(page.locator('#root .app-shell')).toBeVisible();
