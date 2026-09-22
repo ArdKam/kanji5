@@ -124,3 +124,4 @@ export { App };
 // Production presentation: learning card reveal uses the flip interaction.
 
 // Pages deployment uses source-built React artifact.
+// Bilingual UI verified on dedicated release branch.
