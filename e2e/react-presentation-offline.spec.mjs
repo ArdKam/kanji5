@@ -17,7 +17,7 @@ test('React presentation is available offline from the real service-worker shell
   await expect.poll(() => cacheHas('./app-bootstrap.js')).toBe(true);
 
   await context.setOffline(true);
-  await page.reload();
+  await page.goto(page.url(), { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
   await expect(page.locator('#root .daily-summary')).toBeVisible({ timeout: 10000 });
 });
