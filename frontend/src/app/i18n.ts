@@ -153,6 +153,9 @@ export function setLanguage(language: Language): void {
     window.localStorage.setItem(STORAGE_KEY, language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === "fa" ? "rtl" : "ltr";
+    document.title = language === "fa" ? "Kanji 5 — پنج کانجی در روز" : "Kanji 5 — Five kanji a day";
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.setAttribute("content", language === "fa" ? "۵ کانجی مهم ژاپنی در روز با مرور فاصله‌دار تطبیقی" : "Five important Japanese kanji a day with adaptive spaced review");
   }
 }
 
