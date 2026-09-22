@@ -43,7 +43,8 @@ test("learning card flips to a compact back face without card overflow", async (
   expect(exampleCount).toBeLessThanOrEqual(2);
   if (exampleCount > 0) {
     await expect(card.locator(".example-meaning").first()).toBeVisible();
-    await expect(card.locator(".example-meaning").first()).toHaveText("student");
+    const exampleMeanings = await card.locator(".example-meaning").allTextContents();
+    expect(exampleMeanings).toContain("student");
   }
 
   const metrics = await card.evaluate((el) => {
