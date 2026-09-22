@@ -1,4 +1,4 @@
-export type Language = "fa" | "en";
+export type Language = "fa" | "en"; // Persisted bilingual presentation language
 
 const STORAGE_KEY = "kanji5-ui-language";
 
