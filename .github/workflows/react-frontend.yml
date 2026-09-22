@@ -32,6 +32,22 @@ on:
       - "docs/react-migration.md"
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
+      - "scripts/test-react-shipped-artifact.mjs"
+      - "e2e/react-presentation-migration.spec.mjs"
+      - "e2e/react-presentation-parity.spec.mjs"
+      - "e2e/react-presentation-offline.spec.mjs"
+      - "e2e/react-review-practice.spec.mjs"
+      - "e2e/react-learning-card-flip.spec.mjs"
+      - "e2e/react-accessibility.spec.mjs"
+      - "e2e/react-pwa-release.spec.mjs"
+      - "e2e/react-final-release-matrix.spec.mjs"
+      - "e2e/react-experience-session-isolation.spec.mjs"
+      - "e2e/react-experience-nav-visual.spec.mjs"
+      - "index.html"
+      - "app-bootstrap.js"
+      - "react-entry.js"
+      - "react-dist/**"
+      - "sw.js"
 
 permissions:
   contents: write
@@ -94,3 +110,16 @@ jobs:
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
+      - name: Refresh shipped React artifact on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add react-dist
+          if git diff --cached --quiet; then
+            echo "react-dist is already up to date"
+          else
+            git commit -m "build: refresh shipped React artifact"
+            git push origin HEAD:main
+          fi
