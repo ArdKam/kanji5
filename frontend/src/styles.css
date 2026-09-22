@@ -6,7 +6,7 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media(prefers-contrast:more){:root{--line:#8d8577;--mute:#4a463f}.surface,.stat-card,.button,.reading,.dialog,.upcoming,.insights{border-width:2px}}
 /* Learning-card flip: reveal switches to a compact back face so the card can be read without scrolling. */
-.learning-card{overflow:hidden;perspective:1200px;padding:0;min-height:clamp(430px,58dvh,590px);margin-bottom:7rem;}
+.learning-card{overflow:hidden;perspective:1200px;padding:0;min-height:clamp(500px,70dvh,590px);margin-bottom:7rem;}
 .learning-card-flip{position:relative;min-height:inherit;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.7,.2,1);}
 .learning-card.is-revealed .learning-card-flip{transform:rotateY(180deg);}
 .learning-card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
@@ -24,7 +24,7 @@
 .learning-card-back .rating-grid{gap:8px;}
 .learning-card-back .rating{min-height:44px;padding:8px 10px;}
 @media(max-width:760px){
-  .learning-card{min-height:clamp(400px,60dvh,530px);}
+  .learning-card{min-height:clamp(500px,70dvh,590px);}
   .learning-card-face{padding:18px 16px;gap:9px;}
   .learning-card-front .kanji-row{min-height:125px;}
   .learning-card-front .kanji-display{font-size:92px;}
