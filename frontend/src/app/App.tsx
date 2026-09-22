@@ -118,3 +118,5 @@ function DailySummary({snapshot}:{snapshot:Snapshot}){const s=snapshot.dailySumm
 function StatRow({label,value}:{label:string;value:string}){return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>}
 export { App };
 // Production presentation: learning card reveal uses the flip interaction.
+
+// Pages deployment uses source-built React artifact.
