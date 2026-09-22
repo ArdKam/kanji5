@@ -18,6 +18,7 @@ on:
       - "e2e/react-final-release-matrix.spec.mjs"
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
+      - "e2e/react-language.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
