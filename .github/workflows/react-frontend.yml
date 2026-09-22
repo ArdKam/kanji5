@@ -67,10 +67,10 @@ jobs:
           node-version: 24
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
+      - run: npm run build
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
-      - run: npm run build
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
