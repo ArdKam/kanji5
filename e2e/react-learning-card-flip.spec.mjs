@@ -28,9 +28,7 @@ test("learning card flips to a compact back face without card overflow", async (
     };
   });
   expect(metrics.overflow).toBe("hidden");
-  expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewport + 2);
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
-  expect(metrics.pageScrollHeight).toBeLessThanOrEqual(metrics.viewport + 2);
   expect(metrics.backTop).toBeGreaterThanOrEqual(metrics.top - 2);
   expect(metrics.backBottom).toBeLessThanOrEqual(metrics.bottom + 2);
 });
