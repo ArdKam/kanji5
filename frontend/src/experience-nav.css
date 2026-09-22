@@ -1,6 +1,7 @@
 /* Lovable-style floating experience switcher: persistent bottom navigation. */
 .experience-nav{
   position:fixed;
+  top:auto !important;
   left:50%;
   bottom:max(1rem, env(safe-area-inset-bottom));
   z-index:40;
