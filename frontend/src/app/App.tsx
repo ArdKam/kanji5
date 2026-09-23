@@ -64,18 +64,21 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>void;onDontKnow:()=>void;onNext:()=>void}){
-  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
+  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
   const feedback=snapshot.feedback??{},outcome=feedback.outcome;
   useEffect(()=>setAnswer(""),[ex.mode,ex.character,ex.prompt]);
   useEffect(()=>{
-    if(!outcome||busy)return;
+    if(!outcome){setResult(null);return}
+    const nextResult={correct:Boolean(feedback.correct),outcome};
+    setResult(nextResult);
+    if(busy)return;
     const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
     const timer=window.setTimeout(onNext,reduced?100:760);
     return()=>window.clearTimeout(timer);
-  },[outcome,busy,onNext]);
-  const resultClass=outcome?(feedback.correct?" exercise-result-correct":" exercise-result-wrong"):"";
+  },[outcome,feedback.correct,busy,onNext]);
+  const resultClass=result?(result.correct?" exercise-result-correct":" exercise-result-wrong"):"";
   return <section id="exercise" className={"surface card exercise-card"+resultClass} tabIndex={-1}><div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div><h2>{t("currentExercise")}</h2><p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
-    {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{outcome?<div className={"exercise-feedback "+(feedback.correct?"is-correct":"is-wrong")} role="status" aria-live="polite"><span className="exercise-feedback-icon">{feedback.correct?"✓":outcome==="unknown"?"?":"!"}</span><strong>{outcomeLabel(outcome)}</strong></div>:<>
+    {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{result?<div className={"exercise-feedback "+(result.correct?"is-correct":"is-wrong")} role="status" aria-live="polite"><span className="exercise-feedback-icon">{result.correct?"✓":result.outcome==="unknown"?"?":"!"}</span><strong>{outcomeLabel(result.outcome)}</strong></div>:<>
       {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={busy} onClick={()=>onSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={busy} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();onSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
       <div className="actions">{!production?<button className="button primary" type="button" disabled={busy} onClick={()=>onSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={busy} onClick={onDontKnow}>{t("dontKnow")}</button></div>
     </>}</>}
