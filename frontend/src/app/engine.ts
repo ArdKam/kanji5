@@ -54,6 +54,7 @@ export type Snapshot = {
       inputPlaceholder?: string;
     };
     choices?: string[];
+    contentId?: string;
   };
   feedback?: {
     outcome?: string;
