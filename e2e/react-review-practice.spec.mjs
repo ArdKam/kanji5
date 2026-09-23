@@ -28,3 +28,44 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await expect(page.locator('#root #exercise')).toHaveCount(0);
   await expect(page.locator('#root .card')).toBeVisible();
 });
+ 
+async function setFeedback(page, correct){
+  await page.evaluate(async correctValue=>{
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    const snapshot=await boundary?.snapshot?.();
+    if(!boundary||!snapshot?.exercise)throw new Error('exercise snapshot unavailable');
+    await boundary.setFeedback({
+      mode:snapshot.exercise.mode,
+      outcome:correctValue?'correct':'wrong',
+      correct:correctValue,
+      score:correctValue?1:0,
+      graderVersion:'2.0.0-test',
+      reason:correctValue?'':'test wrong answer'
+    });
+  },correct);
+}
+
+test('exercise answers show an in-card result and auto-advance without manual transition controls',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
+  await setFeedback(page,true);
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
+  await expect(page.locator('#root .exercise-feedback')).toContainText('درست');
+  await expect(page.locator('#root .button.wide')).toHaveCount(0);
+  await expect(page.locator('#root .actions')).toHaveCount(0);
+  await expect.poll(async()=>page.locator('#root .exercise-feedback').count(),{timeout:3000}).toBe(0);
+});
+
+test('wrong exercise answers use the red result state and auto-advance',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
+  await setFeedback(page,false);
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
+  await expect(page.locator('#root .exercise-feedback')).toContainText('نادرست');
+  await expect(page.locator('#root .button.wide')).toHaveCount(0);
+  await expect(page.locator('#root .actions')).toHaveCount(0);
+  await expect.poll(async()=>page.locator('#root #exercise .exercise-feedback').count(),{timeout:3000}).toBe(0);
+});
+
