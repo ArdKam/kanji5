@@ -54,7 +54,7 @@ async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REV
 async function rateLearning(rating){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 
 async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
-async function setExercise(input){const core=await load();exercise=core.buildExerciseViewModel(input);await publish();return exercise}
+async function setExercise(input){const core=await load();feedback=null;exercise=core.buildExerciseViewModel(input);await publish();return exercise}
 async function setFeedback(input){const core=await load();feedback=core.buildFeedbackViewModel(input);await publish();return feedback}
 async function setAdaptiveReason(input){const core=await load();adaptiveReason=core.buildAdaptiveReasonViewModel(input);await publish();return adaptiveReason}
 async function clearTransient(){exercise=null;feedback=null;adaptiveReason=null;await publish();return true}

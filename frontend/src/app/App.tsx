@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import {
   clearTransient,
@@ -63,25 +63,58 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   if(s.kind==="masked-context")return <div className="stimulus context-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
-function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>void;onDontKnow:()=>void;onNext:()=>void}){
-  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
-  const feedback=snapshot.feedback??{},outcome=feedback.outcome;
-  useEffect(()=>setAnswer(""),[ex.mode,ex.character,ex.prompt]);
-  useEffect(()=>{
-    if(!outcome){setResult(null);return}
-    const nextResult={correct:Boolean(feedback.correct),outcome};
-    setResult(nextResult);
-    if(busy)return;
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
+  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4,handledResult=useRef(false);
+  const advance=useCallback(()=>{
     const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
-    const timer=window.setTimeout(onNext,reduced?100:760);
-    return()=>window.clearTimeout(timer);
-  },[outcome,feedback.correct,busy,onNext]);
+    window.setTimeout(()=>{void onNext()},reduced?80:760);
+  },[onNext]);
+  const applyResult=useCallback((feedback:{correct?:boolean;outcome?:string}|null)=>{
+    if(!feedback||typeof feedback.correct!=="boolean"||handledResult.current)return;
+    handledResult.current=true;
+    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong"))});
+    advance();
+  },[advance]);
+  useEffect(()=>{
+    setAnswer("");
+    setResult(null);
+    handledResult.current=false;
+  },[ex.mode,ex.character,ex.prompt,ex.contentId]);
+  useEffect(()=>{
+    const onViewModel=(event:Event)=>{
+      const detail=(event as CustomEvent<Snapshot>).detail;
+      const incoming=detail?.exercise;
+      if(!incoming||incoming.mode!==ex.mode||incoming.character!==ex.character||incoming.contentId!==ex.contentId)return;
+      const feedback=detail.feedback;
+      if(feedback?.outcome)applyResult(feedback);
+    };
+    document.addEventListener("kanji5:v1.9-v2-view-models",onViewModel);
+    return()=>document.removeEventListener("kanji5:v1.9-v2-view-models",onViewModel);
+  },[ex.mode,ex.character,ex.contentId,applyResult]);
+  const handleSubmit=async(value:string)=>{
+    if(!value.trim()||busy)return;
+    if(ex.mode==="production"&&ex.character){
+      applyResult({correct:value===ex.character,outcome:value===ex.character?"correct":"wrong"});
+      void onSubmit(value);
+      return;
+    }
+    const raw=await onSubmit(value);
+    const bridgeFeedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
+    applyResult(bridgeFeedback);
+  };
+  const handleDontKnow=async()=>{
+    if(busy)return;
+    const raw=await onDontKnow();
+    const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
+    setResult({correct:false,outcome:String(feedback?.outcome??"unknown")});
+    advance();
+  };
   const resultClass=result?(result.correct?" exercise-result-correct":" exercise-result-wrong"):"";
-  const resultLabel=result?(result.correct?t("correct"):t("wrong")):undefined;
+  const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"surface card exercise-card"+resultClass} tabIndex={-1}><div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div><h2>{t("currentExercise")}</h2><p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
     {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{result?null:<>
-      {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={busy} onClick={()=>onSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={busy} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();onSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
-      <div className="actions">{!production?<button className="button primary" type="button" disabled={busy} onClick={()=>onSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={busy} onClick={onDontKnow}>{t("dontKnow")}</button></div>
+      {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={busy} onClick={()=>void handleSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={busy} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
+      <div className="actions">{!production?<button className="button primary" type="button" disabled={busy||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={busy} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>
     </>}</>}
   </section>
 }
@@ -108,7 +141,7 @@ function App(){
   const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
   useEffect(()=>{let mounted=true;void startLearningExperience().catch(()=>{});const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d)setSnapshot(d)};void refresh().then(()=>document.addEventListener("kanji5:v1.9-v2-view-models",listener)).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});return()=>{mounted=false;document.removeEventListener("kanji5:v1.9-v2-view-models",listener)}},[refresh]);
-  async function action(task:()=>Promise<unknown>){setBusy(true);setError("");try{await task();setSnapshot(await readSnapshot())}catch(e){setError(e instanceof Error?e.message:language==="fa"?"عملیات انجام نشد.":"The operation failed.")}finally{setBusy(false)}}
+  async function action<T>(task:()=>Promise<T>):Promise<T|undefined>{setBusy(true);setError("");try{const result=await task();setSnapshot(await readSnapshot());return result}catch(e){setError(e instanceof Error?e.message:language==="fa"?"عملیات انجام نشد.":"The operation failed.");return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";
   if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>{t("learningCoreError")}</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>{t("tryAgain")}</button></section></div>;
   return <div className="app-shell">
@@ -116,11 +149,11 @@ function App(){
     <header className="header"><div className="header-brand"><p className="eyebrow red">常用漢字 · 2,136</p><h1>{t("title")}</h1></div>
       <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {language==="fa"?"از":"of"} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className="header-tools"><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={language==="fa"?"بیشتر":"More"} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}>☰</button><div id="header-tools-menu" className={"header-tools-menu "+(headerMenuOpen?"open":"")}><button className="button secondary" type="button" disabled={busy} onClick={()=>{setStatsOpen(true);setHeaderMenuOpen(false)}}>{t("stats")}</button><button className="button secondary" type="button" disabled={busy} onClick={()=>{setSettingsOpen(true);setHeaderMenuOpen(false)}}>{t("settings")}</button></div></div></div>
     </header>
-    <nav className="experience-nav" aria-label={t("learningPath",language)}><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startLearningExperience();await clearTransient();setExperience("review")})}>{t("learning",language)}</button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startExercise();setExperience("practice")})}>{t("activeRecall",language)}</button></nav><main id="primary-content" className="content mobile-study-flow">
+    <nav className="experience-nav" aria-label={t("learningPath",language)}><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startLearningExperience();await clearTransient();setExperience("review")})}>{t("learning",language)}</button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("activeRecall",language)}</button></nav><main id="primary-content" className="content mobile-study-flow">
       {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<div className="surface loading">{t("loading")}</div>):null}
       {!showExercise&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top"><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:null}
       {!showExercise&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:null}
-      {showExercise?<Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>void action(()=>submitExercise(v))} onDontKnow={()=>void action(dontKnow)} onNext={()=>void action(nextExercise)}/>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>void action(async()=>{await startExercise();setExperience("practice")})}>{t("startExercise")}</button></section>}
+      {showExercise?<Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>}
       {!showExercise&&snapshot?<Insights snapshot={snapshot}/>:null}
     </main>
     <footer className="footer">{language==="fa"?"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.":"Keep your learning short, consistent, and focused."}</footer>
