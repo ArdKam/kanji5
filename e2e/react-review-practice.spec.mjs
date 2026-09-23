@@ -51,14 +51,15 @@ test('exercise answers show an in-card result and auto-advance without manual tr
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await setFeedback(page,true);
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
-  const correctVisual=await page.locator('#root #exercise').evaluate(el=>({feedback:el.querySelector('.exercise-feedback')?.textContent??'',actions:el.querySelector('.actions'),wideButtons:el.querySelectorAll('.button.wide').length}));
-  expect(correctVisual.feedback).toContain('درست');
+  const correctVisual=await page.locator('#root #exercise').evaluate(el=>({result:el.getAttribute('data-result'),label:el.getAttribute('aria-label'),actions:el.querySelector('.actions'),wideButtons:el.querySelectorAll('.button.wide').length}));
+  expect(correctVisual.result).toBe('correct');
+  expect(correctVisual.label).toBe('درست');
   expect(correctVisual.actions).toBeNull();
   expect(correctVisual.wideButtons).toBe(0);
   await expect(page.locator('#root .button.wide')).toHaveCount(0);
   await expect(page.locator('#root .actions')).toHaveCount(0);
   await page.waitForTimeout(900);
-  await expect(page.locator('#root .exercise-feedback')).toHaveCount(0);
+  await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
 });
 
 test('wrong exercise answers use the red result state and auto-advance',async({page})=>{
@@ -67,8 +68,9 @@ test('wrong exercise answers use the red result state and auto-advance',async({p
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await setFeedback(page,false);
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
-  const wrongVisual=await page.locator('#root #exercise').evaluate(el=>({feedback:el.querySelector('.exercise-feedback')?.textContent??'',actions:el.querySelector('.actions'),wideButtons:el.querySelectorAll('.button.wide').length}));
-  expect(wrongVisual.feedback).toContain('نادرست');
+  const wrongVisual=await page.locator('#root #exercise').evaluate(el=>({result:el.getAttribute('data-result'),label:el.getAttribute('aria-label'),actions:el.querySelector('.actions'),wideButtons:el.querySelectorAll('.button.wide').length}));
+  expect(wrongVisual.result).toBe('wrong');
+  expect(wrongVisual.label).toBe('نادرست');
   expect(wrongVisual.actions).toBeNull();
   expect(wrongVisual.wideButtons).toBe(0);
   await expect(page.locator('#root .button.wide')).toHaveCount(0);
