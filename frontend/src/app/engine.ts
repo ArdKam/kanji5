@@ -198,16 +198,29 @@ export async function startExercise(): Promise<void> {
   throw new Error("KANJI5_EXERCISE_READY_TIMEOUT");
 }
 
-export async function submitExercise(value: string): Promise<void> {
-  const fn = window.__KANJI5_EDU_BRIDGE__?.submitValue;
-  if (!fn) throw new Error("KANJI5_EDU_SUBMIT_UNAVAILABLE");
-  await fn(value);
+type ExerciseOutcome = { correct?: boolean; outcome?: string; quality?: string; score?: number };
+
+async function awaitExerciseOutcome(result: unknown): Promise<ExerciseOutcome | unknown> {
+  if (result && typeof result === "object") return result;
+  const started = performance.now();
+  while (performance.now() - started < 2500) {
+    const feedback = (await snapshot()).feedback;
+    if (feedback?.outcome && typeof feedback.correct === "boolean") return feedback;
+    await new Promise((resolve) => window.setTimeout(resolve, 40));
+  }
+  return result;
 }
 
-export async function dontKnow(): Promise<void> {
+export async function submitExercise(value: string): Promise<ExerciseOutcome | unknown> {
+  const fn = window.__KANJI5_EDU_BRIDGE__?.submitValue;
+  if (!fn) throw new Error("KANJI5_EDU_SUBMIT_UNAVAILABLE");
+  return awaitExerciseOutcome(await fn(value));
+}
+
+export async function dontKnow(): Promise<ExerciseOutcome | unknown> {
   const fn = window.__KANJI5_EDU_BRIDGE__?.dontKnow;
   if (!fn) throw new Error("KANJI5_EDU_DONT_KNOW_UNAVAILABLE");
-  await fn();
+  return awaitExerciseOutcome(await fn());
 }
 
 export async function retryExercise(): Promise<void> {
