@@ -30,6 +30,7 @@ test("learning card flips to a compact back face without card overflow", async (
   expect(frontLayout.buttonTop).toBeGreaterThanOrEqual(frontLayout.readingsBottom);
   await revealButton.dispatchEvent("click");
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  await page.waitForTimeout(600);
   await expect(card.locator(".learning-card-back")).toBeVisible();
   await expect(card.locator(".learning-back-kanji")).toBeVisible();
   await expect(card.locator(".meanings")).toBeVisible();
