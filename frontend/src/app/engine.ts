@@ -189,6 +189,13 @@ export async function startExercise(): Promise<void> {
     else if (session?.start && !current?.started && !current?.finished) await session.start();
   }
   await bridge.start();
+  const started = performance.now();
+  while (performance.now() - started < 15000) {
+    const current = await snapshot();
+    if (current.exercise?.mode && current.exercise?.prompt && current.exercise?.stimulus) return;
+    await new Promise((resolve) => window.setTimeout(resolve, 50));
+  }
+  throw new Error("KANJI5_EXERCISE_READY_TIMEOUT");
 }
 
 export async function submitExercise(value: string): Promise<void> {
