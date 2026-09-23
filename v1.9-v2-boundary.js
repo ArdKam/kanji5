@@ -5,6 +5,7 @@ const state=window.__KANJI5_STATE__;
 if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 let corePromise=null;const load=()=>corePromise||(corePromise=import('./v1.9-v2-contract-core.js'));
 let learning=null,exercise=null,feedback=null,adaptiveReason=null;
+let componentDataPromise=null;
 let publishRevision=0;
 function runtimePresentationData(now=Date.now()){
   const app=state.readAppState?.()||{},deck=state.readDeck?.()||[],cards=app.cards&&typeof app.cards==='object'?app.cards:{};
@@ -24,6 +25,28 @@ function runtimePresentationData(now=Date.now()){
 function activeSession(){const current=window.__KANJI5_V16_SESSION_API__?.getSession?.();if(current?.started&&!current?.finished)return current;const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
 function completedSession(){const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>!x?.status&&x?.modeResults)||null}
 function learner(){return window.__KANJI5_V19_LEARNER_MODEL__?.read?.()||null}
+function loadComponentData(){
+  if(componentDataPromise)return componentDataPromise;
+  componentDataPromise=fetch('./kanji-components.json',{cache:'no-store'}).then(response=>{
+    if(!response.ok)throw new Error('KANJI5_COMPONENT_DATA_UNAVAILABLE');
+    return response.json();
+  }).catch(()=>null);
+  return componentDataPromise;
+}
+async function getComponentInfo(character){
+  const normalized=String(character||'').trim();
+  const data=await loadComponentData();
+  if(!data||!normalized)return {character:normalized,available:false,components:[],sourceGap:false,coverage:data?.coverage||null};
+  const hasOwn=Object.prototype.hasOwnProperty.call(data.components||{},normalized);
+  return {
+    character:normalized,
+    available:hasOwn,
+    components:hasOwn&&Array.isArray(data.components[normalized])?[...data.components[normalized]]:[],
+    sourceGap:Array.isArray(data.missing)&&data.missing.includes(normalized),
+    coverage:data.coverage||null,
+    source:data.source||null
+  };
+}
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
 async function snapshot(){const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData();return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime})}
 async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
@@ -48,7 +71,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
