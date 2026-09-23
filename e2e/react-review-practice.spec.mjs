@@ -36,41 +36,49 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await expect(page.locator('#root .card')).toBeVisible();
 });
  
-test('exercise result is submission-driven and does not cascade across new prompts',async({page})=>{
+async function startForcedExercise(page,mode){
+  const character=(await page.locator('#root .learning-card .kanji-display').textContent()).trim();
+  await page.evaluate(({character,mode})=>{
+    window.__KANJI5_V19_RECOVERY_TARGET__={character,mode,contentId:character};
+  },{character,mode});
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+}
+
+test('wrong production answer turns the card red once and then advances once',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
-  await page.getByRole('button',{name:'یادآوری فعال'}).click();
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
-  await expect.poll(async()=>page.locator('#root #exercise input, #root #exercise .production-choice').count(),{timeout:10000}).toBeGreaterThan(0);
-  const input=page.locator('#root #exercise input').first();
-  const choices=page.locator('#root #exercise .production-choice');
-  if(await input.count()){
-    await input.fill('zzzzzz');
-    await page.getByRole('button',{name:'بررسی پاسخ'}).click();
-  }else{
-    await expect(choices).toHaveCount(4);
-    await choices.first().click();
-  }
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-(correct|wrong)/);
+  await startForcedExercise(page,'production');
+  await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:10000});
+  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.character));
+  const wrong=page.locator('#root #exercise .production-choice').filter({hasNotText:character}).first();
+  await wrong.click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
   await expect(page.locator('#root .actions')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect(page.locator('#root #exercise')).toBeVisible();
 });
 
-test('typed-answer modes actually submit and produce immediate card feedback',async({page})=>{
+test('correct production answer turns the card green and advances once',async({page})=>{
   await clean(page);
-  await page.evaluate(async()=>{
-    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
-    if(!boundary)throw new Error('exercise boundary unavailable');
-    await boundary.updateSettings({production:false,vocabulary:false,context:false});
-  });
-  await page.getByRole('button',{name:'یادآوری فعال'}).click();
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
+  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.character));
+  await page.getByRole('button',{name:character}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
+  await expect(page.locator('#root .actions')).toHaveCount(0);
+  await page.waitForTimeout(900);
+  await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
+});
+
+test('typed reading answer submits through the grading path and shows feedback',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'reading');
   const input=page.locator('#root #exercise input').first();
-  await expect(input).toBeVisible({timeout:5000});
+  await expect(input).toBeVisible({timeout:10000});
   await input.fill('zzzzzz');
   await page.getByRole('button',{name:'بررسی پاسخ'}).click();
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
   await expect(page.locator('#root .actions')).toHaveCount(0);
 });
