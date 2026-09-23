@@ -74,7 +74,10 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   const handleSubmit=async(value:string)=>{
     if(!value.trim()||busy)return;
     const raw=await onSubmit(value);
-    const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
+    const bridgeFeedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
+    const feedback=ex.mode==="production"&&ex.character
+      ? {correct:value===ex.character,outcome:value===ex.character?"correct":"wrong"}
+      : bridgeFeedback;
     if(!feedback||typeof feedback.correct!=="boolean")return;
     setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong"))});
     advance();
