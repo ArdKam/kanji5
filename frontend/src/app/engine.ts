@@ -24,6 +24,7 @@ export type Snapshot = {
   };
   upcomingReviews?: { character: string; dueAt: string }[];
   session?: {
+    status?: string;
     completionFraction?: number;
     plannedTotal?: number;
     remainingTotal?: number;
