@@ -37,7 +37,7 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
   await expect(page.getByRole('button',{name:'فارسی',exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:'بیشتر',exact:true}).toHaveCount(0);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).toBeHidden();
   await page.getByRole('button',{name:'تنظیمات',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true})).toHaveAttribute('aria-pressed','true');
@@ -69,7 +69,7 @@ test('React presentation can switch between Persian and English and persist the 
 
 test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'بیشتر',exact:true}).toHaveCount(0);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).toBeHidden();
   await page.getByRole('button',{name:'تنظیمات',exact:true}).click();
   await page.getByRole('dialog').getByRole('button',{name:'English',exact:true}).click();
   await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).first().click();
