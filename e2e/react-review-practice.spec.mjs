@@ -60,7 +60,6 @@ test('wrong production answer turns the card red once and then advances once',as
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
   await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
   await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:5000});
-  await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
   await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:5000});
 });
 
@@ -75,6 +74,8 @@ test('correct production answer turns the card green and advances once',async({p
   await expect(page.locator('#root .actions')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
+  await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:5000});
 });
 
 test('typed reading answer submits through the grading path and shows feedback',async({page})=>{
