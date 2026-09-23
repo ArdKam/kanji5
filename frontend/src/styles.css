@@ -92,3 +92,14 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
     margin-top:0;
   }
 }
+/* Practice answer feedback: result lives on the card itself, then advances automatically. */
+.exercise-card{position:relative;overflow:hidden;transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;}
+.exercise-result-correct{background:rgba(126,140,90,.13);border-color:rgba(126,140,90,.52);box-shadow:0 22px 48px -28px rgba(76,105,42,.46);animation:kanji5ExerciseCorrect .48s ease both;}
+.exercise-result-wrong{background:rgba(192,57,43,.09);border-color:rgba(192,57,43,.48);box-shadow:0 22px 48px -28px rgba(192,57,43,.38);animation:kanji5ExerciseWrong .48s ease both;}
+.exercise-result-correct::after,.exercise-result-wrong::after{position:absolute;top:18px;right:18px;width:52px;height:52px;border-radius:17px;display:grid;place-items:center;font-size:30px;font-weight:900;background:var(--paper);box-shadow:0 12px 28px -18px rgba(28,26,23,.55);animation:kanji5ExerciseFeedbackIn .2s ease both;pointer-events:none;}
+.exercise-result-correct::after{content:"✓";color:var(--matcha);}
+.exercise-result-wrong::after{content:"!";color:var(--shu);}
+@keyframes kanji5ExerciseCorrect{0%{transform:scale(1)}42%{transform:scale(1.012)}100%{transform:scale(1)}}
+@keyframes kanji5ExerciseWrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes kanji5ExerciseFeedbackIn{0%{opacity:0;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.exercise-result-correct,.exercise-result-wrong{animation:none!important;transition:none!important}.exercise-result-correct::after,.exercise-result-wrong::after{animation:none!important;}}
