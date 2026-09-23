@@ -46,8 +46,12 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('html')).toHaveAttribute('dir','ltr');
   await expect(page.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
-  await expect(page.getByRole('button',{name:'Stats',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Settings',exact:true})).toBeVisible();
+  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Stats',exact:true})).toBeVisible();
+  await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true})).toBeVisible();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true}).click();
   await expect(page.getByRole('dialog').getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveText("Learning");
   await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveAttribute('aria-current','page');
@@ -59,7 +63,9 @@ test('React presentation can switch between Persian and English and persist the 
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('html')).toHaveAttribute('dir','ltr');
-  await expect(page.getByRole('button',{name:'Stats',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Stats',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Settings',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true}).click();
