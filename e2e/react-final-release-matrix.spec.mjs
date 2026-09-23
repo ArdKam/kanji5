@@ -25,6 +25,13 @@ for(const viewport of viewports){
     await expect(learning).toHaveAttribute('aria-current','page');
     await expect(page.locator('#exercise')).toHaveCount(0);
     await expect(page.locator('.card').first()).toBeVisible();
+    if(viewport.width>760){
+      const learningBox=await page.locator('.learning-card').boundingBox();
+      const summaryBox=await page.locator('.daily-summary').boundingBox();
+      expect(learningBox).toBeTruthy();
+      expect(summaryBox).toBeTruthy();
+      expect(summaryBox.y).toBeGreaterThan(learningBox.y+learningBox.height-1);
+    }
 
     await page.getByRole('button',{name:'بیشتر'}).click();
     await expect(page.locator('.header-menu-trigger')).toBeVisible();
