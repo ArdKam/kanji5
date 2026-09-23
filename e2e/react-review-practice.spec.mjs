@@ -33,6 +33,7 @@ test('exercise result is submission-driven and does not cascade across new promp
   await clean(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
+  await expect.poll(async()=>page.locator('#root #exercise input, #root #exercise .production-choice').count(),{timeout:10000}).toBeGreaterThan(0);
   const input=page.locator('#root #exercise input').first();
   const choices=page.locator('#root #exercise .production-choice');
   if(await input.count()){
