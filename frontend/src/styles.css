@@ -6,8 +6,8 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media(prefers-contrast:more){:root{--line:#8d8577;--mute:#4a463f}.surface,.stat-card,.button,.reading,.dialog,.upcoming,.insights{border-width:2px}}
 /* Learning-card flip: reveal switches to a compact back face so the card can be read without scrolling. */
-.learning-card{overflow:hidden;perspective:1200px;padding:0;min-height:clamp(500px,70dvh,590px);margin-bottom:7rem;}
-.learning-card-flip{position:relative;min-height:inherit;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.7,.2,1);}
+.learning-card{overflow:hidden;perspective:1200px;padding:0;height:clamp(500px,70dvh,590px);min-height:0;margin-bottom:7rem;}
+.learning-card-flip{position:relative;height:100%;min-height:0;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.7,.2,1);}
 .learning-card.is-revealed .learning-card-flip{transform:rotateY(180deg);}
 .learning-card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:16px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
 .learning-card-back{transform:rotateY(180deg);justify-content:initial;display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto;min-height:0;}
