@@ -6,6 +6,13 @@ async function clean(page){
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
+async function seedSeenCard(page){
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  await page.locator('#root .learning-card .button.wide').click();
+  await expect(page.locator('#root .learning-card .rating-good')).toBeVisible({timeout:5000});
+  await page.locator('#root .learning-card .rating-good').click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+}
 
 test('Learning and Active Recall are explicit independent presentation experiences',async({page})=>{
   await clean(page);
@@ -31,6 +38,7 @@ test('Learning and Active Recall are explicit independent presentation experienc
  
 test('exercise result is submission-driven and does not cascade across new prompts',async({page})=>{
   await clean(page);
+  await seedSeenCard(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.locator('#root #exercise input, #root #exercise .production-choice').count(),{timeout:10000}).toBeGreaterThan(0);
