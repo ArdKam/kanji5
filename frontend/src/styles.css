@@ -91,3 +91,16 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
     margin-top:0;
   }
 }
+/* Practice answer feedback: keep the result on the exercise card, then advance automatically. */
+.exercise-card{position:relative;overflow:hidden;transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;}
+.exercise-result-correct{background:rgba(126,140,90,.13);border-color:rgba(126,140,90,.52);box-shadow:0 22px 48px -28px rgba(76,105,42,.46);animation:kanji5ExerciseCorrect .48s ease both;}
+.exercise-result-wrong{background:rgba(192,57,43,.09);border-color:rgba(192,57,43,.48);box-shadow:0 22px 48px -28px rgba(192,57,43,.38);animation:kanji5ExerciseWrong .48s ease both;}
+.exercise-feedback{min-height:150px;padding:24px 18px;border:1px solid currentColor;border-radius:24px;display:grid;place-items:center;align-content:center;gap:10px;text-align:center;animation:kanji5ExerciseFeedbackIn .2s ease both;}
+.exercise-feedback.is-correct{color:var(--matcha);background:rgba(126,140,90,.11);}
+.exercise-feedback.is-wrong{color:var(--shu);background:rgba(192,57,43,.08);}
+.exercise-feedback-icon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:32px;font-weight:900;background:var(--paper);box-shadow:0 10px 24px -18px rgba(28,26,23,.55);}
+.exercise-feedback strong{color:var(--sumi);font-size:22px;line-height:1.25;}
+@keyframes kanji5ExerciseCorrect{0%{transform:scale(1)}42%{transform:scale(1.012)}100%{transform:scale(1)}}
+@keyframes kanji5ExerciseWrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes kanji5ExerciseFeedbackIn{0%{opacity:0;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.exercise-result-correct,.exercise-result-wrong,.exercise-feedback{animation:none!important;transition:none!important;}}
