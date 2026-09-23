@@ -96,8 +96,10 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     try{
       if(ex.mode==="production"&&ex.character){
         const correct=value===ex.character;
+        setResult({correct,outcome:correct?"correct":"wrong"});
         await onSubmit(value);
-        await finishAndAdvance({correct,outcome:correct?"correct":"wrong"});
+        await waitForFeedbackAnimation();
+        await onNext();
         return;
       }
       const raw=await onSubmit(value);
