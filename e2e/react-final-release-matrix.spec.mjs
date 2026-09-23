@@ -26,15 +26,10 @@ for(const viewport of viewports){
     await expect(page.locator('#exercise')).toHaveCount(0);
     await expect(page.locator('.card').first()).toBeVisible();
 
-    if(viewport.width<=760){
-      await page.getByRole('button',{name:'بیشتر'}).click();
-      await expect(page.locator('.header-menu-trigger')).toBeVisible();
-      await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
-      await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات'}).click();
-    }else{
-      await expect(page.getByRole('button',{name:'بیشتر'})).toBeHidden();
-      await page.getByRole('button',{name:'تنظیمات'}).click();
-    }
+    await page.getByRole('button',{name:'بیشتر'}).click();
+    await expect(page.locator('.header-menu-trigger')).toBeVisible();
+    await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+    await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات'}).click();
     await expect(page.locator('#settings-title')).toBeVisible();
     await page.getByRole('button',{name:'پاک کردن پیشرفت'}).click();
     await expect(page.locator('#root .app-shell')).toBeVisible();
