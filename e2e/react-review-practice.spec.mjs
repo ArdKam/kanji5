@@ -50,6 +50,7 @@ test('wrong production answer turns the card red once and then advances once',as
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
   await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:10000});
+  const before=await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)});
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.character));
   const wrong=page.locator('#root #exercise .production-choice').filter({hasNotText:character}).first();
   await wrong.click();
@@ -57,18 +58,23 @@ test('wrong production answer turns the card red once and then advances once',as
   await expect(page.locator('#root .actions')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
+  await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
 test('correct production answer turns the card green and advances once',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
+  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.contentId));
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.character));
   await page.getByRole('button',{name:character}).click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
   await expect(page.locator('#root .actions')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
+  await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
 test('typed reading answer submits through the grading path and shows feedback',async({page})=>{
