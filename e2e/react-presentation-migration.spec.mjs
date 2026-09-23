@@ -76,3 +76,9 @@ test('English learning rating buttons are ordered Easy, Good, Hard, Again',async
   await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
   await expect(page.locator('.rating-grid .rating')).toHaveText(['Easy','Good','Hard','Again']);
 });
+
+
+test('empty session progress indicator is absent before a session starts',async({page})=>{
+  await clean(page);
+  await expect(page.locator('.session-progress')).toHaveCount(0);
+});
