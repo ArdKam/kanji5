@@ -58,5 +58,12 @@ test("learning card flips to a compact back face without card overflow", async (
   });
   expect(metrics.overflow).toBe("hidden");
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
+  const ratingBounds = await card.locator(".rating-grid").evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const c = el.closest(".learning-card")?.getBoundingClientRect();
+    return { top: r.top, bottom: r.bottom, cardTop: c?.top ?? 0, cardBottom: c?.bottom ?? 0 };
+  });
+  expect(ratingBounds.top).toBeGreaterThanOrEqual(ratingBounds.cardTop);
+  expect(ratingBounds.bottom).toBeLessThanOrEqual(ratingBounds.cardBottom);
   }
 });
