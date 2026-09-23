@@ -93,12 +93,14 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   },[ex.mode,ex.character,ex.contentId,applyResult]);
   const handleSubmit=async(value:string)=>{
     if(!value.trim()||busy)return;
+    if(ex.mode==="production"&&ex.character){
+      applyResult({correct:value===ex.character,outcome:value===ex.character?"correct":"wrong"});
+      void onSubmit(value);
+      return;
+    }
     const raw=await onSubmit(value);
     const bridgeFeedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
-    const feedback=ex.mode==="production"&&ex.character
-      ? {correct:value===ex.character,outcome:value===ex.character?"correct":"wrong"}
-      : bridgeFeedback;
-    applyResult(feedback);
+    applyResult(bridgeFeedback);
   };
   const handleDontKnow=async()=>{
     if(busy)return;
