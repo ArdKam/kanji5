@@ -11,6 +11,6 @@ try{
     localStorage.setItem(VERSION_KEY,DATA_VERSION);
   }
 }catch(_){}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=114').catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=115').catch(()=>{});
 import('./v1.6-session.js').catch(()=>{});
 })();
