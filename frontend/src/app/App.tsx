@@ -70,7 +70,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   useEffect(()=>{
     if(!outcome||busy)return;
     const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
-    const timer=window.setTimeout(onNext,reduced?80:480);
+    const timer=window.setTimeout(onNext,reduced?100:760);
     return()=>window.clearTimeout(timer);
   },[outcome,busy,onNext]);
   const resultClass=outcome?(feedback.correct?" exercise-result-correct":" exercise-result-wrong"):"";
