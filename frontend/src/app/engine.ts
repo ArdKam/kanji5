@@ -94,8 +94,18 @@ export type Snapshot = {
   settings?: Settings;
 };
 
+export type ComponentInfo = {
+  character: string;
+  available: boolean;
+  components: string[];
+  sourceGap: boolean;
+  coverage?: { available?: number; total?: number; fraction?: number } | null;
+  source?: { name?: string; commit?: string; license?: string; semantics?: string } | null;
+};
+
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
+  getComponentInfo: (character: string) => Promise<ComponentInfo>;
   refreshLearning: () => Promise<Snapshot>;
   revealLearning: (direct?: boolean) => Promise<boolean>;
   rateLearning: (rating: Rating) => Promise<boolean>;
@@ -202,4 +212,7 @@ export async function nextExercise(): Promise<void> {
   const fn = window.__KANJI5_EDU_BRIDGE__?.next;
   if (!fn) throw new Error("KANJI5_EDU_NEXT_UNAVAILABLE");
   await fn();
+}
+export async function getComponentInfo(character: string): Promise<ComponentInfo> {
+  return (await waitForEngine()).getComponentInfo(character);
 }
