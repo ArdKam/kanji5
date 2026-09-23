@@ -4,7 +4,6 @@ const STORAGE_KEY = "kanji5-ui-language";
 
 type TranslationKey =
   | "title"
-  | "subtitle"
   | "stats"
   | "settings"
   | "language"
@@ -92,7 +91,7 @@ type TranslationKey =
 
 const messages: Record<Language, Record<TranslationKey, string>> = {
   fa: {
-    title:"کانجی ۵", subtitle:"پنج کانجی مهم ژاپنی در روز، با مرور تطبیقی",
+    title:"کانجی ۵",
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"آشنایی با کانجی", learningReview:"مرور یادگیری",
@@ -115,7 +114,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست"
   },
   en: {
-    title:"Kanji 5", subtitle:"Five important Japanese kanji a day, with adaptive review",
+    title:"Kanji 5",
     stats:"Stats", settings:"Settings", language:"Language", persian:"فارسی", english:"English",
     learning:"Learning", activeRecall:"Active Recall", learningPath:"Learning path", sessionProgress:"Session progress",
     goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"Introducing this kanji", learningReview:"Learning review",
