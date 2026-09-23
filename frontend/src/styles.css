@@ -104,3 +104,5 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 @keyframes kanji5ExerciseWrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 @keyframes kanji5ExerciseFeedbackIn{0%{opacity:0;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.exercise-result-correct,.exercise-result-wrong{animation:none!important;transition:none!important}.exercise-result-correct::after,.exercise-result-wrong::after{animation:none!important;}}
+
+.exercise-feedback{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.65rem;min-height:9rem;text-align:center;font-size:1.15rem}.exercise-feedback>strong{font-size:1.35rem}.exercise-correct-answer{display:flex;flex-direction:column;gap:.2rem;padding:.75rem 1rem;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid currentColor}.exercise-correct-answer span{font-size:.8rem;opacity:.72}.exercise-correct-answer b{font-size:1.5rem}.exercise-result-wrong .exercise-correct-answer{color:inherit}
