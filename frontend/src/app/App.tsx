@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import {
   clearTransient,
@@ -64,13 +64,33 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
-  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
-  useEffect(()=>{setAnswer("");setResult(null)},[ex.mode,ex.character,ex.prompt,ex.contentId]);
+  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4,handledResult=useRef(false);
   const advance=useCallback(()=>{
     const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
-    const timer=window.setTimeout(()=>{void onNext()},reduced?80:760);
-    return()=>window.clearTimeout(timer);
+    window.setTimeout(()=>{void onNext()},reduced?80:760);
   },[onNext]);
+  const applyResult=useCallback((feedback:{correct?:boolean;outcome?:string}|null)=>{
+    if(!feedback||typeof feedback.correct!=="boolean"||handledResult.current)return;
+    handledResult.current=true;
+    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong"))});
+    advance();
+  },[advance]);
+  useEffect(()=>{
+    setAnswer("");
+    setResult(null);
+    handledResult.current=false;
+  },[ex.mode,ex.character,ex.prompt,ex.contentId]);
+  useEffect(()=>{
+    const onViewModel=(event:Event)=>{
+      const detail=(event as CustomEvent<Snapshot>).detail;
+      const incoming=detail?.exercise;
+      if(!incoming||incoming.mode!==ex.mode||incoming.character!==ex.character||incoming.contentId!==ex.contentId)return;
+      const feedback=detail.feedback;
+      if(feedback?.outcome)applyResult(feedback);
+    };
+    document.addEventListener("kanji5:v1.9-v2-view-models",onViewModel);
+    return()=>document.removeEventListener("kanji5:v1.9-v2-view-models",onViewModel);
+  },[ex.mode,ex.character,ex.contentId,applyResult]);
   const handleSubmit=async(value:string)=>{
     if(!value.trim()||busy)return;
     const raw=await onSubmit(value);
@@ -78,9 +98,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     const feedback=ex.mode==="production"&&ex.character
       ? {correct:value===ex.character,outcome:value===ex.character?"correct":"wrong"}
       : bridgeFeedback;
-    if(!feedback||typeof feedback.correct!=="boolean")return;
-    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong"))});
-    advance();
+    applyResult(feedback);
   };
   const handleDontKnow=async()=>{
     if(busy)return;
