@@ -64,57 +64,73 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
-  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4,handledResult=useRef(false);
-  const advance=useCallback(()=>{
-    const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
-    window.setTimeout(()=>{void onNext()},reduced?80:760);
-  },[onNext]);
-  const applyResult=useCallback((feedback:{correct?:boolean;outcome?:string}|null)=>{
-    if(!feedback||typeof feedback.correct!=="boolean"||handledResult.current)return;
-    handledResult.current=true;
-    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong"))});
-    advance();
-  },[advance]);
+  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
+  const lockedRef=useRef(false);
+  const exerciseKey=String(ex.contentId??"")+"|"+String(ex.mode??"")+"|"+String(ex.character??"");
+  const previousKeyRef=useRef(exerciseKey);
+
   useEffect(()=>{
-    setAnswer("");
-    setResult(null);
-    handledResult.current=false;
-  },[ex.mode,ex.character,ex.prompt,ex.contentId]);
-  useEffect(()=>{
-    const onViewModel=(event:Event)=>{
-      const detail=(event as CustomEvent<Snapshot>).detail;
-      const incoming=detail?.exercise;
-      if(!incoming||incoming.mode!==ex.mode||incoming.character!==ex.character||incoming.contentId!==ex.contentId)return;
-      const feedback=detail.feedback;
-      if(feedback?.outcome)applyResult(feedback);
-    };
-    document.addEventListener("kanji5:v1.9-v2-view-models",onViewModel);
-    return()=>document.removeEventListener("kanji5:v1.9-v2-view-models",onViewModel);
-  },[ex.mode,ex.character,ex.contentId,applyResult]);
-  const handleSubmit=async(value:string)=>{
-    if(!value.trim()||busy)return;
-    if(ex.mode==="production"&&ex.character){
-      applyResult({correct:value===ex.character,outcome:value===ex.character?"correct":"wrong"});
-      void onSubmit(value);
-      return;
+    if(previousKeyRef.current!==exerciseKey){
+      previousKeyRef.current=exerciseKey;
+      lockedRef.current=false;
+      setAnswer("");
+      setResult(null);
     }
-    const raw=await onSubmit(value);
-    const bridgeFeedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
-    applyResult(bridgeFeedback);
+  },[exerciseKey]);
+
+  const waitForFeedbackAnimation=useCallback(async()=>{
+    const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
+    await new Promise(resolve=>window.setTimeout(resolve,reduced?100:700));
+  },[]);
+
+  const finishAndAdvance=useCallback(async(feedback:{correct?:boolean;outcome?:string}|null)=>{
+    if(!feedback||typeof feedback.correct!=="boolean")return;
+    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong"))});
+    await waitForFeedbackAnimation();
+    await onNext();
+  },[onNext,waitForFeedbackAnimation]);
+
+  const handleSubmit=async(value:string)=>{
+    if(!value.trim()||busy||lockedRef.current)return;
+    lockedRef.current=true;
+    try{
+      if(ex.mode==="production"&&ex.character){
+        const correct=value===ex.character;
+        await onSubmit(value);
+        await finishAndAdvance({correct,outcome:correct?"correct":"wrong"});
+        return;
+      }
+      const raw=await onSubmit(value);
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
+      await finishAndAdvance(feedback);
+    }catch(_){
+      lockedRef.current=false;
+    }
   };
+
   const handleDontKnow=async()=>{
-    if(busy)return;
-    const raw=await onDontKnow();
-    const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
-    setResult({correct:false,outcome:String(feedback?.outcome??"unknown")});
-    advance();
+    if(busy||lockedRef.current)return;
+    lockedRef.current=true;
+    try{
+      const raw=await onDontKnow();
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
+      await finishAndAdvance({correct:false,outcome:String(feedback?.outcome??"unknown")});
+    }catch(_){
+      lockedRef.current=false;
+    }
   };
+
   const resultClass=result?(result.correct?" exercise-result-correct":" exercise-result-wrong"):"";
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
-  return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"surface card exercise-card"+resultClass} tabIndex={-1}><div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div><h2>{t("currentExercise")}</h2><p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
+  const disabled=busy||lockedRef.current||Boolean(result);
+
+  return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"surface card exercise-card"+resultClass} tabIndex={-1}>
+    <div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div>
+    <h2>{t("currentExercise")}</h2>
+    <p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
     {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{result?null:<>
-      {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={busy} onClick={()=>void handleSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={busy} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
-      <div className="actions">{!production?<button className="button primary" type="button" disabled={busy||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={busy} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>
+      {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
+      <div className="actions">{!production?<button className="button primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>
     </>}</>}
   </section>
 }
