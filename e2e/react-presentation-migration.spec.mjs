@@ -46,7 +46,7 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('html')).toHaveAttribute('dir','ltr');
   await expect(page.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
-  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).last().click();
   await page.getByRole('button',{name:'More',exact:true}).click();
   await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
   await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Stats',exact:true})).toBeVisible();
