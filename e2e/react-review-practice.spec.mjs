@@ -53,18 +53,15 @@ test('typed-answer modes actually submit and produce immediate card feedback',as
   await clean(page);
   await page.evaluate(async()=>{
     const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
-    const edu=window.__KANJI5_EDU_BRIDGE__;
-    if(!boundary||!edu)throw new Error('exercise bridge unavailable');
-    await edu.start();
+    if(!boundary)throw new Error('exercise boundary unavailable');
+    await boundary.updateSettings({production:false,vocabulary:false,context:false});
   });
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
   const input=page.locator('#root #exercise input').first();
-  if(await input.count()){
-    await input.fill('zzzzzz');
-    await page.getByRole('button',{name:'بررسی پاسخ'}).click();
-    await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-(correct|wrong)/);
-    await expect(page.locator('#root .actions')).toHaveCount(0);
-  }else{
-    test.info().annotations.push({type:'note',description:'Adaptive planner selected a non-typed exercise after a clean session; typed path is covered by the education-core regression test.'});
-  }
+  await expect(input).toBeVisible({timeout:5000});
+  await input.fill('zzzzzz');
+  await page.getByRole('button',{name:'بررسی پاسخ'}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect(page.locator('#root .actions')).toHaveCount(0);
 });
