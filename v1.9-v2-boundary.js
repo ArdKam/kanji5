@@ -165,7 +165,10 @@ function clearCustomStudyFilter(){
 }
 async function startCustomStudy(filter={}){
   const result=await setCustomStudyFilter(filter);
-  if(!result.available)return {...result,started:false};
+  if(!result.available){
+    clearCustomStudyFilter();
+    return {...result,started:false};
+  }
   const session=window.__KANJI5_V16_SESSION_API__;
   if(session?.startExperience)await session.startExperience('review');
   else if(session?.startReady)await session.startReady();
