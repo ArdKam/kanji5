@@ -212,6 +212,8 @@ export async function startLearningExperience(): Promise<void> {
 export async function startExercise(): Promise<void> {
   const boundary = await waitForEngine();
   await boundary.clearCustomStudyFilter?.();
+  const educationReady = await boundary.ensureEducationRuntime?.();
+  if (!educationReady) throw new Error("KANJI5_EDUCATION_RUNTIME_UNAVAILABLE");
   const bridge = window.__KANJI5_EDU_BRIDGE__;
   if (!bridge?.start) throw new Error("KANJI5_EDU_BRIDGE_UNAVAILABLE");
   const session = window.__KANJI5_V16_SESSION_API__;
