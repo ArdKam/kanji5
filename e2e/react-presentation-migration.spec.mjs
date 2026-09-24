@@ -95,22 +95,26 @@ test('empty session progress indicator is absent before a session starts',async(
   await expect(page.locator('.session-progress')).toHaveCount(0);
 });
 
-test('Kanji dictionary searches by character and shows structured study metadata',async({page})=>{
+test('Kanji dictionary searches, filters and opens a non-rating Kanji card',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'فرهنگ کانجی',exact:true}).click();
-  const dialog=page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
-  const search=dialog.getByRole('textbox',{name:'کانجی، خوانش یا معنی را جست‌وجو کن'});
+  await page.getByRole('button',{name:'فرهنگ کانجی',exact:true}).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible();
+  const search=pageRoot.getByRole('textbox',{name:'کانجی، خوانش یا معنی را جست‌وجو کن'});
   await search.fill('学');
-  await expect(dialog.locator('.dictionary-result').first()).toBeVisible({timeout:10000});
-  await expect(dialog.locator('.dictionary-character').first()).toHaveText('学');
-  await expect(dialog.locator('.dictionary-readings')).toContainText('ガク');
-  await expect(dialog.locator('.dictionary-meta')).toContainText('JLPT');
-  await expect(dialog.locator('.dictionary-meta')).toContainText('استروک');
-  await expect(dialog.locator('.dictionary-meta')).toContainText('پایه');
+  const tile=pageRoot.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
+  await expect(tile).toBeVisible({timeout:10000});
+  await expect(tile).toHaveAttribute('data-jlpt','N5');
+  await tile.click();
+  const card=page.getByRole('dialog');
+  await expect(card).toBeVisible();
+  await expect(card.locator('.dictionary-card-character')).toHaveText('学');
+  await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
+  await expect(card).toContainText('N5');
+  await expect(card.locator('.rating-grid')).toHaveCount(0);
+  await card.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(card).toBeHidden();
 });
-
 test('mastery visualization renders skill signals and seven-day review activity',async({page})=>{
   await clean(page);
   await page.locator('.insights summary').click();
