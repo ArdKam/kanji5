@@ -283,10 +283,13 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 }
 .stroke-order-header{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
   gap:10px;
 }
+.stroke-order-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex:0 0 auto;}
+.stroke-order-toggle{min-height:44px;padding:6px 9px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;font-size:10px;font-weight:850;cursor:pointer;}
+.stroke-order-toggle[aria-expanded="true"]{background:var(--sumi);border-color:var(--sumi);color:var(--paper);}
 .stroke-order-header h3{margin:0 0 3px;font-size:13px;}
 .stroke-order-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
 .stroke-order-count{
