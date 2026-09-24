@@ -109,6 +109,8 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
   const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2)return;
+    const target=event.target as HTMLElement|null;
+    if(target?.closest("button,input,textarea,select,a"))return;
     swipeStartX.current=event.clientX;
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
