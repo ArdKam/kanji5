@@ -421,3 +421,18 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .activity-bar-track{height:94px;}
   .activity-count,.activity-label{font-size:9px;}
 }
+
+/* Final interaction/layout overrides: keep stroke controls non-overlapping and dense cards inside one viewport. */
+@media(min-width:761px){
+  .stroke-order-controls{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .stroke-order-controls .button:nth-child(2),
+  .stroke-order-reset{grid-column:auto;order:initial;}
+}
+.learning-card[data-card-density="dense"] .stroke-order-header p{display:none;}
+.learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(64px,20vw);}
+.learning-card[data-card-density="dense"] .stroke-order-stage{gap:2px;}
+.learning-card[data-card-density="dense"] .stroke-order-progress{font-size:9px;}
+.learning-card[data-card-density="dense"] .component-breakdown-target{font-size:34px;}
+.learning-card[data-card-density="dense"] .component-breakdown-part{min-width:26px;min-height:26px;padding:3px 5px;font-size:15px;}
+.learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:40px;padding:4px 6px;}
+.learning-card[data-card-density="dense"] .learning-card-back .reading>strong{font-size:13px;}
