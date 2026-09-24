@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=132').catch(()=>{});
 document.documentElement.classList.add('kanji5-react-default');
 const startupRoot=document.getElementById('kanji5-startup-shell');
 const startupObserver=startupRoot?new MutationObserver(()=>{
@@ -19,11 +20,11 @@ let reactStylesheet=document.querySelector('link[data-kanji5-react-styles]');
 if(!reactStylesheet){
   reactStylesheet=document.createElement('link');
   reactStylesheet.rel='stylesheet';
-  reactStylesheet.href='./react-dist/kanji5-react.css?v=20260925-release1';
+  reactStylesheet.href='./react-dist/kanji5-react.css?v=20260925-release2';
   reactStylesheet.dataset.kanji5React='true';
   document.head.appendChild(reactStylesheet);
 }
-import('./react-dist/kanji5-react.js?v=20260925-release1')
+import('./react-dist/kanji5-react.js?v=20260925-release2')
   .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 
 function mountAccountFallback(){

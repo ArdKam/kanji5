@@ -37,6 +37,8 @@ test('account signup preserves entered credentials and handles a successful sign
   await page.goto('/');
   await page.locator('.account-button').click();
   await expect(page.locator('.account-dialog')).toBeVisible();
+  await expect(page.locator('.account-dialog .account-auth-form')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.account-dialog input[name="email"]')).toBeVisible();
 
   const form = page.locator('.account-dialog .account-auth-form');
   await form.locator('input[name="email"]').fill('test-signup@example.com');
