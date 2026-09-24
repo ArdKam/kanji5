@@ -64,7 +64,7 @@ export type Snapshot = {
     state?: string;
   };
   learner?: {
-    attributes?: Record<string, { state?: string; recentAccuracy?: number }>;
+    attributes?: Record<string, { state?: string; accuracy?: number; recentAccuracy?: number; confidence?: number; momentum?: number; repeatedFailure?: boolean }>;
   };
   adaptiveReason?: {
     mode?: string;
@@ -91,6 +91,7 @@ export type Snapshot = {
     currentStreak?: number;
     longestStreak?: number;
     leechCount?: number;
+    last7?: { label?: string; count?: number }[];
   };
   settings?: Settings;
 };
