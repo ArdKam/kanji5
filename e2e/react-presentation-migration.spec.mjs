@@ -128,6 +128,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
 
   await page.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  await page.waitForTimeout(700);
 
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
@@ -140,7 +141,9 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await expect(reloadedCard).toBeVisible({ timeout: 20000 });
   if (!(await reloadedCard.evaluate((el) => el.classList.contains("is-revealed")))) {
     await reloadedCard.getByRole("button", { name: "Show kanji information" }).click();
+    await expect(reloadedCard).toHaveClass(/is-revealed/, { timeout: 10000 });
   }
+  await page.waitForTimeout(700);
   await expect(reloadedCard.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
 
   await reloadedCard.getByRole("button", { name: "Edit" }).click();
