@@ -27,6 +27,9 @@ function readAppState(){return safeObject(safeParse(readValue(STORAGE,null)))||{
 function readReviews(){const value=safeParse(readValue(REVIEWS_STORAGE,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object'):[]}
 function readComponents(){return readObject(COMPONENT_KEY,{})}
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
+function normalizeMnemonics(value){const out={};if(!value||typeof value!=='object'||Array.isArray(value))return out;for(const [key,val] of Object.entries(value).slice(0,2136)){const character=String(key||'').trim().slice(0,2);const mnemonic=String(val??'').trim().slice(0,500);if(character&&mnemonic)out[character]=mnemonic;}return out}
+function readMnemonics(){return normalizeMnemonics(readObject(MNEMONIC_STORAGE,{}))}
+function writeMnemonics(value){return writeObject(MNEMONIC_STORAGE,normalizeMnemonics(value))}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
 function readSessionHistory(){const value=safeParse(readValue(SESSION_HISTORY_KEY,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[]}
 function writeSessionHistory(value){const history=Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[];return writeObject(SESSION_HISTORY_KEY,history)}
