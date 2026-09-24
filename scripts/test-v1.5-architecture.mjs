@@ -81,6 +81,9 @@ assert.match(sw, /"\.\/v1\.5-state\.js"/, 'state module must be offline-precache
 assert.doesNotMatch(sw, /"\.\/v1\.5-recall-core\.js"/, 'legacy recall core must not be in the default precache');
 assert.doesNotMatch(sw, /"\.\/v1\.5-p0\.js"/, 'legacy P0 must not be in the default precache');
 assert.match(sw, /"\.\/v1\.5-network\.js"/, 'network adapter must be offline-precached');
+assert.match(sw, /"\.\/v1\.4-education-migration\.js"/, 'lazy education migration must be offline-precached');
+assert.match(sw, /"\.\/v1\.4-education-core\.js"/, 'education core must be offline-precached for offline exercise startup');
+assert.match(sw, /"\.\/v1\.9-recovery\.js"/, 'recovery runtime must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-education-sync-core\.js"/, 'education sync core must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-sync-core\.js"/, 'sync core must be offline-precached for sync-enabled startup paths');
 
