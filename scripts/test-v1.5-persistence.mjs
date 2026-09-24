@@ -44,6 +44,8 @@ assert.equal(typeof base.readKnowledge, 'function');
 assert.equal(typeof base.writeKnowledge, 'function');
 assert.equal(typeof base.readComponents, 'function');
 assert.equal(typeof base.writeComponents, 'function');
+assert.equal(typeof base.readMnemonics, 'function');
+assert.equal(typeof base.writeMnemonics, 'function');
 assert.equal(typeof base.writeLastAttempt, 'function');
 assert.equal(typeof base.clearRuntimeKnowledge, 'function');
 
@@ -61,6 +63,8 @@ assert.equal(boundaryApi.writeComponents({ 学: { reading: { gaku: { attempts: 1
 assert.equal(boundaryApi.writeLastAttempt({ character: '学', unknown: true }), true);
 assert.equal(JSON.parse(boundaryStorage.getItem('kanji5-v1.2-knowledge')).学.reading.gaku, 1);
 assert.equal(JSON.parse(boundaryStorage.getItem('kanji5-v1.5-components')).学.reading.gaku.attempts, 1);
+assert.equal(boundaryApi.writeMnemonics({学:'学校の黒板を思い出す'}), true);
+assert.equal(boundaryApi.readMnemonics().学, '学校の黒板を思い出す');
 assert.equal(JSON.parse(boundaryStorage.getItem('kanji5-v1.2-last-attempt')).unknown, true);
 assert.equal(boundaryApi.clearRuntimeKnowledge(), true);
 assert.equal(boundaryStorage.getItem('kanji5-v1.2-knowledge'), null);
@@ -73,6 +77,7 @@ const state = stateApi.createInitial({
   settings: { dailyNew: 7 },
   cards: { a: { card: { due: '2026-09-04T00:00:00.000Z' }, reviews: 1 } },
   knowledge: { a: { meaning: { day: 1 } } },
+  mnemonics: { a: 'a classroom blackboard' },
   reviews: [{ id: 'a', eventId: 'e1', at: '2026-09-04T00:00:00.000Z', rating: 'Good' }],
   today: stateApi.todayKey()
 });
@@ -88,6 +93,7 @@ const loaded = reloadedApi.loadState();
 assert.equal(loaded.settings.dailyNew, 7);
 assert.equal(JSON.stringify(loaded.cards), JSON.stringify(state.cards));
 assert.equal(JSON.stringify(loaded.knowledge), JSON.stringify(state.knowledge));
+assert.equal(loaded.mnemonics.a, 'a classroom blackboard');
 assert.equal(loaded.reviews.length, 1);
 
 storage.setItem(stateApi.CARDS_STORAGE, JSON.stringify({ ...state.cards, b: { card: {} } }));

@@ -19,7 +19,7 @@ function runtimePresentationData(now=Date.now()){
   const nonAgainReviews=reviews.filter(item=>String(item.rating||'')!=='Again').length;
   const days=[];
   for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const key=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);days.push({label:new Intl.DateTimeFormat('fa-IR',{weekday:'short'}).format(d),count:reviews.filter(item=>String(item.at||'').slice(0,10)===key).length})}
-  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming,settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:Object.values(cards).filter(item=>item?.leech).length,last7:days}};
+  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},mnemonics:state.readMnemonics?.()||{},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming,settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:Object.values(cards).filter(item=>item?.leech).length,last7:days}};
 }
 
 function activeSession(){const current=window.__KANJI5_V16_SESSION_API__?.getSession?.();if(current?.started&&!current?.finished)return current;const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
@@ -79,6 +79,18 @@ async function searchKanji(query,limit=24){
     results:ranked.slice(0,Math.max(1,Math.min(40,Number(limit)||24))).map(row=>row.result)
   };
 }
+async function saveMnemonic(character,value){
+  const normalizedCharacter=String(character||'').trim().slice(0,2);
+  if(!normalizedCharacter)return snapshot();
+  const current=state.readMnemonics?.()||{};
+  const next={...current};
+  const normalizedValue=String(value??'').trim().slice(0,500);
+  if(normalizedValue)next[normalizedCharacter]=normalizedValue;
+  else delete next[normalizedCharacter];
+  state.writeMnemonics?.(next);
+  await publish();
+  return snapshot();
+}
 async function getComponentInfo(character){
   const normalized=String(character||'').trim();
   const data=await loadComponentData();
@@ -117,7 +129,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,saveMnemonic});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);

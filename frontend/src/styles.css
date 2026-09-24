@@ -223,3 +223,16 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .activity-bar-track{height:94px;}
   .activity-count,.activity-label{font-size:9px;}
 }
+
+.mnemonic-panel{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--paper);}
+.mnemonic-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.mnemonic-head h3{margin:0;font-size:12px;}
+.link-button{border:0;background:transparent;color:var(--ai);font-size:10px;font-weight:850;padding:3px 0;cursor:pointer;}
+.mnemonic-body{margin-top:8px;font-size:12px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;}
+.mnemonic-empty{margin:8px 0 0;color:var(--mute);font-size:10px;line-height:1.7;}
+.mnemonic-editor{display:grid;gap:8px;margin-top:8px;}
+.mnemonic-editor textarea{width:100%;min-height:92px;resize:vertical;border:1px solid var(--line);border-radius:12px;background:var(--washi);padding:10px;color:var(--sumi);font:inherit;font-size:12px;line-height:1.7;}
+.mnemonic-actions{display:flex;gap:7px;flex-wrap:wrap;}
+.mnemonic-actions .button{min-height:34px;padding:6px 12px;font-size:10px;}
+.mnemonic-saved{display:block;margin-top:6px;color:var(--matcha);font-size:10px;font-weight:800;}
+.mnemonic-delete{margin-top:6px;padding:0;border:0;background:none;color:var(--shu);font:inherit;font-size:9px;font-weight:800;cursor:pointer;}

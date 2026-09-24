@@ -118,3 +118,18 @@ test('mastery visualization renders skill signals and seven-day review activity'
   await expect(page.locator('.activity-chart')).toBeVisible();
   await expect(page.locator('.activity-bar-wrap')).toHaveCount(7);
 });
+
+test('personal mnemonic can be saved and remains visible on the learning card',async({page})=>{
+  await clean(page);
+  const summary=page.locator('.learning-card').first();
+  await expect(summary).toBeVisible();
+  await summary.getByRole('button',{name:/نمایش اطلاعات کانجی|Show kanji information/}).click();
+  const panel=summary.locator('.mnemonic-panel');
+  await expect(panel).toBeVisible();
+  const edit=panel.getByRole('button',{name:/ذخیره یادسپاری|Save mnemonic|ویرایش|Edit/}).first();
+  await edit.click();
+  const input=panel.locator('textarea');
+  await input.fill('این کانجی را با تصویر یک کلاس و تختهٔ سیاه به یاد می‌سپارم.');
+  await panel.getByRole('button',{name:/ذخیره یادسپاری|Save mnemonic/}).click();
+  await expect(panel.locator('.mnemonic-body')).toContainText('این کانجی را با تصویر یک کلاس و تختهٔ سیاه');
+});
