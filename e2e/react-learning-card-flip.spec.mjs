@@ -149,14 +149,14 @@ test("learning card keeps dense information on separate back pages in Persian an
     if (viewport.width <= 760) {
       await swipePager(page, pager, 0.25, 0.75);
     } else {
-      await mouseSwipePager(page, pager, 0.75, 0.25);
+      await mouseSwipePager(page, pager, 0.25, 0.75);
     }
     await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
     await expect(previousButton).toBeDisabled();
     await expect(nextButton).toBeEnabled();
 
     if (viewport.width <= 760) {
-      await swipePager(page, pager, 0.25, 0.75);
+      await swipePager(page, pager, 0.75, 0.25);
       await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
       await expect(previousButton).toBeEnabled();
       await expect(nextButton).toBeDisabled();
