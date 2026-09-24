@@ -240,3 +240,5 @@
 @media (prefers-reduced-motion:reduce){
   .kanji-catalog-tile{transition:none;}
 }
+
+.dictionary-card-dialog .dialog-close{position:absolute;top:8px;inset-inline-start:8px;z-index:3;background:color-mix(in srgb, var(--paper) 86%, transparent);border-radius:12px;}
