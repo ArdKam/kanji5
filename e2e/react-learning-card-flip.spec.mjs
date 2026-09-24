@@ -32,7 +32,15 @@ test("learning card flips to a compact back face without card overflow", async (
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await page.waitForTimeout(600);
   await expect(card.locator(".learning-card-back")).toBeVisible();
-  await expect(card.locator(".learning-back-kanji")).toBeVisible();
+  const identityCount = await card.locator(".learning-back-kanji, .component-breakdown-target").count();
+  expect(identityCount).toBe(1);
+  const componentTarget = card.locator(".component-breakdown-target");
+  if (await componentTarget.count()) {
+    await expect(componentTarget).toBeVisible();
+    await expect(card.locator(".component-breakdown-visual")).toContainText(/=/);
+  } else {
+    await expect(card.locator(".learning-back-kanji")).toBeVisible();
+  }
   await expect(card.locator(".meanings")).toBeVisible();
   await expect(card.locator(".readings")).toBeVisible();
   await expect(card.locator(".rating-grid")).toBeVisible();
