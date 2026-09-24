@@ -242,3 +242,27 @@
 }
 
 .dictionary-card-dialog .dialog-close{position:absolute;top:8px;inset-inline-start:8px;z-index:3;background:color-mix(in srgb, var(--paper) 86%, transparent);border-radius:12px;}
+
+.dictionary-card-kanji-row{
+  min-height:150px;
+  margin:2px 0 6px;
+}
+.dictionary-card-kanji-row .dictionary-card-character{
+  margin:0;
+  font-size:clamp(90px,18vw,140px);
+}
+.dictionary-audio-button{
+  flex:0 0 auto;
+}
+.dictionary-readings-header{
+  margin-top:15px;
+  padding-top:13px;
+  border-top:1px solid var(--line);
+}
+.dictionary-readings .reading{
+  min-height:88px;
+}
+@media (max-width:520px){
+  .dictionary-card-kanji-row{min-height:130px;}
+  .dictionary-card-kanji-row .dictionary-card-character{font-size:clamp(76px,22vw,112px);}
+}
