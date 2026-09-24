@@ -59,12 +59,38 @@ test("learning card flips to a compact back face without card overflow", async (
   });
   expect(metrics.overflow).toBe("hidden");
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
-  const ratingBounds = await card.locator(".rating-grid").evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    const c = el.closest(".learning-card")?.getBoundingClientRect();
-    return { top: r.top, bottom: r.bottom, cardTop: c?.top ?? 0, cardBottom: c?.bottom ?? 0 };
+  await expect(card.locator(".learning-back-scroll")).toBeVisible();
+  await expect(card.locator(".learning-back-footer")).toBeVisible();
+  const layoutBounds = await card.evaluate((el) => {
+    const rect = (selector) => {
+      const node = el.querySelector(selector);
+      if (!node) return null;
+      const r = node.getBoundingClientRect();
+      return { top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height,width:r.width };
+    };
+    return {
+      card: rect(".learning-card-back"),
+      scroll: rect(".learning-back-scroll"),
+      overview: rect(".learning-back-overview"),
+      examples: rect(".compact-examples"),
+      components: rect(".component-breakdown"),
+      footer: rect(".learning-back-footer"),
+      ratings: rect(".rating-grid"),
+    };
   });
-  expect(ratingBounds.top).toBeGreaterThanOrEqual(ratingBounds.cardTop);
-  expect(ratingBounds.bottom).toBeLessThanOrEqual(ratingBounds.cardBottom);
+  expect(layoutBounds.card).not.toBeNull();
+  expect(layoutBounds.scroll).not.toBeNull();
+  expect(layoutBounds.footer).not.toBeNull();
+  expect(layoutBounds.ratings).not.toBeNull();
+  expect(layoutBounds.scroll.bottom).toBeLessThanOrEqual(layoutBounds.footer.top + 1);
+  expect(layoutBounds.footer.bottom).toBeLessThanOrEqual(layoutBounds.card.bottom + 1);
+  expect(layoutBounds.ratings.bottom).toBeLessThanOrEqual(layoutBounds.footer.bottom + 1);
+  expect(layoutBounds.ratings.top).toBeGreaterThanOrEqual(layoutBounds.footer.top - 1);
+  if (layoutBounds.overview && layoutBounds.examples) {
+    expect(layoutBounds.examples.top).toBeGreaterThanOrEqual(layoutBounds.overview.bottom - 1);
+  }
+  if (layoutBounds.examples && layoutBounds.components) {
+    expect(layoutBounds.components.top).toBeGreaterThanOrEqual(layoutBounds.examples.bottom - 1);
+  }
   }
 });
