@@ -237,6 +237,10 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
 
   const panel = card.locator(".stroke-order-panel");
   await expect(panel).toBeVisible();
+  const strokeToggle = panel.getByRole("button", { name: "Stroke order" });
+  await expect(strokeToggle).toHaveAttribute("aria-expanded", "false");
+  await strokeToggle.click();
+  await expect(strokeToggle).toHaveAttribute("aria-expanded", "true");
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
   await expect(panel.getByRole("button", { name: "Play" })).toBeVisible();
