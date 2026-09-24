@@ -14,11 +14,18 @@ if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react
   throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
 }
 console.log("React entry uses cache-busted shipped runtime assets.");
-if(!/mountAccountFallback/.test(fs.readFileSync("react-entry.js","utf8"))){ throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK"); }
+const reactJs=fs.readFileSync("react-dist/kanji5-react.js","utf8");
+try{
+  new Function(reactJs);
+}catch(error){
+  throw new Error("SHIPPED_REACT_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));
+}
+if(/data-kanji5-account-injected/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_EMBEDDED_FALLBACK_PATCH");
+console.log("Shipped React JS parses as valid JavaScript.");
+
+const reactEntry=fs.readFileSync("react-entry.js","utf8");
+if(!/mountAccountFallback/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK");
 console.log("React entry contains account visibility fallback.");
 if(!fs.existsSync("account-fallback.js")) throw new Error("ACCOUNT_FALLBACK_SCRIPT_MISSING");
 if(!/__KANJI5_ACCOUNT__|account-button/.test(fs.readFileSync("account-fallback.js","utf8"))) throw new Error("ACCOUNT_FALLBACK_SCRIPT_INCOMPLETE");
 console.log("Standalone account fallback is present.");
-
-if(!/account-fallback|data-kanji5-account-fallback|mountAccountFallback/.test(fs.readFileSync("react-dist/kanji5-react.js","utf8"))) throw new Error("SHIPPED_REACT_JS_MISSING_ACCOUNT_FALLBACK");
-console.log("Shipped React JS contains account fallback.");
