@@ -61,7 +61,10 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <span className="badge badge-red">{item.jlpt || "—"}</span>
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
         </div>
-        <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
+        <div className="dictionary-stroke-order-wrap">
+          <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
+          <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
+        </div>
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
         {componentInfo?.available && componentInfo.components.length ? (
           <ComponentBreakdown
