@@ -83,10 +83,8 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     const next=mnemonicDraft.trim().slice(0,600);
     setMnemonicBusy(true);
     setMnemonicError("");
-    console.log("MNEMONIC_HANDLER_START", {character: card.character, next});
     try{
       const saved=await saveMnemonic(card.character,next);
-      console.log("MNEMONIC_HANDLER_SAVED", {character: card.character, saved, stored: window.localStorage.getItem("kanji5-v2-mnemonics")});
       setPersonalMnemonic(saved.text);
       setMnemonicDraft(saved.text);
       setMnemonicEditing(false);
