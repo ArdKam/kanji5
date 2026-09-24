@@ -10,7 +10,11 @@ const SESSION_HISTORY_KEY = 'kanji5-v1.6-session-history';
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 15000;
 const MAX_SYNC_ATTEMPTS = 3;
-const SUPABASE_JS = 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const SUPABASE_JS_CANDIDATES = [
+  './vendor/supabase-js.mjs',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm',
+  'https://esm.sh/@supabase/supabase-js@2.57.4'
+];
 
 const emptyState = {
   status: 'loading',
@@ -126,7 +130,25 @@ function mergedPayload(local, remote) {
 async function getClient() {
   if (client) return client;
   if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
-  const mod = await import(SUPABASE_JS);
+  let lastError = null;
+  for (const source of SUPABASE_JS_CANDIDATES) {
+    try {
+      const mod = await import(source);
+      client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      });
+      return client;
+    } catch (error) {
+      lastError = error;
+      console.warn('Kanji 5 Supabase client source failed', source, error);
+    }
+  }
+  throw lastError || new Error('SUPABASE_JS_UNAVAILABLE');
+  /*
   client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
     auth: {
       persistSession: true,
@@ -135,6 +157,7 @@ async function getClient() {
     }
   });
   return client;
+  */
 }
 
 async function readRemote() {
