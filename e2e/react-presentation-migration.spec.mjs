@@ -97,7 +97,7 @@ test('empty session progress indicator is absent before a session starts',async(
 
 test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji card',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'فرهنگ کانجی',exact:true}).click();
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136,{timeout:10000});
