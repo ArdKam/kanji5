@@ -138,6 +138,13 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await expect(editor).toBeVisible();
   await editor.fill("A student learning under a roof.");
   await card.getByRole("button", { name: "Save mnemonic" }).click();
+  console.log("MNEMONIC_DEBUG", await page.evaluate(() => ({
+    path: document.querySelector("#root .learning-card .learning-back-page.active")?.getAttribute("aria-label") ?? null,
+    saved: document.querySelector("#root .learning-card .mnemonic-saved p")?.textContent ?? null,
+    editor: document.querySelector("#root .learning-card .mnemonic-editor textarea")?.value ?? null,
+    error: document.querySelector("#root .learning-card .mnemonic-error")?.textContent ?? null,
+    storage: localStorage.getItem("kanji5-v2-mnemonics")
+  })));
   await expect(card.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
 
   await page.reload();
