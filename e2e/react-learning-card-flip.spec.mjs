@@ -43,6 +43,15 @@ test("learning card flips to a compact back face without card overflow", async (
   }
   await expect(card.locator(".meanings")).toBeVisible();
   await expect(card.locator(".readings")).toBeVisible();
+  await expect(card).toHaveAttribute("data-card-density", /^(comfortable|compact|dense)$/);
+  const readingMetrics = await card.locator(".learning-back-readings .reading").first().evaluate((el) => ({
+    display:getComputedStyle(el).display,
+    minHeight:parseFloat(getComputedStyle(el).minHeight),
+    height:el.getBoundingClientRect().height,
+  }));
+  expect(readingMetrics.display).toBe("grid");
+  expect(readingMetrics.minHeight).toBeLessThanOrEqual(68);
+  expect(readingMetrics.height).toBeLessThanOrEqual(72);
   await expect(card.locator(".rating-grid")).toBeVisible();
   const exampleCount = await card.locator(".example-row").count();
   expect(exampleCount).toBeLessThanOrEqual(2);
