@@ -252,7 +252,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           </div>
           <div className="stroke-order-controls">
             <button className="button secondary" type="button" onClick={() => step(-1)} disabled={completed === 0}>{t("previousStroke", language)}</button>
-            <button className="button primary" type="button" onClick={play}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
+            <button className="button primary" type="button" onClick={() => play()}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
             <button className="button secondary" type="button" onClick={() => step(1)} disabled={completed >= paths.length}>{t("nextStroke", language)}</button>
             <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
