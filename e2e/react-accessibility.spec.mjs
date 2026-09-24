@@ -10,7 +10,7 @@ async function clean(page){
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
 
-test('React presentation meets core keyboard, focus, motion and touch-target accessibility checks', async ({page})=>{
+test('React presentation meets core keyboard, focus, motion and touch-target accessibility checks with current rendered controls', async ({page})=>{
   await clean(page);
 
   const semantics=await page.evaluate(()=>({
