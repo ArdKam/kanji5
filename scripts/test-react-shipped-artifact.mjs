@@ -33,3 +33,7 @@ console.log("Standalone account fallback is present.");
 const accountUi=/account-button|account-dialog|signInWithPassword|sendMagicLink/.test(reactJs);
 if(!accountUi) throw new Error("SHIPPED_REACT_JS_MISSING_ACCOUNT_UI");
 console.log("Shipped React JS contains Account UI.");
+
+const accountFallback=fs.readFileSync("account-fallback.js","utf8");
+try{new Function(accountFallback);}catch(error){throw new Error("ACCOUNT_FALLBACK_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));}
+console.log("Account fallback parses as valid JavaScript.");
