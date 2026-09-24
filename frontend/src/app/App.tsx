@@ -246,6 +246,57 @@ function Insights({snapshot}:{snapshot:Snapshot}){
   </div></details>;
 }
 function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}){return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>}
+function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}){return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>}
+function DictionaryDialog({open,busy,language,onClose}:{open:boolean;busy:boolean;language:Language;onClose:()=>void}){
+  const [query,setQuery]=useState("");
+  const [results,setResults]=useState<KanjiDictionaryResult[]>([]);
+  const [searching,setSearching]=useState(false);
+  useEffect(()=>{if(!open){setQuery("");setResults([]);setSearching(false)}},[open]);
+  useEffect(()=>{
+    if(!open)return;
+    const clean=query.trim();
+    if(!clean){setResults([]);setSearching(false);return}
+    let active=true;
+    setSearching(true);
+    const timer=window.setTimeout(()=>{
+      void searchKanji(clean,24).then(value=>{if(active){setResults(value.results);setSearching(false)}}).catch(()=>{if(active){setResults([]);setSearching(false)}});
+    },120);
+    return ()=>{active=false;window.clearTimeout(timer)};
+  },[open,query]);
+  return open?<dialog open className="dialog dictionary-dialog" aria-labelledby="dictionary-title">
+    <button className="dialog-close" type="button" aria-label={t("close",language)} onClick={onClose}>×</button>
+    <h2 id="dictionary-title">{t("dictionaryTitle",language)}</h2>
+    <label className="dictionary-search"><span className="sr-only">{t("dictionaryTitle",language)}</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder={t("dictionaryPlaceholder",language)} aria-label={t("dictionaryPlaceholder",language)} /></label>
+    {!query.trim()?<p className="dictionary-hint">{t("dictionaryHint",language)}</p>:searching?<p className="dictionary-hint" role="status">{t("dictionarySearching",language)}</p>:!results.length?<p className="dictionary-hint">{t("dictionaryNoResults",language)}</p>:<div className="dictionary-results" role="list">
+      {results.map(result=><article className="dictionary-result" role="listitem" key={result.character}>
+        <div className="dictionary-character" lang="ja">{result.character}</div>
+        <div className="dictionary-detail">
+          <div className="dictionary-meanings">{result.meanings.join(" · ")||"—"}</div>
+          <div className="dictionary-readings">
+            {result.on.length?<div><span>{t("dictionaryOn",language)}</span><b lang="ja">{result.on.join(" · ")}</b></div>:null}
+            {result.kun.length?<div><span>{t("dictionaryKun",language)}</span><b lang="ja">{result.kun.join(" · ")}</b></div>:null}
+          </div>
+          <div className="dictionary-meta">
+            {result.jlpt?<span>{t("dictionaryJlpt",language)} {result.jlpt}</span>:null}
+            {result.grade?<span>{t("dictionaryGrade",language)} {fa(result.grade)}</span>:null}
+            {result.strokes?<span>{t("dictionaryStrokes",language)} {fa(result.strokes)}</span>:null}
+            {result.frequency?<span>{t("dictionaryFrequency",language)} #{fa(result.frequency)}</span>:null}
+          </div>
+        </div>
+      </article>)}
+    </div>}
+  </dialog>:null;
+}
+
+function SettingsDialog({open,snapshot,busy,language,onLanguageChange,onClose,onSave,onReset}:{open:boolean;snapshot:Snapshot;busy:boolean;language:Language;onLanguageChange:(language:Language)=>void;onClose:()=>void;onSave:(s:Settings)=>void;onReset:()=>void}){
+  const s=snapshot.settings??{dailyNew:5,dailyGoal:20,leechThreshold:8,production:true,vocabulary:true,context:true};const [draft,setDraft]=useState<Settings>(s);
+  useEffect(()=>{if(open)setDraft(s)},[open,s.dailyNew,s.dailyGoal,s.leechThreshold,s.production,s.vocabulary,s.context]);
+  return open?<dialog open className="dialog" aria-labelledby="settings-title"><button className="dialog-close" type="button" aria-label={t("close",language)} onClick={onClose}>×</button><h2 id="settings-title">{t("settingsTitle",language)}</h2><form className="settings-form" onSubmit={e=>{e.preventDefault();onSave(draft)}}><div className="settings-section"><div className="settings-section-title">{t("language",language)}</div><div className="settings-language-switcher" role="group" aria-label={t("language",language)}><button className={"settings-language-button "+(language==="fa"?"active":"")} type="button" aria-pressed={language==="fa"} onClick={()=>onLanguageChange("fa")}>{t("persian",language)}</button><button className={"settings-language-button "+(language==="en"?"active":"")} type="button" aria-pressed={language==="en"} onClick={()=>onLanguageChange("en")}>{t("english",language)}</button></div></div>
+    <Setting label={t("newKanjiPerDay")} value={draft.dailyNew} min={1} max={30} onChange={v=>setDraft({...draft,dailyNew:v})}/><Setting label={t("dailyReviewGoal")} value={draft.dailyGoal} min={1} max={500} onChange={v=>setDraft({...draft,dailyGoal:v})}/><Setting label={t("leechThreshold")} value={draft.leechThreshold} min={2} max={30} onChange={v=>setDraft({...draft,leechThreshold:v})}/>
+    {([["production",t("productionKanji")],["vocabulary",t("completeVocabulary")],["context",t("contextRecall")]] as const).map(([k,l])=><label className="setting-row" key={k}><span>{l}</span><input type="checkbox" checked={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.checked})}/></label>)}
+    <div className="actions"><button className="button primary" type="submit" disabled={busy}>{t("save")}</button><button className="button secondary" type="button" onClick={onClose}>{t("close")}</button><button className="button secondary" type="button" disabled={busy} onClick={onReset}>{t("resetProgress")}</button></div>
+  </form></dialog>:null;
+}
 function App(){
   const [snapshot,setSnapshot]=useState<Snapshot|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[language,setLanguageState]=useState<Language>(()=>getLanguage());
   useEffect(()=>applyLanguage(language),[language]);
