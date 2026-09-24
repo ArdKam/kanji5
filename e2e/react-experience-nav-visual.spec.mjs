@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-test('Learning and Active Recall use a persistent Lovable-style bottom switcher', async ({ page }) => {
+test('Learning, Active Recall and Dictionary use a persistent Lovable-style bottom switcher', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
 
   const nav = page.locator('.experience-nav');
   const tabs = nav.locator('.experience-tab');
   await expect(nav).toBeVisible();
-  await expect(tabs).toHaveCount(2);
+  await expect(tabs).toHaveCount(3);
 
   const geometry = await nav.evaluate((node) => {
     const rect = node.getBoundingClientRect();
@@ -38,4 +38,10 @@ test('Learning and Active Recall use a persistent Lovable-style bottom switcher'
   await tabs.nth(0).click();
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.card').first()).toBeVisible();
+
+  await tabs.nth(2).click();
+  await expect(tabs.nth(2)).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
+  await expect(page.locator('.dictionary-page-search input')).toBeVisible();
+  await expect(page.locator('.kanji-catalog-tile')).toHaveCount(2136, {timeout:10000});
 });
