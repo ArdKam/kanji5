@@ -49,6 +49,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
+  const mnemonicLoadToken=useRef(0);
   useEffect(()=>{
     let active=true;
     if(!revealed||!card.character){setComponentInfo(null);return ()=>{active=false};}
@@ -59,6 +60,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   useEffect(()=>{setHiraganaReadings(false)},[card.character]);
   useEffect(()=>{
     let active=true;
+    const token=++mnemonicLoadToken.current;
     setPersonalMnemonic("");
     setMnemonicDraft("");
     setMnemonicEditing(false);
@@ -66,7 +68,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     setMnemonicError("");
     if(!revealed||!card.character)return ()=>{active=false};
     void getMnemonic(card.character).then(value=>{
-      if(!active)return;
+      if(!active||token!==mnemonicLoadToken.current)return;
       const next=String(value?.text??"");
       setPersonalMnemonic(next);
       setMnemonicDraft(next);
@@ -77,6 +79,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   },[revealed,card.character]);
   const handleSaveMnemonic=useCallback(async()=>{
     if(!card.character||mnemonicBusy)return;
+    ++mnemonicLoadToken.current;
     const next=mnemonicDraft.trim().slice(0,600);
     setMnemonicBusy(true);
     setMnemonicError("");
@@ -152,7 +155,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                     </div>
                     {mnemonicEditing||!personalMnemonic?
                       <div className="mnemonic-editor">
-                        <textarea value={mnemonicDraft} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
+                        <textarea value={mnemonicDraft} maxLength={600} onChange={e=>{++mnemonicLoadToken.current;setMnemonicDraft(e.target.value)}} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
                         <div className="mnemonic-editor-footer">
                           <span>{fa(mnemonicDraft.length)}/{fa(600)}</span>
                           <div className="actions">
