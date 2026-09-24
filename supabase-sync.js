@@ -406,7 +406,7 @@ const api = {
       email: user.email,
       password: currentPassword
     });
-    if (reauthError) throw reauthError;
+    if (reauthError) throw new Error('AUTH_CURRENT_PASSWORD_INVALID');
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw error;
     user = data.user || user;
