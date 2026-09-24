@@ -12,6 +12,8 @@ const network = read('v1.5-network.js');
 const educationUi = read('v1.5-education-ui.js');
 const migration = read('v1.4-education-migration.js');
 const sw = read('sw.js');
+const boundary = read('v1.9-v2-boundary.js');
+const engine = read('frontend/src/app/engine.ts');
 const pkg = JSON.parse(read('package.json'));
 
 assert.equal(pkg.type, 'module', 'package must declare the ESM boundary');
@@ -57,7 +59,11 @@ assert.match(educationUi, /state\.writeKnowledge\(/, 'education UI must persist 
 assert.match(educationUi, /state\.readAppState\(\)/, 'education UI must consume app state through state');
 assert.match(migration, /window\.__KANJI5_EDU_MIGRATION_API__/, 'education migration must expose its migration API');
 assert.doesNotMatch(migration, /__KANJI5_EDU_UI_V1_4__/, 'retired v1.4 education UI marker must stay removed');
-assert.match(migration, /import\('\.\/v1\.5-education-ui\.js'\)/, 'migration must hand off to the v1.5 education UI');
+assert.doesNotMatch(migration, /import\('\.\/v1\.5-education-ui\.js'\)/, 'migration must not auto-load the education UI');
+assert.match(boundary, /async function ensureEducationRuntime\(\)/, 'v2 boundary must own lazy education bootstrap');
+assert.match(boundary, /await import\('\.\/v1\.4-education-migration\.js'\)/, 'lazy education bootstrap must retain migration');
+assert.match(boundary, /await import\('\.\/v1\.4-education-core\.js'\)/, 'lazy education bootstrap must load education rules');
+assert.match(engine, /ensureEducationRuntime/, 'React exercise start must request lazy education bootstrap');
 assert.match(network, /^export async function fetchWords/m, 'network adapter must export vocabulary retrieval');
 assert.match(network, /^export async function fetchContextSentences/m, 'network adapter must export context retrieval');
 assert.doesNotMatch(network, /localStorage|sessionStorage/, 'network adapter must not own storage');
@@ -67,12 +73,13 @@ assert.match(sw, /\.clone\(\)/, 'service worker must return independent response
 assert.doesNotMatch(index, /window\.fetch\s*=|globalThis\.fetch\s*=/, 'application shell must not monkey-patch fetch');
 
 assert.match(index, /<script src="\.\/v1\.5-state\.js"><\/script>/, 'state boundary must be loaded before the application runtime');
-assert.match(index, /<script src="\.\/v1\.5-p0\.js"><\/script>/, 'P0 must be explicitly wired once by the active shell');
-assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length, 1, 'P0 must be loaded exactly once');
+assert.match(index, /legacyScripts\s*=\s*\[/, 'legacy compatibility loader must remain explicit');
+assert.match(index, /"\.\/v1\.5-p0\.js"/, 'P0 must remain available to the compatibility route');
+assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length, 0, 'P0 must not be directly wired into the default shell');
 
 assert.match(sw, /"\.\/v1\.5-state\.js"/, 'state module must be offline-precached');
-assert.match(sw, /"\.\/v1\.5-recall-core\.js"/, 'recall core must be offline-precached');
-assert.match(sw, /"\.\/v1\.5-p0\.js"/, 'P0 must be offline-precached');
+assert.doesNotMatch(sw, /"\.\/v1\.5-recall-core\.js"/, 'legacy recall core must not be in the default precache');
+assert.doesNotMatch(sw, /"\.\/v1\.5-p0\.js"/, 'legacy P0 must not be in the default precache');
 assert.match(sw, /"\.\/v1\.5-network\.js"/, 'network adapter must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-education-sync-core\.js"/, 'education sync core must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-sync-core\.js"/, 'sync core must be offline-precached for sync-enabled startup paths');
