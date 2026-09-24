@@ -87,7 +87,19 @@ type TranslationKey =
   | "vocabularyExamples"
   | "showCardHint"
   | "correctRecall"
-  | "correctAnswer";
+  | "correctAnswer"
+  | "dictionary"
+  | "dictionaryTitle"
+  | "dictionaryPlaceholder"
+  | "dictionaryHint"
+  | "dictionarySearching"
+  | "dictionaryNoResults"
+  | "dictionaryStrokes"
+  | "dictionaryGrade"
+  | "dictionaryJlpt"
+  | "dictionaryFrequency"
+  | "dictionaryOn"
+  | "dictionaryKun";
 
 const messages: Record<Language, Record<TranslationKey, string>> = {
   fa: {
@@ -111,7 +123,8 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     startExercise:"شروع تمرین", loading:"در حال اتصال به هستهٔ یادگیری…", learningCoreError:"رابط هستهٔ یادگیری آماده نشد", tryAgain:"تلاش دوباره",
     audioUnavailable:"صدا در این مرورگر در دسترس نیست", playKanjiPronunciation:"پخش تلفظ کانجی", playWordPronunciation:"پخش تلفظ واژه",
     playReading:"پخش", vocabularyExamples:"نمونهٔ واژگانی", showCardHint:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
-    correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست"
+    correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست",
+    dictionary:"فرهنگ کانجی", dictionaryTitle:"جست‌وجوی کانجی", dictionaryPlaceholder:"کانجی، خوانش یا معنی را جست‌وجو کن", dictionaryHint:"می‌توانی خود کانجی، خوانش یا معنی انگلیسی آن را وارد کنی.", dictionarySearching:"در حال جست‌وجو…", dictionaryNoResults:"نتیجه‌ای پیدا نشد.", dictionaryStrokes:"استروک", dictionaryGrade:"پایه", dictionaryJlpt:"JLPT", dictionaryFrequency:"فراوانی", dictionaryOn:"اُن‌یومی", dictionaryKun:"کُن‌یومی"
   },
   en: {
     title:"Kanji 5",
@@ -134,7 +147,8 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     startExercise:"Start exercise", loading:"Connecting to the learning engine…", learningCoreError:"The learning interface could not be loaded", tryAgain:"Try again",
     audioUnavailable:"Audio is not available in this browser", playKanjiPronunciation:"Play kanji pronunciation", playWordPronunciation:"Play word pronunciation",
     playReading:"Play", vocabularyExamples:"Vocabulary examples", showCardHint:"First look at the kanji, then reveal its information.",
-    correctRecall:"Recall was correct.", correctAnswer:"Correct answer"
+    correctRecall:"Recall was correct.", correctAnswer:"Correct answer",
+    dictionary:"Kanji dictionary", dictionaryTitle:"Kanji dictionary", dictionaryPlaceholder:"Search kanji, reading, or meaning", dictionaryHint:"Search by the kanji itself, a reading, or an English meaning.", dictionarySearching:"Searching…", dictionaryNoResults:"No results found.", dictionaryStrokes:"Strokes", dictionaryGrade:"Grade", dictionaryJlpt:"JLPT", dictionaryFrequency:"Frequency", dictionaryOn:"On’yomi", dictionaryKun:"Kun’yomi"
   }
 };
 
