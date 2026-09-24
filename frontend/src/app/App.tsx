@@ -15,6 +15,7 @@ import {
   snapshot as readSnapshot,
   revealLearning,
   startExercise,
+  startCustomStudy,
   startLearningExperience,
   submitExercise,
   saveMnemonic,

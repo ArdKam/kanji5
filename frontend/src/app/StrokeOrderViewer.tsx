@@ -29,7 +29,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
     if (!normalized) return () => { active = false; };
 
     setLoading(true);
-    void (async () => {
+    (async () => {
       const url = kanjiSvgUrl(normalized);
       if (!url) throw new Error("Invalid kanji");
       const response = await fetch(url, { cache: "force-cache" });
@@ -40,7 +40,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
       if (!active) return;
       setPaths(next);
       setLoading(false);
-    }).catch(() => {
+    })().catch(() => {
       if (!active) return;
       setLoading(false);
       setError(t("strokeOrderUnavailable", language));
