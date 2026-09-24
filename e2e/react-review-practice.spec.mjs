@@ -64,6 +64,20 @@ test('wrong production answer turns the card red once and then advances once',as
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
+test('dont know does not carry red feedback into the next exercise',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
+  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.contentId));
+  await page.getByRole('button',{name:/نمی.?دانم|don.?t know/i}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
+  await expect(page.locator('#root #exercise .exercise-feedback')).toBeVisible();
+  await page.waitForTimeout(1500);
+  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.contentId)) ))).not.toBe(before);
+  await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect(page.locator('#root #exercise .prompt')).toBeVisible();
+});
+
 test('correct production answer turns the card green and advances once',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
