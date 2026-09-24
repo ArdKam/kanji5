@@ -458,3 +458,8 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .learning-card[data-card-density="dense"] .learning-card-back .meanings{font-size:17px;line-height:1.2;}
   .learning-card[data-card-density="dense"] .learning-back-readings{gap:4px;}
 }
+
+/* Stroke controls: reset must never intercept adjacent controls, especially while disabled. */
+.stroke-order-controls .button{position:relative;z-index:1;}
+.stroke-order-controls .stroke-order-reset{z-index:0;}
+.stroke-order-controls .stroke-order-reset:disabled{pointer-events:none;}
