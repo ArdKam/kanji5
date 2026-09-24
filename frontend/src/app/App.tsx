@@ -79,11 +79,10 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div className="learning-card-face learning-card-front" aria-hidden={revealed}>
-        <div className="card-topline"><span className="badge badge-red">学習</span><span>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
+        <div className="card-topline"><span className="badge badge-red">学習</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2>{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
         <div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div>
-        <p className="hint">{localizeDynamic(card.hint,getLanguage(),t("firstLook"))}</p>
         <button className="button primary wide" type="button" onClick={onReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed}>
