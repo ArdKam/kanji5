@@ -68,9 +68,9 @@ export function DictionaryPage({ language }: { language: Language }) {
     rows.sort((a, b) => {
       if (sort === "mastery-desc") return b.mastery - a.mastery || (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
       if (sort === "mastery-asc") return a.mastery - b.mastery || (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
-      if (sort === "level-desc") return (levelRank[b.jlpt || ""] ?? 99) - (levelRank[a.jlpt || ""] ?? 99) || a.order - b.order;
-      if (sort === "order") return a.order - b.order;
-      return (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || a.order - b.order;
+      if (sort === "level-desc") return (levelRank[b.jlpt || ""] ?? 99) - (levelRank[a.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
+      if (sort === "order") return Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
+      return (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
     });
     return rows;
   }, [catalog, level, query, sort]);
@@ -113,7 +113,7 @@ export function DictionaryPage({ language }: { language: Language }) {
       {loading ? <div className="surface loading dictionary-loading">{t("dictionaryLoading", language)}</div> : null}
       {!loading && !visible.length ? <div className="surface dictionary-empty">{t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
-        <div className="kanji-catalog-grid" role="grid" aria-label={t("dictionaryGrid", language)}>
+        <div className="kanji-catalog-grid">
           {visible.map((item) => {
             const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
             const fillOpacity = mastery === 0 ? 0 : 0.2 + mastery * 0.8;
@@ -122,7 +122,6 @@ export function DictionaryPage({ language }: { language: Language }) {
                 key={item.character}
                 className="kanji-catalog-tile"
                 type="button"
-                role="gridcell"
                 data-jlpt={item.jlpt || "unknown"}
                 data-mastery={mastery.toFixed(3)}
                 aria-label={item.character + " — " + (item.jlpt || "unknown") + " — " + formatNumber(Math.round(mastery * 100), language) + "%"}
