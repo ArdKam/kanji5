@@ -36,7 +36,10 @@ async function mouseSwipePager(page, pager, fromRatio, toRatio) {
   await page.mouse.up();
 }
 
+let nextTouchPointerId = 1;
+
 async function swipePager(page, pager, fromRatio, toRatio) {
+  const pointerId = nextTouchPointerId++;
   const box = await pager.boundingBox();
   if (!box) throw new Error("Pager bounds unavailable");
   const y = box.y + box.height * 0.5;
@@ -44,7 +47,7 @@ async function swipePager(page, pager, fromRatio, toRatio) {
   const toX = box.x + box.width * toRatio;
   await pager.dispatchEvent("pointerdown", {
     pointerType: "touch",
-    pointerId: 1,
+    pointerId,
     isPrimary: true,
     button: 0,
     buttons: 1,
@@ -53,7 +56,7 @@ async function swipePager(page, pager, fromRatio, toRatio) {
   });
   await pager.dispatchEvent("pointermove", {
     pointerType: "touch",
-    pointerId: 1,
+    pointerId,
     isPrimary: true,
     button: 0,
     buttons: 1,
@@ -62,7 +65,7 @@ async function swipePager(page, pager, fromRatio, toRatio) {
   });
   await pager.dispatchEvent("pointerup", {
     pointerType: "touch",
-    pointerId: 1,
+    pointerId,
     isPrimary: true,
     button: 0,
     buttons: 0,
