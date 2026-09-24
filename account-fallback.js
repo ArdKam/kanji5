@@ -21,6 +21,7 @@ const boot=()=>{
   if(!existing) {
     if(headerActions) headerActions.appendChild(btn);
     else document.body.appendChild(btn);
+    btn.classList.add('is-ready');
   }
   let mode='email', intent='sign-in', busy=false, notice='', unsubscribe=()=>{};
   const api=()=>window.__KANJI5_ACCOUNT__;
