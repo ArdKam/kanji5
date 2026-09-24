@@ -247,7 +247,7 @@ async function syncOnce() {
   if (mergedHash === remoteHash) {
     writeLocal(merged, remoteRow.updatedAt);
     setSyncStatus('synced');
-    window.setTimeout(() => location.reload(), 250);
+    document.dispatchEvent(new CustomEvent('kanji5:v1.9-sync-applied'));
     return { retry: false };
   }
 
@@ -255,7 +255,7 @@ async function syncOnce() {
   if (result.conflict) return { retry: true };
   writeLocal(merged, result.updatedAt);
   setSyncStatus('synced');
-  if (mergedHash !== localHash) window.setTimeout(() => location.reload(), 250);
+  if (mergedHash !== localHash) document.dispatchEvent(new CustomEvent('kanji5:v1.9-sync-applied'));
   return { retry: false };
 }
 
