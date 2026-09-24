@@ -32,7 +32,11 @@ export function stablePayload(payload) {
     knowledge: payload?.knowledge || {},
     deckVersion: payload?.deckVersion || null,
     educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
-    syncSchemaVersion: Number(payload?.syncSchemaVersion) || SYNC_SCHEMA_VERSION
+    syncSchemaVersion: Number(payload?.syncSchemaVersion) || SYNC_SCHEMA_VERSION,
+    v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || 1,
+    sessionHistory: Array.isArray(payload?.sessionHistory) ? payload.sessionHistory : [],
+    components: payload?.components && typeof payload.components === 'object' ? payload.components : {},
+    skillProfile: payload?.skillProfile && typeof payload.skillProfile === 'object' ? payload.skillProfile : null
   };
 }
 
@@ -85,6 +89,28 @@ export function mergeSyncPayload(localPayload, remotePayload, now = new Date()) 
     knowledge: mergeKnowledge(local.knowledge, remote.knowledge),
     deckVersion: local.deckVersion || remote.deckVersion || null,
     educationSchemaVersion: Math.max(Number(local.educationSchemaVersion) || 2, Number(remote.educationSchemaVersion) || 2),
-    syncSchemaVersion: SYNC_SCHEMA_VERSION
+    syncSchemaVersion: SYNC_SCHEMA_VERSION,
+    v16SyncSchemaVersion: Math.max(Number(local.v16SyncSchemaVersion) || 1, Number(remote.v16SyncSchemaVersion) || 1),
+    sessionHistory: mergeV16History(local.sessionHistory, remote.sessionHistory),
+    components: { ...local.components, ...remote.components },
+    skillProfile: newerProfile(local.skillProfile, remote.skillProfile)
   };
+}
+
+function mergeV16History(local, remote) {
+  const combined = [...(Array.isArray(local) ? local : []), ...(Array.isArray(remote) ? remote : [])];
+  const map = new Map();
+  for (const row of combined) {
+    const key = String(row?.sessionId || row?.id || (String(row?.startedAt || '') + '|' + String(row?.endedAt || '')));
+    map.set(key, clone(row));
+  }
+  return [...map.values()]
+    .sort((a, b) => String(a?.endedAt || a?.startedAt || '').localeCompare(String(b?.endedAt || b?.startedAt || '')))
+    .slice(-30);
+}
+
+function newerProfile(local, remote) {
+  if (!local) return remote ? clone(remote) : null;
+  if (!remote) return clone(local);
+  return String(local.updatedAt || '') >= String(remote.updatedAt || '') ? clone(local) : clone(remote);
 }
