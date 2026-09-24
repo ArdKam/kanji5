@@ -16,6 +16,7 @@ import {
   revealLearning,
   startExercise,
   startLearningExperience,
+  startCustomStudy,
   submitExercise,
   saveMnemonic,
   updateSettings,
