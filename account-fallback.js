@@ -24,6 +24,7 @@ const boot=()=>{
   }
   let mode='email', intent='sign-in', busy=false, notice='', unsubscribe=()=>{};
   const api=()=>window.__KANJI5_ACCOUNT__;
+  const waitForApi=async()=>{for(let i=0;i<120;i+=1){const a=api();if(a)return a;await new Promise(r=>setTimeout(r,100));}throw new Error('KANJI5_ACCOUNT_UNAVAILABLE');};
   const state=()=>api()?.getState?.()||{status:'loading',user:null,syncStatus:'idle'};
   const safe=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const render=()=>{
@@ -35,8 +36,8 @@ const boot=()=>{
       btn.innerHTML='<span class="account-avatar account-avatar-fallback" aria-hidden="true">'+safe(letter.toUpperCase())+'</span><span class="account-button-label">'+safe(name)+'</span>';
       dialog.innerHTML=(notice?'<p class="account-message" role="status">'+notice+'</p>':'')+'<button class="dialog-close" type="button" aria-label="'+c('close')+'">×</button><div class="account-dialog-heading"><span class="account-avatar account-avatar-fallback" aria-hidden="true">'+safe(letter.toUpperCase())+'</span><div><p class="eyebrow">'+c('account')+'</p><h2>'+safe(name)+'</h2></div></div><div class="account-user-card"><div class="account-user-copy"><strong>'+safe(c('signedIn'))+'</strong>'+(s.user?.email?'<span>'+safe(s.user.email)+'</span>':'')+'</div><span class="sync-pill">'+c(s.syncStatus==='syncing'?'syncing':'synced')+'</span></div><div class="account-actions"><button class="button secondary" data-account-sync type="button">'+c('sync')+'</button><button class="button secondary" data-account-signout type="button">'+c('signOut')+'</button></div>';
       dialog.querySelector('.dialog-close').onclick=()=>dialog.close();
-      dialog.querySelector('[data-account-sync]').onclick=async()=>{if(busy)return;busy=true;render();try{await api().syncNow();}catch(_){}finally{busy=false;render();}};
-      dialog.querySelector('[data-account-signout]').onclick=async()=>{if(busy)return;busy=true;try{await api().signOut();dialog.close();}catch(_){}finally{busy=false;render();}};
+      dialog.querySelector('[data-account-sync]').onclick=async()=>{if(busy)return;busy=true;render();try{const a=await waitForApi();await a.syncNow();}catch(_){}finally{busy=false;render();}};
+      dialog.querySelector('[data-account-signout]').onclick=async()=>{if(busy)return;busy=true;try{const a=await waitForApi();await a.signOut();dialog.close();}catch(_){}finally{busy=false;render();}};
       return;
     }
     btn.classList.remove('is-signed-in'); btn.setAttribute('aria-label',c('account')); btn.title=c('account'); btn.innerHTML='<span class="account-avatar account-avatar-guest" aria-hidden="true">◎</span><span class="account-button-label">'+c('signIn')+'</span>';
@@ -45,7 +46,7 @@ const boot=()=>{
     dialog.querySelector('.dialog-close').onclick=()=>dialog.close();
     dialog.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode==='magic'?'magic':'email';notice='';render();});
     dialog.querySelector('[data-intent]')?.addEventListener('click',()=>{intent=intent==='sign-in'?'sign-up':'sign-in';notice='';render();});
-    dialog.querySelector('form').onsubmit=async ev=>{ev.preventDefault();if(busy)return;busy=true;notice='';render();try{const form=dialog.querySelector('form');const email=String(form.querySelector('[name=email]').value||'');if(mode==='magic'){await api().sendMagicLink(email);notice=c('sent');}else{const password=String(form.querySelector('[name=password]').value||'');if(intent==='sign-in'){await api().signInWithPassword(email,password);dialog.close();}else{const r=await api().signUpWithPassword(email,password);notice=r.needsEmailConfirmation?c('confirm'):c('signedIn');if(!r.needsEmailConfirmation)dialog.close();}}}catch(_){notice=c('error');}finally{busy=false;render();}};
+    dialog.querySelector('form').onsubmit=async ev=>{ev.preventDefault();if(busy)return;busy=true;notice='';render();try{const form=dialog.querySelector('form');const email=String(form.querySelector('[name=email]').value||'');if(mode==='magic'){await waitForApi();await api().sendMagicLink(email);notice=c('sent');}else{const password=String(form.querySelector('[name=password]').value||'');if(intent==='sign-in'){await waitForApi();await api().signInWithPassword(email,password);dialog.close();}else{await waitForApi();const r=await api().signUpWithPassword(email,password);notice=r.needsEmailConfirmation?c('confirm'):c('signedIn');if(!r.needsEmailConfirmation)dialog.close();}}}catch(_){notice=c('error');}finally{busy=false;render();}};
   };
   btn.onclick=()=>{render();dialog.showModal();};
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
