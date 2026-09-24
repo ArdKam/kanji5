@@ -480,12 +480,12 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .learning-card-back .stroke-order-header h3{font-size:11px;margin:0;}
 .learning-card-back .stroke-order-header p{display:none;}
 .learning-card-back .stroke-order-count{padding:3px 7px;font-size:8px;}
-.learning-card-back .stroke-order-toggle{min-height:32px;padding:4px 8px;border-radius:9px;font-size:9px;}
+.learning-card-back .stroke-order-toggle{min-height:44px;padding:4px 8px;border-radius:9px;font-size:9px;}
 .learning-card-back .stroke-order-stage{gap:3px;padding:4px 0 1px;}
 .learning-card-back .stroke-order-stage svg{width:min(92px,24vw);}
 .learning-card-back .stroke-order-progress{font-size:8px;}
 .learning-card-back .stroke-order-controls{gap:5px;}
-.learning-card-back .stroke-order-controls .button{min-height:34px;padding:5px 7px;font-size:9px;}
+.learning-card-back .stroke-order-controls .button{min-height:44px;padding:5px 7px;font-size:9px;}
 .learning-card-back .stroke-order-source{font-size:8px;}
 .mnemonic-tool{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:7px;min-width:0;min-height:42px;padding:5px 7px;border:1px solid var(--line);border-radius:13px;background:var(--washi);}
 .mnemonic-tool:not(.has-value):not(.is-open){background:transparent;border-color:transparent;padding-inline:0;}
@@ -501,12 +501,12 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .mnemonic-editor-heading strong{color:var(--sumi);font-size:10px;}
 .mnemonic-editor textarea{min-height:62px;height:62px;padding:7px 8px;border-radius:10px;font-size:11px;line-height:1.5;}
 .mnemonic-editor-footer{min-height:34px;}
-.mnemonic-editor-footer .button{min-height:32px;padding:5px 8px;font-size:9px;}
+.mnemonic-editor-footer .button{min-height:44px;padding:5px 8px;font-size:9px;}
 .mnemonic-error{font-size:9px;}
 @media(max-width:760px){
   .learning-back-readings{grid-template-columns:1fr;}
   .learning-card-back .stroke-order-stage svg{width:min(82px,25vw);}
-  .learning-card-back .stroke-order-controls .button{min-height:32px;font-size:8.5px;}
+  .learning-card-back .stroke-order-controls .button{min-height:44px;font-size:8.5px;}
 }
 @media(min-width:761px){
   .learning-card-back .stroke-order-panel{padding-inline:9px;}

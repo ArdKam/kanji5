@@ -135,6 +135,11 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await n5.click();
   await expect(n5).toHaveAttribute('aria-pressed','true');
   await expect.poll(async()=>pageRoot.locator('.kanji-catalog-tile').evaluateAll(nodes=>nodes.length>0&&nodes.every(node=>node.getAttribute('data-jlpt')==='N5'))).toBe(true);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg"><g id="kvg:StrokePaths_05b66"><path id="kvg:05b66-s1" d="M10,10 L30,30"/><path id="kvg:05b66-s2" d="M30,30 L50,10"/><path id="kvg:05b66-s3" d="M50,10 L70,30"/></g></svg>`;
+    await route.fulfill({ status: 200, contentType: 'image/svg+xml', body: svg });
+  });
   const sort=pageRoot.locator('.dictionary-sort select');
   await sort.selectOption('mastery-desc');
   await expect(sort).toHaveValue('mastery-desc');
@@ -147,7 +152,16 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await tile.click();
   const card=page.getByRole('dialog');
   await expect(card).toBeVisible();
-  await expect(card.locator('.dictionary-card-character')).toHaveText('学');
+  await expect(card.locator('.dictionary-card-character')).toHaveCount(0);
+  const stroke = card.locator('.dictionary-stroke-order');
+  await expect(stroke).toBeVisible({timeout:10000});
+  await expect(stroke.locator('svg')).toBeVisible();
+  await expect(stroke).toHaveAttribute('data-stroke-order-completed', '0');
+  await expect(stroke.locator('.stroke-order-active')).toHaveCount(1);
+  await expect.poll(async()=>stroke.locator('.stroke-order-active').getAttribute('d'), {timeout:2000}).toBe('M10,10 L30,30');
+  await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:2000}).toBe('1');
+  await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:2000}).toBe('2');
+  await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:2500}).toBe('0');
   await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
   await expect(card).toContainText('N5');
   await expect(card).toContainText('تسلط');
