@@ -173,35 +173,49 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={getLanguage()==="fa"?"صفحه اطلاعات اصلی":"Core information"} aria-hidden={backPage!==0}>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
-                  {componentInfo?.available&&componentInfo.components.length
-                    ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
-                    : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
-                  {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
-                  {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
-                  <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
-                  <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
-                  <section className="mnemonic-panel" aria-labelledby="personal-mnemonic-title">
-                    <div className="mnemonic-header">
-                      <div>
-                        <h3 id="personal-mnemonic-title">{t("personalMnemonic")}</h3>
-                        <p>{t("personalMnemonicHint")}</p>
-                      </div>
-                      {personalMnemonic&&!mnemonicEditing?<button className="button secondary mnemonic-edit" type="button" onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(true)}}>{t("editMnemonic")}</button>:null}
-                    </div>
-                    {mnemonicEditing||!personalMnemonic?
-                      <div className="mnemonic-editor">
-                        <textarea value={mnemonicDraft} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
-                        <div className="mnemonic-editor-footer">
-                          <span>{fa(mnemonicDraft.length)}/{fa(600)}</span>
-                          <div className="actions">
-                            {mnemonicEditing?<button className="button secondary" type="button" disabled={mnemonicBusy} onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(false)}}>{t("cancel")}</button>:null}
-                            <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
+                  <div className="learning-back-identity">
+                    {componentInfo?.available&&componentInfo.components.length
+                      ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
+                      : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
+                    {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
+                    <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
+                    <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                  </div>
+                  <div className="learning-back-tools">
+                    {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
+                    <section className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                      <button
+                        className="mnemonic-trigger"
+                        type="button"
+                        aria-label={personalMnemonic?t("editMnemonic"):t("personalMnemonic")}
+                        title={t("personalMnemonic")}
+                        aria-expanded={mnemonicEditing}
+                        aria-controls="personal-mnemonic-editor"
+                        onClick={()=>{
+                          setMnemonicError("");
+                          setMnemonicDraft(personalMnemonic);
+                          setMnemonicEditing(value=>!value);
+                        }}
+                      >
+                        <span aria-hidden="true">✎</span>
+                      </button>
+                      {personalMnemonic&&!mnemonicEditing?<div className="mnemonic-saved"><span aria-hidden="true">🧠</span><p id="personal-mnemonic-title">{personalMnemonic}</p></div>:null}
+                      {mnemonicEditing?
+                        <div className="mnemonic-editor" id="personal-mnemonic-editor">
+                          <div className="mnemonic-editor-heading"><strong>{t("personalMnemonic")}</strong><span>{fa(mnemonicDraft.length)}/{fa(600)}</span></div>
+                          <textarea value={mnemonicDraft} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
+                          <div className="mnemonic-editor-footer">
+                            <span aria-hidden="true"></span>
+                            <div className="actions">
+                              <button className="button secondary" type="button" disabled={mnemonicBusy} onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(false)}}>{t("cancel")}</button>
+                              <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
+                            </div>
                           </div>
+                          {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
                         </div>
-                        {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
-                      </div>
-                      :<div className="mnemonic-saved"><span>🧠</span><p>{personalMnemonic}</p></div>}
-                  </section>
+                        :null}
+                    </section>
+                  </div>
                 </div>
                 {!hasExamplesPage&&card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
               </div>
