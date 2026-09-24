@@ -84,7 +84,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       const saved=await saveMnemonic(card.character,next);
       setPersonalMnemonic(saved.text);
       setMnemonicDraft(saved.text);
-      setMnemonicEditing(false);
+      setMnemonicEditing(saved.text.trim().length === 0);
     }catch(_){
       setMnemonicError(t("mnemonicSaveError"));
     }finally{
