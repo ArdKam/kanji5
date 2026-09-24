@@ -20,7 +20,15 @@ const fixture = {
 
 const sandbox = {
   window: {
-    __KANJI5_STATE__: {}
+    __KANJI5_STATE__: {
+      readDeck() {
+        return [
+          {id:"学",character:"学",meaning:["study","learning"],on:["ガク"],kun:["まな.ぶ"],strokes:8,grade:1,jlpt:"N5",frequency:100,order:100},
+          {id:"校",character:"校",meaning:["school"],on:["コウ"],kun:[],strokes:10,grade:1,jlpt:"N5",frequency:110,order:110},
+          {id:"語",character:"語",meaning:["word","language"],on:["ゴ"],kun:["かた.る"],strokes:14,grade:2,jlpt:"N4",frequency:120,order:120}
+        ];
+      }
+    }
   },
   document: {
     addEventListener() {},
@@ -65,4 +73,15 @@ if (known.coverage?.available !== 2100 || known.coverage?.total !== 2136) {
   throw new Error("Coverage metadata was not preserved");
 }
 
-console.log("Kanji component boundary contract passed.");
+const exact=await api.searchKanji("学");
+if (exact.results?.[0]?.character !== "学") throw new Error("Exact character dictionary search did not rank first");
+if (exact.results?.[0]?.meanings?.[0] !== "study") throw new Error("Dictionary meaning payload missing");
+if (exact.results?.[0]?.strokes !== 8 || exact.results?.[0]?.jlpt !== "N5") throw new Error("Dictionary metadata payload missing");
+
+const reading=await api.searchKanji("がく");
+if (reading.results?.[0]?.character !== "学") throw new Error("Hiragana reading normalization failed");
+
+const meaning=await api.searchKanji("school");
+if (meaning.results?.[0]?.character !== "校") throw new Error("Meaning search failed");
+
+console.log("Kanji component and dictionary boundary contracts passed.");
