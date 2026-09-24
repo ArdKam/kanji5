@@ -94,6 +94,7 @@ export type Snapshot = {
     last7?: { label?: string; count?: number }[];
   };
   settings?: Settings;
+  mnemonics?: Record<string, string>;
 };
 
 export type KanjiDictionaryResult = {
@@ -121,6 +122,7 @@ export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
+  saveMnemonic: (character: string, value: string) => Promise<Snapshot>;
   refreshLearning: () => Promise<Snapshot>;
   revealLearning: (direct?: boolean) => Promise<boolean>;
   rateLearning: (rating: Rating) => Promise<boolean>;
