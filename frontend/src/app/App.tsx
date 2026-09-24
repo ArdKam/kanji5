@@ -55,7 +55,24 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(componentCount,4)+Math.min(readingCount,6);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
-  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} aria-label={t("learningCard")}>
+  const hasExamplesPage=exampleCount>2||(componentCount>=3&&exampleCount>0)||(density==="dense"&&exampleCount>0);
+  const backPageCount=hasExamplesPage?2:1;
+  const [backPage,setBackPage]=useState(0);
+  const swipeStartX=useRef<number|null>(null);
+  useEffect(()=>setBackPage(0),[card.character]);
+  const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
+  const handleBackPointerDown=(event:React.PointerEvent<HTMLDivElement>)=>{
+    if(backPageCount<2)return;
+    swipeStartX.current=event.clientX;
+  };
+  const handleBackPointerUp=(event:React.PointerEvent<HTMLDivElement>)=>{
+    if(backPageCount<2||swipeStartX.current===null)return;
+    const delta=event.clientX-swipeStartX.current;
+    swipeStartX.current=null;
+    if(Math.abs(delta)<48)return;
+    changeBackPage(delta<0?1:-1);
+  };
+  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div className="learning-card-face learning-card-front" aria-hidden={revealed}>
         <div className="card-topline"><span className="badge badge-red">学習</span><span>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
@@ -67,18 +84,38 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed}>
         <div className="card-topline"><span className="badge badge-red">学習</span><span>{t("cardBack")}</span></div>
-        <div className="learning-back-scroll">
-          <div className="learning-back-overview">
-            {componentInfo?.available&&componentInfo.components.length
-              ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
-              : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
-            {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
-            <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
-            <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+        <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerUp={handleBackPointerUp} onPointerCancel={()=>{swipeStartX.current=null;}} data-page-count={backPageCount}>
+          <div className="learning-back-pager-track" style={{transform:`translateX(-${backPage*100}%)`}}>
+            <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={getLanguage()==="fa"?"صفحه اطلاعات اصلی":"Core information"} aria-hidden={backPage!==0}>
+              <div className="learning-back-scroll">
+                <div className="learning-back-overview">
+                  {componentInfo?.available&&componentInfo.components.length
+                    ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
+                    : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
+                  {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
+                  <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
+                  <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                </div>
+                {!hasExamplesPage&&card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
+              </div>
+            </div>
+            {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1}>
+              <div className="learning-back-scroll">
+                <div className="examples compact-examples">
+                  <h3>{t("vocabularyExamples")}</h3>
+                  {card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}
+                </div>
+              </div>
+            </div>:null}
           </div>
-          {card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
         </div>
         <div className="learning-back-footer">
+          {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
+            <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1)} disabled={backPage===0}>‹</button>
+            <span className="pager-status" aria-live="polite">{backPage+1} / {backPageCount}</span>
+            <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
+            <span className="pager-hint">{t("swipeForMore")}</span>
+          </div>:null}
           <p className="rating-title">{t("reviewQuality")}</p>
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
         </div>
