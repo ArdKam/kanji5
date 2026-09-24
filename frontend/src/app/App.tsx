@@ -54,8 +54,9 @@ function Learning({card,mnemonics,onReveal,onRate}:{card:NonNullable<Snapshot["l
     void getComponentInfo(card.character).then(info=>{if(active)setComponentInfo(info)}).catch(()=>{if(active)setComponentInfo(null)});
     return ()=>{active=false};
   },[revealed,card.character]);
-  useEffect(()=>{setHiraganaReadings(false);setMnemonic(mnemonics[card.character]??"");setMnemonicEditing(false);setMnemonicSaved(false)},[card.character,mnemonics]);
-  const persistMnemonic=async()=>{if(!card.character)return;setMnemonicSaving(true);try{await saveMnemonic(card.character,mnemonic);setMnemonicEditing(false);setMnemonicSaved(true);window.setTimeout(()=>setMnemonicSaved(false),1400)}finally{setMnemonicSaving(false)}};
+  const mnemonicCharacter=String(card.character??"");
+  useEffect(()=>{setHiraganaReadings(false);setMnemonic(mnemonics[mnemonicCharacter]??"");setMnemonicEditing(false);setMnemonicSaved(false)},[mnemonicCharacter,mnemonics]);
+  const persistMnemonic=async()=>{if(!mnemonicCharacter)return;setMnemonicSaving(true);try{await saveMnemonic(mnemonicCharacter,mnemonic);setMnemonicEditing(false);setMnemonicSaved(true);window.setTimeout(()=>setMnemonicSaved(false),1400)}finally{setMnemonicSaving(false)}};
   const displayedOn=(card.on??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const displayedKun=(card.kun??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const exampleCount=(card.examples??[]).length;
@@ -106,7 +107,7 @@ function Learning({card,mnemonics,onReveal,onRate}:{card:NonNullable<Snapshot["l
                   <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
                   <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div><div className="mnemonic-panel">
   <div className="mnemonic-head"><h3>{t("mnemonic")}</h3>{!mnemonicEditing?<button className="link-button" type="button" onClick={()=>setMnemonicEditing(true)}>{mnemonic?t("saveMnemonic").replace("ذخیره","ویرایش").replace("Save","Edit"):t("saveMnemonic")}</button>:null}</div>
-  {mnemonicEditing?<div className="mnemonic-editor"><textarea value={mnemonic} maxLength={500} onChange={e=>setMnemonic(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")}/><div className="mnemonic-actions"><button className="button primary" type="button" disabled={mnemonicSaving} onClick={()=>void persistMnemonic()}>{t("saveMnemonic")}</button><button className="button secondary" type="button" disabled={mnemonicSaving} onClick={()=>{setMnemonic(mnemonics[card.character]??"");setMnemonicEditing(false)}}>{t("close")}</button></div></div>:mnemonic?<div className="mnemonic-body">{mnemonic}</div>:<p className="mnemonic-empty">{t("mnemonicPlaceholder")}</p>}
+  {mnemonicEditing?<div className="mnemonic-editor"><textarea value={mnemonic} maxLength={500} onChange={e=>setMnemonic(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")}/><div className="mnemonic-actions"><button className="button primary" type="button" disabled={mnemonicSaving} onClick={()=>void persistMnemonic()}>{t("saveMnemonic")}</button><button className="button secondary" type="button" disabled={mnemonicSaving} onClick={()=>{setMnemonic(mnemonics[mnemonicCharacter]??"");setMnemonicEditing(false)}}>{t("close")}</button></div></div>:mnemonic?<div className="mnemonic-body">{mnemonic}</div>:<p className="mnemonic-empty">{t("mnemonicPlaceholder")}</p>}
   {mnemonicSaved?<small className="mnemonic-saved" role="status">{t("mnemonicSaved")}</small>:null}
   {mnemonic&&!mnemonicEditing?<button className="mnemonic-delete" type="button" disabled={mnemonicSaving} onClick={()=>{setMnemonic("");setMnemonicEditing(true)}}>{t("deleteMnemonic")}</button>:null}
 </div>
