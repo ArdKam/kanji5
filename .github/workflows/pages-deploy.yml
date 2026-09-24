@@ -46,6 +46,15 @@ jobs:
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
 
+      - name: Install root test dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      - name: Verify account UI end-to-end
+        run: npx playwright test --timeout=30000 --retries=0 e2e/react-account-shell.spec.mjs
+
       - name: Upload freshly built GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
