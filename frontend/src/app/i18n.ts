@@ -20,7 +20,6 @@ type TranslationKey =
   | "cardBack"
   | "showKanjiInfo"
   | "firstLook"
-  | "reviewQuality"
   | "again"
   | "hard"
   | "good"
@@ -100,7 +99,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"آشنایی با کانجی", learningReview:"مرور یادگیری",
     cardBack:"پشت کارت", showKanjiInfo:"نمایش اطلاعات کانجی", firstLook:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
-    reviewQuality:"کیفیت مرور بعدی را انتخاب کن.", again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
+    again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
     meaning:"معنی", reading:"خوانش", production:"تولید", vocabulary:"واژگان", context:"بافت",
     unknown:"نمی‌دانم", correct:"درست", wrong:"نادرست", nearMiss:"نزدیک بود", empty:"خالی", unavailable:"در دسترس نیست",
     activeRecallLabel:"یادآوری فعال", currentExercise:"تمرین فعلی", exerciseReady:"هنوز تمرینی آماده نیست.",
@@ -123,7 +122,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     learning:"Learning", activeRecall:"Active Recall", learningPath:"Learning path", sessionProgress:"Session progress",
     goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"Introducing this kanji", learningReview:"Learning review",
     cardBack:"Card back", showKanjiInfo:"Show kanji information", firstLook:"First look at the kanji, then reveal its information.",
-    reviewQuality:"Choose the quality of the next review.", again:"Again", hard:"Hard", good:"Good", easy:"Easy",
+    again:"Again", hard:"Hard", good:"Good", easy:"Easy",
     meaning:"Meaning", reading:"Reading", production:"Production", vocabulary:"Vocabulary", context:"Context",
     unknown:"I don't know", correct:"Correct", wrong:"Incorrect", nearMiss:"Near miss", empty:"Empty", unavailable:"Unavailable",
     activeRecallLabel:"Active recall", currentExercise:"Current exercise", exerciseReady:"No exercise is ready yet.",
