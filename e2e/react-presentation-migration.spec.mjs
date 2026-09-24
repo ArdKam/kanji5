@@ -155,11 +155,30 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   expect(stateProbe.apiText).toBe("Boundary persistence probe.");
   expect(stateProbe.stored).toContain("Boundary persistence probe.");
 
+  await page.evaluate(() => {
+    const original = window.__KANJI5_V19_V2_BOUNDARY__;
+    window.__KANJI5_MNEMONIC_TRACE__ = [];
+    window.__KANJI5_V19_V2_BOUNDARY__ = {
+      ...original,
+      async saveMnemonic(...args) {
+        window.__KANJI5_MNEMONIC_TRACE__.push({ phase: "boundary-start", args });
+        try {
+          const result = await original.saveMnemonic(...args);
+          window.__KANJI5_MNEMONIC_TRACE__.push({ phase: "boundary-done", result });
+          return result;
+        } catch (error) {
+          window.__KANJI5_MNEMONIC_TRACE__.push({ phase: "boundary-error", message: String(error?.message ?? error) });
+          throw error;
+        }
+      }
+    };
+  });
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
   await editor.fill("A student learning under a roof.");
   await card.getByRole("button", { name: "Save mnemonic" }).click();
   console.log("MNEMONIC_DEBUG", await page.evaluate(() => ({
+    trace: window.__KANJI5_MNEMONIC_TRACE__ ?? [],
     path: document.querySelector("#root .learning-card .learning-back-page.active")?.getAttribute("aria-label") ?? null,
     saved: document.querySelector("#root .learning-card .mnemonic-saved p")?.textContent ?? null,
     editor: document.querySelector("#root .learning-card .mnemonic-editor textarea")?.value ?? null,
