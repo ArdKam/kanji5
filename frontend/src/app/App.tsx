@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { ComponentBreakdown } from "./ComponentBreakdown";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import {
   clearTransient,
   dontKnow,
+  getComponentInfo,
   nextExercise,
   rateLearning,
   resetProgress,
@@ -13,6 +15,7 @@ import {
   submitExercise,
   updateSettings,
   type Rating,
+  type ComponentInfo,
   type Settings,
   type Snapshot,
   waitForEngine,
@@ -34,6 +37,14 @@ const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["
 
 function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
+  const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
+  useEffect(()=>{
+    let active=true;
+    if(!revealed||!card.character){setComponentInfo(null);return ()=>{active=false};}
+    setComponentInfo(null);
+    void getComponentInfo(card.character).then(info=>{if(active)setComponentInfo(info)}).catch(()=>{if(active)setComponentInfo(null)});
+    return ()=>{active=false};
+  },[revealed,card.character]);
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div className="learning-card-face learning-card-front" aria-hidden={revealed}>
@@ -50,6 +61,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
         {card.meanings?.length?<div className="meanings">{card.meanings.join(" · ")}</div>:null}
         <div className="readings"><Reading title="On’yomi" values={card.on??[]}/><Reading title="Kun’yomi" values={card.kun??[]}/></div>
         {card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.slice(0,2).map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
+        {componentInfo?<ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>:null}
         <p className="rating-title">{t("reviewQuality")}</p>
         <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
       </div>
