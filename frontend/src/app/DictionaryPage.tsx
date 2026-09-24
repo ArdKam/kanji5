@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { ComponentBreakdown } from "./ComponentBreakdown";
 import { formatNumber, t, type Language } from "./i18n";
-import { listKanji, type KanjiCatalogItem } from "./engine";
+import { getComponentInfo, listKanji, type ComponentInfo, type KanjiCatalogItem } from "./engine";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
