@@ -1,28 +1,384 @@
-import { mergeSyncPayload, stablePayload, hashPayload, SYNC_SCHEMA_VERSION } from './v1.5-sync-core.js';
+import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
-const V12="kanji5-v1.2",STORAGE_KEY="kanji5-v1",CARDS_STORAGE_KEY="kanji5-v1-cards",REVIEWS_STORAGE_KEY="kanji5-v1-reviews",KNOWLEDGE_KEY=`${V12}-knowledge`,COMPONENT_KEY="kanji5-v1.5-components",SESSION_HISTORY_KEY="kanji5-v1.6-session-history",SYNC_META_KEY=`${V12}-sync-meta`,POLL_MS=15000,MAX_SYNC_ATTEMPTS=3,SUPABASE_JS="https://esm.sh/@supabase/supabase-js@2.57.4",EDUCATION_SCHEMA_VERSION=2;
-(()=>{
-'use strict';
-if(!window.KANJI5_SUPABASE)return;
-const cfg=window.KANJI5_SUPABASE;
-if(!cfg.url||!cfg.anonKey||cfg.url.includes("YOUR_PROJECT_ID")||cfg.anonKey.includes("YOUR_SUPABASE")){console.info("Kanji 5 sync is not configured yet.");return}
-let lifecycleInstalled=false;
-let client=null,user=null,syncPromise=null,pollTimer=null;
-const byId=id=>document.getElementById(id),safeJSON=(raw,fallback)=>{try{return raw?JSON.parse(raw):fallback}catch(_){return fallback}};
-const localPayload=()=>{const persisted=safeJSON(localStorage.getItem(STORAGE_KEY),null),cards=safeJSON(localStorage.getItem(CARDS_STORAGE_KEY),persisted?.cards||{}),reviews=safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY),persisted?.reviews||[]),state=persisted?{...persisted,cards,reviews,queue:[],current:null,revealed:false,examples:{}}:null;const components=safeJSON(localStorage.getItem(COMPONENT_KEY),{}),history=safeJSON(localStorage.getItem(SESSION_HISTORY_KEY),[]),profile=components?.v16SkillProfile||null;return{state,knowledge:safeJSON(localStorage.getItem(KNOWLEDGE_KEY),{}),deckVersion:localStorage.getItem("kanji5-deck-version")||null,educationSchemaVersion:EDUCATION_SCHEMA_VERSION,syncSchemaVersion:SYNC_SCHEMA_VERSION,v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,sessionHistory:Array.isArray(history)?history:[],components:components&&typeof components==='object'?components:{},skillProfile:profile}};
-const readRemote=async()=>{const{data,error}=await client.from("user_learning_state").select("payload,updated_at").eq("user_id",user.id).maybeSingle();if(error)throw error;return data?{payload:data.payload||null,updatedAt:data.updated_at||null}:null};
-const writeLocal=(payload,remoteUpdatedAt=null)=>{if(payload.state){const s=payload.state;localStorage.setItem(STORAGE_KEY,JSON.stringify({settings:s.settings,today:s.today,todayNew:s.todayNew,todayReviewCount:s.todayReviewCount,goalCelebrated:s.goalCelebrated,streak:s.streak}));localStorage.setItem(CARDS_STORAGE_KEY,JSON.stringify(s.cards||{}));localStorage.setItem(REVIEWS_STORAGE_KEY,JSON.stringify(s.reviews||[]))}localStorage.setItem(KNOWLEDGE_KEY,JSON.stringify(payload.knowledge||{}));if(payload.deckVersion)localStorage.setItem("kanji5-deck-version",payload.deckVersion);const v16=mergeV16SyncData(payload,payload);localStorage.setItem(SESSION_HISTORY_KEY,JSON.stringify(v16.sessionHistory||[]));localStorage.setItem(COMPONENT_KEY,JSON.stringify({...((safeJSON(localStorage.getItem(COMPONENT_KEY),{}))||{}),...(v16.components||{}),...(v16.skillProfile?{v16SkillProfile:v16.skillProfile}:{})}));localStorage.setItem(SYNC_META_KEY,JSON.stringify({educationSchemaVersion:EDUCATION_SCHEMA_VERSION,syncSchemaVersion:SYNC_SCHEMA_VERSION,v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,syncedAt:new Date().toISOString(),remoteUpdatedAt:remoteUpdatedAt||null,payloadHash:hashPayload(payload)}))};
-const setStatus=(text,tone="")=>{const el=byId("syncStatusText");if(el){el.textContent=text;el.dataset.tone=tone}};
-async function withSyncLock(task){if(syncPromise)return syncPromise;syncPromise=(async()=>{try{return await task()}finally{syncPromise=null}})();return syncPromise}
-async function replaceRemote(payload,expectedUpdatedAt=null){const now=new Date().toISOString(),rowPayload={...stablePayload(payload),clientUpdatedAt:now};if(expectedUpdatedAt){const{data,error}=await client.from("user_learning_state").update({payload:rowPayload,updated_at:now}).eq("user_id",user.id).eq("updated_at",expectedUpdatedAt).select("updated_at").maybeSingle();if(error)throw error;if(!data)return{conflict:true,updatedAt:expectedUpdatedAt};return{conflict:false,updatedAt:data.updated_at||now}}const{data,error}=await client.from("user_learning_state").insert({user_id:user.id,payload:rowPayload,updated_at:now}).select("updated_at").maybeSingle();if(error){if(String(error.code||"")==="23505")return{conflict:true,updatedAt:null};throw error}return{conflict:false,updatedAt:data?.updated_at||now}}
-async function syncOnce(){const local=localPayload(),remoteRow=await readRemote();if(!remoteRow?.payload){const result=await replaceRemote(local,null);if(result.conflict)return{retry:true};writeLocal(local,result.updatedAt);setStatus("همگام شد","ok");return{retry:false}}const mergedBase=mergeSyncPayload(local,remoteRow.payload),v16=mergeV16SyncData(local,remoteRow.payload),merged={...mergedBase,sessionHistory:v16.sessionHistory,components:v16.components,skillProfile:v16.skillProfile,v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION},localHash=hashPayload(local),mergedHash=hashPayload(merged),remoteHash=hashPayload(remoteRow.payload);if(mergedHash===localHash&&mergedHash===remoteHash){localStorage.setItem(SYNC_META_KEY,JSON.stringify({educationSchemaVersion:EDUCATION_SCHEMA_VERSION,syncSchemaVersion:SYNC_SCHEMA_VERSION,v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,syncedAt:new Date().toISOString(),remoteUpdatedAt:remoteRow.updatedAt,payloadHash:mergedHash}));setStatus("همگام است","ok");return{retry:false}}if(mergedHash===remoteHash){writeLocal(merged,remoteRow.updatedAt);setStatus("داده‌های جدید دریافت شد","ok");setTimeout(()=>location.reload(),250);return{retry:false}}const result=await replaceRemote(merged,remoteRow.updatedAt);if(result.conflict)return{retry:true};writeLocal(merged,result.updatedAt);if(mergedHash!==localHash){setStatus("داده‌های ادغام‌شده دریافت شد","ok");setTimeout(()=>location.reload(),250)}else setStatus("همگام شد","ok");return{retry:false}}
-async function pullAndMerge(){if(!user)return;return withSyncLock(async()=>{for(let attempt=1;attempt<=MAX_SYNC_ATTEMPTS;attempt+=1){try{const result=await syncOnce();if(!result.retry)return}catch(e){console.warn("Kanji 5 sync attempt failed",e);if(attempt===MAX_SYNC_ATTEMPTS){setStatus("اتصال به sync ناموفق","error");return}}}setStatus("تغییرات همزمان دریافت شد؛ دوباره تلاش کن","error")})}
-async function getClient(){if(client)return client;const mod=await import(SUPABASE_JS);client=mod.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return client}
-function ensureUI(){if(byId("syncBtn"))return;const wrap=document.querySelector("header > div:last-child");if(!wrap)return;const button=document.createElement("button");button.className="iconbtn";button.id="syncBtn";button.setAttribute("aria-label","حساب و همگام‌سازی");button.textContent="☁️";button.addEventListener("click",openAuth);wrap.prepend(button);const dialog=document.createElement("dialog");dialog.id="syncDialog";dialog.innerHTML=`<div class="modal"><h2>حساب و همگام‌سازی</h2><div id="syncContent"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button class="secondary" id="closeSync">بستن</button></div></div>`;document.body.appendChild(dialog);byId("closeSync").addEventListener("click",()=>dialog.close())}
-function openAuth(){const dialog=byId("syncDialog"),content=byId("syncContent");if(!dialog||!content)return;if(user){content.innerHTML=`<p>ورود با <b id="syncUserEmail"></b></p><p id="syncStatusText" style="color:#6b7280">همگام‌سازی خودکار فعال است.</p><div style="display:flex;gap:8px"><button class="primary" id="syncNow">همگام‌سازی الآن</button><button class="secondary" id="signOut">خروج</button></div>`;const emailEl=byId("syncUserEmail");if(emailEl)emailEl.textContent=user.email||"Google";byId("syncNow").addEventListener("click",pullAndMerge);byId("signOut").addEventListener("click",async()=>{await client.auth.signOut();dialog.close()})}else{content.innerHTML=`<button class="primary" id="googleLogin" style="width:100%;margin-bottom:10px">ورود با Google</button><div style="text-align:center;color:#6b7280;margin:8px 0">یا</div><input id="syncEmail" type="email" placeholder="ایمیل" autocomplete="email" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;box-sizing:border-box"><input id="syncPassword" type="password" placeholder="رمز عبور" autocomplete="current-password" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;box-sizing:border-box;margin-top:8px"><div style="display:flex;gap:8px;margin-top:10px"><button class="primary" id="emailLogin">ورود</button><button class="secondary" id="emailSignup">ساخت حساب</button></div><p id="syncMsg" style="color:#6b7280;font-size:12px;margin-top:10px"></p>`;byId("googleLogin").addEventListener("click",async()=>{try{const c=await getClient();const{error}=await c.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href}});if(error)byId("syncMsg").textContent=error.message}catch(e){byId("syncMsg").textContent=e.message||String(e)}});byId("emailLogin").addEventListener("click",()=>emailAuth(false));byId("emailSignup").addEventListener("click",()=>emailAuth(true))}dialog.showModal()}
-async function emailAuth(signup){const email=byId("syncEmail")?.value.trim(),password=byId("syncPassword")?.value||"",msg=byId("syncMsg");if(!email||password.length<6){if(msg)msg.textContent="ایمیل و رمز عبور حداقل ۶ کاراکتری را وارد کن.";return}try{const c=await getClient();const result=signup?await c.auth.signUp({email,password,options:{emailRedirectTo:location.href}}):await c.auth.signInWithPassword({email,password});if(result.error){if(msg)msg.textContent=result.error.message;return}if(signup&&!result.data.session&&msg)msg.textContent="ایمیل تأیید برایت ارسال شد."}catch(e){if(msg)msg.textContent=e.message||String(e)}}
-function startSyncLifecycle(){if(!user)return;clearInterval(pollTimer);pollTimer=setInterval(pullAndMerge,POLL_MS);if(lifecycleInstalled)return;lifecycleInstalled=true;window.addEventListener("online", pullAndMerge); window.addEventListener("storage", event => {if([STORAGE_KEY,CARDS_STORAGE_KEY,REVIEWS_STORAGE_KEY,KNOWLEDGE_KEY,COMPONENT_KEY,SESSION_HISTORY_KEY].includes(event.key))pullAndMerge()});document.addEventListener("visibilitychange", () => {if(!document.hidden)pullAndMerge()})}
-function stopSyncLifecycle(){clearInterval(pollTimer);pollTimer=null}
-async function boot(){ensureUI();try{const c=await getClient();const{data}=await c.auth.getSession();user=data.session?.user||null;if(user){setStatus("در حال همگام‌سازی…");await pullAndMerge();startSyncLifecycle()}c.auth.onAuthStateChange(async(_event,session)=>{user=session?.user||null;if(user){startSyncLifecycle();await pullAndMerge()}else{stopSyncLifecycle();setStatus("وارد نشده")}})}catch(e){console.warn("Kanji 5 sync unavailable",e);stopSyncLifecycle()}}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
-})();
+
+const STORAGE_KEY = 'kanji5-v1';
+const CARDS_STORAGE_KEY = 'kanji5-v1-cards';
+const REVIEWS_STORAGE_KEY = 'kanji5-v1-reviews';
+const KNOWLEDGE_KEY = 'kanji5-v1.2-knowledge';
+const COMPONENT_KEY = 'kanji5-v1.5-components';
+const SESSION_HISTORY_KEY = 'kanji5-v1.6-session-history';
+const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
+const POLL_MS = 15000;
+const MAX_SYNC_ATTEMPTS = 3;
+const SUPABASE_JS = 'https://esm.sh/@supabase/supabase-js@2.57.4';
+
+const emptyState = {
+  status: 'loading',
+  user: null,
+  syncStatus: 'idle',
+  error: null
+};
+
+let state = { ...emptyState };
+let client = null;
+let user = null;
+let syncPromise = null;
+let pollTimer = null;
+let syncDebounce = null;
+const listeners = new Set();
+
+const clone = value => value == null ? value : structuredClone(value);
+const configured = () => {
+  const cfg = window.KANJI5_SUPABASE;
+  return Boolean(cfg?.url && cfg?.anonKey && !String(cfg.url).includes('YOUR_PROJECT_ID') && !String(cfg.anonKey).includes('YOUR_SUPABASE'));
+};
+
+function notify() {
+  const snapshot = { ...state, user: state.user ? { ...state.user } : null };
+  for (const listener of listeners) listener(snapshot);
+}
+
+function setState(next) {
+  state = { ...state, ...next };
+  notify();
+}
+
+function mapUser(value) {
+  if (!value) return null;
+  const meta = value.user_metadata || {};
+  return {
+    id: String(value.id),
+    email: value.email || null,
+    name: meta.full_name || meta.name || value.email || null,
+    avatarUrl: meta.avatar_url || meta.picture || null
+  };
+}
+
+function localPayload() {
+  const persisted = safeJSON(localStorage.getItem(STORAGE_KEY), null);
+  const cards = safeJSON(localStorage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});
+  const reviews = safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);
+  const components = safeJSON(localStorage.getItem(COMPONENT_KEY), {});
+  const history = safeJSON(localStorage.getItem(SESSION_HISTORY_KEY), []);
+  return {
+    state: persisted ? { ...persisted, cards, reviews, queue: [], current: null, revealed: false, examples: {} } : null,
+    knowledge: safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {}),
+    deckVersion: localStorage.getItem('kanji5-deck-version') || null,
+    educationSchemaVersion: 2,
+    syncSchemaVersion: 1,
+    v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
+    sessionHistory: Array.isArray(history) ? history : [],
+    components: components && typeof components === 'object' ? components : {},
+    skillProfile: components?.v16SkillProfile && typeof components.v16SkillProfile === 'object' ? components.v16SkillProfile : null
+  };
+}
+
+function safeJSON(raw, fallback) {
+  try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
+}
+
+function writeLocal(payload, remoteUpdatedAt = null) {
+  if (payload?.state) {
+    const s = payload.state;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      settings: s.settings,
+      today: s.today,
+      todayNew: s.todayNew,
+      todayReviewCount: s.todayReviewCount,
+      goalCelebrated: s.goalCelebrated,
+      streak: s.streak
+    }));
+    localStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(s.cards || {}));
+    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(s.reviews || []));
+  }
+  localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(payload?.knowledge || {}));
+  if (payload?.deckVersion) localStorage.setItem('kanji5-deck-version', payload.deckVersion);
+  const v16 = mergeV16SyncData(payload, payload);
+  const currentComponents = safeJSON(localStorage.getItem(COMPONENT_KEY), {}) || {};
+  localStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(v16.sessionHistory || payload?.sessionHistory || []));
+  localStorage.setItem(COMPONENT_KEY, JSON.stringify({
+    ...currentComponents,
+    ...(v16.components || payload?.components || {}),
+    ...(v16.skillProfile || payload?.skillProfile ? { v16SkillProfile: v16.skillProfile || payload.skillProfile } : {})
+  }));
+  localStorage.setItem(SYNC_META_KEY, JSON.stringify({
+    educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
+    syncSchemaVersion: Number(payload?.syncSchemaVersion) || 1,
+    v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || V16_SYNC_SCHEMA_VERSION,
+    syncedAt: new Date().toISOString(),
+    remoteUpdatedAt: remoteUpdatedAt || null,
+    payloadHash: hashPayload(payload)
+  }));
+}
+
+function mergedPayload(local, remote) {
+  const base = mergeSyncPayload(local, remote);
+  const v16 = mergeV16SyncData(local, remote);
+  return {
+    ...base,
+    v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
+    sessionHistory: v16.sessionHistory || base.sessionHistory || [],
+    components: v16.components || base.components || {},
+    skillProfile: v16.skillProfile || base.skillProfile || null
+  };
+}
+
+async function getClient() {
+  if (client) return client;
+  if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
+  const mod = await import(SUPABASE_JS);
+  client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+  return client;
+}
+
+async function readRemote() {
+  const c = await getClient();
+  const { data, error } = await c.from('user_learning_state')
+    .select('payload,updated_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? { payload: data.payload || null, updatedAt: data.updated_at || null } : null;
+}
+
+async function replaceRemote(payload, expectedUpdatedAt = null) {
+  const c = await getClient();
+  const now = new Date().toISOString();
+  const rowPayload = stablePayload({ ...payload });
+  if (expectedUpdatedAt) {
+    const { data, error } = await c.from('user_learning_state')
+      .update({ payload: rowPayload, updated_at: now })
+      .eq('user_id', user.id)
+      .eq('updated_at', expectedUpdatedAt)
+      .select('updated_at')
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return { conflict: true, updatedAt: expectedUpdatedAt };
+    return { conflict: false, updatedAt: data.updated_at || now };
+  }
+  const { data, error } = await c.from('user_learning_state')
+    .insert({ user_id: user.id, payload: rowPayload, updated_at: now })
+    .select('updated_at')
+    .maybeSingle();
+  if (error) {
+    if (String(error.code || '') === '23505') return { conflict: true, updatedAt: null };
+    throw error;
+  }
+  return { conflict: false, updatedAt: data?.updated_at || now };
+}
+
+async function withSyncLock(task) {
+  if (syncPromise) return syncPromise;
+  syncPromise = (async () => {
+    try { return await task(); }
+    finally { syncPromise = null; }
+  })();
+  return syncPromise;
+}
+
+function setSyncStatus(syncStatus, error = null) {
+  setState({ syncStatus, error });
+}
+
+async function syncOnce() {
+  const local = localPayload();
+  const remoteRow = await readRemote();
+  if (!remoteRow?.payload) {
+    const result = await replaceRemote(local);
+    if (result.conflict) return { retry: true };
+    writeLocal(local, result.updatedAt);
+    setSyncStatus('synced');
+    return { retry: false };
+  }
+
+  const merged = mergedPayload(local, remoteRow.payload);
+  const localHash = hashPayload(local);
+  const mergedHash = hashPayload(merged);
+  const remoteHash = hashPayload(remoteRow.payload);
+
+  if (mergedHash === localHash && mergedHash === remoteHash) {
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify({
+      educationSchemaVersion: 2,
+      syncSchemaVersion: 1,
+      v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
+      syncedAt: new Date().toISOString(),
+      remoteUpdatedAt: remoteRow.updatedAt,
+      payloadHash: mergedHash
+    }));
+    setSyncStatus('synced');
+    return { retry: false };
+  }
+
+  if (mergedHash === remoteHash) {
+    writeLocal(merged, remoteRow.updatedAt);
+    setSyncStatus('synced');
+    window.setTimeout(() => location.reload(), 250);
+    return { retry: false };
+  }
+
+  const result = await replaceRemote(merged, remoteRow.updatedAt);
+  if (result.conflict) return { retry: true };
+  writeLocal(merged, result.updatedAt);
+  setSyncStatus('synced');
+  if (mergedHash !== localHash) window.setTimeout(() => location.reload(), 250);
+  return { retry: false };
+}
+
+async function syncNow() {
+  if (!user) return;
+  return withSyncLock(async () => {
+    setSyncStatus('syncing');
+    for (let attempt = 1; attempt <= MAX_SYNC_ATTEMPTS; attempt += 1) {
+      try {
+        const result = await syncOnce();
+        if (!result.retry) return;
+      } catch (error) {
+        console.warn('Kanji 5 sync attempt failed', error);
+        if (attempt === MAX_SYNC_ATTEMPTS) {
+          setSyncStatus('error', 'SYNC_FAILED');
+          return;
+        }
+      }
+    }
+    setSyncStatus('error', 'SYNC_CONFLICT');
+  });
+}
+
+function scheduleSync() {
+  if (!user) return;
+  if (syncDebounce) window.clearTimeout(syncDebounce);
+  syncDebounce = window.setTimeout(() => { syncDebounce = null; void syncNow(); }, 900);
+}
+
+function onStorage(event) {
+  if ([STORAGE_KEY, CARDS_STORAGE_KEY, REVIEWS_STORAGE_KEY, KNOWLEDGE_KEY, COMPONENT_KEY, SESSION_HISTORY_KEY].includes(event.key)) scheduleSync();
+}
+
+function onVisibilityChange() {
+  if (!document.hidden) scheduleSync();
+}
+
+function stopSyncLifecycle() {
+  clearInterval(pollTimer);
+  pollTimer = null;
+  if (syncDebounce) {
+    window.clearTimeout(syncDebounce);
+    syncDebounce = null;
+  }
+  window.removeEventListener('online', scheduleSync);
+  window.removeEventListener('storage', onStorage);
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+}
+
+function startSyncLifecycle() {
+  clearInterval(pollTimer);
+  pollTimer = window.setInterval(() => { void syncNow(); }, POLL_MS);
+  window.removeEventListener('online', scheduleSync);
+  window.addEventListener('online', scheduleSync);
+  window.removeEventListener('storage', onStorage);
+  window.addEventListener('storage', onStorage);
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  document.addEventListener('visibilitychange', onVisibilityChange);
+}
+
+async function boot() {
+  if (!configured()) {
+    setState({ status: 'unavailable', syncStatus: 'error', error: null });
+    return;
+  }
+  try {
+    const c = await getClient();
+    const { data, error } = await c.auth.getSession();
+    if (error) throw error;
+    user = data.session?.user || null;
+    setState({ status: user ? 'signed-in' : 'signed-out', user: mapUser(user), syncStatus: user ? 'syncing' : 'idle', error: null });
+    if (user) {
+      await syncNow();
+      startSyncLifecycle();
+    }
+    c.auth.onAuthStateChange((_event, session) => {
+      user = session?.user || null;
+      setState({ status: user ? 'signed-in' : 'signed-out', user: mapUser(user), syncStatus: user ? 'syncing' : 'idle', error: null });
+      if (user) {
+        startSyncLifecycle();
+        window.setTimeout(() => { void syncNow(); }, 0);
+      } else {
+        stopSyncLifecycle();
+      }
+    });
+  } catch (error) {
+    console.warn('Kanji 5 account unavailable', error);
+    setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE' });
+  }
+}
+
+const api = {
+  getState: () => ({ ...state, user: state.user ? { ...state.user } : null }),
+  subscribe(listener) {
+    listeners.add(listener);
+    listener(api.getState());
+    return () => listeners.delete(listener);
+  },
+  async signInWithGoogle() {
+    const c = await getClient();
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await c.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo }
+    });
+    if (error) throw error;
+  },
+  async signInWithPassword(email, password) {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (!normalizedEmail || !password) throw new Error('AUTH_EMAIL_PASSWORD_REQUIRED');
+    const c = await getClient();
+    const { error } = await c.auth.signInWithPassword({
+      email: normalizedEmail,
+      password
+    });
+    if (error) throw error;
+  },
+  async signUpWithPassword(email, password) {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (!normalizedEmail || !password) throw new Error('AUTH_EMAIL_PASSWORD_REQUIRED');
+    if (password.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
+    const c = await getClient();
+    const { data, error } = await c.auth.signUp({
+      email: normalizedEmail,
+      password
+    });
+    if (error) throw error;
+    return { needsEmailConfirmation: !data.session };
+  },
+  async sendMagicLink(email) {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (!normalizedEmail) throw new Error('AUTH_EMAIL_REQUIRED');
+    const c = await getClient();
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await c.auth.signInWithOtp({
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo: redirectTo,
+        shouldCreateUser: true
+      }
+    });
+    if (error) throw error;
+  },
+  async signOut() {
+    const c = await getClient();
+    const { error } = await c.auth.signOut();
+    if (error) throw error;
+  },
+  async syncNow() {
+    await syncNow();
+  }
+};
+
+window.__KANJI5_ACCOUNT__ = api;
+void boot();

@@ -8,6 +8,8 @@ on:
       - "frontend/**"
       - "react-dist/**"
       - "index.html"
+      - "supabase-config.js"
+      - "supabase-sync.js"
       - "app-bootstrap.js"
       - "react-entry.js"
       - "learning-card-flip-runtime.js"
