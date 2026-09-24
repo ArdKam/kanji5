@@ -57,6 +57,20 @@ export function DictionaryPage({ language }: { language: Language }) {
     return () => { active = false; };
   }, []);
 
+  const masterySummary = useMemo(() => {
+    const total = catalog.length || 1;
+    const average = catalog.reduce((sum, item) => sum + Math.max(0, Math.min(1, Number(item.mastery) || 0)), 0) / total;
+    const count = (name: string) => catalog.filter(item => item.state === name).length;
+    return {
+      average,
+      mastered: count("mastered"),
+      stable: count("stable"),
+      learning: count("learning") + count("introduced"),
+      attention: count("weak") + count("recovering"),
+      unseen: count("unseen"),
+    };
+  }, [catalog]);
+
   const visible = useMemo(() => {
     const q = normalize(query);
     const filtered = catalog.filter((item) => {
@@ -84,6 +98,26 @@ export function DictionaryPage({ language }: { language: Language }) {
         </div>
         <span className="dictionary-count">{formatNumber(visible.length, language)} / {formatNumber(catalog.length || 2136, language)}</span>
       </div>
+
+      <section className="mastery-map-summary" aria-labelledby="mastery-map-title">
+        <div className="mastery-map-summary-head">
+          <div>
+            <p className="eyebrow">{t("masteryMap", language)}</p>
+            <h3 id="mastery-map-title">{t("masteryMapHint", language)}</h3>
+          </div>
+          <div className="mastery-map-average">
+            <span>{t("masteryAverage", language)}</span>
+            <strong>{formatNumber(Math.round(masterySummary.average * 100), language)}%</strong>
+          </div>
+        </div>
+        <div className="mastery-map-metrics">
+          <div className="mastery-map-metric"><span className="mastery-swatch mastered" aria-hidden="true" /><strong>{formatNumber(masterySummary.mastered, language)}</strong><span>{t("masteryMastered", language)}</span></div>
+          <div className="mastery-map-metric"><span className="mastery-swatch stable" aria-hidden="true" /><strong>{formatNumber(masterySummary.stable, language)}</strong><span>{t("masteryStable", language)}</span></div>
+          <div className="mastery-map-metric"><span className="mastery-swatch learning" aria-hidden="true" /><strong>{formatNumber(masterySummary.learning, language)}</strong><span>{t("masteryLearning", language)}</span></div>
+          <div className="mastery-map-metric"><span className="mastery-swatch attention" aria-hidden="true" /><strong>{formatNumber(masterySummary.attention, language)}</strong><span>{t("masteryNeedsAttention", language)}</span></div>
+          <div className="mastery-map-metric"><span className="mastery-swatch unseen" aria-hidden="true" /><strong>{formatNumber(masterySummary.unseen, language)}</strong><span>{t("masteryUnseen", language)}</span></div>
+        </div>
+      </section>
 
       <label className="dictionary-page-search">
         <span className="sr-only">{t("dictionaryPlaceholder", language)}</span>
@@ -124,6 +158,7 @@ export function DictionaryPage({ language }: { language: Language }) {
                 type="button"
                 data-jlpt={item.jlpt || "unknown"}
                 data-mastery={mastery.toFixed(3)}
+                data-mastery-state={item.state || "unseen"}
                 aria-label={item.character + " — " + (item.jlpt || "unknown") + " — " + formatNumber(Math.round(mastery * 100), language) + "%"}
                 onClick={() => setSelected(item)}
               >
