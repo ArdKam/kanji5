@@ -24,6 +24,41 @@ async function routeExamples(page, count) {
   });
 }
 
+async function swipePager(page, pager, fromRatio, toRatio) {
+  const box = await pager.boundingBox();
+  if (!box) throw new Error("Pager bounds unavailable");
+  const y = box.y + box.height * 0.5;
+  const fromX = box.x + box.width * fromRatio;
+  const toX = box.x + box.width * toRatio;
+  await pager.dispatchEvent("pointerdown", {
+    pointerType: "touch",
+    pointerId: 1,
+    isPrimary: true,
+    button: 0,
+    buttons: 1,
+    clientX: fromX,
+    clientY: y,
+  });
+  await pager.dispatchEvent("pointermove", {
+    pointerType: "touch",
+    pointerId: 1,
+    isPrimary: true,
+    button: 0,
+    buttons: 1,
+    clientX: fromX + (toX - fromX) * 0.5,
+    clientY: y,
+  });
+  await pager.dispatchEvent("pointerup", {
+    pointerType: "touch",
+    pointerId: 1,
+    isPrimary: true,
+    button: 0,
+    buttons: 0,
+    clientX: toX,
+    clientY: y,
+  });
+}
+
 async function revealLearningCard(page, language = "fa") {
   await page.addInitScript((value) => localStorage.setItem("kanji5-ui-language", value), language);
   await page.goto("/");
@@ -99,15 +134,21 @@ test("learning card keeps dense information on separate back pages in Persian an
     await assertCardBounds(card);
 
     const pager = card.locator(".learning-back-pager-shell");
-    const box = await pager.boundingBox();
-    if (!box) throw new Error("Pager bounds unavailable");
-    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5);
-    await page.mouse.down();
-    await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5, { steps: 4 });
-    await page.mouse.up();
+    await swipePager(page, pager, 0.75, 0.25);
     await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
     await expect(previousButton).toBeDisabled();
     await expect(nextButton).toBeEnabled();
+
+    if (viewport.width <= 760) {
+      await swipePager(page, pager, 0.25, 0.75);
+      await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
+      await expect(previousButton).toBeEnabled();
+      await expect(nextButton).toBeDisabled();
+      await swipePager(page, pager, 0.75, 0.25);
+      await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
+      await expect(previousButton).toBeDisabled();
+      await expect(nextButton).toBeEnabled();
+    }
 
     const footerBounds = await card.locator(".learning-back-footer").evaluate((el) => {
       const footer = el.getBoundingClientRect();
