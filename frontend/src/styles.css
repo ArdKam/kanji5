@@ -26,7 +26,7 @@
 .learning-card-back .rating-grid{position:absolute;left:20px;right:20px;bottom:16px;gap:8px;z-index:2;}
 .learning-card-back .rating{min-height:44px;padding:8px 10px;}
 @media(max-width:760px){
-  .learning-card{min-height:clamp(500px,70dvh,590px);}
+  .learning-card{height:min(650px,calc(100dvh - 32px));min-height:500px;}
   .learning-card-face{padding:14px 16px;gap:7px;}
   .learning-card-front .kanji-row{min-height:125px;}
   .learning-card-front .kanji-display{font-size:92px;}
