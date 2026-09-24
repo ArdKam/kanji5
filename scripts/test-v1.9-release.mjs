@@ -29,7 +29,7 @@ assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
 for(const file of [
   'v1.9-outcome-core.js','v1.9-learner-model-core.js','v1.9-learner-model.js',
   'v1.9-adaptive-planner-core.js','v1.9-adaptive-planner.js',
-  'v1.9-recovery-core.js','v1.9-recovery.js','v1.9-recovery-ui.js',
+  'v1.9-recovery-core.js','v1.9-recovery.js',
   'v1.9-learning-evaluation-core.js','v1.9-learning-evaluation.js',
   'v1.9-data-quality-core.js','v1.9-data-integrity-core.js',
   'v1.9-v2-contract-core.js','v1.9-v2-boundary.js','review-runtime.js'
