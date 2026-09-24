@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
+import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, listKanji, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 
@@ -26,17 +27,6 @@ function DictionaryAudio({ value, label }: { value: string; label: string }) {
   );
 }
 
-function DictionaryReading({ title, values, language }: { title: string; values: string[]; language: Language }) {
-  const first = values[0];
-  return (
-    <div className="reading dictionary-reading">
-      <span>{title}</span>
-      <strong lang="ja">{values.length ? values.join(" · ") : "—"}</strong>
-      {first ? <DictionaryAudio value={first} label={t("playReading", language) + " " + title} /> : null}
-    </div>
-  );
-}
-
 function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
@@ -60,10 +50,7 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <span className="badge badge-red">{item.jlpt || "—"}</span>
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
         </div>
-        <div className="kanji-row dictionary-card-kanji-row">
-          <div className="kanji-display dictionary-card-character" lang="ja">{item.character}</div>
-          <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
-        </div>
+        <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
         {componentInfo?.available && componentInfo.components.length ? (
           <ComponentBreakdown
@@ -77,8 +64,8 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <span>{language === "fa" ? "خوانش‌ها" : "Readings"}</span>
         </div>
         <div className="readings learning-back-readings dictionary-readings">
-          <DictionaryReading title="On’yomi" values={item.on} language={language} />
-          <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
+          <div className="reading dictionary-reading"><span>On’yomi</span><strong lang="ja">{item.on.length ? item.on.join(" · ") : "—"}</strong></div>
+          <div className="reading dictionary-reading"><span>Kun’yomi</span><strong lang="ja">{item.kun.length ? item.kun.join(" · ") : "—"}</strong></div>
         </div>
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
