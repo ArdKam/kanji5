@@ -90,6 +90,34 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 .learning-card[data-card-density="dense"] .example-meaning{font-size:9px;}
 .learning-card[data-card-density="dense"] .component-breakdown{gap:4px;}
 
+@media(min-width:761px){
+  .learning-card[data-card-density="dense"] .learning-back-overview{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:
+      "components stroke"
+      "meaning stroke"
+      "readings-head mnemonic"
+      "readings mnemonic";
+    align-items:start;
+    column-gap:8px;
+    row-gap:4px;
+  }
+  .learning-card[data-card-density="dense"] .learning-back-overview>.component-breakdown{grid-area:components;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.stroke-order-panel{grid-area:stroke;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.learning-back-meaning{grid-area:meaning;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.readings-header{grid-area:readings-head;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.learning-back-readings{grid-area:readings;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.mnemonic-panel{grid-area:mnemonic;align-self:stretch;}
+}
+.learning-card[data-card-density="dense"] .stroke-order-source{display:none;}
+.learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(72px,auto) minmax(0,1fr);align-items:center;}
+.learning-card[data-card-density="dense"] .mnemonic-header{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-header h3{font-size:10px;white-space:nowrap;}
+.learning-card[data-card-density="dense"] .mnemonic-editor{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer .actions{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{padding-inline:8px;}
+
 .learning-card[data-card-density="dense"] .stroke-order-panel{grid-template-columns:minmax(92px,26vw) minmax(0,1fr);column-gap:8px;align-items:center;padding:8px;}
 .learning-card[data-card-density="dense"] .stroke-order-header{grid-column:1 / -1;}
 .learning-card[data-card-density="dense"] .stroke-order-stage{padding:0;gap:3px;}
@@ -108,9 +136,23 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 .learning-card[data-card-density="dense"] .mnemonic-editor-footer .actions{flex-wrap:nowrap;}
 .learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{white-space:nowrap;}
 @media(max-width:760px){
-  .learning-card[data-card-density="dense"] .stroke-order-controls{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(84px,24vw);}
-  .learning-card[data-card-density="dense"] .mnemonic-editor{grid-template-columns:1fr auto;}
+  .learning-card[data-card-density="dense"] .learning-back-scroll{gap:4px;padding-top:4px;padding-bottom:7px;}
+  .learning-card[data-card-density="dense"] .learning-back-overview{gap:4px;}
+  .learning-card[data-card-density="dense"] .stroke-order-panel{gap:6px;padding:7px;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage{gap:2px;padding:0;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(72px,21vw);}
+  .learning-card[data-card-density="dense"] .stroke-order-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;}
+  .learning-card[data-card-density="dense"] .stroke-order-controls .button{padding-inline:5px;font-size:9px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .meanings{font-size:18px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:42px;padding:5px 6px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .reading>strong{font-size:13px;}
+  .learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(66px,auto) minmax(0,1fr);gap:5px;padding:7px;}
+  .learning-card[data-card-density="dense"] .mnemonic-header h3{font-size:9px;white-space:normal;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor{grid-template-columns:minmax(0,1fr) auto;gap:4px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor textarea{min-height:44px;height:44px;padding:5px 7px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{padding-inline:6px;font-size:9px;}
+  .learning-card[data-card-density="dense"] .component-breakdown-target{font-size:38px;}
+  .learning-card[data-card-density="dense"] .component-breakdown-part{min-width:30px;min-height:30px;padding:4px 6px;font-size:17px;}
 }
 
 @container learning-back (max-width:320px){
