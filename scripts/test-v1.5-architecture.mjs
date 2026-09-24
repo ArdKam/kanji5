@@ -78,8 +78,8 @@ assert.match(index, /"\.\/v1\.5-p0\.js"/, 'P0 must remain available to the compa
 assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length, 0, 'P0 must not be directly wired into the default shell');
 
 assert.match(sw, /"\.\/v1\.5-state\.js"/, 'state module must be offline-precached');
-assert.doesNotMatch(sw, /"\.\/v1\.5-recall-core\.js"/, 'legacy recall core must not be in the default precache');
-assert.doesNotMatch(sw, /"\.\/v1\.5-p0\.js"/, 'legacy P0 must not be in the default precache');
+assert.match(sw, /"\.\/v1\.5-recall-core\.js"/, 'legacy recall core must remain available offline for compatibility');
+assert.match(sw, /"\.\/v1\.5-p0\.js"/, 'legacy P0 must remain available offline for compatibility');
 assert.match(sw, /"\.\/v1\.5-network\.js"/, 'network adapter must be offline-precached');
 assert.match(sw, /"\.\/v1\.4-education-migration\.js"/, 'lazy education migration must be offline-precached');
 assert.match(sw, /"\.\/v1\.4-education-core\.js"/, 'education core must be offline-precached for offline exercise startup');
