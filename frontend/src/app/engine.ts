@@ -123,6 +123,8 @@ export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
+  getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
+  saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
   listKanji: () => Promise<{ results: KanjiCatalogItem[] }>;
   refreshLearning: () => Promise<Snapshot>;
   revealLearning: (direct?: boolean) => Promise<boolean>;
@@ -257,6 +259,14 @@ export async function searchKanji(query: string, limit = 24): Promise<{ query: s
 
 export async function listKanji(): Promise<{ results: KanjiCatalogItem[] }> {
   return (await waitForEngine()).listKanji();
+}
+
+export async function getMnemonic(character: string): Promise<{ character: string; text: string }> {
+  return (await waitForEngine()).getMnemonic(character);
+}
+
+export async function saveMnemonic(character: string, value: string): Promise<{ character: string; text: string }> {
+  return (await waitForEngine()).saveMnemonic(character, value);
 }
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
