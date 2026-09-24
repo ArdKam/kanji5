@@ -34,16 +34,22 @@
 <script src="./app-bootstrap.js?v=121"></script>
 <script src="./v1.5-state.js"></script>
 <script src="./v1.3-p0.js"></script>
-<script src="./v1.3-perf.js"></script>
-<script src="./v1.3-settings.js"></script>
-<script src="./v1.4-education-migration.js"></script>
-<script src="./v1.4-education-core.js"></script>
-<script src="./v1.5-p0.js"></script>
 <script type="module" src="./review-runtime.js"></script>
-<script src="./v1.2-enhancements.js"></script>
-<script src="./v1.2-runtime-fixes.js"></script>
-<script src="./v1.9-recovery.js"></script>
-<script src="./v1.5-education-ui.js"></script>
+<script>
+(() => {
+  if (new URLSearchParams(location.search).get("legacy") !== "1") return;
+  const legacyScripts = [
+    "./v1.4-education-migration.js",
+    "./v1.4-education-core.js",
+    "./v1.5-p0.js",
+    "./v1.2-enhancements.js",
+    "./v1.2-runtime-fixes.js",
+    "./v1.9-recovery.js",
+    "./v1.5-education-ui.js"
+  ];
+  document.write(legacyScripts.map(src => `<script src="${src}"><\/script>`).join(""));
+})();
+</script>
 <script src="./v1.9-v2-boundary.js"></script>
 <script src="./supabase-config.js"></script>
 <script src="./account-fallback.js?v=20260925-release4"></script>
