@@ -100,6 +100,10 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
+  await expect(pageRoot.locator('.mastery-map-summary')).toBeVisible();
+  await expect(pageRoot.locator('.mastery-map-metric')).toHaveCount(5);
+  await expect(pageRoot.locator('.mastery-map-average strong')).toContainText('%');
+  await expect(pageRoot.locator('.kanji-catalog-tile').first()).toHaveAttribute('data-mastery-state');
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136,{timeout:10000});
   const n5=pageRoot.getByRole('button',{name:'N5',exact:true});
   await n5.click();
