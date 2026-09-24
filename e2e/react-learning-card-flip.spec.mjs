@@ -77,8 +77,9 @@ test("learning card keeps dense information on separate back pages without verti
         };
       }),
     );
+    expect(pageMetrics[0].visible).toBe("visible");
+    expect(pageMetrics[1].visible).toBe("hidden");
     for (const metrics of pageMetrics) {
-      expect(metrics.visible).toBe("visible");
       expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 2);
     }
 
@@ -96,9 +97,9 @@ test("learning card keeps dense information on separate back pages without verti
     const pager = card.locator(".learning-back-pager-shell");
     const box = await pager.boundingBox();
     if (!box) throw new Error("Pager bounds unavailable");
-    await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5);
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5, { steps: 4 });
+    await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5, { steps: 4 });
     await page.mouse.up();
     await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /Core information/);
     await expect(previousButton).toBeDisabled();
