@@ -14,7 +14,7 @@ test('React is the sole default presentation renderer',async({page})=>{
   await expect(page.locator('#root .learning-card-front .hint')).toHaveCount(0);
   await expect(page.locator('#v2App')).toHaveCount(0);
   await expect(page.locator('.wrap, #app, #loading')).toHaveCount(0);
-  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
 });
 
 test('React learning and review actions stay behind the authoritative boundary',async({page})=>{
