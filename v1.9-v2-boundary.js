@@ -97,7 +97,6 @@ async function saveMnemonic(character,value){
   const ok=Boolean(state.writeMnemonics?.(next));
   if(!ok)throw new Error('KANJI5_MNEMONIC_SAVE_FAILED');
   document.dispatchEvent(new CustomEvent('kanji5:v2-mnemonic-changed',{detail:{character:key}}));
-  await publish();
   return {contractVersion:'1.9.0-v2-boundary-contract',kind:'personal-mnemonic',character:key,text:textValue};
 }
 async function getComponentInfo(character){
