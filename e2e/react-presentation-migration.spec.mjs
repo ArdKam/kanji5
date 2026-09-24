@@ -92,3 +92,19 @@ test('empty session progress indicator is absent before a session starts',async(
   await clean(page);
   await expect(page.locator('.session-progress')).toHaveCount(0);
 });
+
+test('Kanji dictionary searches by character and shows structured study metadata',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'فرهنگ کانجی',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  const search=dialog.getByRole('textbox',{name:'کانجی، خوانش یا معنی را جست‌وجو کن'});
+  await search.fill('学');
+  await expect(dialog.locator('.dictionary-result').first()).toBeVisible({timeout:10000});
+  await expect(dialog.locator('.dictionary-character').first()).toHaveText('学');
+  await expect(dialog.locator('.dictionary-readings')).toContainText('ガク');
+  await expect(dialog.locator('.dictionary-meta')).toContainText('JLPT');
+  await expect(dialog.locator('.dictionary-meta')).toContainText('استروک');
+  await expect(dialog.locator('.dictionary-meta')).toContainText('پایه');
+});

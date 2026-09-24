@@ -33,6 +33,52 @@ function loadComponentData(){
   }).catch(()=>null);
   return componentDataPromise;
 }
+function normalizeDictionaryQuery(value){
+  return String(value||'').trim().replace(/[ァ-ヺ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).toLowerCase();
+}
+function dictionaryResult(item){
+  return {
+    character:String(item?.character||item?.id||'').trim().slice(0,4),
+    meanings:Array.isArray(item?.meaning)?item.meaning.map(v=>String(v||'').trim()).filter(Boolean).slice(0,8):[],
+    on:Array.isArray(item?.on)?item.on.map(v=>String(v||'').trim()).filter(Boolean).slice(0,8):[],
+    kun:Array.isArray(item?.kun)?item.kun.map(v=>String(v||'').trim()).filter(Boolean).slice(0,8):[],
+    strokes:Number.isFinite(Number(item?.strokes))?Math.max(0,Number(item.strokes)):undefined,
+    grade:Number.isFinite(Number(item?.grade))?Math.max(0,Number(item.grade)):undefined,
+    jlpt:item?.jlpt?String(item.jlpt).trim().slice(0,8):null,
+    frequency:Number.isFinite(Number(item?.frequency))?Math.max(0,Number(item.frequency)):undefined,
+    order:Number.isFinite(Number(item?.order))?Math.max(0,Number(item.order)):undefined
+  };
+}
+async function searchKanji(query,limit=24){
+  const raw=String(query||'').trim().slice(0,80);
+  const q=normalizeDictionaryQuery(raw);
+  const deck=state.readDeck?.()||[];
+  if(!q)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'dictionary-search',query:'',results:[]};
+  const ranked=[];
+  for(const item of deck){
+    const character=String(item?.character||item?.id||'').trim();
+    if(!character)continue;
+    const fields=[
+      ...[item?.id,item?.character].map(v=>normalizeDictionaryQuery(v)),
+      ...(Array.isArray(item?.on)?item.on:[]).map(normalizeDictionaryQuery),
+      ...(Array.isArray(item?.kun)?item.kun:[]).map(normalizeDictionaryQuery),
+      ...(Array.isArray(item?.meaning)?item.meaning:[]).map(normalizeDictionaryQuery)
+    ].filter(Boolean);
+    let score=-1;
+    if(normalizeDictionaryQuery(character)===q)score=1000;
+    else if(fields.some(v=>v===q))score=900;
+    else if(fields.some(v=>v.startsWith(q)))score=700;
+    else if(fields.some(v=>v.includes(q)))score=500;
+    if(score>=0)ranked.push({score,frequency:Number(item?.frequency)||999999,result:dictionaryResult(item)});
+  }
+  ranked.sort((a,b)=>b.score-a.score||a.frequency-b.frequency);
+  return {
+    contractVersion:'1.9.0-v2-boundary-contract',
+    kind:'dictionary-search',
+    query:raw,
+    results:ranked.slice(0,Math.max(1,Math.min(40,Number(limit)||24))).map(row=>row.result)
+  };
+}
 async function getComponentInfo(character){
   const normalized=String(character||'').trim();
   const data=await loadComponentData();
@@ -71,7 +117,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
