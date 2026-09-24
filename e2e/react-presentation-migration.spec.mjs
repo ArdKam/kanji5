@@ -129,6 +129,10 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await page.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await page.waitForTimeout(700);
+  if (await card.getAttribute("data-back-page-count") === "2") {
+    await card.locator(".pager-button").nth(1).click();
+    await expect(card.locator(".learning-back-page.active .mnemonic-panel")).toBeVisible();
+  }
 
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
@@ -144,6 +148,10 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
     await expect(reloadedCard).toHaveClass(/is-revealed/, { timeout: 10000 });
   }
   await page.waitForTimeout(700);
+  if (await reloadedCard.getAttribute("data-back-page-count") === "2") {
+    await reloadedCard.locator(".pager-button").nth(1).click();
+    await expect(reloadedCard.locator(".learning-back-page.active .mnemonic-panel")).toBeVisible();
+  }
   await expect(reloadedCard.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
 
   await reloadedCard.getByRole("button", { name: "Edit" }).click();
