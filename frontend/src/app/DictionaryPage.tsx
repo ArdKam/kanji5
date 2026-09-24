@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { ComponentBreakdown } from "./ComponentBreakdown";
 import { formatNumber, t, type Language } from "./i18n";
-import { listKanji, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
+import { getComponentInfo, listKanji, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
@@ -8,21 +9,77 @@ const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
+function DictionaryAudio({ value, label }: { value: string; label: string }) {
+  const unsupported = typeof window.speechSynthesis?.speak !== "function" || typeof window.SpeechSynthesisUtterance !== "function";
+  return (
+    <button className="audio-button dictionary-audio-button" type="button" disabled={unsupported} aria-label={unsupported ? t("audioUnavailable") : label}
+      onClick={() => {
+        if (unsupported) return;
+        const utterance = new SpeechSynthesisUtterance(value);
+        utterance.lang = "ja-JP";
+        utterance.rate = 0.85;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      }}>
+      🔊
+    </button>
+  );
+}
+
+function DictionaryReading({ title, values, language }: { title: string; values: string[]; language: Language }) {
+  const first = values[0];
+  return (
+    <div className="reading dictionary-reading">
+      <span>{title}</span>
+      <strong lang="ja">{values.length ? values.join(" · ") : "—"}</strong>
+      {first ? <DictionaryAudio value={first} label={t("playReading", language) + " " + title} /> : null}
+    </div>
+  );
+}
+
 function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
+  const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setComponentInfo(null);
+    void getComponentInfo(item.character).then((info) => {
+      if (active) setComponentInfo(info);
+    }).catch(() => {
+      if (active) setComponentInfo(null);
+    });
+    return () => { active = false; };
+  }, [item.character]);
+
   return (
-    <dialog open className="dialog dictionary-card-dialog" aria-labelledby="dictionary-card-title">
+    <dialog open className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <div className="dictionary-card">
         <div className="dictionary-card-top">
           <span className="badge badge-red">{item.jlpt || "—"}</span>
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
         </div>
-        <div className="dictionary-card-character" lang="ja">{item.character}</div>
-        <h2 id="dictionary-card-title">{t("dictionaryCardTitle", language)}</h2>
+        <div className="kanji-row dictionary-card-kanji-row">
+          <div className="kanji-display dictionary-card-character" lang="ja">{item.character}</div>
+          <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
+        </div>
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
-        {item.on.length ? <div className="dictionary-card-section"><span>{t("dictionaryOn", language)}</span><strong lang="ja">{item.on.join(" · ")}</strong></div> : null}
-        {item.kun.length ? <div className="dictionary-card-section"><span>{t("dictionaryKun", language)}</span><strong lang="ja">{item.kun.join(" · ")}</strong></div> : null}
+        {componentInfo?.available && componentInfo.components.length ? (
+          <ComponentBreakdown
+            info={componentInfo}
+            title={language === "fa" ? "ساختار کانجی" : "Kanji structure"}
+            note={language === "fa" ? "اجزای دیداری" : "Visual components"}
+            ariaLabel={language === "fa" ? "ساختار دیداری کانجی" : "Kanji visual structure"}
+          />
+        ) : null}
+        <div className="readings-header dictionary-readings-header">
+          <span>{language === "fa" ? "خوانش‌ها" : "Readings"}</span>
+        </div>
+        <div className="readings learning-back-readings dictionary-readings">
+          <DictionaryReading title="On’yomi" values={item.on} language={language} />
+          <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
+        </div>
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
           {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
