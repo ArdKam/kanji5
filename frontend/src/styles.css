@@ -195,3 +195,29 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .dictionary-readings{grid-template-columns:1fr;}
   .dictionary-results{max-height:60vh;}
 }
+
+.mastery-grid{display:grid;gap:12px;}
+.mastery-row{display:grid;gap:6px;padding:9px 0;border-top:1px solid var(--line);}
+.mastery-row:first-child{border-top:0;}
+.mastery-label,.mastery-state{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;}
+.mastery-label strong{font-size:12px;}
+.mastery-track{height:10px;border-radius:999px;background:#e9e3d8;overflow:hidden;border:1px solid var(--line);}
+.mastery-track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--ai),var(--matcha));transition:width .25s ease;}
+.mastery-state{color:var(--mute);font-size:10px;}
+.mastery-state .trend-up{color:var(--matcha);font-weight:850;}
+.mastery-state .trend-down{color:var(--shu);font-weight:850;}
+.mastery-state .trend-flat{color:var(--mute);font-weight:850;}
+.mastery-footnote{margin:8px 0 0;color:var(--mute);font-size:10px;line-height:1.6;}
+.activity-chart{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:end;min-height:150px;padding-top:6px;}
+.activity-bar-wrap{display:grid;grid-template-rows:auto 1fr auto;gap:5px;min-width:0;height:150px;text-align:center;}
+.activity-count{font-size:10px;font-weight:850;color:var(--ink);}
+.activity-bar-track{height:110px;border:1px solid var(--line);border-radius:10px;background:var(--washi);display:flex;align-items:flex-end;overflow:hidden;}
+.activity-bar-track>span{display:block;width:100%;min-height:5px;background:var(--shu);border-radius:8px 8px 0 0;transition:height .25s ease;}
+.activity-label{font-size:9px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media(prefers-reduced-motion:reduce){.mastery-track>span,.activity-bar-track>span{transition:none;}}
+@media(max-width:760px){
+  .activity-chart{gap:4px;}
+  .activity-bar-wrap{height:132px;}
+  .activity-bar-track{height:94px;}
+  .activity-count,.activity-label{font-size:9px;}
+}
