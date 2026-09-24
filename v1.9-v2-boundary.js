@@ -79,6 +79,27 @@ async function searchKanji(query,limit=24){
     results:ranked.slice(0,Math.max(1,Math.min(40,Number(limit)||24))).map(row=>row.result)
   };
 }
+function normalizeMnemonicCharacter(value){return Array.from(String(value||'').trim()).slice(0,1).join('');}
+async function getMnemonic(character){
+  const key=normalizeMnemonicCharacter(character);
+  if(!key)return {character:'',text:''};
+  const mnemonics=state.readMnemonics?.()||{};
+  const value=typeof mnemonics[key]==='string'?mnemonics[key].trim().slice(0,600):'';
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'personal-mnemonic',character:key,text:value};
+}
+async function saveMnemonic(character,value){
+  const key=normalizeMnemonicCharacter(character);
+  if(!key)throw new Error('KANJI5_MNEMONIC_CHARACTER_REQUIRED');
+  const textValue=String(value??'').trim().slice(0,600);
+  const current=state.readMnemonics?.()||{};
+  const next={...current};
+  if(textValue)next[key]=textValue;else delete next[key];
+  const ok=Boolean(state.writeMnemonics?.(next));
+  if(!ok)throw new Error('KANJI5_MNEMONIC_SAVE_FAILED');
+  document.dispatchEvent(new CustomEvent('kanji5:v2-mnemonic-changed',{detail:{character:key}}));
+  await publish();
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'personal-mnemonic',character:key,text:textValue};
+}
 async function getComponentInfo(character){
   const normalized=String(character||'').trim();
   const data=await loadComponentData();
@@ -117,7 +138,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,getMnemonic,saveMnemonic});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
