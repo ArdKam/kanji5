@@ -92,6 +92,84 @@
 .kanji-catalog-tile[data-mastery-state="weak"] .kanji-catalog-fill,
 .kanji-catalog-tile[data-mastery-state="recovering"] .kanji-catalog-fill{background:var(--sumi);}
 .kanji-catalog-tile[data-mastery-state="unseen"] .kanji-catalog-fill{background:var(--line);}
+.custom-study-panel{
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--washi);
+}
+.custom-study-panel>summary{
+  cursor:pointer;
+  color:var(--ink);
+  font-size:.82rem;
+  font-weight:850;
+}
+.custom-study-panel>p{
+  margin:8px 0 10px;
+  color:var(--mute);
+  font-size:.7rem;
+  line-height:1.6;
+}
+.custom-study-controls{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.custom-study-focus{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.custom-study-limit{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--mute);
+  font-size:.7rem;
+  font-weight:750;
+  white-space:nowrap;
+}
+.custom-study-limit select{
+  min-height:36px;
+  padding:5px 26px 5px 9px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:.7rem;
+  font-weight:750;
+}
+.custom-study-action{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+  color:var(--mute);
+  font-size:.7rem;
+  font-weight:750;
+}
+.custom-study-action .button{
+  min-height:40px;
+  padding:7px 12px;
+}
+.custom-study-message{
+  margin:8px 0 0;
+  color:var(--shu)!important;
+  font-weight:800;
+}
+@media(max-width:720px){
+  .custom-study-controls{align-items:stretch;flex-direction:column;}
+  .custom-study-limit{justify-content:space-between;}
+  .custom-study-limit select{flex:1;max-width:180px;}
+  .custom-study-action{align-items:stretch;flex-direction:column;}
+  .custom-study-action .button{width:100%;}
+}
 .dictionary-page-search{
   display:block;
   margin-bottom:12px;
