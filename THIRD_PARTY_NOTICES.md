@@ -6,6 +6,7 @@ Kanji 5 uses KanjiVG stroke-order SVG data for the learning-card Stroke Order vi
 
 - Project: KanjiVG (Kanji Vector Graphics)
 - Source: https://github.com/KanjiVG/kanjivg
+- Pinned source commit: `422b5538595676da918c288a4230cb5e22a1ee7e`
 - Website: http://kanjivg.tagaini.net/
 - License: Creative Commons Attribution-Share Alike 3.0 (CC BY-SA 3.0)
 
