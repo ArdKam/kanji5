@@ -385,6 +385,33 @@ const api = {
     if (error) throw error;
     return { needsEmailConfirmation: !data.session };
   },
+  async updateProfile(name) {
+    const normalizedName = String(name || '').trim();
+    if (!normalizedName) throw new Error('AUTH_PROFILE_NAME_REQUIRED');
+    if (Array.from(normalizedName).length > 40) throw new Error('AUTH_PROFILE_NAME_TOO_LONG');
+    const c = await getClient();
+    const { data, error } = await c.auth.updateUser({
+      data: { full_name: normalizedName }
+    });
+    if (error) throw error;
+    user = data.user || user;
+    setState({ status: 'signed-in', user: mapUser(user), error: null });
+  },
+  async updatePassword(currentPassword, newPassword) {
+    if (!currentPassword || !newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
+    if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
+    if (!user?.email) throw new Error('AUTH_EMAIL_REQUIRED');
+    const c = await getClient();
+    const { error: reauthError } = await c.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    });
+    if (reauthError) throw reauthError;
+    const { data, error } = await c.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+    user = data.user || user;
+    setState({ status: 'signed-in', user: mapUser(user), error: null });
+  },
   async sendMagicLink(email) {
     const normalizedEmail = String(email || '').trim().toLowerCase();
     if (!normalizedEmail) throw new Error('AUTH_EMAIL_REQUIRED');
