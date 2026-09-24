@@ -9,7 +9,8 @@ test("learning card flips to a compact back face without card overflow", async (
       contentType: "application/json",
       body: JSON.stringify([
         { variants: [{ written: character + "生", pronounced: "がくせい" }], meanings: [{ glosses: ["student"] }] },
-        { variants: [{ written: character + "校", pronounced: "がっこう" }], meanings: [{ glosses: ["school"] }] }
+        { variants: [{ written: character + "校", pronounced: "がっこう" }], meanings: [{ glosses: ["school"] }] },
+        { variants: [{ written: character + "生", pronounced: "せい" }], meanings: [{ glosses: ["life"] }] }
       ]),
     });
   });
@@ -37,7 +38,7 @@ test("learning card flips to a compact back face without card overflow", async (
   await expect(card.locator(".readings")).toBeVisible();
   await expect(card.locator(".rating-grid")).toBeVisible();
   const exampleCount = await card.locator(".example-row").count();
-  expect(exampleCount).toBeLessThanOrEqual(2);
+  expect(exampleCount).toBe(3);
   if (exampleCount > 0) {
     await expect(card.locator(".example-meaning").first()).toBeVisible();
     const exampleMeanings = await card.locator(".example-meaning").allTextContents();
