@@ -102,7 +102,12 @@ type TranslationKey =
   | "cardPage"
   | "previousCardPage"
   | "nextCardPage"
-  | "swipeForMore";
+  | "swipeForMore"
+  | "masteryOverview"
+  | "masterySignal"
+  | "modelConfidence"
+  | "sevenDayActivity"
+  | "reviewsCount";
 
 const messages: Record<Language, Record<TranslationKey, string>> = {
   fa: {
