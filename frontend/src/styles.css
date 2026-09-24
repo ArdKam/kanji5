@@ -207,6 +207,21 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .dictionary-results{max-height:60vh;}
 }
 
+.mnemonic-panel{display:grid;gap:10px;margin-top:4px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--washi);}
+.mnemonic-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.mnemonic-header h3{margin:0 0 3px;font-size:13px;}
+.mnemonic-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.55;max-width:58ch;}
+.mnemonic-edit{min-height:38px;padding:6px 10px;white-space:nowrap;}
+.mnemonic-editor{display:grid;gap:8px;}
+.mnemonic-editor textarea{width:100%;min-height:78px;resize:vertical;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--sumi);padding:10px 11px;font:inherit;font-size:12px;line-height:1.6;box-sizing:border-box;}
+.mnemonic-editor textarea:focus-visible{outline:3px solid rgba(38,64,107,.22);outline-offset:1px;}
+.mnemonic-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--mute);font-size:10px;}
+.mnemonic-editor-footer .actions{margin:0;gap:6px;}
+.mnemonic-editor-footer .button{min-height:38px;padding:6px 10px;}
+.mnemonic-error{margin:0;color:var(--shu);font-size:10px;line-height:1.5;}
+.mnemonic-saved{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:9px;padding:10px 11px;border:1px dashed var(--line);border-radius:12px;background:var(--paper);}
+.mnemonic-saved>span{font-size:16px;line-height:1.3;}
+.mnemonic-saved p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.65;}
 .mastery-grid{display:grid;gap:12px;}
 .mastery-row{display:grid;gap:6px;padding:9px 0;border-top:1px solid var(--line);}
 .mastery-row:first-child{border-top:0;}

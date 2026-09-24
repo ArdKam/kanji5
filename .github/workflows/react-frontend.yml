@@ -13,6 +13,7 @@ on:
       - "e2e/react-presentation-offline.spec.mjs"
       - "e2e/react-review-practice.spec.mjs"
       - "e2e/react-learning-card-flip.spec.mjs"
+      - "e2e/react-personal-mnemonic.spec.mjs"
       - "e2e/react-accessibility.spec.mjs"
       - "e2e/react-pwa-release.spec.mjs"
       - "e2e/react-final-release-matrix.spec.mjs"
@@ -107,6 +108,9 @@ jobs:
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
+      - name: Run personal mnemonic gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-personal-mnemonic.spec.mjs
       - name: Run Review/Practice separation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
