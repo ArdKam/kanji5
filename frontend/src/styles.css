@@ -502,7 +502,9 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .learning-card-back .stroke-order-tool-trigger{
   width:44px;
   height:44px;
+  min-width:44px;
   min-height:44px;
+  flex:0 0 44px;
   padding:0;
   display:grid;
   place-items:center;
