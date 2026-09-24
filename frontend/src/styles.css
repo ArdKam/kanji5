@@ -436,3 +436,11 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .learning-card[data-card-density="dense"] .component-breakdown-part{min-width:26px;min-height:26px;padding:3px 5px;font-size:15px;}
 .learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:40px;padding:4px 6px;}
 .learning-card[data-card-density="dense"] .learning-card-back .reading>strong{font-size:13px;}
+
+/* Dense desktop final fit: reclaim the last few vertical pixels without hiding content. */
+@media(min-width:761px){
+  .learning-card[data-card-density="dense"] .learning-back-overview{row-gap:0;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(50px,16vw);}
+  .learning-card[data-card-density="dense"] .component-breakdown-target{font-size:28px;}
+  .learning-card[data-card-density="dense"] .component-breakdown-part{min-width:24px;min-height:24px;padding:2px 4px;font-size:14px;}
+}
