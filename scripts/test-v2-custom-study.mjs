@@ -1,4 +1,12 @@
 import { normalizeCustomStudyFilter, selectCustomStudyItems } from "../v2-custom-study-core.js";
+import { readFile } from "node:fs/promises";
+
+const reviewRuntimeSource = await readFile(new URL("../review-runtime.js", import.meta.url), "utf8");
+const boundarySource = await readFile(new URL("../v1.9-v2-boundary.js", import.meta.url), "utf8");
+const serviceWorkerSource = await readFile(new URL("../sw.js", import.meta.url), "utf8");
+new Function(reviewRuntimeSource);
+new Function(boundarySource);
+if (!serviceWorkerSource.includes(""./v2-custom-study-core.js"")) throw new Error("Custom study core is not precached by the service worker");
 
 const now = Date.parse("2026-09-24T18:00:00Z");
 const deck = [
