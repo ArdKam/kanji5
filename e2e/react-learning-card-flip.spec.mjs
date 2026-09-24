@@ -69,6 +69,7 @@ async function swipePager(page, pager, fromRatio, toRatio) {
     clientX: toX,
     clientY: y,
   });
+  await page.waitForTimeout(520);
 }
 
 async function revealLearningCard(page, language = "fa") {
