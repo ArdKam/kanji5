@@ -84,7 +84,6 @@ type TranslationKey =
   | "playWordPronunciation"
   | "playReading"
   | "vocabularyExamples"
-  | "showCardHint"
   | "correctRecall"
   | "correctAnswer"
   | "dictionary"
@@ -110,7 +109,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
-    cardBack:"پشت کارت", showKanjiInfo:"نمایش اطلاعات کانجی", firstLook:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
+    cardBack:"پشت کارت", showKanjiInfo:"نمایش اطلاعات کانجی",
     again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
     meaning:"معنی", reading:"خوانش", production:"تولید", vocabulary:"واژگان", context:"بافت",
     unknown:"نمی‌دانم", correct:"درست", wrong:"نادرست", nearMiss:"نزدیک بود", empty:"خالی", unavailable:"در دسترس نیست",
@@ -125,7 +124,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     learned:"یادگرفته‌شده", streak:"روز پیاپی", dailyGoal:"هدف روزانه", completed:"تکمیل شد", noSession:"جلسه‌ای برای نمایش وجود ندارد",
     startExercise:"شروع تمرین", loading:"در حال اتصال به هستهٔ یادگیری…", learningCoreError:"رابط هستهٔ یادگیری آماده نشد", tryAgain:"تلاش دوباره",
     audioUnavailable:"صدا در این مرورگر در دسترس نیست", playKanjiPronunciation:"پخش تلفظ کانجی", playWordPronunciation:"پخش تلفظ واژه",
-    playReading:"پخش", vocabularyExamples:"نمونهٔ واژگانی", showCardHint:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
+    playReading:"پخش", vocabularyExamples:"نمونهٔ واژگانی",
     correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست", dictionary:"فرهنگ کانجی", dictionaryTitle:"جست‌وجوی کانجی", dictionaryPlaceholder:"کانجی، خوانش یا معنی را جست‌وجو کن", dictionaryHint:"می‌توانی خود کانجی، خوانش یا معنی انگلیسی آن را وارد کنی.", dictionarySearching:"در حال جست‌وجو…", dictionaryNoResults:"نتیجه‌ای پیدا نشد.", dictionaryStrokes:"استروک", dictionaryGrade:"پایه", dictionaryJlpt:"JLPT", dictionaryFrequency:"فراوانی", dictionaryOn:"اُن‌یومی", dictionaryKun:"کُن‌یومی", cardPage:"صفحه اطلاعات کارت", previousCardPage:"صفحه قبلی کارت", nextCardPage:"صفحه بعدی کارت", swipeForMore:"برای اطلاعات بیشتر سوایپ کن"
   },
   en: {
@@ -133,7 +132,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"Stats", settings:"Settings", language:"Language", persian:"فارسی", english:"English",
     learning:"Learning", activeRecall:"Active Recall", learningPath:"Learning path", sessionProgress:"Session progress",
     goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"New", learningReview:"Learning review",
-    cardBack:"Card back", showKanjiInfo:"Show kanji information", firstLook:"First look at the kanji, then reveal its information.",
+    cardBack:"Card back", showKanjiInfo:"Show kanji information",
     again:"Again", hard:"Hard", good:"Good", easy:"Easy",
     meaning:"Meaning", reading:"Reading", production:"Production", vocabulary:"Vocabulary", context:"Context",
     unknown:"I don't know", correct:"Correct", wrong:"Incorrect", nearMiss:"Near miss", empty:"Empty", unavailable:"Unavailable",
@@ -148,7 +147,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     learned:"Learned", streak:"Streak", dailyGoal:"Daily goal", completed:"Completed", noSession:"There is no session to display",
     startExercise:"Start exercise", loading:"Connecting to the learning engine…", learningCoreError:"The learning interface could not be loaded", tryAgain:"Try again",
     audioUnavailable:"Audio is not available in this browser", playKanjiPronunciation:"Play kanji pronunciation", playWordPronunciation:"Play word pronunciation",
-    playReading:"Play", vocabularyExamples:"Vocabulary examples", showCardHint:"First look at the kanji, then reveal its information.",
+    playReading:"Play", vocabularyExamples:"Vocabulary examples",
     correctRecall:"Recall was correct.", correctAnswer:"Correct answer", dictionary:"Kanji dictionary", dictionaryTitle:"Kanji dictionary", dictionaryPlaceholder:"Search kanji, reading, or meaning", dictionaryHint:"Search by the kanji itself, a reading, or an English meaning.", dictionarySearching:"Searching…", dictionaryNoResults:"No results found.", dictionaryStrokes:"Strokes", dictionaryGrade:"Grade", dictionaryJlpt:"JLPT", dictionaryFrequency:"Frequency", dictionaryOn:"On’yomi", dictionaryKun:"Kun’yomi", cardPage:"Card information page", previousCardPage:"Previous card information page", nextCardPage:"Next card information page", swipeForMore:"Swipe for more information"
   }
 };
