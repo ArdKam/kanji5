@@ -24,6 +24,14 @@ jobs:
       - name: Checkout release tree
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate shipped React artifact
+        run: node scripts/test-react-shipped-artifact.mjs
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
