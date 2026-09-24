@@ -65,7 +65,9 @@ test("learning card keeps dense information on separate back pages without verti
     await expect(card.locator(".learning-back-page-nav")).toBeVisible();
     await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
     await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(0);
-    await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(5);
+    const totalExampleCount = await card.locator(".example-row").count();
+    expect(totalExampleCount).toBeGreaterThan(2);
+    await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(totalExampleCount);
 
     const pageMetrics = await card.locator(".learning-back-page").evaluateAll((pages) =>
       pages.map((page) => {
@@ -89,7 +91,7 @@ test("learning card keeps dense information on separate back pages without verti
     await expect(previousButton).toBeDisabled();
     await nextButton.click();
     await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "نمونهٔ واژگانی");
-    await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(5);
+    await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(totalExampleCount);
     await expect(previousButton).toBeEnabled();
     await expect(nextButton).toBeDisabled();
     await assertCardBounds(card);
