@@ -40,6 +40,7 @@ export async function fetchContextSentences(character){
   url.searchParams.set('trans:is_direct','yes');
   url.searchParams.set('is_orphan','no');
   url.searchParams.set('is_unapproved','no');
+  url.searchParams.set('sort','relevance');
   url.searchParams.set('limit','24');
   const payload=await requestJSON(url.toString());
   const rows=Array.isArray(payload?.data)?payload.data:[];
