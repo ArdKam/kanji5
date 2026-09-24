@@ -18,11 +18,12 @@ const boot=()=>{
   btn.type='button'; btn.className='account-button'; btn.dataset.kanji5AccountFallback='true';
   const dialog=document.createElement('dialog'); dialog.className='dialog account-dialog'; dialog.dataset.kanji5AccountFallbackDialog='true';
   document.body.appendChild(dialog);
-  if(!existing) {
-    if(headerActions) headerActions.appendChild(btn);
-    else document.body.appendChild(btn);
-    btn.classList.add('is-ready');
+  if(headerActions){
+    if(btn.parentElement!==headerActions) headerActions.appendChild(btn);
+  }else if(btn.parentElement!==document.body){
+    document.body.appendChild(btn);
   }
+  btn.classList.add('is-ready');
   let mode='email', intent='sign-in', busy=false, notice='', unsubscribe=()=>{};
   const api=()=>window.__KANJI5_ACCOUNT__;
   const waitForApi=async()=>{for(let i=0;i<120;i+=1){const a=api();if(a)return a;await new Promise(r=>setTimeout(r,100));}throw new Error('KANJI5_ACCOUNT_UNAVAILABLE');};
