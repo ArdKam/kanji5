@@ -8,7 +8,7 @@ export function normalizeStrokeOrderCharacter(value: unknown): string {
 export function kanjiSvgUrl(character: string): string {
   const normalized = normalizeStrokeOrderCharacter(character);
   const codePoint = normalized.codePointAt(0);
-  if (!normalized || !Number.isFinite(codePoint)) return "";
+  if (!normalized || codePoint === undefined || !Number.isFinite(codePoint)) return "";
   const filename = codePoint.toString(16).padStart(5, "0").toLowerCase() + ".svg";
   return KANJIVG_BASE_URL + "/" + filename;
 }
