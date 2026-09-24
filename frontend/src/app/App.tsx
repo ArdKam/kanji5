@@ -140,6 +140,35 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                   {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
                   <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
                   <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+
+                </div>
+                {!hasExamplesPage?<section className="mnemonic-panel" aria-labelledby="personal-mnemonic-title">
+                    <div className="mnemonic-header">
+                      <div>
+                        <h3 id="personal-mnemonic-title">{t("personalMnemonic")}</h3>
+                        <p>{t("personalMnemonicHint")}</p>
+                      </div>
+                      {personalMnemonic&&!mnemonicEditing?<button className="button secondary mnemonic-edit" type="button" onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(true)}}>{t("editMnemonic")}</button>:null}
+                    </div>
+                    {mnemonicEditing||!personalMnemonic?
+                      <div className="mnemonic-editor">
+                        <textarea value={mnemonicDraft} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
+                        <div className="mnemonic-editor-footer">
+                          <span>{fa(mnemonicDraft.length)}/{fa(600)}</span>
+                          <div className="actions">
+                            {mnemonicEditing?<button className="button secondary" type="button" disabled={mnemonicBusy} onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(false)}}>{t("cancel")}</button>:null}
+                            <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
+                          </div>
+                        </div>
+                        {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
+                      </div>
+                      :<div className="mnemonic-saved"><span>🧠</span><p>{personalMnemonic}</p></div>}
+                  </section>:null}
+                {!hasExamplesPage&&card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
+              </div>
+            </div>
+            {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1}>
+              <div className="learning-back-scroll">
                   <section className="mnemonic-panel" aria-labelledby="personal-mnemonic-title">
                     <div className="mnemonic-header">
                       <div>
@@ -162,12 +191,6 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                       </div>
                       :<div className="mnemonic-saved"><span>🧠</span><p>{personalMnemonic}</p></div>}
                   </section>
-                </div>
-                {!hasExamplesPage&&card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
-              </div>
-            </div>
-            {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1}>
-              <div className="learning-back-scroll">
                 <div className="examples compact-examples">
                   <h3>{t("vocabularyExamples")}</h3>
                   {card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}
