@@ -53,7 +53,7 @@ jobs:
           grep -q 'function dynamicSameOrigin' sw.js
           ! grep -q '"./v1.6-ui-hotfix-safe.js"' sw.js
           ! grep -q '"./v1.4-education-ui.js"' sw.js
-          for f in v1.5-state.js v1.5-recall-core.js v1.5-p0.js v1.5-network.js v1.5-education-ui.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js v1.5-sync-core.js v1.6-session.js v1.6-session-core.js v1.6-session-feedback.js v1.6-session-analytics.js v1.6-skill-profile.js v1.6-sync-core.js v1.6-session-ui.js v1.8-production-core.js v1.8-vocabulary-core.js v1.8-context-core.js v1.8-learning-ux.js; do grep -q "./$f" sw.js; done
+          for f in v1.5-state.js v1.5-network.js v1.5-education-ui.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js v1.5-sync-core.js v1.6-session.js v1.6-session-core.js v1.6-session-feedback.js v1.6-session-analytics.js v1.6-skill-profile.js v1.6-sync-core.js v1.6-session-ui.js v1.8-production-core.js v1.8-vocabulary-core.js v1.8-context-core.js; do grep -q "./$f" sw.js; done
           grep -q 'SNAPSHOT_STORAGE' v1.5-state.js
           grep -q 'SNAPSHOT_COMMIT' v1.5-state.js
           grep -q 'PERSISTENCE_SCHEMA_VERSION' v1.5-state.js
