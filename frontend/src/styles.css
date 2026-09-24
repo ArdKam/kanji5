@@ -444,3 +444,17 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .learning-card[data-card-density="dense"] .component-breakdown-target{font-size:28px;}
   .learning-card[data-card-density="dense"] .component-breakdown-part{min-width:24px;min-height:24px;padding:2px 4px;font-size:14px;}
 }
+
+/* Dense desktop micro-compaction. */
+@media(min-width:761px){
+  .learning-card[data-card-density="dense"] .learning-back-scroll{padding-top:2px;padding-bottom:4px;}
+  .learning-card[data-card-density="dense"] .stroke-order-panel{gap:4px;padding:5px;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(44px,14vw);}
+  .learning-card[data-card-density="dense"] .stroke-order-progress{font-size:8px;}
+  .learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(58px,auto) minmax(0,1fr);gap:4px;padding:5px;}
+  .learning-card[data-card-density="dense"] .mnemonic-header h3{font-size:9px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor textarea{min-height:40px;height:40px;padding:4px 6px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{padding-inline:6px;font-size:9px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .meanings{font-size:17px;line-height:1.2;}
+  .learning-card[data-card-density="dense"] .learning-back-readings{gap:4px;}
+}
