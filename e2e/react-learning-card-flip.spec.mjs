@@ -147,7 +147,7 @@ test("learning card keeps dense information on separate back pages in Persian an
 
     const pager = card.locator(".learning-back-pager-shell");
     if (viewport.width <= 760) {
-      await swipePager(page, pager, 0.75, 0.25);
+      await swipePager(page, pager, 0.25, 0.75);
     } else {
       await mouseSwipePager(page, pager, 0.75, 0.25);
     }
