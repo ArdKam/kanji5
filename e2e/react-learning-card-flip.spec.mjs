@@ -24,6 +24,18 @@ async function routeExamples(page, count) {
   });
 }
 
+async function mouseSwipePager(page, pager, fromRatio, toRatio) {
+  const box = await pager.boundingBox();
+  if (!box) throw new Error("Pager bounds unavailable");
+  const y = box.y + box.height * 0.5;
+  const fromX = box.x + box.width * fromRatio;
+  const toX = box.x + box.width * toRatio;
+  await page.mouse.move(fromX, y);
+  await page.mouse.down();
+  await page.mouse.move(toX, y, { steps: 5 });
+  await page.mouse.up();
+}
+
 async function swipePager(page, pager, fromRatio, toRatio) {
   const box = await pager.boundingBox();
   if (!box) throw new Error("Pager bounds unavailable");
@@ -134,7 +146,11 @@ test("learning card keeps dense information on separate back pages in Persian an
     await assertCardBounds(card);
 
     const pager = card.locator(".learning-back-pager-shell");
-    await swipePager(page, pager, 0.75, 0.25);
+    if (viewport.width <= 760) {
+      await swipePager(page, pager, 0.75, 0.25);
+    } else {
+      await mouseSwipePager(page, pager, 0.75, 0.25);
+    }
     await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
     await expect(previousButton).toBeDisabled();
     await expect(nextButton).toBeEnabled();
