@@ -8,6 +8,7 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
+      - "scripts/test-architecture-hygiene.mjs"
       - "e2e/react-presentation-migration.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
