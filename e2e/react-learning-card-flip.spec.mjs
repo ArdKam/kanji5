@@ -215,7 +215,7 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   <path id="kvg:05b66-s3" d="M50,10 L70,30"/>
 </g>
 </svg>`;
-  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/**.svg", async route => {
+  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
     await route.fulfill({ status: 200, contentType: "image/svg+xml", body: svg });
   });
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
