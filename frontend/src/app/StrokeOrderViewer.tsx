@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-
-type StrokePath = { strokeNumber: number; d: string };
-type StrokeOrderCore = {
-  STROKE_ORDER_VERSION: string;
-  kanjiSvgUrl: (character: string) => string;
-  parseStrokePaths: (svgText: string) => StrokePath[];
-};
-
-async function loadCore(): Promise<StrokeOrderCore> {
-  return import("../../../v2-stroke-order-core.js") as unknown as Promise<StrokeOrderCore>;
-}
+import { kanjiSvgUrl, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 
 export function StrokeOrderViewer({ character, language }: { character: string; language: Language }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
@@ -38,13 +28,13 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
     if (!normalized) return () => { active = false; };
 
     setLoading(true);
-    void loadCore().then(async (core) => {
-      const url = core.kanjiSvgUrl(normalized);
+    void (async () => {
+      const url = kanjiSvgUrl(normalized);
       if (!url) throw new Error("Invalid kanji");
       const response = await fetch(url, { cache: "force-cache" });
       if (!response.ok) throw new Error("KanjiVG request failed");
       const svg = await response.text();
-      const next = core.parseStrokePaths(svg);
+      const next = parseStrokePaths(svg);
       if (!next.length) throw new Error("No stroke paths found");
       if (!active) return;
       setPaths(next);
