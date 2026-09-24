@@ -156,11 +156,11 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
       <form className="account-auth-form" onSubmit={event => { event.preventDefault(); submitEmailAuth(); }}>
         <label>
           <span>{t("email", language)}</span>
-          <input type="email" value={email} onChange={event => setEmail(event.target.value)} autoComplete="email" required placeholder="name@example.com" disabled={busy} />
+          <input name="email" type="email" value={email} onChange={event => setEmail(event.target.value)} autoComplete="email" required placeholder="name@example.com" disabled={busy} />
         </label>
         {authMode === "email" ? <label>
           <span>{t("password", language)}</span>
-          <input type="password" value={password} onChange={event => setPassword(event.target.value)} autoComplete="current-password" minLength={6} required placeholder="••••••••" disabled={busy} />
+          <input name="password" type="password" value={password} onChange={event => setPassword(event.target.value)} autoComplete="current-password" minLength={6} required placeholder="••••••••" disabled={busy} />
         </label> : null}
                 <button className="button primary account-email-button" type="submit" disabled={busy}>
           {busy ? t("signingIn", language) : authMode === "email" ? (emailIntent === "sign-in" ? t("signInWithEmail", language) : t("createAccountAction", language)) : t("sendMagicLink", language)}
