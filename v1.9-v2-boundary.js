@@ -79,6 +79,34 @@ async function searchKanji(query,limit=24){
     results:ranked.slice(0,Math.max(1,Math.min(40,Number(limit)||24))).map(row=>row.result)
   };
 }
+function kanjiMastery(character,knowledge,model){
+  const attributes=model?.kanji?.[character]?.attributes||{};
+  const modes=['meaning','reading','production','vocabulary','context'];
+  let total=0;
+  for(const mode of modes){
+    const projected=attributes[mode]||{};
+    const raw=knowledge?.[character]?.[mode]||{};
+    const attempts=Number(projected.attempts??raw.attempts)||0;
+    const mastery=Number(projected.mastery);
+    const fallback=Math.max(0,Math.min(1,(Number(projected.correct??raw.correct)||0)+1)/(attempts+2));
+    if(attempts>0)total+=Number.isFinite(mastery)?Math.max(0,Math.min(1,mastery)):fallback;
+  }
+  return total/modes.length;
+}
+async function listKanji(){
+  const deck=state.readDeck?.()||[];
+  const knowledge=state.readKnowledge?.()||{};
+  const model=learner()||{};
+  const results=deck.map(item=>{
+    const result=dictionaryResult(item);
+    const character=result.character;
+    const attrs=model?.kanji?.[character]?.attributes||{};
+    const states=Object.values(attrs).map(v=>String(v?.state||'')).filter(Boolean);
+    const state=states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'recovering':states.includes('weak')?'weak':states.includes('learning')?'learning':states.includes('introduced')?'introduced':'unseen';
+    return {...result,mastery:kanjiMastery(character,knowledge,model),state};
+  });
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-catalog',results};
+}
 async function getComponentInfo(character){
   const normalized=String(character||'').trim();
   const data=await loadComponentData();
@@ -117,7 +145,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
