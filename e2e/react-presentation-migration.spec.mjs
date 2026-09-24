@@ -10,6 +10,8 @@ async function clean(page){
 test('React is the sole default presentation renderer',async({page})=>{
   await clean(page);
   await expect(page.locator('#root .daily-summary')).toBeVisible({timeout:10000});
+  await expect(page.locator('#root .learning-card-front .badge').filter({hasText:'جدید'})).toBeVisible({timeout:10000});
+  await expect(page.locator('#root .learning-card-front .hint')).toHaveCount(0);
   await expect(page.locator('#v2App')).toHaveCount(0);
   await expect(page.locator('.wrap, #app, #loading')).toHaveCount(0);
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
