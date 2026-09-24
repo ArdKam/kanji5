@@ -38,7 +38,7 @@ function DictionaryReading({ title, values, language }: { title: string; values:
   );
 }
 
-({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
+function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
 
