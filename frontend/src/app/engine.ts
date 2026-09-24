@@ -108,6 +108,8 @@ export type KanjiDictionaryResult = {
   order?: number;
 };
 
+export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:string };
+
 export type ComponentInfo = {
   character: string;
   available: boolean;
@@ -121,6 +123,7 @@ export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
+  listKanji: () => Promise<{ results: KanjiCatalogItem[] }>;
   refreshLearning: () => Promise<Snapshot>;
   revealLearning: (direct?: boolean) => Promise<boolean>;
   rateLearning: (rating: Rating) => Promise<boolean>;
@@ -250,6 +253,10 @@ export async function nextExercise(): Promise<void> {
 }
 export async function searchKanji(query: string, limit = 24): Promise<{ query: string; results: KanjiDictionaryResult[] }> {
   return (await waitForEngine()).searchKanji(query, limit);
+}
+
+export async function listKanji(): Promise<{ results: KanjiCatalogItem[] }> {
+  return (await waitForEngine()).listKanji();
 }
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
