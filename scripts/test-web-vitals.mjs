@@ -8,9 +8,9 @@ const css = read("frontend/src/styles.css");
 
 assert.match(index, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/, "Google Fonts origin should be preconnected");
 assert.match(index, /rel="preconnect" href="https:\/\/fonts\.gstatic\.com"/, "Google Fonts static origin should be preconnected");
-assert.match(index, /rel="preload" as="fetch" href="\.\/kanji-data\.json"/, "Kanji data should be preloaded");
+assert.doesNotMatch(index, /rel="preload"[^>]+kanji-data\.json/, "Kanji data must not use an unused preload hint");
 assert.match(index, /rel="modulepreload" href="\.\/vendor\/ts-fsrs-5\.4\.1\.mjs"/, "FSRS should be module-preloaded");
-assert.match(index, /rel="preload" as="style" href="\.\/react-dist\/kanji5-react\.css/, "React CSS should be preloaded");
+assert.match(index, /rel="stylesheet" href="\.\/react-dist\/kanji5-react\.css\?v=20260925-release1"[^>]*data-kanji5-react-styles/, "React CSS should be loaded as a normal stylesheet so it is not a duplicate preload");
 assert.match(app, /useState<Snapshot\|null>\(\(\)=>getInitialSnapshot\(\)\)/, "App should consume a ready snapshot on first render when available");
 assert.match(app, /function LoadingSummary\(\)/, "Review loading state must reserve summary geometry");
 assert.match(app, /function LoadingGoal\(\)/, "Review loading state must reserve goal geometry");
