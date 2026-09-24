@@ -235,22 +235,38 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  const panel = card.locator(".stroke-order-panel");
+  const tool = card.locator(".stroke-order-tool");
+  await expect(tool).toBeVisible();
+  const trigger = tool.getByRole("button", { name: "Stroke order" });
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(trigger.locator(".stroke-order-replay-icon")).toBeVisible();
+  const triggerBox = await trigger.boundingBox();
+  expect(triggerBox?.width).toBeGreaterThanOrEqual(32);
+  expect(triggerBox?.width).toBeLessThanOrEqual(48);
+  expect(triggerBox?.height).toBeGreaterThanOrEqual(32);
+  expect(triggerBox?.height).toBeLessThanOrEqual(48);
+
+  const identity = card.locator(".learning-back-identity");
+  const tools = card.locator(".learning-back-tools");
+  await expect(identity.locator(".learning-back-tools")).toHaveCount(1);
+  await expect(tools).toBeVisible();
+  const readingsBox = await card.locator(".learning-back-readings").boundingBox();
+  const toolsBox = await tools.boundingBox();
+  expect(readingsBox).not.toBeNull();
+  expect(toolsBox).not.toBeNull();
+  expect((toolsBox?.top ?? 0)).toBeGreaterThanOrEqual((readingsBox?.bottom ?? 0) - 1);
+
+  await trigger.click();
+  const panel = card.locator(".stroke-order-panel.is-expanded");
   await expect(panel).toBeVisible();
-  const strokeToggle = panel.getByRole("button", { name: "Stroke order" });
-  await expect(strokeToggle).toHaveAttribute("aria-expanded", "false");
-  await strokeToggle.click();
-  await expect(strokeToggle).toHaveAttribute("aria-expanded", "true");
+  await expect(panel.locator(".stroke-order-toggle")).toHaveAttribute("aria-expanded", "true");
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
-  await expect(panel.getByRole("button", { name: "Play" })).toBeVisible();
-  console.log("STROKE_CONTROLS_LAYOUT", JSON.stringify(await panel.locator(".stroke-order-controls").evaluate((el) => ({
-    gridTemplateColumns: getComputedStyle(el).gridTemplateColumns,
-    rects: Array.from(el.querySelectorAll("button")).map((button) => {
-      const r = button.getBoundingClientRect();
-      return { text: button.textContent, left: r.left, top: r.top, right: r.right, bottom: r.bottom, position: getComputedStyle(button).position, pointerEvents: getComputedStyle(button).pointerEvents, gridColumn: getComputedStyle(button).gridColumn };
-    })
-  }))));
+  await expect(panel.locator(".stroke-order-active")).toHaveCount(1);
+  const expandedStage = await panel.locator(".stroke-order-stage svg").boundingBox();
+  expect(expandedStage?.width ?? 0).toBeGreaterThan(120);
+  await expect.poll(async () => panel.getAttribute("data-stroke-order-open"), { timeout: 1000 }).toBe("true");
+
   await panel.getByRole("button", { name: "Next" }).click();
   await expect(panel.locator(".stroke-order-progress")).toHaveText("1 / 3");
   await panel.getByRole("button", { name: "Previous" }).click();
