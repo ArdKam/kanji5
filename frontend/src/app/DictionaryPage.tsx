@@ -5,7 +5,11 @@ import { getComponentInfo, listKanji, type ComponentInfo, type CustomStudyFilter
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
-const levelRank: Record<string, number> = { N5: 0, N4: 1,function DictionaryAudio({ value, label }: { value: string; label: string }) {
+const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
+
+const normalize = (value: string) => value.trim().toLocaleLowerCase();
+
+function DictionaryAudio({ value, label }: { value: string; label: string }) {
   const unsupported = typeof window.speechSynthesis?.speak !== "function" || typeof window.SpeechSynthesisUtterance !== "function";
   return (
     <button className="audio-button dictionary-audio-button" type="button" disabled={unsupported} aria-label={unsupported ? t("audioUnavailable") : label}
@@ -80,13 +84,6 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
           {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
           {item.frequency ? <span>{t("dictionaryFrequency", language)} #{formatNumber(item.frequency, language)}</span> : null}
-        </div>
-      </div>
-    </dialog>
-  );
-}
-
-mber(item.frequency, language)}</span> : null}
         </div>
       </div>
     </dialog>
