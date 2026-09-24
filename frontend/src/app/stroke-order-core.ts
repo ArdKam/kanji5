@@ -1,5 +1,5 @@
 export const STROKE_ORDER_VERSION = "1.0.0";
-export const KANJIVG_BASE_URL = "https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji";
+export const KANJIVG_BASE_URL = "https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji";
 
 export function normalizeStrokeOrderCharacter(value: unknown): string {
   return Array.from(String(value || "").trim()).slice(0, 1).join("");
