@@ -9,6 +9,7 @@ const core = new Function(executable + "\nreturn { STROKE_ORDER_VERSION, KANJIVG
 if (core.STROKE_ORDER_VERSION !== "1.0.0") throw new Error("Unexpected stroke-order core version");
 if (core.normalizeStrokeOrderCharacter(" 学 extra ") !== "学") throw new Error("Character normalization failed");
 if (!core.kanjiSvgUrl("学").endsWith("/05b66.svg")) throw new Error("KanjiVG codepoint URL failed");
+if (!core.kanjiSvgUrl("学").includes("/422b5538595676da918c288a4230cb5e22a1ee7e/")) throw new Error("KanjiVG source is not pinned");
 
 const svg = `
 <svg><g id="kvg:StrokePaths_05b66">
@@ -25,6 +26,7 @@ if (paths.some(row => !row.d)) throw new Error("Stroke path data missing");
 
 const sw = await readFile(new URL("../sw.js", import.meta.url), "utf8");
 if (!sw.includes("KANJIVG_ORIGIN") || !sw.includes("KANJIVG_PATH")) throw new Error("KanjiVG service-worker route missing");
+if (!sw.includes("422b5538595676da918c288a4230cb5e22a1ee7e")) throw new Error("Service worker does not use the pinned KanjiVG source");
 const notices = await readFile(new URL("../THIRD_PARTY_NOTICES.md", import.meta.url), "utf8");
 if (!notices.includes("KanjiVG") || !notices.includes("CC BY-SA 3.0")) throw new Error("KanjiVG attribution notice missing");
 
