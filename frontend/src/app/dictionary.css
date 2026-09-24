@@ -395,8 +395,6 @@
 
 .dictionary-card-dialog .dialog-close{position:absolute;top:8px;inset-inline-start:8px;z-index:3;background:color-mix(in srgb, var(--paper) 86%, transparent);border-radius:12px;}
 
-.dictionary-card-kanji-row{min-height:150px;margin:2px 0 6px;}
-.dictionary-card-kanji-row .dictionary-card-character{margin:0;font-size:clamp(90px,18vw,140px);}
 .dictionary-audio-button{flex:0 0 auto;}
 .dictionary-readings-header{margin-top:15px;padding-top:13px;border-top:1px solid var(--line);}
 .dictionary-readings .reading{min-height:88px;}
@@ -408,4 +406,49 @@
 .dictionary-readings .dictionary-audio-button:focus-visible{
   outline:3px solid color-mix(in srgb, var(--shu) 45%, transparent);
   outline-offset:2px;
+}
+
+.dictionary-stroke-order{
+  margin:2px 0 6px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  gap:0;
+  min-height:150px;
+  display:grid;
+  place-items:center;
+}
+.dictionary-stroke-order .stroke-order-stage{
+  width:100%;
+  min-height:150px;
+  padding:0;
+  gap:0;
+}
+.dictionary-stroke-order .stroke-order-stage svg{
+  width:min(210px,54vw);
+  max-height:190px;
+}
+.dictionary-stroke-order .stroke-order-ghost{
+  display:none;
+}
+.dictionary-stroke-order .stroke-order-done{
+  stroke:var(--ink);
+  stroke-width:4.8;
+}
+.dictionary-stroke-order .stroke-order-active{
+  stroke:var(--shu);
+  stroke-width:5.2;
+}
+.dictionary-stroke-order .stroke-order-loading{
+  min-height:130px;
+  width:100%;
+}
+.dictionary-stroke-order .stroke-order-error{
+  width:100%;
+}
+@media (max-width:520px){
+  .dictionary-stroke-order,
+  .dictionary-stroke-order .stroke-order-stage{min-height:128px;}
+  .dictionary-stroke-order .stroke-order-stage svg{width:min(170px,52vw);max-height:160px;}
 }
