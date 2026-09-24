@@ -16,6 +16,7 @@ import {
   revealLearning,
   startExercise,
   startLearningExperience,
+  startCustomStudy,
   submitExercise,
   saveMnemonic,
   updateSettings,
@@ -113,6 +114,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   useEffect(()=>{snapPagerTrack(backPage)},[backPage,snapPagerTrack]);
   const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2)return;
+    if((event.target as HTMLElement|null)?.closest?.("button,input,textarea,select,a"))return;
     if(event.pointerType==="mouse"&&event.button!==0)return;
     swipeRef.current={startX:event.clientX,lastX:event.clientX,lastTime:performance.now(),active:true};
     const track=pagerTrackRef.current;

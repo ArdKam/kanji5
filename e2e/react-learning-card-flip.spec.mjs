@@ -143,8 +143,18 @@ test("learning card keeps dense information on separate back pages in Persian an
     );
     expect(pageMetrics[0].visible).toBe("visible");
     expect(pageMetrics[1].visible).toBe("hidden");
-    for (const metrics of pageMetrics) {
-      expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 2);
+    for (let index = 0; index < pageMetrics.length; index += 1) {
+      const metrics = pageMetrics[index];
+      if (metrics.scrollHeight > metrics.clientHeight + 2) {
+        const children = await card.locator(".learning-back-page").nth(index).locator(".learning-back-overview").evaluate((el) =>
+          Array.from(el.children).map((child) => {
+            const r = child.getBoundingClientRect();
+            const style = getComputedStyle(child);
+            return { className: child.className, top: r.top, height: r.height, bottom: r.bottom, marginTop: style.marginTop, marginBottom: style.marginBottom, display: style.display };
+          })
+        );
+        throw new Error("page "+index+" overflow: "+JSON.stringify({ metrics, children }));
+      }
     }
 
     await assertCardBounds(card);
@@ -227,9 +237,20 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
 
   const panel = card.locator(".stroke-order-panel");
   await expect(panel).toBeVisible();
+  const strokeToggle = panel.getByRole("button", { name: "Stroke order" });
+  await expect(strokeToggle).toHaveAttribute("aria-expanded", "false");
+  await strokeToggle.click();
+  await expect(strokeToggle).toHaveAttribute("aria-expanded", "true");
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
   await expect(panel.getByRole("button", { name: "Play" })).toBeVisible();
+  console.log("STROKE_CONTROLS_LAYOUT", JSON.stringify(await panel.locator(".stroke-order-controls").evaluate((el) => ({
+    gridTemplateColumns: getComputedStyle(el).gridTemplateColumns,
+    rects: Array.from(el.querySelectorAll("button")).map((button) => {
+      const r = button.getBoundingClientRect();
+      return { text: button.textContent, left: r.left, top: r.top, right: r.right, bottom: r.bottom, position: getComputedStyle(button).position, pointerEvents: getComputedStyle(button).pointerEvents, gridColumn: getComputedStyle(button).gridColumn };
+    })
+  }))));
   await panel.getByRole("button", { name: "Next" }).click();
   await expect(panel.locator(".stroke-order-progress")).toHaveText("1 / 3");
   await panel.getByRole("button", { name: "Previous" }).click();

@@ -90,10 +90,75 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 .learning-card[data-card-density="dense"] .example-meaning{font-size:9px;}
 .learning-card[data-card-density="dense"] .component-breakdown{gap:4px;}
 
-@container learning-back (max-width:360px){
+@media(min-width:761px){
+  .learning-card[data-card-density="dense"] .learning-back-overview{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:
+      "components stroke"
+      "meaning stroke"
+      "readings-head mnemonic"
+      "readings mnemonic";
+    align-items:start;
+    column-gap:8px;
+    row-gap:4px;
+  }
+  .learning-card[data-card-density="dense"] .learning-back-overview>.component-breakdown{grid-area:components;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.stroke-order-panel{grid-area:stroke;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.learning-back-meaning{grid-area:meaning;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.readings-header{grid-area:readings-head;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.learning-back-readings{grid-area:readings;}
+  .learning-card[data-card-density="dense"] .learning-back-overview>.mnemonic-panel{grid-area:mnemonic;align-self:stretch;}
+}
+.learning-card[data-card-density="dense"] .stroke-order-source{display:none;}
+.learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(72px,auto) minmax(0,1fr);align-items:center;}
+.learning-card[data-card-density="dense"] .mnemonic-header{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-header h3{font-size:10px;white-space:nowrap;}
+.learning-card[data-card-density="dense"] .mnemonic-editor{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer .actions{min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{padding-inline:8px;}
+
+.learning-card[data-card-density="dense"] .stroke-order-panel{grid-template-columns:minmax(92px,26vw) minmax(0,1fr);column-gap:8px;align-items:center;padding:8px;}
+.learning-card[data-card-density="dense"] .stroke-order-header{grid-column:1 / -1;}
+.learning-card[data-card-density="dense"] .stroke-order-stage{padding:0;gap:3px;}
+.learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(84px,24vw);}
+.learning-card[data-card-density="dense"] .stroke-order-controls{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;align-content:center;}
+.learning-card[data-card-density="dense"] .stroke-order-controls .button{min-width:0;}
+.learning-card[data-card-density="dense"] .stroke-order-controls .button:nth-child(2){grid-column:auto;order:initial;}
+.learning-card[data-card-density="dense"] .stroke-order-reset{grid-column:auto;}
+.learning-card[data-card-density="dense"] .stroke-order-source{grid-column:1 / -1;}
+.learning-card[data-card-density="dense"] .mnemonic-panel{gap:6px;padding:8px;}
+.learning-card[data-card-density="dense"] .mnemonic-header p{display:none;}
+.learning-card[data-card-density="dense"] .mnemonic-editor{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;}
+.learning-card[data-card-density="dense"] .mnemonic-editor textarea{min-height:44px;height:44px;padding:6px 8px;resize:none;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer{gap:6px;min-width:0;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer>span{display:none;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer .actions{flex-wrap:nowrap;}
+.learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{white-space:nowrap;}
+@media(max-width:760px){
+  .learning-card[data-card-density="dense"] .learning-back-scroll{gap:4px;padding-top:4px;padding-bottom:7px;}
+  .learning-card[data-card-density="dense"] .learning-back-overview{gap:4px;}
+  .learning-card[data-card-density="dense"] .stroke-order-panel{gap:6px;padding:7px;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage{gap:2px;padding:0;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(72px,21vw);}
+  .learning-card[data-card-density="dense"] .stroke-order-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;}
+  .learning-card[data-card-density="dense"] .stroke-order-controls .button{padding-inline:5px;font-size:9px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .meanings{font-size:18px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:42px;padding:5px 6px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .reading>strong{font-size:13px;}
+  .learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(66px,auto) minmax(0,1fr);gap:5px;padding:7px;}
+  .learning-card[data-card-density="dense"] .mnemonic-header h3{font-size:9px;white-space:normal;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor{grid-template-columns:minmax(0,1fr) auto;gap:4px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor textarea{min-height:44px;height:44px;padding:5px 7px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{padding-inline:6px;font-size:9px;}
+  .learning-card[data-card-density="dense"] .component-breakdown-target{font-size:38px;}
+  .learning-card[data-card-density="dense"] .component-breakdown-part{min-width:30px;min-height:30px;padding:4px 6px;font-size:17px;}
+}
+
+@container learning-back (max-width:320px){
   .learning-back-readings{grid-template-columns:1fr;}
 }
-@container learning-back (max-width:320px){
+@container learning-back (max-width:290px){
   .learning-card-back .reading{grid-template-columns:1fr auto;}
   .learning-card-back .reading>span{grid-column:1;grid-row:1;}
   .learning-card-back .reading>strong{grid-column:1;grid-row:2;}
@@ -218,10 +283,13 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 }
 .stroke-order-header{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
   gap:10px;
 }
+.stroke-order-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex:0 0 auto;}
+.stroke-order-toggle{min-height:44px;padding:6px 9px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;font-size:10px;font-weight:850;cursor:pointer;}
+.stroke-order-toggle[aria-expanded="true"]{background:var(--sumi);border-color:var(--sumi);color:var(--paper);}
 .stroke-order-header h3{margin:0 0 3px;font-size:13px;}
 .stroke-order-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
 .stroke-order-count{
@@ -245,7 +313,7 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   line-height:1.5;
 }
 .stroke-order-error{color:var(--shu);justify-content:space-between;}
-.stroke-order-error .button{min-height:36px;padding:5px 9px;}
+.stroke-order-error .button{min-height:44px;padding:5px 9px;}
 .stroke-order-stage{
   display:grid;
   place-items:center;
@@ -299,7 +367,7 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   grid-template-columns:1fr 1fr;
   gap:6px;
 }
-.stroke-order-controls .button{min-height:40px;padding:6px 8px;font-size:10px;}
+.stroke-order-controls .button{min-height:44px;padding:6px 8px;font-size:10px;}
 .stroke-order-controls .button:nth-child(2){grid-column:1 / -1;order:-1;}
 .stroke-order-reset{grid-column:1 / -1;}
 .stroke-order-source{
@@ -320,13 +388,13 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .mnemonic-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
 .mnemonic-header h3{margin:0 0 3px;font-size:13px;}
 .mnemonic-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.55;max-width:58ch;}
-.mnemonic-edit{min-height:38px;padding:6px 10px;white-space:nowrap;}
+.mnemonic-edit{min-height:44px;padding:6px 10px;white-space:nowrap;}
 .mnemonic-editor{display:grid;gap:8px;}
 .mnemonic-editor textarea{width:100%;min-height:78px;resize:vertical;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--sumi);padding:10px 11px;font:inherit;font-size:12px;line-height:1.6;box-sizing:border-box;}
 .mnemonic-editor textarea:focus-visible{outline:3px solid rgba(38,64,107,.22);outline-offset:1px;}
 .mnemonic-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--mute);font-size:10px;}
 .mnemonic-editor-footer .actions{margin:0;gap:6px;}
-.mnemonic-editor-footer .button{min-height:38px;padding:6px 10px;}
+.mnemonic-editor-footer .button{min-height:44px;padding:6px 10px;}
 .mnemonic-error{margin:0;color:var(--shu);font-size:10px;line-height:1.5;}
 .mnemonic-saved{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:9px;padding:10px 11px;border:1px dashed var(--line);border-radius:12px;background:var(--paper);}
 .mnemonic-saved>span{font-size:16px;line-height:1.3;}
@@ -356,3 +424,45 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .activity-bar-track{height:94px;}
   .activity-count,.activity-label{font-size:9px;}
 }
+
+/* Final interaction/layout overrides: keep stroke controls non-overlapping and dense cards inside one viewport. */
+@media(min-width:761px){
+  .stroke-order-controls{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .stroke-order-controls .button:nth-child(2),
+  .stroke-order-reset{grid-column:auto;order:initial;}
+}
+.learning-card[data-card-density="dense"] .stroke-order-header p{display:none;}
+.learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(64px,20vw);}
+.learning-card[data-card-density="dense"] .stroke-order-stage{gap:2px;}
+.learning-card[data-card-density="dense"] .stroke-order-progress{font-size:9px;}
+.learning-card[data-card-density="dense"] .component-breakdown-target{font-size:34px;}
+.learning-card[data-card-density="dense"] .component-breakdown-part{min-width:26px;min-height:26px;padding:3px 5px;font-size:15px;}
+.learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:40px;padding:4px 6px;}
+.learning-card[data-card-density="dense"] .learning-card-back .reading>strong{font-size:13px;}
+
+/* Dense desktop final fit: reclaim the last few vertical pixels without hiding content. */
+@media(min-width:761px){
+  .learning-card[data-card-density="dense"] .learning-back-overview{row-gap:0;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(50px,16vw);}
+  .learning-card[data-card-density="dense"] .component-breakdown-target{font-size:28px;}
+  .learning-card[data-card-density="dense"] .component-breakdown-part{min-width:24px;min-height:24px;padding:2px 4px;font-size:14px;}
+}
+
+/* Dense desktop micro-compaction. */
+@media(min-width:761px){
+  .learning-card[data-card-density="dense"] .learning-back-scroll{padding-top:2px;padding-bottom:4px;}
+  .learning-card[data-card-density="dense"] .stroke-order-panel{gap:4px;padding:5px;}
+  .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(44px,14vw);}
+  .learning-card[data-card-density="dense"] .stroke-order-progress{font-size:8px;}
+  .learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(58px,auto) minmax(0,1fr);gap:4px;padding:5px;}
+  .learning-card[data-card-density="dense"] .mnemonic-header h3{font-size:9px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor textarea{min-height:40px;height:40px;padding:4px 6px;}
+  .learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{padding-inline:6px;font-size:9px;}
+  .learning-card[data-card-density="dense"] .learning-card-back .meanings{font-size:17px;line-height:1.2;}
+  .learning-card[data-card-density="dense"] .learning-back-readings{gap:4px;}
+}
+
+/* Stroke controls: reset must never intercept adjacent controls, especially while disabled. */
+.stroke-order-controls .button{position:relative;z-index:1;}
+.stroke-order-controls .stroke-order-reset{z-index:0;}
+.stroke-order-controls .stroke-order-reset:disabled{pointer-events:none;}

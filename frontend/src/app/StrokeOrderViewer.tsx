@@ -8,6 +8,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   const stopPlayback = useCallback(() => {
@@ -29,7 +30,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
     if (!normalized) return () => { active = false; };
 
     setLoading(true);
-    void (async () => {
+    (async () => {
       const url = kanjiSvgUrl(normalized);
       if (!url) throw new Error("Invalid kanji");
       const response = await fetch(url, { cache: "force-cache" });
@@ -40,7 +41,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
       if (!active) return;
       setPaths(next);
       setLoading(false);
-    }).catch(() => {
+    })().catch(() => {
       if (!active) return;
       setLoading(false);
       setError(t("strokeOrderUnavailable", language));
@@ -83,9 +84,22 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
           <p>{t("strokeOrderHint", language)}</p>
         </div>
-        {!loading && !error && paths.length ? (
-          <span className="stroke-order-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
-        ) : null}
+        <div className="stroke-order-header-actions">
+          {!loading && !error && paths.length ? (
+            <span className="stroke-order-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
+          ) : null}
+          {!loading && !error && paths.length ? (
+            <button
+              className="stroke-order-toggle"
+              type="button"
+              aria-expanded={expanded}
+              aria-controls="stroke-order-content"
+              onClick={() => setExpanded(value => !value)}
+            >
+              {t("strokeOrder", language)}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
@@ -96,8 +110,8 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
         </div>
       ) : null}
 
-      {!loading && !error && paths.length ? (
-        <>
+      {!loading && !error && paths.length && expanded ? (
+        <div id="stroke-order-content">
           <div className="stroke-order-stage">
             <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
               {paths.map((path, index) => (
@@ -136,7 +150,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
             <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
-        </>
+        </div>
       ) : null}
     </section>
   );
