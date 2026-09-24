@@ -107,7 +107,12 @@ type TranslationKey =
   | "masterySignal"
   | "modelConfidence"
   | "sevenDayActivity"
-  | "reviewsCount";
+  | "reviewsCount"
+  | "mnemonic"
+  | "mnemonicPlaceholder"
+  | "saveMnemonic"
+  | "deleteMnemonic"
+  | "mnemonicSaved";
 
 const messages: Record<Language, Record<TranslationKey, string>> = {
   fa: {
@@ -131,7 +136,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     startExercise:"شروع تمرین", loading:"در حال اتصال به هستهٔ یادگیری…", learningCoreError:"رابط هستهٔ یادگیری آماده نشد", tryAgain:"تلاش دوباره",
     audioUnavailable:"صدا در این مرورگر در دسترس نیست", playKanjiPronunciation:"پخش تلفظ کانجی", playWordPronunciation:"پخش تلفظ واژه",
     playReading:"پخش", vocabularyExamples:"نمونهٔ واژگانی", showCardHint:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
-    correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست", dictionary:"فرهنگ کانجی", dictionaryTitle:"جست‌وجوی کانجی", dictionaryPlaceholder:"کانجی، خوانش یا معنی را جست‌وجو کن", dictionaryHint:"می‌توانی خود کانجی، خوانش یا معنی انگلیسی آن را وارد کنی.", dictionarySearching:"در حال جست‌وجو…", dictionaryNoResults:"نتیجه‌ای پیدا نشد.", dictionaryStrokes:"استروک", dictionaryGrade:"پایه", dictionaryJlpt:"JLPT", dictionaryFrequency:"فراوانی", dictionaryOn:"اُن‌یومی", dictionaryKun:"کُن‌یومی", masteryOverview:"نمای کلی تسلط", masterySignal:"سیگنال تسلط", modelConfidence:"اعتماد مدل", sevenDayActivity:"فعالیت ۷ روز اخیر", reviewsCount:"مرور", cardPage:"صفحه اطلاعات کارت", previousCardPage:"صفحه قبلی کارت", nextCardPage:"صفحه بعدی کارت", swipeForMore:"برای اطلاعات بیشتر سوایپ کن"
+    correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست", dictionary:"فرهنگ کانجی", dictionaryTitle:"جست‌وجوی کانجی", dictionaryPlaceholder:"کانجی، خوانش یا معنی را جست‌وجو کن", dictionaryHint:"می‌توانی خود کانجی، خوانش یا معنی انگلیسی آن را وارد کنی.", dictionarySearching:"در حال جست‌وجو…", dictionaryNoResults:"نتیجه‌ای پیدا نشد.", dictionaryStrokes:"استروک", dictionaryGrade:"پایه", dictionaryJlpt:"JLPT", dictionaryFrequency:"فراوانی", dictionaryOn:"اُن‌یومی", dictionaryKun:"کُن‌یومی", mnemonic:"یادسپاری شخصی", mnemonicPlaceholder:"یک داستان، تصویر یا ارتباط شخصی برای این کانجی بنویس…", saveMnemonic:"ذخیره یادسپاری", deleteMnemonic:"حذف یادسپاری", mnemonicSaved:"یادسپاری ذخیره شد", masteryOverview:"نمای کلی تسلط", masterySignal:"سیگنال تسلط", modelConfidence:"اعتماد مدل", sevenDayActivity:"فعالیت ۷ روز اخیر", reviewsCount:"مرور", cardPage:"صفحه اطلاعات کارت", previousCardPage:"صفحه قبلی کارت", nextCardPage:"صفحه بعدی کارت", swipeForMore:"برای اطلاعات بیشتر سوایپ کن"
   },
   en: {
     title:"Kanji 5",
@@ -154,7 +159,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     startExercise:"Start exercise", loading:"Connecting to the learning engine…", learningCoreError:"The learning interface could not be loaded", tryAgain:"Try again",
     audioUnavailable:"Audio is not available in this browser", playKanjiPronunciation:"Play kanji pronunciation", playWordPronunciation:"Play word pronunciation",
     playReading:"Play", vocabularyExamples:"Vocabulary examples", showCardHint:"First look at the kanji, then reveal its information.",
-    correctRecall:"Recall was correct.", correctAnswer:"Correct answer", dictionary:"Kanji dictionary", dictionaryTitle:"Kanji dictionary", dictionaryPlaceholder:"Search kanji, reading, or meaning", dictionaryHint:"Search by the kanji itself, a reading, or an English meaning.", dictionarySearching:"Searching…", dictionaryNoResults:"No results found.", dictionaryStrokes:"Strokes", dictionaryGrade:"Grade", dictionaryJlpt:"JLPT", dictionaryFrequency:"Frequency", dictionaryOn:"On’yomi", dictionaryKun:"Kun’yomi", masteryOverview:"Mastery overview", masterySignal:"Mastery signal", modelConfidence:"Model confidence", sevenDayActivity:"7-day review activity", reviewsCount:"reviews", cardPage:"Card information page", previousCardPage:"Previous card information page", nextCardPage:"Next card information page", swipeForMore:"Swipe for more information"
+    correctRecall:"Recall was correct.", correctAnswer:"Correct answer", dictionary:"Kanji dictionary", dictionaryTitle:"Kanji dictionary", dictionaryPlaceholder:"Search kanji, reading, or meaning", dictionaryHint:"Search by the kanji itself, a reading, or an English meaning.", dictionarySearching:"Searching…", dictionaryNoResults:"No results found.", dictionaryStrokes:"Strokes", dictionaryGrade:"Grade", dictionaryJlpt:"JLPT", dictionaryFrequency:"Frequency", dictionaryOn:"On’yomi", dictionaryKun:"Kun’yomi", mnemonic:"Personal mnemonic", mnemonicPlaceholder:"Write a personal story, image, or association for this kanji…", saveMnemonic:"Save mnemonic", deleteMnemonic:"Delete mnemonic", mnemonicSaved:"Mnemonic saved", masteryOverview:"Mastery overview", masterySignal:"Mastery signal", modelConfidence:"Model confidence", sevenDayActivity:"7-day review activity", reviewsCount:"reviews", cardPage:"Card information page", previousCardPage:"Previous card information page", nextCardPage:"Next card information page", swipeForMore:"Swipe for more information"
   }
 };
 
