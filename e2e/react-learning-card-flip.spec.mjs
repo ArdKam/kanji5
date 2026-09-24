@@ -24,12 +24,13 @@ async function routeExamples(page, count) {
   });
 }
 
-async function revealLearningCard(page) {
+async function revealLearningCard(page, language = "fa") {
+  await page.addInitScript((value) => localStorage.setItem("kanji5-ui-language", value), language);
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 10000 });
-  const revealButton = page.getByRole("button", { name: /نمایش (پاسخ|اطلاعات کانجی)/ });
+  const revealButton = page.getByRole("button", { name: /(نمایش (پاسخ|اطلاعات کانجی)|Show (answer|kanji information))/ });
   await revealButton.click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await page.waitForTimeout(600);
@@ -51,11 +52,12 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
-test("learning card keeps dense information on separate back pages without vertical page overflow", async ({ page }) => {
+test("learning card keeps dense information on separate back pages in Persian and English", async ({ page }) => {
   await routeExamples(page, 5);
-  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
-    await page.setViewportSize(viewport);
-    const card = await revealLearningCard(page);
+  for (const language of ["fa", "en"]) {
+    for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      const card = await revealLearningCard(page, language);
 
     const identityCount = await card.locator(".learning-back-kanji, .component-breakdown-target").count();
     expect(identityCount).toBe(1);
@@ -67,7 +69,7 @@ test("learning card keeps dense information on separate back pages without verti
     await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(0);
     const totalExampleCount = await card.locator(".example-row").count();
     expect(totalExampleCount).toBeGreaterThan(2);
-    await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(totalExampleCount);
+      await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(totalExampleCount);
 
     const pageMetrics = await card.locator(".learning-back-page").evaluateAll((pages) =>
       pages.map((page) => {
@@ -90,7 +92,7 @@ test("learning card keeps dense information on separate back pages without verti
     const previousButton = card.locator(".pager-button").nth(0);
     await expect(previousButton).toBeDisabled();
     await nextButton.click();
-    await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "نمونهٔ واژگانی");
+      await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
     await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(totalExampleCount);
     await expect(previousButton).toBeEnabled();
     await expect(nextButton).toBeDisabled();
@@ -124,6 +126,7 @@ test("learning card keeps dense information on separate back pages without verti
     expect(footerBounds.footerBottom).toBeLessThanOrEqual(footerBounds.cardBottom + 1);
     expect(footerBounds.ratingTop).toBeGreaterThanOrEqual(footerBounds.footerTop - 1);
     expect(footerBounds.ratingBottom).toBeLessThanOrEqual(footerBounds.footerBottom + 1);
+    }
   }
 });
 
