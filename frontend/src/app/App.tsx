@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import {
@@ -61,11 +61,11 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const swipeStartX=useRef<number|null>(null);
   useEffect(()=>setBackPage(0),[card.character]);
   const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
-  const handleBackPointerDown=(event:React.PointerEvent<HTMLDivElement>)=>{
+  const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2)return;
     swipeStartX.current=event.clientX;
   };
-  const handleBackPointerUp=(event:React.PointerEvent<HTMLDivElement>)=>{
+  const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2||swipeStartX.current===null)return;
     const delta=event.clientX-swipeStartX.current;
     swipeStartX.current=null;
