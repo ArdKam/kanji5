@@ -5,6 +5,8 @@ const SHELL=["./","./index.html","./app-bootstrap.js","./react-entry.js","./lear
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
+const KANJIVG_ORIGIN='https://raw.githubusercontent.com';
+const KANJIVG_PATH='/KanjiVG/kanjivg/master/kanji/';
 const API_TTL_MS=7*24*60*60*1000;
 const API_MAX_ENTRIES=250;
 const API_INFLIGHT=new Map();
@@ -19,4 +21,5 @@ async function filterVocabularyResponse(req,response){if(!req.url.startsWith(`${
 async function apiCacheFirst(req){const c=await caches.open(API_CACHE);const hit=await c.match(req);if(hit){const stamp=Number(hit.headers.get('X-Kanji5-Cache-Time')||0);if(stamp&&Date.now()-stamp<=API_TTL_MS){void evictApiCache(c);return hit}if(stamp)await c.delete(req)}const key=req.url,pending=API_INFLIGHT.get(key);if(pending)return(await pending).clone();const request=(async()=>{try{const raw=await fetch(req);const response=await filterVocabularyResponse(req,raw);await cacheApiResponse(c,req,response);void evictApiCache(c);return response}catch(_){return(await c.match(req))||Response.error()}})();API_INFLIGHT.set(key,request);try{return(await request).clone()}finally{if(API_INFLIGHT.get(key)===request)API_INFLIGHT.delete(key)}}
 async function dynamicSameOrigin(req){try{return await fetch(req)}catch(_){return Response.error()}}
 async function networkFirst(req,name,fallback){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(req,{ignoreSearch:false}))||(fallback?await c.match(fallback,{ignoreSearch:false}):Response.error())}}
-self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}if(u.origin===self.location.origin&&u.href===DATA_URL){e.respondWith(cacheFirst(r,DATA_CACHE));return}if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}if(u.origin===self.location.origin){e.respondWith(cacheFirst(r,CACHE));return}e.respondWith(dynamicSameOrigin(r))});
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}if(u.origin===self.location.origin&&u.href===DATA_URL){e.respondWith(cacheFirst(r,DATA_CACHE));return}if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}
+if(u.origin===KANJIVG_ORIGIN&&u.pathname.startsWith(KANJIVG_PATH)&&u.pathname.toLowerCase().endsWith('.svg')){e.respondWith(apiCacheFirst(r));return}if(u.origin===self.location.origin){e.respondWith(cacheFirst(r,CACHE));return}e.respondWith(dynamicSameOrigin(r))});
