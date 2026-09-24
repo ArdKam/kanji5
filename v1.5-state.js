@@ -2,7 +2,7 @@
 'use strict';
 if(window.__KANJI5_STATE__)return;
 const DEVICE_KEY='kanji5-device-id',STORAGE='kanji5-v1',CARDS_STORAGE='kanji5-v1-cards',REVIEWS_STORAGE='kanji5-v1-reviews',KNOWLEDGE_STORAGE='kanji5-v1.2-knowledge',COMPONENT_KEY='kanji5-v1.5-components',LAST_ATTEMPT_KEY='kanji5-v1.2-last-attempt',SESSION_HISTORY_KEY='kanji5-v1.6-session-history',DECK_KEY='kanji5-deck',SETTINGS_KEY='kanji5-v1.3-education-settings';
-const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2,SESSION_HISTORY_LIMIT=30,MNEMONIC_SCHEMA_VERSION=1;
+const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2,SESSION_HISTORY_LIMIT=30,MNEMONIC_SCHEMA_VERSION=1,MNEMONICS_STORAGE='kanji5-v2-mnemonics';
 const defaults={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
 const educationDefaults={production:true,vocabulary:true,context:true};
 let activeState=null;
@@ -26,14 +26,14 @@ function writeSettings(value){const next={...educationDefaults,...(value&&typeof
 function readAppState(){return safeObject(safeParse(readValue(STORAGE,null)))||{}}
 function readReviews(){const value=safeParse(readValue(REVIEWS_STORAGE,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object'):[]}
 function readComponents(){return readObject(COMPONENT_KEY,{})}
-function readMnemonics(){const knowledge=readKnowledge();const value=safeObject(knowledge.v2Mnemonics);return value||{}}
-function writeMnemonics(value){const next=value&&typeof value==='object'&&!Array.isArray(value)?value:{};const knowledge=readKnowledge();knowledge.v2Mnemonics=next;return writeKnowledge(knowledge)}
+function readMnemonics(){return readObject(MNEMONICS_STORAGE,{})}
+function writeMnemonics(value){const next=value&&typeof value==='object'&&!Array.isArray(value)?value:{};return writeObject(MNEMONICS_STORAGE,next)}
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
 function readSessionHistory(){const value=safeParse(readValue(SESSION_HISTORY_KEY,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[]}
 function writeSessionHistory(value){const history=Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[];return writeObject(SESSION_HISTORY_KEY,history)}
 function appendSessionSummary(summary){if(!summary||typeof summary!=='object')return false;const history=readSessionHistory();history.push(structuredClone(summary));return writeSessionHistory(history)}
-function clearRuntimeKnowledge(){let ok=true;for(const key of [KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY]){try{localStorage.removeItem(key)}catch(_){ok=false}}if(activeState)activeState.knowledge={};return ok}
+function clearRuntimeKnowledge(){let ok=true;for(const key of [KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,MNEMONICS_STORAGE]){try{localStorage.removeItem(key)}catch(_){ok=false}}if(activeState)activeState.knowledge={};return ok}
 function fnv1a(value){const input=JSON.stringify(value);let hash=2166136261;for(let i=0;i<input.length;i++){hash^=input.charCodeAt(i);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16)}
 function readLegacyParts(){const main=safeObject(safeParse(localStorage.getItem(STORAGE))),cards=safeObject(safeParse(localStorage.getItem(CARDS_STORAGE))),reviews=safeParse(localStorage.getItem(REVIEWS_STORAGE)),knowledge=safeObject(safeParse(localStorage.getItem(KNOWLEDGE_STORAGE)));return{main,cards,reviews:Array.isArray(reviews)?reviews:null,knowledge}}
 function snapshotPayload(state,reviewLimit=2000){const cards=state.cards&&typeof state.cards==='object'?state.cards:{};const storedKnowledge=safeObject(safeParse(localStorage.getItem(KNOWLEDGE_STORAGE)));const knowledge={...(storedKnowledge||{}),...((state.knowledge&&typeof state.knowledge==='object')?state.knowledge:{})};return{settings:state.settings,today:state.today,todayNew:state.todayNew,todayReviewCount:state.todayReviewCount,goalCelebrated:state.goalCelebrated,streak:state.streak,cards,reviews:compactReviews(state.reviews,reviewLimit),knowledge}}
@@ -53,5 +53,5 @@ function reset(defaultsValue,deck=[]){const next=createInitial({settings:{...def
 function loadState(defaultsValue=defaults){return loadSaved(createInitial({today:todayKey()}),defaultsValue)}
 function saveState(state){save(state);return state}
 function transaction(mutator){if(typeof mutator!=='function')throw new TypeError('transaction requires a function');const current=loadState();const draft=structuredClone(current);const result=mutator(draft)??draft;save(result);return result}
-window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,MNEMONIC_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readMnemonics,writeMnemonics,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
+window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,MNEMONIC_SCHEMA_VERSION,MNEMONICS_STORAGE,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readMnemonics,writeMnemonics,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
 })();
