@@ -209,12 +209,44 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   </section>
 }
 function Panel({title,children}:{title:string;children:ReactNode}){return <section className="surface insight-panel"><h3>{title}</h3>{children}</section>}
-function Insights({snapshot}:{snapshot:Snapshot}){return <details className="insights"><summary>{t("sessionDetails")}</summary><div className="insights-grid">
-  <Panel title={t("learnerSkills")}>{skillKeys.map(k=>{const s=snapshot.learner?.attributes?.[k]??{};return <p className="row" key={k}><span>{skillLabel(k)}</span><strong>{stateLabel(s.state??"")} · {t("recent")} {fa(pct(s.recentAccuracy))}%</strong></p>})}</Panel>
-  <Panel title={t("adaptiveFocus")}><p className="row"><span>{t("skill")}</span><strong>{skillLabel(snapshot.adaptiveReason?.mode??"")}</strong></p><p className="row"><span>{t("action")}</span><strong>{actionLabel(snapshot.adaptiveReason?.action??"")}</strong></p>{(snapshot.adaptiveReason?.reasons??[]).filter(Boolean).map((r,i)=><p className="reason" key={r+"-"+i}>{r}</p>)}</Panel>
-  <Panel title={t("sessionSummary")}><p className="row"><span>{t("attempts")}</span><strong>{fa(snapshot.sessionSummary?.attempts??0)}</strong></p><p className="row"><span>{t("right")}</span><strong>{fa(snapshot.sessionSummary?.correct??0)}</strong></p><p className="row"><span>{t("accuracy")}</span><strong>{fa(pct(snapshot.sessionSummary?.accuracy))}{getLanguage()==="fa"?"٪":"%"}</strong></p></Panel>
-  <Panel title={t("recentResults")}>{(snapshot.recentOutcomes??[]).map((r,i)=><div className="outcome-row" key={(r.character??"")+"-"+i}><strong lang="ja">{text(r.character)}</strong><span>{skillLabel(r.mode??"")} · {outcomeLabel(r.quality??r.outcome??"")}</span><b>{r.correct?"✓":outcomeLabel(r.outcome??"")}</b></div>)}{!snapshot.recentOutcomes?.length?<p className="empty-text">{t("noResults")}</p>:null}</Panel>
-</div></details>}
+function MasteryOverview({snapshot}:{snapshot:Snapshot}){
+  return <Panel title={t("masteryOverview")}><div className="mastery-grid">{skillKeys.map(k=>{
+    const s=snapshot.learner?.attributes?.[k]??{};
+    const value=pct(s.confidence??s.accuracy);
+    const trend=Number(s.momentum??0);
+    const trendClass=trend>0.02?"trend-up":trend<-0.02?"trend-down":"trend-flat";
+    const trendIcon=trend>0.02?"↑":trend<-0.02?"↓":"→";
+    const trendValue=Math.round(Math.abs(trend)*100);
+    return <div className="mastery-row" key={k}>
+      <div className="mastery-label"><span>{skillLabel(k)}</span><strong>{fa(value)}%</strong></div>
+      <div className="mastery-track" role="progressbar" aria-label={skillLabel(k)+" — "+t("modelConfidence")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:value+"%"}} /></div>
+      <div className="mastery-state"><span>{stateLabel(s.state??"")}</span><span className={trendClass}>{trendIcon} {fa(trendValue)}%</span></div>
+    </div>;
+  })}</div><p className="mastery-footnote">{t("modelConfidence")}</p></Panel>;
+}
+function SevenDayActivity({snapshot}:{snapshot:Snapshot}){
+  const days=snapshot.stats?.last7??[];
+  const max=Math.max(1,...days.map(d=>Math.max(0,Number(d.count)||0)));
+  return <Panel title={t("sevenDayActivity")}><div className="activity-chart" aria-label={t("sevenDayActivity")}>{days.map((d,i)=>{
+    const count=Math.max(0,Number(d.count)||0);
+    const height=Math.max(6,Math.round(count/max*100));
+    return <div className="activity-bar-wrap" key={(d.label??"")+(i)}>
+      <div className="activity-count">{fa(count)}</div>
+      <div className="activity-bar-track" aria-hidden="true"><span style={{height:height+"%"}} /></div>
+      <div className="activity-label">{text(d.label,"—")}</div>
+    </div>;
+  })}</div></Panel>;
+}
+function Insights({snapshot}:{snapshot:Snapshot}){
+  return <details className="insights"><summary>{t("sessionDetails")}</summary><div className="insights-grid">
+    <MasteryOverview snapshot={snapshot}/>
+    <SevenDayActivity snapshot={snapshot}/>
+    <Panel title={t("learnerSkills")}>{skillKeys.map(k=>{const s=snapshot.learner?.attributes?.[k]??{};return <p className="row" key={k}><span>{skillLabel(k)}</span><strong>{stateLabel(s.state??"")} · {t("recent")} {fa(pct(s.recentAccuracy))}%</strong></p>})}</Panel>
+    <Panel title={t("adaptiveFocus")}><p className="row"><span>{t("skill")}</span><strong>{skillLabel(snapshot.adaptiveReason?.mode??"")}</strong></p><p className="row"><span>{t("action")}</span><strong>{actionLabel(snapshot.adaptiveReason?.action??"")}</strong></p>{(snapshot.adaptiveReason?.reasons??[]).filter(Boolean).map((r,i)=><p className="reason" key={r+"-"+i}>{r}</p>)}</Panel>
+    <Panel title={t("sessionSummary")}><p className="row"><span>{t("attempts")}</span><strong>{fa(snapshot.sessionSummary?.attempts??0)}</strong></p><p className="row"><span>{t("right")}</span><strong>{fa(snapshot.sessionSummary?.correct??0)}</strong></p><p className="row"><span>{t("accuracy")}</span><strong>{fa(pct(snapshot.sessionSummary?.accuracy))}{getLanguage()==="fa"?"٪":"%"}</strong></p></Panel>
+    <Panel title={t("recentResults")}>{(snapshot.recentOutcomes??[]).map((r,i)=><div className="outcome-row" key={(r.character??"")+"-"+i}><strong lang="ja">{text(r.character)}</strong><span>{skillLabel(r.mode??"")} · {outcomeLabel(r.quality??r.outcome??"")}</span><b>{r.correct?"✓":outcomeLabel(r.outcome??"")}</b></div>)}{!snapshot.recentOutcomes?.length?<p className="empty-text">{t("noResults")}</p>:null}</Panel>
+  </div></details>;
+}
 function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}){return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>}
 function DictionaryDialog({open,busy,language,onClose}:{open:boolean;busy:boolean;language:Language;onClose:()=>void}){
   const [query,setQuery]=useState("");
