@@ -108,3 +108,5 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .exercise-feedback{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.65rem;min-height:9rem;text-align:center;font-size:1.15rem}.exercise-feedback>strong{font-size:1.35rem}.exercise-correct-answer{display:flex;flex-direction:column;gap:.2rem;padding:.75rem 1rem;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid currentColor}.exercise-correct-answer span{font-size:.8rem;opacity:.72}.exercise-correct-answer b{font-size:1.5rem}.exercise-result-wrong .exercise-correct-answer{color:inherit}
 
 @media(min-width:761px){.experience-nav{bottom:max(18px,env(safe-area-inset-bottom));}.app-shell{padding-bottom:118px;}}
+
+.readings-header{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--mute);font-size:11px;font-weight:800}.reading-toggle{min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--sumi);font:inherit;font-weight:800}.reading-toggle:hover{background:var(--washi)}
