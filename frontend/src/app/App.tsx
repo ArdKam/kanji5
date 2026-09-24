@@ -155,7 +155,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                           <span>{fa(mnemonicDraft.length)}/{fa(600)}</span>
                           <div className="actions">
                             {mnemonicEditing?<button className="button secondary" type="button" disabled={mnemonicBusy} onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(false)}}>{t("cancel")}</button>:null}
-                            <button className="button primary" type="button" disabled={mnemonicBusy||mnemonicDraft.trim().length===0} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
+                            <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
                           </div>
                         </div>
                         {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
