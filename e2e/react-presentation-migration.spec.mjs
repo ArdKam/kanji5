@@ -104,6 +104,7 @@ test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await n5.click();
   const panel=pageRoot.locator('.custom-study-panel');
   await expect(panel).toBeVisible();
+  await panel.locator('summary').click();
   await panel.getByRole('button',{name:'فقط جدیدها',exact:true}).click();
   await panel.getByRole('button',{name:'شروع مطالعه',exact:true}).click();
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
