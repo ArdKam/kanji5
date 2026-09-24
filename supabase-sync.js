@@ -11,7 +11,6 @@ const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 15000;
 const MAX_SYNC_ATTEMPTS = 3;
 const SUPABASE_JS_CANDIDATES = [
-  './vendor/supabase-js.mjs',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm',
   'https://esm.sh/@supabase/supabase-js@2.57.4'
 ];
