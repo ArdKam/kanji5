@@ -95,6 +95,18 @@ export type Snapshot = {
   settings?: Settings;
 };
 
+export type KanjiDictionaryResult = {
+  character: string;
+  meanings: string[];
+  on: string[];
+  kun: string[];
+  strokes?: number;
+  grade?: number;
+  jlpt?: string | null;
+  frequency?: number;
+  order?: number;
+};
+
 export type ComponentInfo = {
   character: string;
   available: boolean;
@@ -107,6 +119,7 @@ export type ComponentInfo = {
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
+  searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   refreshLearning: () => Promise<Snapshot>;
   revealLearning: (direct?: boolean) => Promise<boolean>;
   rateLearning: (rating: Rating) => Promise<boolean>;
@@ -234,6 +247,10 @@ export async function nextExercise(): Promise<void> {
   if (!fn) throw new Error("KANJI5_EDU_NEXT_UNAVAILABLE");
   await fn();
 }
+export async function searchKanji(query: string, limit = 24): Promise<{ query: string; results: KanjiDictionaryResult[] }> {
+  return (await waitForEngine()).searchKanji(query, limit);
+}
+
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
 }
