@@ -230,6 +230,13 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
   await expect(panel.getByRole("button", { name: "Play" })).toBeVisible();
+  console.log("STROKE_CONTROLS_LAYOUT", JSON.stringify(await panel.locator(".stroke-order-controls").evaluate((el) => ({
+    gridTemplateColumns: getComputedStyle(el).gridTemplateColumns,
+    rects: Array.from(el.querySelectorAll("button")).map((button) => {
+      const r = button.getBoundingClientRect();
+      return { text: button.textContent, left: r.left, top: r.top, right: r.right, bottom: r.bottom, position: getComputedStyle(button).position, pointerEvents: getComputedStyle(button).pointerEvents, gridColumn: getComputedStyle(button).gridColumn };
+    })
+  }))));
   await panel.getByRole("button", { name: "Next" }).click();
   await expect(panel.locator(".stroke-order-progress")).toHaveText("1 / 3");
   await panel.getByRole("button", { name: "Previous" }).click();
