@@ -134,6 +134,14 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
     await expect(card.locator(".learning-back-page.active .mnemonic-panel")).toBeVisible();
   }
 
+  const direct = await page.evaluate(async () => {
+    const api = window.__KANJI5_V19_V2_BOUNDARY__;
+    const result = await api.saveMnemonic("学", "Boundary persistence probe.");
+    return { result, stored: localStorage.getItem("kanji5-v2-mnemonics") };
+  });
+  expect(direct.result?.text).toBe("Boundary persistence probe.");
+  expect(direct.stored).toContain("Boundary persistence probe.");
+
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
   await editor.fill("A student learning under a roof.");
