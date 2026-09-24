@@ -6,7 +6,9 @@ const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
 const STORAGE="kanji5-v1";const CARDS_STORAGE="kanji5-v1-cards";const REVIEWS_STORAGE="kanji5-v1-reviews";
 const DEFAULTS={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
-let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;let customStudyFilter=null;let customStudyCore=null;
+const CUSTOM_STUDY_STORAGE='kanji5-v2-custom-study-filter';
+let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;let customStudyCore=null;let customStudyFilter=null;
+try{customStudyFilter=JSON.parse(sessionStorage.getItem(CUSTOM_STUDY_STORAGE)||'null')}catch(_){customStudyFilter=null}
 const $=id=>document.getElementById(id);const {todayKey,deviceId,eventId,save,loadSaved,reviveCard,hydrateCards}=window.__KANJI5_STATE__;
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function speak(text){if(!text)return;if(!("speechSynthesis"in window)){toast("مرورگر شما از خواندن صدا پشتیبانی نمی‌کند.");return}try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(_){toast("پخش صدا ممکن نشد.")}}
@@ -59,6 +61,7 @@ function buildQueue(){
 async function setCustomStudyFilter(filter={}){
   if(!customStudyCore)customStudyCore=await import('./v2-custom-study-core.js');
   customStudyFilter=customStudyCore.normalizeCustomStudyFilter(filter);
+  try{sessionStorage.setItem(CUSTOM_STUDY_STORAGE,JSON.stringify(customStudyFilter))}catch(_){ }
   buildQueue();
   state.current=null;
   state.revealed=false;
@@ -67,6 +70,7 @@ async function setCustomStudyFilter(filter={}){
 }
 function clearCustomStudyFilter(){
   customStudyFilter=null;
+  try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){ }
   buildQueue();
   state.current=null;
   state.revealed=false;
@@ -93,7 +97,7 @@ function renderExamples(){const el=$("examples");if(!el||!state.current)return;c
 function next(){if(state.queue.length===0){state.current=null;state.revealed=false;if(IS_LEGACY){renderEmpty();updateStats();}notifyV2Learning();return}state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats();}notifyV2Learning()}
 function learningBridgeSnapshot(){return reviewSnapshot();}
 
-function resetRuntime(){customStudyFilter=null;state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
+function resetRuntime(){customStudyFilter=null;try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){ }state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
 window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:directReveal,rate:directRate,updateSettings:updateRuntimeSettings,reset:resetRuntime,setCustomStudyFilter,clearCustomStudyFilter});
 window.__KANJI5_V19_REVIEW_BRIDGE__=Object.freeze({snapshot:reviewSnapshot,setCustomStudyFilter,clearCustomStudyFilter,reveal:(direct=false)=>{if(!IS_LEGACY||direct)return directReveal();const button=document.getElementById('revealBtn');if(!button)return false;window.__KANJI5_CANONICAL_REVEAL__=true;button.click();setTimeout(()=>{delete window.__KANJI5_CANONICAL_REVEAL__},0);setTimeout(notifyV2Learning,0);return true;},rate:(rating)=>{if(!IS_LEGACY)return directRate(rating);const button=document.querySelector(`.rate[data-r="${String(rating||'')}"]`);if(!button)return false;button.click();setTimeout(notifyV2Learning,0);return true;}});
 
