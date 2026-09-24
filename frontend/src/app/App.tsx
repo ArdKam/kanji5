@@ -85,7 +85,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
   const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
   const lockedRef=useRef(false);
-  const exerciseKey=String(ex.contentId??"")+"|"+String(ex.mode??"")+"|"+String(ex.character??"");
+  const exerciseKey=JSON.stringify([ex.mode??"",ex.character??"",ex.prompt??"",ex.stimulus?.kind??"",ex.stimulus?.primary??"",ex.stimulus?.secondary??""]);
   const previousKeyRef=useRef(exerciseKey);
 
   useEffect(()=>{
