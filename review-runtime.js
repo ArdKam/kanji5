@@ -6,7 +6,7 @@ const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
 const STORAGE="kanji5-v1";const CARDS_STORAGE="kanji5-v1-cards";const REVIEWS_STORAGE="kanji5-v1-reviews";
 const DEFAULTS={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
-let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;
+let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;let customStudyFilter=null;let customStudyCore=null;
 const $=id=>document.getElementById(id);const {todayKey,deviceId,eventId,save,loadSaved,reviveCard,hydrateCards}=window.__KANJI5_STATE__;
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function speak(text){if(!text)return;if(!("speechSynthesis"in window)){toast("مرورگر شما از خواندن صدا پشتیبانی نمی‌کند.");return}try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(_){toast("پخش صدا ممکن نشد.")}}
@@ -19,7 +19,60 @@ function dueNow(card){return card&&card.due&&new Date(card.due)<=new Date()}
 function educationQueuePriority(item,knowledge,now=Date.now()){const core=window.__KANJI5_EDU_CORE__;if(!core||!item)return 0;const entry=knowledge?.[item.character]||{};const signal=core.educationSchedulerSignal?core.educationSchedulerSignal(entry):null;if(!signal)return 0;const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;const componentValues=['meaning','reading'].map(mode=>Number(entry.componentEvidence?.[mode]?.weakness)).filter(Number.isFinite);const componentWeakness=componentValues.length?Math.max(...componentValues):0;return signal.weakness*.7+(1-signal.weakestSkillMastery)*.3+Math.min(1,ageDays/14)*.15+componentWeakness*.25}
 function jlptRank(item){const rank={N5:0,N4:1,N3:2,N2:3,N1:4};return rank[item?.jlpt]??5}
 function newCardPriority(item,knowledge,now=Date.now()){const entry=knowledge?.[item.character]||{};const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;return educationQueuePriority(item,knowledge,now)+Math.min(1,ageDays/30)*.1}
-function buildQueue(){let knowledge={};try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){}const now=Date.now();const dueItems=state.deck.filter(item=>state.cards[item.id]?.card&&dueNow(state.cards[item.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));dueItems.sort((a,b)=>{const aLate=Math.max(0,(now-new Date(a.card.due).getTime())/86400000),bLate=Math.max(0,(now-new Date(b.card.due).getTime())/86400000);const aScore=aLate*.6+educationQueuePriority(a.item,knowledge,now)*.4,bScore=bLate*.6+educationQueuePriority(b.item,knowledge,now)*.4;return bScore-aScore||new Date(a.card.due)-new Date(b.card.due)});const due=dueItems.map(x=>x.item.id);const remaining=Math.max(0,state.settings.dailyNew-state.todayNew);const newCards=state.deck.filter(item=>!state.cards[item.id]).sort((a,b)=>{const level=jlptRank(a)-jlptRank(b);if(level)return level;const priority=newCardPriority(b,knowledge,now)-newCardPriority(a,knowledge,now);if(Math.abs(priority)>.0001)return priority;const af=Number.isFinite(Number(a.frequency))?Number(a.frequency):Infinity,bf=Number.isFinite(Number(b.frequency))?Number(b.frequency):Infinity;return af-bf||String(a.character).localeCompare(String(b.character))}).slice(0,remaining).map(item=>item.id);state.queue=[...due,...newCards];return state.queue}
+function buildDefaultQueue(){
+  let knowledge={};
+  try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){}
+  const now=Date.now();
+  const dueItems=state.deck.filter(item=>state.cards[item.id]?.card&&dueNow(state.cards[item.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));
+  dueItems.sort((a,b)=>{
+    const aLate=Math.max(0,(now-new Date(a.card.due).getTime())/86400000),bLate=Math.max(0,(now-new Date(b.card.due).getTime())/86400000);
+    const aScore=aLate*.6+educationQueuePriority(a.item,knowledge,now)*.4,bScore=bLate*.6+educationQueuePriority(b.item,knowledge,now)*.4;
+    return bScore-aScore||new Date(a.card.due)-new Date(b.card.due)
+  });
+  const due=dueItems.map(x=>x.item.id);
+  const remaining=Math.max(0,state.settings.dailyNew-state.todayNew);
+  const newCards=state.deck.filter(item=>!state.cards[item.id]).sort((a,b)=>{
+    const level=jlptRank(a)-jlptRank(b);if(level)return level;
+    const priority=newCardPriority(b,knowledge,now)-newCardPriority(a,knowledge,now);if(Math.abs(priority)>.0001)return priority;
+    const af=Number.isFinite(Number(a.frequency))?Number(a.frequency):Infinity,bf=Number.isFinite(Number(b.frequency))?Number(b.frequency):Infinity;
+    return af-bf||String(a.character).localeCompare(String(b.character))
+  }).slice(0,remaining).map(item=>item.id);
+  state.queue=[...due,...newCards];
+  return state.queue;
+}
+function buildQueue(){
+  if(customStudyFilter&&customStudyCore?.selectCustomStudyItems){
+    const selected=customStudyCore.selectCustomStudyItems({
+      deck:state.deck,
+      cards:state.cards||{},
+      learner:window.__KANJI5_V19_LEARNER_MODEL__?.read?.()||{},
+      filter:customStudyFilter,
+      dailyNew:state.settings.dailyNew,
+      todayNew:state.todayNew,
+      now:Date.now()
+    });
+    state.queue=[...selected.ids];
+    return state.queue;
+  }
+  return buildDefaultQueue();
+}
+async function setCustomStudyFilter(filter={}){
+  if(!customStudyCore)customStudyCore=await import('./v2-custom-study-core.js');
+  customStudyFilter=customStudyCore.normalizeCustomStudyFilter(filter);
+  buildQueue();
+  state.current=null;
+  state.revealed=false;
+  next();
+  return state.queue.length;
+}
+function clearCustomStudyFilter(){
+  customStudyFilter=null;
+  buildQueue();
+  state.current=null;
+  state.revealed=false;
+  next();
+  return true;
+}
 function formatInterval(card){const mins=Math.max(0,Math.round((new Date(card.due)-Date.now())/60000));if(mins<60)return`${Math.max(1,mins)}m`;const h=mins/60;if(h<24)return`${Math.round(h)}h`;return`${Math.round(h/24)}d`}
 function formatMeta(k){const chips=[];if(state.cards[k.id]?.leech)chips.push({t:"🥴 Leech",cls:" leech"});if(k.frequency)chips.push({t:`頻度 #${k.frequency}`});if(k.grade)chips.push({t:`Jōyō grade ${k.grade}`});if(k.jlpt)chips.push({t:k.jlpt});chips.push({t:`${k.strokes} strokes`});return chips.map(x=>`<span class="chip${x.cls||""}">${x.t}</span>`).join("")}
 function exampleComplexity(example,k){const word=String(example?.word||''),reading=String(example?.reading||'');const otherKanji=[...word].filter(ch=>/[\u3400-\u9fff]/.test(ch)&&ch!==k.character).length;return otherKanji*6+Math.max(0,[...word].length-2)*1.5+Math.max(0,[...reading].length-4)*.35}
@@ -40,9 +93,9 @@ function renderExamples(){const el=$("examples");if(!el||!state.current)return;c
 function next(){if(state.queue.length===0){state.current=null;state.revealed=false;if(IS_LEGACY){renderEmpty();updateStats();}notifyV2Learning();return}state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats();}notifyV2Learning()}
 function learningBridgeSnapshot(){return reviewSnapshot();}
 
-function resetRuntime(){state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
-window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:directReveal,rate:directRate,updateSettings:updateRuntimeSettings,reset:resetRuntime});
-window.__KANJI5_V19_REVIEW_BRIDGE__=Object.freeze({snapshot:reviewSnapshot,reveal:(direct=false)=>{if(!IS_LEGACY||direct)return directReveal();const button=document.getElementById('revealBtn');if(!button)return false;window.__KANJI5_CANONICAL_REVEAL__=true;button.click();setTimeout(()=>{delete window.__KANJI5_CANONICAL_REVEAL__},0);setTimeout(notifyV2Learning,0);return true;},rate:(rating)=>{if(!IS_LEGACY)return directRate(rating);const button=document.querySelector(`.rate[data-r="${String(rating||'')}"]`);if(!button)return false;button.click();setTimeout(notifyV2Learning,0);return true;}});
+function resetRuntime(){customStudyFilter=null;state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
+window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:directReveal,rate:directRate,updateSettings:updateRuntimeSettings,reset:resetRuntime,setCustomStudyFilter,clearCustomStudyFilter});
+window.__KANJI5_V19_REVIEW_BRIDGE__=Object.freeze({snapshot:reviewSnapshot,setCustomStudyFilter,clearCustomStudyFilter,reveal:(direct=false)=>{if(!IS_LEGACY||direct)return directReveal();const button=document.getElementById('revealBtn');if(!button)return false;window.__KANJI5_CANONICAL_REVEAL__=true;button.click();setTimeout(()=>{delete window.__KANJI5_CANONICAL_REVEAL__},0);setTimeout(notifyV2Learning,0);return true;},rate:(rating)=>{if(!IS_LEGACY)return directRate(rating);const button=document.querySelector(`.rate[data-r="${String(rating||'')}"]`);if(!button)return false;button.click();setTimeout(notifyV2Learning,0);return true;}});
 
 function updateStreak(){const t=todayKey(),s=state.streak;if(s.lastActiveDate===t)return;const y=new Date();y.setDate(y.getDate()-1);const yesterday=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(y);s.current=s.lastActiveDate===yesterday?(s.current||0)+1:1;s.longest=Math.max(s.longest||0,s.current);s.lastActiveDate=t}
 function review(which){const id=state.current;if(!id)return;const wasNew=!state.cards[id],rec=ensureCard(state.deck.find(x=>x.id===id)),now=new Date(),rating=Rating[which],result=scheduler.next(rec.card,now,rating),beforeState=rec.card.state;rec.card=result.card;rec.reviews=(rec.reviews||0)+1;if(which==="Again")rec.lapses=(rec.lapses||0)+1;if(beforeState===0&&rec.learnedAt===null)rec.learnedAt=now.toISOString();if(rec.lapses>=state.settings.leechThreshold)rec.leech=true;const previousEvent=[...state.reviews].reverse().find(r=>r.id===id&&r.eventId)?.eventId||null;const reviewEventId=eventId();const reviewDeviceId=deviceId();const baseRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))});state.reviews.push({eventId:reviewEventId,deviceId:reviewDeviceId,parentEventId:previousEvent,baseRecord,id,at:now.toISOString(),rating:which,due:rec.card.due,scheduledDays:rec.card.scheduled_days||0});if(state.reviews.length>5000)state.reviews.splice(0,state.reviews.length-5000);if(wasNew)state.todayNew++;state.todayReviewCount=(state.todayReviewCount||0)+1;updateStreak();state.queue.shift();save();const hitGoal=!state.goalCelebrated&&state.todayReviewCount>=state.settings.dailyGoal;if(hitGoal){state.goalCelebrated=true;toast("🎉 هدف روزانه تکمیل شد!")}else if(IS_LEGACY) toast(which==="Again"?"برمی‌گردد برای مرور نزدیک.":"ثبت شد.");next()}
@@ -58,4 +111,4 @@ $("statsBtn").addEventListener("click",()=>{renderStats();$("statsDialog").showM
 $("closeStats").addEventListener("click",()=>$("statsDialog").close());
 document.addEventListener("keydown",e=>{if(document.querySelector("dialog[open]")||!state.current)return;if(!state.revealed&&(e.code==="Space"||e.key==="Enter")){e.preventDefault();$("revealBtn")?.click();return}if(state.revealed){const map={"1":"Again","2":"Hard","3":"Good","4":"Easy"};if(map[e.key])document.querySelector(`.rate[data-r="${map[e.key]}"]`)?.click()}});
 }
-async function start(){try{const shared=window.__KANJI5_P0_FSRS_PROMISE;const loadPromise=shared?shared.then(mod=>{if(!mod)throw new Error("FSRS_PREFETCH_FAILED");return mod}):import(FSRS_URL);const mod=await Promise.race([loadPromise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);({createEmptyCard,fsrs,Rating}=mod);}catch(e){console.error(e);if(IS_LEGACY){$("loading").innerHTML="<div><div style=\"font-size:42px\">⚠️</div><div style=\"font-weight:800;margin:10px 0\">موتور مرور بارگذاری نشد.</div><div style=\"color:#6b7280;font-size:13px;line-height:1.8\">اتصال به کتابخانه مرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><button class=\"primary\" id=\"v12FsrsRetry\" style=\"margin-top:14px\">تلاش دوباره</button></div>";$("v12FsrsRetry").addEventListener("click",()=>location.reload());return;}}state=loadSaved(state,DEFAULTS);state=hydrateCards(state);const cached=loadDeckFromCache();try{if(!cached)await loadDeck();initScheduler();if(IS_LEGACY){$("loading").hidden=true;$("app").hidden=false;}buildQueue();next();if(IS_LEGACY)updateStats()}catch(e){console.error(e);if(IS_LEGACY){$("loadStatus").innerHTML=`بارگذاری داده ممکن نشد.<br><br><button class="primary" id="retry">تلاش دوباره</button>`;$("retry").addEventListener("click",()=>location.reload())}}}start();
+async function start(){try{const shared=window.__KANJI5_P0_FSRS_PROMISE;const loadPromise=shared?shared.then(mod=>{if(!mod)throw new Error("FSRS_PREFETCH_FAILED");return mod}):import(FSRS_URL);const mod=await Promise.race([loadPromise,new Promise((_,reject)=>setTimeout(()=>reject(new Error("FSRS_LOAD_TIMEOUT")),10000))]);({createEmptyCard,fsrs,Rating}=mod);}catch(e){console.error(e);if(IS_LEGACY){$("loading").innerHTML="<div><div style=\"font-size:42px\">⚠️</div><div style=\"font-weight:800;margin:10px 0\">موتور مرور بارگذاری نشد.</div><div style=\"color:#6b7280;font-size:13px;line-height:1.8\">اتصال به کتابخانه مرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><button class=\"primary\" id=\"v12FsrsRetry\" style=\"margin-top:14px\">تلاش دوباره</button></div>";$("v12FsrsRetry").addEventListener("click",()=>location.reload());return;}}state=loadSaved(state,DEFAULTS);state=hydrateCards(state);customStudyCore=await import('./v2-custom-study-core.js');const cached=loadDeckFromCache();try{if(!cached)await loadDeck();initScheduler();if(IS_LEGACY){$("loading").hidden=true;$("app").hidden=false;}buildQueue();next();if(IS_LEGACY)updateStats()}catch(e){console.error(e);if(IS_LEGACY){$("loadStatus").innerHTML=`بارگذاری داده ممکن نشد.<br><br><button class="primary" id="retry">تلاش دوباره</button>`;$("retry").addEventListener("click",()=>location.reload())}}}start();
