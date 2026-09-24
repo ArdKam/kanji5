@@ -30,4 +30,6 @@ if(!fs.existsSync("account-fallback.js")) throw new Error("ACCOUNT_FALLBACK_SCRI
 if(!/__KANJI5_ACCOUNT__|account-button/.test(fs.readFileSync("account-fallback.js","utf8"))) throw new Error("ACCOUNT_FALLBACK_SCRIPT_INCOMPLETE");
 console.log("Standalone account fallback is present.");
 
-const accountUi=/account-button|account-dialog|signInWithPassword|sendMagicLink/.test(reactJs);\nif(!accountUi) throw new Error("SHIPPED_REACT_JS_MISSING_ACCOUNT_UI");\nconsole.log("Shipped React JS contains Account UI.");
+const accountUi=/account-button|account-dialog|signInWithPassword|sendMagicLink/.test(reactJs);
+if(!accountUi) throw new Error("SHIPPED_REACT_JS_MISSING_ACCOUNT_UI");
+console.log("Shipped React JS contains Account UI.");
