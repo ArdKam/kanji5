@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
+import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import {
@@ -173,6 +174,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                   {componentInfo?.available&&componentInfo.components.length
                     ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
                     : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
+                  {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
                   {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
                   <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
                   <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
