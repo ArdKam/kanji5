@@ -1,0 +1,13 @@
+import fs from "node:fs";
+const css=fs.readFileSync("frontend/src/styles.css","utf8");
+const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
+const nav=app.match(/<nav className="experience-nav"[\s\S]*?<\/nav>/)?.[0]??"";
+if(!nav) throw new Error("experience navigation markup missing");
+if(!css.includes(".experience-nav{position:fixed")) throw new Error("experience nav is not fixed");
+if(!css.includes("env(safe-area-inset-bottom)")) throw new Error("safe-area bottom inset missing");
+if(!css.includes("backdrop-filter:blur(14px)")) throw new Error("floating nav surface missing");
+if(!css.includes("padding:28px 20px 118px")) throw new Error("desktop content clearance missing");
+if(!css.includes(".app-shell{padding:18px 14px 118px}")) throw new Error("mobile content clearance missing");
+const order=(a,b)=>{const i=css.indexOf(a),j=css.indexOf(b);return i>=0&&j>=0&&i<j};
+if(!order(".experience-nav{position:fixed",".experience-tab{border:0")) throw new Error("nav rules malformed");
+console.log("floating experience nav contract: PASS");
