@@ -33,3 +33,4 @@ assert.match(schema, /enable row level security/);
 assert.match(schema, /auth\.uid\(\).*user_id/);
 
 console.log("Kanji 5 Supabase account integration contract passed.");
+\nassert.match(sync, /cdn\.jsdelivr\.net\/npm\/\@supabase\/supabase-js\@2\.57\.4\/\+esm/);\n
