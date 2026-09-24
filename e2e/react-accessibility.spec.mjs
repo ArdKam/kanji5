@@ -26,8 +26,14 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   expect(semantics.progressLabel).toBeTruthy();
   expect(semantics.navLabel).toBe('مسیر یادگیری');
 
-  const buttons=await page.locator('button:visible').evaluateAll(nodes=>nodes.map(node=>parseFloat(getComputedStyle(node).minHeight)));
-  expect(buttons.every(value=>value>=44)).toBe(true);
+  const buttons=await page.locator('button:visible').evaluateAll(nodes=>nodes.map(node=>({
+    text:(node.textContent||'').trim(),
+    aria:node.getAttribute('aria-label')||'',
+    classes:node.className,
+    minHeight:parseFloat(getComputedStyle(node).minHeight),
+  })));
+  const undersized=buttons.filter(button=>button.minHeight<44);
+  expect(undersized, JSON.stringify(undersized)).toEqual([]);
 
   await page.keyboard.press('Tab');
   await expect(page.locator('.skip-link')).toBeFocused();
