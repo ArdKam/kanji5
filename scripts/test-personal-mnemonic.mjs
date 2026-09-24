@@ -40,6 +40,28 @@ if (state.readMnemonics()["学"] !== "A different study image.") throw new Error
 if (!state.writeMnemonics({})) throw new Error("Could not clear mnemonic namespace");
 if (Object.keys(state.readMnemonics()).length !== 0) throw new Error("Mnemonic clear failed");
 
+const boundarySandbox = {
+  window: {
+    __KANJI5_STATE__: {
+      readDeck(){ return []; },
+      readMnemonics(){ return { "学": "A student memory hook." }; }
+    }
+  },
+  document: { addEventListener(){}, dispatchEvent(){} },
+  CustomEvent: class CustomEvent {
+    constructor(type, init = {}) { this.type = type; this.detail = init.detail; }
+  },
+  setTimeout(){},
+  fetch: async () => ({ ok: false, async json(){ return {}; } })
+};
+vm.runInNewContext(boundarySource, boundarySandbox, { filename: "v1.9-v2-boundary.js" });
+const boundary = boundarySandbox.window.__KANJI5_V19_V2_BOUNDARY__;
+if (!boundary?.getMnemonic || !boundary?.saveMnemonic) throw new Error("Personal mnemonic boundary API was not published");
+const loaded = await boundary.getMnemonic("学");
+if (loaded.character !== "学" || loaded.text !== "A student memory hook.") {
+  throw new Error(`Boundary mnemonic read failed: ${JSON.stringify(loaded)}`);
+}
+
 const boundarySource = await readFile(new URL("../v1.9-v2-boundary.js", import.meta.url), "utf8");
 if (!boundarySource.includes("async function getMnemonic(character)")) throw new Error("Boundary getMnemonic implementation missing");
 if (!boundarySource.includes("async function saveMnemonic(character,value)")) throw new Error("Boundary saveMnemonic implementation missing");
