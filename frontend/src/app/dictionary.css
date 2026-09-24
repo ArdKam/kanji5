@@ -87,9 +87,9 @@
 .mastery-swatch.unseen{background:var(--line);}
 .kanji-catalog-tile[data-mastery-state="mastered"] .kanji-catalog-fill{background:var(--matcha);}
 .kanji-catalog-tile[data-mastery-state="stable"] .kanji-catalog-fill{background:var(--ai);}
-.kanji-catalog-tile[data-mastery-state="learning"],
+.kanji-catalog-tile[data-mastery-state="learning"] .kanji-catalog-fill,
 .kanji-catalog-tile[data-mastery-state="introduced"] .kanji-catalog-fill{background:var(--shu);}
-.kanji-catalog-tile[data-mastery-state="weak"],
+.kanji-catalog-tile[data-mastery-state="weak"] .kanji-catalog-fill,
 .kanji-catalog-tile[data-mastery-state="recovering"] .kanji-catalog-fill{background:var(--sumi);}
 .kanji-catalog-tile[data-mastery-state="unseen"] .kanji-catalog-fill{background:var(--line);}
 .dictionary-page-search{
