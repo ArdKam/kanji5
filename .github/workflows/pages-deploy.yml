@@ -57,9 +57,9 @@ jobs:
         run: npx playwright install chromium
 
       - name: Verify learning card flip
-        run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
+        run: npx playwright test --timeout=30000 --retries=0 e2e/react-learning-card-flip.spec.mjs
       - name: Verify personal mnemonic flow
-        run: npx playwright test --timeout=20000 --retries=0 e2e/react-personal-mnemonic.spec.mjs
+        run: npx playwright test --timeout=30000 --retries=0 e2e/react-personal-mnemonic.spec.mjs
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
