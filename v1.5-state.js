@@ -25,7 +25,9 @@ function readSettings(){return{...educationDefaults,...readObject(SETTINGS_KEY,{
 function writeSettings(value){const next={...educationDefaults,...(value&&typeof value==='object'?value:{})};return writeObject(SETTINGS_KEY,next)}
 function readAppState(){return safeObject(safeParse(readValue(STORAGE,null)))||{}}
 function readReviews(){const value=safeParse(readValue(REVIEWS_STORAGE,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object'):[]}
-function readComponents(){return readObject(COMPONENT_KEY,{})}\nfunction readMnemonics(){const knowledge=readKnowledge();const value=safeObject(knowledge.v2Mnemonics);return value||{}}\nfunction writeMnemonics(value){const next=value&&typeof value==='object'&&!Array.isArray(value)?value:{};const knowledge=readKnowledge();knowledge.v2Mnemonics=next;return writeKnowledge(knowledge)}
+function readComponents(){return readObject(COMPONENT_KEY,{})}
+function readMnemonics(){const knowledge=readKnowledge();const value=safeObject(knowledge.v2Mnemonics);return value||{}}
+function writeMnemonics(value){const next=value&&typeof value==='object'&&!Array.isArray(value)?value:{};const knowledge=readKnowledge();knowledge.v2Mnemonics=next;return writeKnowledge(knowledge)}
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
 function readSessionHistory(){const value=safeParse(readValue(SESSION_HISTORY_KEY,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[]}
