@@ -11,7 +11,7 @@
   width:min(calc(100% - 2rem), 880px);
   transform:translateX(-50%);
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(3,1fr);
   gap:.25rem;
   padding:.35rem;
   border:1px solid var(--line);
@@ -25,6 +25,7 @@
 .experience-tab::before{display:block;margin-bottom:2px;font-family:inherit;font-size:1.05rem;line-height:1.1;color:currentColor;}
 .experience-tab:nth-child(1)::before{content:"学";}
 .experience-tab:nth-child(2)::before{content:"想";}
+.experience-tab:nth-child(3)::before{content:"字";}
 .experience-tab.active{background:var(--washi);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
 .experience-tab.active::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--shu);transform:translateX(-50%);}
 .experience-tab:focus-visible{outline:3px solid color-mix(in srgb, var(--shu) 45%, transparent);outline-offset:2px;}
