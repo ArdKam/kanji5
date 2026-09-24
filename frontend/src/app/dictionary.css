@@ -326,3 +326,9 @@
   .dictionary-card-kanji-row{min-height:130px;}
   .dictionary-card-kanji-row .dictionary-card-character{font-size:clamp(76px,22vw,112px);}
 }
+
+.dictionary-card-kanji-row .dictionary-audio-button:focus-visible,
+.dictionary-readings .dictionary-audio-button:focus-visible{
+  outline:3px solid color-mix(in srgb, var(--shu) 45%, transparent);
+  outline-offset:2px;
+}
