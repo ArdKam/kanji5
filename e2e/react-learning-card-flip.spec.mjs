@@ -98,7 +98,7 @@ test("learning card flips to a compact back face without card overflow", async (
     expect(layoutBounds.examples.top).toBeGreaterThanOrEqual(layoutBounds.overview.bottom - 1);
   }
   if (layoutBounds.examples && layoutBounds.components) {
-    expect(layoutBounds.components.top).toBeGreaterThanOrEqual(layoutBounds.examples.bottom - 1);
+    expect(layoutBounds.examples.top).toBeGreaterThanOrEqual(layoutBounds.components.bottom - 1);
   }
   }
 });
