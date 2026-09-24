@@ -6,6 +6,7 @@ import {
   dontKnow,
   getComponentInfo,
   searchKanji,
+  saveMnemonic,
   nextExercise,
   rateLearning,
   resetProgress,
@@ -38,10 +39,14 @@ function Audio({value,label}:{value:string;label:string}){const unsupported=type
 
 const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
 
-function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;onReveal:()=>void;onRate:(r:Rating)=>void}){
+function Learning({card,mnemonics,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;mnemonics:Record<string,string>;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
+  const [mnemonic,setMnemonic]=useState("");
+  const [mnemonicEditing,setMnemonicEditing]=useState(false);
+  const [mnemonicSaving,setMnemonicSaving]=useState(false);
+  const [mnemonicSaved,setMnemonicSaved]=useState(false);
   useEffect(()=>{
     let active=true;
     if(!revealed||!card.character){setComponentInfo(null);return ()=>{active=false};}
@@ -49,7 +54,8 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     void getComponentInfo(card.character).then(info=>{if(active)setComponentInfo(info)}).catch(()=>{if(active)setComponentInfo(null)});
     return ()=>{active=false};
   },[revealed,card.character]);
-  useEffect(()=>{setHiraganaReadings(false)},[card.character]);
+  useEffect(()=>{setHiraganaReadings(false);setMnemonic(mnemonics[card.character]??"");setMnemonicEditing(false);setMnemonicSaved(false)},[card.character,mnemonics]);
+  const persistMnemonic=async()=>{if(!card.character)return;setMnemonicSaving(true);try{await saveMnemonic(card.character,mnemonic);setMnemonicEditing(false);setMnemonicSaved(true);window.setTimeout(()=>setMnemonicSaved(false),1400)}finally{setMnemonicSaving(false)}};
   const displayedOn=(card.on??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const displayedKun=(card.kun??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const exampleCount=(card.examples??[]).length;
@@ -98,7 +104,12 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                     : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
                   {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
                   <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
-                  <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                  <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div><div className="mnemonic-panel">
+  <div className="mnemonic-head"><h3>{t("mnemonic")}</h3>{!mnemonicEditing?<button className="link-button" type="button" onClick={()=>setMnemonicEditing(true)}>{mnemonic?t("saveMnemonic").replace("ذخیره","ویرایش").replace("Save","Edit"):t("saveMnemonic")}</button>:null}</div>
+  {mnemonicEditing?<div className="mnemonic-editor"><textarea value={mnemonic} maxLength={500} onChange={e=>setMnemonic(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")}/><div className="mnemonic-actions"><button className="button primary" type="button" disabled={mnemonicSaving} onClick={()=>void persistMnemonic()}>{t("saveMnemonic")}</button><button className="button secondary" type="button" disabled={mnemonicSaving} onClick={()=>{setMnemonic(mnemonics[card.character]??"");setMnemonicEditing(false)}}>{t("close")}</button></div></div>:mnemonic?<div className="mnemonic-body">{mnemonic}</div>:<p className="mnemonic-empty">{t("mnemonicPlaceholder")}</p>}
+  {mnemonicSaved?<small className="mnemonic-saved" role="status">{t("mnemonicSaved")}</small>:null}
+  {mnemonic&&!mnemonicEditing?<button className="mnemonic-delete" type="button" disabled={mnemonicSaving} onClick={()=>{setMnemonic("");setMnemonicEditing(true)}}>{t("deleteMnemonic")}</button>:null}
+</div>
                 </div>
                 {!hasExamplesPage&&card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
               </div>
@@ -316,7 +327,7 @@ function App(){
       {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<div className="surface loading">{t("loading")}</div>):null}
       {!showExercise&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top"><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:null}
       {!showExercise&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:null}
-      {showExercise?<Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>}
+      {showExercise?<Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>:snapshot?.learning?.active?<Learning card={snapshot.learning} mnemonics={snapshot.mnemonics??{}} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>}
       {!showExercise&&snapshot?<Insights snapshot={snapshot}/>:null}
     </main>
     <footer className="footer">{language==="fa"?"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.":"Keep your learning short, consistent, and focused."}</footer>
