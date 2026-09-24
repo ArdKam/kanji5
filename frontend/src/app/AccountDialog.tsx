@@ -44,6 +44,11 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [accountView, setAccountView] = useState<"profile" | "security" | "sync">("profile");
+  const [displayName, setDisplayName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -63,6 +68,16 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (!open || !state.user) return;
+    setDisplayName(state.user.name && state.user.name !== state.user.email ? state.user.name : "");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setAccountView("profile");
+    setAuthMessage(null);
+  }, [open, state.user?.id]);
+
   const run = async (task: () => Promise<void>) => {
     if (busy) return;
     setAuthMessage(null);
@@ -74,6 +89,10 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
       const message = code === "AUTH_PASSWORD_TOO_SHORT" ? t("passwordTooShort", language)
         : code === "AUTH_EMAIL_REQUIRED" ? t("emailRequired", language)
         : code === "AUTH_EMAIL_PASSWORD_REQUIRED" ? t("emailPasswordRequired", language)
+        : code === "AUTH_PASSWORD_REQUIRED" ? t("passwordRequired", language)
+        : code === "AUTH_PROFILE_NAME_REQUIRED" ? t("nameRequired", language)
+        : code === "AUTH_PROFILE_NAME_TOO_LONG" ? t("nameTooLong", language)
+        : code === "Password should be at least 6 characters." ? t("passwordTooShort", language)
         : code || t("authError", language);
       setAuthMessage(message);
     } finally {
@@ -159,20 +178,74 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     </> : null}
 
     {state.status === "signed-in" ? <>
-      <div className="account-user-card">
+      <div className="account-profile-hero">
         <AccountMark user={state.user} />
-        <div className="account-user-copy">
-          <strong>{state.user?.name || t("googleAccount", language)}</strong>
+        <div className="account-profile-identity">
+          <span className="eyebrow">{t("account", language)}</span>
+          <strong>{displayName || state.user?.email || t("googleAccount", language)}</strong>
           {state.user?.email ? <span>{state.user.email}</span> : null}
         </div>
         <span className={"sync-pill sync-"+state.syncStatus}>{statusLabel}</span>
       </div>
-      <p className="account-copy">{t("accountSyncHint", language)}</p>
-      {state.error ? <p className="account-error" role="alert">{state.error}</p> : null}
-      <div className="account-actions">
-        <button className="button secondary" type="button" disabled={busy || state.syncStatus === "syncing"} onClick={() => void run(async () => { const api = await getAccountApi(); await api.syncNow(); })}>{t("syncNow", language)}</button>
-        <button className="button secondary" type="button" disabled={busy} onClick={() => void run(async () => { const api = await getAccountApi(); await api.signOut(); onClose(); })}>{t("signOut", language)}</button>
+
+      <p className="account-copy account-overview-copy">{t("accountOverview", language)}</p>
+
+      <div className="account-section-tabs" role="tablist" aria-label={t("account", language)}>
+        <button className={accountView === "profile" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "profile"} onClick={() => { setAccountView("profile"); setAuthMessage(null); }}>{t("profile", language)}</button>
+        <button className={accountView === "security" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "security"} onClick={() => { setAccountView("security"); setAuthMessage(null); }}>{t("security", language)}</button>
+        <button className={accountView === "sync" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "sync"} onClick={() => { setAccountView("sync"); setAuthMessage(null); }}>{t("accountSync", language)}</button>
       </div>
+
+      {accountView === "profile" ? <section className="account-section" aria-labelledby="account-profile-heading">
+        <div className="account-section-heading">
+          <div><h3 id="account-profile-heading">{t("profile", language)}</h3><p>{t("displayNameHint", language)}</p></div>
+        </div>
+        <form className="account-profile-form" onSubmit={event => { event.preventDefault(); void run(async () => {
+          const api = await getAccountApi();
+          await api.updateProfile(displayName);
+          setAuthMessage(t("profileSaved", language));
+        }); }}>
+          <label><span>{t("displayName", language)}</span><input value={displayName} onChange={event => setDisplayName(event.target.value)} maxLength={40} required disabled={busy} /></label>
+          <label><span>{t("emailReadonly", language)}</span><input value={state.user?.email || ""} readOnly disabled /></label>
+          <button className="button primary" type="submit" disabled={busy}>{busy ? t("saving", language) : t("saveProfile", language)}</button>
+        </form>
+      </section> : null}
+
+      {accountView === "security" ? <section className="account-section" aria-labelledby="account-security-heading">
+        <div className="account-section-heading">
+          <div><h3 id="account-security-heading">{t("security", language)}</h3><p>{t("passwordHint", language)}</p></div>
+        </div>
+        <form className="account-profile-form" onSubmit={event => { event.preventDefault(); void run(async () => {
+          if (!currentPassword || !newPassword) throw new Error("AUTH_PASSWORD_REQUIRED");
+          if (newPassword !== confirmPassword) throw new Error("AUTH_PASSWORD_MISMATCH");
+          const api = await getAccountApi();
+          await api.updatePassword(currentPassword, newPassword);
+          setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+          setAuthMessage(t("passwordChanged", language));
+        }); }}>
+          <label><span>{t("currentPassword", language)}</span><input type="password" value={currentPassword} onChange={event => setCurrentPassword(event.target.value)} autoComplete="current-password" minLength={6} required disabled={busy} /></label>
+          <label><span>{t("newPassword", language)}</span><input type="password" value={newPassword} onChange={event => setNewPassword(event.target.value)} autoComplete="new-password" minLength={6} required disabled={busy} /></label>
+          <label><span>{t("confirmPassword", language)}</span><input type="password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} autoComplete="new-password" minLength={6} required disabled={busy} /></label>
+          <button className="button primary" type="submit" disabled={busy}>{busy ? t("signingIn", language) : t("changePassword", language)}</button>
+        </form>
+      </section> : null}
+
+      {accountView === "sync" ? <section className="account-section" aria-labelledby="account-sync-heading">
+        <div className="account-section-heading">
+          <div><h3 id="account-sync-heading">{t("accountSync", language)}</h3><p>{t("accountSyncHint", language)}</p></div>
+          <span className={"sync-pill sync-"+state.syncStatus}>{statusLabel || t("syncing", language)}</span>
+        </div>
+        <div className="account-sync-status-card">
+          <div><span>{t("emailReadonly", language)}</span><strong>{state.user?.email || "—"}</strong></div>
+          <div><span>{t("accountSync", language)}</span><strong>{statusLabel || t("syncing", language)}</strong></div>
+        </div>
+        <div className="account-actions">
+          <button className="button primary" type="button" disabled={busy || state.syncStatus === "syncing"} onClick={() => void run(async () => { const api = await getAccountApi(); await api.syncNow(); })}>{t("syncNow", language)}</button>
+          <button className="button secondary" type="button" disabled={busy} onClick={() => void run(async () => { const api = await getAccountApi(); await api.signOut(); onClose(); })}>{t("signOut", language)}</button>
+        </div>
+      </section> : null}
+
+      {authMessage ? <p className="account-message" role="status">{authMessage}</p> : null}
     </> : null}
 
     <div className="account-footer">
