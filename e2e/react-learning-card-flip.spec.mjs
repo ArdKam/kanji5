@@ -206,6 +206,36 @@ test("learning card keeps dense information on separate back pages in Persian an
   }
 });
 
+test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ page }) => {
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg">
+<g id="kvg:StrokePaths_05b66">
+  <path id="kvg:05b66-s1" d="M10,10 L30,30"/>
+  <path id="kvg:05b66-s2" d="M30,30 L50,10"/>
+  <path id="kvg:05b66-s3" d="M50,10 L70,30"/>
+</g>
+</svg>`;
+  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
+    await route.fulfill({ status: 200, contentType: "image/svg+xml", body: svg });
+  });
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  await card.getByRole("button", { name: "Show kanji information" }).click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+
+  const panel = card.locator(".stroke-order-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
+  await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
+  await expect(panel.getByRole("button", { name: "Play" })).toBeVisible();
+  await panel.getByRole("button", { name: "Next" }).click();
+  await expect(panel.locator(".stroke-order-progress")).toHaveText("1 / 3");
+  await panel.getByRole("button", { name: "Previous" }).click();
+  await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
+});
+
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
