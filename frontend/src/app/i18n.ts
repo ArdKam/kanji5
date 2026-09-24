@@ -87,7 +87,11 @@ type TranslationKey =
   | "vocabularyExamples"
   | "showCardHint"
   | "correctRecall"
-  | "correctAnswer";
+  | "correctAnswer"
+  | "cardPage"
+  | "previousCardPage"
+  | "nextCardPage"
+  | "swipeForMore";
 
 const messages: Record<Language, Record<TranslationKey, string>> = {
   fa: {
@@ -111,7 +115,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     startExercise:"شروع تمرین", loading:"در حال اتصال به هستهٔ یادگیری…", learningCoreError:"رابط هستهٔ یادگیری آماده نشد", tryAgain:"تلاش دوباره",
     audioUnavailable:"صدا در این مرورگر در دسترس نیست", playKanjiPronunciation:"پخش تلفظ کانجی", playWordPronunciation:"پخش تلفظ واژه",
     playReading:"پخش", vocabularyExamples:"نمونهٔ واژگانی", showCardHint:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
-    correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست"
+    correctRecall:"بازیابی درست بود.", correctAnswer:"پاسخ درست", cardPage:"صفحه اطلاعات کارت", previousCardPage:"صفحه قبلی کارت", nextCardPage:"صفحه بعدی کارت", swipeForMore:"برای اطلاعات بیشتر سوایپ کن"
   },
   en: {
     title:"Kanji 5",
@@ -134,7 +138,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     startExercise:"Start exercise", loading:"Connecting to the learning engine…", learningCoreError:"The learning interface could not be loaded", tryAgain:"Try again",
     audioUnavailable:"Audio is not available in this browser", playKanjiPronunciation:"Play kanji pronunciation", playWordPronunciation:"Play word pronunciation",
     playReading:"Play", vocabularyExamples:"Vocabulary examples", showCardHint:"First look at the kanji, then reveal its information.",
-    correctRecall:"Recall was correct.", correctAnswer:"Correct answer"
+    correctRecall:"Recall was correct.", correctAnswer:"Correct answer", cardPage:"Card information page", previousCardPage:"Previous card information page", nextCardPage:"Next card information page", swipeForMore:"Swipe for more information"
   }
 };
 
