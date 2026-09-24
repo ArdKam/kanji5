@@ -1,11 +1,11 @@
 {
-  "name": "Kanji 5",
-  "short_name": "Kanji 5",
-  "description": "۵ کانجی مهم ژاپنی در روز با FSRS",
+  "name": "کانجی‌یار",
+  "short_name": "کانجی‌یار",
+  "description": "یادگیری روزانهٔ ۵ کانجی با مرور فاصله‌دار تطبیقی FSRS",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f5f7",
-  "theme_color": "#4f46e5",
+  "background_color": "#f4efe3",
+  "theme_color": "#c0392b",
   "lang": "fa",
   "dir": "rtl",
   "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
