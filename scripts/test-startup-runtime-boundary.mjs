@@ -53,7 +53,7 @@ assert.doesNotMatch(session, /v1\.8-learning-ux\.js/);
 
 for (const file of deletedFiles) assert.equal(fs.existsSync(file), false, `retired file still exists: ${file}`);
 for (const file of ['v1.5-p0.js','v1.5-recall-core.js','v1.2-enhancements.js','v1.2-runtime-fixes.js']) {
-  assert.doesNotMatch(sw, new RegExp(`"${file.replaceAll('.', '\\\.')}"`), `legacy-only file remains in default precache: ${file}`);
+  assert.match(sw, new RegExp(`"${file.replaceAll('.', '\\\.')}"`), `legacy compatibility dependency missing from offline cache: ${file}`);
 }
 for (const file of ['v1.4-education-migration.js','v1.4-education-core.js','v1.5-education-ui.js','v1.9-recovery.js']) {
   assert.match(sw, new RegExp(`"${file.replaceAll('.', '\\\.')}"`), `active lazy exercise dependency missing from precache: ${file}`);
