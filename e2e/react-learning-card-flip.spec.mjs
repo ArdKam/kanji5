@@ -103,7 +103,7 @@ test("learning card keeps dense information on separate back pages without verti
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5, { steps: 4 });
     await page.mouse.up();
-    await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /Core information/);
+    await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
     await expect(previousButton).toBeDisabled();
     await expect(nextButton).toBeEnabled();
 
