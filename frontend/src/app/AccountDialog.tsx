@@ -90,6 +90,8 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         : code === "AUTH_EMAIL_REQUIRED" ? t("emailRequired", language)
         : code === "AUTH_EMAIL_PASSWORD_REQUIRED" ? t("emailPasswordRequired", language)
         : code === "AUTH_PASSWORD_REQUIRED" ? t("passwordRequired", language)
+        : code === "AUTH_CURRENT_PASSWORD_INVALID" ? t("passwordChangeError", language)
+        : code === "AUTH_PASSWORD_MISMATCH" ? t("passwordMismatch", language)
         : code === "AUTH_PROFILE_NAME_REQUIRED" ? t("nameRequired", language)
         : code === "AUTH_PROFILE_NAME_TOO_LONG" ? t("nameTooLong", language)
         : code === "Password should be at least 6 characters." ? t("passwordTooShort", language)
