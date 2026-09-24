@@ -15,11 +15,14 @@ startupObserver?.observe(document.getElementById('root')||document.documentEleme
 const style=document.createElement('style');
 style.textContent='#root{display:block;min-height:100vh}';
 document.head.appendChild(style);
-const reactStylesheet=document.createElement('link');
-reactStylesheet.rel='stylesheet';
-reactStylesheet.href='./react-dist/kanji5-react.css?v=20260925-release1';
-reactStylesheet.dataset.kanji5React='true';
-document.head.appendChild(reactStylesheet);
+let reactStylesheet=document.querySelector('link[data-kanji5-react-styles]');
+if(!reactStylesheet){
+  reactStylesheet=document.createElement('link');
+  reactStylesheet.rel='stylesheet';
+  reactStylesheet.href='./react-dist/kanji5-react.css?v=20260925-release1';
+  reactStylesheet.dataset.kanji5React='true';
+  document.head.appendChild(reactStylesheet);
+}
 import('./react-dist/kanji5-react.js?v=20260925-release1')
   .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 
