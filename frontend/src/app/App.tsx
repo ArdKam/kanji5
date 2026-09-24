@@ -183,7 +183,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                   </div>
                   <div className="learning-back-tools">
                     {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
-                    <section className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-labelledby="personal-mnemonic-title">
+                    <section className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
                       <button
                         className="mnemonic-trigger"
                         type="button"
