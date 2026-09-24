@@ -40,7 +40,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
       if (!active) return;
       setPaths(next);
       setLoading(false);
-    }).catch(() => {
+    })().catch(() => {
       if (!active) return;
       setLoading(false);
       setError(t("strokeOrderUnavailable", language));
