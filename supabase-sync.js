@@ -10,6 +10,7 @@ const SESSION_HISTORY_KEY = 'kanji5-v1.6-session-history';
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 15000;
 const MAX_SYNC_ATTEMPTS = 3;
+const SUPABASE_UMD = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js';
 const SUPABASE_JS_CANDIDATES = [
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm',
   'https://esm.sh/@supabase/supabase-js@2.57.4'
@@ -129,6 +130,12 @@ function mergedPayload(local, remote) {
 async function getClient() {
   if (client) return client;
   if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
+  if (globalThis.supabase?.createClient) {
+    client = globalThis.supabase.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+    return client;
+  }
   let lastError = null;
   for (const source of SUPABASE_JS_CANDIDATES) {
     try {
