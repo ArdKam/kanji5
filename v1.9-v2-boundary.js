@@ -152,6 +152,29 @@ async function setExercise(input){const core=await load();feedback=null;exercise
 async function setFeedback(input){const core=await load();feedback=core.buildFeedbackViewModel(input);await publish();return feedback}
 async function setAdaptiveReason(input){const core=await load();adaptiveReason=core.buildAdaptiveReasonViewModel(input);await publish();return adaptiveReason}
 async function clearTransient(){exercise=null;feedback=null;adaptiveReason=null;await publish();return true}
+async function setCustomStudyFilter(filter={}){
+  const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;
+  if(!bridge?.setCustomStudyFilter)throw new Error('KANJI5_CUSTOM_STUDY_UNAVAILABLE');
+  const available=Number(await bridge.setCustomStudyFilter(filter));
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'custom-study-filter',available:Math.max(0,available)};
+}
+function clearCustomStudyFilter(){
+  const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;
+  if(!bridge?.clearCustomStudyFilter)return false;
+  return Boolean(bridge.clearCustomStudyFilter());
+}
+async function startCustomStudy(filter={}){
+  const result=await setCustomStudyFilter(filter);
+  if(!result.available){
+    clearCustomStudyFilter();
+    return {...result,started:false};
+  }
+  const session=window.__KANJI5_V16_SESSION_API__;
+  if(session?.startExperience)await session.startExperience('review');
+  else if(session?.startReady)await session.startReady();
+  else if(session?.start)await session.start();
+  return {...result,started:true};
+}
 async function updateSettings(nextValue={}){
   const requested=nextValue&&typeof nextValue==='object'?nextValue:{};
   const current=runtimePresentationData().settings;
@@ -165,7 +188,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji,getMnemonic,saveMnemonic});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);

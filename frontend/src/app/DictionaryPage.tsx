@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import { listKanji, type KanjiCatalogItem } from "./engine";
+import { listKanji, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
@@ -33,13 +33,16 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
   );
 }
 
-export function DictionaryPage({ language }: { language: Language }) {
+export function DictionaryPage({ language, onStartCustomStudy }: { language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean> }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<LevelFilter>("all");
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
+  const [customFocus, setCustomFocus] = useState<CustomStudyFilter["focus"]>("available");
+  const [customLimit, setCustomLimit] = useState(20);
+  const [customMessage, setCustomMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -143,6 +146,40 @@ export function DictionaryPage({ language }: { language: Language }) {
           </select>
         </label>
       </div>
+
+      <details className="custom-study-panel">
+        <summary>{t("customStudy", language)}</summary>
+        <p>{t("customStudyHint", language)}</p>
+        <div className="custom-study-controls">
+          <div className="custom-study-focus" role="group" aria-label={t("customFocus", language)}>
+            {([
+              ["available", t("customAvailable", language)],
+              ["due", t("customDue", language)],
+              ["new", t("customNew", language)],
+              ["weak", t("customWeak", language)],
+            ] as const).map(([value, label]) => (
+              <button key={value} className={"dictionary-filter-button " + (customFocus === value ? "active" : "")} type="button" aria-pressed={customFocus === value} onClick={() => setCustomFocus(value)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <label className="custom-study-limit">
+            <span>{t("customLimit", language)}</span>
+            <select value={customLimit} onChange={(event) => setCustomLimit(Number(event.target.value))}>
+              {[5, 10, 20, 30, 50].map((value) => <option key={value} value={value}>{formatNumber(value, language)}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="custom-study-action">
+          <span>{level === "all" ? t("allLevels", language) : level} · {t("customStudy", language)}</span>
+          <button className="button primary" type="button" onClick={async () => {
+            setCustomMessage("");
+            const started = await onStartCustomStudy({ level, focus: customFocus, limit: customLimit });
+            if (!started) setCustomMessage(t("customNoCards", language));
+          }}>{t("customStart", language)}</button>
+        </div>
+        {customMessage ? <p className="custom-study-message" role="status">{customMessage}</p> : null}
+      </details>
 
       {loading ? <div className="surface loading dictionary-loading">{t("dictionaryLoading", language)}</div> : null}
       {!loading && !visible.length ? <div className="surface dictionary-empty">{t("dictionaryNoResults", language)}</div> : null}

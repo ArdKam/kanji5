@@ -95,6 +95,31 @@ test('empty session progress indicator is absent before a session starts',async(
   await expect(page.locator('.session-progress')).toHaveCount(0);
 });
 
+test('custom study starts a filtered JLPT/new-card session',async({page})=>{
+  await clean(page);
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible({timeout:10000});
+  const n5=pageRoot.getByRole('button',{name:'N5',exact:true});
+  await n5.click();
+  const panel=pageRoot.locator('.custom-study-panel');
+  await expect(panel).toBeVisible();
+  await panel.getByRole('button',{name:'فقط جدیدها',exact:true}).click();
+  await panel.getByRole('button',{name:'شروع مطالعه',exact:true}).click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  const selection=await page.evaluate(async()=>{
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    const snapshot=await boundary?.snapshot?.();
+    const catalog=await boundary?.listKanji?.();
+    const character=snapshot?.learning?.character||'';
+    const item=(catalog?.results||[]).find(row=>row.character===character);
+    return {character,jlpt:item?.jlpt||null};
+  });
+  if(!selection.character) throw new Error('Custom study did not produce a learning card');
+  expect(selection.jlpt).toBe('N5');
+  await expect(page.locator('.experience-nav .experience-tab').nth(0)).toHaveClass(/active/);
+});
+
 test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji card',async({page})=>{
   await clean(page);
   await page.locator('.experience-nav .experience-tab').nth(2).click();
