@@ -138,8 +138,15 @@ export type Boundary = {
   resetProgress?: () => boolean;
 };
 
+type EducationStartResult = {
+  started?: boolean;
+  reason?: string;
+  character?: string;
+  mode?: string;
+};
+
 type EducationBridge = {
-  start?: () => Promise<unknown> | unknown;
+  start?: () => Promise<EducationStartResult | unknown> | (EducationStartResult | unknown);
   submitValue?: (value: string) => Promise<unknown> | unknown;
   dontKnow?: () => Promise<unknown> | unknown;
   retry?: () => Promise<unknown> | unknown;
@@ -214,7 +221,8 @@ export async function startExercise(): Promise<void> {
     if (session?.startReady && !current?.started && !current?.finished) await session.startReady();
     else if (session?.start && !current?.started && !current?.finished) await session.start();
   }
-  await bridge.start();
+  const startResult = await bridge.start();
+  if (startResult && typeof startResult === "object" && "started" in startResult && startResult.started === false) return;
   const started = performance.now();
   while (performance.now() - started < 15000) {
     const current = await snapshot();
