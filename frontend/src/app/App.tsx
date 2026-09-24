@@ -64,11 +64,13 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2)return;
     swipeStartX.current=event.clientX;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
   const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2||swipeStartX.current===null)return;
     const delta=event.clientX-swipeStartX.current;
     swipeStartX.current=null;
+    if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
     if(Math.abs(delta)<48)return;
     changeBackPage(delta<0?1:-1);
   };
