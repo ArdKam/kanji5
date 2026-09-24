@@ -14,6 +14,5 @@ const MIGRATIONS=Object.freeze({1:migrateV1,2:migrateV2});
 function migrate(){const meta=readMeta(),existing=readKnowledge(),from=Math.max(0,Math.min(VERSION,Number(meta?.version)||0));let out=existing;const now=new Date().toISOString();for(let version=from+1;version<=VERSION;version++)out=version===1?MIGRATIONS[version](out,now):MIGRATIONS[version](out);try{if(from<VERSION||Number(meta?.version)!==VERSION){localStorage.setItem(KEY,JSON.stringify(out));localStorage.setItem(META,JSON.stringify({version:VERSION,migratedAt:now,fromVersion:from}))}}catch(_){}return out}
 const migrated=migrate();
 window.__KANJI5_EDU_MIGRATION_API__=Object.freeze({version:VERSION,migrate:()=>migrate(),knowledge:migrated,migrations:Object.keys(MIGRATIONS).map(Number)});
-const loadV15=()=>import('./v1.5-education-ui.js').catch(()=>{});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadV15,{once:true});else loadV15();
+// The migration is intentionally side-effect-only. The v2 exercise runtime loads it on demand.
 })();
