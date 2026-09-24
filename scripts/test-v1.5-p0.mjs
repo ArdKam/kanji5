@@ -23,7 +23,7 @@ for(const token of ['export const RECALL_MODES','export function normalize','exp
 assert.doesNotMatch(p0,/function normalize\(/);
 
 for(const dependency of ['./v1.5-state.js','./v1.5-network.js','./v1.5-education-sync-core.js','./v1.5-fsrs-sync-core.js','./v1.5-sync-core.js','./v1.8-production-core.js','./v1.8-vocabulary-core.js','./v1.8-context-core.js'])assert.ok(sw.includes(`"${dependency}"`),`${dependency} missing from offline shell`);
-for(const legacyOnly of ['./v1.5-p0.js','./v1.5-recall-core.js','./v1.2-enhancements.js','./v1.2-runtime-fixes.js'])assert.ok(!sw.includes(`"${legacyOnly}"`),`${legacyOnly} should not be in the default precache`);
+for(const legacyOnly of ['./v1.5-p0.js','./v1.5-recall-core.js','./v1.2-enhancements.js','./v1.2-runtime-fixes.js'])assert.ok(sw.includes(`"${legacyOnly}"`),`${legacyOnly} must remain available offline for the compatibility route`);
 assert.ok(!sw.includes('./v1.8-learning-ux.js'));
 assert.ok(!sw.includes('./v1.9-recovery-ui.js'));
 assert.ok(sw.includes("const API_ORIGIN='https://kanjiapi.dev'"));
