@@ -452,3 +452,16 @@
   .dictionary-stroke-order .stroke-order-stage{min-height:128px;}
   .dictionary-stroke-order .stroke-order-stage svg{width:min(170px,52vw);max-height:160px;}
 }
+
+.dictionary-stroke-order-wrap{
+  position:relative;
+}
+.dictionary-stroke-order-wrap>.dictionary-audio-button{
+  position:absolute;
+  top:10px;
+  inset-inline-end:10px;
+  z-index:2;
+}
+@media (max-width:520px){
+  .dictionary-stroke-order-wrap>.dictionary-audio-button{top:6px;inset-inline-end:6px;}
+}
