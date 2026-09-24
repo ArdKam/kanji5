@@ -1,113 +1,136 @@
 import { test, expect } from "@playwright/test";
 
-test("learning card flips to a compact back face without card overflow", async ({ page }) => {
+async function routeExamples(page, count) {
   await page.route("https://kanjiapi.dev/v1/words/**", async (route) => {
     const url = new URL(route.request().url());
     const character = decodeURIComponent(url.pathname.split("/").pop() || "学");
+    const pool = [
+      [character + "生", "がくせい", "student"],
+      [character + "校", "がっこう", "school"],
+      [character + "語", "ご", "language"],
+      [character + "習", "がくしゅう", "study"],
+      [character + "室", "しつ", "room"],
+    ];
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify([
-        { variants: [{ written: character + "生", pronounced: "がくせい" }], meanings: [{ glosses: ["student"] }] },
-        { variants: [{ written: character + "校", pronounced: "がっこう" }], meanings: [{ glosses: ["school"] }] }
-      ]),
+      body: JSON.stringify(
+        pool.slice(0, count).map(([written, pronounced, gloss]) => ({
+          variants: [{ written, pronounced }],
+          meanings: [{ glosses: [gloss] }],
+        })),
+      ),
     });
   });
-  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
-    await page.setViewportSize(viewport);
-    await page.goto("/");
+}
+
+async function revealLearningCard(page) {
+  await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 10000 });
-  await expect(card).not.toHaveClass(/is-revealed/);
-
   const revealButton = page.getByRole("button", { name: /نمایش (پاسخ|اطلاعات کانجی)/ });
-  const frontLayout = await card.evaluate((el) => {
-    const readings = el.querySelector(".first-readings")?.getBoundingClientRect();
-    const button = el.querySelector(".learning-card-front .button.wide")?.getBoundingClientRect();
-    return { readingsBottom: readings?.bottom ?? 0, buttonTop: button?.top ?? 0 };
-  });
-  expect(frontLayout.buttonTop).toBeGreaterThanOrEqual(frontLayout.readingsBottom);
-  await revealButton.dispatchEvent("click");
+  await revealButton.click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await page.waitForTimeout(600);
-  await expect(card.locator(".learning-card-back")).toBeVisible();
-  const identityCount = await card.locator(".learning-back-kanji, .component-breakdown-target").count();
-  expect(identityCount).toBe(1);
-  const componentTarget = card.locator(".component-breakdown-target");
-  if (await componentTarget.count()) {
-    await expect(componentTarget).toBeVisible();
-    await expect(card.locator(".component-breakdown-visual")).toContainText(/=/);
-  } else {
-    await expect(card.locator(".learning-back-kanji")).toBeVisible();
-  }
-  await expect(card.locator(".meanings")).toBeVisible();
-  await expect(card.locator(".readings")).toBeVisible();
-  await expect(card).toHaveAttribute("data-card-density", /^(comfortable|compact|dense)$/);
-  const readingMetrics = await card.locator(".learning-back-readings .reading").first().evaluate((el) => ({
-    display:getComputedStyle(el).display,
-    minHeight:parseFloat(getComputedStyle(el).minHeight),
-    height:el.getBoundingClientRect().height,
-  }));
-  expect(readingMetrics.display).toBe("grid");
-  expect(readingMetrics.minHeight).toBeLessThanOrEqual(68);
-  expect(readingMetrics.height).toBeLessThanOrEqual(72);
-  await expect(card.locator(".rating-grid")).toBeVisible();
-  const exampleCount = await card.locator(".example-row").count();
-  expect(exampleCount).toBeLessThanOrEqual(2);
-  if (exampleCount > 0) {
-    await expect(card.locator(".example-meaning").first()).toBeVisible();
-    const exampleMeanings = await card.locator(".example-meaning").allTextContents();
-    expect(exampleMeanings).toContain("student");
-  }
+  return card;
+}
 
+async function assertCardBounds(card) {
   const metrics = await card.evaluate((el) => {
     const r = el.getBoundingClientRect();
-    const back = el.querySelector(".learning-card-back");
-    const br = back?.getBoundingClientRect();
     return {
-      top: r.top,
       bottom: r.bottom,
       height: r.height,
       viewport: window.innerHeight,
-      pageScrollHeight: document.scrollingElement?.scrollHeight ?? document.body.scrollHeight,
       overflow: getComputedStyle(el).overflow,
     };
   });
   expect(metrics.overflow).toBe("hidden");
+  expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewport + 1);
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
-  await expect(card.locator(".learning-back-scroll")).toBeVisible();
-  await expect(card.locator(".learning-back-footer")).toBeVisible();
-  const layoutBounds = await card.evaluate((el) => {
-    const rect = (selector) => {
-      const node = el.querySelector(selector);
-      if (!node) return null;
-      const r = node.getBoundingClientRect();
-      return { top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height,width:r.width };
-    };
-    return {
-      card: rect(".learning-card-back"),
-      scroll: rect(".learning-back-scroll"),
-      overview: rect(".learning-back-overview"),
-      examples: rect(".compact-examples"),
-      components: rect(".component-breakdown"),
-      footer: rect(".learning-back-footer"),
-      ratings: rect(".rating-grid"),
-    };
-  });
-  expect(layoutBounds.card).not.toBeNull();
-  expect(layoutBounds.scroll).not.toBeNull();
-  expect(layoutBounds.footer).not.toBeNull();
-  expect(layoutBounds.ratings).not.toBeNull();
-  expect(layoutBounds.scroll.bottom).toBeLessThanOrEqual(layoutBounds.footer.top + 1);
-  expect(layoutBounds.footer.bottom).toBeLessThanOrEqual(layoutBounds.card.bottom + 1);
-  expect(layoutBounds.ratings.bottom).toBeLessThanOrEqual(layoutBounds.footer.bottom + 1);
-  expect(layoutBounds.ratings.top).toBeGreaterThanOrEqual(layoutBounds.footer.top - 1);
-  if (layoutBounds.overview && layoutBounds.examples) {
-    expect(layoutBounds.examples.top).toBeGreaterThanOrEqual(layoutBounds.overview.bottom - 1);
+}
+
+test("learning card keeps dense information on separate back pages without vertical page overflow", async ({ page }) => {
+  await routeExamples(page, 5);
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    const card = await revealLearningCard(page);
+
+    const identityCount = await card.locator(".learning-back-kanji, .component-breakdown-target").count();
+    expect(identityCount).toBe(1);
+    await expect(card.locator(".meanings")).toBeVisible();
+    await expect(card.locator(".readings")).toBeVisible();
+    await expect(card).toHaveAttribute("data-back-page-count", "2");
+    await expect(card.locator(".learning-back-page-nav")).toBeVisible();
+    await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
+    await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(0);
+    await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(5);
+
+    const pageMetrics = await card.locator(".learning-back-page").evaluateAll((pages) =>
+      pages.map((page) => {
+        const scroll = page.querySelector(".learning-back-scroll");
+        return {
+          visible: getComputedStyle(page).visibility,
+          clientHeight: scroll?.clientHeight ?? 0,
+          scrollHeight: scroll?.scrollHeight ?? 0,
+        };
+      }),
+    );
+    for (const metrics of pageMetrics) {
+      expect(metrics.visible).toBe("visible");
+      expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 2);
+    }
+
+    await assertCardBounds(card);
+    const nextButton = card.locator(".pager-button").nth(1);
+    const previousButton = card.locator(".pager-button").nth(0);
+    await expect(previousButton).toBeDisabled();
+    await nextButton.click();
+    await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "نمونهٔ واژگانی");
+    await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(5);
+    await expect(previousButton).toBeEnabled();
+    await expect(nextButton).toBeDisabled();
+    await assertCardBounds(card);
+
+    const pager = card.locator(".learning-back-pager-shell");
+    const box = await pager.boundingBox();
+    if (!box) throw new Error("Pager bounds unavailable");
+    await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5, { steps: 4 });
+    await page.mouse.up();
+    await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /Core information/);
+    await expect(previousButton).toBeDisabled();
+    await expect(nextButton).toBeEnabled();
+
+    const footerBounds = await card.locator(".learning-back-footer").evaluate((el) => {
+      const footer = el.getBoundingClientRect();
+      const rating = el.querySelector(".rating-grid")?.getBoundingClientRect();
+      const cardRect = el.closest(".learning-card")?.getBoundingClientRect();
+      return {
+        footerTop: footer.top,
+        footerBottom: footer.bottom,
+        ratingTop: rating?.top ?? 0,
+        ratingBottom: rating?.bottom ?? 0,
+        cardTop: cardRect?.top ?? 0,
+        cardBottom: cardRect?.bottom ?? 0,
+      };
+    });
+    expect(footerBounds.footerTop).toBeGreaterThanOrEqual(footerBounds.cardTop - 1);
+    expect(footerBounds.footerBottom).toBeLessThanOrEqual(footerBounds.cardBottom + 1);
+    expect(footerBounds.ratingTop).toBeGreaterThanOrEqual(footerBounds.footerTop - 1);
+    expect(footerBounds.ratingBottom).toBeLessThanOrEqual(footerBounds.footerBottom + 1);
   }
-  if (layoutBounds.examples && layoutBounds.components) {
-    expect(layoutBounds.examples.top).toBeGreaterThanOrEqual(layoutBounds.components.bottom - 1);
-  }
-  }
+});
+
+test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
+  await routeExamples(page, 1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const card = await revealLearningCard(page);
+  await expect(card).toHaveAttribute("data-back-page-count", "1");
+  await expect(card.locator(".learning-back-page-nav")).toHaveCount(0);
+  await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(1);
+  await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
+  await assertCardBounds(card);
 });
