@@ -7,6 +7,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
   const timerRef = useRef<number | null>(null);
 
   const stopPlayback = useCallback(() => {
@@ -45,7 +46,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
       setError(t("strokeOrderUnavailable", language));
     });
     return () => { active = false; };
-  }, [character, language, stopPlayback]);
+  }, [character, language, retryKey, stopPlayback]);
 
   const play = useCallback(() => {
     if (!paths.length) return;
@@ -91,7 +92,7 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
       {!loading && error ? (
         <div className="stroke-order-error" role="status">
           <span>{error}</span>
-          <button className="button secondary" type="button" onClick={() => setCompleted(0)}>{t("close", language)}</button>
+          <button className="button secondary" type="button" onClick={() => setRetryKey(value => value + 1)}>{t("tryAgain", language)}</button>
         </div>
       ) : null}
 
