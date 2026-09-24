@@ -21,6 +21,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Checkout release tree
         uses: actions/checkout@v4
@@ -30,10 +31,22 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck frontend
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Build shipped React artifact from source
+        working-directory: frontend
+        run: npm run build
+
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
 
-      - name: Upload GitHub Pages artifact
+      - name: Upload freshly built GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: .
@@ -41,4 +54,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
