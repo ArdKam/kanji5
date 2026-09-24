@@ -240,11 +240,15 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   const trigger = tool.getByRole("button", { name: "Stroke order" });
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await expect(trigger.locator(".stroke-order-replay-icon")).toBeVisible();
-  const triggerBox = await trigger.boundingBox();
-  expect(triggerBox?.width).toBeGreaterThanOrEqual(32);
-  expect(triggerBox?.width).toBeLessThanOrEqual(48);
-  expect(triggerBox?.height).toBeGreaterThanOrEqual(32);
-  expect(triggerBox?.height).toBeLessThanOrEqual(48);
+  const triggerSize = await trigger.evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { width: parseFloat(style.width), height: parseFloat(style.height), minHeight: parseFloat(style.minHeight) };
+  });
+  expect(triggerSize.width).toBeGreaterThanOrEqual(32);
+  expect(triggerSize.width).toBeLessThanOrEqual(48);
+  expect(triggerSize.height).toBeGreaterThanOrEqual(32);
+  expect(triggerSize.height).toBeLessThanOrEqual(48);
+  expect(triggerSize.minHeight).toBeGreaterThanOrEqual(44);
 
   const identity = card.locator(".learning-back-identity");
   const tools = card.locator(".learning-back-tools");
