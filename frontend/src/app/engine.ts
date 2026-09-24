@@ -254,6 +254,10 @@ export async function searchKanji(query: string, limit = 24): Promise<{ query: s
   return (await waitForEngine()).searchKanji(query, limit);
 }
 
+export async function saveMnemonic(character: string, value: string): Promise<Snapshot> {
+  return (await waitForEngine()).saveMnemonic(character, value);
+}
+
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
 }
