@@ -2,13 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 
-export function StrokeOrderViewer({ character, language }: { character: string; language: Language }) {
+export function StrokeOrderViewer({ character, language, mode = "learning" }: { character: string; language: Language; mode?: "learning" | "dictionary-loop" }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const compactLoop = mode === "dictionary-loop";
   const timerRef = useRef<number | null>(null);
 
   const stopPlayback = useCallback(() => {
@@ -49,6 +50,20 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
     return () => { active = false; };
   }, [character, language, retryKey, stopPlayback]);
 
+  useEffect(() => {
+    if (!compactLoop || !paths.length) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setCompleted(paths.length);
+      return;
+    }
+    stopPlayback();
+    setCompleted(0);
+    timerRef.current = window.setInterval(() => {
+      setCompleted(current => (current >= paths.length - 1 ? 0 : current + 1));
+    }, 720);
+    return () => stopPlayback();
+  }, [compactLoop, paths.length, stopPlayback]);
+
   const play = useCallback(() => {
     if (!paths.length) return;
     stopPlayback();
@@ -76,6 +91,55 @@ export function StrokeOrderViewer({ character, language }: { character: string; 
     stopPlayback();
     setCompleted(0);
   }, [stopPlayback]);
+
+  if (compactLoop) {
+    return (
+      <section
+        className="stroke-order-panel dictionary-stroke-order"
+        aria-label={t("strokeOrderAria", language)}
+        data-stroke-order-completed={completed}
+      >
+        {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
+        {!loading && error ? (
+          <div className="stroke-order-error" role="status">
+            <span>{error}</span>
+            <button className="button secondary" type="button" onClick={() => setRetryKey(value => value + 1)}>{t("tryAgain", language)}</button>
+          </div>
+        ) : null}
+        {!loading && !error && paths.length ? (
+          <div className="stroke-order-stage">
+            <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
+              {paths.map(path => (
+                <path
+                  key={"ghost-" + path.strokeNumber}
+                  className="stroke-order-ghost"
+                  d={path.d}
+                  pathLength={1}
+                />
+              ))}
+              {paths.slice(0, completed).map(path => (
+                <path
+                  key={"done-" + path.strokeNumber}
+                  className="stroke-order-done"
+                  d={path.d}
+                  pathLength={1}
+                />
+              ))}
+              {completed < paths.length ? (
+                <path
+                  key={"active-" + paths[completed].strokeNumber}
+                  className="stroke-order-active"
+                  d={paths[completed].d}
+                  pathLength={1}
+                />
+              ) : null}
+            </svg>
+          </div>
+        ) : null}
+        <span className="sr-only">KanjiVG · CC BY-SA 3.0</span>
+      </section>
+    );
+  }
 
   return (
     <section className="stroke-order-panel" aria-labelledby="stroke-order-title">
