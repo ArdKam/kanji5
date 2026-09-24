@@ -108,3 +108,13 @@ test('Kanji dictionary searches by character and shows structured study metadata
   await expect(dialog.locator('.dictionary-meta')).toContainText('استروک');
   await expect(dialog.locator('.dictionary-meta')).toContainText('پایه');
 });
+
+test('mastery visualization renders skill signals and seven-day review activity',async({page})=>{
+  await clean(page);
+  await page.locator('.insights summary').click();
+  await expect(page.locator('.mastery-grid')).toBeVisible();
+  await expect(page.locator('.mastery-row')).toHaveCount(5);
+  await expect(page.locator('.mastery-track[role="progressbar"]').first()).toHaveAttribute('aria-valuenow');
+  await expect(page.locator('.activity-chart')).toBeVisible();
+  await expect(page.locator('.activity-bar-wrap')).toHaveCount(7);
+});
