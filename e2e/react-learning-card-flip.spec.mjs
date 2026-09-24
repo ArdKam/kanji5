@@ -143,9 +143,9 @@ test("learning card keeps dense information on separate back pages in Persian an
     );
     expect(pageMetrics[0].visible).toBe("visible");
     expect(pageMetrics[1].visible).toBe("hidden");
-    for (const metrics of pageMetrics) {
-      expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.clientHeight + 2);
-    }
+    pageMetrics.forEach((metrics, index) => {
+      expect(metrics.scrollHeight, "page "+index+" metrics: "+JSON.stringify(metrics)).toBeLessThanOrEqual(metrics.clientHeight + 2);
+    });
 
     await assertCardBounds(card);
     const nextButton = card.locator(".pager-button").nth(1);
