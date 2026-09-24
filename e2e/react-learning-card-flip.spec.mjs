@@ -151,7 +151,12 @@ test("learning card keeps dense information on separate back pages in Persian an
     const nextButton = card.locator(".pager-button").nth(1);
     const previousButton = card.locator(".pager-button").nth(0);
     await expect(previousButton).toBeDisabled();
-    await nextButton.click();
+    if (viewport.width <= 760) {
+      const pager = card.locator(".learning-back-pager-shell");
+      await swipePager(page, pager, 0.75, 0.25);
+    } else {
+      await nextButton.click();
+    }
       await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
     await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(totalExampleCount);
     await expect(previousButton).toBeEnabled();
