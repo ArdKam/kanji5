@@ -16,7 +16,7 @@ assert.match(learner,/v1\.9-recovery\.js/);
 assert.match(boundary,/await import\('\.\/v1\.9-recovery\.js'\)/);
 assert.match(sw,/v1\.9-recovery-core\.js/);
 assert.match(sw,/v1\.9-recovery\.js/);
-assert.doesNotMatch(sw,/v1\.9-recovery-ui\.js/);
+assert.doesNotMatch(sw,/v1\.9-recovery-ui\.js/);assert.match(sw,/v1\.9-recovery\.js/);
 assert.doesNotMatch(learner,/v1\.9-recovery-ui\.js/);
 assert.ok(!fs.existsSync('v1.9-recovery-ui.js'));
 console.log('Kanji 5 v1.9 recovery runtime boundaries passed.');
