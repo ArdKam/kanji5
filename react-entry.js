@@ -1,6 +1,17 @@
 (()=>{
 'use strict';
 document.documentElement.classList.add('kanji5-react-default');
+const startupRoot=document.getElementById('kanji5-startup-shell');
+const startupObserver=startupRoot?new MutationObserver(()=>{
+  if(document.querySelector('#root .app-shell')){
+    startupRoot.classList.add('is-ready');
+    window.setTimeout(()=>{
+      startupRoot.remove();
+      startupObserver?.disconnect();
+    },180);
+  }
+}):null;
+startupObserver?.observe(document.getElementById('root')||document.documentElement,{childList:true,subtree:true});
 const style=document.createElement('style');
 style.textContent='#root{display:block;min-height:100vh}';
 document.head.appendChild(style);
