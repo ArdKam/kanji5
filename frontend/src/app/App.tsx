@@ -153,9 +153,13 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
         <div className="learning-back-footer">
           {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
             <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1)} disabled={backPage===0}>‹</button>
-            <span className="pager-status" aria-live="polite">{backPage+1} / {backPageCount}</span>
+            <span className="pager-indicators" aria-hidden="true">
+              {Array.from({length:backPageCount},(_,index)=><span key={index} className={"pager-dot"+(index===backPage?" active":"")} />)}
+            </span>
+            <span className="pager-current sr-only" aria-live="polite">
+              {getLanguage()==="fa"?`صفحه ${fa(backPage+1)} از ${fa(backPageCount)}`:`Page ${backPage+1} of ${backPageCount}`}
+            </span>
             <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
-            <span className="pager-hint">{t("swipeForMore")}</span>
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
         </div>

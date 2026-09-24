@@ -116,6 +116,15 @@ test("learning card keeps dense information on separate back pages in Persian an
     await expect(card.locator(".readings")).toBeVisible();
     await expect(card).toHaveAttribute("data-back-page-count", "2");
     await expect(card.locator(".learning-back-page-nav")).toBeVisible();
+    await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(2);
+    await expect(card.locator(".pager-dot.active")).toHaveCount(1);
+    if (viewport.width <= 760) {
+      await expect(card.locator(".pager-button").first()).toBeHidden();
+      await expect(card.locator(".pager-indicators")).toBeVisible();
+    } else {
+      await expect(card.locator(".pager-button").first()).toBeVisible();
+      await expect(card.locator(".pager-button").nth(1)).toBeVisible();
+    }
     await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
     await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(0);
     const totalExampleCount = await card.locator(".example-row").count();
@@ -142,11 +151,17 @@ test("learning card keeps dense information on separate back pages in Persian an
     const nextButton = card.locator(".pager-button").nth(1);
     const previousButton = card.locator(".pager-button").nth(0);
     await expect(previousButton).toBeDisabled();
-    await nextButton.click();
+    if (viewport.width <= 760) {
+      const pager = card.locator(".learning-back-pager-shell");
+      await swipePager(page, pager, 0.75, 0.25);
+    } else {
+      await nextButton.click();
+    }
       await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
     await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(totalExampleCount);
     await expect(previousButton).toBeEnabled();
     await expect(nextButton).toBeDisabled();
+    await expect(card.locator(".pager-dot.active")).toHaveCount(1);
     await assertCardBounds(card);
 
     const pager = card.locator(".learning-back-pager-shell");
