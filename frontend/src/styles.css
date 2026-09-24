@@ -500,9 +500,9 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   background:transparent;
 }
 .learning-card-back .stroke-order-tool-trigger{
-  width:32px;
-  height:32px;
-  min-height:32px;
+  width:44px;
+  height:44px;
+  min-height:44px;
   padding:0;
   display:grid;
   place-items:center;
@@ -552,7 +552,7 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 }
 .mnemonic-tool{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:7px;min-width:0;min-height:42px;padding:5px 7px;border:1px solid var(--line);border-radius:13px;background:var(--washi);}
 .mnemonic-tool:not(.has-value):not(.is-open){background:transparent;border-color:transparent;padding-inline:0;}
-.mnemonic-trigger{width:32px;height:32px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--sumi);font:inherit;font-size:17px;line-height:1;cursor:pointer;}
+.mnemonic-trigger{width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--sumi);font:inherit;font-size:17px;line-height:1;cursor:pointer;}
 .mnemonic-trigger:hover{background:var(--washi);}
 .mnemonic-trigger:focus-visible{outline:3px solid rgba(38,64,107,.22);outline-offset:2px;}
 .mnemonic-trigger[aria-expanded="true"]{background:var(--sumi);border-color:var(--sumi);color:var(--paper);}
