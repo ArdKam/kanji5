@@ -47,7 +47,7 @@ test('account signup preserves entered credentials and handles a successful sign
 
   await expect(form.locator('input[name="email"]')).toHaveValue('test-signup@example.com');
   await expect(form.locator('input[name="password"]')).toHaveValue('StrongTestPassword123!');
-  await expect(form.locator('button[type="submit"]')).toHaveText(/ایجاد حساب|Create account/);
+  await expect(form.locator('button[type="submit"]')).toHaveText(/ایجاد حساب|ساخت حساب|Create account/);
 
   await form.locator('button[type="submit"]').click();
   await expect(page.locator('.account-message')).toContainText(/حساب ساخته شد|Account created/);
