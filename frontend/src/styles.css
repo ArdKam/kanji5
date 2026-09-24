@@ -480,7 +480,7 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .learning-card-back .stroke-order-header h3{font-size:11px;margin:0;}
 .learning-card-back .stroke-order-header p{display:none;}
 .learning-card-back .stroke-order-count{padding:3px 7px;font-size:8px;}
-.learning-card-back .stroke-order-toggle{min-height:32px;padding:4px 8px;border-radius:9px;font-size:9px;}
+.learning-card-back .stroke-order-toggle{min-height:44px;padding:4px 8px;border-radius:9px;font-size:9px;}
 .learning-card-back .stroke-order-stage{gap:3px;padding:4px 0 1px;}
 .learning-card-back .stroke-order-stage svg{width:min(92px,24vw);}
 .learning-card-back .stroke-order-progress{font-size:8px;}
