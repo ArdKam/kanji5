@@ -120,7 +120,6 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
             <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
             <span className="pager-hint">{t("swipeForMore")}</span>
           </div>:null}
-          <p className="rating-title">{t("reviewQuality")}</p>
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
         </div>
       </div>

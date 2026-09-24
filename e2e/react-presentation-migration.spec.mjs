@@ -20,7 +20,7 @@ test('React learning and review actions stay behind the authoritative boundary',
   const kanji=page.locator('#root .kanji-display');
   await expect(kanji).toHaveText(/\S/);
   await page.getByRole('button',{name:/نمایش (پاسخ|اطلاعات کانجی)/}).dispatchEvent('click');
-  await expect(page.getByText('کیفیت مرور بعدی را انتخاب کن.')).toBeVisible({timeout:10000});
+  await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'خوب'}).dispatchEvent('click');
   await expect(kanji).toHaveText(/\S/,{timeout:10000});
 });
