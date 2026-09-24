@@ -12,6 +12,7 @@ on:
       - "supabase-sync.js"
       - "app-bootstrap.js"
       - "react-entry.js"
+      - "account-fallback.js"
       - "learning-card-flip-runtime.js"
       - "learning-card-flip-runtime.css"
       - "sw.js"
