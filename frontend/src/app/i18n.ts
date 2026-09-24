@@ -109,7 +109,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     title:"کانجی ۵",
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
-    goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"آشنایی با کانجی", learningReview:"مرور یادگیری",
+    goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
     cardBack:"پشت کارت", showKanjiInfo:"نمایش اطلاعات کانجی", firstLook:"اول کانجی را ببین و بعد اطلاعات آن را باز کن.",
     again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
     meaning:"معنی", reading:"خوانش", production:"تولید", vocabulary:"واژگان", context:"بافت",
@@ -132,7 +132,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     title:"Kanji 5",
     stats:"Stats", settings:"Settings", language:"Language", persian:"فارسی", english:"English",
     learning:"Learning", activeRecall:"Active Recall", learningPath:"Learning path", sessionProgress:"Session progress",
-    goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"Introducing this kanji", learningReview:"Learning review",
+    goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"New", learningReview:"Learning review",
     cardBack:"Card back", showKanjiInfo:"Show kanji information", firstLook:"First look at the kanji, then reveal its information.",
     again:"Again", hard:"Hard", good:"Good", easy:"Easy",
     meaning:"Meaning", reading:"Reading", production:"Production", vocabulary:"Vocabulary", context:"Context",
@@ -183,7 +183,6 @@ export function formatNumber(value: number, language: Language): string {
 }
 
 const dynamicTranslations: Record<string, string> = {
-  "اول کانجی را ببین و بعد اطلاعات آن را باز کن.": "showCardHint",
   "نمایش اطلاعات کانجی": "showKanjiInfo",
   "پاسخ را وارد کنید": "answerPlaceholder",
   "هنوز تمرینی آماده نیست.": "exerciseReady",
@@ -204,7 +203,6 @@ const dynamicTranslations: Record<string, string> = {
 };
 
 const dynamicEn: Record<string,string> = {
-  showCardHint:"First look at the kanji, then reveal its information.",
   showKanjiInfo:"Show kanji information",
   answerPlaceholder:"Enter your answer",
   exerciseReady:"No exercise is ready yet.",
