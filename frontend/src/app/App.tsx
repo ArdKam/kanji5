@@ -152,7 +152,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                       <div className="mnemonic-editor">
                         <textarea value={mnemonicDraft} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
                         <div className="mnemonic-editor-footer">
-                          <span>{fa(mnemonicDraft.length)}/۶۰۰</span>
+                          <span>{fa(mnemonicDraft.length)}/{fa(600)}</span>
                           <div className="actions">
                             {mnemonicEditing?<button className="button secondary" type="button" disabled={mnemonicBusy} onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(false)}}>{t("cancel")}</button>:null}
                             <button className="button primary" type="button" disabled={mnemonicBusy||mnemonicDraft.trim().length===0} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
