@@ -45,6 +45,20 @@ async function startForcedExercise(page,mode){
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
 }
 
+test('empty Active Recall state stays responsive before any card is learned',async({page})=>{
+  await clean(page);
+  const learning=page.getByRole('button',{name:'یادگیری'});
+  const practice=page.getByRole('button',{name:'یادآوری فعال'});
+  await practice.click();
+  await expect(practice).toHaveAttribute('aria-current','page');
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:3000});
+  await expect(page.locator('#root #exercise')).toContainText('هنوز تمرینی آماده نیست');
+  await expect(learning).toBeEnabled();
+  await learning.click();
+  await expect(learning).toHaveAttribute('aria-current','page');
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:5000});
+});
+
 test('wrong production answer turns the card red once and then advances once',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
