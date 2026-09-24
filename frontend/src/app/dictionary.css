@@ -155,7 +155,7 @@
   font-weight:750;
 }
 .custom-study-action .button{
-  min-height:40px;
+  min-height:44px;
   padding:7px 12px;
 }
 .custom-study-message{
@@ -204,7 +204,7 @@
   gap:6px;
 }
 .dictionary-filter-button{
-  min-height:34px;
+  min-height:44px;
   padding:6px 11px;
   border:1px solid var(--line);
   border-radius:999px;
@@ -382,7 +382,7 @@
   .dictionary-page-header{margin-bottom:10px;}
   .dictionary-page-search input{min-height:48px;border-radius:14px;}
   .dictionary-level-filter{gap:5px;}
-  .dictionary-filter-button{min-height:32px;padding:5px 9px;}
+  .dictionary-filter-button{min-height:44px;padding:5px 9px;}
   .kanji-catalog-grid{grid-template-columns:repeat(auto-fill,38px);gap:6px;padding-top:5px;}
   .kanji-catalog-tile{width:38px;height:38px;border-radius:9px;}
   .kanji-catalog-character{font-size:.9rem;}
