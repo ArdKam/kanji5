@@ -60,22 +60,61 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const hasExamplesPage=exampleCount>2||(componentCount>=3&&exampleCount>0)||(density==="dense"&&exampleCount>0);
   const backPageCount=hasExamplesPage?2:1;
   const [backPage,setBackPage]=useState(0);
-  const swipeStartX=useRef<number|null>(null);
+  const pagerTrackRef=useRef<HTMLDivElement|null>(null);
+  const swipeRef=useRef<{startX:number;lastX:number;lastTime:number;active:boolean}>({startX:0,lastX:0,lastTime:0,active:false});
   useEffect(()=>setBackPage(0),[card.character]);
   const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
+  const snapPagerTrack=useCallback((page:number)=>{
+    const track=pagerTrackRef.current;
+    if(!track)return;
+    track.style.transition="";
+    requestAnimationFrame(()=>{track.style.transform="translate3d(-"+page*100+"%,0,0)";});
+  },[]);
+  useEffect(()=>{snapPagerTrack(backPage)},[backPage,snapPagerTrack]);
   const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2)return;
-    swipeStartX.current=event.clientX;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
+    if(event.pointerType==="mouse"&&event.button!==0)return;
+    swipeRef.current={startX:event.clientX,lastX:event.clientX,lastTime:performance.now(),active:true};
+    const track=pagerTrackRef.current;
+    if(track)track.style.transition="none";
+    try{event.currentTarget.setPointerCapture?.(event.pointerId)}catch(_){/* synthetic touch events may not support capture */}
   };
-  const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>{
-    if(backPageCount<2||swipeStartX.current===null)return;
-    const delta=event.clientX-swipeStartX.current;
-    swipeStartX.current=null;
-    if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
-    if(Math.abs(delta)<48)return;
-    changeBackPage(delta<0?1:-1);
+  const handleBackPointerMove=(event:PointerEvent<HTMLDivElement>)=>{
+    const swipe=swipeRef.current;
+    if(backPageCount<2||!swipe.active)return;
+    const shell=event.currentTarget;
+    const width=Math.max(1,shell.getBoundingClientRect().width);
+    let delta=event.clientX-swipe.startX;
+    const atFirst=backPage===0&&delta>0;
+    const atLast=backPage===backPageCount-1&&delta<0;
+    if(atFirst||atLast)delta*=0.28;
+    delta=Math.max(-width*0.92,Math.min(width*0.92,delta));
+    const track=pagerTrackRef.current;
+    if(track)track.style.transform="translate3d(calc(-"+backPage*100+"% + "+delta+"px),0,0)";
+    swipe.lastX=event.clientX;
+    swipe.lastTime=performance.now();
   };
+  const finishBackSwipe=(event:PointerEvent<HTMLDivElement>,cancelled=false)=>{
+    const swipe=swipeRef.current;
+    if(backPageCount<2||!swipe.active)return;
+    swipe.active=false;
+    const delta=cancelled?0:event.clientX-swipe.startX;
+    const elapsed=Math.max(16,performance.now()-swipe.lastTime);
+    const velocity=cancelled?0:(event.clientX-swipe.lastX)/elapsed;
+    const width=Math.max(1,event.currentTarget.getBoundingClientRect().width);
+    const threshold=Math.max(48,width*0.14);
+    const shouldAdvance=(!cancelled&&Math.abs(delta)>=threshold)||(!cancelled&&Math.abs(velocity)>=0.55&&Math.abs(delta)>=20);
+    const target=shouldAdvance?Math.max(0,Math.min(backPageCount-1,backPage+(delta<0?1:-1))):backPage;
+    const track=pagerTrackRef.current;
+    if(track){
+      track.style.transition="";
+      requestAnimationFrame(()=>{track.style.transform="translate3d(-"+target*100+"%,0,0)";});
+    }
+    try{if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(_){/* no active capture */}
+    if(target!==backPage)setBackPage(target);
+  };
+  const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event);
+  const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div className="learning-card-face learning-card-front" aria-hidden={revealed}>
@@ -87,8 +126,8 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed}>
         <div className="card-topline"><span className="badge badge-red">学習</span><span>{t("cardBack")}</span></div>
-        <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerUp={handleBackPointerUp} onPointerCancel={()=>{swipeStartX.current=null;}} data-page-count={backPageCount}>
-          <div className="learning-back-pager-track" style={{transform:`translateX(-${backPage*100}%)`}}>
+        <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
+          <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={getLanguage()==="fa"?"صفحه اطلاعات اصلی":"Core information"} aria-hidden={backPage!==0}>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
