@@ -2,6 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 
+function ReplayIcon() {
+  return (
+    <svg className="stroke-order-replay-icon" viewBox="0 0 44 44" aria-hidden="true">
+      <path className="stroke-order-replay-arc" d="M34.5 13.5A15 15 0 1 0 36.2 27" />
+      <path className="stroke-order-replay-head" d="M34 8.5v7h-7" />
+      <path className="stroke-order-replay-play" d="M18.5 16.5 28 22l-9.5 5.5z" />
+    </svg>
+  );
+}
+
 export function StrokeOrderViewer({ character, language, mode = "learning" }: { character: string; language: Language; mode?: "learning" | "dictionary-loop" }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
   const [completed, setCompleted] = useState(0);
@@ -64,10 +74,10 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     return () => stopPlayback();
   }, [compactLoop, paths.length, stopPlayback]);
 
-  const play = useCallback(() => {
+  const play = useCallback((fromStart = false) => {
     if (!paths.length) return;
     stopPlayback();
-    const start = completed >= paths.length ? 0 : completed;
+    const start = fromStart || completed >= paths.length ? 0 : completed;
     setCompleted(start);
     timerRef.current = window.setInterval(() => {
       setCompleted(current => {
@@ -80,6 +90,16 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
       });
     }, 720);
   }, [completed, paths.length, stopPlayback]);
+
+  const openLearningTool = useCallback(() => {
+    setExpanded(true);
+    play(true);
+  }, [play]);
+
+  const closeLearningTool = useCallback(() => {
+    stopPlayback();
+    setExpanded(false);
+  }, [stopPlayback]);
 
   const step = useCallback((delta: number) => {
     if (!paths.length) return;
@@ -141,8 +161,29 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     );
   }
 
+  if (!expanded && paths.length && !compactLoop) {
+    return (
+      <section
+        className="stroke-order-tool"
+        aria-label={t("strokeOrder", language)}
+        data-stroke-order-open="false"
+      >
+        <button
+          className="stroke-order-tool-trigger"
+          type="button"
+          aria-label={t("strokeOrder", language)}
+          title={t("strokeOrder", language)}
+          aria-expanded="false"
+          onClick={openLearningTool}
+        >
+          <ReplayIcon />
+        </button>
+      </section>
+    );
+  }
+
   return (
-    <section className="stroke-order-panel" aria-labelledby="stroke-order-title">
+    <section className={"stroke-order-panel"+(expanded ? " is-expanded" : "")} aria-labelledby="stroke-order-title" data-stroke-order-open={expanded ? "true" : "false"}>
       <div className="stroke-order-header">
         <div>
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
@@ -158,9 +199,11 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
               type="button"
               aria-expanded={expanded}
               aria-controls="stroke-order-content"
-              onClick={() => setExpanded(value => !value)}
+              onClick={expanded ? closeLearningTool : openLearningTool}
+              title={expanded ? t("strokeOrder", language) : t("strokeOrder", language)}
             >
-              {t("strokeOrder", language)}
+              <ReplayIcon />
+              <span>{t("strokeOrder", language)}</span>
             </button>
           ) : null}
         </div>
@@ -209,7 +252,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           </div>
           <div className="stroke-order-controls">
             <button className="button secondary" type="button" onClick={() => step(-1)} disabled={completed === 0}>{t("previousStroke", language)}</button>
-            <button className="button primary" type="button" onClick={play}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
+            <button className="button primary" type="button" onClick={() => play()}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
             <button className="button secondary" type="button" onClick={() => step(1)} disabled={completed >= paths.length}>{t("nextStroke", language)}</button>
             <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
