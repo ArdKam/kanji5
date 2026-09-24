@@ -27,7 +27,18 @@ function DictionaryAudio({ value, label }: { value: string; label: string }) {
   );
 }
 
-function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
+function DictionaryReading({ title, values, language }: { title: string; values: string[]; language: Language }) {
+  const first = values[0];
+  return (
+    <div className="reading dictionary-reading">
+      <span>{title}</span>
+      <strong lang="ja">{values.length ? values.join(" · ") : "—"}</strong>
+      {first ? <DictionaryAudio value={first} label={t("playReading", language) + " " + title} /> : null}
+    </div>
+  );
+}
+
+({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
 
@@ -64,8 +75,8 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <span>{language === "fa" ? "خوانش‌ها" : "Readings"}</span>
         </div>
         <div className="readings learning-back-readings dictionary-readings">
-          <div className="reading dictionary-reading"><span>On’yomi</span><strong lang="ja">{item.on.length ? item.on.join(" · ") : "—"}</strong></div>
-          <div className="reading dictionary-reading"><span>Kun’yomi</span><strong lang="ja">{item.kun.length ? item.kun.join(" · ") : "—"}</strong></div>
+          <DictionaryReading title="On’yomi" values={item.on} language={language} />
+          <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
         </div>
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
