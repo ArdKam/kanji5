@@ -62,6 +62,31 @@ if (loaded.character !== "学" || loaded.text !== "A student memory hook.") {
   throw new Error(`Boundary mnemonic read failed: ${JSON.stringify(loaded)}`);
 }
 
+const boundaryStore = { "学": "A student memory hook." };
+const saveSandbox = {
+  window: {
+    __KANJI5_STATE__: {
+      readDeck(){ return []; },
+      readMnemonics(){ return { ...boundaryStore }; },
+      writeMnemonics(value){ Object.keys(boundaryStore).forEach(key => delete boundaryStore[key]); Object.assign(boundaryStore, value); return true; }
+    }
+  },
+  document: { addEventListener(){}, dispatchEvent(){} },
+  CustomEvent: class CustomEvent { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } },
+  setTimeout(){},
+  fetch: async () => ({ ok: false, async json(){ return {}; } })
+};
+vm.runInNewContext(boundarySource, saveSandbox, { filename: "v1.9-v2-boundary-save.js" });
+const saveApi = saveSandbox.window.__KANJI5_V19_V2_BOUNDARY__;
+const updated = await saveApi.saveMnemonic("学", "New memory hook.");
+if (updated.text !== "New memory hook." || boundaryStore["学"] !== "New memory hook.") {
+  throw new Error(`Boundary mnemonic save failed: ${JSON.stringify(updated)}`);
+}
+const cleared = await saveApi.saveMnemonic("学", "");
+if (cleared.text !== "" || Object.keys(boundaryStore).length !== 0) {
+  throw new Error("Boundary mnemonic clear failed");
+}
+
 const boundarySource = await readFile(new URL("../v1.9-v2-boundary.js", import.meta.url), "utf8");
 if (!boundarySource.includes("async function getMnemonic(character)")) throw new Error("Boundary getMnemonic implementation missing");
 if (!boundarySource.includes("async function saveMnemonic(character,value)")) throw new Error("Boundary saveMnemonic implementation missing");
