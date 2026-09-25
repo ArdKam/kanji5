@@ -688,21 +688,47 @@
   display:grid;
   gap:9px;
   margin-top:13px;
-  padding:12px;
+  padding:10px;
   border:1px solid var(--line);
   border-radius:16px;
   background:var(--washi);
 }
+.handwriting-practice.is-collapsed{gap:0;}
 .handwriting-header{
+  width:100%;
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
   gap:10px;
+  margin:0;
+  padding:2px;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:start;
+  font:inherit;
+  cursor:pointer;
 }
-.handwriting-header h3{margin:0 0 3px;font-size:13px;}
+.handwriting-header:hover{background:transparent;}
+.handwriting-header:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--shu) 42%,transparent);
+  outline-offset:4px;
+  border-radius:10px;
+}
+.handwriting-header-copy{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.handwriting-header h3{margin:0;font-size:13px;}
 .handwriting-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
-.handwriting-stroke-count{
+.handwriting-header-end{
   flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.handwriting-stroke-count{
   padding:5px 8px;
   border:1px solid var(--line);
   border-radius:999px;
@@ -711,6 +737,21 @@
   font-size:9px;
   font-weight:800;
 }
+.handwriting-toggle-icon{
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--paper);
+  color:var(--mute);
+  font-size:14px;
+  line-height:1;
+  transform:rotate(180deg);
+  transition:transform .18s ease;
+}
+.handwriting-practice.is-expanded .handwriting-toggle-icon{transform:rotate(0deg);}
 .handwriting-canvas-wrap{
   width:min(280px,100%);
   aspect-ratio:1;
@@ -758,6 +799,13 @@
 .handwriting-result.retry{border-color:#f0b4b0;}
 @media(max-width:520px){
   .handwriting-canvas-wrap{width:min(250px,100%);}
+  .handwriting-header p{max-width:220px;}
+  .handwriting-header-end{gap:4px;}
+  .handwriting-stroke-count{font-size:8px;padding:4px 6px;}
+  .handwriting-toggle-icon{width:23px;height:23px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .handwriting-toggle-icon{transition:none;}
 }
 
 .reading-lab{
