@@ -254,11 +254,30 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   const tools = card.locator(".learning-back-tools");
   await expect(identity.locator(".learning-back-tools")).toHaveCount(1);
   await expect(tools).toBeVisible();
+
+  const singleColumnLayout = await card.evaluate(() => {
+    const overview = document.querySelector(".learning-card-back .learning-back-overview");
+    const backTools = document.querySelector(".learning-card-back .learning-back-tools");
+    const strokePanel = document.querySelector(".learning-card-back .stroke-order-panel");
+    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length : 0;
+    return {
+      overviewColumns: columns(overview),
+      toolsColumns: columns(backTools),
+      strokePanelColumns: columns(strokePanel),
+    };
+  });
+  expect(singleColumnLayout.overviewColumns).toBe(1);
+  expect(singleColumnLayout.toolsColumns).toBe(1);
+  expect(singleColumnLayout.strokePanelColumns).toBe(1);
   const readingsBox = await card.locator(".learning-back-readings").boundingBox();
   const toolsBox = await tools.boundingBox();
   expect(readingsBox).not.toBeNull();
   expect(toolsBox).not.toBeNull();
   expect((toolsBox?.top ?? 0)).toBeGreaterThanOrEqual((readingsBox?.bottom ?? 0) - 1);
+
+  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
+  await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
+  const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
 
   await trigger.click();
   const panel = card.locator(".stroke-order-panel.is-expanded");
@@ -327,6 +346,9 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
       return target.top >= scroll.top - 1 && target.bottom <= scroll.bottom + 1;
     });
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
+
+  const scrollAfter = await scrollContainer.evaluate((el) => el.scrollTop);
+  expect(scrollAfter).toBeGreaterThanOrEqual(scrollBefore);
 
   const calls = await page.evaluate(() => window.__kanji5ScrollToCalls || []);
   expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
