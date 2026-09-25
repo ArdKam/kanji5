@@ -82,19 +82,9 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     const target=mnemonicToolRef.current;
     const scrollContainer=target?.closest<HTMLElement>(".learning-back-scroll");
     if(!target||!scrollContainer)return;
-    const containerRect=scrollContainer.getBoundingClientRect();
-    const targetRect=target.getBoundingClientRect();
-    const edgePadding=8;
     const maxScrollTop=Math.max(0,scrollContainer.scrollHeight-scrollContainer.clientHeight);
-    let nextScrollTop=scrollContainer.scrollTop;
-    if(targetRect.bottom>containerRect.bottom-edgePadding){
-      nextScrollTop+=targetRect.bottom-(containerRect.bottom-edgePadding);
-    }else if(targetRect.top<containerRect.top+edgePadding){
-      nextScrollTop-=containerRect.top+edgePadding-targetRect.top;
-    }
-    nextScrollTop=Math.max(0,Math.min(maxScrollTop,nextScrollTop));
     const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    scrollContainer.scrollTo({top:nextScrollTop,behavior:reducedMotion?"auto":"smooth"});
+    scrollContainer.scrollTo({top:maxScrollTop,behavior:reducedMotion?"auto":"smooth"});
   },[]);
   useEffect(()=>{
     if(!mnemonicEditing)return;

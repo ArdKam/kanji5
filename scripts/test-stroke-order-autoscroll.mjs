@@ -16,7 +16,7 @@ const app = await readFile(new URL("../frontend/src/app/App.tsx", import.meta.ur
 assert.match(app, /mnemonicToolRef=useRef<HTMLElement\|null>\(null\)/);
 assert.match(app, /scrollMnemonicEditorIntoView=useCallback\(\(\)=>/);
 assert.match(app, /closest<HTMLElement>\("\.learning-back-scroll"\)/);
-assert.match(app, /scrollContainer\.scrollTo\(\{top:nextScrollTop,behavior:reducedMotion\?"auto":"smooth"\}\)/);
+assert.match(app, /scrollContainer\.scrollTo\(\{top:maxScrollTop,behavior:reducedMotion\?"auto":"smooth"\}\)/);
 assert.match(app, /if\(!mnemonicEditing\)return;/);
 assert.match(app, /ref=\{mnemonicToolRef\}/);
 
