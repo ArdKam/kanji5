@@ -277,6 +277,65 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
 });
 
+test("stroke-order replay auto-scrolls the expanded viewer fully into view", async ({ page }) => {
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg">
+<g id="kvg:StrokePaths_05b66">
+  <path id="kvg:05b66-s1" d="M10,10 L30,30"/>
+  <path id="kvg:05b66-s2" d="M30,30 L50,10"/>
+  <path id="kvg:05b66-s3" d="M50,10 L70,30"/>
+</g>
+</svg>`;
+  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
+    await route.fulfill({ status: 200, contentType: "image/svg+xml", body: svg });
+  });
+  await page.setViewportSize({ width: 390, height: 640 });
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.goto("/");
+
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  await card.getByRole("button", { name: "Show kanji information" }).click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+
+  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
+  const trigger = card.locator(".stroke-order-tool-trigger");
+  await expect(trigger).toBeVisible();
+
+  await page.evaluate(() => {
+    const calls = [];
+    const original = Element.prototype.scrollTo;
+    window.__kanji5ScrollToCalls = calls;
+    window.__kanji5OriginalScrollTo = original;
+    Element.prototype.scrollTo = function (options) {
+      if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
+        calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
+      }
+      return original.apply(this, arguments);
+    };
+  });
+
+  await trigger.click();
+  const panel = card.locator(".stroke-order-panel.is-expanded");
+  await expect(panel).toBeVisible();
+
+  await expect.poll(async () => {
+    return await panel.evaluate((el) => {
+      const target = el.getBoundingClientRect();
+      const scroll = el.closest(".learning-back-scroll")?.getBoundingClientRect();
+      if (!scroll) return false;
+      return target.top >= scroll.top - 1 && target.bottom <= scroll.bottom + 1;
+    });
+  }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
+
+  const calls = await page.evaluate(() => window.__kanji5ScrollToCalls || []);
+  expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
+
+  await page.evaluate(() => {
+    if (window.__kanji5OriginalScrollTo) Element.prototype.scrollTo = window.__kanji5OriginalScrollTo;
+  });
+});
+
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
