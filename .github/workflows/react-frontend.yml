@@ -73,6 +73,13 @@ jobs:
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
+      - name: Capture rebuilt React artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanji5-react-build
+          path: react-dist/kanji5-react.js
+
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
