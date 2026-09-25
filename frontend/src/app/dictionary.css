@@ -309,6 +309,10 @@
 }
 .dictionary-card{
   position:relative;
+  max-height:inherit;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
   padding:26px 24px 24px;
   background:var(--paper);
   color:var(--ink);
