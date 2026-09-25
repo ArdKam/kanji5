@@ -59,6 +59,38 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     void getComponentInfo(card.character).then(info=>{if(active)setComponentInfo(info)}).catch(()=>{if(active)setComponentInfo(null)});
     return ()=>{active=false};
   },[revealed,card.character]);
+  const mnemonicToolRef=useRef<HTMLElement|null>(null);
+  const scrollMnemonicEditorIntoView=useCallback(()=>{
+    const target=mnemonicToolRef.current;
+    const scrollContainer=target?.closest<HTMLElement>(".learning-back-scroll");
+    if(!target||!scrollContainer)return;
+    const containerRect=scrollContainer.getBoundingClientRect();
+    const targetRect=target.getBoundingClientRect();
+    const edgePadding=8;
+    const maxScrollTop=Math.max(0,scrollContainer.scrollHeight-scrollContainer.clientHeight);
+    let nextScrollTop=scrollContainer.scrollTop;
+    if(targetRect.bottom>containerRect.bottom-edgePadding){
+      nextScrollTop+=targetRect.bottom-(containerRect.bottom-edgePadding);
+    }else if(targetRect.top<containerRect.top+edgePadding){
+      nextScrollTop-=containerRect.top+edgePadding-targetRect.top;
+    }
+    nextScrollTop=Math.max(0,Math.min(maxScrollTop,nextScrollTop));
+    const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    scrollContainer.scrollTo({top:nextScrollTop,behavior:reducedMotion?"auto":"smooth"});
+  },[]);
+  useEffect(()=>{
+    if(!mnemonicEditing)return;
+    let frame=0;
+    let nextFrame=0;
+    frame=window.requestAnimationFrame(()=>{
+      nextFrame=window.requestAnimationFrame(()=>scrollMnemonicEditorIntoView());
+    });
+    return()=>{
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(nextFrame);
+    };
+  },[mnemonicEditing,scrollMnemonicEditorIntoView]);
+
   useEffect(()=>{setHiraganaReadings(false)},[card.character]);
   useEffect(()=>{
     let active=true;
@@ -183,7 +215,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                     <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
                     <div className="learning-back-tools">
                       {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
-                      <section className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                      <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
                       <button
                         className="mnemonic-trigger"
                         type="button"
