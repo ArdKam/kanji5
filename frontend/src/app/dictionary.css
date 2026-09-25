@@ -845,3 +845,114 @@
 }
 .reading-lab-empty{margin:0;color:var(--mute);font-size:.68rem;}
 @media(prefers-reduced-motion:reduce){.reading-lab-kanji{transition:none;}}
+
+.grammar-guide{
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--washi);
+}
+.grammar-guide>summary{
+  cursor:pointer;
+  color:var(--ink);
+  font-size:.82rem;
+  font-weight:850;
+}
+.grammar-progress{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:9px;
+  color:var(--mute);
+  font-size:.66rem;
+  font-weight:800;
+}
+.grammar-progress strong{
+  color:var(--shu);
+  font-size:.72rem;
+}
+.grammar-lesson{
+  display:grid;
+  gap:9px;
+  margin-top:9px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--paper);
+}
+.grammar-lesson-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--mute);
+  font-size:.64rem;
+  font-weight:800;
+}
+.grammar-lesson-top b{
+  color:var(--ink);
+  font-family:"Noto Serif JP",serif;
+  font-size:1.05rem;
+}
+.grammar-lesson h3{margin:0;font-size:.95rem;}
+.grammar-lesson>p{
+  margin:0;
+  color:var(--mute);
+  font-size:.7rem;
+  line-height:1.65;
+}
+.grammar-example{
+  display:grid;
+  gap:4px;
+  padding:10px 11px;
+  border-radius:11px;
+  background:var(--washi);
+  text-align:center;
+}
+.grammar-example strong{
+  color:var(--ink);
+  font-family:"Noto Serif JP",serif;
+  font-size:1.05rem;
+  direction:ltr;
+}
+.grammar-example span{color:var(--mute);font-size:.64rem;}
+.grammar-check{
+  display:grid;
+  gap:7px;
+}
+.grammar-check>span{
+  color:var(--ink);
+  font-size:.7rem;
+  font-weight:800;
+}
+.grammar-options{display:grid;gap:6px;}
+.grammar-option{
+  min-height:42px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+  color:var(--ink);
+  padding:6px 9px;
+  text-align:start;
+  font:inherit;
+  font-size:.68rem;
+  direction:ltr;
+}
+.grammar-option.correct{border-color:#b8d0a0;background:color-mix(in srgb,var(--matcha) 9%,var(--paper));}
+.grammar-feedback{
+  margin:0;
+  color:var(--shu);
+  font-family:"Noto Serif JP",serif;
+  font-size:.8rem;
+  font-weight:800;
+  direction:ltr;
+}
+.grammar-navigation{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:9px;
+}
+.grammar-navigation .button{min-height:42px;padding:6px 10px;font-size:.68rem;}
