@@ -784,3 +784,13 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
     margin-bottom:5px;
   }
 }
+
+
+/* Header/account placement: fallback and React account controls share the same top-left header anchor. */
+.header{padding-bottom:6px;margin-bottom:6px;}
+.header-actions{min-height:42px;}
+#kanji5-account-launcher,.header .account-button{position:absolute!important;left:0!important;top:0!important;z-index:46!important;}
+.header-menu-trigger{height:42px;min-height:42px;}
+.app-shell{padding-top:10px;}
+.content{gap:12px;}
+@media(max-width:760px){.header{padding-bottom:5px;margin-bottom:5px;}.app-shell{padding-top:8px;}#kanji5-account-launcher,.header .account-button{left:0!important;top:0!important;width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;padding:4px!important;}.content{gap:10px;}}
