@@ -50,3 +50,32 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
   await expect(page.locator('#exercise')).toHaveAttribute('tabindex','-1');
 });
+
+test('learning card reveal moves focus out of the aria-hidden face and emits no aria-hidden focus warning', async ({page})=>{
+  const ariaWarnings=[];
+  page.on('console',message=>{
+    if(message.type()==='warning'&&message.text().includes('Blocked aria-hidden')) ariaWarnings.push(message.text());
+  });
+
+  await clean(page);
+
+  const reveal=page.locator('#root .learning-card-front .button.primary.wide');
+  await expect(reveal).toBeVisible();
+  await reveal.focus();
+  await expect(reveal).toBeFocused();
+
+  await reveal.click();
+
+  await expect(page.locator('#root .learning-card-back')).toHaveAttribute('aria-hidden','false');
+  await expect.poll(async()=>page.evaluate(()=>{
+    const active=document.activeElement;
+    const front=document.querySelector('.learning-card-front');
+    const back=document.querySelector('.learning-card-back');
+    return {
+      inFront:active instanceof Node&&front?.contains(active)===true,
+      inBack:active instanceof Node&&back?.contains(active)===true,
+    };
+  })).toEqual({inFront:false,inBack:true});
+
+  expect(ariaWarnings).toEqual([]);
+});
