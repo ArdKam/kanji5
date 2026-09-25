@@ -31,6 +31,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Stamp release asset cache-bust
+        env:
+          KANJI5_RELEASE: ${{ github.sha }}
+        run: node scripts/stamp-release.mjs
+
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm install --no-audit --no-fund
@@ -49,11 +54,26 @@ jobs:
       - name: Install root test dependencies
         run: npm ci
 
+      - name: Run contract and unit suite
+        run: npm test
+
       - name: Install Chromium
         run: npx playwright install chromium
 
-      - name: Verify account UI end-to-end
-        run: npx playwright test --timeout=30000 --retries=0 e2e/react-account-shell.spec.mjs
+      - name: Run React presentation E2E gates
+        run: |
+          npx playwright test --timeout=30000 --retries=0 e2e/react-presentation-migration.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-presentation-parity.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-presentation-offline.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-experience-session-isolation.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-accessibility.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-pwa-release.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-final-release-matrix.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-account-shell.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-learning-card-flip.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-personal-mnemonic.spec.mjs
+          npx playwright test --timeout=30000 --retries=0 e2e/react-review-practice.spec.mjs
 
       - name: Upload freshly built GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
