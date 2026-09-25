@@ -2,10 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, listKanji, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
+import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
+import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
+import { HandwritingPractice } from "./HandwritingPractice";
+import { ReadingLab } from "./ReadingLab";
+import { GrammarGuide } from "./GrammarGuide";
+import { MnemonicBackup } from "./MnemonicBackup";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
+const diagnosticLevels = ["N5", "N4", "N3", "N2"] as const;
 const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
@@ -38,6 +44,64 @@ function DictionaryReading({ title, values, language }: { title: string; values:
   );
 }
 
+function PreparedMnemonicPanel({ character, language }: { character: string; language: Language }) {
+  const suggestions = PREPARED_MNEMONICS[character] ?? [];
+  const [busyIndex, setBusyIndex] = useState<number | null>(null);
+  const [status, setStatus] = useState("");
+
+  const applySuggestion = async (suggestion: PreparedMnemonic, index: number) => {
+    if (busyIndex !== null) return;
+    setStatus("");
+    setBusyIndex(index);
+    try {
+      const current = await getMnemonic(character);
+      const existing = String(current.text ?? "").trim();
+      if (existing && existing !== (language === "fa" ? suggestion.fa : suggestion.en)) {
+        const message = t("mnemonicOverwriteConfirm", language);
+        if (!window.confirm(message)) return;
+      }
+      await saveMnemonic(character, language === "fa" ? suggestion.fa : suggestion.en);
+      setStatus(t("mnemonicApplied", language));
+    } catch {
+      setStatus(t("mnemonicSaveError", language));
+    } finally {
+      setBusyIndex(null);
+    }
+  };
+
+  return (
+    <section className="prepared-mnemonic-panel" aria-label={t("preparedMnemonics", language)}>
+      <div className="prepared-mnemonic-header">
+        <div>
+          <h3>{t("preparedMnemonics", language)}</h3>
+          <p>{t("preparedMnemonicsHint", language)}</p>
+        </div>
+      </div>
+      {suggestions.length ? (
+        <div className="prepared-mnemonic-list">
+          {suggestions.map((suggestion, index) => {
+            const text = language === "fa" ? suggestion.fa : suggestion.en;
+            return (
+              <div className="prepared-mnemonic-item" key={character + "-" + index}>
+                <p>{text}</p>
+                <button
+                  className="button secondary prepared-mnemonic-use"
+                  type="button"
+                  disabled={busyIndex !== null}
+                  onClick={() => void applySuggestion(suggestion, index)}
+                >
+                  {busyIndex === index ? "…" : t("useMnemonic", language)}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : <p className="prepared-mnemonic-empty">{t("preparedMnemonicNone", language)}</p>}
+      {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
+    </section>
+  );
+}
+
 function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
@@ -65,6 +129,7 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
           <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
         </div>
+        <HandwritingPractice character={item.character} language={language} />
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
         {componentInfo?.available && componentInfo.components.length ? (
           <ComponentBreakdown
@@ -81,6 +146,7 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <DictionaryReading title="On’yomi" values={item.on} language={language} />
           <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
         </div>
+        <PreparedMnemonicPanel character={item.character} language={language} />
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
           {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
@@ -88,6 +154,154 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
         </div>
       </div>
     </dialog>
+  );
+}
+
+function PlacementDiagnostic({ catalog, language, onStartCustomStudy }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean> }) {
+  const questions = useMemo(() => {
+    const byLevel = new Map<string, KanjiCatalogItem[]>();
+    catalog.filter(item => item.meanings.length && diagnosticLevels.includes(item.jlpt as typeof diagnosticLevels[number])).forEach(item => {
+      const list = byLevel.get(item.jlpt ?? "") ?? [];
+      list.push(item);
+      byLevel.set(item.jlpt ?? "", list);
+    });
+    const selected: KanjiCatalogItem[] = [];
+    for (const level of diagnosticLevels) {
+      const pool = (byLevel.get(level) ?? []).slice().sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity));
+      selected.push(...pool.slice(0, 3));
+    }
+    if (selected.length < 8) {
+      const fallback = catalog.filter(item => item.meanings.length).slice().sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity));
+      for (const item of fallback) {
+        if (selected.includes(item)) continue;
+        selected.push(item);
+        if (selected.length >= 12) break;
+      }
+    }
+    return selected.slice(0, 12).map((item, questionIndex) => {
+      const correct = item.meanings[0];
+      const distractors = catalog
+        .filter(candidate => candidate.character !== item.character && candidate.meanings[0] && candidate.meanings[0] !== correct)
+        .slice()
+        .sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity))
+        .map(candidate => candidate.meanings[0])
+        .filter((value, index, values) => values.indexOf(value) === index)
+        .slice(questionIndex % 5, questionIndex % 5 + 3);
+      return { item, answer: correct, options: [correct, ...distractors].slice(0, 4) };
+    }).filter(question => question.options.length >= 2);
+  }, [catalog]);
+
+  const [active, setActive] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [selected, setSelected] = useState("");
+  const [score, setScore] = useState(0);
+  const [levelScores, setLevelScores] = useState<Record<string, { correct: number; total: number }>>({});
+  const [finished, setFinished] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const current = questions[index];
+
+  useEffect(() => {
+    if (!questions.length) {
+      setActive(false);
+      setFinished(false);
+    }
+  }, [questions.length]);
+
+  const start = () => {
+    setIndex(0);
+    setSelected("");
+    setScore(0);
+    setLevelScores({});
+    setFinished(false);
+    setActive(true);
+  };
+
+  const choose = (option: string) => {
+    if (!current || selected) return;
+    const correct = option === current.answer;
+    setSelected(option);
+    setScore(value => value + (correct ? 1 : 0));
+    setLevelScores(previous => {
+      const level = current.item.jlpt ?? "unknown";
+      const existing = previous[level] ?? { correct: 0, total: 0 };
+      return { ...previous, [level]: { correct: existing.correct + (correct ? 1 : 0), total: existing.total + 1 } };
+    });
+  };
+
+  const next = () => {
+    if (!current) return;
+    if (index + 1 >= questions.length) {
+      setFinished(true);
+      return;
+    }
+    setIndex(value => value + 1);
+    setSelected("");
+  };
+
+  const suggestedLevel = useMemo(() => {
+    const order = ["N2", "N3", "N4", "N5"];
+    for (const level of order) {
+      const result = levelScores[level];
+      if (result && result.total >= 2 && result.correct / result.total >= 0.67) return level;
+    }
+    return "N5";
+  }, [levelScores]);
+
+  if (!questions.length) return null;
+
+  return (
+    <details className="placement-panel">
+      <summary>{t("placementDiagnostic", language)}</summary>
+      {!active ? (
+        <div className="placement-intro">
+          <p>{t("placementDiagnosticHint", language)}</p>
+          <button className="button primary" type="button" onClick={start}>{t("startDiagnostic", language)}</button>
+        </div>
+      ) : finished ? (
+        <div className="placement-result" aria-live="polite">
+          <div className="placement-result-score">
+            <span>{t("diagnosticResult", language)}</span>
+            <strong>{formatNumber(score, language)} / {formatNumber(questions.length, language)}</strong>
+          </div>
+          <div className="placement-levels">
+            {diagnosticLevels.map(level => {
+              const result = levelScores[level] ?? { correct: 0, total: 0 };
+              return <div className="placement-level" key={level}><span>{level}</span><strong>{formatNumber(result.correct, language)} / {formatNumber(result.total, language)}</strong></div>;
+            })}
+          </div>
+          <p className="placement-suggestion">{t("diagnosticSuggestedLevel", language)} <strong>{suggestedLevel}</strong></p>
+          <div className="placement-actions">
+            <button className="button secondary" type="button" onClick={start}>{t("retakeDiagnostic", language)}</button>
+            <button className="button primary" type="button" disabled={starting} onClick={async () => {
+              setStarting(true);
+              try {
+                const started = await onStartCustomStudy({ level: suggestedLevel as CustomStudyFilter["level"], focus: "available", limit: 20 });
+                if (started) setActive(false);
+              } finally {
+                setStarting(false);
+              }
+            }}>{starting ? "…" : t("startSuggestedStudy", language)}</button>
+          </div>
+        </div>
+      ) : current ? (
+        <div className="placement-question">
+          <div className="placement-progress"><span>{t("diagnosticQuestion", language)} {formatNumber(index + 1, language)} / {formatNumber(questions.length, language)}</span><strong>{current.item.jlpt ?? "—"}</strong></div>
+          <div className="placement-stimulus" lang="ja">{current.item.character}</div>
+          <p className="placement-prompt">{t("diagnosticMeaningPrompt", language)}</p>
+          <div className="placement-options">
+            {current.options.map(option => {
+              const isCorrect = option === current.answer;
+              const isSelected = option === selected;
+              return <button key={option} className={"placement-option " + (selected ? (isCorrect ? "correct" : isSelected ? "wrong" : "") : "")} type="button" disabled={Boolean(selected)} onClick={() => choose(option)}>
+                <span>{option}</span>{selected && isCorrect ? <b aria-label={t("correct", language)}>✓</b> : null}
+              </button>;
+            })}
+          </div>
+          {selected ? <div className="placement-feedback" role="status">{selected === current.answer ? t("diagnosticCorrect", language) : t("diagnosticIncorrect", language)}</div> : null}
+          {selected ? <button className="button primary" type="button" onClick={next}>{index + 1 >= questions.length ? t("finishDiagnostic", language) : t("nextDiagnostic", language)}</button> : null}
+        </div>
+      ) : null}
+    </details>
   );
 }
 
@@ -178,6 +392,26 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
           <div className="mastery-map-metric"><span className="mastery-swatch attention" aria-hidden="true" /><strong>{formatNumber(masterySummary.attention, language)}</strong><span>{t("masteryNeedsAttention", language)}</span></div>
           <div className="mastery-map-metric"><span className="mastery-swatch unseen" aria-hidden="true" /><strong>{formatNumber(masterySummary.unseen, language)}</strong><span>{t("masteryUnseen", language)}</span></div>
         </div>
+        {(() => {
+          const buckets = [
+            { key: "low", count: catalog.filter(item => item.mastery < 0.25).length, label: t("masteryRangeLow", language) },
+            { key: "developing", count: catalog.filter(item => item.mastery >= 0.25 && item.mastery < 0.5).length, label: t("masteryRangeDeveloping", language) },
+            { key: "strong", count: catalog.filter(item => item.mastery >= 0.5 && item.mastery < 0.75).length, label: t("masteryRangeStrong", language) },
+            { key: "mastered", count: catalog.filter(item => item.mastery >= 0.75).length, label: t("masteryRangeMastered", language) },
+          ];
+          const totalBuckets = Math.max(1, catalog.length);
+          return (
+            <div className="mastery-distribution" aria-label={t("masteryDistribution", language)}>
+              <div className="mastery-distribution-title">{t("masteryDistribution", language)}</div>
+              <div className="mastery-distribution-bar" role="img" aria-label={buckets.map(bucket => bucket.label + " " + formatNumber(bucket.count, language)).join(" · ")}>
+                {buckets.map(bucket => <span key={bucket.key} className={"mastery-distribution-segment " + bucket.key} style={{width:(bucket.count / totalBuckets * 100) + "%"}} />)}
+              </div>
+              <div className="mastery-distribution-legend">
+                {buckets.map(bucket => <span key={bucket.key}><i className={"mastery-distribution-dot " + bucket.key} aria-hidden="true" />{bucket.label}<strong>{formatNumber(bucket.count, language)}</strong></span>)}
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       <label className="dictionary-page-search">
@@ -204,6 +438,8 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
           </select>
         </label>
       </div>
+
+      <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
 
       <details className="custom-study-panel">
         <summary>{t("customStudy", language)}</summary>
@@ -242,7 +478,13 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
       {loading ? <div className="surface loading dictionary-loading">{t("dictionaryLoading", language)}</div> : null}
       {!loading && !visible.length ? <div className="surface dictionary-empty">{t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
-        <div className="kanji-catalog-grid">
+        <ReadingLab catalog={catalog} language={language} onSelectKanji={item => setSelected(item)} />
+
+      <GrammarGuide language={language} />
+
+      <MnemonicBackup catalog={catalog} language={language} />
+
+      <div className="kanji-catalog-grid">
           {visible.map((item) => {
             const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
             const fillOpacity = mastery === 0 ? 0 : 0.2 + mastery * 0.8;
