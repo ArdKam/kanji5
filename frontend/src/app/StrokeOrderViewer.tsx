@@ -101,19 +101,11 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     const containerRect = scrollContainer.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
     const edgePadding = 8;
-    let delta = 0;
-
-    if (targetRect.top < containerRect.top + edgePadding) {
-      delta = targetRect.top - (containerRect.top + edgePadding);
-    } else if (targetRect.bottom > containerRect.bottom - edgePadding) {
-      delta = targetRect.bottom - (containerRect.bottom - edgePadding);
-    }
-
-    if (Math.abs(delta) < 1) return;
-
+    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - edgePadding;
     const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
-    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, scrollContainer.scrollTop + delta));
+    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
     scrollContainer.scrollTo({
       top: nextScrollTop,
       behavior: reducedMotion ? "auto" : "smooth",
@@ -144,6 +136,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
 
   const closeLearningTool = useCallback(() => {
     stopPlayback();
+    scrollAfterExpandRef.current = false;
     setExpanded(false);
   }, [stopPlayback]);
 
