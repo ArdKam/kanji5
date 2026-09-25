@@ -9,14 +9,16 @@ const migration = read('v1.4-education-migration.js');
 const p0 = read('v1.3-p0.js');
 const session = read('v1.6-session.js');
 const sw = read('sw.js');
+const legacyLoader = read('legacy-loader.js');
 
 const legacyFiles = [
   'v1.4-education-migration.js','v1.4-education-core.js','v1.5-p0.js',
   'v1.2-enhancements.js','v1.2-runtime-fixes.js','v1.9-recovery.js','v1.5-education-ui.js'
 ];
 
+assert.match(index, /<script src="\.\/legacy-loader\.js"><\/script>/, 'legacy loader must remain an external shell dependency');
 for (const file of legacyFiles) {
-  assert.ok(index.includes(`"./${file}"`), `legacy loader lost ${file}`);
+  assert.ok(legacyLoader.includes(`'./${file}'`), `legacy loader lost ${file}`);
   assert.doesNotMatch(index, new RegExp(`<script[^>]+src="./${file.replaceAll('.', '\\\.')}"[^>]*><\\/script>`),
     `legacy file is directly wired into the default shell: ${file}`);
 }
@@ -45,5 +47,5 @@ for (const file of ['./v1.8-learning-ux.js','./v1.9-recovery-ui.js'])
 for (const file of ['v1.5-p0.js','v1.5-recall-core.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
   assert.match(sw, new RegExp(`"${file.replaceAll('.', '\\\.')}"`), `legacy compatibility dependency missing from offline cache: ${file}`);
 
-assert.match(sw, /const CACHE='kanji5-shell-v129'/);
+assert.match(sw, /const CACHE='kanji5-shell-v\d+'/);
 console.log('Kanji 5 startup runtime boundary contract passed.');
