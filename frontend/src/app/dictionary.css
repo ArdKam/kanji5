@@ -576,6 +576,127 @@
   .mastery-distribution-legend{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 
+.component-learning-path{
+  display:grid;
+  gap:9px;
+  margin-top:12px;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--washi);
+}
+.component-learning-path-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+}
+.component-learning-path-header h3{
+  margin:0 0 3px;
+  font-size:12px;
+}
+.component-learning-path-header p{
+  margin:0;
+  color:var(--mute);
+  font-size:9px;
+  line-height:1.55;
+}
+.component-learning-path-root{
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:36px;
+  height:36px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Noto Serif JP",serif;
+  font-size:1.15rem;
+}
+.component-learning-path-list{
+  display:grid;
+  gap:6px;
+}
+.component-learning-path-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  padding:7px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+}
+.component-learning-path-main{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.component-learning-path-kanji{
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:39px;
+  height:39px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--washi);
+  color:var(--ink);
+  font-family:"Noto Serif JP",serif;
+  font-size:1.2rem;
+  cursor:pointer;
+}
+.component-learning-path-kanji:hover{
+  border-color:color-mix(in srgb,var(--shu) 35%,var(--line));
+}
+.component-learning-path-kanji.is-static{cursor:default;}
+.component-learning-path-copy{
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+.component-learning-path-copy strong{
+  color:var(--ink);
+  font-size:9px;
+}
+.component-learning-path-copy span{
+  overflow:hidden;
+  color:var(--mute);
+  font-size:9px;
+  line-height:1.4;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.component-learning-path-mastery{
+  flex:0 0 auto;
+  padding:4px 7px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--washi);
+  color:var(--ink);
+  font-size:8px;
+  font-weight:850;
+  white-space:nowrap;
+}
+.component-learning-path-mastery.is-unavailable{
+  color:var(--mute);
+}
+@media(max-width:520px){
+  .component-learning-path-item{
+    align-items:flex-start;
+  }
+  .component-learning-path-mastery{
+    font-size:7px;
+    padding:4px 6px;
+  }
+  .component-learning-path-copy span{
+    white-space:normal;
+  }
+}
 .placement-panel{
   margin:0 0 14px;
   padding:12px 14px;
