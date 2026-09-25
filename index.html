@@ -37,6 +37,14 @@
  .content{gap:5px!important}
 }
 </style>
+<style id="kanji5-exercise-density-fix">
+.content > .exercise-card{width:min(100%,680px)!important;max-width:680px!important;margin-inline:auto!important}
+.content > .exercise-card > .stimulus{width:min(100%,620px)!important;max-width:620px!important;min-height:140px!important;padding:20px 16px!important;border-radius:20px!important;margin-inline:auto!important}
+@media(max-width:760px){
+ .content > .exercise-card{width:100%!important;max-width:none!important}
+ .content > .exercise-card > .stimulus{width:100%!important;max-width:none!important;min-height:140px!important}
+}
+</style>
 </head>
 <body>
 <div id="kanji5-startup-shell" aria-hidden="true">
