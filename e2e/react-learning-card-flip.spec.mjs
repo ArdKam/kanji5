@@ -360,10 +360,15 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
 
 test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
   await routeExamples(page, 5);
-  await page.setViewportSize({ width: 390, height: 640 });
   await page.addInitScript(() => {
     localStorage.setItem("kanji5-ui-language", "en");
   });
+
+  for (const viewport of [
+    { width: 390, height: 640 },
+    { width: 1280, height: 640 },
+  ]) {
+    await page.setViewportSize(viewport);
   await page.goto("/");
 
   const card = page.locator("#root .learning-card");
@@ -408,11 +413,12 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
   const calls = await page.evaluate(() => window.__kanji5MnemonicScrollToCalls || []);
   expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
 
-  await page.evaluate(() => {
-    if (window.__kanji5MnemonicOriginalScrollTo) {
-      Element.prototype.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
-    }
-  });
+    await page.evaluate(() => {
+      if (window.__kanji5MnemonicOriginalScrollTo) {
+        Element.prototype.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
+      }
+    });
+  }
 });
 
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
