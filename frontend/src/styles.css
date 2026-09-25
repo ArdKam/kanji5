@@ -743,3 +743,44 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .account-sync-status-card>div{display:grid;gap:3px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
 .account-sync-status-card span{font-size:10px;color:var(--mute);font-weight:800}
 .account-sync-status-card strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+
+/* Header/account spatial refinement: account left, slimmer header, tighter content start. */
+.header{
+  padding-bottom:6px;
+  margin-bottom:6px;
+}
+.header-actions{
+  min-height:42px;
+}
+.account-button{
+  position:absolute;
+  left:0;
+  top:0;
+  z-index:2;
+  min-height:42px;
+  height:42px;
+}
+.header-menu-trigger{
+  min-height:42px;
+  height:42px;
+}
+.app-shell{
+  padding-top:10px;
+}
+.content{
+  gap:12px;
+}
+@media(max-width:760px){
+  .account-button{
+    left:0;
+    top:0;
+    width:42px;
+    height:42px;
+    min-height:42px;
+  }
+  .header{
+    padding-bottom:5px;
+    margin-bottom:5px;
+  }
+}
