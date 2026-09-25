@@ -2,6 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const scripts=(await readdir(path.join(root,'scripts')))
@@ -9,6 +10,14 @@ const scripts=(await readdir(path.join(root,'scripts')))
   .sort();
 
 if(!scripts.length)throw new Error('No scripts/test-*.mjs files found');
+
+const shippedReactJs=path.join(root,'react-dist','kanji5-react.js');
+if(!fs.existsSync(shippedReactJs)){
+  console.log('React shipped artifact is missing; building frontend before contract tests...');
+  const npmCommand=process.platform==='win32'?'npm.cmd':'npm';
+  const build=spawnSync(npmCommand,['run','build'],{cwd:path.join(root,'frontend'),stdio:'inherit'});
+  if(build.status!==0)throw new Error('React shipped artifact build failed before contract tests');
+}
 console.log(`Running ${scripts.length} contract/unit tests...`);
 
 const failures=[];
