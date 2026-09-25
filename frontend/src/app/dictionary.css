@@ -683,3 +683,79 @@
   .placement-actions{display:grid;grid-template-columns:1fr;}
   .placement-actions .button{width:100%;}
 }
+
+.handwriting-practice{
+  display:grid;
+  gap:9px;
+  margin-top:13px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--washi);
+}
+.handwriting-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.handwriting-header h3{margin:0 0 3px;font-size:13px;}
+.handwriting-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
+.handwriting-stroke-count{
+  flex:0 0 auto;
+  padding:5px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--mute);
+  font-size:9px;
+  font-weight:800;
+}
+.handwriting-canvas-wrap{
+  width:min(280px,100%);
+  aspect-ratio:1;
+  margin:0 auto;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--paper);
+}
+.handwriting-canvas{
+  display:block;
+  width:100%;
+  height:100%;
+  touch-action:none;
+  cursor:crosshair;
+}
+.handwriting-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.handwriting-actions .button{min-height:42px;padding:6px 10px;font-size:10px;}
+.handwriting-status{
+  min-height:42px;
+  display:grid;
+  place-items:center;
+  color:var(--mute);
+  font-size:10px;
+}
+.handwriting-error{color:var(--shu);}
+.handwriting-result{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+  font-size:10px;
+}
+.handwriting-result strong{font-size:1rem;}
+.handwriting-result.great{border-color:#b8d0a0;}
+.handwriting-result.good{border-color:#d6c9a3;}
+.handwriting-result.retry{border-color:#f0b4b0;}
+@media(max-width:520px){
+  .handwriting-canvas-wrap{width:min(250px,100%);}
+}
