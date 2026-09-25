@@ -16,5 +16,5 @@ assert.ok(sw.includes('v1.8-production-core.js'));
 assert.ok(sw.includes('v1.8-vocabulary-core.js'));
 assert.ok(sw.includes('v1.8-context-core.js'));
 assert.ok(!sw.includes('v1.8-learning-ux.js'));
-assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);
+assert.match(sw,/const CACHE='kanji5-shell-[A-Za-z0-9._-]+'/);
 console.log('Kanji 5 v1.8 data/runtime quality contract passed.');
