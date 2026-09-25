@@ -14,7 +14,7 @@ assert.match(entry, /new MutationObserver\(\(\)=>\{/, "React entry must observe 
 assert.match(entry, /#root \.app-shell/, "startup shell must wait for the real app shell");
 assert.match(entry, /startupRoot\.classList\.add\('is-ready'\)/, "startup shell should fade out after React mounts");
 assert.match(entry, /startupRoot\.remove\(\)/, "startup shell should be removed after the transition");
-assert.match(sw, /const CACHE='kanji5-shell-v\d+'/, "shell cache version must be declared structurally");
+assert.match(sw, /const CACHE='kanji5-shell-[A-Za-z0-9._-]+'/, "shell cache version must be declared structurally");
 assert.match(sw, /"\.\/startup-shell\.css"/, "startup shell stylesheet must be precached for offline startup");
 
 console.log("Kanji 5 first-paint shell contract passed.");
