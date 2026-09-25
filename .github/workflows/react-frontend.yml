@@ -70,18 +70,6 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
-      - name: Commit freshly built React artifact
-        working-directory: .
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add react-dist/kanji5-react.js react-dist/kanji5-react.css react-dist/index.html
-          if git diff --cached --quiet; then
-            echo "React shipped artifact is already up to date."
-            exit 0
-          fi
-          git commit -m "build: refresh shipped React artifact [skip ci]"
-          git push origin HEAD:${GITHUB_REF_NAME}
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
