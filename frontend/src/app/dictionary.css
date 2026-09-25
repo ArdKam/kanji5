@@ -759,3 +759,89 @@
 @media(max-width:520px){
   .handwriting-canvas-wrap{width:min(250px,100%);}
 }
+
+.reading-lab{
+  display:grid;
+  gap:9px;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--washi);
+}
+.reading-lab-header h3{margin:0 0 3px;font-size:13px;}
+.reading-lab-header p{margin:0;color:var(--mute);font-size:10px;line-height:1.6;}
+.reading-lab-input{
+  width:100%;
+  min-height:118px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--paper);
+  color:var(--ink);
+  padding:10px 11px;
+  font-family:"Noto Serif JP",serif;
+  font-size:.92rem;
+  line-height:1.9;
+  direction:ltr;
+  outline:none;
+}
+.reading-lab-input:focus-visible{
+  border-color:var(--shu);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--shu) 16%,transparent);
+}
+.reading-lab-stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.reading-lab-stats span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-height:28px;
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--mute);
+  font-size:.6rem;
+  font-weight:750;
+}
+.reading-lab-stats strong{color:var(--ink);font-size:.68rem;}
+.reading-lab-kanji-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.reading-lab-kanji{
+  min-width:54px;
+  min-height:52px;
+  display:grid;
+  grid-template-rows:1fr auto;
+  place-items:center;
+  gap:2px;
+  padding:5px 7px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  cursor:pointer;
+}
+.reading-lab-kanji:hover{
+  border-color:color-mix(in srgb,var(--shu) 35%,var(--line));
+  transform:translateY(-1px);
+}
+.reading-lab-kanji span{
+  font-family:"Noto Serif JP",serif;
+  font-size:1.15rem;
+  line-height:1;
+}
+.reading-lab-kanji small{
+  color:var(--mute);
+  font-size:.55rem;
+  font-weight:800;
+}
+.reading-lab-empty{margin:0;color:var(--mute);font-size:.68rem;}
+@media(prefers-reduced-motion:reduce){.reading-lab-kanji{transition:none;}}
