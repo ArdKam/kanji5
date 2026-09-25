@@ -956,3 +956,41 @@
   margin-top:9px;
 }
 .grammar-navigation .button{min-height:42px;padding:6px 10px;font-size:.68rem;}
+
+.reading-lab-import-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.reading-lab-import{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:6px 11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+  color:var(--ink);
+  font-size:.66rem;
+  font-weight:800;
+  cursor:pointer;
+}
+.reading-lab-import input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+.reading-lab-clear{
+  min-height:42px;
+  padding:6px 10px;
+  font-size:.66rem;
+}
+@media(max-width:520px){
+  .reading-lab-import-row{align-items:stretch;display:grid;grid-template-columns:1fr 1fr;}
+  .reading-lab-import,.reading-lab-clear{width:100%;}
+}
