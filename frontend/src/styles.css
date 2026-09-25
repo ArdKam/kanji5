@@ -93,22 +93,12 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 
 @media(min-width:761px){
   .learning-card[data-card-density="dense"] .learning-back-overview{
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    grid-template-areas:
-      "components stroke"
-      "meaning stroke"
-      "readings-head mnemonic"
-      "readings mnemonic";
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:none;
     align-items:start;
-    column-gap:8px;
+    column-gap:0;
     row-gap:4px;
   }
-  .learning-card[data-card-density="dense"] .learning-back-overview>.component-breakdown{grid-area:components;}
-  .learning-card[data-card-density="dense"] .learning-back-overview>.stroke-order-panel{grid-area:stroke;}
-  .learning-card[data-card-density="dense"] .learning-back-overview>.learning-back-meaning{grid-area:meaning;}
-  .learning-card[data-card-density="dense"] .learning-back-overview>.readings-header{grid-area:readings-head;}
-  .learning-card[data-card-density="dense"] .learning-back-overview>.learning-back-readings{grid-area:readings;}
-  .learning-card[data-card-density="dense"] .learning-back-overview>.mnemonic-panel{grid-area:mnemonic;align-self:stretch;}
 }
 .learning-card[data-card-density="dense"] .stroke-order-source{display:none;}
 .learning-card[data-card-density="dense"] .mnemonic-panel{grid-template-columns:minmax(72px,auto) minmax(0,1fr);align-items:center;}
@@ -469,20 +459,17 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .stroke-order-controls .stroke-order-reset:disabled{pointer-events:none;}
 
 
-/* Learning-card back must remain single-column at every desktop density tier. */
+/* Learning-card back: one visual column on every viewport and density tier. */
 .learning-card-back .learning-back-overview,
-.learning-card[data-card-density="dense"] .learning-card-back .learning-back-overview{
-  grid-template-columns:minmax(0,1fr)!important;
-  grid-template-areas:none!important;
-}
+.learning-card-back .learning-back-tools,
+.learning-card-back .stroke-order-panel,
+.learning-card[data-card-density="dense"] .learning-card-back .learning-back-overview,
+.learning-card[data-card-density="dense"] .learning-card-back .learning-back-tools,
 .learning-card[data-card-density="dense"] .learning-card-back .stroke-order-panel{
-  grid-template-columns:minmax(0,1fr)!important;
-  column-gap:0!important;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:none;
+  column-gap:0;
 }
-.learning-card-back .learning-back-tools{
-  grid-template-columns:minmax(0,1fr)!important;
-}
-
 /* Compact learning-card back: a single visual column with lightweight optional study tools. */
 .learning-back-overview{grid-template-columns:1fr;gap:10px;}
 .learning-back-identity{display:grid;grid-template-columns:1fr;gap:8px;min-width:0;}
