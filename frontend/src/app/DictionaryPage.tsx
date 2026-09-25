@@ -7,6 +7,7 @@ import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
 import { GrammarGuide } from "./GrammarGuide";
+import { MnemonicBackup } from "./MnemonicBackup";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
@@ -480,6 +481,8 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         <ReadingLab catalog={catalog} language={language} onSelectKanji={item => setSelected(item)} />
 
       <GrammarGuide language={language} />
+
+      <MnemonicBackup catalog={catalog} language={language} />
 
       <div className="kanji-catalog-grid">
           {visible.map((item) => {
