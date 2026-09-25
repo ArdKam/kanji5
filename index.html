@@ -45,6 +45,19 @@
  .content > .exercise-card > .stimulus{width:100%!important;max-width:none!important;min-height:100px!important}
 }
 </style>
+<style id="kanji5-exercise-viewport-fix">
+.content > .exercise-card{
+  max-height:calc(100dvh - 155px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable;
+}
+@media(max-width:760px){
+  .content > .exercise-card{
+    max-height:calc(100dvh - 145px)!important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="kanji5-startup-shell" aria-hidden="true">
