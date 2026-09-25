@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 
@@ -124,7 +124,7 @@ export function HandwritingPractice({ character, language }: { character: string
     if (currentStroke.length) drawUserStrokes(ctx, [currentStroke], size / 109);
   }, [currentStroke, paths, strokes]);
 
-  const pointFromEvent = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const pointFromEvent = (event: PointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / Math.max(1, rect.width)) * 109;
     const y = ((event.clientY - rect.top) / Math.max(1, rect.height)) * 109;
