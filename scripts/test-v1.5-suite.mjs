@@ -16,7 +16,10 @@ const tests = [
   'test-v1.5-network.mjs',
   'test-v1.5-jlpt-order.mjs',
   'test-v1.5-roadmap-final.mjs',
-  'test-v1.5-v13-parity.mjs'
+  'test-v1.5-v13-parity.mjs',
+  'test-v1.8-production.mjs',
+  'test-v1.8-vocabulary.mjs',
+  'test-v1.8-context.mjs'
 ];
 
 const chunks = [];
