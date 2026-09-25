@@ -48,7 +48,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test "$(node -p "require('./package.json').version")" = "1.6.0" || test "$(node -p "require('./package.json').version")" = "1.7.0" || test "$(node -p "require('./package.json').version")" = "1.8.0" || test "$(node -p "require('./package.json').version")" = "1.9.0" || test "$(node -p "require('./package.json').version")" = "2.0.0"
           grep -q '"type": "module"' package.json
-          grep -Eq "const CACHE='kanji5-shell-v[0-9]+'" sw.js
+          grep -Eq "const CACHE='kanji5-shell-[A-Za-z0-9._-]+'" sw.js
           grep -q 'function staleWhileRevalidate' sw.js
           grep -q 'function dynamicSameOrigin' sw.js
           ! grep -q '"./v1.6-ui-hotfix-safe.js"' sw.js
