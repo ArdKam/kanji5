@@ -11,6 +11,8 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
 }) {
   const [value, setValue] = useState("");
   const [readerOpen, setReaderOpen] = useState(true);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioName, setAudioName] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const extracted = useMemo(() => {
@@ -49,6 +51,16 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
     setValue(cleaned);
   };
 
+  const importAudioFile = (file: File) => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+    setAudioUrl(URL.createObjectURL(file));
+    setAudioName(file.name);
+  };
+
+  useEffect(() => () => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+  }, [audioUrl]);
+
   const clearText = () => {
     setValue("");
     setReaderOpen(true);
@@ -85,6 +97,17 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         </label>
         <button className="button secondary reading-lab-clear" type="button" onClick={clearText} disabled={!value}>{t("clearReadingText", language)}</button>
       </div>
+      <div className="reading-lab-audio-row">
+        <label className="reading-lab-import">
+          <span>{t("importAudio", language)}</span>
+          <input type="file" accept="audio/*" onChange={event => {
+            const file = event.currentTarget.files?.[0];
+            if (file) importAudioFile(file);
+          }} />
+        </label>
+        {audioUrl ? <span className="reading-lab-audio-name" title={audioName}>{audioName}</span> : null}
+      </div>
+      {audioUrl ? <audio className="reading-lab-audio" controls preload="metadata" src={audioUrl} aria-label={t("readingAudio", language)} /> : null}
       <div className="reading-lab-stats" aria-live="polite">
         <span>{t("readingLabCharacters", language)} <strong>{formatNumber(inputCharacters, language)}</strong></span>
         <span>{t("readingLabKanji", language)} <strong>{formatNumber(uniqueKanji, language)}</strong></span>
