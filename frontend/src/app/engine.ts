@@ -2,6 +2,7 @@ export type Rating = "Again" | "Hard" | "Good" | "Easy";
 
 export type Settings = {
   dailyNew: number;
+  retention: number;
   dailyGoal: number;
   leechThreshold: number;
   production: boolean;
