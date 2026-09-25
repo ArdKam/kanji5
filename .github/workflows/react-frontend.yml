@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kanji5-react-build-${{ github.sha }}
-          path: frontend/react-dist/
+          path: react-dist/
           if-no-files-found: error
       - name: Validate shipped React artifact
         working-directory: .
