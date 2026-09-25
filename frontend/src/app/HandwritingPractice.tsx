@@ -66,6 +66,7 @@ export function HandwritingPractice({ character, language }: { character: string
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -96,6 +97,7 @@ export function HandwritingPractice({ character, language }: { character: string
   }, [language, normalized]);
 
   useEffect(() => {
+    if (!expanded) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -124,7 +126,7 @@ export function HandwritingPractice({ character, language }: { character: string
     }
     drawUserStrokes(ctx, strokes, size / 109);
     if (currentStroke.length) drawUserStrokes(ctx, [currentStroke], size / 109);
-  }, [currentStroke, paths, strokes]);
+  }, [currentStroke, expanded, paths, strokes]);
 
   const pointFromEvent = (event: PointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -162,38 +164,50 @@ export function HandwritingPractice({ character, language }: { character: string
   };
 
   return (
-    <section className="handwriting-practice" aria-label={t("handwritingPractice", language)}>
-      <div className="handwriting-header">
-        <div>
+    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)}>
+      <button
+        className="handwriting-header"
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded(value => !value)}
+      >
+        <span className="handwriting-header-copy">
           <h3>{t("handwritingPractice", language)}</h3>
           <p>{t("handwritingHint", language)}</p>
-        </div>
-        <span className="handwriting-stroke-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
-      </div>
-      {loading ? <div className="handwriting-status" role="status">{t("strokeOrderLoading", language)}</div> : null}
-      {!loading && error ? <div className="handwriting-status handwriting-error" role="status">{error}</div> : null}
-      {!loading && !error ? (
+        </span>
+        <span className="handwriting-header-end">
+          <span className="handwriting-stroke-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
+          <span className="handwriting-toggle-icon" aria-hidden="true">⌄</span>
+        </span>
+      </button>
+      {expanded ? (
         <>
-          <div className="handwriting-canvas-wrap">
-            <canvas
-              ref={canvasRef}
-              className="handwriting-canvas"
-              aria-label={t("handwritingPractice", language)}
-              onPointerDown={startStroke}
-              onPointerMove={moveStroke}
-              onPointerUp={finishStroke}
-              onPointerCancel={finishStroke}
-            />
-          </div>
-          <div className="handwriting-actions">
-            <button className="button secondary" type="button" onClick={clear} disabled={!strokes.length && !currentStroke.length}>{t("clearDrawing", language)}</button>
-            <button className="button primary" type="button" onClick={grade} disabled={!strokes.length}>{t("gradeDrawing", language)}</button>
-          </div>
-          {result !== null ? (
-            <div className={"handwriting-result " + (result >= 82 ? "great" : result >= 65 ? "good" : "retry")} role="status">
-              <strong>{formatNumber(result, language)}%</strong>
-              <span>{result >= 82 ? t("handwritingGreat", language) : result >= 65 ? t("handwritingGood", language) : t("handwritingRetry", language)}</span>
-            </div>
+          {loading ? <div className="handwriting-status" role="status">{t("strokeOrderLoading", language)}</div> : null}
+          {!loading && error ? <div className="handwriting-status handwriting-error" role="status">{error}</div> : null}
+          {!loading && !error ? (
+            <>
+              <div className="handwriting-canvas-wrap">
+                <canvas
+                  ref={canvasRef}
+                  className="handwriting-canvas"
+                  aria-label={t("handwritingPractice", language)}
+                  onPointerDown={startStroke}
+                  onPointerMove={moveStroke}
+                  onPointerUp={finishStroke}
+                  onPointerCancel={finishStroke}
+                />
+              </div>
+              <div className="handwriting-actions">
+                <button className="button secondary" type="button" onClick={clear} disabled={!strokes.length && !currentStroke.length}>{t("clearDrawing", language)}</button>
+                <button className="button primary" type="button" onClick={grade} disabled={!strokes.length}>{t("gradeDrawing", language)}</button>
+              </div>
+              {result !== null ? (
+                <div className={"handwriting-result " + (result >= 82 ? "great" : result >= 65 ? "good" : "retry")} role="status">
+                  <strong>{formatNumber(result, language)}%</strong>
+                  <span>{result >= 82 ? t("handwritingGreat", language) : result >= 65 ? t("handwritingGood", language) : t("handwritingRetry", language)}</span>
+                </div>
+              ) : null}
+            </>
           ) : null}
         </>
       ) : null}
