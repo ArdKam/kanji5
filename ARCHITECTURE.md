@@ -24,8 +24,10 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.9-v2-boundary.js`: browser orchestration boundary that translates authoritative runtime state into structured view models.
 - `supabase-sync.js`: remote transport only.
 - `sw.js`: offline shell/data/API caching and active runtime precaching.
+- `app-bootstrap.js`: canonical startup bootstrap for dataset invalidation, pre-paint language direction, the single service-worker registration, and session-engine loading.
+- `legacy-loader.js`: compatibility-only loader activated by `?legacy=1`; it is not part of the default presentation path.
 
-The former v1/v2 DOM presentation files and compatibility stylesheet are no longer part of the production runtime.
+The former v1/v2 DOM presentation files and compatibility stylesheet are no longer part of the production presentation runtime. Several v1 modules remain intentionally load-bearing runtime services for state, sessions, education, recovery, scheduling, and offline compatibility.
 
 ## Dependency direction
 
