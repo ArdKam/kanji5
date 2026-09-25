@@ -52,6 +52,24 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
+  const frontFaceRef=useRef<HTMLDivElement|null>(null);
+  const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
+  const shouldFocusBackRef=useRef(false);
+  const handleReveal=useCallback(()=>{
+    const active=document.activeElement;
+    if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
+      active.blur();
+    }
+    shouldFocusBackRef.current=true;
+    onReveal();
+  },[onReveal]);
+  useEffect(()=>{
+    if(!revealed||!shouldFocusBackRef.current)return;
+    shouldFocusBackRef.current=false;
+    requestAnimationFrame(()=>{
+      backFaceFocusRef.current?.focus({preventScroll:true});
+    });
+  },[revealed]);
   useEffect(()=>{
     let active=true;
     if(!revealed||!card.character){setComponentInfo(null);return ()=>{active=false};}
@@ -192,14 +210,15 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
-      <div className="learning-card-face learning-card-front" aria-hidden={revealed}>
+      <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline"><span className="badge badge-red">学習</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2>{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
         <div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div>
-        <button className="button primary wide" type="button" onClick={onReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
+        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
       </div>
-      <div className="learning-card-face learning-card-back" aria-hidden={!revealed}>
+      <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
+        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{getLanguage()==="fa"?"اطلاعات کانجی":"Kanji information"}</span>
         <div className="card-topline"><span className="badge badge-red">学習</span><span>{t("cardBack")}</span></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
