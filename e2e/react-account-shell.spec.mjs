@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test('account control exposes email, magic-link, and Google entry points', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.account-button')).toBeVisible({ timeout: 15000 });
-  await page.locator('.account-button').click();
+  await expect(page.locator('.account-button:visible')).toBeVisible({ timeout: 15000 });
+  await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog')).toBeVisible();
   await expect(page.locator('.account-auth-tabs')).toBeVisible();
   await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -35,7 +35,7 @@ test('account signup preserves entered credentials and handles a successful sign
   });
 
   await page.goto('/');
-  await page.locator('.account-button').click();
+  await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog')).toBeVisible();
   await expect(page.locator('.account-dialog .account-auth-form')).toBeVisible({ timeout: 15000 });
   await expect(page.locator('.account-dialog input[name="email"]')).toBeVisible();
