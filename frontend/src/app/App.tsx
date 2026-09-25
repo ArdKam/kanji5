@@ -137,7 +137,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const exampleCount=(card.examples??[]).length;
   const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
   const readingCount=displayedOn.length+displayedKun.length;
-  const densityScore=exampleCount*2+Math.min(componentCount,4)+Math.min(readingCount,6);
+  const densityScore=exampleCount*2+Math.min(readingCount,6);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const hasExamplesPage=exampleCount>2||(componentCount>=3&&exampleCount>0)||(density==="dense"&&exampleCount>0);
   const backPageCount=hasExamplesPage?2:1;
@@ -216,9 +216,11 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
+                    <div className="learning-back-identity-visual">
                     {componentInfo?.available&&componentInfo.components.length
                       ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
                       : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
+                    </div>
                     {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
                     <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
                     <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
@@ -457,7 +459,8 @@ function App(){
   const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
   useEffect(()=>{let mounted=true;void startLearningExperience().catch(()=>{});const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d)setSnapshot(d)};void refresh().then(()=>document.addEventListener("kanji5:v1.9-v2-view-models",listener)).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});return()=>{mounted=false;document.removeEventListener("kanji5:v1.9-v2-view-models",listener)}},[refresh]);
-  async function action<T>(task:()=>Promise<T>):Promise<T|undefined>{setBusy(true);setError("");try{const result=await task();setSnapshot(await readSnapshot());return result}catch(e){setError(e instanceof Error?e.message:language==="fa"?"عملیات انجام نشد.":"The operation failed.");return undefined}finally{setBusy(false)}}
+  const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
+  async function action<T>(task:()=>Promise<T>):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();setSnapshot(await readSnapshot());return result}catch(e){setError(e instanceof Error?e.message:language==="fa"?"عملیات انجام نشد.":"The operation failed.");return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
   if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>{t("learningCoreError")}</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>{t("tryAgain")}</button></section></div>;
   return <div className="app-shell">
