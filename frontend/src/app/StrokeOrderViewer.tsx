@@ -21,6 +21,8 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   const [expanded, setExpanded] = useState(false);
   const compactLoop = mode === "dictionary-loop";
   const timerRef = useRef<number | null>(null);
+  const viewerRef = useRef<HTMLElement | null>(null);
+  const scrollAfterExpandRef = useRef(false);
 
   const stopPlayback = useCallback(() => {
     if (timerRef.current !== null) {
@@ -91,7 +93,51 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     }, 720);
   }, [completed, paths.length, stopPlayback]);
 
+  const scrollExpandedToolIntoView = useCallback(() => {
+    const target = viewerRef.current;
+    const scrollContainer = target?.closest<HTMLElement>(".learning-back-scroll");
+    if (!target || !scrollContainer) return;
+
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const edgePadding = 8;
+    let delta = 0;
+
+    if (targetRect.top < containerRect.top + edgePadding) {
+      delta = targetRect.top - (containerRect.top + edgePadding);
+    } else if (targetRect.bottom > containerRect.bottom - edgePadding) {
+      delta = targetRect.bottom - (containerRect.bottom - edgePadding);
+    }
+
+    if (Math.abs(delta) < 1) return;
+
+    const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, scrollContainer.scrollTop + delta));
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    scrollContainer.scrollTo({
+      top: nextScrollTop,
+      behavior: reducedMotion ? "auto" : "smooth",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!expanded || !scrollAfterExpandRef.current) return;
+    scrollAfterExpandRef.current = false;
+    let frame = 0;
+    let nextFrame = 0;
+    frame = window.requestAnimationFrame(() => {
+      nextFrame = window.requestAnimationFrame(() => {
+        scrollExpandedToolIntoView();
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(nextFrame);
+    };
+  }, [expanded, scrollExpandedToolIntoView]);
+
   const openLearningTool = useCallback(() => {
+    scrollAfterExpandRef.current = true;
     setExpanded(true);
     play(true);
   }, [play]);
@@ -164,6 +210,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   if (!expanded && paths.length && !compactLoop) {
     return (
       <section
+        ref={viewerRef}
         className="stroke-order-tool"
         aria-label={t("strokeOrder", language)}
         data-stroke-order-open="false"
@@ -183,7 +230,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   }
 
   return (
-    <section className={"stroke-order-panel"+(expanded ? " is-expanded" : "")} aria-labelledby="stroke-order-title" data-stroke-order-open={expanded ? "true" : "false"}>
+    <section ref={viewerRef} className={"stroke-order-panel"+(expanded ? " is-expanded" : "")} aria-labelledby="stroke-order-title" data-stroke-order-open={expanded ? "true" : "false"}>
       <div className="stroke-order-header">
         <div>
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
