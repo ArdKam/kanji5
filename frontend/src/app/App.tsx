@@ -297,7 +297,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
-  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
+  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{key:string;correct:boolean;outcome:string;answerHint?:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
   const lockedRef=useRef(false);
   const exerciseKey=String(ex.contentId??"")+"|"+String(ex.mode??"")+"|"+String(ex.character??"");
   const previousKeyRef=useRef(exerciseKey);
@@ -319,7 +319,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
 
   const finishAndAdvance=useCallback(async(feedback:{correct?:boolean;outcome?:string;answerHint?:string}|null)=>{
     if(!feedback||typeof feedback.correct!=="boolean")return;
-    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint});
+    setResult({key:exerciseKey,correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint});
     await waitForFeedbackAnimation(feedback.correct);
     await onNext();
   },[onNext,waitForFeedbackAnimation]);
@@ -330,7 +330,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     try{
       if(ex.mode==="production"&&ex.character){
         const correct=value===ex.character;
-        setResult({correct,outcome:correct?"correct":"wrong",answerHint:correct?undefined:ex.character});
+        setResult({key:exerciseKey,correct,outcome:correct?"correct":"wrong",answerHint:correct?undefined:ex.character});
         await onSubmit(value);
         await waitForFeedbackAnimation(correct);
         await onNext();
@@ -356,16 +356,17 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     }
   };
 
-  const resultClass=result?(result.correct?" exercise-result-correct":" exercise-result-wrong"):"";
-  const revealedAnswer=!result?.correct?(result?.answerHint||ex.answerHint||ex.character):undefined;
-  const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
-  const disabled=busy||lockedRef.current||Boolean(result);
+  const activeResult=result?.key===exerciseKey?result:null;
+  const resultClass=activeResult?(activeResult.correct?" exercise-result-correct":" exercise-result-wrong"):"";
+  const revealedAnswer=!activeResult?.correct?(activeResult?.answerHint||ex.answerHint||ex.character):undefined;
+  const resultLabel=activeResult?(activeResult.correct?t("correct"):activeResult.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
+  const disabled=busy||lockedRef.current||Boolean(activeResult);
 
-  return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"surface card exercise-card"+resultClass} tabIndex={-1}>
+  return <section id="exercise" data-result={activeResult?(activeResult.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"surface card exercise-card"+resultClass} tabIndex={-1}>
     <div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div>
     <h2>{t("currentExercise")}</h2>
     <p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
-    {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{result?<div className="exercise-feedback" role="status"><strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>{revealedAnswer?<div className="exercise-correct-answer"><span>پاسخ درست:</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}</div>:<>
+    {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{activeResult?<div className="exercise-feedback" role="status"><strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>{revealedAnswer?<div className="exercise-correct-answer"><span>پاسخ درست:</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}</div>:<>
       {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
       <div className="actions">{!production?<button className="button primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>
     </>}</>}
