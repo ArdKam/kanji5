@@ -29,7 +29,13 @@ jobs:
           for f in v1.3-p0.js v1.4-education-migration.js v1.4-education-core.js v1.5-recall-core.js v1.5-p0.js v1.5-state.js v1.5-network.js v1.5-education-ui.js v1.5-education-sync-core.js v1.5-fsrs-sync-core.js v1.5-sync-core.js v1.6-session.js v1.6-session-core.js v1.6-session-feedback.js v1.6-session-analytics.js v1.6-skill-profile.js v1.6-sync-core.js v1.6-session-ui.js v1.8-production-core.js v1.8-vocabulary-core.js v1.8-context-core.js v1.2-runtime-fixes.js supabase-sync.js sw.js vendor/ts-fsrs-5.4.1.mjs; do node --check "$f"; done
           for f in scripts/test-v1.4-education.mjs scripts/test-v1.4-p1.mjs scripts/test-v1.5-p0.mjs scripts/test-v1.5-recall-core.mjs scripts/test-v1.5-p0-learning.mjs scripts/test-v1.5-dont-know.mjs scripts/test-v1.5-fsrs-sync.mjs scripts/test-v1.5-sync.mjs scripts/test-v1.5-sync-lifecycle.mjs scripts/test-v1.5-persistence.mjs scripts/test-v1.5-architecture.mjs scripts/test-v1.5-network.mjs scripts/test-v1.5-jlpt-order.mjs scripts/test-v1.5-roadmap-final.mjs scripts/test-v1.5-v13-parity.mjs scripts/test-v1.6-session.mjs scripts/test-v1.6-session-core.mjs scripts/test-v1.6-profile-planning.mjs scripts/test-v1.6-session-feedback.mjs scripts/test-v1.6-session-analytics.mjs scripts/test-v1.6-skill-profile.mjs scripts/test-v1.6-sync.mjs scripts/test-v1.6-release.mjs scripts/test-retired-shims.mjs scripts/test-v1.8-production.mjs scripts/test-v1.8-vocabulary.mjs scripts/test-v1.8-context.mjs scripts/test-v1.8-status.mjs scripts/test-v1.8-ux-runtime.mjs; do node --check "$f"; done
       - name: Validate v1.5 contracts and behavior
-        run: node scripts/test-v1.5-p0.mjs && node scripts/test-v1.5-recall-core.mjs && node scripts/test-v1.5-p0-learning.mjs && node scripts/test-v1.5-dont-know.mjs && node scripts/test-v1.5-fsrs-sync.mjs && node scripts/test-v1.5-sync.mjs && node scripts/test-v1.5-sync-lifecycle.mjs && node scripts/test-v1.5-persistence.mjs && node scripts/test-v1.5-architecture.mjs && node scripts/test-v1.5-network.mjs && node scripts/test-v1.5-jlpt-order.mjs && node scripts/test-v1.5-roadmap-final.mjs && node scripts/test-v1.5-v13-parity.mjs && node scripts/test-v1.4-p1.mjs && node scripts/test-v1.4-education.mjs && node scripts/test-v1.8-production.mjs && node scripts/test-v1.8-vocabulary.mjs && node scripts/test-v1.8-context.mjs
+        run: node scripts/test-v1.5-suite.mjs
+      - name: Upload v1.5 suite diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanji5-v1.5-suite-output
+          path: v1.5-suite-output.txt
       - name: Validate v1.6 contracts and behavior
         run: node scripts/test-v1.6-session.mjs && node scripts/test-v1.6-session-core.mjs && node scripts/test-v1.6-profile-planning.mjs && node scripts/test-v1.6-session-feedback.mjs && node scripts/test-v1.6-session-analytics.mjs && node scripts/test-v1.6-skill-profile.mjs && node scripts/test-v1.6-sync.mjs
       - name: Validate v1.6 release contract
@@ -48,7 +54,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           test "$(node -p "require('./package.json').version")" = "1.6.0" || test "$(node -p "require('./package.json').version")" = "1.7.0" || test "$(node -p "require('./package.json').version")" = "1.8.0" || test "$(node -p "require('./package.json').version")" = "1.9.0" || test "$(node -p "require('./package.json').version")" = "2.0.0"
           grep -q '"type": "module"' package.json
-          grep -Eq "const CACHE='kanji5-shell-v[0-9]+'" sw.js
+          grep -Eq "const CACHE='kanji5-shell-[A-Za-z0-9._-]+'" sw.js
           grep -q 'function staleWhileRevalidate' sw.js
           grep -q 'function dynamicSameOrigin' sw.js
           ! grep -q '"./v1.6-ui-hotfix-safe.js"' sw.js
