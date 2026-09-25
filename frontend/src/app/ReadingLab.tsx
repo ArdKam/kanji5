@@ -10,6 +10,7 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const [value, setValue] = useState("");
+  const [readerOpen, setReaderOpen] = useState(true);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const extracted = useMemo(() => {
@@ -23,6 +24,15 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
     }
     return result;
   }, [catalogByCharacter, value]);
+
+  const readerCharacters = useMemo(
+    () => Array.from(value).map((character, index) => ({
+      character,
+      index,
+      item: isKanji(character) ? catalogByCharacter.get(character) : undefined,
+    })),
+    [catalogByCharacter, value],
+  );
 
   const importTextFile = async (file: File) => {
     const raw = await file.text();
@@ -41,11 +51,13 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
 
   const clearText = () => {
     setValue("");
+    setReaderOpen(true);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const inputCharacters = Array.from(value).length;
   const uniqueKanji = new Set(Array.from(value).filter(isKanji)).size;
+  const knownKanjiCount = extracted.length;
 
   return (
     <section className="reading-lab">
@@ -76,7 +88,7 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
       <div className="reading-lab-stats" aria-live="polite">
         <span>{t("readingLabCharacters", language)} <strong>{formatNumber(inputCharacters, language)}</strong></span>
         <span>{t("readingLabKanji", language)} <strong>{formatNumber(uniqueKanji, language)}</strong></span>
-        <span>{t("readingLabKnownKanji", language)} <strong>{formatNumber(extracted.length, language)}</strong></span>
+        <span>{t("readingLabKnownKanji", language)} <strong>{formatNumber(knownKanjiCount, language)}</strong></span>
       </div>
       {extracted.length ? (
         <div className="reading-lab-kanji-list" role="list" aria-label={t("readingLabKnownKanji", language)}>
@@ -96,6 +108,40 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         </div>
       ) : value.trim() ? (
         <p className="reading-lab-empty">{t("readingLabNoKnownKanji", language)}</p>
+      ) : null}
+      {value.trim() ? (
+        <div className="reading-lab-reader">
+          <button
+            className="reading-lab-reader-toggle"
+            type="button"
+            aria-expanded={readerOpen}
+            onClick={() => setReaderOpen(open => !open)}
+          >
+            <span>{t("readingReader", language)}</span>
+            <span aria-hidden="true">{readerOpen ? "⌃" : "⌄"}</span>
+          </button>
+          {readerOpen ? (
+            <div className="reading-lab-reader-body" role="region" aria-label={t("readingReader", language)}>
+              <p className="reading-lab-reader-hint">{t("readingReaderHint", language)}</p>
+              <div className="reading-lab-reader-text" lang="ja">
+                {readerCharacters.map(({ character, index, item }) => item ? (
+                  <button
+                    key={character + "-" + index}
+                    type="button"
+                    className={"reading-lab-reader-kanji " + (item.mastery >= 0.75 ? "strong" : item.mastery > 0 ? "learning" : "unseen")}
+                    onClick={() => onSelectKanji(item)}
+                    title={t("lookupKanji", language)}
+                    aria-label={character + " — " + t("lookupKanji", language)}
+                  >
+                    {character}
+                  </button>
+                ) : (
+                  <span key={character + "-" + index}>{character}</span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </section>
   );
