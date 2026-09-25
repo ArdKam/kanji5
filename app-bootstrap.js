@@ -25,7 +25,5 @@ try{
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-const loadSession=()=>import('./v1.6-session.js').catch(()=>{});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadSession,{once:true});
-else loadSession();
+import('./v1.6-session.js').catch(()=>{});
 })();
