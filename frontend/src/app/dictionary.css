@@ -1035,6 +1035,34 @@
   border-color:var(--shu);
   box-shadow:0 0 0 3px color-mix(in srgb,var(--shu) 16%,transparent);
 }
+.reading-lab-audio-row{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+}
+.reading-lab-audio-name{
+  min-width:0;
+  overflow:hidden;
+  color:var(--mute);
+  font-size:.62rem;
+  line-height:1.4;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.reading-lab-audio{
+  width:100%;
+  min-height:38px;
+}
+@media(max-width:520px){
+  .reading-lab-audio-row{
+    grid-template-columns:1fr;
+    align-items:stretch;
+  }
+  .reading-lab-audio-name{
+    padding-inline:2px;
+  }
+}
 .reading-lab-stats{
   display:flex;
   flex-wrap:wrap;
