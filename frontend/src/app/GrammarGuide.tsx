@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 
 type GrammarLesson = {
@@ -31,23 +31,11 @@ const LESSONS: GrammarLesson[] = [
 export function GrammarGuide({ language }: { language: Language }) {
   const [index, setIndex] = useState(0);
   const [checked, setChecked] = useState(false);
-  const [completed, setCompleted] = useState<number[]>(() => {
-    try {
-      const raw = localStorage.getItem("kanji5-grammar-progress-v1");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.filter((value): value is number => Number.isInteger(value) && value >= 0 && value < LESSONS.length) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [completed, setCompleted] = useState<number[]>([]);
 
   const lesson = LESSONS[index];
   const percent = Math.round((completed.length / LESSONS.length) * 100);
   const remaining = useMemo(() => LESSONS.length - completed.length, [completed.length]);
-
-  useEffect(() => {
-    try { localStorage.setItem("kanji5-grammar-progress-v1", JSON.stringify(completed)); } catch {}
-  }, [completed]);
 
   const selectAnswer = (option: string) => {
     setChecked(true);
