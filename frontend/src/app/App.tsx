@@ -139,7 +139,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
-  const hasExamplesPage=exampleCount>2||(componentCount>=3&&exampleCount>0)||(density==="dense"&&exampleCount>0);
+  const hasExamplesPage=exampleCount>2||(density==="dense"&&exampleCount>0);
   const backPageCount=hasExamplesPage?2:1;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
