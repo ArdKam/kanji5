@@ -75,7 +75,18 @@ jobs:
         working-directory: .
         run: node scripts/stamp-release.mjs
       - run: npm install --no-audit --no-fund
-      - run: npm run typecheck
+      - name: Typecheck frontend
+        id: typecheck
+        run: |
+          set -o pipefail
+          npm run typecheck -- --pretty false 2>&1 | tee ../typecheck-output.txt
+      - name: Upload typecheck output on failure
+        if: failure()
+        working-directory: .
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanji5-typecheck-output
+          path: typecheck-output.txt
       - run: npm run build
       - name: Validate shipped React artifact
         working-directory: .
