@@ -73,27 +73,6 @@ jobs:
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
-      - name: Capture rebuilt React artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kanji5-react-build
-          path: react-dist/kanji5-react.js
-
-      - name: Sync rebuilt React artifact
-        shell: bash
-        run: |
-          cd ..
-          if git diff --quiet -- react-dist/kanji5-react.js; then
-            echo "Rebuilt React artifact already matches source build."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add react-dist/kanji5-react.js
-          git commit -m "chore: sync generated React artifact [skip ci]"
-          git push
-
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
