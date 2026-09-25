@@ -5,6 +5,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
+import { ReadingLab } from "./ReadingLab";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
@@ -475,7 +476,9 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
       {loading ? <div className="surface loading dictionary-loading">{t("dictionaryLoading", language)}</div> : null}
       {!loading && !visible.length ? <div className="surface dictionary-empty">{t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
-        <div className="kanji-catalog-grid">
+        <ReadingLab catalog={catalog} language={language} onSelectKanji={item => setSelected(item)} />
+
+      <div className="kanji-catalog-grid">
           {visible.map((item) => {
             const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
             const fillOpacity = mastery === 0 ? 0 : 0.2 + mastery * 0.8;
