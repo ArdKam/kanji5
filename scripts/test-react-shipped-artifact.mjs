@@ -21,6 +21,8 @@ try{
   throw new Error("SHIPPED_REACT_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));
 }
 if(/getVocabulary\(t===`fa`\?character:character\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_UNDEFINED_VOCABULARY_CHARACTER_REFERENCE");
+const vocabularyBlock=reactJs.slice(reactJs.indexOf("function VocabularyExamples"),reactJs.indexOf("function je("));
+if(/let e=!0[\\s\\S]{0,300}getVocabulary\\(e\\)[\\s\\S]{0,300}\\[character\\]/.test(vocabularyBlock)) throw new Error("SHIPPED_REACT_JS_VOCABULARY_SCOPE_COLLISION");
 console.log("Shipped React JS contains a valid VocabularyExamples character reference.");
 if(/data-kanji5-account-injected/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_EMBEDDED_FALLBACK_PATCH");
 console.log("Shipped React JS parses as valid JavaScript.");
