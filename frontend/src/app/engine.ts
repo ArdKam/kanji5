@@ -112,6 +112,7 @@ export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:
 export type CustomStudyFocus = "available" | "due" | "new" | "weak";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number };
 
+export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
 export type ComponentInfo = {
   character: string;
   available: boolean;
@@ -123,6 +124,7 @@ export type ComponentInfo = {
 
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
+  getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
@@ -293,6 +295,10 @@ export async function getMnemonic(character: string): Promise<{ character: strin
 
 export async function saveMnemonic(character: string, value: string): Promise<{ character: string; text: string }> {
   return (await waitForEngine()).saveMnemonic(character, value);
+}
+
+export async function getVocabulary(character: string): Promise<{ character: string; items: VocabularyItem[] }> {
+  return (await waitForEngine()).getVocabulary(character);
 }
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
