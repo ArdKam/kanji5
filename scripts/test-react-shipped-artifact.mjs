@@ -20,6 +20,8 @@ try{
 }catch(error){
   throw new Error("SHIPPED_REACT_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));
 }
+if(/getVocabulary\(t===`fa`\?character:character\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_UNDEFINED_VOCABULARY_CHARACTER_REFERENCE");
+console.log("Shipped React JS contains a valid VocabularyExamples character reference.");
 if(/data-kanji5-account-injected/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_EMBEDDED_FALLBACK_PATCH");
 console.log("Shipped React JS parses as valid JavaScript.");
 
