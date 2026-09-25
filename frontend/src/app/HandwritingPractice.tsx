@@ -52,7 +52,9 @@ function scoreDrawing(strokes: Point[][], paths: StrokePath[], size: number): nu
     if (targetInk && userInk) intersection += 1;
   }
   if (!targetCount || !userCount || !intersection) return 0;
-  return Math.round((2 * intersection / (targetCount + userCount)) * 100);
+  const overlapScore = 2 * intersection / (targetCount + userCount);
+  const strokeRatio = Math.min(strokes.length, paths.length) / Math.max(strokes.length, paths.length);
+  return Math.round((overlapScore * 0.82 + strokeRatio * 0.18) * 100);
 }
 
 export function HandwritingPractice({ character, language }: { character: string; language: Language }) {
