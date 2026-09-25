@@ -85,7 +85,6 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
               key={item.character}
               className="reading-lab-kanji"
               type="button"
-              role="listitem"
               onClick={() => onSelectKanji(item)}
               title={t("lookupKanji", language)}
               aria-label={item.character + " — " + t("lookupKanji", language)}
