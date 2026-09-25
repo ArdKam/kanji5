@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
+import { getComponentInfo, getMnemonic, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type VocabularyItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
@@ -116,6 +116,52 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
       </div>
       {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
     </details>
+  );
+}
+
+function VocabularyExamples({ character, language }: { character: string; language: Language }) {
+  const [items, setItems] = useState<VocabularyItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setItems([]);
+    setLoading(true);
+    void getVocabulary(character).then(result => {
+      if (active) setItems(result.items ?? []);
+    }).catch(() => {
+      if (active) setItems([]);
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
+  }, [character]);
+
+  return (
+    <section className="dictionary-vocabulary" aria-label={t("dictionaryVocabulary", language)}>
+      <div className="dictionary-vocabulary-header">
+        <div>
+          <h3>{t("dictionaryVocabulary", language)}</h3>
+          <p>{t("dictionaryVocabularyHint", language)}</p>
+        </div>
+      </div>
+      {loading ? <div className="dictionary-vocabulary-status" role="status">{t("dictionarySearching", language)}</div> : null}
+      {!loading && items.length ? (
+        <div className="dictionary-vocabulary-list">
+          {items.map(item => (
+            <div className="dictionary-vocabulary-item" key={item.word + "-" + item.reading}>
+              <div className="dictionary-vocabulary-main">
+                <strong lang="ja">{item.word}</strong>
+                <span lang="ja">{item.reading}</span>
+              </div>
+              <p>{item.meaning}</p>
+              <DictionaryAudio value={item.reading} label={t("playWordPronunciation", language) + " " + item.word} />
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {!loading && !items.length ? <p className="dictionary-vocabulary-empty">{t("dictionaryVocabularyEmpty", language)}</p> : null}
+    </section>
   );
 }
 
@@ -313,6 +359,7 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }
           <DictionaryReading title="On’yomi" values={item.on} language={language} />
           <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
         </div>
+        <VocabularyExamples character={item.character} language={language} />
         <PreparedMnemonicPanel character={item.character} language={language} />
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
