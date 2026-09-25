@@ -4,6 +4,7 @@ import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
+import { HandwritingPractice } from "./HandwritingPractice";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
@@ -125,6 +126,7 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
           <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
         </div>
+        <HandwritingPractice character={item.character} language={language} />
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
         {componentInfo?.available && componentInfo.components.length ? (
           <ComponentBreakdown
