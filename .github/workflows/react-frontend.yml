@@ -70,6 +70,12 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
+      - name: Upload freshly built React artifact for release repair
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanji5-react-build-${{ github.sha }}
+          path: frontend/react-dist/
+          if-no-files-found: error
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
