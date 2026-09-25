@@ -26,6 +26,10 @@ on:
       - 'package-lock.json'
       - 'sw.js'
       - 'index.html'
+      - 'app-bootstrap.js'
+      - 'legacy-loader.js'
+      - 'react-entry.js'
+      - 'scripts/stamp-release.mjs'
       - '.github/workflows/build-v1.8.yml'
   pull_request:
     branches: [main]
@@ -51,6 +55,10 @@ on:
       - 'package.json'
       - 'sw.js'
       - 'index.html'
+      - 'app-bootstrap.js'
+      - 'legacy-loader.js'
+      - 'react-entry.js'
+      - 'scripts/stamp-release.mjs'
       - '.github/workflows/build-v1.8.yml'
 
   workflow_dispatch:
