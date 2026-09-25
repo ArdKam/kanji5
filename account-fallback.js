@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+const FALLBACK_DELAY=1500;
 const boot=()=>{
   const reactAccount=document.querySelector('#root .account-button');
   const launcher=document.querySelector('#kanji5-account-launcher');
@@ -27,7 +28,7 @@ const boot=()=>{
   }else if(btn.parentElement!==document.body){
     document.body.appendChild(btn);
   }
-  btn.classList.add('is-ready');
+  if(Date.now()>=window.__KANJI5_ACCOUNT_FALLBACK_READY_AT) btn.classList.add('is-ready');
   let mode='email', intent='sign-in', busy=false, notice='', unsubscribe=()=>{};
   const api=()=>window.__KANJI5_ACCOUNT__;
   const waitForApi=async()=>{for(let i=0;i<120;i+=1){const a=api();if(a)return a;await new Promise(r=>setTimeout(r,100));}throw new Error('KANJI5_ACCOUNT_UNAVAILABLE');};
@@ -61,5 +62,25 @@ const boot=()=>{
   wait(); return true;
 };
 const style=document.createElement('style');style.textContent='#kanji5-account-launcher{visibility:visible!important;opacity:1!important;position:absolute!important;left:0!important;top:0!important;z-index:46!important;min-height:42px;border:1px solid var(--line,#ddd);background:var(--paper,#fbf8f0);color:var(--sumi,#211f1b);border-radius:16px;padding:5px 10px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:inherit;box-shadow:none}#kanji5-account-launcher.is-shadowed{visibility:hidden!important;pointer-events:none!important}[data-kanji5-account-fallback]{min-height:44px;border:1px solid var(--line,#ddd);background:var(--paper,#fbf8f0);color:var(--sumi,#211f1b);border-radius:14px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font:inherit}.account-avatar{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--washi,#f0eadf);color:var(--sumi,#211f1b);font-weight:800;flex:0 0 auto}.account-button-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700}.account-dialog{width:min(460px,calc(100vw - 28px));padding:28px}.account-dialog-heading{display:flex;align-items:center;gap:14px;margin-bottom:18px}.account-dialog-heading .account-avatar{width:48px;height:48px}.account-copy{margin:0 0 16px;color:var(--mute,#746f67);line-height:1.8}.account-user-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px;border:1px solid var(--line,#ddd);border-radius:14px}.account-user-copy{min-width:0;display:grid;gap:3px}.account-user-copy strong,.account-user-copy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.account-user-copy span{color:var(--mute,#746f67);font-size:12px}.account-actions{display:flex;gap:8px;margin-top:14px}.account-actions>*{flex:1}.account-auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:14px 0 12px;border:1px solid var(--line,#ddd);border-radius:12px;background:var(--washi,#f0eadf)}.account-auth-tabs button{min-height:44px;border:0;border-radius:8px;background:transparent;color:var(--mute,#746f67);font-size:11px;font-weight:700}.account-auth-tabs button.is-active{background:var(--paper,#fbf8f0);color:var(--sumi,#211f1b)}.account-intent-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 12px;border:1px solid var(--line,#ddd);border-radius:12px;background:var(--washi,#f0eadf)}.account-intent-tabs button{min-height:42px;border:0;border-radius:8px;background:transparent;color:var(--mute,#746f67);font-size:11px;font-weight:700}.account-intent-tabs button.is-active{background:var(--paper,#fbf8f0);color:var(--sumi,#211f1b)}.account-auth-form{display:grid;gap:10px}.account-auth-form label{display:grid;gap:5px}.account-auth-form label>span{font-size:10px;font-weight:700;color:var(--mute,#746f67)}.account-auth-form input{width:100%;min-height:42px;padding:8px 10px;border:1px solid var(--line,#ddd);border-radius:10px;background:var(--paper,#fbf8f0);color:var(--sumi,#211f1b);font:inherit;font-size:12px;box-sizing:border-box}.account-email-button,.account-google-button{width:100%;justify-content:center}.account-text-action{min-height:44px;border:0;background:transparent;color:var(--mute,#746f67);font-size:10px;cursor:pointer;padding:5px}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0 12px;color:var(--mute,#746f67);font-size:10px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line,#ddd)}.account-divider span{white-space:nowrap}.account-message{margin:12px 0 0;padding:9px 10px;border:1px solid var(--line,#ddd);border-radius:10px;background:var(--paper,#fbf8f0);font-size:11px;line-height:1.6}.account-error{margin:12px 0 0;color:#a23a2a;font-size:12px;line-height:1.6}@media(max-width:760px){[data-kanji5-account-fallback]{width:42px;min-width:42px;height:42px;align-self:flex-start}.account-dialog{width:calc(100vw - 28px)}}';document.head.appendChild(style);
-const start=()=>{if(!boot())window.setTimeout(start,100)}; start();
+window.__KANJI5_ACCOUNT_FALLBACK_READY_AT=window.__KANJI5_ACCOUNT_FALLBACK_READY_AT||Date.now()+FALLBACK_DELAY;
+const start=()=>{
+  boot();
+  window.setTimeout(()=>{
+    const react=document.querySelector('#root .account-button');
+    const launcher=document.querySelector('#kanji5-account-launcher');
+    if(!launcher)return;
+    if(react){
+      const s=getComputedStyle(react), r=react.getBoundingClientRect();
+      const visible=s.display!=='none'&&s.visibility!=='hidden'&&s.opacity!=='0'&&r.width>0&&r.height>0;
+      launcher.classList.toggle('is-shadowed',visible);
+      launcher.setAttribute('aria-hidden',visible?'true':'false');
+    }else{
+      launcher.classList.remove('is-shadowed');
+      launcher.removeAttribute('aria-hidden');
+      launcher.classList.add('is-ready');
+    }
+  },FALLBACK_DELAY);
+  if(!document.querySelector('[data-kanji5-account-fallback]')) window.setTimeout(start,250);
+};
+start();
 })();
