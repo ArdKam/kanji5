@@ -994,3 +994,28 @@
   .reading-lab-import-row{align-items:stretch;display:grid;grid-template-columns:1fr 1fr;}
   .reading-lab-import,.reading-lab-clear{width:100%;}
 }
+
+.mnemonic-backup{
+  display:grid;
+  gap:9px;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--washi);
+}
+.mnemonic-backup h3{margin:0 0 3px;font-size:13px;}
+.mnemonic-backup p{margin:0;color:var(--mute);font-size:10px;line-height:1.6;}
+.mnemonic-backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.mnemonic-backup-actions .button{min-height:42px;padding:6px 10px;font-size:.68rem;}
+.mnemonic-import-button{position:relative;display:grid;place-items:center;overflow:hidden;}
+.mnemonic-import-button input{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:pointer;
+}
+.mnemonic-backup-scope{color:var(--mute);font-size:.58rem;line-height:1.5;}
+.mnemonic-backup-status{color:var(--shu)!important;font-size:.64rem!important;font-weight:800;}
