@@ -4,7 +4,7 @@ test('account control exposes email, magic-link, and Google entry points', async
   await page.goto('/');
   await expect(page.locator('.account-button:visible')).toBeVisible({ timeout: 15000 });
   await page.locator('.account-button:visible').click();
-  await expect(page.locator('.account-dialog')).toBeVisible();
+  await expect(page.locator('.account-dialog:visible')).toBeVisible();
   await expect(page.locator('.account-auth-tabs')).toBeVisible();
   await expect(page.locator('input[type="email"]')).toBeVisible();
   await expect(page.locator('input[type="password"]')).toBeVisible();
@@ -36,14 +36,14 @@ test('account signup preserves entered credentials and handles a successful sign
 
   await page.goto('/');
   await page.locator('.account-button:visible').click();
-  await expect(page.locator('.account-dialog')).toBeVisible();
+  await expect(page.locator('.account-dialog:visible')).toBeVisible();
   await expect(page.locator('.account-dialog .account-auth-form')).toBeVisible({ timeout: 15000 });
   await expect(page.locator('.account-dialog input[name="email"]')).toBeVisible();
 
   const form = page.locator('.account-dialog .account-auth-form');
   await form.locator('input[name="email"]').fill('test-signup@example.com');
   await form.locator('input[name="password"]').fill('StrongTestPassword123!');
-  await page.locator('.account-text-action').click();
+  await page.locator('.account-text-action:visible').click();
 
   await expect(form.locator('input[name="email"]')).toHaveValue('test-signup@example.com');
   await expect(form.locator('input[name="password"]')).toHaveValue('StrongTestPassword123!');
