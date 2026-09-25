@@ -76,6 +76,7 @@ type TranslationKey =
   | "save"
   | "close"
   | "resetProgress"
+  | "fsrsRetention"
   | "todayReviews"
   | "todayNewKanji"
   | "learned"
