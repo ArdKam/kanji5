@@ -44,7 +44,8 @@ function DictionaryReading({ title, values, language }: { title: string; values:
   );
 }
 
-function PreparedMnemonicLibrary({ language }: { language: Language }) {
+function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
+  const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const entries = useMemo(
     () => Object.entries(PREPARED_MNEMONICS).flatMap(([character, suggestions]) =>
       suggestions.map((suggestion, index) => ({ character, suggestion, index }))
@@ -102,8 +103,8 @@ function PreparedMnemonicLibrary({ language }: { language: Language }) {
           return (
             <div className="prepared-mnemonic-library-row" key={key} role="listitem">
               <button className="prepared-mnemonic-library-kanji" type="button" onClick={() => {
-                const item = entries.length ? visible.find(value => value.character === entry.character) : undefined;
-                if (item) window.dispatchEvent(new CustomEvent("kanji5:dictionary-select", { detail: item.character }));
+                const item = catalogByCharacter.get(entry.character);
+                if (item) onSelectKanji(item);
               }} lang="ja" title={t("lookupKanji", language)}>{entry.character}</button>
               <p>{mnemonic}</p>
               <button className="button secondary prepared-mnemonic-library-use" type="button" disabled={busyKey !== ""} onClick={() => void apply(entry.character, entry.suggestion, key)}>
@@ -515,7 +516,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
 
       <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
 
-      <PreparedMnemonicLibrary language={language} />
+      <PreparedMnemonicLibrary language={language} catalog={catalog} onSelectKanji={setSelected} />
 
       <details className="custom-study-panel">
         <summary>{t("customStudy", language)}</summary>
