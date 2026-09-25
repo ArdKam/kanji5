@@ -26,6 +26,8 @@ on:
       - "sw.js"
       - "legacy-loader.js"
       - "scripts/stamp-release.mjs"
+      - "legacy-loader.js"
+      - "scripts/stamp-release.mjs"
   push:
     branches:
       - main
@@ -49,7 +51,6 @@ on:
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
-      - "react-dist/**"
       - "sw.js"
 
 permissions:
