@@ -119,7 +119,7 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
   );
 }
 
-function VocabularyExamples({ character, language }: { character: string; language: Language }) {
+function VocabularyExamples({ character: kanjiCharacter, language }: { character: string; language: Language }) {
   const [items, setItems] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -127,7 +127,7 @@ function VocabularyExamples({ character, language }: { character: string; langua
     let active = true;
     setItems([]);
     setLoading(true);
-    void getVocabulary(character).then(result => {
+    void getVocabulary(kanjiCharacter).then(result => {
       if (active) setItems(result.items ?? []);
     }).catch(() => {
       if (active) setItems([]);
@@ -135,7 +135,7 @@ function VocabularyExamples({ character, language }: { character: string; langua
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, [character]);
+  }, [kanjiCharacter]);
 
   return (
     <section className="dictionary-vocabulary" aria-label={t("dictionaryVocabulary", language)}>
