@@ -215,6 +215,19 @@ function setSyncStatus(syncStatus, error = null) {
   setState({ syncStatus, error });
 }
 
+async function refreshPresentationAfterSync() {
+  const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
+  if (!boundary?.snapshot) return;
+  try {
+    const viewModel = await boundary.snapshot();
+    if (!viewModel) return;
+    window.__KANJI5_V19_V2_LAST_SNAPSHOT__ = viewModel;
+    document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models', { detail: viewModel }));
+  } catch (error) {
+    console.warn('Kanji 5 presentation refresh after sync failed', error);
+  }
+}
+
 async function syncOnce() {
   const local = localPayload();
   const remoteRow = await readRemote();
@@ -247,7 +260,7 @@ async function syncOnce() {
   if (mergedHash === remoteHash) {
     writeLocal(merged, remoteRow.updatedAt);
     setSyncStatus('synced');
-    window.setTimeout(() => location.reload(), 250);
+    await refreshPresentationAfterSync();
     return { retry: false };
   }
 
@@ -255,7 +268,7 @@ async function syncOnce() {
   if (result.conflict) return { retry: true };
   writeLocal(merged, result.updatedAt);
   setSyncStatus('synced');
-  if (mergedHash !== localHash) window.setTimeout(() => location.reload(), 250);
+  if (mergedHash !== localHash) await refreshPresentationAfterSync();
   return { retry: false };
 }
 
