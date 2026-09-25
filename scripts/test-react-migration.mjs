@@ -11,7 +11,7 @@ assert.match(app,/from "\.\/engine"/);
 assert.doesNotMatch(app,/__KANJI5_V19_V2_BOUNDARY__/);
 assert.doesNotMatch(app,/localStorage|sessionStorage|FSRS/);
 assert.match(engine,/type Boundary/);assert.match(engine,/rateLearning/);assert.match(engine,/startExercise/);assert.match(engine,/updateSettings/);
-assert.match(docs,/presentation-only/);assert.match(engine,/__KANJI5_V19_V2_BOUNDARY__/);assert.match(engine,/__KANJI5_EDU_BRIDGE__/);assert.match(app,/<div className="app-shell"/);assert.match(app,/setExperience\(`dictionary`\);void action\(async\(\)=>\{await clearCustomStudyFilter\(\);await clearTransient\(\)\}\)/);
+assert.match(docs,/presentation-only/);assert.match(engine,/__KANJI5_V19_V2_BOUNDARY__/);assert.match(engine,/__KANJI5_EDU_BRIDGE__/);assert.match(app,/<div className="app-shell"/);assert.match(app,/const densityScore=exampleCount\*2\+Math\.min\(readingCount,6\);/);assert.match(app,/const hasExamplesPage=exampleCount>2\|\|\(density==="dense"&&exampleCount>0\);/);assert.match(app,/const yieldToBrowser=useCallback/);assert.match(app,/learning-back-identity-visual/);assert.match(app,/setExperience\(`dictionary`\);void action\(async\(\)=>\{await clearCustomStudyFilter\(\);await clearTransient\(\)\}\)/);
 const shell=fs.readFileSync("index.html","utf8"),bootstrap=fs.readFileSync("app-bootstrap.js","utf8"),entry=fs.readFileSync("react-entry.js","utf8"),sw=fs.readFileSync("sw.js","utf8");
 assert.match(shell,/id="root"/);assert.match(shell,/app-bootstrap\.js/);assert.doesNotMatch(shell,/v2-presentation|v2-components|legacy\.css|id="app"|id="loading"/);
 assert.doesNotMatch(bootstrap,/legacy|kanji5-v2-default/);assert.match(bootstrap,/serviceWorker\.register/);assert.match(bootstrap,/v1\.6-session\.js/);
