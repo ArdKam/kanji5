@@ -98,6 +98,12 @@ jobs:
           node --check v1.6-session-feedback.js
           node --check v1.6-skill-profile.js
           node --check review-runtime.js
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --no-audit --no-fund
+      - name: Build React shipped artifact
+        working-directory: frontend
+        run: npm run build
       - name: Install root dependencies for lockfile verification
         run: npm ci --ignore-scripts
       - name: Validate v1.9 release contract
