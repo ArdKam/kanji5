@@ -478,13 +478,14 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
       {loading ? <div className="surface loading dictionary-loading">{t("dictionaryLoading", language)}</div> : null}
       {!loading && !visible.length ? <div className="surface dictionary-empty">{t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
-        <ReadingLab catalog={catalog} language={language} onSelectKanji={item => setSelected(item)} />
+        <>
+          <ReadingLab catalog={catalog} language={language} onSelectKanji={item => setSelected(item)} />
 
-      <GrammarGuide language={language} />
+          <GrammarGuide language={language} />
 
-      <MnemonicBackup catalog={catalog} language={language} />
+          <MnemonicBackup catalog={catalog} language={language} />
 
-      <div className="kanji-catalog-grid">
+          <div className="kanji-catalog-grid">
           {visible.map((item) => {
             const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
             const fillOpacity = mastery === 0 ? 0 : 0.2 + mastery * 0.8;
@@ -504,7 +505,8 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
               </button>
             );
           })}
-        </div>
+          </div>
+        </>
       ) : null}
 
       {selected ? <DictionaryKanjiCard item={selected} language={language} onClose={() => setSelected(null)} /> : null}
