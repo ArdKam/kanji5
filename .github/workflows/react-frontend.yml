@@ -26,8 +26,6 @@ on:
       - "sw.js"
       - "legacy-loader.js"
       - "scripts/stamp-release.mjs"
-      - "legacy-loader.js"
-      - "scripts/stamp-release.mjs"
   push:
     branches:
       - main
@@ -52,6 +50,8 @@ on:
       - "app-bootstrap.js"
       - "react-entry.js"
       - "sw.js"
+      - "legacy-loader.js"
+      - "scripts/stamp-release.mjs"
 
 permissions:
   contents: write
