@@ -817,7 +817,7 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .content > .exercise-card{max-height:calc(100dvh - 155px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;}
 @media(max-width:760px){.content > .exercise-card{max-height:calc(100dvh - 145px);}}
 
-/* Static shell/header fixes moved out of index.html. */
+/* Static shell/header fixes live in the compiled React stylesheet; index.html stays markup-only. */
 #kanji5-account-launcher{
   visibility:visible!important;
   position:absolute!important;
