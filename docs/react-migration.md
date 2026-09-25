@@ -7,8 +7,8 @@ The React/TypeScript frontend is now the **sole production browser presentation*
 - Typed presentation adapter over the v1.9 learning/runtime boundaries
 - Learning / Review / Exercise / Feedback / Insights / Stats / Settings implemented in React
 - Sumi Play / Kanjis Bloom visual language, responsive layout, accessibility, and reduced-motion support
-- React production bundle tracked under `react-dist/`
-- Static-shell integration through `app-bootstrap.js`
+- React production bundle generated into `react-dist/` during build/deploy; generated output is not committed
+- Static-shell integration through `app-bootstrap.js` (session/bootstrap/language/SW startup)
 - React is the only `/` renderer; legacy/v2 DOM presentation routes have been retired
 - Retired presentation assets removed from the production shell and service-worker manifest
 - React E2E, authoritative snapshot, offline, accessibility and visual-system verification retained
