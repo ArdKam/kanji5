@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=151').catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=152').catch(()=>{});
 document.documentElement.classList.add('kanji5-react-default');
 const startupRoot=document.getElementById('kanji5-startup-shell');
 const startupObserver=startupRoot?new MutationObserver(()=>{
