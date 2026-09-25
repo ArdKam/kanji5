@@ -177,7 +177,96 @@ function PreparedMnemonicPanel({ character, language }: { character: string; lan
   );
 }
 
-function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogItem; language: Language; onClose: () => void }) {
+
+function ComponentLearningPath({
+  character,
+  components,
+  catalog,
+  language,
+  onSelectKanji,
+}: {
+  character: string;
+  components: string[];
+  catalog: KanjiCatalogItem[];
+  language: Language;
+  onSelectKanji: (item: KanjiCatalogItem) => void;
+}) {
+  const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
+  const directComponents = useMemo(() => components.slice(0, 8), [components]);
+  const [nested, setNested] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    let active = true;
+    setNested({});
+    void Promise.all(directComponents.map(async component => {
+      try {
+        const info = await getComponentInfo(component);
+        return [component, info.available ? info.components.slice(0, 5) : []] as const;
+      } catch {
+        return [component, []] as const;
+      }
+    })).then(entries => {
+      if (!active) return;
+      setNested(Object.fromEntries(entries));
+    });
+    return () => { active = false; };
+  }, [directComponents]);
+
+  if (!directComponents.length) return null;
+
+  return (
+    <section className="component-learning-path" aria-label={language === "fa" ? "مسیر یادگیری اجزای کانجی" : "Kanji component learning path"}>
+      <div className="component-learning-path-header">
+        <div>
+          <h3>{t("componentLearningPath", language)}</h3>
+          <p>{t("componentLearningPathHint", language)}</p>
+        </div>
+        <span className="component-learning-path-root" lang="ja">{character}</span>
+      </div>
+      <div className="component-learning-path-list" role="list">
+        {directComponents.map(component => {
+          const item = catalogByCharacter.get(component);
+          const mastery = item ? Math.round(Math.max(0, Math.min(1, Number(item.mastery) || 0)) * 100) : null;
+          const children = nested[component] ?? [];
+          return (
+            <div className="component-learning-path-item" key={component} role="listitem">
+              <div className="component-learning-path-main">
+                {item ? (
+                  <button
+                    className="component-learning-path-kanji"
+                    type="button"
+                    lang="ja"
+                    onClick={() => onSelectKanji(item)}
+                    title={t("lookupKanji", language)}
+                  >
+                    {component}
+                  </button>
+                ) : (
+                  <span className="component-learning-path-kanji is-static" lang="ja">{component}</span>
+                )}
+                <div className="component-learning-path-copy">
+                  <strong>{item ? (language === "fa" ? "کانجیِ جویو" : "Jōyō kanji") : (language === "fa" ? "جزء دیداری" : "Visual component")}</strong>
+                  {children.length ? (
+                    <span lang="ja">{children.join(" + ")}</span>
+                  ) : (
+                    <span>{t("componentLearningPathLeaf", language)}</span>
+                  )}
+                </div>
+              </div>
+              {mastery !== null ? (
+                <span className="component-learning-path-mastery">{t("masteryShort", language)} {formatNumber(mastery, language)}%</span>
+              ) : (
+                <span className="component-learning-path-mastery is-unavailable">{t("notInCatalog", language)}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }: { item: KanjiCatalogItem; language: Language; onClose: () => void; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
 
@@ -213,6 +302,9 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
             note={language === "fa" ? "اجزای دیداری" : "Visual components"}
             ariaLabel={language === "fa" ? "ساختار دیداری کانجی" : "Kanji visual structure"}
           />
+        ) : null}
+        {componentInfo?.available && componentInfo.components.length ? (
+          <ComponentLearningPath character={item.character} components={componentInfo.components} catalog={catalog} language={language} onSelectKanji={onSelectKanji} />
         ) : null}
         <div className="readings-header dictionary-readings-header">
           <span>{language === "fa" ? "خوانش‌ها" : "Readings"}</span>
@@ -586,7 +678,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         </>
       ) : null}
 
-      {selected ? <DictionaryKanjiCard item={selected} language={language} onClose={() => setSelected(null)} /> : null}
+      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} /> : null}
     </section>
   );
 }
