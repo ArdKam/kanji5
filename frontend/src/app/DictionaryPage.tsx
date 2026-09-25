@@ -83,7 +83,7 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
   };
 
   return (
-    <details className="prepared-mnemonic-library">
+    <details className="prepared-mnemonic-library" open>
       <summary>{t("preparedMnemonicLibrary", language)}</summary>
       <p className="prepared-mnemonic-library-hint">{t("preparedMnemonicLibraryHint", language)}</p>
       <input
