@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, listKanji, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
+import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
+import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
@@ -35,6 +36,64 @@ function DictionaryReading({ title, values, language }: { title: string; values:
       <strong lang="ja">{values.length ? values.join(" · ") : "—"}</strong>
       {first ? <DictionaryAudio value={first} label={t("playReading", language) + " " + title} /> : null}
     </div>
+  );
+}
+
+function PreparedMnemonicPanel({ character, language }: { character: string; language: Language }) {
+  const suggestions = PREPARED_MNEMONICS[character] ?? [];
+  const [busyIndex, setBusyIndex] = useState<number | null>(null);
+  const [status, setStatus] = useState("");
+
+  const applySuggestion = async (suggestion: PreparedMnemonic, index: number) => {
+    if (busyIndex !== null) return;
+    setStatus("");
+    setBusyIndex(index);
+    try {
+      const current = await getMnemonic(character);
+      const existing = String(current.text ?? "").trim();
+      if (existing && existing !== (language === "fa" ? suggestion.fa : suggestion.en)) {
+        const message = t("mnemonicOverwriteConfirm", language);
+        if (!window.confirm(message)) return;
+      }
+      await saveMnemonic(character, language === "fa" ? suggestion.fa : suggestion.en);
+      setStatus(t("mnemonicApplied", language));
+    } catch {
+      setStatus(t("mnemonicSaveError", language));
+    } finally {
+      setBusyIndex(null);
+    }
+  };
+
+  return (
+    <section className="prepared-mnemonic-panel" aria-label={t("preparedMnemonics", language)}>
+      <div className="prepared-mnemonic-header">
+        <div>
+          <h3>{t("preparedMnemonics", language)}</h3>
+          <p>{t("preparedMnemonicsHint", language)}</p>
+        </div>
+      </div>
+      {suggestions.length ? (
+        <div className="prepared-mnemonic-list">
+          {suggestions.map((suggestion, index) => {
+            const text = language === "fa" ? suggestion.fa : suggestion.en;
+            return (
+              <div className="prepared-mnemonic-item" key={character + "-" + index}>
+                <p>{text}</p>
+                <button
+                  className="button secondary prepared-mnemonic-use"
+                  type="button"
+                  disabled={busyIndex !== null}
+                  onClick={() => void applySuggestion(suggestion, index)}
+                >
+                  {busyIndex === index ? "…" : t("useMnemonic", language)}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : <p className="prepared-mnemonic-empty">{t("preparedMnemonicNone", language)}</p>}
+      {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
+    </section>
   );
 }
 
@@ -81,6 +140,7 @@ function DictionaryKanjiCard({ item, language, onClose }: { item: KanjiCatalogIt
           <DictionaryReading title="On’yomi" values={item.on} language={language} />
           <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
         </div>
+        <PreparedMnemonicPanel character={item.character} language={language} />
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
           {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
@@ -178,6 +238,26 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
           <div className="mastery-map-metric"><span className="mastery-swatch attention" aria-hidden="true" /><strong>{formatNumber(masterySummary.attention, language)}</strong><span>{t("masteryNeedsAttention", language)}</span></div>
           <div className="mastery-map-metric"><span className="mastery-swatch unseen" aria-hidden="true" /><strong>{formatNumber(masterySummary.unseen, language)}</strong><span>{t("masteryUnseen", language)}</span></div>
         </div>
+        {(() => {
+          const buckets = [
+            { key: "low", count: catalog.filter(item => item.mastery < 0.25).length, label: t("masteryRangeLow", language) },
+            { key: "developing", count: catalog.filter(item => item.mastery >= 0.25 && item.mastery < 0.5).length, label: t("masteryRangeDeveloping", language) },
+            { key: "strong", count: catalog.filter(item => item.mastery >= 0.5 && item.mastery < 0.75).length, label: t("masteryRangeStrong", language) },
+            { key: "mastered", count: catalog.filter(item => item.mastery >= 0.75).length, label: t("masteryRangeMastered", language) },
+          ];
+          const totalBuckets = Math.max(1, catalog.length);
+          return (
+            <div className="mastery-distribution" aria-label={t("masteryDistribution", language)}>
+              <div className="mastery-distribution-title">{t("masteryDistribution", language)}</div>
+              <div className="mastery-distribution-bar" role="img" aria-label={buckets.map(bucket => bucket.label + " " + formatNumber(bucket.count, language)).join(" · ")}>
+                {buckets.map(bucket => <span key={bucket.key} className={"mastery-distribution-segment " + bucket.key} style={{width:(bucket.count / totalBuckets * 100) + "%"}} />)}
+              </div>
+              <div className="mastery-distribution-legend">
+                {buckets.map(bucket => <span key={bucket.key}><i className={"mastery-distribution-dot " + bucket.key} aria-hidden="true" />{bucket.label}<strong>{formatNumber(bucket.count, language)}</strong></span>)}
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       <label className="dictionary-page-search">
