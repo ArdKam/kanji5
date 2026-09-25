@@ -358,6 +358,63 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   });
 });
 
+test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.setViewportSize({ width: 390, height: 640 });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+  });
+  await page.goto("/");
+
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  await card.getByRole("button", { name: "Show kanji information" }).click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+
+  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
+  const mnemonic = card.locator(".mnemonic-tool");
+  const trigger = mnemonic.getByRole("button", { name: "Personal mnemonic" });
+  await expect(trigger).toBeVisible();
+
+  await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
+
+  await page.evaluate(() => {
+    const calls = [];
+    const original = Element.prototype.scrollTo;
+    window.__kanji5MnemonicScrollToCalls = calls;
+    window.__kanji5MnemonicOriginalScrollTo = original;
+    Element.prototype.scrollTo = function (options) {
+      if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
+        calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
+      }
+      return original.apply(this, arguments);
+    };
+  });
+
+  await trigger.click();
+  await expect(mnemonic).toHaveClass(/is-open/);
+  await expect(mnemonic.locator("textarea")).toBeVisible();
+  await expect(mnemonic.locator(".mnemonic-editor-footer .actions")).toBeVisible();
+
+  await expect.poll(async () => {
+    return await mnemonic.evaluate((el) => {
+      const target = el.getBoundingClientRect();
+      const scroll = el.closest(".learning-back-scroll")?.getBoundingClientRect();
+      if (!scroll) return false;
+      return target.top >= scroll.top - 1 && target.bottom <= scroll.bottom + 1;
+    });
+  }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
+
+  const calls = await page.evaluate(() => window.__kanji5MnemonicScrollToCalls || []);
+  expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
+
+  await page.evaluate(() => {
+    if (window.__kanji5MnemonicOriginalScrollTo) {
+      Element.prototype.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
+    }
+  });
+});
+
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
