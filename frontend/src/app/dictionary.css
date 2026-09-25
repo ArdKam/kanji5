@@ -1019,3 +1019,93 @@
 }
 .mnemonic-backup-scope{color:var(--mute);font-size:.58rem;line-height:1.5;}
 .mnemonic-backup-status{color:var(--shu)!important;font-size:.64rem!important;font-weight:800;}
+
+.prepared-mnemonic-library{
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--washi);
+}
+.prepared-mnemonic-library>summary{
+  cursor:pointer;
+  color:var(--ink);
+  font-size:.82rem;
+  font-weight:850;
+}
+.prepared-mnemonic-library-hint{
+  margin:8px 0 10px;
+  color:var(--mute);
+  font-size:.68rem;
+  line-height:1.65;
+}
+.prepared-mnemonic-library-search{
+  width:100%;
+  min-height:42px;
+  margin-bottom:7px;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:.7rem;
+  outline:none;
+}
+.prepared-mnemonic-library-search:focus-visible{
+  border-color:var(--shu);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--shu) 16%,transparent);
+}
+.prepared-mnemonic-library-count{
+  margin-bottom:7px;
+  color:var(--mute);
+  font-size:.58rem;
+  font-weight:800;
+}
+.prepared-mnemonic-library-list{
+  display:grid;
+  gap:6px;
+  max-height:420px;
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+.prepared-mnemonic-library-row{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+}
+.prepared-mnemonic-library-row p{
+  margin:0;
+  color:var(--ink);
+  font-size:.66rem;
+  line-height:1.6;
+}
+.prepared-mnemonic-library-kanji{
+  min-height:42px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--washi);
+  color:var(--ink);
+  font-family:"Noto Serif JP",serif;
+  font-size:1.15rem;
+  cursor:pointer;
+}
+.prepared-mnemonic-library-use{
+  min-height:38px;
+  padding:6px 9px;
+  font-size:.62rem;
+}
+@media(max-width:520px){
+  .prepared-mnemonic-library-row{
+    grid-template-columns:42px minmax(0,1fr);
+  }
+  .prepared-mnemonic-library-use{
+    grid-column:1/-1;
+    width:100%;
+  }
+}
