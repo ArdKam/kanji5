@@ -23,6 +23,10 @@ try{
 if(/getVocabulary\(t===`fa`\?character:character\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_UNDEFINED_VOCABULARY_CHARACTER_REFERENCE");
 const vocabularyBlock=reactJs.slice(reactJs.indexOf("function VocabularyExamples"),reactJs.indexOf("function je("));
 if(/let e=!0[\s\S]{0,300}getVocabulary\(e\)[\s\S]{0,300}\[character\]/.test(vocabularyBlock)) throw new Error("SHIPPED_REACT_JS_VOCABULARY_SCOPE_COLLISION");
+if(!/learning-back-identity-visual/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_MISSING_STABLE_IDENTITY_SLOT");
+if(!/requestAnimationFrame\(\(\)=>e\(\)\)|setTimeout\(e,0\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_MISSING_INTERACTION_YIELD");
+if(!/\.experience-tab\{[^}]*height:46px/.test(css)||!/\.experience-tab\{[^}]*box-sizing:border-box/.test(css)) throw new Error("SHIPPED_REACT_CSS_EXPERIENCE_TAB_GEOMETRY_NOT_STABLE");
+console.log("Shipped React artifact contains stable layout and interaction-yield guards.");
 console.log("Shipped React JS contains a valid VocabularyExamples character reference.");
 if(/data-kanji5-account-injected/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_EMBEDDED_FALLBACK_PATCH");
 console.log("Shipped React JS parses as valid JavaScript.");
