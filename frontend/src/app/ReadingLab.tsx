@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import type { KanjiCatalogItem } from "./engine";
 
@@ -10,6 +10,7 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const [value, setValue] = useState("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const extracted = useMemo(() => {
     const seen = new Set<string>();
@@ -22,6 +23,26 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
     }
     return result;
   }, [catalogByCharacter, value]);
+
+  const importTextFile = async (file: File) => {
+    const raw = await file.text();
+    const cleaned = raw
+      .replace(/^\uFEFF/, "")
+      .replace(/^WEBVTT(?:\s+.*)?$/gim, "")
+      .replace(/^\s*\d+\s*$/gm, "")
+      .replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?[.,]\d{3}\s+-->.*$/gm, "")
+      .replace(/<[^>]+>/g, "")
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean)
+      .join("\n");
+    setValue(cleaned);
+  };
+
+  const clearText = () => {
+    setValue("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const inputCharacters = Array.from(value).length;
   const uniqueKanji = new Set(Array.from(value).filter(isKanji)).size;
@@ -42,6 +63,16 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         aria-label={t("readingTextPlaceholder", language)}
         rows={6}
       />
+      <div className="reading-lab-import-row">
+        <label className="reading-lab-import">
+          <span>{t("importSubtitle", language)}</span>
+          <input ref={fileInputRef} type="file" accept=".txt,.srt,.vtt,text/plain,text/vtt" onChange={event => {
+            const file = event.currentTarget.files?.[0];
+            if (file) void importTextFile(file);
+          }} />
+        </label>
+        <button className="button secondary reading-lab-clear" type="button" onClick={clearText} disabled={!value}>{t("clearReadingText", language)}</button>
+      </div>
       <div className="reading-lab-stats" aria-live="polite">
         <span>{t("readingLabCharacters", language)} <strong>{formatNumber(inputCharacters, language)}</strong></span>
         <span>{t("readingLabKanji", language)} <strong>{formatNumber(uniqueKanji, language)}</strong></span>
