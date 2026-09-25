@@ -44,6 +44,80 @@ function DictionaryReading({ title, values, language }: { title: string; values:
   );
 }
 
+function PreparedMnemonicLibrary({ language }: { language: Language }) {
+  const entries = useMemo(
+    () => Object.entries(PREPARED_MNEMONICS).flatMap(([character, suggestions]) =>
+      suggestions.map((suggestion, index) => ({ character, suggestion, index }))
+    ),
+    []
+  );
+  const [query, setQuery] = useState("");
+  const [busyKey, setBusyKey] = useState("");
+  const [status, setStatus] = useState("");
+  const visible = useMemo(() => {
+    const q = normalize(query);
+    return entries.filter(entry => {
+      if (!q) return true;
+      const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
+      return normalize(entry.character).includes(q) || normalize(mnemonic).includes(q);
+    });
+  }, [entries, language, query]);
+
+  const apply = async (character: string, suggestion: PreparedMnemonic, key: string) => {
+    if (busyKey) return;
+    setBusyKey(key);
+    setStatus("");
+    try {
+      const current = await getMnemonic(character);
+      const existing = String(current.text ?? "").trim();
+      const next = language === "fa" ? suggestion.fa : suggestion.en;
+      if (existing && existing !== next && !window.confirm(t("mnemonicOverwriteConfirm", language))) return;
+      await saveMnemonic(character, next);
+      setStatus((language === "fa" ? "یادسپار «" : "Mnemonic for ") + character + (language === "fa" ? "» ذخیره شد." : " saved."));
+    } catch {
+      setStatus(t("mnemonicSaveError", language));
+    } finally {
+      setBusyKey("");
+    }
+  };
+
+  return (
+    <details className="prepared-mnemonic-library">
+      <summary>{t("preparedMnemonicLibrary", language)}</summary>
+      <p className="prepared-mnemonic-library-hint">{t("preparedMnemonicLibraryHint", language)}</p>
+      <input
+        className="prepared-mnemonic-library-search"
+        value={query}
+        onChange={event => setQuery(event.target.value)}
+        placeholder={t("preparedMnemonicLibrarySearch", language)}
+        aria-label={t("preparedMnemonicLibrarySearch", language)}
+      />
+      <div className="prepared-mnemonic-library-count">
+        {formatNumber(visible.length, language)} / {formatNumber(entries.length, language)}
+      </div>
+      <div className="prepared-mnemonic-library-list" role="list">
+        {visible.map(entry => {
+          const key = entry.character + "-" + entry.index;
+          const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
+          return (
+            <div className="prepared-mnemonic-library-row" key={key} role="listitem">
+              <button className="prepared-mnemonic-library-kanji" type="button" onClick={() => {
+                const item = entries.length ? visible.find(value => value.character === entry.character) : undefined;
+                if (item) window.dispatchEvent(new CustomEvent("kanji5:dictionary-select", { detail: item.character }));
+              }} lang="ja" title={t("lookupKanji", language)}>{entry.character}</button>
+              <p>{mnemonic}</p>
+              <button className="button secondary prepared-mnemonic-library-use" type="button" disabled={busyKey !== ""} onClick={() => void apply(entry.character, entry.suggestion, key)}>
+                {busyKey === key ? "…" : t("useMnemonic", language)}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
+    </details>
+  );
+}
+
 function PreparedMnemonicPanel({ character, language }: { character: string; language: Language }) {
   const suggestions = PREPARED_MNEMONICS[character] ?? [];
   const [busyIndex, setBusyIndex] = useState<number | null>(null);
@@ -440,6 +514,8 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
       </div>
 
       <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
+
+      <PreparedMnemonicLibrary language={language} />
 
       <details className="custom-study-panel">
         <summary>{t("customStudy", language)}</summary>
