@@ -210,10 +210,12 @@ async function startCustomStudy(filter={}){
 async function updateSettings(nextValue={}){
   const requested=nextValue&&typeof nextValue==='object'?nextValue:{};
   const current=runtimePresentationData().settings;
-  const next={...current,...requested,production:Boolean(requested.production??current.production),vocabulary:Boolean(requested.vocabulary??current.vocabulary),context:Boolean(requested.context??current.context)};
+  const requestedRetention=Number(requested.retention);
+  const retention=Number.isFinite(requestedRetention)?Math.min(.98,Math.max(.8,requestedRetention)):Math.min(.98,Math.max(.8,Number(current.retention)||.9));
+  const next={...current,...requested,retention,production:Boolean(requested.production??current.production),vocabulary:Boolean(requested.vocabulary??current.vocabulary),context:Boolean(requested.context??current.context)};
   const runtime=window.__KANJI5_REVIEW_RUNTIME__;
-  if(runtime?.updateSettings)runtime.updateSettings({dailyNew:next.dailyNew,dailyGoal:next.dailyGoal,leechThreshold:next.leechThreshold});
-  else state.transaction?.(draft=>{draft.settings={...draft.settings, dailyNew:Math.min(30,Math.max(1,Number(next.dailyNew)||5)),dailyGoal:Math.min(500,Math.max(1,Number(next.dailyGoal)||20)),leechThreshold:Math.min(30,Math.max(2,Number(next.leechThreshold)||8))}});
+  if(runtime?.updateSettings)runtime.updateSettings({dailyNew:next.dailyNew,retention:next.retention,dailyGoal:next.dailyGoal,leechThreshold:next.leechThreshold});
+  else state.transaction?.(draft=>{draft.settings={...draft.settings,retention:Math.min(.98,Math.max(.8,Number(next.retention)||.9)), dailyNew:Math.min(30,Math.max(1,Number(next.dailyNew)||5)),dailyGoal:Math.min(500,Math.max(1,Number(next.dailyGoal)||20)),leechThreshold:Math.min(30,Math.max(2,Number(next.leechThreshold)||8))}});
   state.writeSettings?.({production:next.production,vocabulary:next.vocabulary,context:next.context});
   document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-settings-changed'));
   await publish();
