@@ -23,8 +23,9 @@ on:
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
-      - "react-dist/**"
       - "sw.js"
+      - "legacy-loader.js"
+      - "scripts/stamp-release.mjs"
   push:
     branches:
       - main
@@ -67,6 +68,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Stamp release asset cache-bust
+        env:
+          KANJI5_RELEASE: ${{ github.sha }}
+        working-directory: .
+        run: node scripts/stamp-release.mjs
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
@@ -76,6 +82,9 @@ jobs:
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
+      - name: Run contract and unit suite
+        working-directory: .
+        run: npm test
       - name: Install Chromium
         working-directory: .
         run: npx playwright install chromium
