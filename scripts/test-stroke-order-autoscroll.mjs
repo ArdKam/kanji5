@@ -9,7 +9,8 @@ assert.match(source, /closest<HTMLElement>\("\.learning-back-scroll"\)/);
 assert.match(source, /behavior: reducedMotion \? "auto" : "smooth"/);
 assert.match(source, /scrollContainer\.scrollTo\(\{/);
 assert.match(source, /requestAnimationFrame\(\(\) => \{/);
-assert.match(source, /const targetTop = scrollContainer\.scrollTop \+ \(targetRect\.top - containerRect\.top\) - edgePadding/);\nassert.match(source, /ref=\{viewerRef\}/);
+assert.match(source, /const targetTop = scrollContainer\.scrollTop \+ \(targetRect\.top - containerRect\.top\) - edgePadding/);
+assert.match(source, /ref=\{viewerRef\}/);
 
 const styles = await readFile(new URL("../frontend/src/styles.css", import.meta.url), "utf8");
 assert.match(styles, /\.learning-card-back \.learning-back-overview,/);
