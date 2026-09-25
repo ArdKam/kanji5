@@ -15,7 +15,9 @@ assert.match(docs,/presentation-only/);assert.match(engine,/__KANJI5_V19_V2_BOUN
 const shell=fs.readFileSync("index.html","utf8"),bootstrap=fs.readFileSync("app-bootstrap.js","utf8"),entry=fs.readFileSync("react-entry.js","utf8"),sw=fs.readFileSync("sw.js","utf8");
 assert.match(shell,/id="root"/);assert.match(shell,/app-bootstrap\.js/);assert.match(shell,/legacy-loader\.js/);assert.doesNotMatch(shell,/v2-presentation|v2-components|legacy\.css|id="app"|id="loading"/);
 assert.doesNotMatch(bootstrap,/legacy|kanji5-v2-default/);assert.match(bootstrap,/serviceWorker\.register/);assert.match(bootstrap,/v1\.6-session\.js/);
-assert.doesNotMatch(entry,/URLSearchParams|legacy|v2=1|react=0/);assert.match(entry,/react-dist\/kanji5-react\.js/);assert.match(entry,/react-dist\/kanji5-react\.css/);
+assert.doesNotMatch(entry,/URLSearchParams|legacy|v2=1|react=0/);
+const registrationSites=[shell,bootstrap,entry].join('\n').match(/serviceWorker\.register/g)||[];
+assert.equal(registrationSites.length,1,'service worker must have exactly one registration call site');assert.match(entry,/react-dist\/kanji5-react\.js/);assert.match(entry,/react-dist\/kanji5-react\.css/);
 assert.match(sw,/\.\/react-dist\/kanji5-react\.js/);assert.match(sw,/\.\/react-dist\/kanji5-react\.css/);assert.match(sw,/\.\/app-bootstrap\.js/);
 for(const file of ["e2e/react-presentation-migration.spec.mjs","e2e/react-presentation-parity.spec.mjs","e2e/react-presentation-offline.spec.mjs"])assert.ok(fs.existsSync(file),"Missing React verification test: "+file);
 console.log("Kanji 5 React migration boundary contract passed.");
