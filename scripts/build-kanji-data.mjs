@@ -31,7 +31,10 @@ const ranked = allKanji
     grade: x.grade,
     jlpt: x.jlpt_waller || null,
     frequency: x.frequency,
-    order: i + 1
+    order: i + 1,
+    radical: {
+      classical: Number.isInteger(x.radical?.classical) ? x.radical.classical : null,
+    }
   }));
 
 if (ranked.length !== COUNT) throw new Error(`Expected ${COUNT} kanji, got ${ranked.length}`);
