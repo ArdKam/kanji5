@@ -6,8 +6,6 @@ export type HandwritingGradingOptions = {
   resamplePoints?: number;
   minPointDistance?: number;
   smoothing?: number;
-  translationTolerance?: number;
-  placementTolerance?: number;
   sizeTolerance?: number;
 };
 export type HandwritingPerStrokeScore = {
