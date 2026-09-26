@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
+import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
+import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
 import { AccountButton, AccountDialog } from "./AccountDialog";
@@ -45,10 +47,12 @@ const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["
 
 function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
+  const preparedMeaningKey=(card.meanings??[]).join("\u0001");
   const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
   const [personalMnemonic,setPersonalMnemonic]=useState("");
   const [mnemonicDraft,setMnemonicDraft]=useState("");
+  const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
@@ -72,11 +76,25 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   },[revealed]);
   useEffect(()=>{
     let active=true;
-    if(!revealed||!card.character){setComponentInfo(null);return ()=>{active=false};}
+    if(!revealed||!card.character){
+      setComponentInfo(null);
+      setPreparedMnemonic(null);
+      return ()=>{active=false};
+    }
     setComponentInfo(null);
-    void getComponentInfo(card.character).then(info=>{if(active)setComponentInfo(info)}).catch(()=>{if(active)setComponentInfo(null)});
+    setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
+    void getComponentInfo(card.character).then(info=>{
+      if(!active)return;
+      setComponentInfo(info);
+      setPreparedMnemonic(buildPreparedMnemonic(
+        {character:card.character,meanings:card.meanings??[]},
+        info.components??[]
+      ));
+    }).catch(()=>{
+      if(active)setComponentInfo(null);
+    });
     return ()=>{active=false};
-  },[revealed,card.character]);
+  },[revealed,card.character,preparedMeaningKey]);
   const mnemonicToolRef=useRef<HTMLElement|null>(null);
   const scrollMnemonicEditorIntoView=useCallback(()=>{
     const target=mnemonicToolRef.current;
@@ -113,7 +131,9 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       const next=String(value?.text??"");
       setPersonalMnemonic(next);
       setMnemonicDraft(next);
-    }).catch(()=>{if(active)setMnemonicError(t("mnemonicLoadError"))});
+    }).catch(()=>{
+      if(active)setMnemonicError(t("mnemonicLoadError"));
+    });
     return ()=>{active=false};
   },[revealed,card.character]);
   const handleSaveMnemonic=useCallback(async()=>{
@@ -132,6 +152,24 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       setMnemonicBusy(false);
     }
   },[card.character,mnemonicBusy,mnemonicDraft]);
+  const handleUsePreparedMnemonic=useCallback(async()=>{
+    if(!card.character||mnemonicBusy||!preparedMnemonic)return;
+    const next=(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en).trim().slice(0,600);
+    if(!next)return;
+    if(personalMnemonic&&personalMnemonic!==next&&!window.confirm(t("mnemonicOverwriteConfirm")))return;
+    setMnemonicBusy(true);
+    setMnemonicError("");
+    try{
+      const saved=await saveMnemonic(card.character,next);
+      setPersonalMnemonic(saved.text);
+      setMnemonicDraft(saved.text);
+      setMnemonicEditing(false);
+    }catch(_){
+      setMnemonicError(t("mnemonicSaveError"));
+    }finally{
+      setMnemonicBusy(false);
+    }
+  },[card.character,mnemonicBusy,personalMnemonic,preparedMnemonic]);
   const displayedOn=(card.on??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const displayedKun=(card.kun??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const exampleCount=(card.examples??[]).length;
@@ -227,6 +265,19 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                     <div className="learning-back-tools">
                       {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
                       <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                      {!mnemonicEditing&&preparedMnemonic?
+                        <div className="mnemonic-prepared">
+                          <div className="mnemonic-prepared-copy">
+                            <strong>{t("preparedMnemonics")}</strong>
+                            <p>{getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en}</p>
+                          </div>
+                          {personalMnemonic===(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en)?
+                            null:
+                            <button className="button secondary mnemonic-prepared-use" type="button" disabled={mnemonicBusy} onClick={()=>void handleUsePreparedMnemonic()}>
+                              {mnemonicBusy?"…":t("useMnemonic")}
+                            </button>}
+                        </div>
+                        :null}
                       <button
                         className="mnemonic-trigger"
                         type="button"
