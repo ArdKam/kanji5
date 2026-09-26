@@ -29,140 +29,31 @@ export function DictionaryKanjiCard({
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey>(null);
-  const [isIdle, setIsIdle] = useState(false);
-  const [isWaking, setIsWaking] = useState(false);
-  const sectionRefs = useRef<Partial<Record<Exclude<SectionKey, null>, HTMLElement>>>({});
-
-  useEffect(() => {
-    setOpenSection(null);
-    setIsIdle(false);
-    setIsWaking(false);
-    setComponentInfo(null);
-    setHandwritingSkill(null);
-  }, [item.character]);
-
-  useEffect(() => {
-    if (openSection !== "structure") return;
-    let active = true;
-    void getComponentInfo(item.character).then(info => {
-      if (active) setComponentInfo(info);
-    }).catch(() => {
-      if (active) setComponentInfo(null);
-    });
-    return () => { active = false; };
-  }, [item.character, openSection]);
-
-  useEffect(() => {
-    if (openSection !== "writing") return;
-    let active = true;
-    void getHandwritingSkill(item.character).then(skill => {
-      if (active) setHandwritingSkill(skill);
-    }).catch(() => {
-      if (active) setHandwritingSkill(null);
-    });
-    return () => { active = false; };
-  }, [item.character, openSection]);
-
-  const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>, behavior: ScrollBehavior = "smooth") => {
-    const target = sectionRefs.current[section];
-    const scrollContainer = target?.closest<HTMLElement>(".dictionary-card");
-    if (!target || !scrollContainer) return;
-
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const optionNav = scrollContainer.querySelector<HTMLElement>(".dictionary-section-nav");
-    const stickyOffset = (optionNav?.getBoundingClientRect().height ?? 0) + 12;
-    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - stickyOffset;
-    const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
-    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-    scrollContainer.scrollTo({
-      top: nextScrollTop,
-      behavior: reducedMotion ? "auto" : behavior,
-    });
+  const [isCloseIdle, setIsCloseIdle] = useState(false);
+  const closeIdleTimerRef = useRef<number | null>(null);
+  const closeWakeTimerRef = useRef<number | null>(null);
+  const armCloseIdleTimer = () => {
+    if (closeIdleTimerRef.current !== null) window.clearTimeout(closeIdleTimerRef.current);
+    closeIdleTimerRef.current = window.setTimeout(() => setIsCloseIdle(true), 4200);
   };
-
+  const wakeCloseControl = () => {
+    if (closeIdleTimerRef.current !== null) window.clearTimeout(closeIdleTimerRef.current);
+    if (closeWakeTimerRef.current !== null) window.clearTimeout(closeWakeTimerRef.current);
+    setIsCloseIdle(false);
+    closeWakeTimerRef.current = window.setTimeout(() => {}, 900);
+    armCloseIdleTimer();
+  };
   useEffect(() => {
-    if (!openSection) return;
-    const target = sectionRefs.current[openSection];
-    if (!target) return;
-
-    let frame = 0;
-    let nextFrame = 0;
-    let settleTimer = 0;
-    let observer: ResizeObserver | null = null;
-    let observationStopTimer = 0;
-
-    const scheduleScroll = (behavior: ScrollBehavior) => {
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => {
-        frame = window.requestAnimationFrame(() => {
-          nextFrame = window.requestAnimationFrame(() => {
-            scrollOpenSectionIntoView(openSection, behavior);
-          });
-        });
-      }, 180);
-    };
-
-    const handleResize = () => {
-      scheduleScroll("auto");
-    };
-
-    scheduleScroll("smooth");
-
-    if ("ResizeObserver" in window) {
-      observer = new ResizeObserver(handleResize);
-      observer.observe(target);
-      observationStopTimer = window.setTimeout(() => {
-        observer?.disconnect();
-        observer = null;
-      }, 1800);
-    }
-
+    armCloseIdleTimer();
     return () => {
-      window.clearTimeout(settleTimer);
-      window.clearTimeout(observationStopTimer);
-      observer?.disconnect();
-      window.cancelAnimationFrame(frame);
-      window.cancelAnimationFrame(nextFrame);
-    };
-  }, [openSection, item.character]);
-
-  const idleTimerRef = useRef<number | null>(null);
-  const wakeTimerRef = useRef<number | null>(null);
-
-  const armIdleTimer = () => {
-    if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = window.setTimeout(() => {
-      setIsIdle(true);
-      setIsWaking(false);
-    }, 4200);
-  };
-
-  const wakeFromIdle = () => {
-    if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
-    if (wakeTimerRef.current !== null) window.clearTimeout(wakeTimerRef.current);
-    setIsIdle(false);
-    setIsWaking(true);
-    wakeTimerRef.current = window.setTimeout(() => setIsWaking(false), 900);
-    armIdleTimer();
-  };
-
-  useEffect(() => {
-    armIdleTimer();
-    return () => {
-      if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
-      if (wakeTimerRef.current !== null) window.clearTimeout(wakeTimerRef.current);
+      if (closeIdleTimerRef.current !== null) window.clearTimeout(closeIdleTimerRef.current);
+      if (closeWakeTimerRef.current !== null) window.clearTimeout(closeWakeTimerRef.current);
     };
   }, [item.character]);
 
   const handleCardActivity = () => {
-    if (isIdle) {
-      wakeFromIdle();
-      return;
-    }
-    armIdleTimer();
+    if (isCloseIdle) wakeCloseControl();
+    else armCloseIdleTimer();
   };
 
   const toggle = (section: Exclude<SectionKey, null>) => {
@@ -187,31 +78,21 @@ export function DictionaryKanjiCard({
   return (
     <dialog open className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
       <div
-        className={`dictionary-card${isIdle ? " is-idle" : ""}${isWaking ? " is-waking" : ""}`}
+        className="dictionary-card"
         onPointerDown={handleCardActivity}
         onWheel={handleCardActivity}
         onKeyDown={handleCardActivity}
       >
-        <div className="dictionary-card-close-layer" aria-hidden="true">
+        <div className={`dictionary-card-close-layer${isCloseIdle ? " is-idle" : " is-waking"}`}>
           <button
             className="dialog-close"
             type="button"
             aria-label={t("close", language)}
             onClick={onClose}
             aria-hidden="false"
+            onPointerDown={handleCardActivity}
           >×</button>
         </div>
-        {isIdle ? (
-          <button
-            className="dictionary-card-idle-wake"
-            type="button"
-            aria-label={language === "fa" ? "فعال کردن دوباره کارت" : "Wake card"}
-            onPointerDown={(event) => {
-              event.stopPropagation();
-              wakeFromIdle();
-            }}
-          />
-        ) : null}
         <div className="dictionary-card-top">
           <span className="badge badge-red">{item.jlpt || "—"}</span>
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
