@@ -54,8 +54,18 @@ const wrongShape = [
   line(20, 55, 50, 30),
   polyline([80, 5], [85, 5], [90, 20]),
 ];
+
+const wrongKanji = [
+  line(80, 8, 80, 42),
+  line(64, 28, 94, 28),
+  line(64, 48, 94, 48),
+  line(72, 64, 86, 82),
+];
 const wrongShapeGrade = gradeHandwriting(wrongShape, reference);
 assert.ok(wrongShapeGrade.score < 70, `wrong shape must score clearly lower; got ${wrongShapeGrade.score}`);
+
+const wrongKanjiGrade = gradeHandwriting(wrongKanji, reference);
+assert.ok(wrongKanjiGrade.score < 65, `unrelated character geometry must not score as a good match; got ${wrongKanjiGrade.score}`);
 
 const wrongCount = gradeHandwriting([reference[0]], reference);
 assert.ok(wrongCount.score < 40, `severe stroke-count mismatch must score low; got ${wrongCount.score}`);
