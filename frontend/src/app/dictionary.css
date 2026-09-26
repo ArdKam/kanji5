@@ -973,7 +973,7 @@
 }
 .handwriting-actions{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:7px;
 }
 .handwriting-actions .button{min-height:42px;padding:6px 10px;font-size:10px;}

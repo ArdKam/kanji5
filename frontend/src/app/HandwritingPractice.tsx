@@ -280,6 +280,17 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch{}
   };
 
+  const undoLastStroke=()=>{
+    if(activeStrokeRef.current.length>0||strokesRef.current.length===0)return;
+    const next=strokesRef.current.slice(0,-1);
+    strokesRef.current=next;
+    activeStrokeRef.current=[];
+    setStrokes(next);
+    setResult(null);
+    setLiveFeedback(null);
+    if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,next,wrapRef.current,dprRef.current,-1);
+  };
+
   const clear=()=>{
     strokesRef.current=[];
     activeStrokeRef.current=[];
@@ -372,6 +383,9 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
                 </div>
               ):null}
               <div className="handwriting-actions">
+                <button className="button secondary" type="button" onClick={undoLastStroke} disabled={!strokes.length||Boolean(activeStrokeRef.current.length)} aria-label={t("undoLastStroke",language)}>
+                  {t("undoLastStroke",language)}
+                </button>
                 <button className="button secondary" type="button" onClick={clear} disabled={!strokes.length&&!activeStrokeRef.current.length}>
                   {t("clearDrawing",language)}
                 </button>

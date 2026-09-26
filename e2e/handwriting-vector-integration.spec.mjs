@@ -108,6 +108,10 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(handwriting).toHaveAttribute("data-hint-level","0");
   await expect(handwriting).toHaveAttribute("data-hint-mode","trace");
 
+  await handwriting.getByRole("button",{name:"Undo last stroke",exact:true}).click();
+  await expect(handwriting).toHaveAttribute("data-stroke-count",String(reference.length-1));
+  await expect(result).toHaveCount(0);
+
   await handwriting.locator(".handwriting-actions .secondary").click();
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
 
