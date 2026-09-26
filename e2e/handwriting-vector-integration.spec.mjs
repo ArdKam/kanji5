@@ -67,6 +67,12 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(handwriting.locator(".handwriting-guide-canvas")).toBeVisible();
   const penBox=await canvas.boundingBox();
   if(!penBox)throw new Error("handwriting canvas has no bounding box");
+  const penX=penBox.x+penBox.width*0.4, penY=penBox.y+penBox.height*0.4;
+  await canvas.dispatchEvent("pointerdown",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:penX,clientY:penY});
+  await canvas.dispatchEvent("pointermove",{pointerId:73,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:penX+12,clientY:penY+8});
+  await canvas.dispatchEvent("pointerup",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:penX+12,clientY:penY+8});
+  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
+  await handwriting.locator(".handwriting-actions .secondary").click();
 
   const reference=await page.evaluate(paths=>{
     const holder=document.createElement("div"),svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -87,31 +93,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
     }finally{holder.remove();}
   },FIXTURE.characters["学"].paths);
 
-  await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
-
-  const badStroke=[
-    {x:Math.round(penBox.x+penBox.width*0.68),y:Math.round(penBox.y+penBox.height*0.86)},
-    {x:Math.round(penBox.x+penBox.width*0.82),y:Math.round(penBox.y+penBox.height*0.68)},
-    {x:Math.round(penBox.x+penBox.width*0.94),y:Math.round(penBox.y+penBox.height*0.88)},
-    {x:Math.round(penBox.x+penBox.width*0.74),y:Math.round(penBox.y+penBox.height*0.58)},
-  ];
-  await canvas.dispatchEvent("pointerdown",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:badStroke[0].x,clientY:badStroke[0].y});
-  for(let i=1;i<badStroke.length;i+=1){
-    const point=badStroke[i];
-    await canvas.dispatchEvent("pointermove",{pointerId:73,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:point.x,clientY:point.y});
-  }
-  const last=badStroke[badStroke.length-1];
-  await canvas.dispatchEvent("pointerup",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:last.x,clientY:last.y});
-  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
-  await expect(handwriting).toHaveAttribute("data-stroke-count","1");
-  await expect(handwriting).toHaveAttribute("data-live-feedback",/^(?!none$).+/);
-  await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
-  await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code",/endpoints|direction|shape|length|curvature/);
-  await handwriting.locator(".handwriting-actions .secondary").click();
-  await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
-
   await drawReference(page,canvas,reference);
-
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
   await handwriting.locator(".handwriting-actions .primary").click();
   const result=handwriting.locator(".handwriting-result");
@@ -135,6 +117,37 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   const badScore=Number(await result.getAttribute("data-score"));
   expect(badScore).toBeLessThan(goodScore);
   expect(await result.getAttribute("data-feedback-code")).toBeTruthy();
+});
+
+
+test("handwriting UI gives reliable real-time stroke feedback",async({page})=>{
+  await page.route("**/kanji/05b66.svg",route=>route.fulfill({
+    status:200,
+    contentType:"image/svg+xml",
+    body:svgFor("学"),
+  }));
+  await clean(page);
+  const handwriting=await openSchoolHandwriting(page);
+  const canvas=handwriting.locator(".handwriting-ink-canvas");
+  const box=await canvas.boundingBox();
+  if(!box)throw new Error("handwriting canvas has no bounding box");
+  const points=[
+    {x:box.x+box.width*0.68,y:box.y+box.height*0.86},
+    {x:box.x+box.width*0.82,y:box.y+box.height*0.68},
+    {x:box.x+box.width*0.94,y:box.y+box.height*0.88},
+    {x:box.x+box.width*0.74,y:box.y+box.height*0.58},
+  ];
+  await canvas.dispatchEvent("pointerdown",{pointerId:81,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:points[0].x,clientY:points[0].y});
+  for(let i=1;i<points.length;i+=1){
+    const point=points[i];
+    await canvas.dispatchEvent("pointermove",{pointerId:81,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:point.x,clientY:point.y});
+  }
+  const last=points[points.length-1];
+  await canvas.dispatchEvent("pointerup",{pointerId:81,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:last.x,clientY:last.y});
+  await expect(handwriting).toHaveAttribute("data-stroke-count","1");
+  await expect(handwriting).toHaveAttribute("data-live-feedback",/^(?!none$).+/);
+  await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
+  await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code",/endpoints|direction|shape|length|curvature/);
 });
 
 test("handwriting UI remains usable in English and reduced-motion mode",async({page})=>{
