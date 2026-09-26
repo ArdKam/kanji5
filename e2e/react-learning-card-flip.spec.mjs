@@ -296,6 +296,7 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
 });
 
 test("stroke-order replay auto-scrolls the expanded viewer fully into view", async ({ page }) => {
+  // Capture the pre-trigger scroll position so the regression checks both movement and smooth behavior.
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
