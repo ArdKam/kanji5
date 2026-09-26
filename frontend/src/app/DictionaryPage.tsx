@@ -341,7 +341,7 @@ function ComponentLearningPath({
   );
 }
 
-function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji, onExploreStructure }: { item: KanjiCatalogItem; language: Language; onClose: () => void; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void; onExploreStructure: (mode: "radical" | "component", query: string) => void }) {
+function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji, onExploreStructure }: { item: KanjiCatalogItem; language: Language; onClose: () => void; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void; onExploreStructure: (mode: "radical" | "component", query: string, preferredCharacter?: string) => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
@@ -385,7 +385,7 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji, 
         {radicalInfo?.available ? (
           <div className="dictionary-card-structure-line">
             <span>{language === "fa" ? "رادیکال سنتی" : "Traditional radical"}</span>
-            <button type="button" className="dictionary-structure-link" onClick={() => onExploreStructure("radical", String(radicalInfo.radicalId))}>
+            <button type="button" className="dictionary-structure-link" onClick={() => onExploreStructure("radical", String(radicalInfo.radicalId), item.character)}>
               <span className="dictionary-structure-glyph" lang="ja">{radicalInfo.radical?.canonicalGlyph}</span>
               <span>#{formatNumber(radicalInfo.radicalId ?? 0, language)}</span>
             </button>
@@ -397,7 +397,7 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji, 
             title={language === "fa" ? "ساختار کانجی" : "Kanji structure"}
             note={language === "fa" ? "اجزای دیداری" : "Visual components"}
             ariaLabel={language === "fa" ? "ساختار دیداری کانجی" : "Kanji visual structure"}
-            onComponentClick={(component) => onExploreStructure("component", component)}
+            onComponentClick={(component) => onExploreStructure("component", component, item.character)}
           />
         ) : null}
         {componentInfo?.available && componentInfo.components.length ? (
@@ -581,7 +581,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
   const [customLimit, setCustomLimit] = useState(20);
   const [customMessage, setCustomMessage] = useState("");
   const [structureRequest, setStructureRequest] = useState<{ mode: "radical" | "component"; query: string; nonce: number; prefetchedResults?: KanjiDictionaryResult[] } | null>(null);
-  const openStructureExplorer = async (mode: "radical" | "component", query: string) => {
+  const openStructureExplorer = async (mode: "radical" | "component", query: string, preferredCharacter?: string) => {
     let value: { results?: KanjiDictionaryResult[] } | null = null;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
@@ -594,12 +594,20 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
       }
       if (attempt < 2) await new Promise(resolve => window.setTimeout(resolve, attempt === 0 ? 50 : 150));
     }
+    const prefetchedResults = value?.results ? [...value.results] : undefined;
+    if (preferredCharacter && prefetchedResults) {
+      const preferred = prefetchedResults.find(result => result.character === preferredCharacter);
+      if (preferred) {
+        const remainder = prefetchedResults.filter(result => result.character !== preferredCharacter);
+        prefetchedResults.splice(0, prefetchedResults.length, preferred, ...remainder);
+      }
+    }
     setSelected(null);
     setStructureRequest(previous => ({
       mode,
       query,
       nonce: (previous?.nonce ?? 0) + 1,
-      ...(value ? { prefetchedResults: value.results ?? [] } : {}),
+      ...(prefetchedResults ? { prefetchedResults } : {}),
     }));
   };
 
@@ -800,7 +808,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         </>
       ) : null}
 
-      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} onExploreStructure={(mode, query) => { void openStructureExplorer(mode, query); }} /> : null}
+      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} onExploreStructure={(mode, query, preferredCharacter) => { void openStructureExplorer(mode, query, preferredCharacter); }} /> : null}
     </section>
   );
 }
