@@ -1,0 +1,2796 @@
+{
+  "version": 1,
+  "schema": "kanji-radicals/v1",
+  "system": "Kangxi",
+  "count": 214,
+  "source": {
+    "name": "Unicode Kangxi Radicals block",
+    "range": "U+2F00–U+2FD5",
+    "license": "Unicode Terms of Use",
+    "semantics": "Canonical radical glyph catalog; per-Kanji assignment comes from KANJIDIC2 classical radical data."
+  },
+  "radicals": [
+    {
+      "id": 1,
+      "glyph": "⼀",
+      "unicode": "U+2F00",
+      "unicodeName": "KANGXI RADICAL ONE",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 2,
+      "glyph": "⼁",
+      "unicode": "U+2F01",
+      "unicodeName": "KANGXI RADICAL LINE",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 3,
+      "glyph": "⼂",
+      "unicode": "U+2F02",
+      "unicodeName": "KANGXI RADICAL DOT",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 4,
+      "glyph": "⼃",
+      "unicode": "U+2F03",
+      "unicodeName": "KANGXI RADICAL SLASH",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 5,
+      "glyph": "⼄",
+      "unicode": "U+2F04",
+      "unicodeName": "KANGXI RADICAL SECOND",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 6,
+      "glyph": "⼅",
+      "unicode": "U+2F05",
+      "unicodeName": "KANGXI RADICAL NUMBER 6",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 7,
+      "glyph": "⼆",
+      "unicode": "U+2F06",
+      "unicodeName": "KANGXI RADICAL NUMBER 7",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 8,
+      "glyph": "⼇",
+      "unicode": "U+2F07",
+      "unicodeName": "KANGXI RADICAL NUMBER 8",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 9,
+      "glyph": "⼈",
+      "unicode": "U+2F08",
+      "unicodeName": "KANGXI RADICAL NUMBER 9",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 10,
+      "glyph": "⼉",
+      "unicode": "U+2F09",
+      "unicodeName": "KANGXI RADICAL NUMBER 10",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 11,
+      "glyph": "⼊",
+      "unicode": "U+2F0A",
+      "unicodeName": "KANGXI RADICAL NUMBER 11",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 12,
+      "glyph": "⼋",
+      "unicode": "U+2F0B",
+      "unicodeName": "KANGXI RADICAL NUMBER 12",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 13,
+      "glyph": "⼌",
+      "unicode": "U+2F0C",
+      "unicodeName": "KANGXI RADICAL NUMBER 13",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 14,
+      "glyph": "⼍",
+      "unicode": "U+2F0D",
+      "unicodeName": "KANGXI RADICAL NUMBER 14",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 15,
+      "glyph": "⼎",
+      "unicode": "U+2F0E",
+      "unicodeName": "KANGXI RADICAL NUMBER 15",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 16,
+      "glyph": "⼏",
+      "unicode": "U+2F0F",
+      "unicodeName": "KANGXI RADICAL NUMBER 16",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 17,
+      "glyph": "⼐",
+      "unicode": "U+2F10",
+      "unicodeName": "KANGXI RADICAL NUMBER 17",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 18,
+      "glyph": "⼑",
+      "unicode": "U+2F11",
+      "unicodeName": "KANGXI RADICAL NUMBER 18",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 19,
+      "glyph": "⼒",
+      "unicode": "U+2F12",
+      "unicodeName": "KANGXI RADICAL NUMBER 19",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 20,
+      "glyph": "⼓",
+      "unicode": "U+2F13",
+      "unicodeName": "KANGXI RADICAL NUMBER 20",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 21,
+      "glyph": "⼔",
+      "unicode": "U+2F14",
+      "unicodeName": "KANGXI RADICAL NUMBER 21",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 22,
+      "glyph": "⼕",
+      "unicode": "U+2F15",
+      "unicodeName": "KANGXI RADICAL NUMBER 22",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 23,
+      "glyph": "⼖",
+      "unicode": "U+2F16",
+      "unicodeName": "KANGXI RADICAL NUMBER 23",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 24,
+      "glyph": "⼗",
+      "unicode": "U+2F17",
+      "unicodeName": "KANGXI RADICAL NUMBER 24",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 25,
+      "glyph": "⼘",
+      "unicode": "U+2F18",
+      "unicodeName": "KANGXI RADICAL NUMBER 25",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 26,
+      "glyph": "⼙",
+      "unicode": "U+2F19",
+      "unicodeName": "KANGXI RADICAL NUMBER 26",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 27,
+      "glyph": "⼚",
+      "unicode": "U+2F1A",
+      "unicodeName": "KANGXI RADICAL NUMBER 27",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 28,
+      "glyph": "⼛",
+      "unicode": "U+2F1B",
+      "unicodeName": "KANGXI RADICAL NUMBER 28",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 29,
+      "glyph": "⼜",
+      "unicode": "U+2F1C",
+      "unicodeName": "KANGXI RADICAL NUMBER 29",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 30,
+      "glyph": "⼝",
+      "unicode": "U+2F1D",
+      "unicodeName": "KANGXI RADICAL NUMBER 30",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 31,
+      "glyph": "⼞",
+      "unicode": "U+2F1E",
+      "unicodeName": "KANGXI RADICAL NUMBER 31",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 32,
+      "glyph": "⼟",
+      "unicode": "U+2F1F",
+      "unicodeName": "KANGXI RADICAL NUMBER 32",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 33,
+      "glyph": "⼠",
+      "unicode": "U+2F20",
+      "unicodeName": "KANGXI RADICAL NUMBER 33",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 34,
+      "glyph": "⼡",
+      "unicode": "U+2F21",
+      "unicodeName": "KANGXI RADICAL NUMBER 34",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 35,
+      "glyph": "⼢",
+      "unicode": "U+2F22",
+      "unicodeName": "KANGXI RADICAL NUMBER 35",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 36,
+      "glyph": "⼣",
+      "unicode": "U+2F23",
+      "unicodeName": "KANGXI RADICAL NUMBER 36",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 37,
+      "glyph": "⼤",
+      "unicode": "U+2F24",
+      "unicodeName": "KANGXI RADICAL NUMBER 37",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 38,
+      "glyph": "⼥",
+      "unicode": "U+2F25",
+      "unicodeName": "KANGXI RADICAL NUMBER 38",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 39,
+      "glyph": "⼦",
+      "unicode": "U+2F26",
+      "unicodeName": "KANGXI RADICAL NUMBER 39",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 40,
+      "glyph": "⼧",
+      "unicode": "U+2F27",
+      "unicodeName": "KANGXI RADICAL NUMBER 40",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 41,
+      "glyph": "⼨",
+      "unicode": "U+2F28",
+      "unicodeName": "KANGXI RADICAL NUMBER 41",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 42,
+      "glyph": "⼩",
+      "unicode": "U+2F29",
+      "unicodeName": "KANGXI RADICAL NUMBER 42",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 43,
+      "glyph": "⼪",
+      "unicode": "U+2F2A",
+      "unicodeName": "KANGXI RADICAL NUMBER 43",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 44,
+      "glyph": "⼫",
+      "unicode": "U+2F2B",
+      "unicodeName": "KANGXI RADICAL NUMBER 44",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 45,
+      "glyph": "⼬",
+      "unicode": "U+2F2C",
+      "unicodeName": "KANGXI RADICAL NUMBER 45",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 46,
+      "glyph": "⼭",
+      "unicode": "U+2F2D",
+      "unicodeName": "KANGXI RADICAL NUMBER 46",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 47,
+      "glyph": "⼮",
+      "unicode": "U+2F2E",
+      "unicodeName": "KANGXI RADICAL NUMBER 47",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 48,
+      "glyph": "⼯",
+      "unicode": "U+2F2F",
+      "unicodeName": "KANGXI RADICAL NUMBER 48",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 49,
+      "glyph": "⼰",
+      "unicode": "U+2F30",
+      "unicodeName": "KANGXI RADICAL NUMBER 49",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 50,
+      "glyph": "⼱",
+      "unicode": "U+2F31",
+      "unicodeName": "KANGXI RADICAL NUMBER 50",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 51,
+      "glyph": "⼲",
+      "unicode": "U+2F32",
+      "unicodeName": "KANGXI RADICAL NUMBER 51",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 52,
+      "glyph": "⼳",
+      "unicode": "U+2F33",
+      "unicodeName": "KANGXI RADICAL NUMBER 52",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 53,
+      "glyph": "⼴",
+      "unicode": "U+2F34",
+      "unicodeName": "KANGXI RADICAL NUMBER 53",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 54,
+      "glyph": "⼵",
+      "unicode": "U+2F35",
+      "unicodeName": "KANGXI RADICAL NUMBER 54",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 55,
+      "glyph": "⼶",
+      "unicode": "U+2F36",
+      "unicodeName": "KANGXI RADICAL NUMBER 55",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 56,
+      "glyph": "⼷",
+      "unicode": "U+2F37",
+      "unicodeName": "KANGXI RADICAL NUMBER 56",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 57,
+      "glyph": "⼸",
+      "unicode": "U+2F38",
+      "unicodeName": "KANGXI RADICAL NUMBER 57",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 58,
+      "glyph": "⼹",
+      "unicode": "U+2F39",
+      "unicodeName": "KANGXI RADICAL NUMBER 58",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 59,
+      "glyph": "⼺",
+      "unicode": "U+2F3A",
+      "unicodeName": "KANGXI RADICAL NUMBER 59",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 60,
+      "glyph": "⼻",
+      "unicode": "U+2F3B",
+      "unicodeName": "KANGXI RADICAL NUMBER 60",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 61,
+      "glyph": "⼼",
+      "unicode": "U+2F3C",
+      "unicodeName": "KANGXI RADICAL NUMBER 61",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 62,
+      "glyph": "⼽",
+      "unicode": "U+2F3D",
+      "unicodeName": "KANGXI RADICAL NUMBER 62",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 63,
+      "glyph": "⼾",
+      "unicode": "U+2F3E",
+      "unicodeName": "KANGXI RADICAL NUMBER 63",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 64,
+      "glyph": "⼿",
+      "unicode": "U+2F3F",
+      "unicodeName": "KANGXI RADICAL NUMBER 64",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 65,
+      "glyph": "⽀",
+      "unicode": "U+2F40",
+      "unicodeName": "KANGXI RADICAL NUMBER 65",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 66,
+      "glyph": "⽁",
+      "unicode": "U+2F41",
+      "unicodeName": "KANGXI RADICAL NUMBER 66",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 67,
+      "glyph": "⽂",
+      "unicode": "U+2F42",
+      "unicodeName": "KANGXI RADICAL NUMBER 67",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 68,
+      "glyph": "⽃",
+      "unicode": "U+2F43",
+      "unicodeName": "KANGXI RADICAL NUMBER 68",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 69,
+      "glyph": "⽄",
+      "unicode": "U+2F44",
+      "unicodeName": "KANGXI RADICAL NUMBER 69",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 70,
+      "glyph": "⽅",
+      "unicode": "U+2F45",
+      "unicodeName": "KANGXI RADICAL NUMBER 70",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 71,
+      "glyph": "⽆",
+      "unicode": "U+2F46",
+      "unicodeName": "KANGXI RADICAL NUMBER 71",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 72,
+      "glyph": "⽇",
+      "unicode": "U+2F47",
+      "unicodeName": "KANGXI RADICAL NUMBER 72",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 73,
+      "glyph": "⽈",
+      "unicode": "U+2F48",
+      "unicodeName": "KANGXI RADICAL NUMBER 73",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 74,
+      "glyph": "⽉",
+      "unicode": "U+2F49",
+      "unicodeName": "KANGXI RADICAL NUMBER 74",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 75,
+      "glyph": "⽊",
+      "unicode": "U+2F4A",
+      "unicodeName": "KANGXI RADICAL NUMBER 75",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 76,
+      "glyph": "⽋",
+      "unicode": "U+2F4B",
+      "unicodeName": "KANGXI RADICAL NUMBER 76",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 77,
+      "glyph": "⽌",
+      "unicode": "U+2F4C",
+      "unicodeName": "KANGXI RADICAL NUMBER 77",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 78,
+      "glyph": "⽍",
+      "unicode": "U+2F4D",
+      "unicodeName": "KANGXI RADICAL NUMBER 78",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 79,
+      "glyph": "⽎",
+      "unicode": "U+2F4E",
+      "unicodeName": "KANGXI RADICAL NUMBER 79",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 80,
+      "glyph": "⽏",
+      "unicode": "U+2F4F",
+      "unicodeName": "KANGXI RADICAL NUMBER 80",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 81,
+      "glyph": "⽐",
+      "unicode": "U+2F50",
+      "unicodeName": "KANGXI RADICAL NUMBER 81",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 82,
+      "glyph": "⽑",
+      "unicode": "U+2F51",
+      "unicodeName": "KANGXI RADICAL NUMBER 82",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 83,
+      "glyph": "⽒",
+      "unicode": "U+2F52",
+      "unicodeName": "KANGXI RADICAL NUMBER 83",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 84,
+      "glyph": "⽓",
+      "unicode": "U+2F53",
+      "unicodeName": "KANGXI RADICAL NUMBER 84",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 85,
+      "glyph": "⽔",
+      "unicode": "U+2F54",
+      "unicodeName": "KANGXI RADICAL NUMBER 85",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 86,
+      "glyph": "⽕",
+      "unicode": "U+2F55",
+      "unicodeName": "KANGXI RADICAL NUMBER 86",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 87,
+      "glyph": "⽖",
+      "unicode": "U+2F56",
+      "unicodeName": "KANGXI RADICAL NUMBER 87",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 88,
+      "glyph": "⽗",
+      "unicode": "U+2F57",
+      "unicodeName": "KANGXI RADICAL NUMBER 88",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 89,
+      "glyph": "⽘",
+      "unicode": "U+2F58",
+      "unicodeName": "KANGXI RADICAL NUMBER 89",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 90,
+      "glyph": "⽙",
+      "unicode": "U+2F59",
+      "unicodeName": "KANGXI RADICAL NUMBER 90",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 91,
+      "glyph": "⽚",
+      "unicode": "U+2F5A",
+      "unicodeName": "KANGXI RADICAL NUMBER 91",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 92,
+      "glyph": "⽛",
+      "unicode": "U+2F5B",
+      "unicodeName": "KANGXI RADICAL NUMBER 92",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 93,
+      "glyph": "⽜",
+      "unicode": "U+2F5C",
+      "unicodeName": "KANGXI RADICAL NUMBER 93",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 94,
+      "glyph": "⽝",
+      "unicode": "U+2F5D",
+      "unicodeName": "KANGXI RADICAL NUMBER 94",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 95,
+      "glyph": "⽞",
+      "unicode": "U+2F5E",
+      "unicodeName": "KANGXI RADICAL NUMBER 95",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 96,
+      "glyph": "⽟",
+      "unicode": "U+2F5F",
+      "unicodeName": "KANGXI RADICAL NUMBER 96",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 97,
+      "glyph": "⽠",
+      "unicode": "U+2F60",
+      "unicodeName": "KANGXI RADICAL NUMBER 97",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 98,
+      "glyph": "⽡",
+      "unicode": "U+2F61",
+      "unicodeName": "KANGXI RADICAL NUMBER 98",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 99,
+      "glyph": "⽢",
+      "unicode": "U+2F62",
+      "unicodeName": "KANGXI RADICAL NUMBER 99",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 100,
+      "glyph": "⽣",
+      "unicode": "U+2F63",
+      "unicodeName": "KANGXI RADICAL NUMBER 100",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 101,
+      "glyph": "⽤",
+      "unicode": "U+2F64",
+      "unicodeName": "KANGXI RADICAL NUMBER 101",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 102,
+      "glyph": "⽥",
+      "unicode": "U+2F65",
+      "unicodeName": "KANGXI RADICAL NUMBER 102",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 103,
+      "glyph": "⽦",
+      "unicode": "U+2F66",
+      "unicodeName": "KANGXI RADICAL NUMBER 103",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 104,
+      "glyph": "⽧",
+      "unicode": "U+2F67",
+      "unicodeName": "KANGXI RADICAL NUMBER 104",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 105,
+      "glyph": "⽨",
+      "unicode": "U+2F68",
+      "unicodeName": "KANGXI RADICAL NUMBER 105",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 106,
+      "glyph": "⽩",
+      "unicode": "U+2F69",
+      "unicodeName": "KANGXI RADICAL NUMBER 106",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 107,
+      "glyph": "⽪",
+      "unicode": "U+2F6A",
+      "unicodeName": "KANGXI RADICAL NUMBER 107",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 108,
+      "glyph": "⽫",
+      "unicode": "U+2F6B",
+      "unicodeName": "KANGXI RADICAL NUMBER 108",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 109,
+      "glyph": "⽬",
+      "unicode": "U+2F6C",
+      "unicodeName": "KANGXI RADICAL NUMBER 109",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 110,
+      "glyph": "⽭",
+      "unicode": "U+2F6D",
+      "unicodeName": "KANGXI RADICAL NUMBER 110",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 111,
+      "glyph": "⽮",
+      "unicode": "U+2F6E",
+      "unicodeName": "KANGXI RADICAL NUMBER 111",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 112,
+      "glyph": "⽯",
+      "unicode": "U+2F6F",
+      "unicodeName": "KANGXI RADICAL NUMBER 112",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 113,
+      "glyph": "⽰",
+      "unicode": "U+2F70",
+      "unicodeName": "KANGXI RADICAL NUMBER 113",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 114,
+      "glyph": "⽱",
+      "unicode": "U+2F71",
+      "unicodeName": "KANGXI RADICAL NUMBER 114",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 115,
+      "glyph": "⽲",
+      "unicode": "U+2F72",
+      "unicodeName": "KANGXI RADICAL NUMBER 115",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 116,
+      "glyph": "⽳",
+      "unicode": "U+2F73",
+      "unicodeName": "KANGXI RADICAL NUMBER 116",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 117,
+      "glyph": "⽴",
+      "unicode": "U+2F74",
+      "unicodeName": "KANGXI RADICAL NUMBER 117",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 118,
+      "glyph": "⽵",
+      "unicode": "U+2F75",
+      "unicodeName": "KANGXI RADICAL NUMBER 118",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 119,
+      "glyph": "⽶",
+      "unicode": "U+2F76",
+      "unicodeName": "KANGXI RADICAL NUMBER 119",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 120,
+      "glyph": "⽷",
+      "unicode": "U+2F77",
+      "unicodeName": "KANGXI RADICAL NUMBER 120",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 121,
+      "glyph": "⽸",
+      "unicode": "U+2F78",
+      "unicodeName": "KANGXI RADICAL NUMBER 121",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 122,
+      "glyph": "⽹",
+      "unicode": "U+2F79",
+      "unicodeName": "KANGXI RADICAL NUMBER 122",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 123,
+      "glyph": "⽺",
+      "unicode": "U+2F7A",
+      "unicodeName": "KANGXI RADICAL NUMBER 123",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 124,
+      "glyph": "⽻",
+      "unicode": "U+2F7B",
+      "unicodeName": "KANGXI RADICAL NUMBER 124",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 125,
+      "glyph": "⽼",
+      "unicode": "U+2F7C",
+      "unicodeName": "KANGXI RADICAL NUMBER 125",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 126,
+      "glyph": "⽽",
+      "unicode": "U+2F7D",
+      "unicodeName": "KANGXI RADICAL NUMBER 126",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 127,
+      "glyph": "⽾",
+      "unicode": "U+2F7E",
+      "unicodeName": "KANGXI RADICAL NUMBER 127",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 128,
+      "glyph": "⽿",
+      "unicode": "U+2F7F",
+      "unicodeName": "KANGXI RADICAL NUMBER 128",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 129,
+      "glyph": "⾀",
+      "unicode": "U+2F80",
+      "unicodeName": "KANGXI RADICAL NUMBER 129",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 130,
+      "glyph": "⾁",
+      "unicode": "U+2F81",
+      "unicodeName": "KANGXI RADICAL NUMBER 130",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 131,
+      "glyph": "⾂",
+      "unicode": "U+2F82",
+      "unicodeName": "KANGXI RADICAL NUMBER 131",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 132,
+      "glyph": "⾃",
+      "unicode": "U+2F83",
+      "unicodeName": "KANGXI RADICAL NUMBER 132",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 133,
+      "glyph": "⾄",
+      "unicode": "U+2F84",
+      "unicodeName": "KANGXI RADICAL NUMBER 133",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 134,
+      "glyph": "⾅",
+      "unicode": "U+2F85",
+      "unicodeName": "KANGXI RADICAL NUMBER 134",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 135,
+      "glyph": "⾆",
+      "unicode": "U+2F86",
+      "unicodeName": "KANGXI RADICAL NUMBER 135",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 136,
+      "glyph": "⾇",
+      "unicode": "U+2F87",
+      "unicodeName": "KANGXI RADICAL NUMBER 136",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 137,
+      "glyph": "⾈",
+      "unicode": "U+2F88",
+      "unicodeName": "KANGXI RADICAL NUMBER 137",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 138,
+      "glyph": "⾉",
+      "unicode": "U+2F89",
+      "unicodeName": "KANGXI RADICAL NUMBER 138",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 139,
+      "glyph": "⾊",
+      "unicode": "U+2F8A",
+      "unicodeName": "KANGXI RADICAL NUMBER 139",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 140,
+      "glyph": "⾋",
+      "unicode": "U+2F8B",
+      "unicodeName": "KANGXI RADICAL NUMBER 140",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 141,
+      "glyph": "⾌",
+      "unicode": "U+2F8C",
+      "unicodeName": "KANGXI RADICAL NUMBER 141",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 142,
+      "glyph": "⾍",
+      "unicode": "U+2F8D",
+      "unicodeName": "KANGXI RADICAL NUMBER 142",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 143,
+      "glyph": "⾎",
+      "unicode": "U+2F8E",
+      "unicodeName": "KANGXI RADICAL NUMBER 143",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 144,
+      "glyph": "⾏",
+      "unicode": "U+2F8F",
+      "unicodeName": "KANGXI RADICAL NUMBER 144",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 145,
+      "glyph": "⾐",
+      "unicode": "U+2F90",
+      "unicodeName": "KANGXI RADICAL NUMBER 145",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 146,
+      "glyph": "⾑",
+      "unicode": "U+2F91",
+      "unicodeName": "KANGXI RADICAL NUMBER 146",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 147,
+      "glyph": "⾒",
+      "unicode": "U+2F92",
+      "unicodeName": "KANGXI RADICAL NUMBER 147",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 148,
+      "glyph": "⾓",
+      "unicode": "U+2F93",
+      "unicodeName": "KANGXI RADICAL NUMBER 148",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 149,
+      "glyph": "⾔",
+      "unicode": "U+2F94",
+      "unicodeName": "KANGXI RADICAL NUMBER 149",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 150,
+      "glyph": "⾕",
+      "unicode": "U+2F95",
+      "unicodeName": "KANGXI RADICAL NUMBER 150",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 151,
+      "glyph": "⾖",
+      "unicode": "U+2F96",
+      "unicodeName": "KANGXI RADICAL NUMBER 151",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 152,
+      "glyph": "⾗",
+      "unicode": "U+2F97",
+      "unicodeName": "KANGXI RADICAL NUMBER 152",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 153,
+      "glyph": "⾘",
+      "unicode": "U+2F98",
+      "unicodeName": "KANGXI RADICAL NUMBER 153",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 154,
+      "glyph": "⾙",
+      "unicode": "U+2F99",
+      "unicodeName": "KANGXI RADICAL NUMBER 154",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 155,
+      "glyph": "⾚",
+      "unicode": "U+2F9A",
+      "unicodeName": "KANGXI RADICAL NUMBER 155",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 156,
+      "glyph": "⾛",
+      "unicode": "U+2F9B",
+      "unicodeName": "KANGXI RADICAL NUMBER 156",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 157,
+      "glyph": "⾜",
+      "unicode": "U+2F9C",
+      "unicodeName": "KANGXI RADICAL NUMBER 157",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 158,
+      "glyph": "⾝",
+      "unicode": "U+2F9D",
+      "unicodeName": "KANGXI RADICAL NUMBER 158",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 159,
+      "glyph": "⾞",
+      "unicode": "U+2F9E",
+      "unicodeName": "KANGXI RADICAL NUMBER 159",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 160,
+      "glyph": "⾟",
+      "unicode": "U+2F9F",
+      "unicodeName": "KANGXI RADICAL NUMBER 160",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 161,
+      "glyph": "⾠",
+      "unicode": "U+2FA0",
+      "unicodeName": "KANGXI RADICAL NUMBER 161",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 162,
+      "glyph": "⾡",
+      "unicode": "U+2FA1",
+      "unicodeName": "KANGXI RADICAL NUMBER 162",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 163,
+      "glyph": "⾢",
+      "unicode": "U+2FA2",
+      "unicodeName": "KANGXI RADICAL NUMBER 163",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 164,
+      "glyph": "⾣",
+      "unicode": "U+2FA3",
+      "unicodeName": "KANGXI RADICAL NUMBER 164",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 165,
+      "glyph": "⾤",
+      "unicode": "U+2FA4",
+      "unicodeName": "KANGXI RADICAL NUMBER 165",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 166,
+      "glyph": "⾥",
+      "unicode": "U+2FA5",
+      "unicodeName": "KANGXI RADICAL NUMBER 166",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 167,
+      "glyph": "⾦",
+      "unicode": "U+2FA6",
+      "unicodeName": "KANGXI RADICAL NUMBER 167",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 168,
+      "glyph": "⾧",
+      "unicode": "U+2FA7",
+      "unicodeName": "KANGXI RADICAL NUMBER 168",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 169,
+      "glyph": "⾨",
+      "unicode": "U+2FA8",
+      "unicodeName": "KANGXI RADICAL NUMBER 169",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 170,
+      "glyph": "⾩",
+      "unicode": "U+2FA9",
+      "unicodeName": "KANGXI RADICAL NUMBER 170",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 171,
+      "glyph": "⾪",
+      "unicode": "U+2FAA",
+      "unicodeName": "KANGXI RADICAL NUMBER 171",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 172,
+      "glyph": "⾫",
+      "unicode": "U+2FAB",
+      "unicodeName": "KANGXI RADICAL NUMBER 172",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 173,
+      "glyph": "⾬",
+      "unicode": "U+2FAC",
+      "unicodeName": "KANGXI RADICAL NUMBER 173",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 174,
+      "glyph": "⾭",
+      "unicode": "U+2FAD",
+      "unicodeName": "KANGXI RADICAL NUMBER 174",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 175,
+      "glyph": "⾮",
+      "unicode": "U+2FAE",
+      "unicodeName": "KANGXI RADICAL NUMBER 175",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 176,
+      "glyph": "⾯",
+      "unicode": "U+2FAF",
+      "unicodeName": "KANGXI RADICAL NUMBER 176",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 177,
+      "glyph": "⾰",
+      "unicode": "U+2FB0",
+      "unicodeName": "KANGXI RADICAL NUMBER 177",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 178,
+      "glyph": "⾱",
+      "unicode": "U+2FB1",
+      "unicodeName": "KANGXI RADICAL NUMBER 178",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 179,
+      "glyph": "⾲",
+      "unicode": "U+2FB2",
+      "unicodeName": "KANGXI RADICAL NUMBER 179",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 180,
+      "glyph": "⾳",
+      "unicode": "U+2FB3",
+      "unicodeName": "KANGXI RADICAL NUMBER 180",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 181,
+      "glyph": "⾴",
+      "unicode": "U+2FB4",
+      "unicodeName": "KANGXI RADICAL NUMBER 181",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 182,
+      "glyph": "⾵",
+      "unicode": "U+2FB5",
+      "unicodeName": "KANGXI RADICAL NUMBER 182",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 183,
+      "glyph": "⾶",
+      "unicode": "U+2FB6",
+      "unicodeName": "KANGXI RADICAL NUMBER 183",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 184,
+      "glyph": "⾷",
+      "unicode": "U+2FB7",
+      "unicodeName": "KANGXI RADICAL NUMBER 184",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 185,
+      "glyph": "⾸",
+      "unicode": "U+2FB8",
+      "unicodeName": "KANGXI RADICAL NUMBER 185",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 186,
+      "glyph": "⾹",
+      "unicode": "U+2FB9",
+      "unicodeName": "KANGXI RADICAL NUMBER 186",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 187,
+      "glyph": "⾺",
+      "unicode": "U+2FBA",
+      "unicodeName": "KANGXI RADICAL NUMBER 187",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 188,
+      "glyph": "⾻",
+      "unicode": "U+2FBB",
+      "unicodeName": "KANGXI RADICAL NUMBER 188",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 189,
+      "glyph": "⾼",
+      "unicode": "U+2FBC",
+      "unicodeName": "KANGXI RADICAL NUMBER 189",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 190,
+      "glyph": "⾽",
+      "unicode": "U+2FBD",
+      "unicodeName": "KANGXI RADICAL NUMBER 190",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 191,
+      "glyph": "⾾",
+      "unicode": "U+2FBE",
+      "unicodeName": "KANGXI RADICAL NUMBER 191",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 192,
+      "glyph": "⾿",
+      "unicode": "U+2FBF",
+      "unicodeName": "KANGXI RADICAL NUMBER 192",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 193,
+      "glyph": "⿀",
+      "unicode": "U+2FC0",
+      "unicodeName": "KANGXI RADICAL NUMBER 193",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 194,
+      "glyph": "⿁",
+      "unicode": "U+2FC1",
+      "unicodeName": "KANGXI RADICAL NUMBER 194",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 195,
+      "glyph": "⿂",
+      "unicode": "U+2FC2",
+      "unicodeName": "KANGXI RADICAL NUMBER 195",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 196,
+      "glyph": "⿃",
+      "unicode": "U+2FC3",
+      "unicodeName": "KANGXI RADICAL NUMBER 196",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 197,
+      "glyph": "⿄",
+      "unicode": "U+2FC4",
+      "unicodeName": "KANGXI RADICAL NUMBER 197",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 198,
+      "glyph": "⿅",
+      "unicode": "U+2FC5",
+      "unicodeName": "KANGXI RADICAL NUMBER 198",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 199,
+      "glyph": "⿆",
+      "unicode": "U+2FC6",
+      "unicodeName": "KANGXI RADICAL NUMBER 199",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 200,
+      "glyph": "⿇",
+      "unicode": "U+2FC7",
+      "unicodeName": "KANGXI RADICAL NUMBER 200",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 201,
+      "glyph": "⿈",
+      "unicode": "U+2FC8",
+      "unicodeName": "KANGXI RADICAL NUMBER 201",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 202,
+      "glyph": "⿉",
+      "unicode": "U+2FC9",
+      "unicodeName": "KANGXI RADICAL NUMBER 202",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 203,
+      "glyph": "⿊",
+      "unicode": "U+2FCA",
+      "unicodeName": "KANGXI RADICAL NUMBER 203",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 204,
+      "glyph": "⿋",
+      "unicode": "U+2FCB",
+      "unicodeName": "KANGXI RADICAL NUMBER 204",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 205,
+      "glyph": "⿌",
+      "unicode": "U+2FCC",
+      "unicodeName": "KANGXI RADICAL NUMBER 205",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 206,
+      "glyph": "⿍",
+      "unicode": "U+2FCD",
+      "unicodeName": "KANGXI RADICAL NUMBER 206",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 207,
+      "glyph": "⿎",
+      "unicode": "U+2FCE",
+      "unicodeName": "KANGXI RADICAL NUMBER 207",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 208,
+      "glyph": "⿏",
+      "unicode": "U+2FCF",
+      "unicodeName": "KANGXI RADICAL NUMBER 208",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 209,
+      "glyph": "⿐",
+      "unicode": "U+2FD0",
+      "unicodeName": "KANGXI RADICAL NUMBER 209",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 210,
+      "glyph": "⿑",
+      "unicode": "U+2FD1",
+      "unicodeName": "KANGXI RADICAL NUMBER 210",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 211,
+      "glyph": "⿒",
+      "unicode": "U+2FD2",
+      "unicodeName": "KANGXI RADICAL NUMBER 211",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 212,
+      "glyph": "⿓",
+      "unicode": "U+2FD3",
+      "unicodeName": "KANGXI RADICAL NUMBER 212",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 213,
+      "glyph": "⿔",
+      "unicode": "U+2FD4",
+      "unicodeName": "KANGXI RADICAL NUMBER 213",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    },
+    {
+      "id": 214,
+      "glyph": "⿕",
+      "unicode": "U+2FD5",
+      "unicodeName": "KANGXI RADICAL NUMBER 214",
+      "names": {
+        "en": [],
+        "ja": [],
+        "fa": []
+      },
+      "variants": [],
+      "strokeCount": null
+    }
+  ]
+}
