@@ -11,10 +11,12 @@ export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
 }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
-    if (!open || catalog.length || loading) return;
+    if (!open || catalog.length || loading || attempted) return;
     let active = true;
+    setAttempted(true);
     setLoading(true);
     void listKanji().then(result => {
       if (active) setCatalog(result.results);
@@ -24,7 +26,7 @@ export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, [open, catalog.length, loading]);
+  }, [open, catalog.length, loading, attempted]);
 
   if (!open) return null;
 
