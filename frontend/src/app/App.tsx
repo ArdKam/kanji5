@@ -299,7 +299,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
-  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string}|null>(null),choices=(ex.choices??[]).slice(0,4),production=ex.mode==="production"&&choices.length>=4;
+  const ex=snapshot.exercise??{},[answer,setAnswer]=useState(""),[result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string}|null>(null),[productionRevealed,setProductionRevealed]=useState(false),production=ex.mode==="production";
   const lockedRef=useRef(false);
   const exerciseKey=String(ex.contentId??"")+"|"+String(ex.mode??"")+"|"+String(ex.character??"");
   const previousKeyRef=useRef(exerciseKey);
@@ -310,6 +310,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
       lockedRef.current=false;
       setAnswer("");
       setResult(null);
+      setProductionRevealed(false);
     }
   },[exerciseKey]);
 
@@ -330,17 +331,29 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     if(!value.trim()||busy||lockedRef.current)return;
     lockedRef.current=true;
     try{
-      if(ex.mode==="production"&&ex.character){
-        const correct=value===ex.character;
-        setResult({correct,outcome:correct?"correct":"wrong",answerHint:correct?undefined:ex.character});
-        await onSubmit(value);
-        await waitForFeedbackAnimation(correct);
-        await onNext();
-        return;
-      }
       const raw=await onSubmit(value);
       const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
       await finishAndAdvance(feedback);
+    }catch(_){
+      lockedRef.current=false;
+    }
+  };
+
+  const handleProductionGrade=async(knewIt:boolean)=>{
+    if(!production||!productionRevealed||busy||lockedRef.current||result||!ex.character)return;
+    lockedRef.current=true;
+    try{
+      if(knewIt){
+        setResult({correct:true,outcome:"correct"});
+        await onSubmit(ex.character);
+        await waitForFeedbackAnimation(true);
+        await onNext();
+      }else{
+        setResult({correct:false,outcome:"unknown",answerHint:ex.character});
+        await onDontKnow();
+        await waitForFeedbackAnimation(false);
+        await onNext();
+      }
     }catch(_){
       lockedRef.current=false;
     }
@@ -367,10 +380,19 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     <div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div>
     <h2>{t("currentExercise")}</h2>
     <p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
-    {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{result?<div className="exercise-feedback" role="status"><strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>{revealedAnswer?<div className="exercise-correct-answer"><span>پاسخ درست:</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}</div>:<>
-      {production?<div className="production-grid">{choices.map(c=><button className="button production-choice" type="button" key={c} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(c)}>{c}</button>)}</div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
-      <div className="actions">{!production?<button className="button primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>:null}<button className="button secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>
-    </>}</>}
+    {!ex.mode?<div className="empty-state">{t("exerciseReady")}: production;<Stimulus ex={ex}/>{result?<div className="exercise-feedback" role="status"><strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>{revealedAnswer?<div className="exercise-correct-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}</div>:production?<div className="production-recall">
+          <p className="production-recall-instruction">{t("productionRecallInstruction")}</p>
+          {!productionRevealed?<button className="button primary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>:<div className="production-recall-revealed" aria-live="polite">
+              <span>{t("revealedAnswer")}</span>
+              <strong lang="ja">{text(ex.character||"—")}</strong>
+              <div className="actions production-recall-actions">
+                <button className="button primary" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(true)}>{t("iKnewIt")}</button>
+                <button className="button secondary" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(false)}>{t("iDidntKnow")}</button>
+              </div>
+            </div>}
+        </div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
+      {production?null:<div className="actions"><button className="button primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button><button className="button secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>}
+    </>}
   </section>
 }
 function Panel({title,children}:{title:string;children:ReactNode}){return <section className="surface insight-panel"><h3>{title}</h3>{children}</section>}
