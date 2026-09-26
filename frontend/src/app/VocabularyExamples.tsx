@@ -22,7 +22,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
     }).finally(() => {
       if (active) setLoading(false);
     });
-    return () => { active = false; };
+    const visibleItems = showAllExamples ? items : items.slice(0, 3);\n  const graphEdges = vocabularyEdges.filter(edge => edge.related.length);\n  const visibleGraphEdges = showAllGraph ? graphEdges : graphEdges.slice(0, 3);\n\n  return () => { active = false; };
   }, [kanjiCharacter]);
 
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
@@ -54,7 +54,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
               </div>
             ))}
           </div>
-          {vocabularyEdges.some(edge => edge.related.length) ? (
+          {items.length > 3 ? (\n            <button className="dictionary-vocabulary-more" type="button" onClick={() => setShowAllExamples(current => !current)} aria-expanded={showAllExamples}>\n              {showAllExamples ? (language === "fa" ? "نمایش کمتر" : "Show less") : (language === "fa" ? `نمایش همهٔ نمونه‌ها (${items.length})` : `Show all examples (${items.length})`)}\n            </button>\n          ) : null}\n          {graphEdges.length ? (
             <section className="vocabulary-learning-graph" aria-label={t("vocabularyLearningGraph", language)}>
               <div className="vocabulary-learning-graph-header">
                 <div>
