@@ -18,6 +18,8 @@ for(const viewport of viewports){
 
     await recall.click();
     await expect(recall).toHaveAttribute('aria-current','page');
+    await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+    await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
     await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
     await expect(page.locator('#root .daily-summary')).toHaveCount(0);
 
