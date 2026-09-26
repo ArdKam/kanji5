@@ -13,6 +13,8 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
   const [readerOpen, setReaderOpen] = useState(true);
   const [audioUrl, setAudioUrl] = useState("");
   const [audioName, setAudioName] = useState("");
+  const [speechRate, setSpeechRate] = useState(0.85);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const extracted = useMemo(() => {
@@ -59,7 +61,36 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
 
   useEffect(() => () => {
     if (audioUrl) URL.revokeObjectURL(audioUrl);
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
   }, [audioUrl]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.speechSynthesis?.cancel();
+    setIsSpeaking(false);
+  }, [value]);
+
+  const speechSupported = typeof window !== "undefined"
+    && typeof window.speechSynthesis?.speak === "function"
+    && typeof window.SpeechSynthesisUtterance === "function";
+
+  const speakText = () => {
+    if (!speechSupported || !value.trim()) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(value.trim());
+    utterance.lang = "ja-JP";
+    utterance.rate = speechRate;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeech = () => {
+    if (!speechSupported) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
 
   const clearText = () => {
     setValue("");
@@ -106,6 +137,24 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
           }} />
         </label>
         {audioUrl ? <span className="reading-lab-audio-name" title={audioName}>{audioName}</span> : null}
+      </div>
+      <div className="reading-lab-speech-row" aria-label={t("readingSpeechControls", language)}>
+        <button className="button secondary" type="button" disabled={!speechSupported || !value.trim()} onClick={speakText}>
+          {isSpeaking ? t("readingSpeaking", language) : t("readingSpeakText", language)}
+        </button>
+        <button className="button secondary" type="button" disabled={!speechSupported || !isSpeaking} onClick={stopSpeech}>
+          {t("readingStopSpeech", language)}
+        </button>
+        <label className="reading-lab-speech-rate">
+          <span>{t("readingSpeechRate", language)}</span>
+          <select value={speechRate} onChange={event => setSpeechRate(Number(event.target.value))}>
+            <option value={0.7}>0.7×</option>
+            <option value={0.85}>0.85×</option>
+            <option value={1}>1×</option>
+            <option value={1.15}>1.15×</option>
+          </select>
+        </label>
+        {!speechSupported ? <span className="reading-lab-speech-status">{t("readingSpeechUnsupported", language)}</span> : null}
       </div>
       {audioUrl ? <audio className="reading-lab-audio" controls preload="metadata" src={audioUrl} aria-label={t("readingAudio", language)} /> : null}
       <div className="reading-lab-stats" aria-live="polite">
