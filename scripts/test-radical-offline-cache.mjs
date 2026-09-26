@@ -1,0 +1,1 @@
+import assert from "node:assert/strict"; import fs from "node:fs"; const sw=fs.readFileSync("sw.js","utf8"); assert.match(sw,/const DATA_CACHE='kanji5-data-v25'/); assert.match(sw,/kanji-radicals\.json/); console.log("Kanji5 radical offline cache contract passed.");
