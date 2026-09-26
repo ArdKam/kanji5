@@ -396,7 +396,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     {!ex.mode?<div className="empty-state">{t("exerciseReady")}</div>:<><Stimulus ex={ex}/>{result?<div className="exercise-feedback" role="status"><strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>{revealedAnswer?<div className="exercise-correct-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}</div>:production&&!showProductionOptions?<div className="production-recall">
       <p className="production-recall-instruction">{t("productionRecallInstruction")}</p>
       {!productionRevealed?<div className="production-recall-actions">
-        <button className="button primary" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>
+        <button className="button primary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>
         {choices.length>=4?<button className="button secondary" type="button" disabled={disabled} onClick={()=>setShowProductionOptions(true)}>{t("useOptionsHint")}</button>:null}
       </div>:<div className="production-recall-revealed" aria-live="polite">
         <span>{t("revealedAnswer")}</span>
