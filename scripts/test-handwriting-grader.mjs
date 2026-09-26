@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { gradeHandwriting } from "../frontend/src/app/handwriting-grader.js";
+import { HANDWRITING_GRADER_VERSION, gradeHandwriting, preprocessStrokes } from "../frontend/src/app/handwriting-grader.js";
+
+assert.equal(HANDWRITING_GRADER_VERSION, "1.0.0");
 
 const point = (x, y) => ({ x, y });
 const line = (x1, y1, x2, y2, n = 24) =>
@@ -20,6 +22,7 @@ const perfect = gradeHandwriting(reference, reference);
 assert.equal(perfect.score, 100, "perfect reference trace must score 100");
 assert.equal(perfect.strokeCount.ratio, 1);
 assert.equal(perfect.scoreReliability, "high");
+assert.equal(perfect.lengthIntegrity, 1);
 
 const translated = reference.map(stroke => stroke.map(p => point(p.x + 3, p.y + 2)));
 const translatedGrade = gradeHandwriting(translated, reference);
@@ -101,12 +104,18 @@ const highPointInput = [highPointStroke, ...reference.slice(1)];
 const highPointGrade = gradeHandwriting(highPointInput, reference);
 assert.ok(Number.isFinite(highPointGrade.score), "high-point input must remain gradeable");
 assert.equal(highPointGrade.strokeCount.user, reference.length);
+const processedHighPointInput = preprocessStrokes([highPointStroke]);
+assert.equal(processedHighPointInput.length, 1);
+assert.ok(processedHighPointInput[0].length <= 96, "preprocessing should cap deterministic resampling density");
+
 const empty = gradeHandwriting([], reference);
 assert.equal(empty.score, 0);
 assert.equal(empty.feedbackCode, "empty");
+assert.equal(empty.lengthIntegrity, 0);
 
 const invalid = gradeHandwriting([[point(NaN, 1)], []], reference);
 assert.equal(invalid.score, 0);
 assert.equal(invalid.feedbackCode, "empty");
+assert.equal(invalid.lengthIntegrity, 0);
 
 console.log("Handwriting grader unit contract passed.");
