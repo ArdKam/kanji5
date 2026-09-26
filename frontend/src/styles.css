@@ -838,4 +838,5 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 @media(max-width:420px){
   .mnemonic-prepared{grid-template-columns:1fr;}
   .mnemonic-prepared-use{justify-self:start;}
+}
 .mnemonic-prepared-library-more{min-height:38px;width:100%;margin-top:8px;}
