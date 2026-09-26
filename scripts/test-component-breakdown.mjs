@@ -11,6 +11,7 @@ assert(source.includes('import type { ComponentInfo } from "./engine";'), "Compo
 assert(source.includes('if (!info.available || !info.components.length) return null;'), "Unavailable component data must not render misleading UI");
 assert(source.includes('className="component-breakdown"'), "Component root class missing");
 assert(source.includes('role="list"'), "Component list semantics missing");
+assert(source.includes("component-breakdown-radical"), "Canonical radical presentation missing");
 assert(source.includes('role="listitem"'), "Component list item semantics missing");
 assert(source.includes('lang="ja"'), "Japanese language semantics missing");
 assert(!/localStorage|sessionStorage|fetch\(|__KANJI5_|v1\.9-|planner|learner/i.test(source), "Presentation component must not access engine or persistence internals");
