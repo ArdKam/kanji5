@@ -981,9 +981,10 @@
 .handwriting-error{color:var(--shu);}
 .handwriting-result{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   justify-content:center;
-  gap:9px;
+  gap:7px 9px;
   padding:8px 10px;
   border:1px solid var(--line);
   border-radius:12px;
@@ -993,6 +994,7 @@
 .handwriting-result strong{font-size:1rem;}
 .handwriting-result.great{border-color:#b8d0a0;}
 .handwriting-result.good{border-color:#d6c9a3;}
+.handwriting-feedback-detail{width:100%;color:var(--mute);font-size:9px;line-height:1.5;text-align:center;}
 .handwriting-result.retry{border-color:#f0b4b0;}
 @media(max-width:520px){
   .handwriting-canvas-wrap{width:min(250px,100%);}
