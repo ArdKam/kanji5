@@ -265,7 +265,7 @@ export function HandwritingPractice({ character, language }: { character:string;
       case "placement":return"handwritingFeedbackPlacement";
       case "endpoints":return"handwritingFeedbackEndpoints";
       case "direction":return"handwritingFeedbackDirection";
-      case "length":return"handwritingFeedbackLength;
+      case "length":return"handwritingFeedbackLength";
       case "curvature":return"handwritingFeedbackCurvature";
       case "shape":return"handwritingFeedbackShape";
       case "good":return"handwritingGreat";
