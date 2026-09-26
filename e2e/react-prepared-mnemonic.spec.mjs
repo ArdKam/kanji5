@@ -14,6 +14,29 @@ test("prepared mnemonic is available on every learning card and can be saved as 
 
   const prepared = card.locator(".mnemonic-prepared");
   await expect(prepared).toBeVisible();
+  await prepared.scrollIntoViewIfNeeded();
+  const preparedViewport = await prepared.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    const scroll = el.closest(".learning-back-scroll")?.getBoundingClientRect();
+    return {
+      width: rect.width,
+      height: rect.height,
+      top: rect.top,
+      bottom: rect.bottom,
+      scrollTop: scroll?.top ?? 0,
+      scrollBottom: scroll?.bottom ?? 0,
+      display: style.display,
+      visibility: style.visibility,
+      opacity: Number(style.opacity || 1)
+    };
+  });
+  expect(preparedViewport.width).toBeGreaterThan(0);
+  expect(preparedViewport.height).toBeGreaterThan(0);
+  expect(preparedViewport.visibility).toBe("visible");
+  expect(preparedViewport.opacity).toBeGreaterThan(0);
+  expect(preparedViewport.top).toBeGreaterThanOrEqual(preparedViewport.scrollTop - 1);
+  expect(preparedViewport.bottom).toBeLessThanOrEqual(preparedViewport.scrollBottom + 1);
   const preparedText = prepared.locator(".mnemonic-prepared-copy p");
   await expect(preparedText).toHaveText(/\S+/);
 
