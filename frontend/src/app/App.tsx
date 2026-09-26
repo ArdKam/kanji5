@@ -11,6 +11,7 @@ import { SettingsDialog } from "./SettingsDialog";
 import { PracticeHome } from "./PracticeHome";
 import { GrammarDialog } from "./GrammarDialog";
 import { ReadingLabDialog } from "./ReadingLabDialog";
+import { MnemonicsDialog } from "./MnemonicsDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -41,6 +42,7 @@ import {
   recordHandwritingGrade,
   type HandwritingSkill,
   waitForEngine,
+  listKanji,
 } from "./engine";
 
 const fa=(v:number)=>formatNumber(v,getLanguage());
@@ -623,8 +625,9 @@ function LoadingInsights(){
 }
 
 function App(){
-  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[placementRequest,setPlacementRequest]=useState(0),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[language,setLanguageState]=useState<Language>(()=>getLanguage());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[placementRequest,setPlacementRequest]=useState(0),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[language,setLanguageState]=useState<Language>(()=>getLanguage());
   useEffect(()=>applyLanguage(language),[language]);
+  useEffect(()=>{if(!settingsOpen||mnemonicCatalog.length)return;let active=true;void listKanji().then(value=>{if(active)setMnemonicCatalog(value.results)}).catch(()=>{});return()=>{active=false}},[settingsOpen,mnemonicCatalog.length]);
   const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
   useEffect(()=>{let mounted=true;void startLearningExperience().catch(()=>{});const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d)setSnapshot(d)};void refresh().then(()=>document.addEventListener("kanji5:v1.9-v2-view-models",listener)).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});return()=>{mounted=false;document.removeEventListener("kanji5:v1.9-v2-view-models",listener)}},[refresh]);
@@ -639,6 +642,7 @@ function App(){
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setStatsOpen(true);setHeaderMenuOpen(false)}}>{t("stats")}</button>
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setGrammarOpen(true);setHeaderMenuOpen(false)}}>{t("grammarGuide")}</button>
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setReadingLabOpen(true);setHeaderMenuOpen(false)}}>{t("readingLab")}</button>
+  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setMnemonicsOpen(true);setHeaderMenuOpen(false)}}>{t("preparedMnemonicLibrary")}</button>
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setSettingsOpen(true);setHeaderMenuOpen(false)}}>{t("settings")}</button>
 </div></div><AccountButton language={language} onClick={()=>setAccountOpen(true)}/></div>
     </header>
@@ -691,11 +695,22 @@ function App(){
         const message=language==="fa"?"همهٔ پیشرفت یادگیری پاک می‌شود. این کار قابل بازگشت نیست. ادامه می‌دهید?":"All learning progress will be erased. This cannot be undone. Continue?";
         if(window.confirm(message))void action(async()=>{resetProgress()});
       }}
+      mnemonicCatalog={mnemonicCatalog}
       onRetakePlacement={()=>{
         setSettingsOpen(false);
         setExperience("practice");
         setPracticeMode("home");
         setPlacementRequest(value=>value+1);
+      }}
+    />
+    <MnemonicsDialog
+      open={mnemonicsOpen}
+      language={language}
+      catalog={mnemonicCatalog}
+      onClose={()=>setMnemonicsOpen(false)}
+      onSelectKanji={(item: KanjiCatalogItem)=>{
+        setDictionaryLookupCharacter(item.character);
+        setExperience("dictionary");
       }}
     />
     <GrammarDialog open={grammarOpen} language={language} onClose={()=>setGrammarOpen(false)}/>
