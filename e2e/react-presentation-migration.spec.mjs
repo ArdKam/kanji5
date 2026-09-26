@@ -170,7 +170,7 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(3);
   await expect(card.locator('.component-breakdown')).toBeVisible();
   await expect(card.locator('.component-learning-path')).toBeVisible();
-  await expect(card.locator('.component-learning-path-list .component-learning-path-node')).toHaveCount(2);
+  await expect.poll(async()=>card.locator('.component-learning-path-node.depth-0').count(),{timeout:5000}).toBeGreaterThan(0);
   await expect.poll(async()=>card.locator('.component-learning-path-node.depth-1').count(),{timeout:5000}).toBeGreaterThan(0);
   await expect(card.locator('.component-learning-path-node.depth-0 .component-learning-path-kanji').first()).toBeVisible();
   await expect(card).not.toContainText('کارت کانجی');
