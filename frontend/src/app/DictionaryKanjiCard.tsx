@@ -219,6 +219,7 @@ export function DictionaryKanjiCard({
                 <HandwritingPractice
                   character={item.character}
                   language={language}
+                  defaultExpanded
                   learningSignal={handwritingSkill ? { state: handwritingSkill.state, confidence: handwritingSkill.confidence, score: handwritingSkill.score } : undefined}
                   onGradeRecorded={(grade) => recordHandwritingGrade(item.character, grade).then(async saved => {
                     if (!saved) return false;
