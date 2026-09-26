@@ -23,6 +23,7 @@ export type HandwritingGrade = {
   strokeCount: { user: number; reference: number; ratio: number; missing: number; extra: number };
   orderScore: number;
   placementScore: number;
+  lengthIntegrity: number;
   perStroke: HandwritingPerStrokeScore[];
   feedbackCode: HandwritingFeedbackCode;
   feedbackStroke: number | null;
