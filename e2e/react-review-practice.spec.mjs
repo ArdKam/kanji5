@@ -14,6 +14,10 @@ async function seedSeenCard(page){
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
 }
 
+async function forcedTargetCharacter(page){
+  return await page.evaluate(()=>String(window.__KANJI5_V19_RECOVERY_TARGET__?.character||"").trim());
+}
+
 test('Learning and Active Recall are explicit independent presentation experiences',async({page})=>{
   await clean(page);
   const review=page.getByRole('button',{name:'یادگیری'});
@@ -65,7 +69,7 @@ test('wrong production answer turns the card red once and then advances once',as
   await startForcedExercise(page,'production');
   await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:10000});
   const before=await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)});
-  const character=await page.evaluate(()=>String(window.__KANJI5_EDU_UI_API__?.getState?.().item?.character||"").trim());
+  const character=await forcedTargetCharacter(page);
   const wrong=page.locator('#root #exercise .production-choice').filter({hasNotText:character}).first();
   await wrong.click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
