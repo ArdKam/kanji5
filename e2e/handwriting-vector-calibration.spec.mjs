@@ -51,6 +51,8 @@ test.setTimeout(30000);
 test("vector grader calibration remains deterministic across meaningful handwriting cases",async({page})=>{
   const school=await sampleReferenceStrokes(page,FIXTURE.characters["学"].paths);
   const person=await sampleReferenceStrokes(page,FIXTURE.characters["人"].paths);
+  const day=await sampleReferenceStrokes(page,FIXTURE.characters["日"].paths);
+  const month=await sampleReferenceStrokes(page,FIXTURE.characters["月"].paths);
   const cases={
     perfect:gradeHandwriting(school,school),
     translated:gradeHandwriting(translate(school,3,2),school),
@@ -59,9 +61,11 @@ test("vector grader calibration remains deterministic across meaningful handwrit
     missingStroke:gradeHandwriting(school.slice(0,-1),school),
     extraStroke:gradeHandwriting([...school,[{x:92,y:92},{x:98,y:98}]],school),
     wrongOrder:gradeHandwriting(reverseOrder(school),school),
+    swappedOrder:gradeHandwriting([school[1],school[0],...school.slice(2)],school),
     wrongDirection:gradeHandwriting(reverseDirection(school),school),
     wrongShape:gradeHandwriting(perturb(school),school),
     wrongKanji:gradeHandwriting(person,school),
+    wrongSameCountKanji:gradeHandwriting(day,month),
     grossTranslation:gradeHandwriting(translate(school,25,25),school),
     largeScale:gradeHandwriting(scale(school,1.45),school),
     grossShape:gradeHandwriting(grossShape(school),school),
@@ -84,10 +88,13 @@ test("vector grader calibration remains deterministic across meaningful handwrit
   expect(cases.extraStroke.overallSimilarity).toBeLessThan(90);
   expect(cases.wrongOrder.overallSimilarity).toBeLessThan(75);
   expect(cases.wrongOrder.orderScore).toBeLessThan(0.70);
+  expect(cases.swappedOrder.overallSimilarity).toBeLessThan(82);
+  expect(cases.swappedOrder.orderScore).toBeLessThan(0.80);
   expect(cases.wrongDirection.overallSimilarity).toBeLessThan(80);
   expect(cases.wrongShape.overallSimilarity).toBeLessThan(75);
   expect(cases.grossShape.overallSimilarity).toBeLessThan(65);
   expect(cases.wrongKanji.overallSimilarity).toBeLessThan(45);
+  expect(cases.wrongSameCountKanji.overallSimilarity).toBeLessThan(55);
   expect(cases.grossTranslation.overallSimilarity).toBeLessThan(75);
   expect(cases.largeScale.overallSimilarity).toBeLessThan(85);
 });
