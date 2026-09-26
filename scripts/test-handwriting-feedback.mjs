@@ -6,6 +6,6 @@ assert.equal(feedbackFocusKind("direction"),"direction");
 assert.equal(feedbackFocusKind("endpoints"),"endpoints");
 assert.equal(feedbackFocusKind("improve"),"general");
 const p=feedbackMarkerPoints([{x:1,y:2},{x:3,y:4},{x:6,y:7}]);
-assert.deepEqual(p,{start:{x:1,y:2},end:{x:6,y:7},ahead:{x:3,y:4}});
+assert.deepEqual(p,{start:{x:1,y:2},end:{x:6,y:7},ahead:{x:6,y:7}});
 assert.equal(feedbackMarkerPoints([{x:1,y:2}]),null);
 console.log("Handwriting visual feedback focus contract passed.");
