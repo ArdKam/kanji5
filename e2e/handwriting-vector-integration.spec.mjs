@@ -74,12 +74,11 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
   await handwriting.locator(".handwriting-actions .secondary").click();
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
-  await page.mouse.move(penX,penY);
-  await page.mouse.down();
-  await page.mouse.move(penX,penY+20);
-  await page.mouse.move(penX,penY+45);
-  await page.mouse.move(penX,penY+70);
-  await page.mouse.up();
+  await canvas.dispatchEvent("pointerdown",{pointerId:91,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:penX,clientY:penY});
+  await canvas.dispatchEvent("pointermove",{pointerId:91,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:penX,clientY:penY+20});
+  await canvas.dispatchEvent("pointermove",{pointerId:91,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:penX,clientY:penY+45});
+  await canvas.dispatchEvent("pointermove",{pointerId:91,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:penX,clientY:penY+70});
+  await canvas.dispatchEvent("pointerup",{pointerId:91,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:penX,clientY:penY+70});
   await expect(handwriting).toHaveAttribute("data-stroke-count","1");
   await expect(handwriting).toHaveAttribute("data-live-feedback",/^(?!none$).+/);
   await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
