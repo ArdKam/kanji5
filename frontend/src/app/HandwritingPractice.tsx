@@ -224,7 +224,8 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const moveStroke=(event:PointerEvent<HTMLCanvasElement>)=>{
     if(!activeStrokeRef.current.length)return;
     const nativeEvent=event.nativeEvent as globalThis.PointerEvent;
-    const events=typeof nativeEvent.getCoalescedEvents==="function"?nativeEvent.getCoalescedEvents():[nativeEvent];
+    const coalesced=typeof nativeEvent.getCoalescedEvents==="function"?nativeEvent.getCoalescedEvents():[];
+    const events=coalesced.length?coalesced:[nativeEvent];
     const rect=event.currentTarget.getBoundingClientRect();
     for(const pointEvent of events){
       commitPoint(pointFromClient(pointEvent.clientX,pointEvent.clientY,rect));
