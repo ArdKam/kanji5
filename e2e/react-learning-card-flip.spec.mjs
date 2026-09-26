@@ -279,6 +279,9 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
   const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
 
+  await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
+  const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
+
   await trigger.click();
   const panel = card.locator(".stroke-order-panel.is-expanded");
   await expect(panel).toBeVisible();
@@ -348,7 +351,7 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
 
   const scrollAfter = await scrollContainer.evaluate((el) => el.scrollTop);
-  expect(scrollAfter).toBeGreaterThanOrEqual(0);
+  expect(scrollAfter).toBeGreaterThanOrEqual(scrollBefore);
 
   const calls = await page.evaluate(() => window.__kanji5ScrollToCalls || []);
   expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
