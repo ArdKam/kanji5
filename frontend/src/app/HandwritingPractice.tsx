@@ -176,7 +176,8 @@ export function HandwritingPractice({ character, language }: { character: string
   }, []);
 
   const appendPointerPoints = useCallback((event: PointerEvent<HTMLCanvasElement>) => {
-    const events = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : [event];
+    const nativeEvent = event.nativeEvent as globalThis.PointerEvent;
+    const events = typeof nativeEvent.getCoalescedEvents === "function" ? nativeEvent.getCoalescedEvents() : [nativeEvent];
     const points = events.map(pointFromEvent);
     for (const point of points) {
       const previous = currentStrokeRef.current.at(-1);
