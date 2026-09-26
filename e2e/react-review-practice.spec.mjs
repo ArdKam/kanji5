@@ -15,7 +15,10 @@ async function seedSeenCard(page){
 }
 
 async function forcedTargetCharacter(page){
-  return await page.evaluate(()=>String(window.__KANJI5_V19_RECOVERY_TARGET__?.character||"").trim());
+  return await page.evaluate(async()=>{
+    const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.();
+    return String(snapshot?.exercise?.character||"").trim();
+  });
 }
 
 test('Learning and Active Recall are explicit independent presentation experiences',async({page})=>{
