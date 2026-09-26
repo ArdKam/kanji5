@@ -23,7 +23,7 @@ vm.runInNewContext(source,sandbox,{filename:"v1.9-v2-boundary.js"});
 const api=sandbox.window.__KANJI5_V19_V2_BOUNDARY__;
 const info=await api.getComponentInfo("語");
 assert.equal(info.available,true);
-assert.deepEqual(info.components,["言","吾"]);
+assert.equal(JSON.stringify(info.components),'["言","吾"]');
 assert.equal(info.recursive?.[0]?.glyph,"言");
 assert.equal(info.recursive?.[0]?.sourceConfidence,"source-direct");
 assert.equal(info.recursive?.[0]?.children?.length,0);
