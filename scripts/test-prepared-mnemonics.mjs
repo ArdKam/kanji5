@@ -59,7 +59,7 @@ for (const character of Object.keys(core.CURATED_PREPARED_MNEMONICS)) {
 }
 
 const scorerCases = [
-  { entry: { fa: "یک صحنهٔ واقعی با درخت که حرکت می‌کند.", en: "A real scene with a tree that moves.", source: "curated" }, expected: { valid: true, minLength: true, concreteAnchorFa: true, concreteAnchorEn: true, actionSceneFa: true, actionSceneEn: true, genericTemplate: false } },
+  { entry: { fa: "یک صحنهٔ واقعی با درخت که می‌دود.", en: "Picture a real scene with a tree that runs.", source: "curated" }, expected: { valid: true, minLength: true, concreteAnchorFa: true, concreteAnchorEn: true, actionSceneFa: true, actionSceneEn: true, genericTemplate: false } },
   { entry: { fa: "یک تصویر واحد از «木» بساز.", en: "Picture the visual anchors 木.", source: "generated" }, expected: { genericTemplate: true } },
   { entry: { fa: "کوتاه", en: "short", source: "curated" }, expected: { minLength: false } }
 ];
