@@ -38,6 +38,12 @@ const ranked = allKanji
   }));
 
 if (ranked.length !== COUNT) throw new Error(`Expected ${COUNT} kanji, got ${ranked.length}`);
+const missingClassicalRadicals = ranked.filter(
+  x => !Number.isInteger(x.radical?.classical) || x.radical.classical < 1 || x.radical.classical > 214
+);
+if (missingClassicalRadicals.length) {
+  throw new Error(`Missing valid classical radical for ${missingClassicalRadicals.length} Jōyō kanji`);
+}
 
 await fs.writeFile(OUT, JSON.stringify({
   version: 1,
