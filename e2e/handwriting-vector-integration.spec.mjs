@@ -35,13 +35,15 @@ async function openSchoolHandwriting(page){
 async function drawReference(page,canvas,strokes){
   const box=await canvas.boundingBox();
   if(!box)throw new Error("handwriting canvas has no bounding box");
-  const toClient=p=>({x:box.x+(p.x/109)*box.width,y:box.y+(p.y/109)*box.height});
+  const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
   for(const stroke of strokes){
     const first=toClient(stroke[0]);
+    if(!Number.isFinite(first.x)||!Number.isFinite(first.y))throw new Error(`Invalid first point: ${JSON.stringify(stroke[0])}`);
     await page.mouse.move(first.x,first.y);
     await page.mouse.down();
     for(let i=1;i<stroke.length;i+=1){
       const point=toClient(stroke[i]);
+      if(!Number.isFinite(point.x)||!Number.isFinite(point.y))throw new Error(`Invalid point: ${JSON.stringify(stroke[i])}`);
       await page.mouse.move(point.x,point.y);
     }
     await page.mouse.up();
