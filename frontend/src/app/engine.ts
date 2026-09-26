@@ -133,10 +133,41 @@ export type RadicalInfo = {
   mappingSource?: { name?: string; via?: string; commit?: string; field?: string; semantics?: string } | null;
 };
 
+export type RadicalCatalogResult = {
+  id: number;
+  canonicalGlyph: string;
+  variants: string[];
+  names?: { ja?: string };
+  readings?: { ja?: string[] };
+  kanjiCount?: number;
+};
+
+export type StructureLookupResult = {
+  character: string;
+  direct?: boolean;
+  recursive?: boolean;
+  radicalId?: number;
+};
+
+export type ComponentNode = {
+  glyph: string;
+  relation: "leaf" | "nested" | "cycle";
+  sourceConfidence: "source-direct" | "derived-recursive";
+  children: ComponentNode[];
+};
+
+export type ComponentEntity = {
+  glyph: string;
+  isJoyoKanji: boolean;
+  sourceConfidence: "source-direct";
+};
+
 export type ComponentInfo = {
   character: string;
   available: boolean;
   components: string[];
+  recursive?: ComponentNode[];
+  sourceGap: boolean;
   sourceGap: boolean;
   coverage?: { available?: number; total?: number; fraction?: number } | null;
   source?: { name?: string; commit?: string; license?: string; semantics?: string } | null;
@@ -147,6 +178,10 @@ export type Boundary = {
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   getRadicalInfo: (character: string) => Promise<RadicalInfo>;
+  listRadicals: () => Promise<{ results: RadicalCatalogResult[] }>;
+  getKanjiByRadical: (radicalId: number, limit?: number) => Promise<{ radicalId: number; results: KanjiDictionaryResult[] }>;
+  getKanjiByComponent: (glyph: string, recursive?: boolean, limit?: number) => Promise<{ glyph: string; recursive: boolean; results: KanjiDictionaryResult[] }>;
+  getKanjiByComponents: (glyphs: string[], recursive?: boolean, limit?: number) => Promise<{ glyphs: string[]; recursive: boolean; results: KanjiDictionaryResult[] }>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
@@ -328,4 +363,16 @@ export async function getComponentInfo(character: string): Promise<ComponentInfo
 
 export async function getRadicalInfo(character: string): Promise<RadicalInfo> {
   return (await waitForEngine()).getRadicalInfo(character);
+}
+export async function listRadicals(): Promise<{ results: RadicalCatalogResult[] }> {
+  return (await waitForEngine()).listRadicals();
+}
+export async function getKanjiByRadical(radicalId: number, limit = 80): Promise<{ radicalId: number; results: KanjiDictionaryResult[] }> {
+  return (await waitForEngine()).getKanjiByRadical(radicalId, limit);
+}
+export async function getKanjiByComponent(glyph: string, recursive = true, limit = 80): Promise<{ glyph: string; recursive: boolean; results: KanjiDictionaryResult[] }> {
+  return (await waitForEngine()).getKanjiByComponent(glyph, recursive, limit);
+}
+export async function getKanjiByComponents(glyphs: string[], recursive = true, limit = 80): Promise<{ glyphs: string[]; recursive: boolean; results: KanjiDictionaryResult[] }> {
+  return (await waitForEngine()).getKanjiByComponents(glyphs, recursive, limit);
 }
