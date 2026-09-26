@@ -21,6 +21,7 @@ on:
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
       - "e2e/handwriting-legacy-benchmark.spec.mjs"
+      - "e2e/handwriting-vector-integration.spec.mjs"
       - "scripts/test-handwriting-grader.mjs"
       - "frontend/src/app/handwriting-grader.js"
       - "frontend/src/app/handwriting-grader.d.ts"
@@ -113,6 +114,9 @@ jobs:
       - name: Run Lovable-style experience navigation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
+      - name: Run handwriting grader integration gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
       - name: Run handwriting legacy benchmark
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
