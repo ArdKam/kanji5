@@ -27,5 +27,19 @@ assert.equal(new Set(entries.map(entry => entry.character)).size, 2136, "Prepare
 const coverage = core.preparedMnemonicCoverage(catalog);
 assert.deepEqual(coverage, { total: 2136, curated: 39, generated: 2097, coverage: 1 });
 assert.match(core.buildPreparedMnemonic({ character: "海", meaning: ["sea"] }, ["毎", "氵"]).fa, /毎・氵|معنی «sea»/);
+const curatedDay = core.buildPreparedMnemonic({ character: "日", meaning: ["day"] }, []);
+assert.equal(curatedDay.source, "curated", "Curated mnemonic source metadata must remain explicit");
+assert.equal(
+  core.buildPreparedMnemonic({ character: "日", meaning: ["day"] }, []).fa,
+  curatedDay.fa,
+  "Curated mnemonic generation must be deterministic"
+);
+const generatedSea = core.buildPreparedMnemonic({ character: "海", meaning: ["sea"] }, ["毎", "氵"]);
+assert.equal(generatedSea.source, "generated", "Fallback mnemonic source metadata must be explicit");
+assert.equal(
+  core.buildPreparedMnemonic({ character: "海", meaning: ["sea"] }, ["毎", "氵"]).fa,
+  generatedSea.fa,
+  "Generated mnemonic fallback must be deterministic"
+);
 
 console.log("Prepared mnemonic coverage: PASS (2136/2136; 39 curated + 2097 generated fallbacks)");
