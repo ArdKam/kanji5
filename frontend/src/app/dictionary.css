@@ -328,8 +328,8 @@
 }
 .dictionary-card-dialog .dialog-close{
   position:absolute;
-  inset-block-start:0;
-  inset-inline-end:0;
+  inset-block-start:-12px;
+  inset-inline-end:-8px;
   z-index:8;
   display:grid;
   place-items:center;
@@ -1798,4 +1798,20 @@
 }
 @media(prefers-reduced-motion:reduce){
   .dictionary-section-nav .dictionary-accordion-trigger{transition:none;}
+}
+
+.dictionary-card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:14px;
+}
+.dictionary-card-meta span{
+  padding:5px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--washi);
+  color:var(--mute);
+  font-size:.68rem;
+  font-weight:800;
 }
