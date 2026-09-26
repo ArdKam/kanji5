@@ -334,7 +334,8 @@ export function gradeHandwriting(userStrokes, referenceStrokes, options = {}) {
     order * 0.13 +
     placement * 0.15;
 
-  const score = Math.round(clamp(rawScore * countFactor * Math.pow(lengthIntegrity, 0.8)) * 100);
+  const placementFactor = 0.45 + 0.55 * placement;
+  const score = Math.round(clamp(rawScore * countFactor * Math.pow(lengthIntegrity, 0.8) * placementFactor) * 100);
   const weakest = [...perStroke].sort((a, b) => a.score - b.score)[0];
   const localFeedback = weakest ? feedbackForStroke(weakest, weakest.index) : null;
   const feedbackCode =
