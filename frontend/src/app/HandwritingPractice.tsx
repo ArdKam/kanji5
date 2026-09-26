@@ -20,7 +20,7 @@ function pointFromClient(clientX:number,clientY:number,rect:DOMRect):Point{
 
 function drawGridAndGuide(
   canvas:HTMLCanvasElement,
-  paths:StrokePath[],
+  referenceStrokes:HandwritingStroke[],
   wrap:HTMLElement,
   dpr:number,
 ){
@@ -45,18 +45,11 @@ function drawGridAndGuide(
   ctx.lineWidth=GUIDE_LINE_WIDTH;
   ctx.lineCap="round";
   ctx.lineJoin="round";
-  for(const path of paths){
-    const pathElement=document.createElementNS("http://www.w3.org/2000/svg","path");
-    pathElement.setAttribute("d",path.d);
-    const total=pathElement.getTotalLength();
-    if(!Number.isFinite(total)||total<=0)continue;
-    const count=Math.max(16,Math.min(96,Math.round(total/2)));
+  for(const stroke of referenceStrokes){
+    if(stroke.length<2)continue;
     ctx.beginPath();
-    for(let i=0;i<count;i+=1){
-      const point=pathElement.getPointAtLength((total*i)/Math.max(1,count-1));
-      if(i===0)ctx.moveTo(point.x,point.y);
-      else ctx.lineTo(point.x,point.y);
-    }
+    ctx.moveTo(stroke[0].x,stroke[0].y);
+    for(let i=1;i<stroke.length;i+=1)ctx.lineTo(stroke[i].x,stroke[i].y);
     ctx.stroke();
   }
 }
@@ -173,7 +166,7 @@ export function HandwritingPractice({ character, language }: { character:string;
       guide.height=Math.round(size*dpr);
       ink.width=Math.round(size*dpr);
       ink.height=Math.round(size*dpr);
-      drawGridAndGuide(guide,paths,wrap,dpr);
+      drawGridAndGuide(guide,referenceStrokes,wrap,dpr);
       redrawUserInk(ink,strokesRef.current,wrap,dpr);
     };
 
@@ -181,7 +174,7 @@ export function HandwritingPractice({ character, language }: { character:string;
     const observer=new ResizeObserver(resize);
     observer.observe(wrap);
     return()=>observer.disconnect();
-  },[expanded,paths]);
+  },[expanded,paths,referenceStrokes]);
 
   const commitPoint=(point:Point)=>{
     const active=activeStrokeRef.current;
@@ -276,7 +269,7 @@ export function HandwritingPractice({ character, language }: { character:string;
   const nextMessageKey=(similarity:number)=>similarity>=88?"handwritingGreat":similarity>=70?"handwritingGood":"handwritingRetry";
 
   const feedbackKey=result?messageKey(result.feedbackCode):null;
-  const feedbackStrokeSpecific=result&&result.feedbackStroke!==null&&!["good","improve"].includes(result.feedbackCode);
+  const feedbackStrokeSpecific=result&&result.feedbackStroke!==null&&["endpoints","direction","length","curvature","shape"].includes(result.feedbackCode);
   const tone=result?(result.overallSimilarity>=88?"great":result.overallSimilarity>=70?"good":"retry"):"";
 
   return(
