@@ -82,7 +82,7 @@ v1.8 سه mode واقعی learner-facing را به جریان آموزشی اض�
 - **Curated vs guided:** curated prepared mnemonics are kept separate from deterministic guided scaffolds; scaffolds are prompts for creating a personal cue, not personal mnemonics themselves.
 - **Reading support:** phonetic keyword hooks are used when a curated sound anchor exists, with conservative vocabulary matching to avoid attaching an unrelated reading example.
 - **Confusion network:** common lookalikes are represented as auditable bidirectional groups with target-specific visual contrasts.
-- **Adaptive disclosure:** memory support expands for new/recovery states, collapses as recall stabilizes, and is hidden for sufficiently mastered meaning/reading.
+- **Adaptive disclosure:** memory support expands for new/recovery states, collapses as recall stabilizes, and remains available as a collapsed aid for sufficiently mastered meaning/reading.
 - **Personal-first persistence:** curated prepared mnemonics can be adopted directly; generated scaffolds are labeled and route the learner toward creating their own mnemonic.
 - **Offline support:** component data used by the memory-aid layer is included in the service-worker data cache.
 
