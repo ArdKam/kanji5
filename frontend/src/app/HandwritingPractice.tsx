@@ -199,7 +199,7 @@ export function HandwritingPractice({ character, language }: { character:string;
 
   const beginStroke=(event:PointerEvent<HTMLCanvasElement>)=>{
     if(loading||error||!referenceStrokes.length)return;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try{event.currentTarget.setPointerCapture(event.pointerId)}catch{}
     setResult(null);
     activeStrokeRef.current=[];
     const nativeEvent=event.nativeEvent as globalThis.PointerEvent;
