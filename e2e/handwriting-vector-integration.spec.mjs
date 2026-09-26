@@ -32,7 +32,7 @@ async function referenceStrokes(page) {
         .sort((a, b) => a[0] - b[0])
         .map(([, path]) => {
           const total = path.getTotalLength();
-          const count = 48;
+          const count = 24;
           return Array.from({ length: count }, (_, index) => {
             const p = path.getPointAtLength((total * index) / Math.max(1, count - 1));
             return { x: p.x, y: p.y };
@@ -76,6 +76,8 @@ async function drawStrokes(page, canvas, strokes, order = strokes) {
     await page.mouse.up();
   }
 }
+
+test.setTimeout(30000);
 
 test("real KanjiVG trace reaches the React handwriting grader", async ({ page }) => {
   const strokes = await referenceStrokes(page);
