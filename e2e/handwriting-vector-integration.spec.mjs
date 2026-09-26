@@ -14,7 +14,7 @@ async function referenceStrokes(page) {
     const svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("viewBox", "0 0 109 109");
     const byStroke = new Map();
-    const pattern = /<path\\s+[^>]*\\bid="([^"]+-s(\\d+))"[^>]*\\bd="([^"]+)"[^>]*\\/?/g;
+    const pattern = /<path\s+id="([^"]+-s(\d+))"[^>]*\bd="([^"]+)"/g;
     for (const match of source.matchAll(pattern)) {
       const strokeNumber = Number(match[2]);
       const d = String(match[3] || "").trim();
