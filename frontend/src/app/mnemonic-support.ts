@@ -1459,7 +1459,7 @@ export function getMnemonicHintPlan(stage: MnemonicHintStage, focus: MnemonicHin
     case "stable":
       return { stage, focus, expandedByDefault: false, showReading: true, showVocabulary: false, showConfusable: false, preparedMode: "collapsed" };
     case "mastered":
-      return { stage, focus, expandedByDefault: false, showReading: false, showVocabulary: false, showConfusable: false, preparedMode: "hidden" };
+      return { stage, focus, expandedByDefault: false, showReading: false, showVocabulary: false, showConfusable: false, preparedMode: "collapsed" };
   }
 }
 
