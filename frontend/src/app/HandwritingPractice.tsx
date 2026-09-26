@@ -195,7 +195,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
       guide.height=Math.round(size*dpr);
       ink.width=Math.round(size*dpr);
       ink.height=Math.round(size*dpr);
-      const gradeFocusIndex=feedbackStrokeIndex(result||liveFeedback?.grade||{});
+      const gradeFocusIndex=result?feedbackStrokeIndex(result):-1;
       const liveFocusIndex=liveFeedback?liveFeedback.strokeNumber-1:-1;
       const feedbackIndex=gradeFocusIndex>=0?gradeFocusIndex:liveFocusIndex;
       const feedbackKind=feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode);
@@ -268,7 +268,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
         setLiveFeedback(shouldPresentStrokeFeedback(strokeGrade)?{strokeNumber,grade:strokeGrade}:null);
       }else setLiveFeedback(null);
     }else if(inkCanvasRef.current&&wrapRef.current){
-      redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current);
+      redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current,-1);
     }
     activeStrokeRef.current=[];
     try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch{}
@@ -276,7 +276,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
 
   const cancelStroke=(event:PointerEvent<HTMLCanvasElement>)=>{
     activeStrokeRef.current=[];
-    if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current);
+    if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current,-1);
     try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch{}
   };
 
@@ -286,7 +286,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     setStrokes([]);
     setResult(null);
     setLiveFeedback(null);
-    if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,[],wrapRef.current,dprRef.current);
+    if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,[],wrapRef.current,dprRef.current,-1);
   };
 
   const grade=()=>{
