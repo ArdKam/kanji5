@@ -3,7 +3,7 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StructureExplorer } from "./StructureExplorer";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getKanjiByComponent, getKanjiByRadical, getMnemonic, getRadicalInfo, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type KanjiDictionaryResult, type RadicalInfo, type VocabularyItem } from "./engine";
+import { getComponentInfo, getKanjiByComponent, getKanjiByRadical, getMnemonic, getRadicalInfo, getStructureInsights, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type KanjiDictionaryResult, type RadicalInfo, type StructureInsights, type VocabularyItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
