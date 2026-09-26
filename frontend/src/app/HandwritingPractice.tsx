@@ -1,18 +1,34 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
+import { gradeHandwriting, type HandwritingFeedbackCode, type HandwritingPoint, type HandwritingStroke } from "./handwriting-grader";
 
-type Point = { x: number; y: number };
+const CANVAS_COORDINATE_SIZE = 109;
+const USER_STROKE_WIDTH = 5;
 
-function drawUserStrokes(ctx: CanvasRenderingContext2D, strokes: Point[][], scale: number) {
+function handwritingFeedback(code: HandwritingFeedbackCode, language: Language): string {
+  switch (code) {
+    case "stroke-count": return t("handwritingFeedbackStrokeCount", language);
+    case "stroke-order": return t("handwritingFeedbackOrder", language);
+    case "placement": return t("handwritingFeedbackPlacement", language);
+    case "endpoints": return t("handwritingFeedbackEndpoints", language);
+    case "length": return t("handwritingFeedbackLength", language);
+    case "direction": return t("handwritingFeedbackDirection", language);
+    case "curvature": return t("handwritingFeedbackCurvature", language);
+    case "shape": return t("handwritingFeedbackShape", language);
+    default: return "";
+  }
+}
+
+function drawUserStrokes(ctx: CanvasRenderingContext2D, strokes: HandwritingStroke[], scale: number) {
   ctx.save();
   ctx.scale(scale, scale);
   ctx.strokeStyle = "#1c1a17";
-  ctx.lineWidth = 8;
+  ctx.lineWidth = USER_STROKE_WIDTH;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   for (const stroke of strokes) {
-    if (!stroke.length) continue;
+    if (stroke.length < 2) continue;
     ctx.beginPath();
     ctx.moveTo(stroke[0].x, stroke[0].y);
     for (let i = 1; i < stroke.length; i += 1) ctx.lineTo(stroke[i].x, stroke[i].y);
@@ -21,58 +37,123 @@ function drawUserStrokes(ctx: CanvasRenderingContext2D, strokes: Point[][], scal
   ctx.restore();
 }
 
-function scoreDrawing(strokes: Point[][], paths: StrokePath[], size: number): number {
-  if (!strokes.length || !paths.length) return 0;
-  const target = document.createElement("canvas");
-  const user = document.createElement("canvas");
-  target.width = target.height = user.width = user.height = size;
-  const targetCtx = target.getContext("2d");
-  const userCtx = user.getContext("2d");
-  if (!targetCtx || !userCtx) return 0;
-
-  targetCtx.fillStyle = "#1c1a17";
-  const scale = size / 109;
-  targetCtx.save();
-  targetCtx.scale(scale, scale);
-  for (const path of paths) targetCtx.fill(new Path2D(path.d));
-  targetCtx.restore();
-
-  drawUserStrokes(userCtx, strokes, scale);
-
-  const targetPixels = targetCtx.getImageData(0, 0, size, size).data;
-  const userPixels = userCtx.getImageData(0, 0, size, size).data;
-  let targetCount = 0;
-  let userCount = 0;
-  let intersection = 0;
-  for (let i = 3; i < targetPixels.length; i += 4) {
-    const targetInk = targetPixels[i] > 20;
-    const userInk = userPixels[i] > 20;
-    if (targetInk) targetCount += 1;
-    if (userInk) userCount += 1;
-    if (targetInk && userInk) intersection += 1;
+function drawReferenceStrokes(ctx: CanvasRenderingContext2D, paths: StrokePath[], scale: number) {
+  ctx.save();
+  ctx.scale(scale, scale);
+  ctx.strokeStyle = "rgba(116,109,97,.16)";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  for (const path of paths) {
+    ctx.stroke(new Path2D(path.d));
   }
-  if (!targetCount || !userCount || !intersection) return 0;
-  const overlapScore = 2 * intersection / (targetCount + userCount);
-  const strokeRatio = Math.min(strokes.length, paths.length) / Math.max(strokes.length, paths.length);
-  return Math.round((overlapScore * 0.82 + strokeRatio * 0.18) * 100);
+  ctx.restore();
 }
 
+function sampleReferenceStrokes(svgText: string, paths: StrokePath[], pointCount = 48): HandwritingStroke[] {
+  if (typeof document === "undefined" || !svgText || !paths.length) return [];
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const holder = document.createElement("div");
+  holder.setAttribute("aria-hidden", "true");
+  holder.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:109px;height:109px;visibility:hidden;";
+
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 109 109");
+  svg.setAttribute("width", "109");
+  svg.setAttribute("height", "109");
+
+  const sourceByStroke = new Map<number, SVGPathElement>();
+  const pattern = /<path\s+id="([^"]+-s(\d+))"[^>]*\bd="([^"]+)"/g;
+  for (const match of svgText.matchAll(pattern)) {
+    const strokeNumber = Number(match[2]);
+    const d = String(match[3] || "").trim();
+    if (!Number.isInteger(strokeNumber) || strokeNumber < 1 || !d) continue;
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("id", match[1]);
+    path.setAttribute("d", d);
+    svg.appendChild(path);
+    sourceByStroke.set(strokeNumber, path);
+  }
+
+  if (!sourceByStroke.size) return [];
+
+  holder.appendChild(svg);
+  document.body.appendChild(holder);
+  try {
+    const count = Math.max(8, Math.min(96, Math.round(pointCount)));
+    return paths.map(path => {
+      const sourcePath = sourceByStroke.get(path.strokeNumber);
+      if (!sourcePath) return [];
+      const total = sourcePath.getTotalLength();
+      if (!Number.isFinite(total) || total <= 0) return [];
+      return Array.from({ length: count }, (_, index) => {
+        const point = sourcePath.getPointAtLength((total * index) / Math.max(1, count - 1));
+        return { x: point.x, y: point.y } as HandwritingPoint;
+      });
+    }).filter(stroke => stroke.length >= 2);
+  } finally {
+    holder.remove();
+  }
+}
 export function HandwritingPractice({ character, language }: { character: string; language: Language }) {
   const normalized = normalizeStrokeOrderCharacter(character);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const strokesRef = useRef<HandwritingStroke[]>([]);
+  const currentStrokeRef = useRef<HandwritingStroke>([]);
+  const drawingPointerIdRef = useRef<number | null>(null);
   const [paths, setPaths] = useState<StrokePath[]>([]);
-  const [strokes, setStrokes] = useState<Point[][]>([]);
-  const [currentStroke, setCurrentStroke] = useState<Point[]>([]);
+  const [referenceStrokes, setReferenceStrokes] = useState<HandwritingStroke[]>([]);
+  const [strokeCount, setStrokeCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<number | null>(null);
+  const [result, setResult] = useState<ReturnType<typeof gradeHandwriting> | null>(null);
   const [expanded, setExpanded] = useState(false);
+
+  const redrawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const size = Math.max(1, Math.round(rect.width));
+    const ratio = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const expectedWidth = Math.round(size * ratio);
+    const expectedHeight = Math.round(size * ratio);
+    if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
+      canvas.width = expectedWidth;
+      canvas.height = expectedHeight;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    const grid = size / 4;
+    ctx.strokeStyle = "rgba(116,109,97,.13)";
+    ctx.lineWidth = 1;
+    for (let i = 1; i < 4; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(i * grid, 0);
+      ctx.lineTo(i * grid, size);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i * grid);
+      ctx.lineTo(size, i * grid);
+      ctx.stroke();
+    }
+    if (paths.length) drawReferenceStrokes(ctx, paths, size / CANVAS_COORDINATE_SIZE);
+    drawUserStrokes(ctx, strokesRef.current, size / CANVAS_COORDINATE_SIZE);
+    if (currentStrokeRef.current.length >= 2) {
+      drawUserStrokes(ctx, [currentStrokeRef.current], size / CANVAS_COORDINATE_SIZE);
+    }
+  }, [paths]);
 
   useEffect(() => {
     let active = true;
     setPaths([]);
-    setStrokes([]);
-    setCurrentStroke([]);
+    setReferenceStrokes([]);
+    strokesRef.current = [];
+    currentStrokeRef.current = [];
+    drawingPointerIdRef.current = null;
+    setStrokeCount(0);
     setResult(null);
     setError("");
     if (!normalized) return () => { active = false; };
@@ -85,7 +166,12 @@ export function HandwritingPractice({ character, language }: { character: string
       .then(svg => {
         const next = parseStrokePaths(svg);
         if (!next.length) throw new Error("No stroke paths found");
-        if (active) setPaths(next);
+        const sampled = sampleReferenceStrokes(svg, next);
+        if (!sampled.length || sampled.length !== next.length) throw new Error("Reference sampling failed");
+        if (active) {
+          setPaths(next);
+          setReferenceStrokes(sampled);
+        }
       })
       .catch(() => {
         if (active) setError(t("handwritingUnavailable", language));
@@ -98,73 +184,112 @@ export function HandwritingPractice({ character, language }: { character: string
 
   useEffect(() => {
     if (!expanded) return;
+    redrawCanvas();
+  }, [expanded, redrawCanvas]);
+
+  useEffect(() => {
+    if (!expanded || typeof ResizeObserver === "undefined") return;
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const size = Math.max(1, Math.round(rect.width));
-    const ratio = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    canvas.width = Math.round(size * ratio);
-    canvas.height = Math.round(size * ratio);
+    const container = canvas?.parentElement;
+    if (!container) return;
+    const observer = new ResizeObserver(() => redrawCanvas());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [expanded, redrawCanvas]);
+
+  const pointFromClient = useCallback((clientX: number, clientY: number, rect: DOMRect) => ({
+    x: ((clientX - rect.left) / Math.max(1, rect.width)) * CANVAS_COORDINATE_SIZE,
+    y: ((clientY - rect.top) / Math.max(1, rect.height)) * CANVAS_COORDINATE_SIZE,
+  }), []);
+
+  const appendPointerPoints = useCallback((event: PointerEvent<HTMLCanvasElement>): HandwritingPoint[] => {
+    const nativeEvent = event.nativeEvent as globalThis.PointerEvent;
+    const coalesced = typeof nativeEvent.getCoalescedEvents === "function" ? nativeEvent.getCoalescedEvents() : [];
+    const events = coalesced.length ? [...coalesced, nativeEvent] : [nativeEvent];
+    const rect = event.currentTarget.getBoundingClientRect();
+    const points = events.map(point => pointFromClient(point.clientX, point.clientY, rect));
+    const appended: HandwritingPoint[] = [];
+    for (const point of points) {
+      const previous = currentStrokeRef.current.at(-1);
+      if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) < 0.25) continue;
+      currentStrokeRef.current.push(point);
+      appended.push(point);
+    }
+    return appended;
+  }, [pointFromClient]);
+
+  const startStroke = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (loading || error || !paths.length || !referenceStrokes.length) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drawingPointerIdRef.current = event.pointerId;
+    setResult(null);
+    currentStrokeRef.current = [];
+    appendPointerPoints(event);
+    redrawCanvas();
+  };
+
+  const moveStroke = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (drawingPointerIdRef.current !== event.pointerId || !currentStrokeRef.current.length) return;
+    const previous = currentStrokeRef.current.at(-1);
+    const appended = appendPointerPoints(event);
+    if (!previous || !appended.length) return;
+
+    const canvas = event.currentTarget;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(ratio, ratio);
-    const grid = size / 4;
-    ctx.strokeStyle = "rgba(116,109,97,.13)";
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 4; i += 1) {
-      ctx.beginPath(); ctx.moveTo(i * grid, 0); ctx.lineTo(i * grid, size); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, i * grid); ctx.lineTo(size, i * grid); ctx.stroke();
+    const rect = canvas.getBoundingClientRect();
+    const size = Math.max(1, rect.width);
+    const scale = size / CANVAS_COORDINATE_SIZE;
+    const ratio = canvas.width / Math.max(1, size);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.strokeStyle = "#1c1a17";
+    ctx.lineWidth = USER_STROKE_WIDTH;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    let from = previous;
+    for (const point of appended) {
+      if (from.x === point.x && from.y === point.y) continue;
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(point.x, point.y);
+      from = point;
     }
-    if (paths.length) {
-      const scale = size / 109;
-      ctx.save();
-      ctx.scale(scale, scale);
-      ctx.fillStyle = "rgba(116,109,97,.12)";
-      for (const path of paths) ctx.fill(new Path2D(path.d));
-      ctx.restore();
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  const finishStroke = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (drawingPointerIdRef.current !== event.pointerId) return;
+    appendPointerPoints(event);
+    const stroke = currentStrokeRef.current.slice();
+    currentStrokeRef.current = [];
+    drawingPointerIdRef.current = null;
+    if (stroke.length > 1) {
+      strokesRef.current.push(stroke);
+      setStrokeCount(strokesRef.current.length);
     }
-    drawUserStrokes(ctx, strokes, size / 109);
-    if (currentStroke.length) drawUserStrokes(ctx, [currentStroke], size / 109);
-  }, [currentStroke, expanded, paths, strokes]);
-
-  const pointFromEvent = (event: PointerEvent<HTMLCanvasElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / Math.max(1, rect.width)) * 109;
-    const y = ((event.clientY - rect.top) / Math.max(1, rect.height)) * 109;
-    return { x, y };
-  };
-
-  const startStroke = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (loading || error || !paths.length) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setResult(null);
-    setCurrentStroke([pointFromEvent(event)]);
-  };
-
-  const moveStroke = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!currentStroke.length) return;
-    const point = pointFromEvent(event);
-    setCurrentStroke(previous => previous.concat(point));
-  };
-
-  const finishStroke = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!currentStroke.length) return;
-    const stroke = currentStroke.slice();
-    if (stroke.length > 1) setStrokes(previous => previous.concat([stroke]));
-    setCurrentStroke([]);
     try { event.currentTarget.releasePointerCapture(event.pointerId); } catch {}
+    redrawCanvas();
   };
 
-  const clear = () => { setStrokes([]); setCurrentStroke([]); setResult(null); };
+  const clear = () => {
+    strokesRef.current = [];
+    currentStrokeRef.current = [];
+    drawingPointerIdRef.current = null;
+    setStrokeCount(0);
+    setResult(null);
+    redrawCanvas();
+  };
 
   const grade = () => {
-    const value = scoreDrawing(strokes, paths, 220);
+    const value = gradeHandwriting(strokesRef.current, referenceStrokes);
     setResult(value);
   };
 
   return (
-    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)}>
+    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)} data-handwriting-grader="vector-v1" data-stroke-count={String(strokeCount)} data-feedback-code={result?.feedbackCode ?? ""} data-feedback-stroke={result?.feedbackStroke == null ? "" : String(result.feedbackStroke + 1)}>
       <button
         className="handwriting-header"
         type="button"
@@ -177,7 +302,7 @@ export function HandwritingPractice({ character, language }: { character: string
         </span>
         <span className="handwriting-header-end">
           <span className="handwriting-stroke-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
-          <span className="handwriting-toggle-icon" aria-hidden="true">⌄</span>
+          <span className="handwriting-toggle-icon" aria-hidden="true">{expanded ? "⌃" : "⌄"}</span>
         </span>
       </button>
       {expanded ? (
@@ -198,13 +323,27 @@ export function HandwritingPractice({ character, language }: { character: string
                 />
               </div>
               <div className="handwriting-actions">
-                <button className="button secondary" type="button" onClick={clear} disabled={!strokes.length && !currentStroke.length}>{t("clearDrawing", language)}</button>
-                <button className="button primary" type="button" onClick={grade} disabled={!strokes.length}>{t("gradeDrawing", language)}</button>
+                <button className="button secondary" type="button" onClick={clear} disabled={!strokeCount}>{t("clearDrawing", language)}</button>
+                <button className="button primary" type="button" onClick={grade} disabled={!strokeCount}>{t("gradeDrawing", language)}</button>
               </div>
               {result !== null ? (
-                <div className={"handwriting-result " + (result >= 82 ? "great" : result >= 65 ? "good" : "retry")} role="status">
-                  <strong>{formatNumber(result, language)}%</strong>
-                  <span>{result >= 82 ? t("handwritingGreat", language) : result >= 65 ? t("handwritingGood", language) : t("handwritingRetry", language)}</span>
+                <div className={"handwriting-result " + (result.score >= 88 ? "great" : result.score >= 75 ? "good" : "retry")} role="status" data-score={String(result.score)}>
+                  <strong>{t("handwritingSimilarity", language)} {formatNumber(result.score, language)}%</strong>
+                  <span>
+                    {result.score >= 88
+                      ? t("handwritingGreat", language)
+                      : result.score >= 75
+                        ? t("handwritingGood", language)
+                        : t("handwritingRetry", language)}
+                  </span>
+                  {result.feedbackCode !== "good" && result.feedbackCode !== "improve" && result.feedbackCode !== "empty" && result.feedbackCode !== "unavailable" ? (
+                    <small className="handwriting-feedback-detail">
+                      {result.feedbackStroke !== null
+                        ? (language === "fa" ? "حرکت " : "Stroke ") + formatNumber(result.feedbackStroke + 1, language) + ": "
+                        : ""}
+                      {handwritingFeedback(result.feedbackCode, language)}
+                    </small>
+                  ) : null}
                 </div>
               ) : null}
             </>

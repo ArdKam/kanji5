@@ -950,7 +950,7 @@
 }
 .handwriting-practice.is-expanded .handwriting-toggle-icon{transform:rotate(0deg);}
 .handwriting-canvas-wrap{
-  width:min(280px,100%);
+  width:min(300px,100%);
   aspect-ratio:1;
   margin:0 auto;
   overflow:hidden;
@@ -970,7 +970,7 @@
   grid-template-columns:1fr 1fr;
   gap:7px;
 }
-.handwriting-actions .button{min-height:42px;padding:6px 10px;font-size:10px;}
+.handwriting-actions .button{min-height:44px;padding:7px 10px;font-size:10px;}
 .handwriting-status{
   min-height:42px;
   display:grid;
@@ -981,9 +981,10 @@
 .handwriting-error{color:var(--shu);}
 .handwriting-result{
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   justify-content:center;
-  gap:9px;
+  gap:7px 9px;
   padding:8px 10px;
   border:1px solid var(--line);
   border-radius:12px;
@@ -993,9 +994,10 @@
 .handwriting-result strong{font-size:1rem;}
 .handwriting-result.great{border-color:#b8d0a0;}
 .handwriting-result.good{border-color:#d6c9a3;}
+.handwriting-feedback-detail{width:100%;color:var(--mute);font-size:9px;line-height:1.5;text-align:center;}
 .handwriting-result.retry{border-color:#f0b4b0;}
 @media(max-width:520px){
-  .handwriting-canvas-wrap{width:min(250px,100%);}
+  .handwriting-canvas-wrap{width:min(270px,100%);}
   .handwriting-header p{max-width:220px;}
   .handwriting-header-end{gap:4px;}
   .handwriting-stroke-count{font-size:8px;padding:4px 6px;}

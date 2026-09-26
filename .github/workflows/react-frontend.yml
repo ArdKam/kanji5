@@ -20,6 +20,12 @@ on:
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
+      - "e2e/handwriting-legacy-benchmark.spec.mjs"
+      - "e2e/handwriting-vector-integration.spec.mjs"
+      - "e2e/handwriting-vector-calibration.spec.mjs"
+      - "scripts/test-handwriting-grader.mjs"
+      - "frontend/src/app/handwriting-grader.js"
+      - "frontend/src/app/handwriting-grader.d.ts"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
@@ -72,15 +78,45 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
+      - name: Sync generated React artifact to PR branch
+        if: github.event_name == 'pull_request' && github.head_ref != ''
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- react-dist; then
+            echo "react-dist already matches the current build."
+          else
+            git add react-dist
+            git commit -m "chore: sync generated React artifact"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
+      - name: Upload generated React artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanji5-react-dist
+          path: react-dist/
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
       - name: Install Chromium
         working-directory: .
         run: npx playwright install chromium
+      - name: Run handwriting grader unit contract
+        working-directory: .
+        run: node scripts/test-handwriting-grader.mjs
+      - name: Run handwriting grader integration gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
+      - name: Run handwriting vector calibration gate
+        working-directory: .
+        run: npx playwright test --timeout=30000 --retries=0 e2e/handwriting-vector-calibration.spec.mjs
+      - name: Run handwriting legacy benchmark
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
       - name: Validate migration boundary
         working-directory: .
         run: node scripts/test-react-migration.mjs
@@ -108,9 +144,6 @@ jobs:
       - name: Run Lovable-style experience navigation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
-      - name: Run account shell gate
-        working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
@@ -120,3 +153,6 @@ jobs:
       - name: Run Review/Practice separation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
+      - name: Run account shell gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
