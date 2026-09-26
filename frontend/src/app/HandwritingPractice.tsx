@@ -251,7 +251,7 @@ export function HandwritingPractice({ character, language }: { character: string
   };
 
   return (
-    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)}>
+    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)} data-handwriting-grader="vector-v1">
       <button
         className="handwriting-header"
         type="button"
