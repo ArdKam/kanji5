@@ -1323,6 +1323,12 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     const components = componentResolver?.(character) ?? [];
     return scorePreparedMnemonic(CURATED_PREPARED_MNEMONICS[character]?.[0], character, components);
   });
+  const generated = items.filter(item => !CURATED_PREPARED_MNEMONICS[String(item.character)]);
+  const generatedScores = generated.map(item => {
+    const character = String(item.character);
+    const components = componentResolver?.(character) ?? [];
+    return scorePreparedMnemonic(buildPreparedMnemonic(item, components), character, components);
+  });
   const count = scores.length;
   const rate = (key) => count ? scores.filter(score => Boolean(score[key])).length / count : 0;
   const criticalFailures = scores.filter(score => !score.valid || !score.minLength || score.source !== "curated").length;
@@ -1335,6 +1341,8 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     total: items.length,
     curated: count,
     generated: Math.max(0, items.length - count),
+    generatedSceneV2: generated.filter(item => buildPreparedMnemonic(item, componentResolver?.(String(item.character)) ?? []).generationStrategy === "scene-v2").length,
+    generatedGenericTemplateLeaks: generatedScores.filter(score => score.genericTemplate).length,
     criticalFailures,
     genericTemplateLeaks,
     concreteAnchorFa,
