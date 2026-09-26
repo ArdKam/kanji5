@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
-import { buildPreparedMnemonic, type PreparedMnemonic } from "./prepared-mnemonic-core";
+import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
+import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
 import { AccountButton, AccountDialog } from "./AccountDialog";
