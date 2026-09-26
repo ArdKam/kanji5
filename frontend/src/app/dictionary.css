@@ -309,7 +309,8 @@
   backdrop-filter:blur(4px);
   -webkit-backdrop-filter:blur(4px);
 }
-.dictionary-card-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}
+@media (max-width:520px){
+  .dictionary-card-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}
   .dictionary-card{padding:22px 18px 20px;}
 }
 @media (prefers-reduced-motion:reduce){
