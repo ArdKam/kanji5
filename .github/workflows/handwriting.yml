@@ -1,0 +1,64 @@
+name: Handwriting verification
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/app/HandwritingPractice.tsx"
+      - "frontend/src/app/stroke-order-core.ts"
+      - "frontend/src/app/handwriting-*.ts"
+      - "frontend/src/app/handwriting-*.js"
+      - "e2e/handwriting-*.spec.mjs"
+      - "e2e/fixtures/handwriting-*.json"
+      - "scripts/test-handwriting-*.mjs"
+      - ".github/workflows/handwriting.yml"
+      - "react-dist/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/src/app/HandwritingPractice.tsx"
+      - "frontend/src/app/stroke-order-core.ts"
+      - "frontend/src/app/handwriting-*.ts"
+      - "frontend/src/app/handwriting-*.js"
+      - "e2e/handwriting-*.spec.mjs"
+      - "e2e/fixtures/handwriting-*.json"
+      - "scripts/test-handwriting-*.mjs"
+      - ".github/workflows/handwriting.yml"
+      - "react-dist/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --no-audit --no-fund
+      - name: Typecheck frontend
+        working-directory: frontend
+        run: npm run typecheck
+      - name: Run handwriting architecture boundary
+        run: node scripts/test-handwriting-boundary.mjs
+      - name: Run pure grader contract
+        run: node scripts/test-handwriting-grader.mjs
+      - name: Build React artifact
+        working-directory: frontend
+        run: npm run build
+      - name: Install root test dependencies
+        run: npm ci
+      - name: Run complete repository test suite
+        run: npm test
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Run handwriting vector calibration
+        run: npx playwright test --timeout=30000 --retries=0 e2e/handwriting-vector-calibration.spec.mjs
+      - name: Run handwriting browser integration
+        run: npx playwright test --timeout=45000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
+      - name: Run handwriting legacy benchmark
+        run: npx playwright test --timeout=30000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
