@@ -194,6 +194,15 @@ function lengthScore(user, reference) {
   return Math.exp(-Math.abs(Math.log(userLength / referenceLength)) / 0.34);
 }
 
+function lengthIntegrityScore(perStroke) {
+  if (!perStroke.length) return 0;
+  let product = 1;
+  for (const stroke of perStroke) {
+    product *= clamp(Number(stroke.length) || 0);
+  }
+  return Math.pow(Math.max(EPSILON, product), 1 / perStroke.length);
+}
+
 function strokeGeometryScore(user, reference, diagonal) {
   const shape = shapeScore(user, reference, diagonal);
   const endpoints = endpointScore(user, reference, diagonal);
@@ -315,12 +324,13 @@ export function gradeHandwriting(userStrokes, referenceStrokes, options = {}) {
   const order = orderScore(alignedUser, reference);
   const placement = placementScore(user, reference, settings);
 
+  const lengthIntegrity = lengthIntegrityScore(perStroke);
   const rawScore =
     matchedAverage * 0.72 +
     order * 0.13 +
     placement * 0.15;
 
-  const score = Math.round(clamp(rawScore * countFactor) * 100);
+  const score = Math.round(clamp(rawScore * countFactor * Math.pow(lengthIntegrity, 0.8)) * 100);
   const weakest = [...perStroke].sort((a, b) => a.score - b.score)[0];
   const localFeedback = weakest ? feedbackForStroke(weakest, weakest.index) : null;
   const feedbackCode =
@@ -346,6 +356,7 @@ export function gradeHandwriting(userStrokes, referenceStrokes, options = {}) {
     },
     orderScore: order,
     placementScore: placement,
+    lengthIntegrity,
     perStroke,
     feedbackCode,
     feedbackStroke: localFeedback?.stroke ?? (weakest?.index ?? null),
