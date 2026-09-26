@@ -118,6 +118,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const [error,setError]=useState("");
   const [result,setResult]=useState<HandwritingGrade|null>(null);
   const [liveFeedback,setLiveFeedback]=useState<{strokeNumber:number;grade:HandwritingStrokeGrade}|null>(null);
+  const [lastLiveGrade,setLastLiveGrade]=useState<HandwritingStrokeGrade|null>(null);
   const [expanded,setExpanded]=useState(false);
   const [hintLevel,setHintLevel]=useState(()=>initialHintLevel(learningSignal));
 
@@ -130,6 +131,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     setStrokes([]);
     setResult(null);
     setLiveFeedback(null);
+    setLastLiveGrade(null);
     setError("");
     setHintLevel(initialHintLevel(learningSignal));
     if(!normalized)return()=>{active=false};
@@ -213,6 +215,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     try{event.currentTarget.setPointerCapture(event.pointerId)}catch{}
     setResult(null);
     setLiveFeedback(null);
+    setLastLiveGrade(null);
     activeStrokeRef.current=[];
     const nativeEvent=event.nativeEvent as globalThis.PointerEvent;
     commitPoint(pointFromClient(nativeEvent.clientX,nativeEvent.clientY,event.currentTarget.getBoundingClientRect()));
@@ -241,6 +244,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
       const reference=referenceStrokes[strokeNumber-1];
       if(reference){
         const strokeGrade=gradeHandwritingStroke(committed,reference);
+        setLastLiveGrade(strokeGrade);
         setLiveFeedback(shouldPresentStrokeFeedback(strokeGrade)?{strokeNumber,grade:strokeGrade}:null);
       }else setLiveFeedback(null);
     }else if(inkCanvasRef.current&&wrapRef.current){
@@ -262,6 +266,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     setStrokes([]);
     setResult(null);
     setLiveFeedback(null);
+    setLastLiveGrade(null);
     if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,[],wrapRef.current,dprRef.current);
   };
 
@@ -294,7 +299,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const tone=result?(result.overallSimilarity>=88?"great":result.overallSimilarity>=70?"good":"retry"):"";
 
   return(
-    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"}>
+    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"} data-last-live-grade={lastLiveGrade?String(lastLiveGrade.feedbackCode)+":"+String(Math.round(lastLiveGrade.similarity*100))+":"+String(lastLiveGrade.scoreReliability)+":"+String(lastLiveGrade.actionable):"none"}>
       <button
         className="handwriting-header"
         type="button"
