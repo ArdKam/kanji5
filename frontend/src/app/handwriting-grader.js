@@ -191,7 +191,7 @@ function shapeScore(user,reference,diagonal){
   const indexed=errors.reduce((sum,value)=>sum+value,0)/count;
   const p90=percentile(errors,0.90);
   const chamfer=(nearestMean(user,reference)+nearestMean(reference,user))/2;
-  const scale=Math.max(pathLength(reference)*0.28,diagonal*0.035,1);
+  const scale=Math.max(pathLength(reference)*0.35,diagonal*0.05,1);
   const error=(indexed*0.52+chamfer*0.26+p90*0.22)/scale;
   return Math.exp(-error*2.7);
 }
