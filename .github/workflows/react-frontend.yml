@@ -25,6 +25,7 @@ on:
       - "react-entry.js"
       - "react-dist/**"
       - "sw.js"
+      - "account-fallback.js"
   push:
     branches:
       - main
