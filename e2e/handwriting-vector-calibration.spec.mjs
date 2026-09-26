@@ -70,6 +70,7 @@ test("vector grader calibration remains deterministic across meaningful handwrit
     largeScale:gradeHandwriting(scale(school,1.45),school),
     grossShape:gradeHandwriting(grossShape(school),school),
   };
+  console.log(JSON.stringify({jitteredFeatures:cases.jittered.perStroke,placement:cases.jittered.placementScore,order:cases.jittered.orderScore},null,2));
   const report=Object.fromEntries(Object.entries(cases).map(([name,result])=>[name,{
     score:result.overallSimilarity,
     order:result.orderScore,
