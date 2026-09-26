@@ -123,6 +123,7 @@ function drawSegment(canvas:HTMLCanvasElement,wrap:HTMLElement,dpr:number,from:P
 type HandwritingLearningSignal={state?:string;confidence?:number;mastery?:number;score?:number};
 type HandwritingGradeCommit = HandwritingGrade;
 
+// Handwriting remains presentation-only; learning integration is injected by the parent boundary.
 export function HandwritingPractice({ character, language, learningSignal, onGradeRecorded }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal; onGradeRecorded?:(grade:HandwritingGradeCommit)=>void|Promise<unknown> }){
   const normalized=normalizeStrokeOrderCharacter(character);
   const wrapRef=useRef<HTMLDivElement|null>(null);
