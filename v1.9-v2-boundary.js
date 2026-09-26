@@ -248,7 +248,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
