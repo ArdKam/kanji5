@@ -10,18 +10,13 @@ if(!/\.experience-tab\.active/.test(css)){
 }
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
-if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react\.css\?v=/.test(entry)){
-  throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
-}
-console.log("React entry uses cache-busted shipped runtime assets.");
-
-if(!/react-dist\\/kanji5-react\\.js\\?v=20260926-handwriting-v1/.test(entry)||!/react-dist\\/kanji5-react\\.css\\?v=20260926-handwriting-v1/.test(entry)){
+if(!entry.includes("react-dist/kanji5-react.js?v=20260926-handwriting-v1")||!entry.includes("react-dist/kanji5-react.css?v=20260926-handwriting-v1")){
   throw new Error("REACT_ENTRY_HANDWRITING_RELEASE_CACHE_VERSION_MISMATCH");
 }
 const bootstrap=fs.readFileSync("app-bootstrap.js","utf8");
-if(!/sw\\.js\\?v=132/.test(bootstrap)) throw new Error("APP_BOOTSTRAP_SW_CACHE_VERSION_MISMATCH");
+if(!bootstrap.includes("./sw.js?v=132")) throw new Error("APP_BOOTSTRAP_SW_CACHE_VERSION_MISMATCH");
 const sw=fs.readFileSync("sw.js","utf8");
-if(!/const CACHE='kanji5-shell-v160'/.test(sw)) throw new Error("SERVICE_WORKER_SHELL_CACHE_VERSION_MISMATCH");
+if(!sw.includes("const CACHE='kanji5-shell-v160';")) throw new Error("SERVICE_WORKER_SHELL_CACHE_VERSION_MISMATCH");
 console.log("Handwriting release cache-busting contract is consistent.");
 const reactJs=fs.readFileSync("react-dist/kanji5-react.js","utf8");
 try{
