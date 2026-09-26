@@ -153,13 +153,13 @@ function curvatureScore(user,reference){
   const a=turningAngles(user), b=turningAngles(reference);
   if(!a.length||!b.length) return 0.5;
   const count=Math.min(a.length,b.length);
-  const tolerance=0.10;
+  const tolerance=0.18;
   let error=0;
   for(let i=0;i<count;i+=1){
     const ai=a[Math.floor(i*a.length/count)], bi=b[Math.floor(i*b.length/count)];
     error += Math.max(0,Math.abs(ai-bi)-tolerance);
   }
-  return clamp(1-(error/count)/1.20);
+  return clamp(1-(error/count)/1.45);
 }
 
 function nearestMean(source,target){
@@ -305,11 +305,11 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
     const curvature=curvatureScore(aligned[i],reference[i]);
     const lengthInfo=meaningfulLengthPenalty(aligned[i],reference[i]);
     const baseSimilarity=clamp(
-      shape*0.45+
+      shape*0.50+
       endpoints*0.15+
       length*0.10+
       direction*0.15+
-      curvature*0.15
+      curvature*0.10
     );
     const similarity=clamp(baseSimilarity*lengthInfo.penalty);
     perStroke.push({
