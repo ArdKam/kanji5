@@ -66,8 +66,9 @@ export function DictionaryKanjiCard({
 
     const containerRect = scrollContainer.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
-    const edgePadding = 10;
-    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - edgePadding;
+    const optionNav = scrollContainer.querySelector<HTMLElement>(".dictionary-section-nav");
+    const stickyOffset = (optionNav?.getBoundingClientRect().height ?? 0) + 12;
+    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - stickyOffset;
     const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
     const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
