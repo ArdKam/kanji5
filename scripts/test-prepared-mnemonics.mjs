@@ -44,6 +44,16 @@ assert.ok(quality.actionSceneEnRate >= 0.25, `Curated English mnemonics should c
 const generatedTarget = catalog.find(item => !core.CURATED_PREPARED_MNEMONICS[item.character]);
 assert.ok(generatedTarget, "At least one Jōyō kanji must remain on generated fallback coverage");
 const generatedSample = core.buildPreparedMnemonic(generatedTarget, ["木", "氵"]);
+const waterScene = core.buildPreparedMnemonic({ character: "河", meaning: "river" }, ["氵", "可"]);
+assert.match(waterScene.fa, /آب|خیس|جابه‌جا/);
+assert.match(waterScene.en, /water|moves|carries/i);
+const movementScene = core.buildPreparedMnemonic({ character: "遠", meaning: "far" }, ["辶", "方"]);
+assert.match(movementScene.fa, /مسافر|راه|مقصد|جلو/);
+assert.match(movementScene.en, /traveler|destination|moves|sets off/i);
+const fallbackScene = core.buildPreparedMnemonic({ character: "謎", meaning: "mystery" }, ["言", "米"]);
+assert.match(fallbackScene.fa, /گفتار|برنج|حرکت|تغییر|معنی/);
+assert.match(fallbackScene.en, /speech|rice|movement|change|meaning/i);
+
 assert.equal(generatedSample.source, "generated");
 assert.equal(generatedSample.generationStrategy, "scene-v2");
 assert.doesNotMatch(generatedSample.fa, /یک تصویر واحد از/);
