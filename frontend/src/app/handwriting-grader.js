@@ -267,9 +267,9 @@ function orderScore(user, reference) {
 }
 
 function feedbackForStroke(stroke, index) {
+  if (stroke.direction < 0.65) return { code: "direction", stroke: index };
   if (stroke.endpoints < 0.65) return { code: "endpoints", stroke: index };
   if (stroke.length < 0.65) return { code: "length", stroke: index };
-  if (stroke.direction < 0.65) return { code: "direction", stroke: index };
   if (stroke.curvature < 0.60) return { code: "curvature", stroke: index };
   if (stroke.shape < 0.65) return { code: "shape", stroke: index };
   return null;
