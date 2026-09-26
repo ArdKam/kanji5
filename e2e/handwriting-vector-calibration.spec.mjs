@@ -80,6 +80,8 @@ test("vector grader calibration remains deterministic across meaningful handwrit
     stroke:result.feedbackStroke
   }]));
   console.log(JSON.stringify({grader:"vector-2.0.0",character:"学",...report},null,2));
+  console.log("Wrong-shape stroke diagnostics:",JSON.stringify(cases.wrongShape.perStroke,null,2));
+  console.log("Swapped-order stroke diagnostics:",JSON.stringify(cases.swappedOrder.perStroke,null,2));
 
   expect(cases.perfect.overallSimilarity).toBeGreaterThanOrEqual(98);
   expect(cases.translated.overallSimilarity).toBeGreaterThanOrEqual(85);
