@@ -301,7 +301,8 @@
   width:min(520px,calc(100vw - 28px));
   max-width:520px;
   max-height:min(760px,calc(100dvh - 28px));
-  overflow:hidden;
+  overflow:auto;
+  overscroll-behavior:contain;
   padding:0;
 }
 .dictionary-card-dialog::backdrop{
