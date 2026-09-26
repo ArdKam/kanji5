@@ -40,6 +40,9 @@ test('radical and component explorer support lookup, intersection, and structure
   const dialog = page.locator('.dictionary-card-dialog');
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.dictionary-card-structure-line')).toContainText(/85|رادیکال سنتی|Traditional radical/);
+  await expect(dialog.locator('.structure-insight')).toBeVisible();
+  await expect(dialog.locator('.structure-insight-score strong')).toContainText('100');
+  await expect(dialog.locator('.structure-insight-scaffold strong')).toContainText('湖');
   await expect(dialog.locator('.component-breakdown')).toBeVisible();
 
   const componentButton = dialog.locator('.component-breakdown-part-button').filter({ hasText: '氵' });
