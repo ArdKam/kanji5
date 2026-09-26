@@ -38,10 +38,10 @@ assert.match(p0, /state\.readComponents\(\)/, 'P0 must read recall component sta
 assert.match(p0, /state\.writeComponents\(/, 'P0 must write recall component state through state boundary');
 assert.match(p0, /state\.writeLastAttempt\(/, 'P0 must write last-attempt state through state boundary');
 assert.doesNotMatch(p0, /function\s+normalize\(/, 'pure recall normalization must live in the recall core');
-assert.doesNotMatch(p0, /function\s+componentAccuracy\(/, 'component accuracy must live in the recall core');
-assert.doesNotMatch(p0, /function\s+componentSignal\(/, 'component signal aggregation must live in the recall core');
-assert.doesNotMatch(p0, /function\s+selectFocus\(/, 'focus selection must live in the recall core');
-assert.doesNotMatch(p0, /function\s+applyRecallOutcome\(/, 'recall outcome mutation must live in the recall core');
+assert.doesNotMatch(p0, /function\s+attributeRecallAccuracy\(/, 'component accuracy must live in the recall core');
+assert.doesNotMatch(p0, /function\s+attributeRecallSignal\(/, 'component signal aggregation must live in the recall core');
+assert.doesNotMatch(p0, /function\s+selectWeakestRecallAttribute\(/, 'focus selection must live in the recall core');
+assert.doesNotMatch(p0, /function\s+recordRecallOutcome\(/, 'recall outcome mutation must live in the recall core');
 assert.doesNotMatch(p0, /observer\.observe\(document\.body/, 'P0 must not observe the global document body');
 assert.doesNotMatch(p0, /\|\|document\.body/, 'P0 must not fall back to the global document body');
 assert.doesNotMatch(p0, /function\s+enhanceProduction\(/, 'Production UI logic must stay in the education UI module');
