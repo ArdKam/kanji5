@@ -61,7 +61,7 @@ export function DictionaryKanjiCard({
 
   const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>) => {
     const target = sectionRefs.current[section];
-    const scrollContainer = target?.closest<HTMLElement>(".learning-back-scroll");
+    const scrollContainer = target?.closest<HTMLElement>(".dictionary-card");
     if (!target || !scrollContainer) return;
 
     const containerRect = scrollContainer.getBoundingClientRect();
