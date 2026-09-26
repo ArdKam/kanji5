@@ -42,7 +42,7 @@
 .mnemonic-prepared-copy strong{font-size:10px;font-weight:850;color:var(--sumi)}
 .mnemonic-prepared-copy p{margin:0;font-size:10px;line-height:1.6;color:var(--ink)}
 .mnemonic-prepared-use{white-space:nowrap}
-.mnemonic-prepared-collapsed{display:block;padding:0;overflow:hidden}
+.mnemonic-prepared-collapsed{display:block;margin-top:8px;padding:9px 10px;overflow:hidden;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--washi) 88%,transparent)}
 .mnemonic-prepared-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;list-style:none}
 .mnemonic-prepared-summary::-webkit-details-marker{display:none}
 .mnemonic-prepared-summary::after{content:"＋";color:var(--mute);font-size:12px;font-weight:800}
@@ -53,6 +53,10 @@
 .mnemonic-prepared-details p{margin:0;font-size:10px;line-height:1.55}
 .mnemonic-prepared[data-mnemonic-source="generated"]{background:color-mix(in srgb,var(--washi) 88%,transparent)}
 .mnemonic-prepared[data-mnemonic-source="generated"] .mnemonic-prepared-copy strong{color:var(--mute)}
+.learning-back-identity > .learning-back-tools{order:5}
+.learning-back-identity > .mnemonic-support{order:6}
+.learning-back-tools > .mnemonic-tool{order:1}
+.learning-back-tools > .stroke-order-tool{order:2}
 .mnemonic-prepared-collapsed .mnemonic-prepared-use{justify-self:start}
 @media(max-width:420px){
   .mnemonic-prepared-summary{align-items:flex-start}
