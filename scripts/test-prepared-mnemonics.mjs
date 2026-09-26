@@ -27,8 +27,8 @@ assert.equal(entries.length, 2136, "Prepared mnemonic library must expose every 
 assert.equal(new Set(entries.map(entry => entry.character)).size, 2136, "Prepared mnemonic library contains duplicate characters");
 
 const coverage = core.preparedMnemonicCoverage(catalog);
-assert.ok(Math.abs(coverage.coverage - (259 / 2136)) < 1e-12, `Coverage ratio must be curated/total; got ${coverage.coverage}`);
-assert.deepEqual({ total: coverage.total, curated: coverage.curated, generated: coverage.generated }, { total: 2136, curated: 259, generated: 1877 });
+assert.ok(Math.abs(coverage.coverage - (303 / 2136)) < 1e-12, `Coverage ratio must be curated/total; got ${coverage.coverage}`);
+assert.deepEqual({ total: coverage.total, curated: coverage.curated, generated: coverage.generated }, { total: 2136, curated: 303, generated: 1833 });
 
 const quality = core.preparedMnemonicQualityReport(catalog);
 assert.equal(quality.generatedSceneV2, 1877, "Every non-curated Jōyō kanji must use the scene-v2 fallback");
@@ -73,4 +73,4 @@ console.log(`Mnemonic quality gate: PASS (${quality.concreteAnchorFa}/${quality.
 
 console.log("Prepared mnemonic coverage: PASS (2136/2136; 259 curated + 1877 generated fallbacks)");
 
-assert.equal(quality.curated, 259, "Semantic pass must preserve the curated corpus size");
+assert.equal(quality.curated, 303, "Semantic pass must preserve the curated corpus size");
