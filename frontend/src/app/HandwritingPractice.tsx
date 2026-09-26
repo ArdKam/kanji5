@@ -50,8 +50,8 @@ function drawReferenceStrokes(ctx: CanvasRenderingContext2D, paths: StrokePath[]
   ctx.restore();
 }
 
-function sampleReferenceStrokes(svgText: string, paths: StrokePath[], pointCount = 48): HandwritingStroke[] {
-  if (typeof document === "undefined" || !svgText || !paths.length) return [];
+function sampleReferenceStrokes(paths: StrokePath[], pointCount = 48): HandwritingStroke[] {
+  if (typeof document === "undefined" || !paths.length) return [];
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const holder = document.createElement("div");
@@ -64,19 +64,15 @@ function sampleReferenceStrokes(svgText: string, paths: StrokePath[], pointCount
   svg.setAttribute("height", "109");
 
   const sourceByStroke = new Map<number, SVGPathElement>();
-  const pattern = /<path\s+id="([^"]+-s(\d+))"[^>]*\bd="([^"]+)"/g;
-  for (const match of svgText.matchAll(pattern)) {
-    const strokeNumber = Number(match[2]);
-    const d = String(match[3] || "").trim();
-    if (!Number.isInteger(strokeNumber) || strokeNumber < 1 || !d) continue;
+  for (const stroke of paths) {
+    if (!stroke.d) continue;
     const path = document.createElementNS(SVG_NS, "path");
-    path.setAttribute("id", match[1]);
-    path.setAttribute("d", d);
+    path.setAttribute("d", stroke.d);
     svg.appendChild(path);
-    sourceByStroke.set(strokeNumber, path);
+    sourceByStroke.set(stroke.strokeNumber, path);
   }
 
-  if (!sourceByStroke.size) return [];
+  if (sourceByStroke.size !== paths.length) return [];
 
   holder.appendChild(svg);
   document.body.appendChild(holder);
@@ -166,7 +162,7 @@ export function HandwritingPractice({ character, language }: { character: string
       .then(svg => {
         const next = parseStrokePaths(svg);
         if (!next.length) throw new Error("No stroke paths found");
-        const sampled = sampleReferenceStrokes(svg, next);
+        const sampled = sampleReferenceStrokes(next);
         if (!sampled.length || sampled.length !== next.length) throw new Error("Reference sampling failed");
         if (active) {
           setPaths(next);
