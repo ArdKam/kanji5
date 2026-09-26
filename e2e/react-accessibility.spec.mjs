@@ -47,6 +47,8 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   expect(parseFloat(motion.progressTransition)).toBeLessThanOrEqual(0.01);
 
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
   await expect(page.locator('#exercise')).toHaveAttribute('tabindex','-1');
 });

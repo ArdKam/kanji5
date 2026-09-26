@@ -31,6 +31,8 @@ test('React learning and review actions stay behind the authoritative boundary',
 test('React exercise path can start and expose a boundary-backed exercise',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.())?.exercise))).toBe(true);
 });
@@ -98,14 +100,12 @@ test('empty session progress indicator is absent before a session starts',async(
 
 test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await clean(page);
-  await page.locator('.experience-nav .experience-tab').nth(2).click();
-  const pageRoot=page.locator('.dictionary-page');
-  await expect(pageRoot).toBeVisible({timeout:10000});
-  const n5=pageRoot.getByRole('button',{name:'N5',exact:true});
-  await n5.click();
-  const panel=pageRoot.locator('.custom-study-panel');
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  const practiceHome=page.locator('.practice-home');
+  await expect(practiceHome).toBeVisible({timeout:10000});
+  const panel=practiceHome.locator('.practice-custom-study');
   await expect(panel).toBeVisible();
-  await panel.locator('summary').click();
+  await panel.locator('select').first().selectOption('N5');
   await panel.getByRole('button',{name:'فقط جدیدها',exact:true}).click();
   await panel.getByRole('button',{name:'شروع مطالعه',exact:true}).click();
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
@@ -127,9 +127,7 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
-  await expect(pageRoot.locator('.mastery-map-summary')).toBeVisible();
-  await expect(pageRoot.locator('.mastery-map-metric')).toHaveCount(5);
-  await expect(pageRoot.locator('.mastery-map-average strong')).toContainText('%');
+  await expect(pageRoot.locator('.mastery-map-summary')).toHaveCount(0);
   await expect(pageRoot.locator('.kanji-catalog-tile').first()).toHaveAttribute('data-mastery-state');
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136,{timeout:10000});
   const n5=pageRoot.getByRole('button',{name:'N5',exact:true});
@@ -168,8 +166,13 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card).toContainText('تسلط');
   await expect(card).toHaveAttribute('aria-label','فرهنگ کانجی');
   await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(3);
-  await expect(card.locator('.component-breakdown')).toBeVisible();
-  await expect(card.locator('.component-learning-path')).toBeVisible();
+  await expect(card.getByRole('button',{name:'ساختار',exact:true})).toHaveAttribute('aria-expanded','false');
+  await expect(card.locator('.component-breakdown')).toHaveCount(0);
+  await expect(card.locator('.component-learning-path')).toHaveCount(0);
+  await card.getByRole('button',{name:'ساختار',exact:true}).click();
+  await expect(card.getByRole('button',{name:'ساختار',exact:true})).toHaveAttribute('aria-expanded','true');
+  await expect(card.locator('.component-breakdown')).toBeVisible({timeout:5000});
+  await expect(card.locator('.component-learning-path')).toBeVisible({timeout:5000});
   await expect.poll(async()=>card.locator('.component-learning-path-node.depth-0').count(),{timeout:5000}).toBeGreaterThan(0);
   await expect.poll(async()=>card.locator('.component-learning-path-node.depth-1').count(),{timeout:5000}).toBeGreaterThan(0);
   await expect(card.locator('.component-learning-path-node.depth-0 .component-learning-path-kanji').first()).toBeVisible();
@@ -182,10 +185,11 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
 
 test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await clean(page);
-  await page.locator('.experience-nav .experience-tab').nth(2).click();
-  const pageRoot=page.locator('.dictionary-page');
-  await expect(pageRoot).toBeVisible({timeout:10000});
-  const lab=pageRoot.locator('.reading-lab');
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Reading Lab',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'Reading Lab'});
+  await expect(dialog).toBeVisible({timeout:10000});
+  const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible();
   await lab.locator('textarea').fill('これは日本語の読み上げテストです。');
   await expect(lab.locator('.reading-lab-speech-row')).toBeVisible();

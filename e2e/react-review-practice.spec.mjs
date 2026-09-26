@@ -32,6 +32,9 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await practice.click();
   await expect(practice).toHaveAttribute('aria-current','page');
   await expect(review).not.toHaveAttribute('aria-current','page');
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.locator('#root #exercise')).toHaveCount(0);
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect(page.locator('#root section.card:not(#exercise)')).toHaveCount(0);
   await expect(page.locator('#root .daily-summary')).toHaveCount(0);
@@ -49,6 +52,8 @@ async function startForcedExercise(page,mode){
     window.__KANJI5_V19_RECOVERY_TARGET__={character,mode,contentId:character};
   },{character,mode});
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
 }
 
@@ -58,8 +63,9 @@ test('empty Active Recall state stays responsive before any card is learned',asy
   const practice=page.getByRole('button',{name:'یادآوری فعال'});
   await practice.click();
   await expect(practice).toHaveAttribute('aria-current','page');
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:3000});
-  await expect(page.locator('#root #exercise')).toContainText('هنوز تمرینی آماده نیست');
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.locator('#root #exercise')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeVisible();
   await expect(learning).toBeEnabled();
   await learning.click();
   await expect(learning).toHaveAttribute('aria-current','page');
