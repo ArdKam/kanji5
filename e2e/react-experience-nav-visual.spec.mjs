@@ -30,6 +30,34 @@ test('Learning, Active Recall and Dictionary use a persistent Lovable-style bott
   expect(geometry.left).toBeGreaterThanOrEqual(8);
   expect(geometry.right).toBeGreaterThanOrEqual(8);
 
+  // Verify the same persistent switcher remains usable at both desktop and mobile breakpoints.
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    const mobileGeometry = await nav.evaluate((node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return {
+        position: style.position,
+        bottom: parseFloat(style.bottom),
+        top: rect.top,
+        height: rect.height,
+        left: rect.left,
+        right: window.innerWidth - rect.right,
+        width: rect.width,
+        viewportHeight: window.innerHeight,
+      };
+    });
+    expect(mobileGeometry.position).toBe('fixed');
+    expect(mobileGeometry.bottom).toBeGreaterThanOrEqual(8);
+    expect(mobileGeometry.top).toBeGreaterThan(mobileGeometry.viewportHeight / 2);
+    expect(mobileGeometry.height).toBeLessThan(120);
+    expect(mobileGeometry.left).toBeGreaterThanOrEqual(8);
+    expect(mobileGeometry.right).toBeGreaterThanOrEqual(8);
+    await expect(tabs.nth(0)).toBeVisible();
+    await expect(tabs.nth(1)).toBeVisible();
+    await expect(tabs.nth(2)).toBeVisible();
+  }
+
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
   await tabs.nth(1).click();
   await expect(tabs.nth(1)).toHaveAttribute('aria-current', 'page');
