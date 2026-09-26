@@ -47,12 +47,30 @@ function DictionaryReading({ title, values, language }: { title: string; values:
 
 function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
+  useEffect(() => {
+    let active = true;
+    void fetch("./kanji-components.json", { cache: "force-cache" })
+      .then(response => response.ok ? response.json() : null)
+      .then(data => {
+        if (!active) return;
+        const raw = data && typeof data.components === "object" ? data.components : {};
+        const next: Record<string, string[]> = {};
+        for (const [character, values] of Object.entries(raw as Record<string, unknown>)) {
+          if (Array.isArray(values)) next[character] = values.map(String).filter(Boolean).slice(0, 8);
+        }
+        setComponentMap(next);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
   const entries = useMemo(
-    () => buildPreparedMnemonicEntries(catalog).map((entry, index) => ({ ...entry, index })),
-    [catalog]
+    () => buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? []).map((entry, index) => ({ ...entry, index })),
+    [catalog, componentMap]
   );
   const [query, setQuery] = useState("");
   const [visibleLimit, setVisibleLimit] = useState(60);
+  const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
   const [busyKey, setBusyKey] = useState("");
   const [status, setStatus] = useState("");
   const filteredEntries = useMemo(() => {
