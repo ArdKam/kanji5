@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
+import { buildPreparedMnemonic, type PreparedMnemonic } from "./prepared-mnemonic-core";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
 import { AccountButton, AccountDialog } from "./AccountDialog";
@@ -49,6 +50,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
   const [personalMnemonic,setPersonalMnemonic]=useState("");
   const [mnemonicDraft,setMnemonicDraft]=useState("");
+  const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
@@ -104,18 +106,31 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     let active=true;
     setPersonalMnemonic("");
     setMnemonicDraft("");
+    setPreparedMnemonic(null);
     setMnemonicEditing(false);
     setMnemonicBusy(false);
     setMnemonicError("");
     if(!revealed||!card.character)return ()=>{active=false};
-    void getMnemonic(card.character).then(value=>{
+    void Promise.all([
+      getMnemonic(card.character),
+      getComponentInfo(card.character)
+    ]).then(([value,componentInfo])=>{
       if(!active)return;
       const next=String(value?.text??"");
       setPersonalMnemonic(next);
       setMnemonicDraft(next);
-    }).catch(()=>{if(active)setMnemonicError(t("mnemonicLoadError"))});
+      setPreparedMnemonic(buildPreparedMnemonic(
+        {character:card.character,meanings:card.meanings??[]},
+        componentInfo?.components??[]
+      ));
+    }).catch(()=>{
+      if(active){
+        setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
+        setMnemonicError(t("mnemonicLoadError"));
+      }
+    });
     return ()=>{active=false};
-  },[revealed,card.character]);
+  },[revealed,card.character,card.meanings]);
   const handleSaveMnemonic=useCallback(async()=>{
     if(!card.character||mnemonicBusy)return;
     const next=mnemonicDraft.trim().slice(0,600);
@@ -132,6 +147,24 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       setMnemonicBusy(false);
     }
   },[card.character,mnemonicBusy,mnemonicDraft]);
+  const handleUsePreparedMnemonic=useCallback(async()=>{
+    if(!card.character||mnemonicBusy||!preparedMnemonic)return;
+    const next=(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en).trim().slice(0,600);
+    if(!next)return;
+    if(personalMnemonic&&personalMnemonic!==next&&!window.confirm(t("mnemonicOverwriteConfirm")))return;
+    setMnemonicBusy(true);
+    setMnemonicError("");
+    try{
+      const saved=await saveMnemonic(card.character,next);
+      setPersonalMnemonic(saved.text);
+      setMnemonicDraft(saved.text);
+      setMnemonicEditing(false);
+    }catch(_){
+      setMnemonicError(t("mnemonicSaveError"));
+    }finally{
+      setMnemonicBusy(false);
+    }
+  },[card.character,mnemonicBusy,personalMnemonic,preparedMnemonic]);
   const displayedOn=(card.on??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const displayedKun=(card.kun??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const exampleCount=(card.examples??[]).length;
@@ -227,6 +260,19 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
                     <div className="learning-back-tools">
                       {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
                       <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                      {!mnemonicEditing&&preparedMnemonic?
+                        <div className="mnemonic-prepared">
+                          <div className="mnemonic-prepared-copy">
+                            <strong>{t("preparedMnemonics")}</strong>
+                            <p>{getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en}</p>
+                          </div>
+                          {personalMnemonic===(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en)?
+                            null:
+                            <button className="button secondary mnemonic-prepared-use" type="button" disabled={mnemonicBusy} onClick={()=>void handleUsePreparedMnemonic()}>
+                              {mnemonicBusy?"…":t("useMnemonic")}
+                            </button>}
+                        </div>
+                        :null}
                       <button
                         className="mnemonic-trigger"
                         type="button"
