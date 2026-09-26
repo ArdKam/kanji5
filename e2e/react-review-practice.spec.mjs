@@ -77,7 +77,7 @@ test('Production Recall requires explicit reveal and does not require keyboard i
   await expect(page.getByRole('button',{name:'بلد بودم'})).toHaveCount(0);
   await page.getByRole('button',{name:'نمایش پاسخ'}).click();
   await expect(page.locator('#root #exercise .production-recall-revealed')).toBeVisible();
-  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))))).not.toBe('');
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await expect(page.locator('#root #exercise .production-recall-revealed strong')).toHaveText(character);
   await expect(page.getByRole('button',{name:'بلد بودم'})).toBeVisible();
@@ -90,7 +90,7 @@ test('Production Recall known self-grade submits the revealed Kanji and advances
   await startForcedExercise(page,'production');
   const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""));
   await page.getByRole('button',{name:'نمایش پاسخ'}).click();
-  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))))).not.toBe('');
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'بلد بودم'}).click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
@@ -106,9 +106,9 @@ test('Production Recall unknown self-grade records unknown and advances once',as
   await clean(page);
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
-  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__).snapshot().exercise?.contentId||""));
+  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""));
   await page.getByRole('button',{name:'نمایش پاسخ'}).click();
-  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))))).not.toBe('');
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'نمی‌دانستم'}).click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
