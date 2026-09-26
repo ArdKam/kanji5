@@ -11,6 +11,7 @@ function loadNetwork(){
   return networkPromise||(networkPromise=import('./v1.5-network.js')).catch(error=>{networkPromise=null;throw error});
 }
 let componentDataPromise=null;
+let radicalDataPromise=null;
 async function ensureEducationRuntime(){
   if(window.__KANJI5_EDU_BRIDGE__?.start)return true;
   if(educationRuntimePromise)return educationRuntimePromise;
@@ -54,6 +55,14 @@ function loadComponentData(){
   }).catch(()=>null);
   return componentDataPromise;
 }
+function loadRadicalData(){
+  if(radicalDataPromise)return radicalDataPromise;
+  radicalDataPromise=fetch('./kanji-radicals.json',{cache:'no-store'}).then(response=>{
+    if(!response.ok)throw new Error('KANJI5_RADICAL_DATA_UNAVAILABLE');
+    return response.json();
+  }).catch(()=>null);
+  return radicalDataPromise;
+}
 function normalizeDictionaryQuery(value){
   return String(value||'').trim().replace(/[ァ-ヺ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).toLowerCase();
 }
@@ -67,7 +76,8 @@ function dictionaryResult(item){
     grade:Number.isFinite(Number(item?.grade))?Math.max(0,Number(item.grade)):undefined,
     jlpt:item?.jlpt?String(item.jlpt).trim().slice(0,8):null,
     frequency:Number.isFinite(Number(item?.frequency))?Math.max(0,Number(item.frequency)):undefined,
-    order:Number.isFinite(Number(item?.order))?Math.max(0,Number(item.order)):undefined
+    order:Number.isFinite(Number(item?.order))?Math.max(0,Number(item.order)):undefined,
+    radicalId:Number.isFinite(Number(item?.radical?.classical))?Number(item.radical.classical):undefined
   };
 }
 async function searchKanji(query,limit=24){
@@ -159,14 +169,33 @@ async function getVocabulary(character){
     return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:[]};
   }
 }
+async function getRadicalInfo(character){
+  const normalized=String(character||'').trim();
+  if(!normalized)return {character:normalized,available:false,radical:null,reason:'empty-character'};
+  const deck=state.readDeck?.()||[];
+  const item=deck.find(entry=>String(entry?.character||entry?.id||'')===normalized);
+  const id=Number(item?.radical?.classical);
+  const data=await loadRadicalData();
+  const radical=Number.isFinite(id)&&id>=1&&id<=214
+    ? data?.radicals?.find(value=>Number(value?.id)===id)||null
+    : null;
+  return {
+    character:normalized,
+    available:Boolean(radical),
+    radical:radical?{...radical,source:data?.source?.name||'Unicode Kangxi Radicals'}:null,
+    reason:radical?undefined:(Number.isFinite(id)?'catalog-entry-unavailable':'kanjidic2-classical-radical-missing')
+  };
+}
 async function getComponentInfo(character){
   const normalized=String(character||'').trim();
   const data=await loadComponentData();
   if(!data||!normalized)return {character:normalized,available:false,components:[],sourceGap:false,coverage:data?.coverage||null};
   const hasOwn=Object.prototype.hasOwnProperty.call(data.components||{},normalized);
+  const radicalInfo=await getRadicalInfo(normalized);
   return {
     character:normalized,
     available:hasOwn,
+    radical:radicalInfo.radical||null,
     components:hasOwn&&Array.isArray(data.components[normalized])?[...data.components[normalized]]:[],
     sourceGap:Array.isArray(data.missing)&&data.missing.includes(normalized),
     coverage:data.coverage||null,
@@ -222,7 +251,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary,getRadicalInfo, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
