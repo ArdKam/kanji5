@@ -1,4 +1,4 @@
-export const PREPARED_MNEMONIC_VERSION = "2.6.0";
+export const PREPARED_MNEMONIC_VERSION = "2.7.0";
 
 const BASE_CURATED_PREPARED_MNEMONICS = Object.freeze({
   "日": [{ fa: "یک خورشید مربعی؛ شکلش مثل پنجره‌ای رو به نور روز است.", en: "A square sun; its shape is a window filled with daylight.", source: "curated" }],
@@ -1234,6 +1234,59 @@ const EN_SCENE_CUES = /(?:Picture|Imagine|Put|Place|Lay|Close|Open|Push|Throw|Ti
 const FA_ACTION_CUES = /(?:می‌دود|می‌دواند|می‌کشد|می‌بُرد|می‌برد|می‌گذارد|می‌زند|می‌افتد|می‌ایستد|می‌گیرد|می‌چرخد|می‌رسد|می‌آید|می‌ماند|می‌ریزد|می‌پرند|می‌وزد|باز می‌شوند|جمع شوند|جمع می‌شوند|حرکت می‌کنند|جلو می‌رود|جدا می‌کند|کنترل می‌کند|شروع می‌کند|منتظر می‌مانی|انتخاب می‌کنی|رد شوی|جا می‌گذاری|بسته‌ای|باز می‌کنی|می‌گردد|می‌نشیند|می‌خواهد|می‌دهد|می‌سازد|ساخته شود|فرو می‌رود|مقایسه می‌کنی)/;
 const EN_ACTION_CUES = /(?:runs|run|pulls|cuts|carries|moves|walks|stands|holds|hits|drops|spins|reaches|comes|stays|falls|flies|blows|gathers|separates|controls|starts|waits|pick|leave|cross|blocks|change|changes|drives|travels|returns|opens|closes|shows|works|turns|sits|asks|calls|keeps|becomes|builds|made|moves|compares)/i;
 
+const PREPARED_COMPONENT_LABELS = Object.freeze({
+  "木": { fa: "درخت", en: "tree" }, "日": { fa: "خورشید", en: "sun" }, "月": { fa: "ماه", en: "moon" },
+  "火": { fa: "آتش", en: "fire" }, "水": { fa: "آب", en: "water" }, "氵": { fa: "آب", en: "water" },
+  "土": { fa: "خاک", en: "earth" }, "山": { fa: "کوه", en: "mountain" }, "川": { fa: "رود", en: "river" },
+  "田": { fa: "مزرعه", en: "field" }, "人": { fa: "انسان", en: "person" }, "亻": { fa: "انسان", en: "person" },
+  "口": { fa: "دهان", en: "mouth" }, "目": { fa: "چشم", en: "eye" }, "耳": { fa: "گوش", en: "ear" },
+  "手": { fa: "دست", en: "hand" }, "扌": { fa: "دست", en: "hand" }, "足": { fa: "پا", en: "foot" },
+  "力": { fa: "نیرو", en: "power" }, "心": { fa: "قلب", en: "heart" }, "忄": { fa: "قلب", en: "heart" },
+  "言": { fa: "گفتار", en: "speech" }, "訁": { fa: "گفتار", en: "speech" }, "刀": { fa: "چاقو", en: "knife" },
+  "刂": { fa: "تیغه", en: "blade" }, "文": { fa: "نوشتار", en: "writing" }, "斤": { fa: "تبر", en: "axe" },
+  "攵": { fa: "ضربه", en: "strike" }, "辶": { fa: "مسیر", en: "path" }, "糸": { fa: "نخ", en: "thread" },
+  "貝": { fa: "پول", en: "money" }, "車": { fa: "وسیله", en: "vehicle" }, "門": { fa: "دروازه", en: "gate" },
+  "宀": { fa: "سقف", en: "roof" }, "阝": { fa: "مکان", en: "place" }, "王": { fa: "پادشاه", en: "king" },
+  "玉": { fa: "جواهر", en: "jewel" }, "石": { fa: "سنگ", en: "stone" }, "雨": { fa: "باران", en: "rain" },
+  "竹": { fa: "بامبو", en: "bamboo" }, "艹": { fa: "گیاه", en: "plant" }, "米": { fa: "برنج", en: "rice" },
+  "禾": { fa: "غله", en: "grain" }, "魚": { fa: "ماهی", en: "fish" }, "鳥": { fa: "پرنده", en: "bird" },
+  "隹": { fa: "پرنده", en: "bird" }, "馬": { fa: "اسب", en: "horse" }, "牛": { fa: "گاو", en: "cow" },
+  "犬": { fa: "سگ", en: "dog" }, "犭": { fa: "حیوان", en: "animal" }, "虫": { fa: "حشره", en: "insect" },
+  "立": { fa: "ایستادن", en: "standing" }, "方": { fa: "جهت", en: "direction" }, "正": { fa: "درست", en: "correct" },
+  "父": { fa: "پدر", en: "father" }, "母": { fa: "مادر", en: "mother" }, "子": { fa: "کودک", en: "child" },
+  "兄": { fa: "برادر بزرگ‌تر", en: "older brother" }, "共": { fa: "باهم", en: "together" }, "用": { fa: "استفاده", en: "use" },
+  "冂": { fa: "قاب", en: "frame" }, "广": { fa: "پناهگاه", en: "shelter" }, "冖": { fa: "پوشش", en: "cover" },
+  "夂": { fa: "گام", en: "step" }, "夕": { fa: "شب", en: "evening" }, "白": { fa: "سفید", en: "white" },
+  "八": { fa: "دو بخش", en: "split" }, "一": { fa: "یک", en: "one" }, "二": { fa: "دو", en: "two" },
+  "十": { fa: "ده", en: "ten" }, "大": { fa: "بزرگ", en: "big" }, "小": { fa: "کوچک", en: "small" },
+  "女": { fa: "زن", en: "woman" }, "金": { fa: "فلز/طلا", en: "metal/gold" }
+});
+
+const generatedScene = (character, meaning, components) => {
+  const unique = [...new Set((Array.isArray(components) ? components : []).filter(Boolean))]
+    .filter(c => c !== character).slice(0, 3);
+  const labelsFa = unique.map(c => PREPARED_COMPONENT_LABELS[c]?.fa ?? ("جزء " + c));
+  const labelsEn = unique.map(c => PREPARED_COMPONENT_LABELS[c]?.en ?? ("component " + c));
+  if (!unique.length) {
+    return {
+      fa: "کانجی «" + character + "» را در یک صحنهٔ واقعی برای «" + meaning + "» ببین؛ یک شیء مشخص را انتخاب کن و شکل کانجی را به همان شیء وصل کن تا با دیدنش «" + meaning + "» فوراً برگردد.",
+      en: "Put " + character + " into a concrete scene for “" + meaning + "”: choose one vivid object and bind the character's shape to it so seeing it brings “" + meaning + "” back."
+    };
+  }
+  const faScenes = [
+    "«" + labelsFa.join("»، «") + "» را در یک صحنهٔ واحد کنار هم بگذار؛ یکی را بزرگ و جلوی چشم قرار بده و " + (labelsFa.length > 1 ? "بقیه را در حال تعامل با آن" : "همان را در حال حرکت") + " تصور کن. نتیجه را مستقیم به «" + meaning + "» وصل کن و شکل " + character + " را قاب همان صحنه بدان.",
+    "یک صحنهٔ کوتاه بساز: " + labelsFa.join("، ") + " در آن حضور دارند و اتفاقی روشن برایشان می‌افتد. در لحظهٔ اوج صحنه، " + character + " را ببین و «" + meaning + "» را مثل برچسب روی همان تصویر بچسبان.",
+    "برای «" + meaning + "» یک تصویر متحرک بساز که در آن " + labelsFa.join(" و ") + " نقش اصلی دارند. حرکت یا برخوردشان را با خطوط " + character + " یکی کن تا شکل کانجی بخشی از داستان باشد، نه یک علامت جدا."
+  ];
+  const enScenes = [
+    "Put “" + labelsEn.join("”, “") + "” into one scene; make one vivid and foregrounded, with " + (labelsEn.length > 1 ? "the others interacting with it" : "it moving") + ". Tie the whole scene directly to “" + meaning + "”, and use " + character + " as the frame for the image.",
+    "Build a short scene: " + labelsEn.join(", ") + " are present and something clear happens. At the peak of the scene, see " + character + " and attach the label “" + meaning + "” to that single image.",
+    "Create a moving image for “" + meaning + "” in which " + labelsEn.join(" and ") + " drive the action. Fuse their interaction with the strokes of " + character + " so the kanji becomes part of the story, not a separate symbol."
+  ];
+  const index = character.codePointAt(0) % 3;
+  return { fa: faScenes[index], en: enScenes[index] };
+};
+
 const GENERATED_TEMPLATE_PATTERNS = [
   /یک تصویر واحد از/,
   /شکل «[^»]+» را به یک تصویر/,
@@ -1270,6 +1323,12 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     const components = componentResolver?.(character) ?? [];
     return scorePreparedMnemonic(CURATED_PREPARED_MNEMONICS[character]?.[0], character, components);
   });
+  const generated = items.filter(item => !CURATED_PREPARED_MNEMONICS[String(item.character)]);
+  const generatedScores = generated.map(item => {
+    const character = String(item.character);
+    const components = componentResolver?.(character) ?? [];
+    return scorePreparedMnemonic(buildPreparedMnemonic(item, components), character, components);
+  });
   const count = scores.length;
   const rate = (key) => count ? scores.filter(score => Boolean(score[key])).length / count : 0;
   const criticalFailures = scores.filter(score => !score.valid || !score.minLength || score.source !== "curated").length;
@@ -1282,6 +1341,8 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     total: items.length,
     curated: count,
     generated: Math.max(0, items.length - count),
+    generatedSceneV2: generated.filter(item => buildPreparedMnemonic(item, componentResolver?.(String(item.character)) ?? []).generationStrategy === "scene-v2").length,
+    generatedGenericTemplateLeaks: generatedScores.filter(score => score.genericTemplate).length,
     criticalFailures,
     genericTemplateLeaks,
     concreteAnchorFa,
@@ -1316,19 +1377,13 @@ export function buildPreparedMnemonic(item, components = []) {
   if (curated) return { ...curated };
 
   const meaning = firstMeaning(item);
-  const anchors = [...new Set((Array.isArray(components) ? components : []).map(value => cleanText(value, 2)).filter(Boolean))]
-    .filter(value => value !== character)
-    .slice(0, 4);
-
-  const anchorText = anchors.length ? anchors.join("・") : character;
-  const fa = anchors.length
-    ? `یک تصویر واحد از «${anchorText}» بساز و آن را مستقیم به معنی «${meaning}» وصل کن؛ هر بار که این شکل را می‌بینی، همان معنی را به یاد بیاور.`
-    : `شکل «${character}» را به یک تصویر ذهنی واضح برای معنی «${meaning}» تبدیل کن؛ شکل کانجی را بخشی از همان تصویر بدان.`;
-  const en = anchors.length
-    ? `Picture the visual anchors ${anchorText} as one scene and connect that scene directly to “${meaning}”; seeing the shape should bring the meaning back.`
-    : `Turn the shape of ${character} into one clear mental image for “${meaning}”; make the character itself part of that image.`;
-
-  return { fa: cleanText(fa, 600), en: cleanText(en, 600), source: "generated" };
+  const scene = generatedScene(character, meaning, components);
+  return {
+    fa: cleanText(scene.fa, 600),
+    en: cleanText(scene.en, 600),
+    source: "generated",
+    generationStrategy: "scene-v2"
+  };
 }
 
 export function buildPreparedMnemonicEntries(catalog = [], componentResolver = null) {
@@ -1343,5 +1398,5 @@ export function buildPreparedMnemonicEntries(catalog = [], componentResolver = n
 export function preparedMnemonicCoverage(catalog = []) {
   const total = Array.isArray(catalog) ? catalog.filter(item => String(item?.character ?? "").trim()).length : 0;
   const curated = Object.keys(CURATED_PREPARED_MNEMONICS).length;
-  return { total, curated, generated: Math.max(0, total - curated), coverage: total ? (total / total) : 0 };
+  return { total, curated, generated: Math.max(0, total - curated), coverage: total ? curated / total : 0 };
 }
