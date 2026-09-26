@@ -4,7 +4,7 @@ import type { CustomStudyFilter, KanjiCatalogItem } from "./engine";
 
 const diagnosticLevels = ["N5", "N4", "N3", "N2"] as const;
 
-export function PlacementDiagnostic({ catalog, language, onStartCustomStudy }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean> }) {
+export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, autoOpen = false }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>; autoOpen?: boolean }) {
   const questions = useMemo(() => {
     const byLevel = new Map<string, KanjiCatalogItem[]>();
     catalog.filter(item => item.meanings.length && diagnosticLevels.includes(item.jlpt as typeof diagnosticLevels[number])).forEach(item => {
@@ -97,7 +97,7 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy }: {
   if (!questions.length) return null;
 
   return (
-    <details className="placement-panel">
+    <details className="placement-panel" open={autoOpen || active || finished}>
       <summary>{t("placementDiagnostic", language)}</summary>
       {!active ? (
         <div className="placement-intro">
