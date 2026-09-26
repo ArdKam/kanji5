@@ -6,6 +6,8 @@
  * Scores geometry of ordered stroke polylines rather than raster overlap.
  */
 
+export const HANDWRITING_GRADER_VERSION = "1.0.0";
+
 const EPSILON = 1e-6;
 const DEFAULTS = Object.freeze({
   resamplePoints: 32,
@@ -283,6 +285,7 @@ export function gradeHandwriting(userStrokes, referenceStrokes, options = {}) {
     return {
       score: 0,
       scoreReliability: "low",
+      lengthIntegrity: 0,
       strokeCount: { user: user.length, reference: 0, ratio: 0, missing: 0, extra: user.length },
       orderScore: 0,
       placementScore: 0,
@@ -295,6 +298,7 @@ export function gradeHandwriting(userStrokes, referenceStrokes, options = {}) {
     return {
       score: 0,
       scoreReliability: "low",
+      lengthIntegrity: 0,
       strokeCount: { user: 0, reference: reference.length, ratio: 0, missing: reference.length, extra: 0 },
       orderScore: 0,
       placementScore: 0,
