@@ -1,3 +1,4 @@
+export const HANDWRITING_GRADER_VERSION: string;
 export type HandwritingPoint = { x: number; y: number };
 export type HandwritingStroke = HandwritingPoint[];
 export type HandwritingFeedbackCode = "good" | "improve" | "shape" | "stroke-count" | "stroke-order" | "placement" | "endpoints" | "length" | "direction" | "curvature" | "empty" | "unavailable";
