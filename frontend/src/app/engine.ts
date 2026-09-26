@@ -149,6 +149,36 @@ export type StructureLookupResult = {
   radicalId?: number;
 };
 
+export type StructureComponentInsight = {
+  glyph: string;
+  isJoyoKanji: boolean;
+  available: boolean;
+  mastery?: number;
+  state?: string;
+  relation: "direct" | "recursive";
+};
+
+export type StructureInsights = {
+  character: string;
+  available: boolean;
+  radical?: {
+    id: number;
+    glyph: string;
+    familySize: number;
+    studiedCount: number;
+    masteryAverage: number;
+  };
+  directComponents: StructureComponentInsight[];
+  recursiveComponents: StructureComponentInsight[];
+  familiarity: {
+    directJoyoCount: number;
+    familiarDirectCount: number;
+    weakDirectCount: number;
+    newDirectCount: number;
+    fraction: number;
+  };
+};
+
 export type ComponentNode = {
   glyph: string;
   relation: "leaf" | "nested" | "cycle";
@@ -375,4 +405,8 @@ export async function getKanjiByComponent(glyph: string, recursive = true, limit
 }
 export async function getKanjiByComponents(glyphs: string[], recursive = true, limit = 80): Promise<{ glyphs: string[]; recursive: boolean; results: KanjiDictionaryResult[] }> {
   return (await waitForEngine()).getKanjiByComponents(glyphs, recursive, limit);
+}
+
+export async function getStructureInsights(character: string): Promise<StructureInsights> {
+  return (await waitForEngine()).getStructureInsights(character);
 }
