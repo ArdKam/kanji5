@@ -200,8 +200,10 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
     }});
     window.__KANJI5_SPEECH_CALLS__=calls;
   });
-  const speak=lab.getByRole('button',{name:'خواندن متن',exact:true});
-  const stop=lab.getByRole('button',{name:'توقف خواندن',exact:true});
+  // Keep the locators stable while the accessible label changes during playback.
+  const speechButtons=lab.locator('.reading-lab-speech-row > button');
+  const speak=speechButtons.nth(0);
+  const stop=speechButtons.nth(1);
   await expect(speak).toBeEnabled();
   await expect(stop).toBeDisabled();
   await lab.locator('.reading-lab-speech-rate select').selectOption('1');
