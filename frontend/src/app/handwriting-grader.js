@@ -125,11 +125,12 @@ function directionVector(stroke,index){
 }
 
 function directionScore(user,reference){
-  const count=Math.min(user.length,reference.length)-1;
+  const coarseUser=resampleStroke(user,16), coarseReference=resampleStroke(reference,16);
+  const count=Math.min(coarseUser.length,coarseReference.length)-1;
   if(count<=0) return 0.5;
   let total=0;
   for(let i=0;i<count;i+=1){
-    const a=directionVector(user,i), b=directionVector(reference,i);
+    const a=directionVector(coarseUser,i), b=directionVector(coarseReference,i);
     if(!a||!b) continue;
     total += clamp((a.x*b.x+a.y*b.y+1)/2);
   }
@@ -150,7 +151,7 @@ function turningAngles(stroke){
 }
 
 function curvatureScore(user,reference){
-  const a=turningAngles(user), b=turningAngles(reference);
+  const a=turningAngles(resampleStroke(user,16)), b=turningAngles(resampleStroke(reference,16));
   if(!a.length||!b.length) return 0.5;
   const count=Math.min(a.length,b.length);
   const tolerance=0.18;
@@ -204,7 +205,7 @@ function endpointScore(user,reference,diagonal){
 }
 
 function effectiveStrokeLength(stroke){
-  const lowFrequencyCount=Math.max(8,Math.min(16,Math.round(stroke.length/3)));
+  const lowFrequencyCount=Math.max(8,Math.min(10,Math.round(stroke.length/5)));
   const smoothed=resampleStroke(stroke,lowFrequencyCount);
   return Math.max(EPSILON,pathLength(smoothed));
 }
