@@ -109,6 +109,54 @@ async function searchKanji(query,limit=24){
     results:ranked.slice(0,Math.max(1,Math.min(40,Number(limit)||24))).map(row=>row.result)
   };
 }
+function lookupRadical(data, radicalId){
+  if(!Number.isInteger(Number(radicalId))) return null;
+  return Array.isArray(data?.radicals) ? data.radicals.find(item=>Number(item?.id)===Number(radicalId)) || null : null;
+}
+function kanjiResultsByCharacters(characters, deck, limit=80){
+  const wanted=new Set((Array.isArray(characters)?characters:[]).map(value=>String(value||'').trim()).filter(Boolean));
+  const ranked=[];
+  for(const item of deck){
+    const character=String(item?.character||item?.id||'').trim();
+    if(!wanted.has(character)) continue;
+    ranked.push({order:Number(item?.order)||999999,result:dictionaryResult(item)});
+  }
+  ranked.sort((a,b)=>a.order-b.order||a.result.character.localeCompare(b.result.character));
+  return ranked.slice(0,Math.max(1,Math.min(120,Number(limit)||80))).map(x=>x.result);
+}
+async function listRadicals(){
+  const data=await loadRadicalData();
+  const deck=state.readDeck?.()||[];
+  if(!data)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'radical-catalog',results:[]};
+  const counts={};
+  for(const item of deck){const id=Number(item?.radical?.classical);if(Number.isInteger(id))counts[id]=(counts[id]||0)+1;}
+  const results=(Array.isArray(data.radicals)?data.radicals:[]).map(radical=>({...radical,kanjiCount:counts[Number(radical?.id)]||0}));
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'radical-catalog',results};
+}
+async function getKanjiByRadical(radicalId,limit=80){
+  const id=Number(radicalId),data=await loadRadicalData(),deck=state.readDeck?.()||[];
+  if(!data||!Number.isInteger(id)||id<1||id>214)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'radical-kanji',radicalId:id,results:[]};
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'radical-kanji',radicalId:id,results:kanjiResultsByCharacters(deck.filter(item=>Number(item?.radical?.classical)===id).map(item=>item.character),deck,limit)};
+}
+async function getKanjiByComponent(glyph,recursive=true,limit=80){
+  const normalized=String(glyph||'').trim(),data=await loadComponentData(),deck=state.readDeck?.()||[];
+  if(!data||!normalized)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-kanji',glyph:normalized,recursive:Boolean(recursive),results:[]};
+  const index=(recursive?data.reverseIndex?.recursive:data.reverseIndex?.direct)||{};
+  const characters=Array.isArray(index?.[normalized])?index[normalized]:[];
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-kanji',glyph:normalized,recursive:Boolean(recursive),results:kanjiResultsByCharacters(characters,deck,limit)};
+}
+async function getKanjiByComponents(glyphs,recursive=true,limit=80){
+  const normalized=[...new Set((Array.isArray(glyphs)?glyphs:[]).map(value=>String(value||'').trim()).filter(Boolean))];
+  if(!normalized.length)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-intersection',glyphs:[],recursive:Boolean(recursive),results:[]};
+  const data=await loadComponentData(),deck=state.readDeck?.()||[],index=(recursive?data?.reverseIndex?.recursive:data?.reverseIndex?.direct)||{};
+  if(!data)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-intersection',glyphs:normalized,recursive:Boolean(recursive),results:[]};
+  let shared=null;
+  for(const glyph of normalized){
+    const set=new Set(Array.isArray(index?.[glyph])?index[glyph]:[]);
+    shared=shared===null?set:new Set([...shared].filter(character=>set.has(character)));
+  }
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-intersection',glyphs:normalized,recursive:Boolean(recursive),results:kanjiResultsByCharacters([...shared],deck,limit)};
+}
 function normalizeMnemonicCharacter(value){return Array.from(String(value||'').trim()).slice(0,1).join('');}
 async function getMnemonic(character){
   const key=normalizeMnemonicCharacter(character);
@@ -177,6 +225,7 @@ async function getComponentInfo(character){
     character:normalized,
     available:hasOwn,
     components:hasOwn&&Array.isArray(data.components[normalized])?[...data.components[normalized]]:[],
+    recursive:hasOwn&&data.recursive?.[normalized]?JSON.parse(JSON.stringify(data.recursive[normalized])):[],
     sourceGap:Array.isArray(data.missing)&&data.missing.includes(normalized),
     coverage:data.coverage||null,
     source:data.source||null
@@ -248,7 +297,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,listRadicals,getKanjiByRadical,getKanjiByComponent,getKanjiByComponents,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
