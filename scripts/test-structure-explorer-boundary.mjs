@@ -38,6 +38,8 @@ const direct=await api.getKanjiByComponent("言",false,20);
 assert.equal(JSON.stringify(direct.results.map(x=>x.character)),'["語","議"]');
 const recursive=await api.getKanjiByComponent("言",true,20);
 assert.equal(JSON.stringify(recursive.results.map(x=>x.character)),'["語","議"]');
+const water=await api.getKanjiByComponent("氵",true,20);
+assert.ok(water.results.some(x=>x.character==="湖"));
 const intersection=await api.getKanjiByComponents(["言","義"],true,20);
 assert.equal(JSON.stringify(intersection.results.map(x=>x.character)),'["議"]');
 assert.equal(fetchCount,2);
