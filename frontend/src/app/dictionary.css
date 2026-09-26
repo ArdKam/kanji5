@@ -1681,3 +1681,27 @@
     grid-template-columns: 1fr;
   }
 }
+
+.dictionary-vocabulary-more{
+  width:100%;
+  min-height:40px;
+  margin-top:6px;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:.68rem;
+  font-weight:800;
+  cursor:pointer;
+}
+.dictionary-vocabulary-more:hover{
+  border-color:color-mix(in srgb,var(--shu) 35%,var(--line));
+  background:var(--washi);
+}
+.dictionary-vocabulary-more:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--shu) 55%,transparent);
+  outline-offset:2px;
+}
+@media(prefers-reduced-motion:reduce){.dictionary-vocabulary-more{transition:none;}}
