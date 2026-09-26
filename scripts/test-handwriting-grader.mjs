@@ -67,6 +67,8 @@ assert.ok(wrongKanji.overallSimilarity<45, `wrong character must not score well:
 const veryIncomplete=grade([reference[0]]);
 assert.ok(veryIncomplete.overallSimilarity<40);
 
+const jitteredDebug=(strokes)=>{const noisyStrokes=strokes.map((s,si)=>s.map((p,i)=>point(p.x+(((i+si)%3===0?0.8:-0.4)),p.y+(((i+si)%4===0?0.6:-0.3)) )));const r=grade(noisyStrokes);return{score:r.overallSimilarity,placement:r.placementScore,order:r.orderScore,perStroke:r.perStroke};};
+console.log("Jitter diagnostics:",JSON.stringify(jitteredDebug(reference),null,2));
 const noisy=grade(reference.map((s,si)=>s.map((p,i)=>point(
   p.x+((i+si)%3===0?0.8:-0.4),
   p.y+((i+si)%4===0?0.6:-0.3),
