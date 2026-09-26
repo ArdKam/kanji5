@@ -7,7 +7,7 @@ const EPSILON = 1e-6;
 const DEFAULTS = Object.freeze({
   resamplePoints: 48,
   minPointDistance: 0.35,
-  smoothing: 0.10,
+  smoothing: 0.20,
   maxScaleAdjustment: 0.18,
 });
 
@@ -154,7 +154,7 @@ function curvatureScore(user,reference){
   const a=turningAngles(resampleStroke(user,16)), b=turningAngles(resampleStroke(reference,16));
   if(!a.length||!b.length) return 0.5;
   const count=Math.min(a.length,b.length);
-  const tolerance=0.18;
+  const tolerance=0.25;
   let error=0;
   for(let i=0;i<count;i+=1){
     const ai=a[Math.floor(i*a.length/count)], bi=b[Math.floor(i*b.length/count)];
