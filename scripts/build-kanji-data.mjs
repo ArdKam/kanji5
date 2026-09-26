@@ -21,7 +21,12 @@ const ranked = allKanji
     const bf = b.frequency == null ? Infinity : Number(b.frequency);
     return af - bf;
   })
-  .map((x, i) => ({
+  .map((x, i) => {
+    const radicalClassical = (Array.isArray(x.radicals) ? x.radicals : [])
+      .find(radical => radical?.type === "classical")?.value;
+    const radicalNelson = (Array.isArray(x.radicals) ? x.radicals : [])
+      .find(radical => radical?.type === "nelson_c")?.value;
+    return {
     id: x.character,
     character: x.character,
     meaning: (x.meanings?.en || []).slice(0, 3),
@@ -31,8 +36,13 @@ const ranked = allKanji
     grade: x.grade,
     jlpt: x.jlpt_waller || null,
     frequency: x.frequency,
-    order: i + 1
-  }));
+    order: i + 1,
+    radical: {
+      classical: Number.isFinite(Number(radicalClassical)) ? Number(radicalClassical) : null,
+      nelson: Number.isFinite(Number(radicalNelson)) ? Number(radicalNelson) : null
+    }
+    };
+  });
 
 if (ranked.length !== COUNT) throw new Error(`Expected ${COUNT} kanji, got ${ranked.length}`);
 
@@ -41,6 +51,7 @@ await fs.writeFile(OUT, JSON.stringify({
   count: COUNT,
   source: `KANJIDIC2 via jkindrix/japanese-language-data @ ${SOURCE_COMMIT}`,
   selection: "All 2,136 Jōyō kanji by newspaper frequency rank",
+  radicalSource: "KANJIDIC2 radicals.type=classical (KangXi Zidian reference); Nelson retained separately when present",
   kanji: ranked
 }), "utf8");
 
