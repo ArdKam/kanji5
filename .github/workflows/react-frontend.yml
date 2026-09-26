@@ -70,6 +70,9 @@ jobs:
         with:
           node-version: 24
       - run: npm install --no-audit --no-fund
+      - name: Rebuild pinned Jōyō data with radical metadata
+        working-directory: .
+        run: node scripts/build-kanji-data.mjs
       - run: npm run typecheck
       - run: npm run build
       - name: Validate shipped React artifact
