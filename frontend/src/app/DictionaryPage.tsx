@@ -3,7 +3,7 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type VocabularyItem } from "./engine";
-import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
+import { buildPreparedMnemonic, buildPreparedMnemonicEntries, type PreparedMnemonic } from "./prepared-mnemonic-core";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
 import { GrammarGuide } from "./GrammarGuide";
@@ -47,10 +47,8 @@ function DictionaryReading({ title, values, language }: { title: string; values:
 function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const entries = useMemo(
-    () => Object.entries(PREPARED_MNEMONICS).flatMap(([character, suggestions]) =>
-      suggestions.map((suggestion, index) => ({ character, suggestion, index }))
-    ),
-    []
+    () => buildPreparedMnemonicEntries(catalog).map((entry, index) => ({ ...entry, index })),
+    [catalog]
   );
   const [query, setQuery] = useState("");
   const [busyKey, setBusyKey] = useState("");
@@ -165,23 +163,34 @@ function VocabularyExamples({ character: kanjiCharacter, language }: { character
   );
 }
 
-function PreparedMnemonicPanel({ character, language }: { character: string; language: Language }) {
-  const suggestions = PREPARED_MNEMONICS[character] ?? [];
+function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; language: Language }) {
+  const [suggestion, setSuggestion] = useState<PreparedMnemonic>(() => buildPreparedMnemonic(item));
   const [busyIndex, setBusyIndex] = useState<number | null>(null);
   const [status, setStatus] = useState("");
 
-  const applySuggestion = async (suggestion: PreparedMnemonic, index: number) => {
+  useEffect(() => {
+    let active = true;
+    setSuggestion(buildPreparedMnemonic(item));
+    void getComponentInfo(item.character).then(info => {
+      if (active) setSuggestion(buildPreparedMnemonic(item, info.components));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [item.character]);
+
+  const suggestions = suggestion.fa || suggestion.en ? [suggestion] : [];
+
+  const applySuggestion = async (prepared: PreparedMnemonic, index: number) => {
     if (busyIndex !== null) return;
     setStatus("");
     setBusyIndex(index);
     try {
       const current = await getMnemonic(character);
       const existing = String(current.text ?? "").trim();
-      if (existing && existing !== (language === "fa" ? suggestion.fa : suggestion.en)) {
+      if (existing && existing !== (language === "fa" ? prepared.fa : prepared.en)) {
         const message = t("mnemonicOverwriteConfirm", language);
         if (!window.confirm(message)) return;
       }
-      await saveMnemonic(character, language === "fa" ? suggestion.fa : suggestion.en);
+      await saveMnemonic(item.character, language === "fa" ? prepared.fa : prepared.en);
       setStatus(t("mnemonicApplied", language));
     } catch {
       setStatus(t("mnemonicSaveError", language));
@@ -360,7 +369,7 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }
           <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
         </div>
         <VocabularyExamples character={item.character} language={language} />
-        <PreparedMnemonicPanel character={item.character} language={language} />
+        <PreparedMnemonicPanel item={item} language={language} />
         <div className="dictionary-card-meta">
           {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
           {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
