@@ -181,3 +181,17 @@ test("handwriting UI remains usable in English and reduced-motion mode",async({p
   await expect(handwriting.locator(".handwriting-ink-canvas")).toHaveAttribute("aria-describedby",/handwriting-help-/);
   await expect(handwriting.locator(".handwriting-guide-canvas")).toHaveAttribute("aria-hidden","true");
 });
+
+test("handwriting is an optional skill-building layer inside Practice",async({page})=>{
+  await clean(page);
+  await expect(page.locator(".practice-handwriting")).toHaveCount(0);
+  await page.locator(".experience-nav .experience-tab").nth(1).click();
+  await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.locator(".practice-handwriting").count()).toBeGreaterThan(0);
+  const practiceHandwriting=page.locator(".practice-handwriting");
+  await expect(practiceHandwriting).toHaveAttribute("data-experience","practice");
+  await expect(practiceHandwriting).toHaveAttribute("data-character",/.+/);
+  const session=await page.evaluate(()=>window.__KANJI5_V16_SESSION_API__?.getSession?.());
+  expect(session?.experience).toBe("practice");
+  await expect(practiceHandwriting.locator(".handwriting-header")).toBeVisible();
+});

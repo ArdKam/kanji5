@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent, type React
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
+import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import {
@@ -25,6 +26,9 @@ import {
   type ComponentInfo,
   type Settings,
   type Snapshot,
+  getHandwritingSkill,
+  recordHandwritingGrade,
+  type HandwritingSkill,
   waitForEngine,
 } from "./engine";
 
@@ -412,6 +416,29 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     </>}</>}
   </section>
 }
+function PracticeHandwriting({character,language}:{character:string;language:Language}){
+  const [skill,setSkill]=useState<HandwritingSkill|null>(null);
+  useEffect(()=>{
+    let active=true;
+    setSkill(null);
+    void getHandwritingSkill(character).then(next=>{if(active)setSkill(next)}).catch(()=>{if(active)setSkill(null)});
+    return()=>{active=false};
+  },[character]);
+  if(!character.trim())return null;
+  return <div className="practice-handwriting" data-experience="practice" data-character={character}>
+    <HandwritingPractice
+      character={character}
+      language={language}
+      learningSignal={skill?{state:skill.state,confidence:skill.confidence,score:skill.score}:undefined}
+      onGradeRecorded={(grade)=>recordHandwritingGrade(character,grade).then(async saved=>{
+        if(!saved)return false;
+        const next=await getHandwritingSkill(character);
+        setSkill(next);
+        return true;
+      })}
+    />
+  </div>;
+}
 function Panel({title,children}:{title:string;children:ReactNode}){return <section className="surface insight-panel"><h3>{title}</h3>{children}</section>}
 function MasteryOverview({snapshot}:{snapshot:Snapshot}){
   return <Panel title={t("masteryOverview")}><div className="mastery-grid">{skillKeys.map(k=>{
@@ -512,7 +539,7 @@ function App(){
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top"><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
-              {showExercise?<Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+              {showExercise?<><Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>{snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language}/>:null}</>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
       </>}
     </main>
