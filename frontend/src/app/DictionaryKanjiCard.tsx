@@ -146,8 +146,8 @@ export function DictionaryKanjiCard({
 
   return (
     <dialog open className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
-      <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <div className="dictionary-card">
+        <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
         <div className="dictionary-card-top">
           <span className="badge badge-red">{item.jlpt || "—"}</span>
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
