@@ -1311,15 +1311,17 @@ const PREPARED_COMPONENT_LABELS = Object.freeze({
 });
 
 const MEANING_SCENE_PROFILES = Object.freeze([
-  { keys: /\b(?:person|people|man|woman|child|human|friend|family|someone|self)\b/i, fa: "یک آدم مشخص", en: "a specific person", actionFa: "وارد صحنه می‌شود و کاری روشن انجام می‌دهد", actionEn: "enters the scene and performs one clear action" },
-  { keys: /\b(?:move|go|come|walk|run|leave|enter|return|travel|road|path|far|near|front|back|up|down)\b/i, fa: "یک مسافر", en: "a traveler", actionFa: "راه می‌افتد، جلو می‌رود و به مقصد می‌رسد", actionEn: "sets off, moves forward, and reaches a destination" },
+  { keys: /\b(?:person|people|man|woman|child|human|friend|family|someone|self)\b/i, fa: "یک آدم مشخص", en: "a specific person", actionFa: "او وارد صحنه می‌شود و کاری روشن انجام می‌دهد", actionEn: "they enter the scene and perform one clear action" },
+  { keys: /\b(?:move|go|come|walk|run|leave|enter|return|travel|road|path|far|near|front|back|up|down)\b/i, fa: "یک مسافر", en: "a traveler", actionFa: "مسافر راه می‌افتد، جلو می‌رود و به مقصد می‌رسد", actionEn: "the traveler sets off, moves forward, and reaches a destination" },
   { keys: /\b(?:water|river|sea|lake|rain|snow|cloud|wet|wash|drink|flow|wave)\b/i, fa: "یک صحنهٔ آبی", en: "a water scene", actionFa: "آب حرکت می‌کند و چیزی را خیس یا جابه‌جا می‌کند", actionEn: "water moves and wets or carries something" },
-  { keys: /\b(?:fire|hot|heat|burn|light|sun|bright|dark|night|day|weather|wind|spring|summer|autumn|winter)\b/i, fa: "یک صحنهٔ طبیعی", en: "a natural scene", actionFa: "نور یا نیرو ناگهان تغییر می‌کند و صحنه را عوض می‌کند", actionEn: "the light or force suddenly changes the scene" },
-  { keys: /\b(?:eat|food|drink|rice|meal|buy|sell|money|work|shop|store|use|make|build|school|study|learn|read|write|book)\b/i, fa: "یک کار روزمره", en: "an everyday task", actionFa: "فرد آن را انجام می‌دهد و نتیجهٔ قابل‌دیدنی ایجاد می‌کند", actionEn: "someone performs it and creates a visible result" },
-  { keys: /\b(?:see|look|eye|hear|ear|mouth|hand|foot|head|body|heart|voice|sound|speak|say|listen|sing)\b/i, fa: "یک کنش بدنی", en: "a bodily action", actionFa: "یک عضو بدن حرکت می‌کند و واکنش واضحی نشان می‌دهد", actionEn: "a body part moves and produces a clear reaction" },
-  { keys: /\b(?:happy|sad|anger|fear|love|hate|forget|remember|think|feel|mind|heart|fun|easy|difficult|quiet|calm)\b/i, fa: "یک آدم با واکنش شدید", en: "a person with a strong reaction", actionFa: "واکنشی ناگهانی نشان می‌دهد که معنی را برجسته می‌کند", actionEn: "shows a sudden reaction that makes the meaning vivid" },
+  { keys: /\b(?:fire|hot|heat|burn|light|sun|bright|dark|night|day|weather|wind|spring|summer|autumn|winter)\b/i, fa: "یک صحنهٔ طبیعی", en: "a natural scene", actionFa: "نور یا نیروی طبیعت ناگهان تغییر می‌کند و صحنه را عوض می‌کند", actionEn: "the light or force of nature suddenly changes the scene" },
+  { keys: /\b(?:eat|food|drink|rice|meal|buy|sell|money|work|shop|store|use|make|build|school|study|learn|read|write|book)\b/i, fa: "یک کار روزمره", en: "an everyday task", actionFa: "فرد آن کار را انجام می‌دهد و نتیجه‌ای قابل‌دیدن ایجاد می‌کند", actionEn: "someone performs the task and creates a visible result" },
+  { keys: /\b(?:see|look|eye|hear|ear|mouth|hand|foot|head|body|heart|voice|sound|speak|say|listen|sing)\b/i, fa: "یک کنش بدنی", en: "a bodily action", actionFa: "عضو بدن حرکت می‌کند و واکنش واضحی نشان می‌دهد", actionEn: "the body part moves and produces a clear reaction" },
+  { keys: /\b(?:happy|sad|anger|fear|love|hate|forget|remember|think|feel|mind|heart|fun|easy|difficult|quiet|calm)\b/i, fa: "یک آدم با واکنش شدید", en: "a person with a strong reaction", actionFa: "فرد واکنشی ناگهانی نشان می‌دهد که معنی را برجسته می‌کند", actionEn: "the person shows a sudden reaction that makes the meaning vivid" },
   { keys: /\b(?:place|country|room|house|home|building|station|gate|door|city|shop|yard|garden|school)\b/i, fa: "یک مکان مشخص", en: "a specific place", actionFa: "کسی وارد آن می‌شود، کاری انجام می‌دهد و دوباره بیرون می‌آید", actionEn: "someone enters, does something, and comes back out" },
-  { keys: /\b(?:big|small|many|few|one|two|three|middle|same|different|first|last|long|short|new|old|young)\b/i, fa: "یک مقایسهٔ دیداری", en: "a visual comparison", actionFa: "دو چیز کنار هم قرار می‌گیرند و تفاوتشان فوراً دیده می‌شود", actionEn: "two things are placed together so the difference is instantly visible" }
+  { keys: /\b(?:secret|mystery|unknown|question|answer|hidden|discover|find|solve)\b/i, fa: "یک جعبهٔ قفل‌شده", en: "a locked box", actionFa: "فرد قفل را باز می‌کند و راز پنهان را آشکار می‌کند", actionEn: "someone unlocks it and reveals what was hidden" },
+  { keys: /\b(?:big|small|many|few|one|two|three|middle|same|different|first|last|long|short|new|old|young)\b/i, fa: "یک مقایسهٔ دیداری", en: "a visual comparison", actionFa: "دو چیز کنار هم قرار می‌گیرند و تفاوتشان فوراً دیده می‌شود", actionEn: "two things are placed together so the difference is instantly visible" },
+  { keys: /\b(?:life|live|grow|birth|die|death|dead|health|sick|ill)\b/i, fa: "یک صحنهٔ زندگی", en: "a life scene", actionFa: "چیزی زنده تغییر می‌کند و اثرش فوراً دیده می‌شود", actionEn: "something living changes and its effect is immediately visible" }
 ]);
 
 const resolveMeaningProfile = meaning => {
@@ -1327,8 +1329,8 @@ const resolveMeaningProfile = meaning => {
   return MEANING_SCENE_PROFILES.find(profile => profile.keys.test(text)) ?? {
     fa: "یک شیء یا موقعیت مشخص",
     en: "one specific object or situation",
-    actionFa: "حرکت یا تغییر واضحی رخ می‌دهد و معنی را برجسته می‌کند",
-    actionEn: "a clear movement or change happens and makes the meaning vivid"
+    actionFa: "آن شیء یا موقعیت حرکت یا تغییر واضحی می‌کند و معنی را برجسته می‌کند",
+    actionEn: "that object or situation makes a clear movement or change that makes the meaning vivid"
   };
 };
 
@@ -1344,14 +1346,14 @@ const generatedScene = (character, meaning, components) => {
   const anchorsEn = labels.length ? labels.map(label => label.en).join(", ") : "the shape of " + character;
   const index = (character.codePointAt(0) ?? 0) % 3;
   const faScenes = [
-    profile.fa + " را کنار " + anchorsFa + " بگذار. " + profile.actionFa + "؛ درست در لحظهٔ اوج، «" + meaning + "» را روی این تصویر قفل کن و شکل " + character + " را قاب صحنه بدان.",
-    "صحنه را کوتاه نگه دار: " + anchorsFa + " حضور دارند و " + profile.fa + " " + profile.actionFa + ". وقتی تصویر به اوج رسید، «" + meaning + "» را بگو و " + character + " را داخل همان صحنه ببین.",
-    "یک تصویر متحرک برای «" + meaning + "» بساز: " + profile.fa + " با " + anchorsFa + " درگیر است و " + profile.actionFa + "؛ خطوط " + character + " بخشی از همان حرکت‌اند."
+    profile.fa + " بساز و " + anchorsFa + " را داخل آن قرار بده. " + profile.actionFa + "؛ در لحظهٔ اوج، «" + meaning + "» را روی همان تصویر قفل کن و شکل " + character + " را بخشی از صحنه بدان.",
+    "صحنه را کوتاه نگه دار: " + anchorsFa + " حضور دارند و " + profile.actionFa + ". وقتی اتفاق تمام می‌شود، «" + meaning + "» را بگو و " + character + " را داخل همان تصویر ببین.",
+    "یک تصویر متحرک برای «" + meaning + "» بساز: " + profile.fa + " با " + anchorsFa + " درگیر است؛ " + profile.actionFa + " و خطوط " + character + " را بخشی از همان حرکت تصور کن."
   ];
   const enScenes = [
-    "Put " + profile.en + " beside " + anchorsEn + ". " + profile.actionEn + "; at the peak, lock “" + meaning + "” onto the image and use " + character + " as the scene's frame.",
-    "Keep the scene short: " + anchorsEn + " are present while " + profile.en + " " + profile.actionEn + ". When the image peaks, say “" + meaning + "” and see " + character + " inside the same scene.",
-    "Build a moving image for “" + meaning + "”: " + profile.en + " interacts with " + anchorsEn + " and " + profile.actionEn + "; make the strokes of " + character + " part of that movement."
+    "Build " + profile.en + " and place " + anchorsEn + " inside it. " + profile.actionEn + "; at the peak, lock “" + meaning + "” onto the image and make " + character + " part of the scene.",
+    "Keep the scene short: " + anchorsEn + " are present and " + profile.actionEn + ". When the action ends, say “" + meaning + "” and see " + character + " inside the same image.",
+    "Create a moving image for “" + meaning + "”: " + profile.en + " interacts with " + anchorsEn + "; " + profile.actionEn + ", and make the strokes of " + character + " part of that movement."
   ];
   return { fa: faScenes[index], en: enScenes[index] };
 };
