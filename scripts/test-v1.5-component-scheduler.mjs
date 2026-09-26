@@ -8,7 +8,7 @@ assert(p0.includes('function ensureRecallAttributeEntry(character)'),'Component 
 assert(p0.includes('target.attributeRecallEvidence={...attributeRecallSignal(entry)'),'Component evidence is not persisted into education knowledge');
 assert(p0.includes('writeAttributeRecallEvidence(character)'),'Component result is not forwarded to scheduler evidence');
 assert(state.includes('COMPONENT_KEY=\'kanji5-v1.5-components\''),'Canonical component storage key is missing from state module');
-assert(runtime.includes('entry.attributeRecallEvidence?.[mode]?.weakness'),'Education scheduler does not consume component evidence');
+assert(runtime.includes('const recallEvidence=entry.attributeRecallEvidence||entry.componentEvidence') && runtime.includes('recallEvidence?.[mode]?.weakness'),'Education scheduler does not consume component evidence');
 assert(runtime.includes('const attributeRecallWeakness=attributeRecallValues.length?Math.max(...attributeRecallValues):0'),'Component weakness aggregation missing');
 assert(runtime.includes('+attributeRecallWeakness*.25'),'Component weakness is not weighted into queue priority');
 console.log('Kanji 5 component-to-scheduler integration test passed.');
