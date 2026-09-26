@@ -17,3 +17,8 @@
   .component-breakdown-part{min-width:34px;min-height:34px;padding:5px 7px;font-size:19px}
   .component-breakdown-plus{font-size:13px}
 }
+.component-breakdown-part-wrap-inner{display:inline-grid;justify-items:center;gap:2px}
+.component-breakdown-label{max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mute);font-size:7px;font-weight:750;line-height:1.1}
+@media (max-width:520px){
+  .component-breakdown-label{max-width:64px;font-size:6.5px}
+}

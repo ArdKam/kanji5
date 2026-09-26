@@ -1,4 +1,6 @@
 import type { ComponentInfo } from "./engine";
+import { getComponentLabel } from "./mnemonic-support";
+import { getLanguage } from "./i18n";
 import "./component-breakdown.css";
 
 export type ComponentBreakdownProps = {
@@ -23,7 +25,10 @@ export function ComponentBreakdown({ info, title, note, ariaLabel }: ComponentBr
         {info.components.map((component, index) => (
           <span className="component-breakdown-part-wrap" role="listitem" key={component + "-" + index}>
             {index > 0 ? <span className="component-breakdown-plus" aria-hidden="true">+</span> : null}
-            <span className="component-breakdown-part" lang="ja">{component}</span>
+            <span className="component-breakdown-part-wrap-inner">
+              <span className="component-breakdown-part" lang="ja">{component}</span>
+              {getComponentLabel(component, getLanguage()) ? <span className="component-breakdown-label">{getComponentLabel(component, getLanguage())}</span> : null}
+            </span>
           </span>
         ))}
       </div>

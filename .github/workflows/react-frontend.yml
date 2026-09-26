@@ -8,12 +8,19 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
+      - "scripts/test-prepared-mnemonics.mjs"
+      - "scripts/test-mnemonic-support.mjs"
+      - "frontend/src/app/mnemonic-support.ts"
+      - "frontend/src/app/MnemonicSupport.tsx"
+      - "frontend/src/app/mnemonic-support.css"
       - "e2e/react-presentation-migration.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
       - "e2e/react-review-practice.spec.mjs"
       - "e2e/react-learning-card-flip.spec.mjs"
       - "e2e/react-personal-mnemonic.spec.mjs"
+      - "e2e/react-prepared-mnemonic.spec.mjs"
+      - "e2e/react-mnemonic-support.spec.mjs"
       - "e2e/react-accessibility.spec.mjs"
       - "e2e/react-pwa-release.spec.mjs"
       - "e2e/react-final-release-matrix.spec.mjs"
@@ -36,6 +43,7 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
+      - "scripts/test-prepared-mnemonics.mjs"
       - "e2e/react-presentation-migration.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
@@ -75,6 +83,9 @@ jobs:
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
+      - name: Run prepared mnemonic coverage test
+        working-directory: .
+        run: node scripts/test-prepared-mnemonics.mjs
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
@@ -87,6 +98,12 @@ jobs:
       - name: Run React presentation E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
+      - name: Run prepared mnemonic E2E
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-prepared-mnemonic.spec.mjs
+      - name: Run mnemonic support E2E
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-mnemonic-support.spec.mjs
       - name: Run React authoritative parity gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-parity.spec.mjs
