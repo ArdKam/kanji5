@@ -52,9 +52,10 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
     [catalog]
   );
   const [query, setQuery] = useState("");
+  const [visibleLimit, setVisibleLimit] = useState(60);
   const [busyKey, setBusyKey] = useState("");
   const [status, setStatus] = useState("");
-  const visible = useMemo(() => {
+  const filteredEntries = useMemo(() => {
     const q = normalize(query);
     return entries.filter(entry => {
       if (!q) return true;
@@ -62,6 +63,8 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
       return normalize(entry.character).includes(q) || normalize(mnemonic).includes(q);
     });
   }, [entries, language, query]);
+  useEffect(() => { setVisibleLimit(60); }, [language, query]);
+  const visible = filteredEntries.slice(0, visibleLimit);
 
   const apply = async (character: string, suggestion: PreparedMnemonic, key: string) => {
     if (busyKey) return;
@@ -93,7 +96,7 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
         aria-label={t("preparedMnemonicLibrarySearch", language)}
       />
       <div className="prepared-mnemonic-library-count">
-        {formatNumber(visible.length, language)} / {formatNumber(entries.length, language)}
+        {formatNumber(visible.length, language)} / {formatNumber(filteredEntries.length, language)}
       </div>
       <div className="prepared-mnemonic-library-list" role="list">
         {visible.map(entry => {
@@ -113,6 +116,15 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
           );
         })}
       </div>
+      {visible.length < filteredEntries.length ? (
+        <button
+          className="button secondary prepared-mnemonic-library-more"
+          type="button"
+          onClick={() => setVisibleLimit(value => Math.min(value + 60, filteredEntries.length))}
+        >
+          {t("preparedMnemonicLoadMore", language)}
+        </button>
+      ) : null}
       {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
     </details>
   );
