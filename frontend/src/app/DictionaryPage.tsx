@@ -582,16 +582,25 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
   const [customMessage, setCustomMessage] = useState("");
   const [structureRequest, setStructureRequest] = useState<{ mode: "radical" | "component"; query: string; nonce: number; prefetchedResults?: KanjiDictionaryResult[] } | null>(null);
   const openStructureExplorer = async (mode: "radical" | "component", query: string) => {
-    try {
-      const value = mode === "component"
-        ? await getKanjiByComponent(query, true, 80)
-        : await getKanjiByRadical(Number(query), 80);
-      setSelected(null);
-      setStructureRequest(previous => ({ mode, query, nonce: (previous?.nonce ?? 0) + 1, prefetchedResults: value.results ?? [] }));
-    } catch {
-      setSelected(null);
-      setStructureRequest(previous => ({ mode, query, nonce: (previous?.nonce ?? 0) + 1 }));
+    let value: { results?: KanjiDictionaryResult[] } | null = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        value = mode === "component"
+          ? await getKanjiByComponent(query, true, 80)
+          : await getKanjiByRadical(Number(query), 80);
+        if (mode === "radical" || (value.results ?? []).length > 0) break;
+      } catch {
+        value = null;
+      }
+      if (attempt < 2) await new Promise(resolve => window.setTimeout(resolve, attempt === 0 ? 50 : 150));
     }
+    setSelected(null);
+    setStructureRequest(previous => ({
+      mode,
+      query,
+      nonce: (previous?.nonce ?? 0) + 1,
+      ...(value ? { prefetchedResults: value.results ?? [] } : {}),
+    }));
   };
 
   useEffect(() => {
