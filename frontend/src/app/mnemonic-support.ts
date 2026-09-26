@@ -892,10 +892,10 @@ export type ConfusableCue = {
 };
 
 type ConfusableGroup = {
-  id: string;
-  basis: ConfusableBasis;
-  members: string[];
-  cues: Record<string, { fa: string; en: string }>;
+  readonly id: string;
+  readonly basis: ConfusableBasis;
+  readonly members: readonly string[];
+  readonly cues: Readonly<Record<string, { readonly fa: string; readonly en: string }>>;
 };
 
 export const CONFUSABLE_GROUPS: Readonly<ConfusableGroup[]> = Object.freeze([
