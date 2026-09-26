@@ -13,7 +13,6 @@ const boot=()=>{
     launcher.classList.add('is-ready');
     launcher.removeAttribute('aria-hidden');
   }
-  const headerActions=document.querySelector('.header-actions');
   if(document.querySelector('[data-kanji5-account-fallback]')) return true;
   const lang=()=>localStorage.getItem('kanji5-ui-language')==='en'?'en':'fa';
   const copy=(k)=>({
@@ -25,12 +24,19 @@ const boot=()=>{
   btn.type='button'; btn.className='account-button'; btn.dataset.kanji5AccountFallback='true';
   const dialog=document.createElement('dialog'); dialog.className='dialog account-dialog'; dialog.dataset.kanji5AccountFallbackDialog='true';
   document.body.appendChild(dialog);
-  if(headerActions){
-    if(btn.parentElement!==headerActions) headerActions.appendChild(btn);
-  }else if(btn.parentElement!==document.body){
-    document.body.appendChild(btn);
-  }
+  if(btn.parentElement!==document.body) document.body.appendChild(btn);
+  const positionLauncher=()=>{
+    const header=document.querySelector('.header');
+    if(!header)return;
+    const rect=header.getBoundingClientRect();
+    btn.style.position='absolute';
+    btn.style.left=`${rect.left+window.scrollX}px`;
+    btn.style.top=`${rect.top+window.scrollY}px`;
+    btn.style.zIndex='60';
+  };
   btn.classList.add('is-ready');
+  positionLauncher();
+  window.addEventListener('resize',positionLauncher,{passive:true});
   let mode='email', intent='sign-in', busy=false, notice='', unsubscribe=()=>{};
   const api=()=>window.__KANJI5_ACCOUNT__;
   const waitForApi=async()=>{for(let i=0;i<120;i+=1){const a=api();if(a)return a;await new Promise(r=>setTimeout(r,100));}throw new Error('KANJI5_ACCOUNT_UNAVAILABLE');};
@@ -58,7 +64,7 @@ const boot=()=>{
     dialog.querySelectorAll('[data-intent-choice]').forEach(b=>b.onclick=()=>preserveAuthFields('email',b.dataset.intentChoice==='sign-up'?'sign-up':'sign-in'));
     dialog.querySelector('form').onsubmit=async ev=>{ev.preventDefault();if(busy)return;const form=ev.currentTarget;const currentMode=form.dataset.authMode==='magic'?'magic':'email';const currentIntent=form.dataset.authIntent==='sign-up'?'sign-up':'sign-in';const email=String(form.querySelector('[name=email]')?.value||'').trim();const password=String(form.querySelector('[name=password]')?.value||'');const submit=form.querySelector('button[type="submit"]');busy=true;notice='';if(submit){submit.disabled=true;submit.textContent=currentMode==='magic'?c('magic')+'…':currentIntent==='sign-up'?c('signup')+'…':c('login')+'…';}try{const a=await waitForApi();if(currentMode==='magic'){await a.sendMagicLink(email);notice=c('sent');}else if(currentIntent==='sign-in'){await a.signInWithPassword(email,password);dialog.close();return;}else{const r=await a.signUpWithPassword(email,password);notice=r.needsEmailConfirmation?c('confirm'):c('signedIn');if(!r.needsEmailConfirmation){dialog.close();return;}}}catch(error){const code=String(error?.code||'');const detail=error instanceof Error?String(error.message||''):String(error||'');notice=(code?code+': ':'')+(detail&&detail!=='AUTH_EMAIL_PASSWORD_REQUIRED'?c('error')+' '+detail:c('error'));}finally{busy=false;render();}};
   };
-  btn.onclick=()=>{render();try{if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();else dialog.setAttribute('open','');}catch(_){dialog.setAttribute('open','');}};
+  btn.onclick=()=>{render();try{if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();else dialog.setAttribute('open','');}catch(_){dialog.setAttribute('open','');}if(!dialog.open)dialog.setAttribute('open','');};
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
   const wait=()=>{
     const reactAccount=document.querySelector('#root .account-button');
@@ -66,8 +72,7 @@ const boot=()=>{
       reactAccount.style.setProperty('visibility','hidden','important');
       reactAccount.style.setProperty('pointer-events','none','important');
     }
-    const liveHeaderActions=document.querySelector('.header-actions');
-    if(liveHeaderActions&&btn.parentElement!==liveHeaderActions)liveHeaderActions.appendChild(btn);
+    positionLauncher();
     btn.classList.add('is-ready');
     const a=api();
     if(a&&!unsubscribe._attached){unsubscribe=a.subscribe(render);unsubscribe._attached=true;render();}
