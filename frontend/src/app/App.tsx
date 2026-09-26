@@ -416,7 +416,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     </>}</>}
   </section>
 }
-function PracticeHandwriting({character,language}:{character:string;language:Language}){
+function PracticeHandwriting({character,language,exercise}:{character:string;language:Language;exercise?:NonNullable<Snapshot["exercise"]>}){
   const [skill,setSkill]=useState<HandwritingSkill|null>(null);
   useEffect(()=>{
     let active=true;
@@ -429,6 +429,7 @@ function PracticeHandwriting({character,language}:{character:string;language:Lan
     <HandwritingPractice
       character={character}
       language={language}
+      exercise={exercise}
       learningSignal={skill?{state:skill.state,confidence:skill.confidence,score:skill.score}:undefined}
       onGradeRecorded={(grade)=>recordHandwritingGrade(character,grade).then(async saved=>{
         if(!saved)return false;
@@ -539,7 +540,7 @@ function App(){
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top"><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
-              {showExercise?<><Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>{snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language}/>:null}</>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+              {showExercise?<><Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>{snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}</>:snapshot?.learning?.active?<Learning card={snapshot.learning} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
       </>}
     </main>

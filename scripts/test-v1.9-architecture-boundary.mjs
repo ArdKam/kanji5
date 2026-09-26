@@ -19,3 +19,5 @@ const handwriting=read('frontend/src/app/HandwritingPractice.tsx');assert.doesNo
 const dictionary=read('frontend/src/app/DictionaryPage.tsx');assert.match(dictionary,/getHandwritingSkill/);assert.match(dictionary,/recordHandwritingGrade/);console.log('Kanji 5 handwriting learner-model integration boundary passed.');
 
 const app=read('frontend/src/app/App.tsx');assert.match(app,/PracticeHandwriting/);assert.match(app,/getHandwritingSkill/);assert.match(app,/recordHandwritingGrade/);const practiceStart=app.indexOf('function PracticeHandwriting');const practiceEnd=app.indexOf('function Panel',practiceStart);const practiceBody=app.slice(practiceStart,practiceEnd);assert.doesNotMatch(practiceBody,/rateLearning|submitExercise|startExercise/);console.log('Kanji 5 Practice handwriting integration boundary passed.');
+
+const prompt=read('frontend/src/app/handwriting-prompts.js');assert.match(prompt,/deriveHandwritingPrompt/);const handwritingPresentation=read('frontend/src/app/HandwritingPractice.tsx');assert.match(handwritingPresentation,/deriveHandwritingPrompt/);console.log('Kanji 5 handwriting production prompt boundary passed.');

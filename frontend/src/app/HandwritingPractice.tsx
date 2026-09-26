@@ -5,6 +5,7 @@ import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type H
 import { sampleSvgStrokePaths } from "./handwriting-reference";
 import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, requestMoreHelp, shouldPresentStrokeFeedback } from "./handwriting-hints";
 import { feedbackFocusKind, feedbackMarkerPoints, feedbackStrokeIndex } from "./handwriting-feedback";
+import { deriveHandwritingPrompt, type HandwritingPromptKind } from "./handwriting-prompts";
 
 type Point = { x:number; y:number };
 
@@ -122,10 +123,13 @@ function drawSegment(canvas:HTMLCanvasElement,wrap:HTMLElement,dpr:number,from:P
 
 type HandwritingLearningSignal={state?:string;confidence?:number;mastery?:number;score?:number};
 type HandwritingGradeCommit = HandwritingGrade;
+type HandwritingExerciseContext={mode?:string;prompt?:string;character?:string;stimulus?:{kind?:string;primary?:string;secondary?:string;translation?:string}};
 
 // Handwriting remains presentation-only; learning integration is injected by the parent boundary.
-export function HandwritingPractice({ character, language, learningSignal, onGradeRecorded }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal; onGradeRecorded?:(grade:HandwritingGradeCommit)=>void|Promise<unknown> }){
+export function HandwritingPractice({ character, language, learningSignal, onGradeRecorded, exercise }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal; onGradeRecorded?:(grade:HandwritingGradeCommit)=>void|Promise<unknown>; exercise?:HandwritingExerciseContext }){
   const normalized=normalizeStrokeOrderCharacter(character);
+  const handwritingPrompt=deriveHandwritingPrompt(exercise);
+  const promptKind:HandwritingPromptKind=handwritingPrompt.kind;
   const wrapRef=useRef<HTMLDivElement|null>(null);
   const guideCanvasRef=useRef<HTMLCanvasElement|null>(null);
   const inkCanvasRef=useRef<HTMLCanvasElement|null>(null);
@@ -332,7 +336,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
   const tone=result?(result.overallSimilarity>=88?"great":result.overallSimilarity>=70?"good":"retry"):"";
 
   return(
-    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"} data-feedback-stroke={result?.feedbackStroke??(liveFeedback?liveFeedback.strokeNumber:null)??"none"} data-feedback-focus={feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode)} data-handwriting-skill-state={learningSignal?.state||"unavailable"} data-handwriting-skill-score={Number.isFinite(Number(learningSignal?.score))?String(learningSignal?.score):"unavailable"}>
+    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"} data-feedback-stroke={result?.feedbackStroke??(liveFeedback?liveFeedback.strokeNumber:null)??"none"} data-feedback-focus={feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode)} data-handwriting-skill-state={learningSignal?.state||"unavailable"} data-handwriting-skill-score={Number.isFinite(Number(learningSignal?.score))?String(learningSignal?.score):"unavailable"} data-handwriting-prompt-kind={promptKind}>
       <button
         className="handwriting-header"
         type="button"
@@ -355,6 +359,11 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
           {!loading&&error?<div className="handwriting-status handwriting-error" role="status">{error}</div>:null}
           {!loading&&!error?(
             <>
+              <div className="handwriting-production-prompt" data-prompt-kind={promptKind}>
+                <span className="handwriting-production-prompt-label">{t(promptKind==="meaning"?"handwritingPromptMeaning":promptKind==="reading"?"handwritingPromptReading":promptKind==="vocabulary"?"handwritingPromptVocabulary":promptKind==="context"?"handwritingPromptContext":"handwritingPromptProduction",language)}</span>
+                <strong className={promptKind==="vocabulary"||promptKind==="context"?"handwriting-production-prompt-cue handwriting-production-prompt-japanese":"handwriting-production-prompt-cue"} lang={promptKind==="vocabulary"||promptKind==="context"?"ja":undefined}>{handwritingPrompt.cue||t("handwritingPromptFallback",language)}</strong>
+                {handwritingPrompt.secondary?<small>{handwritingPrompt.secondary}</small>:null}
+              </div>
               <div className="handwriting-hint-row" aria-live="polite">
                 <span className="handwriting-hint-badge">{t("handwritingHintLevel",language)}: {(() => {const key=hintLevel===0?"handwritingTrace":hintLevel===1?"handwritingGhost":hintLevel===2?"handwritingStrokeGuide":hintLevel===3?"handwritingMinimal":"handwritingRecall";return t(key,language);})()}</span>
                 <button className="handwriting-hint-button" type="button" onClick={()=>setHintLevel(current=>requestMoreHelp(current))} disabled={hintLevel===0}>{t("handwritingMoreHelp",language)}</button>

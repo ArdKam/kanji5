@@ -205,3 +205,25 @@ test("handwriting is an optional skill-building layer inside Practice",async({pa
   expect(session?.experience).toBe("practice");
   await expect(practiceHandwriting.locator(".handwriting-header")).toBeVisible();
 });
+
+
+test("handwriting prompts reuse active exercise stimuli",async({page})=>{
+  await clean(page);
+  await page.locator(".experience-nav .experience-tab").nth(1).click();
+  await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  const cases=[
+    {mode:"meaning",prompt:"Meaning",character:"学",stimulus:{kind:"meaning",primary:"study"}},
+    {mode:"reading",prompt:"Reading",character:"学",stimulus:{kind:"reading",primary:"がく"}},
+    {mode:"vocabulary",prompt:"Vocabulary",character:"学",stimulus:{kind:"masked-vocabulary",primary:"□生",secondary:"がくせい"}},
+    {mode:"context",prompt:"Context",character:"学",stimulus:{kind:"masked-context",primary:"私は□です。",translation:"I am a student."}}
+  ];
+  for(const fixture of cases){
+    await page.evaluate(async(f)=>{await window.__KANJI5_V19_V2_BOUNDARY__.setExercise(f)},fixture);
+    const handwriting=page.locator(".practice-handwriting");
+    await expect(handwriting).toHaveCount(1);
+    const kind=fixture.mode;
+    await expect(handwriting.locator(".handwriting-production-prompt")).toHaveAttribute("data-prompt-kind",kind);
+    await expect(handwriting.locator(".handwriting-production-prompt-cue")).toHaveText(fixture.stimulus.primary);
+  }
+});
