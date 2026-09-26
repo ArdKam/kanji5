@@ -73,6 +73,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await canvas.dispatchEvent("pointerup",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:penX+12,clientY:penY+8});
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
   await handwriting.locator(".handwriting-actions .secondary").click();
+  await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
   await page.mouse.move(penX,penY);
   await page.mouse.down();
   await page.mouse.move(penX,penY+20);
@@ -80,7 +81,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await page.mouse.move(penX,penY+70);
   await page.mouse.up();
   await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
-  await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code",/direction|shape|length|curvature/);
+  await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code",/endpoints|direction|shape|length|curvature/);
   await handwriting.locator(".handwriting-actions .secondary").click();
 
   const reference=await page.evaluate(paths=>{
