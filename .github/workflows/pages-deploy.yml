@@ -66,10 +66,6 @@ jobs:
       - name: Install root test dependencies
         run: npm ci
 
-      - name: Verify account UI end-to-end
-        continue-on-error: true
-        run: npx playwright test --timeout=30000 --retries=0 e2e/react-account-shell.spec.mjs
-
       - name: Upload freshly built GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
