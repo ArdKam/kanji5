@@ -37,6 +37,11 @@
 .mnemonic-support[data-hint-stage="stable"] .mnemonic-support-content{opacity:.94}
 
 
+.mnemonic-prepared:not(.mnemonic-prepared-collapsed){display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px;margin-top:8px;padding:9px 10px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--washi) 88%,transparent);text-align:start}
+.mnemonic-prepared-copy{display:grid;gap:3px;min-width:0}
+.mnemonic-prepared-copy strong{font-size:10px;font-weight:850;color:var(--sumi)}
+.mnemonic-prepared-copy p{margin:0;font-size:10px;line-height:1.6;color:var(--ink)}
+.mnemonic-prepared-use{white-space:nowrap}
 .mnemonic-prepared-collapsed{display:block;padding:0;overflow:hidden}
 .mnemonic-prepared-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;list-style:none}
 .mnemonic-prepared-summary::-webkit-details-marker{display:none}
