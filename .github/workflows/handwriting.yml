@@ -54,5 +54,7 @@ jobs:
         run: npx playwright install chromium
       - name: Run handwriting vector calibration
         run: npx playwright test --timeout=30000 --retries=0 e2e/handwriting-vector-calibration.spec.mjs
+      - name: Run handwriting browser integration
+        run: npx playwright test --timeout=45000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
       - name: Run handwriting legacy benchmark
         run: npx playwright test --timeout=30000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
