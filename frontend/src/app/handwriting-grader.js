@@ -344,14 +344,14 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
   const raw=strokeQuality*0.75+order*0.10+placement*0.15;
   const placementFactor=0.25+0.75*placement;
   const similarity=Math.round(clamp(raw*countFactor*placementFactor)*100);
-  const weakest=[...perStroke].sort((a,b)=>a.similarity-b.similarity)[0]||null;
+  const weakestRow=[...perStroke].sort((a,b)=>a.similarity-b.similarity)[0]||null;
 
   const feedbackCode =
     ratio<1 ? "stroke-count" :
     order<0.70 ? "stroke-order" :
     placement<0.58 ? "placement" :
-    weakest?.feedbackCode==="good" ? (similarity>=85?"good":"improve") :
-    weakest?.feedbackCode || (similarity>=85?"good":"improve");
+    weakestRow?.feedbackCode==="good" ? (similarity>=85?"good":"improve") :
+    weakestRow?.feedbackCode || (similarity>=85?"good":"improve");
 
   const rawPointCount=Array.isArray(userStrokes)?userStrokes.flat().length:0;
   const avgRawPoints=user.length?rawPointCount/user.length:0;
@@ -374,6 +374,6 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
     placementScore:placement,
     perStroke,
     feedbackCode,
-    feedbackStroke:weakest?.strokeNumber??null,
+    feedbackStroke:weakestRow?.strokeNumber??null,
   };
 }
