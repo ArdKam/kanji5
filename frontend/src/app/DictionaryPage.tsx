@@ -71,7 +71,7 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
     setBusyKey(key);
     setStatus("");
     try {
-      const current = await getMnemonic(item.character);
+      const current = await getMnemonic(character);
       const existing = String(current.text ?? "").trim();
       const next = language === "fa" ? suggestion.fa : suggestion.en;
       if (existing && existing !== next && !window.confirm(t("mnemonicOverwriteConfirm", language))) return;
