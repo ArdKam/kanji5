@@ -139,6 +139,17 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 .learning-card[data-card-density="dense"] .mnemonic-editor-footer>span{display:none;}
 .learning-card[data-card-density="dense"] .mnemonic-editor-footer .actions{flex-wrap:nowrap;}
 .learning-card[data-card-density="dense"] .mnemonic-editor-footer .button{white-space:nowrap;}
+/* Dense learning-card fit guard: keep core identity readable while preventing back-page overflow. */
+.learning-card[data-card-density="dense"] .learning-back-identity{gap:4px;}
+.learning-card[data-card-density="dense"] .learning-back-identity-visual{min-height:60px;}
+.learning-card[data-card-density="dense"] .learning-back-tools{gap:4px;}
+.learning-card[data-card-density="dense"] .learning-back-identity .readings-header{margin-top:0;}
+.learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:38px;padding:4px 6px;}
+.learning-card[data-card-density="dense"] .learning-card-back .stroke-order-panel{padding:6px;gap:4px;}
+.learning-card[data-card-density="dense"] .component-breakdown{gap:3px;}
+.learning-card[data-card-density="dense"] .component-breakdown-visual{gap:4px;}
+.learning-card[data-card-density="dense"] .component-breakdown-target{font-size:32px;}
+.learning-card[data-card-density="dense"] .component-breakdown-part{min-width:27px;min-height:27px;padding:3px 4px;font-size:14px;}
 @media(max-width:760px){
   .learning-card[data-card-density="dense"] .learning-back-scroll{gap:4px;padding-top:4px;padding-bottom:1px;}
   .learning-card[data-card-density="dense"] .learning-back-overview{gap:4px;}
