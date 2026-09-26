@@ -25,3 +25,10 @@ Kanji5 does **not** bulk-copy the RTK book stories. It also does not treat an ar
 A complete 2,136-kanji product needs a mnemonic available for every Jōyō kanji. Until each entry has passed human/editorial curation, the scene generator provides coverage without pretending that generated content is equivalent to curated content.
 
 The generated entries are marked `source: "generated"` and `generationStrategy: "scene-v2"`.
+
+
+## Editorial quality principles
+
+The 2025 EMNLP work on interpretable mnemonic generation supports the same design direction used in this batch: effective kanji mnemonics are compositional, combining a kanji's meaning with salient component keywords and a coherent, vivid cue rather than relying on an opaque generic template. It also reports that learner preferences vary, so Kanji5 treats curated stories as a strong default rather than a universal optimal story.
+
+Kanji5 uses that research as methodological guidance, not as a text corpus. No third-party mnemonic text is copied into the prepared corpus. Koohii community stories remain reference material only because its learner-contributed content is licensed CC BY-NC-SA; that license is not treated as a blanket permission for unrestricted redistribution.
