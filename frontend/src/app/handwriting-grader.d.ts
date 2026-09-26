@@ -15,6 +15,7 @@ export type HandwritingPerStrokeScore = {
   shape:number;
   endpoints:number;
   length:number;
+  lengthRatio:number;
   direction:number;
   curvature:number;
   feedbackCode:Exclude<HandwritingFeedbackCode,"empty"|"unavailable"|"stroke-count"|"stroke-order"|"placement">;
