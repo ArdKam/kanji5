@@ -126,7 +126,7 @@ type HandwritingGradeCommit = HandwritingGrade;
 type HandwritingExerciseContext={mode?:string;prompt?:string;character?:string;stimulus?:{kind?:string;primary?:string;secondary?:string;translation?:string}};
 
 // Handwriting remains presentation-only; learning integration is injected by the parent boundary.
-export function HandwritingPractice({ character, language, learningSignal, onGradeRecorded, exercise }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal; onGradeRecorded?:(grade:HandwritingGradeCommit)=>void|Promise<unknown>; exercise?:HandwritingExerciseContext }){
+export function HandwritingPractice({ character, language, learningSignal, onGradeRecorded, exercise, defaultExpanded=false }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal; onGradeRecorded?:(grade:HandwritingGradeCommit)=>void|Promise<unknown>; exercise?:HandwritingExerciseContext; defaultExpanded?:boolean }){
   const normalized=normalizeStrokeOrderCharacter(character);
   const handwritingPrompt=deriveHandwritingPrompt(exercise);
   const promptKind:HandwritingPromptKind=handwritingPrompt.kind;
@@ -143,8 +143,9 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
   const [error,setError]=useState("");
   const [result,setResult]=useState<HandwritingGrade|null>(null);
   const [liveFeedback,setLiveFeedback]=useState<{strokeNumber:number;grade:HandwritingStrokeGrade}|null>(null);
-  const [expanded,setExpanded]=useState(false);
+  const [expanded,setExpanded]=useState(defaultExpanded);
   const [hintLevel,setHintLevel]=useState(()=>initialHintLevel(learningSignal));
+  const [hintsOpen,setHintsOpen]=useState(false);
 
   useEffect(()=>{
     let active=true;
@@ -157,6 +158,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
     setLiveFeedback(null);
     setError("");
     setHintLevel(initialHintLevel(learningSignal));
+    setHintsOpen(false);
     if(!normalized)return()=>{active=false};
     setLoading(true);
     fetch(kanjiSvgUrl(normalized),{cache:"force-cache"})
@@ -364,13 +366,29 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                 <strong className={promptKind==="vocabulary"||promptKind==="context"?"handwriting-production-prompt-cue handwriting-production-prompt-japanese":"handwriting-production-prompt-cue"} lang={promptKind==="vocabulary"||promptKind==="context"?"ja":undefined}>{handwritingPrompt.cue||t("handwritingPromptFallback",language)}</strong>
                 {handwritingPrompt.secondary?<small>{handwritingPrompt.secondary}</small>:null}
               </div>
-              <div className="handwriting-hint-row" aria-live="polite">
-                <span className="handwriting-hint-badge">{t("handwritingHintLevel",language)}: {(() => {const key=hintLevel===0?"handwritingTrace":hintLevel===1?"handwritingGhost":hintLevel===2?"handwritingStrokeGuide":hintLevel===3?"handwritingMinimal":"handwritingRecall";return t(key,language);})()}</span>
-                <button className="handwriting-hint-button" type="button" onClick={()=>setHintLevel(current=>requestMoreHelp(current))} disabled={hintLevel===0}>{t("handwritingMoreHelp",language)}</button>
+              <div className="handwriting-hint-control">
+                <button
+                  className="handwriting-info-button"
+                  type="button"
+                  aria-label={language === "fa" ? "نمایش راهنما" : "Show handwriting hints"}
+                  aria-expanded={hintsOpen}
+                  aria-controls={"handwriting-hints-"+normalized}
+                  onClick={()=>setHintsOpen(value=>!value)}
+                >
+                  <span aria-hidden="true">i</span>
+                </button>
+                {hintsOpen?(
+                  <div id={"handwriting-hints-"+normalized} className="handwriting-hints-popover" role="note">
+                    <div className="handwriting-hint-row" aria-live="polite">
+                      <span className="handwriting-hint-badge">{t("handwritingHintLevel",language)}: {(() => {const key=hintLevel===0?"handwritingTrace":hintLevel===1?"handwritingGhost":hintLevel===2?"handwritingStrokeGuide":hintLevel===3?"handwritingMinimal":"handwritingRecall";return t(key,language);})()}</span>
+                      <button className="handwriting-hint-button" type="button" onClick={()=>setHintLevel(current=>requestMoreHelp(current))} disabled={hintLevel===0}>{t("handwritingMoreHelp",language)}</button>
+                    </div>
+                    <p id={"handwriting-help-"+normalized} className="handwriting-help">
+                      {t("handwritingPracticeHelp",language)}
+                    </p>
+                  </div>
+                ):null}
               </div>
-              <p id={"handwriting-help-"+normalized} className="handwriting-help">
-                {t("handwritingPracticeHelp",language)}
-              </p>
               <div className="handwriting-canvas-wrap" ref={wrapRef}>
                 <canvas
                   ref={guideCanvasRef}
