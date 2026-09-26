@@ -47,6 +47,7 @@ const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["
 
 function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
+  const preparedMeaningKey=(card.meanings??[]).join("\u0001");
   const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
   const [personalMnemonic,setPersonalMnemonic]=useState("");
@@ -93,7 +94,7 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
       if(active)setComponentInfo(null);
     });
     return ()=>{active=false};
-  },[revealed,card.character,card.meanings]);
+  },[revealed,card.character,preparedMeaningKey]);
   const mnemonicToolRef=useRef<HTMLElement|null>(null);
   const scrollMnemonicEditorIntoView=useCallback(()=>{
     const target=mnemonicToolRef.current;
