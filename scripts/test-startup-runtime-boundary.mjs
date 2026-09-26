@@ -43,7 +43,7 @@ for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-pe
   assert.equal(fs.existsSync(file), false, `retired file still exists: ${file}`);
 
 for (const file of ['v1.4-education-migration.js','v1.4-education-core.js','v1.5-education-ui.js','v1.9-recovery.js'])
-  assert.match(sw, new RegExp(`"${file.replaceAll('.', '\\\.')}"`), `lazy exercise dependency missing from precache: ${file}`);
+  assert.ok(sw.includes(`"./${file}"`), `lazy exercise dependency missing from precache: ${file}`);
 for (const file of ['./v1.8-learning-ux.js','./v1.9-recovery-ui.js'])
   assert.equal(sw.includes(`"${file}"`), false, `retired file remains in precache: ${file}`);
 for (const file of ['v1.5-p0.js','v1.5-recall-core.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
