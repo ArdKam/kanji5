@@ -49,7 +49,7 @@ async function readStrokes(page, codePointHex) {
 }
 
 async function legacyScore(page, target, user, userLineWidth = 8) {
-  return page.evaluate(({ target, user }) => {
+  return page.evaluate(({ target, user, userLineWidth }) => {
     const size = 220;
     const targetCanvas = document.createElement("canvas");
     const userCanvas = document.createElement("canvas");
@@ -106,7 +106,7 @@ async function legacyScore(page, target, user, userLineWidth = 8) {
       Math.min(user.length, target.length) / Math.max(user.length, target.length);
 
     return Math.round((overlapScore * 0.82 + strokeRatio * 0.18) * 100);
-  }, { target, user });
+  }, { target, user, userLineWidth });
 }
 
 test("legacy handwriting grader baseline exposes the current scoring defects", async ({ page }) => {
