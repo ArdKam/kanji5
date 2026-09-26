@@ -8,7 +8,6 @@ import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
-const diagnosticLevels = ["N5", "N4", "N3", "N2"] as const;
 const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
