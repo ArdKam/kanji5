@@ -6,7 +6,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
   return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>;
 }
 
-export function StatsDialog({ open, snapshot, language }: { open: boolean; snapshot: Snapshot; language: Language }) {
+export function StatsDialog({ open, snapshot, language, onClose }: { open: boolean; snapshot: Snapshot; language: Language; onClose: () => void }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -49,10 +49,7 @@ export function StatsDialog({ open, snapshot, language }: { open: boolean; snaps
 
   return (
     <dialog open className="dialog stats-dialog" aria-labelledby="stats-title">
-      <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={() => {
-        const event = new CustomEvent("kanji5:close-stats");
-        document.dispatchEvent(event);
-      }}>×</button>
+      <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="stats-title">{t("stats", language)}</h2>
       <div className="dialog-grid">
         <StatRow label={language === "fa" ? "کل مرورها" : "Total reviews"} value={formatNumber(snapshot?.stats?.totalReviews ?? 0, language)} />
