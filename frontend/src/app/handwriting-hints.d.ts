@@ -1,0 +1,10 @@
+export const HANDWRITING_HINT_VERSION: string;
+export const HANDWRITING_HINT_LEVELS: Readonly<{TRACE:number;GHOST:number;STROKE_GUIDE:number;MINIMAL:number;RECALL:number}>;
+export type HandwritingLearningSignal = { state?: string; confidence?: number; mastery?: number };
+export type HandwritingGradeLike = { overallSimilarity?: number; scoreReliability?: "high"|"medium"|"low" };
+export function normalizeHintLevel(value: unknown): number;
+export function initialHintLevel(signal?: HandwritingLearningSignal): number;
+export function adaptHintLevel(level: unknown, grade?: HandwritingGradeLike): number;
+export function requestMoreHelp(level: unknown): number;
+export function hintLevelName(level: unknown): string;
+export function hintProfile(level: unknown, options?: {currentStrokeIndex?: number; referenceLength?: number}): {level:number;name:string;referenceMode:"all"|"current"|"none";opacity:number;currentStroke:number;showStart:boolean;showDirection:boolean;showNumber:boolean};

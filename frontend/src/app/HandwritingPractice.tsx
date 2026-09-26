@@ -45,7 +45,7 @@ function drawGridAndGuide(
   }
 
   const profile=hintProfile(hintLevel,{currentStrokeIndex,referenceLength:referenceStrokes.length});
-  const drawStroke=(stroke:HandwritingStroke[],opacity:number,width:number)=>{
+  const drawStroke=(stroke:HandwritingStroke,opacity:number,width:number)=>{
     if(stroke.length<2)return;
     ctx.save();ctx.strokeStyle="rgba(116,109,97,1)";ctx.globalAlpha=opacity;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(stroke[0].x,stroke[0].y);
     for(let i=1;i<stroke.length;i+=1)ctx.lineTo(stroke[i].x,stroke[i].y);
