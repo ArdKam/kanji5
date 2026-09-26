@@ -32,6 +32,9 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await practice.click();
   await expect(practice).toHaveAttribute('aria-current','page');
   await expect(review).not.toHaveAttribute('aria-current','page');
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.locator('#root #exercise')).toHaveCount(0);
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect(page.locator('#root section.card:not(#exercise)')).toHaveCount(0);
   await expect(page.locator('#root .daily-summary')).toHaveCount(0);
