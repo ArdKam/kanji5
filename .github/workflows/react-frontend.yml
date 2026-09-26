@@ -76,6 +76,19 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
+      - name: Sync generated React artifact to PR branch
+        if: github.event_name == 'pull_request' && github.head_ref != ''
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- react-dist; then
+            echo "react-dist already matches the current build."
+          else
+            git add react-dist
+            git commit -m "chore: sync generated React artifact"
+            git push origin "HEAD:${github.head_ref}"
+          fi
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
