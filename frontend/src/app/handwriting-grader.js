@@ -226,7 +226,7 @@ function orderScore(user,reference,diagonal){
 function placementScore(user,reference){
   const ub=bounds(user), rb=bounds(reference), diagonal=Math.max(rb.diagonal,1);
   const center=Math.hypot(ub.cx-rb.cx,ub.cy-rb.cy)/diagonal;
-  const centerScore=Math.exp(-center*3.5);
+  const centerScore=Math.exp(-center*4.5);
   const widthRatio=Math.max(EPSILON,ub.width/Math.max(rb.width,1));
   const heightRatio=Math.max(EPSILON,ub.height/Math.max(rb.height,1));
   const sizeScore=(Math.exp(-Math.abs(Math.log(widthRatio))/0.24)+Math.exp(-Math.abs(Math.log(heightRatio))/0.24))/2;
@@ -308,7 +308,8 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
   const order=orderScore(aligned,reference,diagonal);
   const placement=placementScore(user,reference);
   const raw=average*0.75+order*0.10+placement*0.15;
-  const similarity=Math.round(clamp(raw*countFactor)*100);
+  const placementFactor=0.25+0.75*placement;
+  const similarity=Math.round(clamp(raw*countFactor*placementFactor)*100);
   const weakest=[...perStroke].sort((a,b)=>a.similarity-b.similarity)[0]||null;
 
   const feedbackCode =
