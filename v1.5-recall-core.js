@@ -4,7 +4,7 @@ export function normalize(value) {
   return String(value ?? '').trim().toLowerCase().normalize('NFKC').replace(/[\s\u3000]+/g, '');
 }
 
-export function componentAccuracy(stats) {
+export function attributeRecallAccuracy(stats) {
   const attempts = Math.max(0, Number(stats?.attempts) || 0);
   if (!attempts) return 0;
   const correct = Math.min(attempts, Math.max(0, Number(stats?.correct) || 0));
@@ -14,7 +14,7 @@ export function componentAccuracy(stats) {
   return (score + 1) / (attempts + 2);
 }
 
-export function componentSignal(entry) {
+export function attributeRecallSignal(entry) {
   const out = {};
   for (const mode of RECALL_MODES) {
     const values = Object.values(entry?.[mode] || {}).filter(value =>
@@ -30,7 +30,7 @@ export function componentSignal(entry) {
     for (const value of values) {
       const attempts = Math.max(0, Number(value.attempts) || 0);
       weight += attempts;
-      total += componentAccuracy(value) * attempts;
+      total += attributeRecallAccuracy(value) * attempts;
       const at = typeof value.lastAt === 'string' ? value.lastAt : '';
       if (at && (lastAt === null || at > lastAt)) lastAt = at;
     }
@@ -45,7 +45,7 @@ export function componentSignal(entry) {
   return out;
 }
 
-export function selectFocus(item, mode, componentState = {}) {
+export function selectWeakestRecallAttribute(item, mode, componentState = {}) {
   if (!item || !RECALL_MODES.includes(mode)) return null;
   const state = componentState && typeof componentState === 'object' ? componentState : {};
   const values = mode === 'reading'
@@ -54,13 +54,13 @@ export function selectFocus(item, mode, componentState = {}) {
   const candidates = values.map(raw => ({
     raw,
     key: normalize(raw),
-    accuracy: componentAccuracy(state[normalize(raw)] || {})
+    accuracy: attributeRecallAccuracy(state[normalize(raw)] || {})
   }));
   candidates.sort((a, b) => a.accuracy - b.accuracy || a.key.localeCompare(b.key));
   return candidates[0] || null;
 }
 
-export function applyRecallOutcome(entry, mode, focus, outcome, at) {
+export function applyAttributeRecallOutcome(entry, mode, focus, outcome, at) {
   if (!focus || !RECALL_MODES.includes(mode)) return entry;
   const next = entry && typeof entry === 'object'
     ? structuredClone(entry)
