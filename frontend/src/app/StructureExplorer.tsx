@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   getKanjiByComponent,
   getKanjiByComponents,
@@ -127,7 +127,7 @@ export function StructureExplorer({ language, catalog, onSelectKanji, request }:
     }
   }
 
-  async function submit(event: React.FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
     if (mode === "radical") {
       const q = query.trim();
