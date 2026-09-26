@@ -168,7 +168,7 @@ export type ComponentInfo = {
   components: string[];
   recursive?: ComponentNode[];
   sourceGap: boolean;
-  sourceGap: boolean;
+  
   coverage?: { available?: number; total?: number; fraction?: number } | null;
   source?: { name?: string; commit?: string; license?: string; semantics?: string } | null;
 };
