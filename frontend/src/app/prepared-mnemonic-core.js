@@ -1311,24 +1311,24 @@ const PREPARED_COMPONENT_LABELS = Object.freeze({
 });
 
 const MEANING_SCENE_PROFILES = Object.freeze([
-  { keys: /\b(?:person|people|man|woman|child|human|friend|family|someone|self)\b/i, fa: "یک آدم مشخص", en: "a specific person", actionFa: "او وارد صحنه می‌شود و کاری روشن انجام می‌دهد", actionEn: "they enter the scene and perform one clear action" },
-  { keys: /\b(?:move|go|come|walk|run|leave|enter|return|travel|road|path|far|near|front|back|up|down)\b/i, fa: "یک مسافر", en: "a traveler", actionFa: "مسافر راه می‌افتد، جلو می‌رود و به مقصد می‌رسد", actionEn: "the traveler sets off, moves forward, and reaches a destination" },
-  { keys: /\b(?:water|river|sea|lake|rain|snow|cloud|wet|wash|drink|flow|wave)\b/i, fa: "یک صحنهٔ آبی", en: "a water scene", actionFa: "آب حرکت می‌کند و چیزی را خیس یا جابه‌جا می‌کند", actionEn: "water moves and wets or carries something" },
-  { keys: /\b(?:fire|hot|heat|burn|light|sun|bright|dark|night|day|weather|wind|spring|summer|autumn|winter)\b/i, fa: "یک صحنهٔ طبیعی", en: "a natural scene", actionFa: "نور یا نیروی طبیعت ناگهان تغییر می‌کند و صحنه را عوض می‌کند", actionEn: "the light or force of nature suddenly changes the scene" },
-  { keys: /\b(?:eat|food|drink|rice|meal|buy|sell|money|work|shop|store|use|make|build|school|study|learn|read|write|book)\b/i, fa: "یک کار روزمره", en: "an everyday task", actionFa: "فرد آن کار را انجام می‌دهد و نتیجه‌ای قابل‌دیدن ایجاد می‌کند", actionEn: "someone performs the task and creates a visible result" },
-  { keys: /\b(?:see|look|eye|hear|ear|mouth|hand|foot|head|body|heart|voice|sound|speak|say|listen|sing)\b/i, fa: "یک کنش بدنی", en: "a bodily action", actionFa: "عضو بدن حرکت می‌کند و واکنش واضحی نشان می‌دهد", actionEn: "the body part moves and produces a clear reaction" },
-  { keys: /\b(?:happy|sad|anger|fear|love|hate|forget|remember|think|feel|mind|heart|fun|easy|difficult|quiet|calm)\b/i, fa: "یک آدم با واکنش شدید", en: "a person with a strong reaction", actionFa: "فرد واکنشی ناگهانی نشان می‌دهد که معنی را برجسته می‌کند", actionEn: "the person shows a sudden reaction that makes the meaning vivid" },
-  { keys: /\b(?:place|country|room|house|home|building|station|gate|door|city|shop|yard|garden|school)\b/i, fa: "یک مکان مشخص", en: "a specific place", actionFa: "کسی وارد آن می‌شود، کاری انجام می‌دهد و دوباره بیرون می‌آید", actionEn: "someone enters, does something, and comes back out" },
-  { keys: /\b(?:secret|mystery|unknown|question|answer|hidden|discover|find|solve)\b/i, fa: "یک جعبهٔ قفل‌شده", en: "a locked box", actionFa: "فرد قفل را باز می‌کند و راز پنهان را آشکار می‌کند", actionEn: "someone unlocks it and reveals what was hidden" },
-  { keys: /\b(?:big|small|many|few|one|two|three|middle|same|different|first|last|long|short|new|old|young)\b/i, fa: "یک مقایسهٔ دیداری", en: "a visual comparison", actionFa: "دو چیز کنار هم قرار می‌گیرند و تفاوتشان فوراً دیده می‌شود", actionEn: "two things are placed together so the difference is instantly visible" },
-  { keys: /\b(?:life|live|grow|birth|die|death|dead|health|sick|ill)\b/i, fa: "یک صحنهٔ زندگی", en: "a life scene", actionFa: "چیزی زنده تغییر می‌کند و اثرش فوراً دیده می‌شود", actionEn: "something living changes and its effect is immediately visible" }
+  { keys: /\b(?:person|people|man|woman|child|human|friend|family|someone|self)\b/i, setupFa: "یک آدم مشخص", setupEn: "a specific person", actionFa: "او وارد صحنه می‌شود و کاری روشن انجام می‌دهد", actionEn: "they enter the scene and perform one clear action" },
+  { keys: /\b(?:move|go|come|walk|run|leave|enter|return|travel|road|path|far|near|front|back|up|down)\b/i, setupFa: "یک مسافر", setupEn: "a traveler", actionFa: "مسافر راه می‌افتد، جلو می‌رود و به مقصد می‌رسد", actionEn: "the traveler sets off, moves forward, and reaches a destination" },
+  { keys: /\b(?:water|river|sea|lake|rain|snow|cloud|wet|wash|drink|flow|wave)\b/i, setupFa: "یک صحنهٔ آبی", setupEn: "a water scene", actionFa: "آب حرکت می‌کند و چیزی را خیس یا جابه‌جا می‌کند", actionEn: "water moves and wets or carries something" },
+  { keys: /\b(?:fire|hot|heat|burn|light|sun|bright|dark|night|day|weather|wind|spring|summer|autumn|winter)\b/i, setupFa: "یک صحنهٔ طبیعی", setupEn: "a natural scene", actionFa: "نور یا نیروی طبیعت ناگهان تغییر می‌کند و صحنه را عوض می‌کند", actionEn: "the light or force of nature suddenly changes the scene" },
+  { keys: /\b(?:eat|food|drink|rice|meal|buy|sell|money|work|shop|store|use|make|build|school|study|learn|read|write|book)\b/i, setupFa: "یک کار روزمره", setupEn: "an everyday task", actionFa: "فرد آن کار را انجام می‌دهد و نتیجه‌ای قابل‌دیدن ایجاد می‌کند", actionEn: "someone performs the task and creates a visible result" },
+  { keys: /\b(?:see|look|eye|hear|ear|mouth|hand|foot|head|body|heart|voice|sound|speak|say|listen|sing)\b/i, setupFa: "یک کنش بدنی", setupEn: "a bodily action", actionFa: "عضو بدن حرکت می‌کند و واکنش واضحی نشان می‌دهد", actionEn: "the body part moves and produces a clear reaction" },
+  { keys: /\b(?:happy|sad|anger|fear|love|hate|forget|remember|think|feel|mind|heart|fun|easy|difficult|quiet|calm)\b/i, setupFa: "یک آدم با واکنش شدید", setupEn: "a person with a strong reaction", actionFa: "فرد واکنشی ناگهانی نشان می‌دهد که معنی را برجسته می‌کند", actionEn: "the person shows a sudden reaction that makes the meaning vivid" },
+  { keys: /\b(?:place|country|room|house|home|building|station|gate|door|city|shop|yard|garden|school)\b/i, setupFa: "یک مکان مشخص", setupEn: "a specific place", actionFa: "کسی وارد آن می‌شود، کاری انجام می‌دهد و دوباره بیرون می‌آید", actionEn: "someone enters, does something, and comes back out" },
+  { keys: /\b(?:secret|mystery|unknown|question|answer|hidden|discover|find|solve)\b/i, setupFa: "یک جعبهٔ قفل‌شده", setupEn: "a locked box", actionFa: "فرد قفل را باز می‌کند و راز پنهان را آشکار می‌کند", actionEn: "someone unlocks it and reveals what was hidden" },
+  { keys: /\b(?:big|small|many|few|one|two|three|middle|same|different|first|last|long|short|new|old|young)\b/i, setupFa: "یک مقایسهٔ دیداری", setupEn: "a visual comparison", actionFa: "دو چیز کنار هم قرار می‌گیرند و تفاوتشان فوراً دیده می‌شود", actionEn: "two things are placed together so the difference is instantly visible" },
+  { keys: /\b(?:life|live|grow|birth|die|death|dead|health|sick|ill)\b/i, setupFa: "یک صحنهٔ زندگی", setupEn: "a life scene", actionFa: "چیزی زنده تغییر می‌کند و اثرش فوراً دیده می‌شود", actionEn: "something living changes and its effect is immediately visible" }
 ]);
 
 const resolveMeaningProfile = meaning => {
   const text = String(meaning ?? "");
   return MEANING_SCENE_PROFILES.find(profile => profile.keys.test(text)) ?? {
-    fa: "یک شیء یا موقعیت مشخص",
-    en: "one specific object or situation",
+    setupFa: "یک شیء یا موقعیت مشخص",
+    setupEn: "one specific object or situation",
     actionFa: "آن شیء یا موقعیت حرکت یا تغییر واضحی می‌کند و معنی را برجسته می‌کند",
     actionEn: "that object or situation makes a clear movement or change that makes the meaning vivid"
   };
