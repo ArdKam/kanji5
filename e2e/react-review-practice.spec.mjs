@@ -66,38 +66,57 @@ test('empty Active Recall state stays responsive before any card is learned',asy
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:5000});
 });
 
-test('wrong production answer turns the card red once and then advances once',async({page})=>{
+test('Production Recall requires explicit reveal and does not require keyboard input',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
-  await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:10000});
-  const before=await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)});
-  const character=await forcedTargetCharacter(page);
-  const wrong=page.locator('#root #exercise .production-choice').filter({hasNotText:character}).first();
-  await wrong.click();
+  await expect(page.locator('#root #exercise .production-recall')).toBeVisible({timeout:10000});
+  await expect(page.locator('#root #exercise .production-recall-reveal')).toBeVisible();
+  await expect(page.locator('#root #exercise .production-choice')).toHaveCount(0);
+  await expect(page.locator('#root #exercise input')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'بلد بودم'})).toHaveCount(0);
+  await page.getByRole('button',{name:'نمایش پاسخ'}).click();
+  await expect(page.locator('#root #exercise .production-recall-revealed')).toBeVisible();
+  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))))).not.toBe('');
+  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
+  await expect(page.locator('#root #exercise .production-recall-revealed strong')).toHaveText(character);
+  await expect(page.getByRole('button',{name:'بلد بودم'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'نمی‌دانستم'})).toBeVisible();
+});
+
+test('Production Recall known self-grade submits the revealed Kanji and advances',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
+  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""));
+  await page.getByRole('button',{name:'نمایش پاسخ'}).click();
+  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))))).not.toBe('');
+  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
+  await page.getByRole('button',{name:'بلد بودم'}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
+  await expect(page.locator('#root .production-recall')).toHaveCount(0);
+  await page.waitForTimeout(900);
+  await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
+  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__).snapshot()).exercise?.contentId||""))))).not.toBe(before);
+  await expect(page.locator('#root #exercise .prompt')).toBeVisible();
+  void character;
+});
+
+test('Production Recall unknown self-grade records unknown and advances once',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
+  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__).snapshot().exercise?.contentId||""));
+  await page.getByRole('button',{name:'نمایش پاسخ'}).click();
+  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))))).not.toBe('');
+  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
+  await page.getByRole('button',{name:'نمی‌دانستم'}).click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
-  await expect(page.locator('#root .actions')).toHaveCount(0);
   await expect(page.locator('#root .exercise-correct-answer')).toBeVisible();
   await expect(page.locator('#root .exercise-correct-answer b')).toHaveText(character);
   await page.waitForTimeout(1600);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
-  await expect(page.locator('#root #exercise .prompt')).toBeVisible();
-});
-
-test('correct production answer turns the card green and advances once',async({page})=>{
-  await clean(page);
-  await seedSeenCard(page);
-  await startForcedExercise(page,'production');
-  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.contentId));
-  await expect.poll(async()=>forcedTargetCharacter(page),{timeout:5000}).not.toBe('');
-  const character=await forcedTargetCharacter(page);
-  await page.locator('#root #exercise .production-choice').filter({hasText:character}).first().click();
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
-  await expect(page.locator('#root .actions')).toHaveCount(0);
-  await page.waitForTimeout(900);
-  await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect.poll(async()=>String((await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)})))).not.toBe(before);
+  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__).snapshot()).exercise?.contentId||""))))).not.toBe(before);
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
