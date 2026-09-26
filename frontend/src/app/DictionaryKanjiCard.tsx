@@ -152,6 +152,13 @@ export function DictionaryKanjiCard({
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
         </div>
 
+        <div className="dictionary-section-nav" role="toolbar" aria-label={language === "fa" ? "گزینه‌های کارت" : "Card options"}>
+          {sectionButton("structure", language === "fa" ? "ساختار" : "Structure")}
+          {sectionButton("writing", language === "fa" ? "تمرین نوشتن" : "Practice writing")}
+          {sectionButton("vocabulary", language === "fa" ? "واژگان" : "Vocabulary")}
+          {sectionButton("mnemonic", language === "fa" ? "یادسپار" : "Mnemonic")}
+        </div>
+
         <div className="dictionary-stroke-order-wrap">
           <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
           <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
@@ -179,12 +186,6 @@ export function DictionaryKanjiCard({
         </div>
 
         <div className="dictionary-card-accordion" aria-label={language === "fa" ? "اطلاعات تکمیلی" : "Additional information"}>
-          <div className="dictionary-section-nav" role="toolbar" aria-label={language === "fa" ? "گزینه‌های کارت" : "Card options"}>
-            {sectionButton("structure", language === "fa" ? "ساختار" : "Structure")}
-            {sectionButton("writing", language === "fa" ? "تمرین نوشتن" : "Practice writing")}
-            {sectionButton("vocabulary", language === "fa" ? "واژگان" : "Vocabulary")}
-            {sectionButton("mnemonic", language === "fa" ? "یادسپار" : "Mnemonic")}
-          </div>
           <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "structure"}>
             {openSection === "structure" ? (
               <div id="dictionary-section-panel-structure" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "ساختار" : "Structure"}>
