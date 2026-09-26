@@ -107,6 +107,7 @@ export type KanjiDictionaryResult = {
   jlpt?: string | null;
   frequency?: number;
   order?: number;
+  radicalId?: number;
 };
 
 export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:string };
@@ -321,4 +322,14 @@ export async function getVocabulary(character: string): Promise<{ character: str
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
+}
+
+
+export async function getRadicalInfo(character: string): Promise<{
+  character: string;
+  available: boolean;
+  radical?: RadicalInfo | null;
+  reason?: string;
+}> {
+  return (await waitForEngine()).getRadicalInfo(character);
 }
