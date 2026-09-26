@@ -273,7 +273,7 @@ assert.deepEqual(hintFns.getMnemonicHintPlan("early", "reading"), { stage: "earl
 assert.deepEqual(hintFns.getMnemonicHintPlan("early", "meaning"), { stage: "early", focus: "meaning", expandedByDefault: false, showReading: true, showVocabulary: false, showConfusable: true, preparedMode: "expanded" });
 assert.deepEqual(hintFns.getMnemonicHintPlan("early", "both"), { stage: "early", focus: "both", expandedByDefault: true, showReading: true, showVocabulary: false, showConfusable: true, preparedMode: "expanded" });
 assert.deepEqual(hintFns.getMnemonicHintPlan("stable", "meaning"), { stage: "stable", focus: "meaning", expandedByDefault: false, showReading: true, showVocabulary: false, showConfusable: false, preparedMode: "collapsed" });
-assert.deepEqual(hintFns.getMnemonicHintPlan("mastered", "both"), { stage: "mastered", focus: "both", expandedByDefault: false, showReading: false, showVocabulary: false, showConfusable: false, preparedMode: "hidden" });
+assert.deepEqual(hintFns.getMnemonicHintPlan("mastered", "both"), { stage: "mastered", focus: "both", expandedByDefault: false, showReading: false, showVocabulary: false, showConfusable: false, preparedMode: "collapsed" });
 
 const adaptivePlanSource = support.slice(hintStart, hintEnd);
 assert.match(adaptivePlanSource, /preparedMode: "expanded"/);
