@@ -327,12 +327,12 @@ export function HandwritingPractice({ character, language }: { character: string
                 <button className="button primary" type="button" onClick={grade} disabled={!strokeCount}>{t("gradeDrawing", language)}</button>
               </div>
               {result !== null ? (
-                <div className={"handwriting-result " + (result.score >= 82 ? "great" : result.score >= 65 ? "good" : "retry")} role="status" data-score={String(result.score)}>
+                <div className={"handwriting-result " + (result.score >= 88 ? "great" : result.score >= 75 ? "good" : "retry")} role="status" data-score={String(result.score)}>
                   <strong>{t("handwritingSimilarity", language)} {formatNumber(result.score, language)}%</strong>
                   <span>
-                    {result.score >= 82
+                    {result.score >= 88
                       ? t("handwritingGreat", language)
-                      : result.score >= 65
+                      : result.score >= 75
                         ? t("handwritingGood", language)
                         : t("handwritingRetry", language)}
                   </span>
