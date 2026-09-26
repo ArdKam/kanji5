@@ -31,6 +31,8 @@ test('React learning and review actions stay behind the authoritative boundary',
 test('React exercise path can start and expose a boundary-backed exercise',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
   await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.())?.exercise))).toBe(true);
 });
