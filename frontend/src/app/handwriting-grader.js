@@ -271,6 +271,21 @@ function featureIssue(features){
   return "good";
 }
 
+export function gradeHandwritingStroke(userStroke,referenceStroke,options={}){
+  const settings={...DEFAULTS,...(options||{})};
+  const userPrepared=prepare([userStroke],settings,true)[0];
+  const referencePrepared=prepare([referenceStroke],settings,false)[0];
+  if(!userPrepared||!referencePrepared)return {similarity:0,scoreReliability:"low",feedbackCode:"improve",actionable:false,metrics:{shape:0,endpoints:0,length:0,lengthRatio:0,direction:0,curvature:0,placement:0}};
+  const diagonal=Math.max(bounds([referencePrepared]).diagonal,1);
+  const aligned=alignUserToReference([userPrepared],[referencePrepared],Number(settings.maxScaleAdjustment)||DEFAULTS.maxScaleAdjustment)[0];
+  const shape=shapeScore(aligned,referencePrepared,diagonal),endpoints=endpointScore(aligned,referencePrepared,diagonal),length=lengthScore(aligned,referencePrepared),direction=directionScore(aligned,referencePrepared),curvature=curvatureScore(aligned,referencePrepared),lengthInfo=meaningfulLengthPenalty(aligned,referencePrepared);
+  const baseSimilarity=clamp(shape*0.55+endpoints*0.15+length*0.10+direction*0.16+curvature*0.04),similarity=clamp(baseSimilarity*lengthInfo.penalty),placement=placementScore([userPrepared],[referencePrepared]);
+  const feedbackCode=featureIssue({shape,endpoints,length,direction,curvature});
+  const rawPointCount=Array.isArray(userStroke)?userStroke.length:0,scoreReliability=rawPointCount<3?"low":rawPointCount<8?"medium":"high";
+  const actionable=scoreReliability!=="low"&&(similarity<0.78||(feedbackCode!=="good"&&similarity<0.86));
+  return {similarity,scoreReliability,feedbackCode,actionable,metrics:{shape,endpoints,length,lengthRatio:lengthInfo.ratio,direction,curvature,placement}};
+}
+
 export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
   const settings={...DEFAULTS,...(options||{})};
   const user=prepare(userStrokes,settings,true);

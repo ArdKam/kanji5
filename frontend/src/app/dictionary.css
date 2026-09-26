@@ -1015,6 +1015,21 @@
 }
 .handwriting-hint-button:hover:not(:disabled){border-color:color-mix(in srgb,var(--shu) 35%,var(--line));background:var(--washi);}
 .handwriting-hint-button:disabled{cursor:default;opacity:.52;}
+.handwriting-live-feedback{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-height:38px;
+  padding:7px 9px;
+  border:1px solid color-mix(in srgb,var(--shu) 24%,var(--line));
+  border-radius:11px;
+  background:color-mix(in srgb,var(--shu) 5%,var(--paper));
+  color:var(--mute);
+  font-size:9px;
+}
+.handwriting-live-feedback span{font-weight:800;white-space:nowrap;}
+.handwriting-live-feedback strong{color:var(--ink);font-size:9px;line-height:1.45;text-align:end;}
 .handwriting-help{
   margin:0;
   color:var(--mute);

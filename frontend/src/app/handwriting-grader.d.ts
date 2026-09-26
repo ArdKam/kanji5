@@ -20,6 +20,13 @@ export type HandwritingPerStrokeScore = {
   curvature:number;
   feedbackCode:Exclude<HandwritingFeedbackCode,"empty"|"unavailable"|"stroke-count"|"stroke-order"|"placement">;
 };
+export type HandwritingStrokeGrade = {
+  similarity:number;
+  scoreReliability:HandwritingScoreReliability;
+  feedbackCode:Exclude<HandwritingFeedbackCode,"stroke-count"|"stroke-order"|"placement"|"empty"|"unavailable">;
+  actionable:boolean;
+  metrics:{shape:number;endpoints:number;length:number;lengthRatio:number;direction:number;curvature:number;placement:number};
+};
 export type HandwritingGrade = {
   overallSimilarity:number;
   scoreReliability:HandwritingScoreReliability;
@@ -31,4 +38,5 @@ export type HandwritingGrade = {
   feedbackStroke:number|null;
 };
 export function preprocessStrokes(strokes:HandwritingStroke[],options?:HandwritingGradingOptions):HandwritingStroke[];
+export function gradeHandwritingStroke(userStroke:HandwritingStroke,referenceStroke:HandwritingStroke,options?:HandwritingGradingOptions):HandwritingStrokeGrade;
 export function gradeHandwriting(userStrokes:HandwritingStroke[],referenceStrokes:HandwritingStroke[],options?:HandwritingGradingOptions):HandwritingGrade;

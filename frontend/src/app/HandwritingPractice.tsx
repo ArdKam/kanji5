@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
-import { gradeHandwriting, type HandwritingGrade, type HandwritingStroke } from "./handwriting-grader";
+import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
 import { sampleSvgStrokePaths } from "./handwriting-reference";
 import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, requestMoreHelp } from "./handwriting-hints";
 
@@ -117,6 +117,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState("");
   const [result,setResult]=useState<HandwritingGrade|null>(null);
+  const [liveFeedback,setLiveFeedback]=useState<{strokeNumber:number;grade:HandwritingStrokeGrade}|null>(null);
   const [expanded,setExpanded]=useState(false);
   const [hintLevel,setHintLevel]=useState(()=>initialHintLevel(learningSignal));
 
@@ -128,6 +129,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     activeStrokeRef.current=[];
     setStrokes([]);
     setResult(null);
+    setLiveFeedback(null);
     setError("");
     setHintLevel(initialHintLevel(learningSignal));
     if(!normalized)return()=>{active=false};
@@ -210,6 +212,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     if(loading||error||!referenceStrokes.length)return;
     try{event.currentTarget.setPointerCapture(event.pointerId)}catch{}
     setResult(null);
+    setLiveFeedback(null);
     activeStrokeRef.current=[];
     const nativeEvent=event.nativeEvent as globalThis.PointerEvent;
     commitPoint(pointFromClient(nativeEvent.clientX,nativeEvent.clientY,event.currentTarget.getBoundingClientRect()));
@@ -232,8 +235,14 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     commitPoint(pointFromClient(nativeEvent.clientX,nativeEvent.clientY,event.currentTarget.getBoundingClientRect()));
     if(active.length>=2){
       const committed=active.map(point=>({...point}));
+      const strokeNumber=strokesRef.current.length+1;
       strokesRef.current=[...strokesRef.current,committed];
       setStrokes(strokesRef.current);
+      const reference=referenceStrokes[strokeNumber-1];
+      if(reference){
+        const strokeGrade=gradeHandwritingStroke(committed,reference);
+        setLiveFeedback(strokeGrade.actionable?{strokeNumber,grade:strokeGrade}:null);
+      }else setLiveFeedback(null);
     }else if(inkCanvasRef.current&&wrapRef.current){
       redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current);
     }
@@ -252,11 +261,13 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     activeStrokeRef.current=[];
     setStrokes([]);
     setResult(null);
+    setLiveFeedback(null);
     if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,[],wrapRef.current,dprRef.current);
   };
 
   const grade=()=>{
     const next=gradeHandwriting(strokesRef.current,referenceStrokes);
+    setLiveFeedback(null);
     setResult(next);
     setHintLevel(current=>adaptHintLevel(current,next));
   };
@@ -330,6 +341,12 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
                   onPointerCancel={cancelStroke}
                 />
               </div>
+              {liveFeedback?(
+                <div className="handwriting-live-feedback" role="status" aria-live="polite" data-feedback-code={liveFeedback.grade.feedbackCode}>
+                  <span>{t("handwritingLiveStroke",language).replace("{n}",formatNumber(liveFeedback.strokeNumber,language))}</span>
+                  <strong>{(() => {switch(liveFeedback.grade.feedbackCode){case "endpoints":return t("handwritingFeedbackEndpoints",language);case "direction":return t("handwritingFeedbackDirection",language);case "length":return t("handwritingFeedbackLength",language);case "curvature":return t("handwritingFeedbackCurvature",language);case "shape":return t("handwritingFeedbackShape",language);default:return t("handwritingRetry",language);}})()}</strong>
+                </div>
+              ):null}
               <div className="handwriting-actions">
                 <button className="button secondary" type="button" onClick={clear} disabled={!strokes.length&&!activeStrokeRef.current.length}>
                   {t("clearDrawing",language)}

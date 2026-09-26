@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {gradeHandwritingStroke} from "../frontend/src/app/handwriting-grader.js";
+const reference=[{x:10,y:10},{x:50,y:10},{x:90,y:10}];
+const perfect=reference.map(p=>({...p}));
+const wrongDirection=[{x:10,y:10},{x:10,y:50},{x:10,y:90}];
+const good=gradeHandwritingStroke(perfect,reference);
+const wrong=gradeHandwritingStroke(wrongDirection,reference);
+assert.equal(good.feedbackCode,"good");assert.equal(good.actionable,false);assert.notEqual(good.scoreReliability,"low");assert(good.similarity>=.88);
+assert.notEqual(wrong.feedbackCode,"good");assert.equal(wrong.actionable,true);assert(["direction","shape","length","curvature","endpoints"].includes(wrong.feedbackCode));
+console.log("Handwriting incremental stroke grading contract passed.");
