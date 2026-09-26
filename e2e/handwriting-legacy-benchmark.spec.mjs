@@ -48,7 +48,7 @@ test("legacy handwriting grader exposes the current scoring defects",async({page
   const source=legacyScoreSource(await readFile(new URL("../frontend/src/app/HandwritingPractice.tsx",import.meta.url),"utf8"));
   const reference=await sampleReferenceStrokes(page,FIXTURE.characters["学"].paths);
   expect(reference).toHaveLength(8);
-  const base=reference.map(row=>({points:row.points}));
+  const base=reference.map(row=>row.points);
   const score=(strokes)=>legacyEvaluate(page,source,strokes,reference);
 
   const perfect=await score(base);
@@ -56,10 +56,10 @@ test("legacy handwriting grader exposes the current scoring defects",async({page
   const scaled=await score(transform(base,p=>({x:54.5+(p.x-54.5)*0.94,y:54.5+(p.y-54.5)*0.94})));
   const reversedOrder=await score([...base].reverse());
   const missing=await score(base.slice(0,-1));
-  const extra=await score(base.concat([{points:[{x:92,y:92},{x:98,y:98}]}]));
+  const extra=await score(base.concat([[{x:92,y:92},{x:98,y:98}]]));
   const wrongShape=await score(perturbShape(base));
   const person=await sampleReferenceStrokes(page,FIXTURE.characters["人"].paths);
-  const wrongKanji=await legacyEvaluate(page,source,person.map(row=>({points:row.points})),reference);
+  const wrongKanji=await legacyEvaluate(page,source,person.map(row=>row.points),reference);
 
   const thickness=(lineWidth)=>page.evaluate(({reference,base,lineWidth})=>{
     const size=220,target=document.createElement("canvas"),user=document.createElement("canvas");
