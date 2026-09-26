@@ -4,6 +4,7 @@ import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type Stro
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
 import { sampleSvgStrokePaths } from "./handwriting-reference";
 import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, requestMoreHelp, shouldPresentStrokeFeedback } from "./handwriting-hints";
+import { feedbackFocusKind, feedbackMarkerPoints, feedbackStrokeIndex } from "./handwriting-feedback";
 
 type Point = { x:number; y:number };
 
@@ -26,6 +27,8 @@ function drawGridAndGuide(
   dpr:number,
   hintLevel:number,
   currentStrokeIndex:number,
+  feedbackIndex:number,
+  feedbackKind:string,
 ){
   const rect=wrap.getBoundingClientRect();
   const size=Math.max(1,Math.round(rect.width));
@@ -56,6 +59,22 @@ function drawGridAndGuide(
   if(profile.currentStroke>=0&&profile.showStart){const start=referenceStrokes[profile.currentStroke]?.[0];if(start){ctx.save();ctx.fillStyle="rgba(192,57,43,.72)";ctx.beginPath();ctx.arc(start.x,start.y,2.35,0,Math.PI*2);ctx.fill();ctx.restore();}}
   if(profile.currentStroke>=0&&profile.showDirection){const stroke=referenceStrokes[profile.currentStroke],start=stroke?.[0],next=stroke?.[Math.min(8,(stroke?.length||1)-1)];if(start&&next){const length=Math.hypot(next.x-start.x,next.y-start.y);if(length>0.01){const ux=(next.x-start.x)/length,uy=(next.y-start.y)/length,tip=9,base=4;ctx.save();ctx.strokeStyle="rgba(192,57,43,.62)";ctx.lineWidth=1.25;ctx.beginPath();ctx.moveTo(start.x,start.y);ctx.lineTo(start.x+ux*tip,start.y+uy*tip);ctx.stroke();ctx.beginPath();ctx.moveTo(start.x+ux*tip,start.y+uy*tip);ctx.lineTo(start.x+ux*(tip-base)-uy*base,start.y+uy*(tip-base)+ux*base);ctx.moveTo(start.x+ux*tip,start.y+uy*tip);ctx.lineTo(start.x+ux*(tip-base)+uy*base,start.y+uy*(tip-base)-ux*base);ctx.stroke();ctx.restore();}}}
   if(profile.currentStroke>=0&&profile.showNumber){const start=referenceStrokes[profile.currentStroke]?.[0];if(start){ctx.save();ctx.fillStyle="rgba(28,26,23,.68)";ctx.font="700 7px Inter,system-ui,sans-serif";ctx.textAlign="left";ctx.textBaseline="bottom";ctx.fillText(String(profile.currentStroke+1),start.x+4,start.y-4);ctx.restore();}}
+  if(feedbackIndex>=0&&feedbackIndex<referenceStrokes.length){
+    const stroke=referenceStrokes[feedbackIndex],markers=feedbackMarkerPoints(stroke);
+    if(stroke?.length>=2){
+      ctx.save();ctx.strokeStyle="rgba(139,95,74,.48)";ctx.lineWidth=(feedbackKind==="shape"?3.35:2.9);ctx.lineCap="round";ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(stroke[0].x,stroke[0].y);
+      for(let i=1;i<stroke.length;i+=1)ctx.lineTo(stroke[i].x,stroke[i].y);ctx.stroke();ctx.restore();
+    }
+    if(markers&&(feedbackKind==="endpoints"||feedbackKind==="general")){
+      ctx.save();ctx.strokeStyle="rgba(139,95,74,.38)";ctx.lineWidth=1;ctx.setLineDash([1.4,1.2]);ctx.beginPath();ctx.moveTo(markers.start.x,markers.start.y);ctx.lineTo(markers.end.x,markers.end.y);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle="rgba(139,95,74,.82)";ctx.beginPath();ctx.arc(markers.start.x,markers.start.y,2.65,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="rgba(116,109,97,.72)";ctx.beginPath();ctx.arc(markers.end.x,markers.end.y,2.35,0,Math.PI*2);ctx.fill();ctx.restore();
+    }
+    if(markers&&feedbackKind==="direction"){
+      const dx=markers.ahead.x-markers.start.x,dy=markers.ahead.y-markers.start.y,len=Math.hypot(dx,dy);
+      if(len>0.01){const ux=dx/len,uy=dy/len,tip=11,base=4;ctx.save();ctx.strokeStyle="rgba(139,95,74,.78)";ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(markers.start.x,markers.start.y);ctx.lineTo(markers.start.x+ux*tip,markers.start.y+uy*tip);ctx.stroke();ctx.beginPath();ctx.moveTo(markers.start.x+ux*tip,markers.start.y+uy*tip);ctx.lineTo(markers.start.x+ux*(tip-base)-uy*base,markers.start.y+uy*(tip-base)+ux*base);ctx.moveTo(markers.start.x+ux*tip,markers.start.y+uy*tip);ctx.lineTo(markers.start.x+ux*(tip-base)+uy*base,markers.start.y+uy*(tip-base)-ux*base);ctx.stroke();ctx.restore();}
+    }
+  }
 }
 
 function redrawUserInk(
@@ -63,6 +82,7 @@ function redrawUserInk(
   strokes:HandwritingStroke[],
   wrap:HTMLElement,
   dpr:number,
+  feedbackIndex:number,
 ){
   const rect=wrap.getBoundingClientRect();
   const size=Math.max(1,Math.round(rect.width));
@@ -75,12 +95,11 @@ function redrawUserInk(
   ctx.lineWidth=USER_LINE_WIDTH;
   ctx.lineCap="round";
   ctx.lineJoin="round";
-  for(const stroke of strokes){
+  for(let strokeIndex=0;strokeIndex<strokes.length;strokeIndex+=1){
+    const stroke=strokes[strokeIndex];
     if(stroke.length<2)continue;
-    ctx.beginPath();
-    ctx.moveTo(stroke[0].x,stroke[0].y);
-    for(let i=1;i<stroke.length;i+=1)ctx.lineTo(stroke[i].x,stroke[i].y);
-    ctx.stroke();
+    if(strokeIndex===feedbackIndex){ctx.save();ctx.strokeStyle="rgba(139,95,74,.24)";ctx.lineWidth=8;ctx.lineCap="round";ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(stroke[0].x,stroke[0].y);for(let i=1;i<stroke.length;i+=1)ctx.lineTo(stroke[i].x,stroke[i].y);ctx.stroke();ctx.restore();}
+    ctx.beginPath();ctx.moveTo(stroke[0].x,stroke[0].y);for(let i=1;i<stroke.length;i+=1)ctx.lineTo(stroke[i].x,stroke[i].y);ctx.stroke();
   }
 }
 
@@ -176,16 +195,20 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
       guide.height=Math.round(size*dpr);
       ink.width=Math.round(size*dpr);
       ink.height=Math.round(size*dpr);
+      const gradeFocusIndex=feedbackStrokeIndex(result||liveFeedback?.grade||{});
+      const liveFocusIndex=liveFeedback?liveFeedback.strokeNumber-1:-1;
+      const feedbackIndex=gradeFocusIndex>=0?gradeFocusIndex:liveFocusIndex;
+      const feedbackKind=feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode);
       const guideStrokeIndex=strokesRef.current.length<referenceStrokes.length?strokesRef.current.length:-1;
-      drawGridAndGuide(guide,referenceStrokes,wrap,dpr,hintLevel,guideStrokeIndex);
-      redrawUserInk(ink,strokesRef.current,wrap,dpr);
+      drawGridAndGuide(guide,referenceStrokes,wrap,dpr,hintLevel,guideStrokeIndex,feedbackIndex,feedbackKind);
+      redrawUserInk(ink,strokesRef.current,wrap,dpr,feedbackIndex);
     };
 
     resize();
     const observer=new ResizeObserver(resize);
     observer.observe(wrap);
     return()=>observer.disconnect();
-  },[expanded,paths,referenceStrokes,hintLevel,strokes.length]);
+  },[expanded,paths,referenceStrokes,hintLevel,strokes.length,result,liveFeedback]);
 
   const commitPoint=(point:Point)=>{
     const active=activeStrokeRef.current;
@@ -295,7 +318,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const tone=result?(result.overallSimilarity>=88?"great":result.overallSimilarity>=70?"good":"retry"):"";
 
   return(
-    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"}>
+    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"} data-feedback-stroke={result?.feedbackStroke??(liveFeedback?liveFeedback.strokeNumber:null)??"none"} data-feedback-focus={feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode)}>
       <button
         className="handwriting-header"
         type="button"
@@ -364,6 +387,12 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
                   data-score={result.overallSimilarity}
                   data-feedback-code={result.feedbackCode}
                 >
+                  {result&&result.feedbackStroke!==null&&["endpoints","direction","length","curvature","shape"].includes(result.feedbackCode)?(
+                    <div className="handwriting-focus-copy">
+                      <span>{t("handwritingFocusStroke",language).replace("{n}",formatNumber(result.feedbackStroke,language))}</span>
+                      <strong>{t("handwritingFocusHint",language)}</strong>
+                    </div>
+                  ):null}
                   <div className="handwriting-result-score">
                     <strong>{formatNumber(result.overallSimilarity,language)}%</strong>
                     <span>{t("handwritingSimilarity",language)}</span>

@@ -100,6 +100,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(result).toBeVisible();
   const goodScore=Number(await result.getAttribute("data-score"));
   expect(goodScore).toBeGreaterThanOrEqual(95);
+  await expect(handwriting).toHaveAttribute("data-feedback-stroke");
   await expect(result).toContainText("%");
   await expect(handwriting).toHaveAttribute("data-hint-level","1");
   await expect(handwriting).toHaveAttribute("data-hint-mode","ghost");
@@ -117,6 +118,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   const badScore=Number(await result.getAttribute("data-score"));
   expect(badScore).toBeLessThan(goodScore);
   expect(await result.getAttribute("data-feedback-code")).toBeTruthy();
+  await expect(handwriting.locator(".handwriting-focus-copy")).toHaveCount(1);
 });
 
 
