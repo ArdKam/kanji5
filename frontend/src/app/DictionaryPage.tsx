@@ -47,6 +47,11 @@ function DictionaryReading({ title, values, language }: { title: string; values:
 
 function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
+  const [query, setQuery] = useState("");
+  const [visibleLimit, setVisibleLimit] = useState(60);
+  const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
+  const [busyKey, setBusyKey] = useState("");
+  const [status, setStatus] = useState("");
   useEffect(() => {
     let active = true;
     void fetch("./kanji-components.json", { cache: "force-cache" })
@@ -68,11 +73,6 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
     () => buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? []).map((entry, index) => ({ ...entry, index })),
     [catalog, componentMap]
   );
-  const [query, setQuery] = useState("");
-  const [visibleLimit, setVisibleLimit] = useState(60);
-  const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
-  const [busyKey, setBusyKey] = useState("");
-  const [status, setStatus] = useState("");
   const filteredEntries = useMemo(() => {
     const q = normalize(query);
     return entries.filter(entry => {
