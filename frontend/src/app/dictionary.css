@@ -1058,6 +1058,42 @@
   width:100%;
   min-height:38px;
 }
+.reading-lab-speech-row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  padding-top:1px;
+}
+.reading-lab-speech-row>.button{
+  min-height:42px;
+  padding:7px 11px;
+  font-size:.64rem;
+}
+.reading-lab-speech-rate{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:42px;
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--paper);
+  color:var(--mute);
+  font-size:.62rem;
+  font-weight:800;
+}
+.reading-lab-speech-rate select{
+  min-height:32px;
+  border:0;
+  background:transparent;
+  color:var(--ink);
+  font:inherit;
+}
+.reading-lab-speech-status{
+  color:var(--mute);
+  font-size:.58rem;
+}
 @media(max-width:520px){
   .reading-lab-audio-row{
     grid-template-columns:1fr;
