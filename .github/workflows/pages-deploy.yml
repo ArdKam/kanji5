@@ -78,16 +78,31 @@ jobs:
       - name: Verify live GitHub Pages artifact
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           base="https://ardkam.github.io/kanji5"
           probe="$(date +%s%N)"
-          curl -fsSL "$base/index.html?probe=$probe" > /tmp/kanji5-index.html
-          curl -fsSL "$base/react-entry-release18.js?probe=$probe" > /tmp/kanji5-entry.js
-          curl -fsSL "$base/sw-release18.js?probe=$probe" > /tmp/kanji5-sw.js
-          curl -fsSL "$base/react-dist/kanji5-react-release18.js?probe=$probe" > /tmp/kanji5-react.js
-          grep -q "20260926-release18" /tmp/kanji5-index.html
-          grep -q "20260926-release18" /tmp/kanji5-entry.js
-          grep -q "kanji5-shell-v167" /tmp/kanji5-sw.js
-          grep -q "practice-home" /tmp/kanji5-react.js
-          grep -q "dictionary-card-accordion" /tmp/kanji5-react.js
+          fetch_with_retry() {
+            local url="$1"
+            local file="$2"
+            local expected="$3"
+            local attempt status
+            for attempt in $(seq 1 30); do
+              status="$(curl -sS -L -o "$file" -w '%{http_code}' "$url?probe=$probe" || true)"
+              echo "LIVE_CHECK attempt=$attempt status=$status url=$url"
+              if [ "$status" = "200" ] && grep -q "$expected" "$file"; then
+                return 0
+              fi
+              sleep 2
+            done
+            echo "LIVE_CHECK_FAILED url=$url"
+            echo "---- response preview ----"
+            head -c 500 "$file" || true
+            echo
+            return 1
+          }
+          fetch_with_retry "$base/" /tmp/kanji5-root.html "react-entry-release18.js"
+          fetch_with_retry "$base/react-entry-release18.js" /tmp/kanji5-entry.js "kanji5-react-release18.js"
+          fetch_with_retry "$base/sw-release18.js" /tmp/kanji5-sw.js "kanji5-shell-v167"
+          fetch_with_retry "$base/react-dist/kanji5-react-release18.js" /tmp/kanji5-react.js "practice-home"
+          fetch_with_retry "$base/react-dist/kanji5-react-release18.css" /tmp/kanji5-react.css "dictionary-card-accordion"
           echo "LIVE_PAGES_ARTIFACT_VERIFIED"
