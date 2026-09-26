@@ -30,6 +30,14 @@ const translated = reference.map(stroke => stroke.map(p => point(p.x + 3, p.y + 
 const translatedGrade = gradeHandwriting(translated, reference);
 assert.ok(translatedGrade.score >= 90, `small translation should remain high; got ${translatedGrade.score}`);
 
+const mediumTranslation = reference.map(stroke => stroke.map(p => point(p.x + 8, p.y + 8)));
+const mediumTranslationGrade = gradeHandwriting(mediumTranslation, reference);
+assert.ok(mediumTranslationGrade.score >= 75 && mediumTranslationGrade.score < translatedGrade.score, `medium translation should be tolerated but visibly lower; got ${mediumTranslationGrade.score}`);
+
+const grossTranslation = reference.map(stroke => stroke.map(p => point(p.x + 25, p.y + 25)));
+const grossTranslationGrade = gradeHandwriting(grossTranslation, reference);
+assert.ok(grossTranslationGrade.score < 75, `gross translation must not look good; got ${grossTranslationGrade.score}`);
+
 const scaled = reference.map(stroke => stroke.map(p => point(54.5 + (p.x - 54.5) * 0.94, 54.5 + (p.y - 54.5) * 0.94)));
 const scaledGrade = gradeHandwriting(scaled, reference);
 assert.ok(scaledGrade.score >= 88, `small scale change should remain high; got ${scaledGrade.score}`);
