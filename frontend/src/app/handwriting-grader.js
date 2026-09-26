@@ -203,8 +203,14 @@ function endpointScore(user,reference,diagonal){
   return (start+end)/2;
 }
 
+function effectiveStrokeLength(stroke){
+  const lowFrequencyCount=Math.max(8,Math.min(16,Math.round(stroke.length/3)));
+  const smoothed=resampleStroke(stroke,lowFrequencyCount);
+  return Math.max(EPSILON,pathLength(smoothed));
+}
+
 function lengthScore(user,reference){
-  const ul=Math.max(EPSILON,pathLength(user)), rl=Math.max(EPSILON,pathLength(reference));
+  const ul=effectiveStrokeLength(user), rl=effectiveStrokeLength(reference);
   return Math.exp(-Math.abs(Math.log(ul/rl))/0.30);
 }
 
@@ -247,7 +253,7 @@ function placementScore(user,reference){
 }
 
 function meaningfulLengthPenalty(user,reference){
-  const ratio=Math.max(EPSILON,pathLength(user))/Math.max(EPSILON,pathLength(reference));
+  const ratio=effectiveStrokeLength(user)/effectiveStrokeLength(reference);
   const deviation=Math.abs(Math.log(ratio));
   const severity=clamp((deviation-0.08)/0.50);
   return { ratio, penalty: 1-0.35*severity };
