@@ -111,7 +111,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await handwriting.locator(".handwriting-actions .secondary").click();
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
 
-  const bad=[[{x:5,y:5},{x:100,y:5},{x:100,y:100}],reference[0]];
+  const bad=reference.map((stroke,index)=>index===0?[...stroke].reverse():stroke);
   await drawReference(page,canvas,bad);
   await handwriting.locator(".handwriting-actions .primary").click();
   await expect(result).toBeVisible();
