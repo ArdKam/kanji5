@@ -1,0 +1,39 @@
+.structure-explorer{margin:14px 0 18px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--paper) 76%,transparent);overflow:hidden}
+.structure-explorer>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;font-size:14px;font-weight:850;color:var(--sumi)}
+.structure-explorer>summary::-webkit-details-marker{display:none}
+.structure-explorer-summary-note{font-size:11px;font-weight:700;color:var(--mute)}
+.structure-explorer-body{display:grid;gap:12px;padding:0 14px 15px}
+.structure-explorer-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.structure-explorer-tabs button{border:1px solid var(--line);background:var(--washi);color:var(--ink);border-radius:12px;padding:9px 12px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.structure-explorer-tabs button.active{background:var(--sumi);color:var(--paper);border-color:var(--sumi)}
+.structure-explorer-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.structure-explorer-search input{width:100%;min-height:46px;border:1px solid var(--line);border-radius:13px;background:var(--washi);padding:10px 13px;color:var(--sumi);font:inherit}
+.structure-explorer-toggle{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:12px;font-weight:700}
+.structure-explorer-toggle input{accent-color:var(--shu)}
+.structure-radical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:7px;max-height:220px;overflow:auto;padding-right:2px}
+.structure-radical-chip{display:grid;place-items:center;gap:3px;border:1px solid var(--line);border-radius:12px;background:var(--washi);padding:8px 6px;cursor:pointer;color:var(--sumi)}
+.structure-radical-chip:hover{transform:translateY(-1px)}
+.structure-radical-chip-glyph{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:25px;line-height:1}
+.structure-radical-chip-meta{font-size:9px;font-weight:800;color:var(--mute)}
+.structure-selection{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 10px;border-radius:12px;background:var(--washi);font-size:12px}
+.structure-selection>span[lang="ja"]{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:25px;line-height:1}
+.structure-selection>span:last-child{margin-left:auto;color:var(--mute)}
+.structure-result-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;max-height:300px;overflow:auto}
+.structure-result{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:9px;text-align:left;border:1px solid var(--line);border-radius:13px;background:var(--paper);padding:8px 9px;color:var(--sumi);cursor:pointer}
+.structure-result:disabled{cursor:default;opacity:.65}
+.structure-result-kanji{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:29px;line-height:1}
+.structure-result-copy{display:grid;gap:2px;min-width:0}
+.structure-result-copy strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.structure-result-copy span{font-size:9px;color:var(--mute);font-weight:700}
+.structure-explorer-status,.structure-explorer-empty,.structure-explorer-error,.structure-explorer-footnote{margin:0;color:var(--mute);font-size:11px;line-height:1.6}
+.structure-explorer-error{color:var(--shu)}
+@media(max-width:520px){
+ .structure-explorer>summary{padding:12px 13px;font-size:13px}
+ .structure-explorer-summary-note{display:none}
+ .structure-explorer-body{padding:0 11px 12px}
+ .structure-explorer-search{grid-template-columns:1fr}
+ .structure-result-list{grid-template-columns:1fr 1fr}
+}
+@media(max-width:380px){
+ .structure-result-list{grid-template-columns:1fr}
+}
