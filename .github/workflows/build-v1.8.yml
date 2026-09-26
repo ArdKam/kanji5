@@ -1,5 +1,6 @@
 # v1.8 compatibility + v1.9 learning-engine validation gate
 # v2 P3 verification: accessibility, responsive, and reduced-motion contracts
+# Release-gate sync: validate the current PR head after runtime-boundary fixes
 name: Build Kanji 5 v1.8/v1.9
 
 on:
