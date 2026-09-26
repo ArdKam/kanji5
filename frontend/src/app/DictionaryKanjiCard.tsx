@@ -29,10 +29,14 @@ export function DictionaryKanjiCard({
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey>(null);
+  const [isIdle, setIsIdle] = useState(false);
+  const [isWaking, setIsWaking] = useState(false);
   const sectionRefs = useRef<Partial<Record<Exclude<SectionKey, null>, HTMLElement>>>({});
 
   useEffect(() => {
     setOpenSection(null);
+    setIsIdle(false);
+    setIsWaking(false);
     setComponentInfo(null);
     setHandwritingSkill(null);
   }, [item.character]);
@@ -125,6 +129,42 @@ export function DictionaryKanjiCard({
     };
   }, [openSection, item.character]);
 
+  const idleTimerRef = useRef<number | null>(null);
+  const wakeTimerRef = useRef<number | null>(null);
+
+  const armIdleTimer = () => {
+    if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = window.setTimeout(() => {
+      setIsIdle(true);
+      setIsWaking(false);
+    }, 4200);
+  };
+
+  const wakeFromIdle = () => {
+    if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
+    if (wakeTimerRef.current !== null) window.clearTimeout(wakeTimerRef.current);
+    setIsIdle(false);
+    setIsWaking(true);
+    wakeTimerRef.current = window.setTimeout(() => setIsWaking(false), 900);
+    armIdleTimer();
+  };
+
+  useEffect(() => {
+    armIdleTimer();
+    return () => {
+      if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
+      if (wakeTimerRef.current !== null) window.clearTimeout(wakeTimerRef.current);
+    };
+  }, [item.character]);
+
+  const handleCardActivity = () => {
+    if (isIdle) {
+      wakeFromIdle();
+      return;
+    }
+    armIdleTimer();
+  };
+
   const toggle = (section: Exclude<SectionKey, null>) => {
     setOpenSection(current => current === section ? null : section);
   };
@@ -146,8 +186,32 @@ export function DictionaryKanjiCard({
 
   return (
     <dialog open className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
-      <div className="dictionary-card">
-        <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
+      <div
+        className={`dictionary-card${isIdle ? " is-idle" : ""}${isWaking ? " is-waking" : ""}`}
+        onPointerDown={handleCardActivity}
+        onWheel={handleCardActivity}
+        onKeyDown={handleCardActivity}
+      >
+        <div className="dictionary-card-close-layer" aria-hidden="true">
+          <button
+            className="dialog-close"
+            type="button"
+            aria-label={t("close", language)}
+            onClick={onClose}
+            aria-hidden="false"
+          >×</button>
+        </div>
+        {isIdle ? (
+          <button
+            className="dictionary-card-idle-wake"
+            type="button"
+            aria-label={language === "fa" ? "فعال کردن دوباره کارت" : "Wake card"}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+              wakeFromIdle();
+            }}
+          />
+        ) : null}
         <div className="dictionary-card-top">
           <span className="badge badge-red">{item.jlpt || "—"}</span>
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
