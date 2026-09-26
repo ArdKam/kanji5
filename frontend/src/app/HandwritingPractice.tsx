@@ -187,6 +187,16 @@ export function HandwritingPractice({ character, language }: { character: string
     redrawCanvas();
   }, [expanded, redrawCanvas]);
 
+  useEffect(() => {
+    if (!expanded || typeof ResizeObserver === "undefined") return;
+    const canvas = canvasRef.current;
+    const container = canvas?.parentElement;
+    if (!container) return;
+    const observer = new ResizeObserver(() => redrawCanvas());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [expanded, redrawCanvas]);
+
   const pointFromClient = useCallback((clientX: number, clientY: number, rect: DOMRect) => ({
     x: ((clientX - rect.left) / Math.max(1, rect.width)) * CANVAS_COORDINATE_SIZE,
     y: ((clientY - rect.top) / Math.max(1, rect.height)) * CANVAS_COORDINATE_SIZE,
