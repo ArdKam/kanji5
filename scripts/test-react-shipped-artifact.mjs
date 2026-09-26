@@ -31,6 +31,11 @@ console.log("Shipped React JS contains a valid VocabularyExamples character refe
 if(/data-kanji5-account-injected/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_EMBEDDED_FALLBACK_PATCH");
 console.log("Shipped React JS parses as valid JavaScript.");
 
+if(!/data-handwriting-grader/.test(reactJs)||!/vector-v1/.test(reactJs)||!/handwritingSimilarity/.test(reactJs)||/function scoreDrawing\(strokes/.test(reactJs)){
+  throw new Error("SHIPPED_REACT_JS_HANDWRITING_GRADER_ARTIFACT_MISMATCH");
+}
+console.log("Shipped React JS contains the vector handwriting grader and similarity semantics.");
+
 if(!/learning-back-scroll/.test(reactJs)||!/scrollTo/.test(reactJs)||!/smooth/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_MISSING_LEARNING_SCROLL_BEHAVIOR");
 console.log("Shipped React JS contains learning-card scroll behavior.");
 if(/\\.learning-card\\[data-card-density=dense\\] \\.learning-back-overview\\{[^}]*grid-template-columns:minmax\\(0,1fr\\) minmax\\(0,1fr\\)/.test(css)) throw new Error("SHIPPED_REACT_CSS_CONTAINS_DENSE_TWO_COLUMN_BACK_LAYOUT");
