@@ -60,6 +60,9 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   }));
   await clean(page);
   const handwriting=await openSchoolHandwriting(page);
+  await expect(handwriting).toHaveAttribute("data-hint-level","0");
+  await expect(handwriting).toHaveAttribute("data-hint-mode","trace");
+  await expect(handwriting.getByRole("button",{name:"راهنمای بیشتر"})).toBeDisabled();
   const canvas=handwriting.locator(".handwriting-ink-canvas");
   await expect(handwriting.locator(".handwriting-guide-canvas")).toBeVisible();
   const penBox=await canvas.boundingBox();
@@ -98,6 +101,11 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   const goodScore=Number(await result.getAttribute("data-score"));
   expect(goodScore).toBeGreaterThanOrEqual(95);
   await expect(result).toContainText("%");
+  await expect(handwriting).toHaveAttribute("data-hint-level","1");
+  await expect(handwriting).toHaveAttribute("data-hint-mode","ghost");
+  await handwriting.getByRole("button",{name:"راهنمای بیشتر"}).click();
+  await expect(handwriting).toHaveAttribute("data-hint-level","0");
+  await expect(handwriting).toHaveAttribute("data-hint-mode","trace");
 
   await handwriting.locator(".handwriting-actions .secondary").click();
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();

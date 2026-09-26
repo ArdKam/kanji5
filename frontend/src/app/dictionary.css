@@ -985,6 +985,36 @@
   font-size:10px;
 }
 .handwriting-error{color:var(--shu);}
+.handwriting-hint-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  min-height:30px;
+}
+.handwriting-hint-badge{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--mute);
+  font-size:9px;
+  font-weight:800;
+}
+.handwriting-hint-button{
+  flex:0 0 auto;
+  min-height:34px;
+  padding:5px 9px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:9px;
+  font-weight:800;
+}
+.handwriting-hint-button:hover:not(:disabled){border-color:color-mix(in srgb,var(--shu) 35%,var(--line));background:var(--washi);}
+.handwriting-hint-button:disabled{cursor:default;opacity:.52;}
 .handwriting-help{
   margin:0;
   color:var(--mute);
