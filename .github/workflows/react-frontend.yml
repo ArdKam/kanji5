@@ -21,6 +21,9 @@ on:
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
       - "e2e/handwriting-legacy-benchmark.spec.mjs"
+      - "scripts/test-handwriting-grader.mjs"
+      - "frontend/src/app/handwriting-grader.js"
+      - "frontend/src/app/handwriting-grader.d.ts"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
@@ -80,6 +83,9 @@ jobs:
       - name: Install Chromium
         working-directory: .
         run: npx playwright install chromium
+      - name: Run handwriting grader unit contract
+        working-directory: .
+        run: node scripts/test-handwriting-grader.mjs
       - name: Validate migration boundary
         working-directory: .
         run: node scripts/test-react-migration.mjs
