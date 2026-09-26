@@ -212,6 +212,7 @@ export type Boundary = {
   getKanjiByRadical: (radicalId: number, limit?: number) => Promise<{ radicalId: number; results: KanjiDictionaryResult[] }>;
   getKanjiByComponent: (glyph: string, recursive?: boolean, limit?: number) => Promise<{ glyph: string; recursive: boolean; results: KanjiDictionaryResult[] }>;
   getKanjiByComponents: (glyphs: string[], recursive?: boolean, limit?: number) => Promise<{ glyphs: string[]; recursive: boolean; results: KanjiDictionaryResult[] }>;
+  getStructureInsights: (character: string) => Promise<StructureInsights>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
