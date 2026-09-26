@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
 import { HandwritingPractice } from "./HandwritingPractice";
@@ -29,6 +29,7 @@ export function DictionaryKanjiCard({
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey>(null);
+  const sectionRefs = useRef<Partial<Record<Exclude<SectionKey, null>, HTMLElement>>>({});
 
   useEffect(() => {
     setOpenSection(null);
@@ -57,6 +58,40 @@ export function DictionaryKanjiCard({
     });
     return () => { active = false; };
   }, [item.character, openSection]);
+
+  const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>) => {
+    const target = sectionRefs.current[section];
+    const scrollContainer = target?.closest<HTMLElement>(".learning-back-scroll");
+    if (!target || !scrollContainer) return;
+
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const edgePadding = 10;
+    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - edgePadding;
+    const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    scrollContainer.scrollTo({
+      top: nextScrollTop,
+      behavior: reducedMotion ? "auto" : "smooth",
+    });
+  };
+
+  useEffect(() => {
+    if (!openSection) return;
+    let frame = 0;
+    let nextFrame = 0;
+    frame = window.requestAnimationFrame(() => {
+      nextFrame = window.requestAnimationFrame(() => {
+        scrollOpenSectionIntoView(openSection);
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(nextFrame);
+    };
+  }, [openSection, item.character]);
 
   const toggle = (section: Exclude<SectionKey, null>) => {
     setOpenSection(current => current === section ? null : section);
@@ -110,7 +145,7 @@ export function DictionaryKanjiCard({
         </div>
 
         <div className="dictionary-card-accordion" aria-label={language === "fa" ? "اطلاعات تکمیلی" : "Additional information"}>
-          <section className="dictionary-accordion-section">
+          <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section">
             {sectionButton("structure", language === "fa" ? "ساختار" : "Structure")}
             {openSection === "structure" ? (
               <div className="dictionary-accordion-panel">
@@ -137,7 +172,7 @@ export function DictionaryKanjiCard({
             ) : null}
           </section>
 
-          <section className="dictionary-accordion-section">
+          <section ref={node => { if (node) sectionRefs.current.writing = node; }} className="dictionary-accordion-section">
             {sectionButton("writing", language === "fa" ? "تمرین نوشتن" : "Practice writing")}
             {openSection === "writing" ? (
               <div className="dictionary-accordion-panel">
@@ -156,7 +191,7 @@ export function DictionaryKanjiCard({
             ) : null}
           </section>
 
-          <section className="dictionary-accordion-section">
+          <section ref={node => { if (node) sectionRefs.current.vocabulary = node; }} className="dictionary-accordion-section">
             {sectionButton("vocabulary", language === "fa" ? "واژگان" : "Vocabulary")}
             {openSection === "vocabulary" ? (
               <div className="dictionary-accordion-panel">
@@ -165,7 +200,7 @@ export function DictionaryKanjiCard({
             ) : null}
           </section>
 
-          <section className="dictionary-accordion-section">
+          <section ref={node => { if (node) sectionRefs.current.mnemonic = node; }} className="dictionary-accordion-section">
             {sectionButton("mnemonic", language === "fa" ? "یادسپار" : "Mnemonic")}
             {openSection === "mnemonic" ? (
               <div className="dictionary-accordion-panel">
