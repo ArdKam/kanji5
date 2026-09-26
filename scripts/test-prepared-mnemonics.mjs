@@ -30,7 +30,7 @@ const coverage = core.preparedMnemonicCoverage(catalog);
 assert.ok(Math.abs(coverage.coverage - (259 / 2136)) < 1e-12, `Coverage ratio must be curated/total; got ${coverage.coverage}`);\nassert.deepEqual({ total: coverage.total, curated: coverage.curated, generated: coverage.generated }, { total: 2136, curated: 259, generated: 1877 });
 
 const quality = core.preparedMnemonicQualityReport(catalog);
-assert.equal(quality.criticalFailures, 0, "Curated mnemonics must satisfy the core validity contract");
+assert.equal(quality.generatedSceneV2, 1877, "Every non-curated Jōyō kanji must use the scene-v2 fallback");\nassert.equal(quality.generatedGenericTemplateLeaks, 0, "Scene-v2 fallbacks must not use the retired generic templates");\nassert.equal(quality.criticalFailures, 0, "Curated mnemonics must satisfy the core validity contract");
 assert.equal(quality.genericTemplateLeaks, 0, "Curated mnemonics must not fall back to generic templates");
 assert.ok(quality.concreteAnchorFaRate >= 0.8, `At least 80% of curated Persian mnemonics should contain a concrete anchor; got ${quality.concreteAnchorFaRate}`);
 assert.ok(quality.concreteAnchorEnRate >= 0.9, `At least 90% of curated English mnemonics should contain a concrete anchor; got ${quality.concreteAnchorEnRate}`);
