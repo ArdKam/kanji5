@@ -1346,14 +1346,14 @@ const generatedScene = (character, meaning, components) => {
   const anchorsEn = labels.length ? labels.map(label => label.en).join(", ") : "the shape of " + character;
   const index = (character.codePointAt(0) ?? 0) % 3;
   const faScenes = [
-    profile.fa + " بساز و " + anchorsFa + " را داخل آن قرار بده. " + profile.actionFa + "؛ در لحظهٔ اوج، «" + meaning + "» را روی همان تصویر قفل کن و شکل " + character + " را بخشی از صحنه بدان.",
+    profile.setupFa + " بساز و " + anchorsFa + " را داخل آن قرار بده. " + profile.actionFa + "؛ در لحظهٔ اوج، «" + meaning + "» را روی همان تصویر قفل کن و شکل " + character + " را بخشی از صحنه بدان.",
     "صحنه را کوتاه نگه دار: " + anchorsFa + " حضور دارند و " + profile.actionFa + ". وقتی اتفاق تمام می‌شود، «" + meaning + "» را بگو و " + character + " را داخل همان تصویر ببین.",
-    "یک تصویر متحرک برای «" + meaning + "» بساز: " + profile.fa + " با " + anchorsFa + " درگیر است؛ " + profile.actionFa + " و خطوط " + character + " را بخشی از همان حرکت تصور کن."
+    "یک تصویر متحرک برای «" + meaning + "» بساز: " + profile.setupFa + " با " + anchorsFa + " درگیر است؛ " + profile.actionFa + " و خطوط " + character + " را بخشی از همان حرکت تصور کن."
   ];
   const enScenes = [
-    "Build " + profile.en + " and place " + anchorsEn + " inside it. " + profile.actionEn + "; at the peak, lock “" + meaning + "” onto the image and make " + character + " part of the scene.",
+    "Build " + profile.setupEn + " and place " + anchorsEn + " inside it. " + profile.actionEn + "; at the peak, lock “" + meaning + "” onto the image and make " + character + " part of the scene.",
     "Keep the scene short: " + anchorsEn + " are present and " + profile.actionEn + ". When the action ends, say “" + meaning + "” and see " + character + " inside the same image.",
-    "Create a moving image for “" + meaning + "”: " + profile.en + " interacts with " + anchorsEn + "; " + profile.actionEn + ", and make the strokes of " + character + " part of that movement."
+    "Create a moving image for “" + meaning + "”: " + profile.setupEn + " interacts with " + anchorsEn + "; " + profile.actionEn + ", and make the strokes of " + character + " part of that movement."
   ];
   return { fa: faScenes[index], en: enScenes[index] };
 };
