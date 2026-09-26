@@ -361,11 +361,6 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
           {!loading&&error?<div className="handwriting-status handwriting-error" role="status">{error}</div>:null}
           {!loading&&!error?(
             <>
-              <div className="handwriting-production-prompt" data-prompt-kind={promptKind}>
-                <span className="handwriting-production-prompt-label">{t(promptKind==="meaning"?"handwritingPromptMeaning":promptKind==="reading"?"handwritingPromptReading":promptKind==="vocabulary"?"handwritingPromptVocabulary":promptKind==="context"?"handwritingPromptContext":"handwritingPromptProduction",language)}</span>
-                <strong className={promptKind==="vocabulary"||promptKind==="context"?"handwriting-production-prompt-cue handwriting-production-prompt-japanese":"handwriting-production-prompt-cue"} lang={promptKind==="vocabulary"||promptKind==="context"?"ja":undefined}>{handwritingPrompt.cue||t("handwritingPromptFallback",language)}</strong>
-                {handwritingPrompt.secondary?<small>{handwritingPrompt.secondary}</small>:null}
-              </div>
               <div className="handwriting-hint-control">
                 <button
                   className="handwriting-info-button"
