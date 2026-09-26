@@ -8,35 +8,38 @@ async function referenceStrokes(page) {
   expect(response.ok()).toBe(true);
   const svgText = await response.text();
   return page.evaluate((source) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(source, "image/svg+xml");
-    const svg = doc.documentElement;
-    if (!svg || svg.nodeName.toLowerCase() !== "svg") throw new Error("invalid KanjiVG SVG");
-
-    const host = document.createElement("div");
-    host.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:109px;height:109px;visibility:hidden;";
-    host.appendChild(document.importNode(svg, true));
-    document.body.appendChild(host);
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const holder = document.createElement("div");
+    holder.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:109px;height:109px;visibility:hidden;";
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 109 109");
+    const byStroke = new Map();
+    const pattern = /<path\\s+[^>]*\\bid="([^"]+-s(\\d+))"[^>]*\\bd="([^"]+)"[^>]*\\/?/g;
+    for (const match of source.matchAll(pattern)) {
+      const strokeNumber = Number(match[2]);
+      const d = String(match[3] || "").trim();
+      if (!Number.isInteger(strokeNumber) || strokeNumber < 1 || !d) continue;
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("id", match[1]);
+      path.setAttribute("d", d);
+      svg.appendChild(path);
+      byStroke.set(strokeNumber, path);
+    }
+    holder.appendChild(svg);
+    document.body.appendChild(holder);
     try {
-      return [...host.querySelectorAll("path[id]")]
-        .map(node => {
-          const id = node.getAttribute("id") || "";
-          const match = id.match(/-s(\\d+)$/);
-          if (!match) return null;
-          const path = node;
+      return [...byStroke.entries()]
+        .sort((a, b) => a[0] - b[0])
+        .map(([, path]) => {
           const total = path.getTotalLength();
           const count = 48;
-          const points = Array.from({ length: count }, (_, index) => {
+          return Array.from({ length: count }, (_, index) => {
             const p = path.getPointAtLength((total * index) / Math.max(1, count - 1));
             return { x: p.x, y: p.y };
           });
-          return { strokeNumber: Number(match[1]), points };
-        })
-        .filter(Boolean)
-        .sort((a, b) => a.strokeNumber - b.strokeNumber)
-        .map(({ points }) => points);
+        });
     } finally {
-      host.remove();
+      holder.remove();
     }
   }, svgText);
 }
