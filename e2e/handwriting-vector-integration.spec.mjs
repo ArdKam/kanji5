@@ -4,24 +4,41 @@ const KANJI_VG_URL =
   "https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/05b66.svg";
 
 async function referenceStrokes(page) {
-  await page.goto(KANJI_VG_URL);
-  return page.evaluate(() => [...document.querySelectorAll("path[id]")]
-    .map(node => {
-      const id = node.getAttribute("id") || "";
-      const match = id.match(/-s(\d+)$/);
-      if (!match) return null;
-      const path = node;
-      const total = path.getTotalLength();
-      const count = 48;
-      const points = Array.from({ length: count }, (_, index) => {
-        const p = path.getPointAtLength((total * index) / Math.max(1, count - 1));
-        return { x: p.x, y: p.y };
-      });
-      return { strokeNumber: Number(match[1]), points };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.strokeNumber - b.strokeNumber)
-    .map(({ points }) => points));
+  const response = await page.request.get(KANJI_VG_URL);
+  expect(response.ok()).toBe(true);
+  const svgText = await response.text();
+  return page.evaluate((source) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(source, "image/svg+xml");
+    const svg = doc.documentElement;
+    if (!svg || svg.nodeName.toLowerCase() !== "svg") throw new Error("invalid KanjiVG SVG");
+
+    const host = document.createElement("div");
+    host.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:109px;height:109px;visibility:hidden;";
+    host.appendChild(document.importNode(svg, true));
+    document.body.appendChild(host);
+    try {
+      return [...host.querySelectorAll("path[id]")]
+        .map(node => {
+          const id = node.getAttribute("id") || "";
+          const match = id.match(/-s(\\d+)$/);
+          if (!match) return null;
+          const path = node;
+          const total = path.getTotalLength();
+          const count = 48;
+          const points = Array.from({ length: count }, (_, index) => {
+            const p = path.getPointAtLength((total * index) / Math.max(1, count - 1));
+            return { x: p.x, y: p.y };
+          });
+          return { strokeNumber: Number(match[1]), points };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.strokeNumber - b.strokeNumber)
+        .map(({ points }) => points);
+    } finally {
+      host.remove();
+    }
+  }, svgText);
 }
 
 async function cleanStart(page) {
