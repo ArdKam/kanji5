@@ -60,7 +60,7 @@ export function DictionaryKanjiCard({
 
   const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>, behavior: ScrollBehavior = "smooth") => {
     const target = sectionRefs.current[section];
-    const scrollContainer = target?.closest<HTMLElement>(".dictionary-card");
+    const scrollContainer = target?.closest<HTMLElement>(".dictionary-card-dialog");
     if (!target || !scrollContainer) return;
     const containerRect = scrollContainer.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
