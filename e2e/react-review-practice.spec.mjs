@@ -71,6 +71,8 @@ test('Production Recall requires explicit reveal and does not require keyboard i
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
   await expect(page.locator('#root #exercise .production-recall')).toBeVisible({timeout:10000});
+  await expect(page.locator('#root #exercise .meaning-stimulus')).toBeVisible();
+  await expect(page.locator('#root #exercise .meaning-stimulus strong')).toHaveText(/\S/);
   await expect(page.locator('#root #exercise .production-recall-reveal')).toBeVisible();
   await expect(page.locator('#root #exercise .production-choice')).toHaveCount(0);
   await expect(page.locator('#root #exercise input')).toHaveCount(0);
