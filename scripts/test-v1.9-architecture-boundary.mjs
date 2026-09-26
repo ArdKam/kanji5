@@ -13,3 +13,5 @@ assert.doesNotMatch(read('v1.9-adaptive-planner-core.js'),/localStorage|sessionS
 assert.doesNotMatch(read('v1.9-learning-evaluation-core.js'),/localStorage|sessionStorage|document|window|fetch\(/);
 assert.doesNotMatch(read('v1.9-v2-contract-core.js'),/localStorage|sessionStorage|document|window|fetch\(/);
 console.log('Kanji 5 v1.9 architecture/dependency boundary passed.');
+
+const learnerCore=read('v1.9-learner-model-core.js');assert.match(learnerCore,/projectHandwritingSkill/);assert.match(learnerCore,/skills:\{handwriting/);const learnerRuntime=read('v1.9-learner-model.js');assert.match(learnerRuntime,/mode:String\(detail\.mode\)/);assert.match(learnerRuntime,/evidence:sanitizeEvidence/);const reactEngine=read('frontend/src/app/engine.ts');assert.match(reactEngine,/getHandwritingSkill/);assert.match(reactEngine,/recordHandwritingGrade/);assert.doesNotMatch(reactEngine,/localStorage|sessionStorage|FSRS|adaptive-planner/);console.log('Kanji 5 handwriting learner-model integration boundary passed.');

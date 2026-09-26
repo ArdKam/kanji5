@@ -24,3 +24,14 @@ assert.equal(semantic.retentionVerified,false,'Retention verification must be ex
 assert.equal(typeof semantic.confidence,'number','Confidence must remain distinct from mastery');
 assert.equal(typeof semantic.state,'string','State must remain distinct from performance');
 console.log('Kanji 5 semantic skill-state contract passed.');
+
+import {projectHandwritingSkill} from '../v1.9-learner-model-core.js';
+const handwritingEvidence=[
+ {at:'2026-09-01T00:00:00.000Z',outcome:'wrong',score:.55,evidence:{shape:.5,direction:.7,feedbackCode:'shape',feedbackStroke:2}},
+ {at:'2026-09-02T00:00:00.000Z',outcome:'correct',score:.90,evidence:{shape:.88,direction:.96,feedbackCode:'good'}},
+ {at:'2026-09-03T00:00:00.000Z',outcome:'correct',score:.94,evidence:{shape:.92,direction:.98,feedbackCode:'good'}},
+ {at:'2026-09-04T00:00:00.000Z',outcome:'correct',score:.96,evidence:{shape:.94,direction:.99,feedbackCode:'good'}}
+];
+const handwriting=projectHandwritingSkill(handwritingEvidence);assert.equal(handwriting.attempts,4);assert.equal(handwriting.correct,3);assert.equal(handwriting.state,'learning');assert.ok(handwriting.score>.80&&handwriting.score<.90);assert.ok((handwriting.consistency??0)>.8);assert.equal(handwriting.weakestMetric,'shape');
+const mastered=projectHandwritingSkill([{at:'2026-09-01T00:00:00.000Z',outcome:'correct',score:.94,evidence:{shape:.94}},{at:'2026-09-02T00:00:00.000Z',outcome:'correct',score:.95,evidence:{shape:.95}},{at:'2026-09-03T00:00:00.000Z',outcome:'correct',score:.96,evidence:{shape:.96}},{at:'2026-09-04T00:00:00.000Z',outcome:'correct',score:.97,evidence:{shape:.97}}]);assert.equal(mastered.state,'mastered');
+const projectedHandwriting=projectKanjiAttributes({学:{}},'学',{evidenceByMode:{handwriting:handwritingEvidence}});assert.equal(projectedHandwriting.skills.handwriting.attempts,4);assert.equal(projectedHandwriting.attributes.meaning.state,'unseen');console.log('Kanji 5 handwriting learner-skill fixtures passed.');

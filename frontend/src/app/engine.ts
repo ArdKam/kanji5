@@ -1,4 +1,6 @@
 export type Rating = "Again" | "Hard" | "Good" | "Easy";
+export type HandwritingSkill = {version?:string;attempts?:number;correct?:number;accuracy?:number;score?:number;averageScore?:number;recentAverageScore?:number;confidence?:number;consistency?:number;state?:string;momentum?:number;errorStreak?:number;successStreak?:number;lastScore?:number;lastOutcome?:string|null;feedbackCode?:string|null;feedbackStroke?:number|null;weakestMetric?:string|null;metrics?:{shape?:number|null;endpoints?:number|null;length?:number|null;direction?:number|null;curvature?:number|null;placement?:number|null}};
+export type HandwritingGradeLike = {overallSimilarity?:number;feedbackCode?:string;feedbackStroke?:number|null;perStroke?:Array<Record<string,unknown>>};
 
 export type Settings = {
   dailyNew: number;
@@ -169,6 +171,7 @@ declare global {
     __KANJI5_V19_V2_BOUNDARY__?: Boundary;
     __KANJI5_EDU_BRIDGE__?: EducationBridge;
     __KANJI5_V16_SESSION_API__?: SessionApi;
+    __KANJI5_V19_LEARNER_MODEL__?: { project?: (character:string)=>Promise<{skills?:{handwriting?:HandwritingSkill}}>; recordOutcome?: (detail:Record<string,unknown>)=>Promise<unknown>|unknown; };
   }
 }
 
@@ -305,3 +308,6 @@ export async function getVocabulary(character: string): Promise<{ character: str
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
 }
+
+export async function getHandwritingSkill(character:string):Promise<HandwritingSkill|null>{const key=String(character||"").trim();if(!key)return null;const started=performance.now();while(performance.now()-started<6000){const api=window.__KANJI5_V19_LEARNER_MODEL__;if(api?.project){try{return(await api.project(key))?.skills?.handwriting??null}catch{return null}}await new Promise(resolve=>window.setTimeout(resolve,50))}return null}
+export async function recordHandwritingGrade(character:string,grade:HandwritingGradeLike):Promise<boolean>{const key=String(character||"").trim(),fn=window.__KANJI5_V19_LEARNER_MODEL__?.recordOutcome;if(!key||!fn)return false;const score=Math.max(0,Math.min(1,Number(grade?.overallSimilarity||0)/100)),evidence:Record<string,unknown>={};const weak=Array.isArray(grade?.perStroke)?grade.perStroke.find(row=>Number(row.strokeNumber)===Number(grade?.feedbackStroke)):null;if(weak)for(const metric of ["shape","endpoints","length","direction","curvature","placement"]){const value=Number(weak[metric]);if(Number.isFinite(value))evidence[metric]=Math.max(0,Math.min(1,value))}if(typeof grade?.feedbackCode==="string")evidence.feedbackCode=grade.feedbackCode;if(Number.isFinite(Number(grade?.feedbackStroke)))evidence.feedbackStroke=Number(grade.feedbackStroke);const outcome=grade?.feedbackCode==="good"||score>=.88?"correct":"wrong";return Boolean(await fn({character:key,mode:"handwriting",outcome,correct:outcome==="correct",quality:outcome==="correct"?"good":"needs-work",score,graderVersion:"handwriting-vector-v2",schemaVersion:1,evidence}))}
