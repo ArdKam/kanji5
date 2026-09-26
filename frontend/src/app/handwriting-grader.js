@@ -225,20 +225,22 @@ function centroid(stroke){
 function orderScore(user,reference,diagonal){
   if(!user.length||!reference.length) return 0;
   if(user.length===1&&reference.length===1) return 1;
+  const count=Math.min(user.length,reference.length);
   const maxIndex=Math.max(1,Math.max(user.length,reference.length)-1);
   const rows=[];
-  for(let i=0;i<Math.min(user.length,reference.length);i+=1){
-    const uc=centroid(user[i]);
+  for(let i=0;i<count;i+=1){
     let best=Infinity,bestIndex=0;
     for(let j=0;j<reference.length;j+=1){
-      const rc=centroid(reference[j]);
-      const centroidCost=distance(uc,rc)/Math.max(diagonal,1);
-      const lenCost=Math.abs(Math.log(Math.max(EPSILON,pathLength(user[i]))/Math.max(EPSILON,pathLength(reference[j]))))*0.25;
-      const positionCost=Math.abs(i-j)/maxIndex*0.22;
-      const cost=centroidCost+lenCost+positionCost;
+      const shapeCost=1-shapeScore(user[i],reference[j],diagonal);
+      const endpointCost=1-endpointScore(user[i],reference[j],diagonal);
+      const lengthCost=1-lengthScore(user[i],reference[j]);
+      const positionCost=Math.abs(i-j)/maxIndex*0.10;
+      const cost=shapeCost*0.72+endpointCost*0.16+lengthCost*0.12+positionCost;
       if(cost<best){best=cost;bestIndex=j;}
     }
-    rows.push(Math.exp(-(Math.abs(i-bestIndex)/maxIndex)*3.6));
+    const exact=bestIndex===i ? 1 : 0;
+    const soft=Math.exp(-(Math.abs(i-bestIndex)/maxIndex)*8);
+    rows.push(exact*0.75+soft*0.25);
   }
   return rows.reduce((a,b)=>a+b,0)/rows.length;
 }
@@ -333,11 +335,13 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
   }
 
   const average=perStroke.length?perStroke.reduce((sum,row)=>sum+row.similarity,0)/perStroke.length:0;
+  const weakest=perStroke.length?Math.min(...perStroke.map(row=>row.similarity)):0;
+  const strokeQuality=average*0.82+weakest*0.18;
   const ratio=matched/Math.max(aligned.length,reference.length);
   const countFactor=Math.pow(ratio,1.55);
   const order=orderScore(aligned,reference,diagonal);
   const placement=placementScore(user,reference);
-  const raw=average*0.75+order*0.10+placement*0.15;
+  const raw=strokeQuality*0.75+order*0.10+placement*0.15;
   const placementFactor=0.25+0.75*placement;
   const similarity=Math.round(clamp(raw*countFactor*placementFactor)*100);
   const weakest=[...perStroke].sort((a,b)=>a.similarity-b.similarity)[0]||null;
