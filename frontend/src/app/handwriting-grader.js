@@ -336,7 +336,9 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
 
   const average=perStroke.length?perStroke.reduce((sum,row)=>sum+row.similarity,0)/perStroke.length:0;
   const weakest=perStroke.length?Math.min(...perStroke.map(row=>row.similarity)):0;
-  const strokeQuality=average*0.65+weakest*0.35;
+  const weaknessGap=clamp((average-weakest)/0.50);
+  const worstStrokeWeight=0.35*weaknessGap;
+  const strokeQuality=average*(1-worstStrokeWeight)+weakest*worstStrokeWeight;
   const ratio=matched/Math.max(aligned.length,reference.length);
   const countFactor=Math.pow(ratio,1.55);
   const order=orderScore(aligned,reference,diagonal);
