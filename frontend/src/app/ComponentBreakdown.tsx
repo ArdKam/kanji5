@@ -13,6 +13,13 @@ export function ComponentBreakdown({ info, title, note, ariaLabel }: ComponentBr
 
   return (
     <section className="component-breakdown" aria-label={ariaLabel}>
+      {info.radical?.id ? (
+        <div className="component-breakdown-radical" aria-label={ariaLabel + " radical"}>
+          <span className="component-breakdown-radical-label">{title.includes("ساختار") ? "رادیکال" : "Radical"}</span>
+          <strong lang="ja">{info.radical.glyph}</strong>
+          <span>{`#${info.radical.id}`}</span>
+        </div>
+      ) : null}
       <div className="component-breakdown-header">
         <h3 className="component-breakdown-title">{title}</h3>
         {note ? <span className="component-breakdown-note">{note}</span> : null}
