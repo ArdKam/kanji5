@@ -142,9 +142,6 @@ jobs:
       - name: Run Lovable-style experience navigation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
-      - name: Run learning card flip gate
-        working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
       - name: Run personal mnemonic gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-personal-mnemonic.spec.mjs
@@ -154,3 +151,6 @@ jobs:
       - name: Run account shell gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
+      - name: Run learning card flip gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
