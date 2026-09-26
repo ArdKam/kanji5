@@ -293,9 +293,9 @@ function ComponentLearningPath({
         const entries = await Promise.all(batch.map(async component => {
           try {
             const info = await getComponentInfo(component);
-            return [component, info.available ? [...new Set(info.components)].slice(0, 5) : []] as const;
+            return [component, info.available ? [...new Set(info.components)].slice(0, 5) : ([] as string[])] as const;
           } catch {
-            return [component, []] as const;
+            return [component, [] as string[]] as const;
           }
         }));
         for (const [component, children] of entries) loaded[component] = children;
