@@ -130,13 +130,16 @@ export function DictionaryKanjiCard({
 
   const sectionButton = (key: Exclude<SectionKey, null>, label: string) => (
     <button
-      className="dictionary-accordion-trigger"
+      className={`dictionary-accordion-trigger${openSection === key ? " is-active" : ""}`}
       type="button"
       aria-expanded={openSection === key}
+      aria-controls={`dictionary-section-panel-${key}`}
       onClick={() => toggle(key)}
     >
-      <span>{label}</span>
-      <span className="dictionary-accordion-chevron" aria-hidden="true">{openSection === key ? "⌃" : "⌄"}</span>
+      <span className="dictionary-accordion-label">{label}</span>
+      <span className="dictionary-accordion-state" aria-hidden="true">
+        {openSection === key ? "●" : "○"}
+      </span>
     </button>
   );
 
@@ -176,10 +179,15 @@ export function DictionaryKanjiCard({
         </div>
 
         <div className="dictionary-card-accordion" aria-label={language === "fa" ? "اطلاعات تکمیلی" : "Additional information"}>
-          <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section">
+          <div className="dictionary-section-nav" role="toolbar" aria-label={language === "fa" ? "گزینه‌های کارت" : "Card options"}>
             {sectionButton("structure", language === "fa" ? "ساختار" : "Structure")}
+            {sectionButton("writing", language === "fa" ? "تمرین نوشتن" : "Practice writing")}
+            {sectionButton("vocabulary", language === "fa" ? "واژگان" : "Vocabulary")}
+            {sectionButton("mnemonic", language === "fa" ? "یادسپار" : "Mnemonic")}
+          </div>
+          <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "structure"}>
             {openSection === "structure" ? (
-              <div className="dictionary-accordion-panel">
+              <div id="dictionary-section-panel-structure" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "ساختار" : "Structure"}>
                 {componentInfo?.available && componentInfo.components.length ? (
                   <>
                     <ComponentBreakdown
@@ -203,10 +211,9 @@ export function DictionaryKanjiCard({
             ) : null}
           </section>
 
-          <section ref={node => { if (node) sectionRefs.current.writing = node; }} className="dictionary-accordion-section">
-            {sectionButton("writing", language === "fa" ? "تمرین نوشتن" : "Practice writing")}
+          <section ref={node => { if (node) sectionRefs.current.writing = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "writing"}>
             {openSection === "writing" ? (
-              <div className="dictionary-accordion-panel">
+              <div id="dictionary-section-panel-writing" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "تمرین نوشتن" : "Practice writing"}>
                 <HandwritingPractice
                   character={item.character}
                   language={language}
@@ -222,19 +229,17 @@ export function DictionaryKanjiCard({
             ) : null}
           </section>
 
-          <section ref={node => { if (node) sectionRefs.current.vocabulary = node; }} className="dictionary-accordion-section">
-            {sectionButton("vocabulary", language === "fa" ? "واژگان" : "Vocabulary")}
+          <section ref={node => { if (node) sectionRefs.current.vocabulary = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "vocabulary"}>
             {openSection === "vocabulary" ? (
-              <div className="dictionary-accordion-panel">
+              <div id="dictionary-section-panel-vocabulary" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "واژگان" : "Vocabulary"}>
                 <VocabularyExamples character={item.character} language={language} catalog={catalog} onSelectKanji={onSelectKanji} />
               </div>
             ) : null}
           </section>
 
-          <section ref={node => { if (node) sectionRefs.current.mnemonic = node; }} className="dictionary-accordion-section">
-            {sectionButton("mnemonic", language === "fa" ? "یادسپار" : "Mnemonic")}
+          <section ref={node => { if (node) sectionRefs.current.mnemonic = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "mnemonic"}>
             {openSection === "mnemonic" ? (
-              <div className="dictionary-accordion-panel">
+              <div id="dictionary-section-panel-mnemonic" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "یادسپار" : "Mnemonic"}>
                 {mnemonicContent}
               </div>
             ) : null}
