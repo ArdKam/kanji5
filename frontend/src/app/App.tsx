@@ -6,6 +6,11 @@ import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
+import { StatsDialog } from "./StatsDialog";
+import { SettingsDialog } from "./SettingsDialog";
+import { PracticeHome } from "./PracticeHome";
+import { GrammarDialog } from "./GrammarDialog";
+import { ReadingLabDialog } from "./ReadingLabDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -30,6 +35,8 @@ import {
   type ComponentInfo,
   type Settings,
   type Snapshot,
+  type CustomStudyFilter,
+  type KanjiCatalogItem,
   getHandwritingSkill,
   recordHandwritingGrade,
   type HandwritingSkill,
@@ -584,16 +591,6 @@ function Insights({snapshot}:{snapshot:Snapshot}){
     <Panel title={t("recentResults")}>{(snapshot.recentOutcomes??[]).map((r,i)=><div className="outcome-row" key={(r.character??"")+"-"+i}><strong lang="ja">{text(r.character)}</strong><span>{skillLabel(r.mode??"")} · {outcomeLabel(r.quality??r.outcome??"")}</span><b>{r.correct?"✓":outcomeLabel(r.outcome??"")}</b></div>)}{!snapshot.recentOutcomes?.length?<p className="empty-text">{t("noResults")}</p>:null}</Panel>
   </div></details>;
 }
-function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}){return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>}
-function SettingsDialog({open,snapshot,busy,language,onLanguageChange,onClose,onSave,onReset}:{open:boolean;snapshot:Snapshot;busy:boolean;language:Language;onLanguageChange:(language:Language)=>void;onClose:()=>void;onSave:(s:Settings)=>void;onReset:()=>void}){
-  const s:Settings={dailyNew:5,retention:.9,dailyGoal:20,leechThreshold:8,production:true,vocabulary:true,context:true,...(snapshot.settings??{})};const [draft,setDraft]=useState<Settings>(s);
-  useEffect(()=>{if(open)setDraft(s)},[open,s.dailyNew,s.retention,s.dailyGoal,s.leechThreshold,s.production,s.vocabulary,s.context]);
-  return open?<dialog open className="dialog" aria-labelledby="settings-title"><button className="dialog-close" type="button" aria-label={t("close",language)} onClick={onClose}>×</button><h2 id="settings-title">{t("settingsTitle",language)}</h2><form className="settings-form" onSubmit={e=>{e.preventDefault();onSave(draft)}}><div className="settings-section"><div className="settings-section-title">{t("language",language)}</div><div className="settings-language-switcher" role="group" aria-label={t("language",language)}><button className={"settings-language-button "+(language==="fa"?"active":"")} type="button" aria-pressed={language==="fa"} onClick={()=>onLanguageChange("fa")}>{t("persian",language)}</button><button className={"settings-language-button "+(language==="en"?"active":"")} type="button" aria-pressed={language==="en"} onClick={()=>onLanguageChange("en")}>{t("english",language)}</button></div></div>
-    <Setting label={t("newKanjiPerDay")} value={draft.dailyNew} min={1} max={30} onChange={v=>setDraft({...draft,dailyNew:v})}/><label className="setting-row"><span>{t("fsrsRetention")}</span><span className="setting-range-value">{Math.round(draft.retention*100)}%</span><input type="range" min={80} max={98} step={1} value={Math.round(draft.retention*100)} onChange={e=>setDraft({...draft,retention:Number(e.target.value)/100})}/></label><Setting label={t("dailyReviewGoal")} value={draft.dailyGoal} min={1} max={500} onChange={v=>setDraft({...draft,dailyGoal:v})}/><Setting label={t("leechThreshold")} value={draft.leechThreshold} min={2} max={30} onChange={v=>setDraft({...draft,leechThreshold:v})}/>
-    {([["production",t("productionKanji")],["vocabulary",t("completeVocabulary")],["context",t("contextRecall")]] as const).map(([k,l])=><label className="setting-row" key={k}><span>{l}</span><input type="checkbox" checked={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.checked})}/></label>)}
-    <div className="actions"><button className="button primary" type="submit" disabled={busy}>{t("save")}</button><button className="button secondary" type="button" onClick={onClose}>{t("close")}</button><button className="button secondary" type="button" disabled={busy} onClick={onReset}>{t("resetProgress")}</button></div>
-  </form></dialog>:null;
-}
 function getInitialSnapshot():Snapshot|null{
   if(typeof window==="undefined")return null;
   const value=(window as Window & {__KANJI5_V19_V2_LAST_SNAPSHOT__?:Snapshot}).__KANJI5_V19_V2_LAST_SNAPSHOT__;
@@ -626,7 +623,7 @@ function LoadingInsights(){
 }
 
 function App(){
-  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[language,setLanguageState]=useState<Language>(()=>getLanguage());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[placementRequest,setPlacementRequest]=useState(0),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[language,setLanguageState]=useState<Language>(()=>getLanguage());
   useEffect(()=>applyLanguage(language),[language]);
   const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
@@ -638,24 +635,84 @@ function App(){
   return <div className="app-shell">
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
     <header className="header"><div className="header-brand"><p className="eyebrow red">یادگیری هوشمند</p><h1>کانجی‌یار</h1></div>
-      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {language==="fa"?"از":"of"} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className="header-tools"><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={language==="fa"?"بیشتر":"More"} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}>☰</button><div id="header-tools-menu" className={"header-tools-menu "+(headerMenuOpen?"open":"")}><button className="button secondary" type="button" disabled={busy} onClick={()=>{setStatsOpen(true);setHeaderMenuOpen(false)}}>{t("stats")}</button><button className="button secondary" type="button" disabled={busy} onClick={()=>{setSettingsOpen(true);setHeaderMenuOpen(false)}}>{t("settings")}</button></div></div><AccountButton language={language} onClick={()=>setAccountOpen(true)}/></div>
+      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {language==="fa"?"از":"of"} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className="header-tools"><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={language==="fa"?"بیشتر":"More"} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}>☰</button><div id="header-tools-menu" className={"header-tools-menu "+(headerMenuOpen?"open":"")}>
+  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setStatsOpen(true);setHeaderMenuOpen(false)}}>{t("stats")}</button>
+  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setGrammarOpen(true);setHeaderMenuOpen(false)}}>{t("grammarGuide")}</button>
+  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setReadingLabOpen(true);setHeaderMenuOpen(false)}}>{t("readingLab")}</button>
+  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setSettingsOpen(true);setHeaderMenuOpen(false)}}>{t("settings")}</button>
+</div></div><AccountButton language={language} onClick={()=>setAccountOpen(true)}/></div>
     </header>
-    <nav className="experience-nav" aria-label={t("learningPath",language)}><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startLearningExperience();await clearTransient();setExperience("review")})}>{t("learning",language)}</button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{setExperience("practice");await startExercise()})}>{t("activeRecall",language)}</button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} disabled={busy} onClick={()=>{setExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}>{t("dictionary",language)}</button></nav><main id="primary-content" className="content mobile-study-flow">
-      {showDictionary?<DictionaryPage language={language} onStartCustomStudy={async filter=>{const result=await action(async()=>{await clearTransient();return await startCustomStudy(filter)});if(result?.started)setExperience("review");return Boolean(result?.started);}}/>:<>
+    <nav className="experience-nav" aria-label={t("learningPath",language)}><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startLearningExperience();await clearTransient();setExperience("review")})}>{t("learning",language)}</button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>{setExperience("practice");setPracticeMode(snapshot?.exercise?.mode?"exercise":"home")}}>{t("activeRecall",language)}</button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} disabled={busy} onClick={()=>{setExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}>{t("dictionary",language)}</button></nav><main id="primary-content" className="content mobile-study-flow">
+      {showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top"><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
-              {showExercise?<><Exercise snapshot={snapshot??{}} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>{snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}</>:snapshot?.learning?.active?<Learning card={snapshot.learning} snapshot={snapshot} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{setExperience("practice");void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+              {showExercise ? (
+  practiceMode==="exercise" && snapshot?.exercise?.mode ? (
+    <>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v))} onDontKnow={()=>action(dontKnow)} onNext={()=>action(nextExercise)}/>
+      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
+    </>
+  ) : (
+    <PracticeHome
+      language={language}
+      placementRequest={placementRequest}
+      onStartActiveRecall={async()=>{
+        await action(async()=>{
+          await startExercise();
+          setPracticeMode("exercise");
+        });
+      }}
+      onStartCustomStudy={async(filter: CustomStudyFilter)=>{
+        const result=await action(async()=>{
+          await clearTransient();
+          return await startCustomStudy(filter);
+        });
+        if(result?.started)setExperience("review");
+        return Boolean(result?.started);
+      }}
+    />
+  )
+) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
       </>}
     </main>
 <footer className="footer">{language==="fa"?"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.":"Keep your learning short, consistent, and focused."}</footer>
-    {statsOpen?<dialog open className="dialog" aria-labelledby="stats-title"><button className="dialog-close" type="button" aria-label={t("close")} onClick={()=>setStatsOpen(false)}>×</button><h2 id="stats-title">{t("stats")}</h2><div className="dialog-grid"><StatRow label={language==="fa"?"کل مرورها":"Total reviews"} value={fa(snapshot?.stats?.totalReviews??0)}/><StatRow label={language==="fa"?"مرورهای غیر Again":"Non-Again reviews"} value={fa(pct(snapshot?.stats?.nonAgainRate))+(language==="fa"?"٪":"%")}/><StatRow label={language==="fa"?"کانجی مطالعه‌شده":"Kanji studied"} value={fa(snapshot?.stats?.studiedCount??0)+" / "+fa(snapshot?.stats?.deckSize??0)}/><StatRow label={language==="fa"?"رشتهٔ فعلی":"Current streak"} value={fa(snapshot?.stats?.currentStreak??0)+" 🔥"}/><StatRow label={language==="fa"?"طولانی‌ترین رشته":"Longest streak"} value={fa(snapshot?.stats?.longestStreak??0)+" 🔥"}/><StatRow label="Leech" value={fa(snapshot?.stats?.leechCount??0)}/></div></dialog>:null}
-    <SettingsDialog open={settingsOpen} snapshot={snapshot??{}} busy={busy} language={language} onLanguageChange={changeLanguage} onClose={()=>setSettingsOpen(false)} onSave={s=>void action(async()=>{await updateSettings(s);setSettingsOpen(false)})} onReset={()=>{const message=language==="fa"?"همهٔ پیشرفت یادگیری پاک می‌شود. این کار قابل بازگشت نیست. ادامه می‌دهید?":"All learning progress will be erased. This cannot be undone. Continue?";if(window.confirm(message))void action(async()=>{resetProgress()})}}/><AccountDialog open={accountOpen} language={language} onClose={()=>setAccountOpen(false)}/>
+    <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={()=>setStatsOpen(false)}/>
+    <SettingsDialog
+      open={settingsOpen}
+      snapshot={snapshot??{}}
+      busy={busy}
+      language={language}
+      onLanguageChange={changeLanguage}
+      onClose={()=>setSettingsOpen(false)}
+      onSave={s=>void action(async()=>{await updateSettings(s);setSettingsOpen(false)})}
+      onReset={()=>{
+        const message=language==="fa"?"همهٔ پیشرفت یادگیری پاک می‌شود. این کار قابل بازگشت نیست. ادامه می‌دهید?":"All learning progress will be erased. This cannot be undone. Continue?";
+        if(window.confirm(message))void action(async()=>{resetProgress()});
+      }}
+      onRetakePlacement={()=>{
+        setSettingsOpen(false);
+        setExperience("practice");
+        setPracticeMode("home");
+        setPlacementRequest(value=>value+1);
+      }}
+    />
+    <GrammarDialog open={grammarOpen} language={language} onClose={()=>setGrammarOpen(false)}/>
+    <ReadingLabDialog
+      open={readingLabOpen}
+      language={language}
+      onClose={()=>setReadingLabOpen(false)}
+      onSelectKanji={(item: KanjiCatalogItem)=>{
+        setDictionaryLookupCharacter(item.character);
+        setReadingLabOpen(false);
+        setExperience("dictionary");
+      }}
+    />
+    <AccountDialog open={accountOpen} language={language} onClose={()=>setAccountOpen(false)}/>
   </div>
 }
 function DailySummary({snapshot}:{snapshot:Snapshot}){const s=snapshot.dailySummary??{};return <section className="daily-summary" aria-label="خلاصهٔ امروز">{([[t("todayReviews"),s.dueCount],[t("todayNewKanji"),s.newCount],[t("learned"),s.masteredCount],[t("streak"),s.streak]] as const).map(([label,value])=><div className="stat-card" key={label}><strong>{fa(Number(value)||0)}</strong><span>{label}</span></div>)}</section>}
-function StatRow({label,value}:{label:string;value:string}){return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>}
 export { App };
 // Production presentation: learning card reveal uses the flip interaction.
 
