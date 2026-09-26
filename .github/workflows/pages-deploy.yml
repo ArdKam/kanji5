@@ -86,12 +86,12 @@ jobs:
           base="https://ardkam.github.io/kanji5"
           probe="$(date +%s%N)"
           curl -fsSL "$base/index.html?probe=$probe" > /tmp/kanji5-index.html
-          curl -fsSL "$base/react-entry.js?probe=$probe" > /tmp/kanji5-entry.js
-          curl -fsSL "$base/sw.js?probe=$probe" > /tmp/kanji5-sw.js
-          curl -fsSL "$base/react-dist/kanji5-react.js?probe=$probe" > /tmp/kanji5-react.js
+          curl -fsSL "$base/react-entry-release18.js?probe=$probe" > /tmp/kanji5-entry.js
+          curl -fsSL "$base/sw-release18.js?probe=$probe" > /tmp/kanji5-sw.js
+          curl -fsSL "$base/react-dist/kanji5-react-release18.js?probe=$probe" > /tmp/kanji5-react.js
           grep -q "20260926-release18" /tmp/kanji5-index.html
           grep -q "20260926-release18" /tmp/kanji5-entry.js
-          grep -q "kanji5-shell-v166" /tmp/kanji5-sw.js
+          grep -q "kanji5-shell-v167" /tmp/kanji5-sw.js
           grep -q "practice-home" /tmp/kanji5-react.js
           grep -q "dictionary-card-accordion" /tmp/kanji5-react.js
           echo "LIVE_PAGES_ARTIFACT_VERIFIED"
