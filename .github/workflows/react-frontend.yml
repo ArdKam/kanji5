@@ -80,7 +80,6 @@ jobs:
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
       - name: Upload generated React artifact
-        working-directory: .
         uses: actions/upload-artifact@v4
         with:
           name: kanji5-react-dist
