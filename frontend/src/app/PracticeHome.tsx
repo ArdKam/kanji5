@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { formatNumber, t, type Language } from "./i18n";
+import { t, type Language } from "./i18n";
 import { listKanji, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 import { CustomStudyPanel } from "./CustomStudyPanel";
 import { PlacementDiagnostic } from "./PlacementDiagnostic";
