@@ -29,6 +29,8 @@ export function DictionaryKanjiCard({
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey>(null);
+  const sectionRefs = useRef<Partial<Record<Exclude<SectionKey, null>, HTMLElement>>>({});
+
   const [isCloseIdle, setIsCloseIdle] = useState(false);
   const closeIdleTimerRef = useRef<number | null>(null);
   const closeWakeTimerRef = useRef<number | null>(null);
