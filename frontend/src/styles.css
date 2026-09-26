@@ -827,3 +827,13 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
   .header-menu-trigger{width:44px;height:44px;min-height:44px;}
   .header .account-button{width:44px;min-width:44px;height:44px;min-height:44px;padding:4px;}
 }
+
+/* Production Recall: mental retrieval -> reveal -> self-grade, without keyboard dependency. */
+.production-recall{display:grid;gap:12px;}
+.production-recall-instruction{margin:0;text-align:center;color:var(--mute);font-size:13px;line-height:1.75;}
+.production-recall-reveal{width:100%;}
+.production-recall-revealed{display:grid;gap:10px;place-items:center;padding:18px;border:1px solid var(--line);border-radius:20px;background:var(--paper);}
+.production-recall-revealed>span{color:var(--mute);font-size:11px;font-weight:800;}
+.production-recall-revealed>strong{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:clamp(72px,14vw,108px);line-height:.95;direction:ltr;}
+.production-recall-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;margin-top:4px;}
+@media(max-width:760px){.production-recall-revealed{padding:16px 12px}.production-recall-actions{grid-template-columns:1fr;}}
