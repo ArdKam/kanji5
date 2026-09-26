@@ -67,7 +67,7 @@ export function PracticeHome({
           </button>
         </div>
         {placementError ? <p className="custom-study-message" role="status">{placementError}</p> : null}
-        {placementOpen && !loadingPlacement && catalog.length ? <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} /> : null}
+        {placementOpen && !loadingPlacement && catalog.length ? <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} autoOpen /> : null}
       </section>
     </section>
   );
