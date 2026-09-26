@@ -12,7 +12,7 @@ import { formatNumber, type Language } from "./i18n";
 import "./structure-explorer.css";
 
 type ExplorerMode = "radical" | "component";
-type ExplorerRequest = { mode: ExplorerMode; query: string; nonce: number };
+type ExplorerRequest = { mode: ExplorerMode; query: string; nonce: number; prefetchedResults?: KanjiDictionaryResult[] };
 
 type Props = {
   language: Language;
@@ -54,6 +54,16 @@ export function StructureExplorer({ language, catalog, onSelectKanji, request }:
     setSelectedRadicalId(null);
     setError("");
     if (detailsRef.current) detailsRef.current.open = true;
+    if (Array.isArray(request.prefetchedResults)) {
+      setMode(request.mode);
+      setQuery(request.query);
+      setSelectedRadicalId(request.mode === "radical" ? Number(request.query) : null);
+      setRadicalMatches([]);
+      setSearched(true);
+      setResults(request.prefetchedResults);
+      setBusy(false);
+      return;
+    }
     if (request.mode === "radical") {
       const normalized = request.query.trim().toLocaleLowerCase();
       const match = radicals.find(item =>
