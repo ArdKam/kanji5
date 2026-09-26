@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -46,6 +46,20 @@ jobs:
 
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
+
+      - name: Sync generated React artifact into repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add react-dist/kanji5-react.js react-dist/kanji5-react.css
+          if git diff --cached --quiet; then
+            echo "Generated React artifact already matches the repository."
+          else
+            git commit -m "chore(build): sync generated React artifact"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
       - name: Verify Mnemonic support is present in shipped React artifact
         run: node -e "const fs=require('fs'); const js=fs.readFileSync('react-dist/kanji5-react.js','utf8'); if(!js.includes('mnemonic-support') || !js.includes('mnemonic-prepared')) process.exit(1); console.log('Mnemonic support is present in the shipped React bundle.');"
 
@@ -64,3 +78,20 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify live GitHub Pages artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://ardkam.github.io/kanji5"
+          probe="$(date +%s%N)"
+          curl -fsSL "$base/index.html?probe=$probe" > /tmp/kanji5-index.html
+          curl -fsSL "$base/react-entry.js?probe=$probe" > /tmp/kanji5-entry.js
+          curl -fsSL "$base/sw.js?probe=$probe" > /tmp/kanji5-sw.js
+          curl -fsSL "$base/react-dist/kanji5-react.js?probe=$probe" > /tmp/kanji5-react.js
+          grep -q "20260926-release18" /tmp/kanji5-index.html
+          grep -q "20260926-release18" /tmp/kanji5-entry.js
+          grep -q "kanji5-shell-v166" /tmp/kanji5-sw.js
+          grep -q "practice-home" /tmp/kanji5-react.js
+          grep -q "dictionary-card-accordion" /tmp/kanji5-react.js
+          echo "LIVE_PAGES_ARTIFACT_VERIFIED"
