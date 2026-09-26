@@ -27,7 +27,7 @@ assert.equal(first.radical?.codePoint,"U+2F26");
 assert.equal(first.source?.version,"18.0.0");
 assert.equal(first.mappingSource?.field,"radical.classical");
 assert.equal(second.radicalId,39);
-assert.equal(fetchCount,2);
+assert.equal(fetchCount,1);
 const missing=await api.getRadicalInfo("㐀");
 assert.equal(missing.available,false);
 console.log("Kanji5 radical boundary contract passed.");
