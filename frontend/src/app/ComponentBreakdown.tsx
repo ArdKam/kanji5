@@ -24,7 +24,7 @@ export function ComponentBreakdown({ info, title, note, ariaLabel, onComponentCl
         {info.components.map((component, index) => (
           <span className="component-breakdown-part-wrap" role="listitem" key={component + "-" + index}>
             {index > 0 ? <span className="component-breakdown-plus" aria-hidden="true">+</span> : null}
-            onComponentClick ? <button className="component-breakdown-part component-breakdown-part-button" type="button" lang="ja" onClick={() => onComponentClick(component)}>{component}</button> : <span className="component-breakdown-part" lang="ja">{component}</span>
+            onComponentClick ? <button className="component-breakdown-part component-breakdown-part-button" type="button" lang="ja" onClick={() => onComponentClick?.(component)}>{component}</button> : <span className="component-breakdown-part" lang="ja">{component}</span>
           </span>
         ))}
       </div>
