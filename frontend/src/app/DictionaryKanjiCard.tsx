@@ -58,6 +58,53 @@ export function DictionaryKanjiCard({
     else armCloseIdleTimer();
   };
 
+  const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>, behavior: ScrollBehavior = "smooth") => {
+    const target = sectionRefs.current[section];
+    const scrollContainer = target?.closest<HTMLElement>(".dictionary-card");
+    if (!target || !scrollContainer) return;
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const optionNav = scrollContainer.querySelector<HTMLElement>(".dictionary-section-nav");
+    const stickyOffset = (optionNav?.getBoundingClientRect().height ?? 0) + 12;
+    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - stickyOffset;
+    const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    scrollContainer.scrollTo({ top: nextScrollTop, behavior: reducedMotion ? "auto" : behavior });
+  };
+
+  useEffect(() => {
+    if (!openSection) return;
+    const target = sectionRefs.current[openSection];
+    if (!target) return;
+    let frame = 0;
+    let nextFrame = 0;
+    let settleTimer = 0;
+    let observer: ResizeObserver | null = null;
+    let observationStopTimer = 0;
+    const scheduleScroll = (behavior: ScrollBehavior) => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        frame = window.requestAnimationFrame(() => {
+          nextFrame = window.requestAnimationFrame(() => scrollOpenSectionIntoView(openSection, behavior));
+        });
+      }, 180);
+    };
+    scheduleScroll("smooth");
+    if ("ResizeObserver" in window) {
+      observer = new ResizeObserver(() => scheduleScroll("auto"));
+      observer.observe(target);
+      observationStopTimer = window.setTimeout(() => { observer?.disconnect(); observer = null; }, 1800);
+    }
+    return () => {
+      window.clearTimeout(settleTimer);
+      window.clearTimeout(observationStopTimer);
+      observer?.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(nextFrame);
+    };
+  }, [openSection, item.character]);
+
   const toggle = (section: Exclude<SectionKey, null>) => {
     setOpenSection(current => current === section ? null : section);
   };
