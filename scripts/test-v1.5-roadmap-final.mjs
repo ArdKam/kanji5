@@ -17,7 +17,7 @@ assert(runtime.includes('function ensureUpcomingReviewsUI()'), 'Upcoming reviews
 assert(runtime.includes('function updateUpcomingReviews()'), 'Upcoming reviews updater missing');
 assert(runtime.includes('setInterval(updateUpcomingReviews,15000)'), 'Upcoming reviews are not refreshed live');
 assert(p0.includes('function getWeakestRecallAttribute(character,mode)'), 'Component focus missing');
-assert(p0.includes('function recordFocusedRecallOutcome(character,mode,focus,outcome)'), 'Component recording missing');
+assert(p0.includes('function recordRecallAttributeOutcome(character,mode,focus,outcome)'), 'Component recording missing');
 assert(p0.includes('attributeRecallSignal(entry)'), 'Component aggregate signal missing');
 assert(ui.includes("function record(correct,wrong='')"), 'Active education result must have a dedicated recording path');
 assert(ui.includes('state.writeKnowledge(next)'), 'Education recording must persist through the state boundary');
