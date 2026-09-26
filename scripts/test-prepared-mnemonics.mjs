@@ -11,8 +11,8 @@ const catalog = Array.isArray(data?.kanji) ? data.kanji.map(item => ({
 
 assert.equal(catalog.length, 2136, "Prepared mnemonic coverage must target all 2,136 Jōyō kanji");
 assert.equal(core.PREPARED_MNEMONIC_VERSION, "2.7.0", "Prepared mnemonic version must reflect curated enrichment");
-assert.equal(Object.keys(core.CURATED_PREPARED_MNEMONICS).length, 259, "The original 39 plus 220 enriched curated mnemonics must remain present");
-assert.equal(Object.keys(core.CURATED_PREPARED_MNEMONICS).filter(character => core.CURATED_PREPARED_MNEMONICS[character]?.[0]?.source === "curated").length, 259, "Every curated entry must retain curated provenance");
+assert.equal(Object.keys(core.CURATED_PREPARED_MNEMONICS).length, 303, "The curated mnemonic corpus must remain present after enrichment");
+assert.equal(Object.keys(core.CURATED_PREPARED_MNEMONICS).filter(character => core.CURATED_PREPARED_MNEMONICS[character]?.[0]?.source === "curated").length, 303, "Every curated entry must retain curated provenance");
 
 for (const item of catalog) {
   const mnemonic = core.buildPreparedMnemonic(item, []);
@@ -31,7 +31,7 @@ assert.ok(Math.abs(coverage.coverage - (303 / 2136)) < 1e-12, `Coverage ratio mu
 assert.deepEqual({ total: coverage.total, curated: coverage.curated, generated: coverage.generated }, { total: 2136, curated: 303, generated: 1833 });
 
 const quality = core.preparedMnemonicQualityReport(catalog);
-assert.equal(quality.generatedSceneV2, 1877, "Every non-curated Jōyō kanji must use the scene-v2 fallback");
+assert.equal(quality.generatedSceneV2, 1833, "Every non-curated Jōyō kanji must use the scene-v2 fallback");
 assert.equal(quality.generatedGenericTemplateLeaks, 0, "Scene-v2 fallbacks must not use the retired generic templates");
 assert.equal(quality.criticalFailures, 0, "Curated mnemonics must satisfy the core validity contract");
 assert.equal(quality.genericTemplateLeaks, 0, "Curated mnemonics must not fall back to generic templates");
@@ -68,9 +68,9 @@ for (const testCase of scorerCases) {
   for (const [key, value] of Object.entries(testCase.expected)) assert.equal(score[key], value, `Scorer regression for ${key}`);
 }
 
-console.log("Curated enrichment contract: PASS (259 curated; 220 new high-frequency enrichments)");
+console.log("Curated enrichment contract: PASS (303 curated; 44 additional research-informed enrichments)");
 console.log(`Mnemonic quality gate: PASS (${quality.concreteAnchorFa}/${quality.curated} fa concrete anchors; ${quality.concreteAnchorEn}/${quality.curated} en concrete anchors; ${quality.actionSceneFa}/${quality.curated} fa action scenes; ${quality.actionSceneEn}/${quality.curated} en action scenes)`);
 
-console.log("Prepared mnemonic coverage: PASS (2136/2136; 259 curated + 1877 generated fallbacks)");
+console.log("Prepared mnemonic coverage: PASS (2136/2136; 303 curated + 1833 generated fallbacks)");
 
 assert.equal(quality.curated, 303, "Semantic pass must preserve the curated corpus size");
