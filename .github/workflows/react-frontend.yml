@@ -12,6 +12,7 @@ on:
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
       - "e2e/react-review-practice.spec.mjs"
+      - "e2e/react-structure-explorer.spec.mjs"
       - "e2e/react-learning-card-flip.spec.mjs"
       - "e2e/react-personal-mnemonic.spec.mjs"
       - "e2e/react-accessibility.spec.mjs"
@@ -120,3 +121,6 @@ jobs:
       - name: Run Review/Practice separation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
+      - name: Run structure explorer gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-structure-explorer.spec.mjs
