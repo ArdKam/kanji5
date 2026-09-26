@@ -816,3 +816,10 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 /* Keep Practice card above the fixed bottom navigation. */
 .content > .exercise-card{max-height:calc(100dvh - 155px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;}
 @media(max-width:760px){.content > .exercise-card{max-height:calc(100dvh - 145px);}}
+
+/* Accessible header touch targets: keep the existing layout, raise only the interactive header controls to 44px. */
+.header-menu-trigger,.header .account-button{min-height:44px;height:44px;}
+@media(max-width:760px){
+  .header-menu-trigger{width:44px;height:44px;min-height:44px;}
+  .header .account-button{width:44px;min-width:44px;height:44px;min-height:44px;padding:4px;}
+}
