@@ -116,7 +116,7 @@ test('Production Recall unknown self-grade records unknown and advances once',as
   await expect(page.locator('#root .exercise-correct-answer b')).toHaveText(character);
   await page.waitForTimeout(1600);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect.poll(async()=>String((await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__).snapshot()).exercise?.contentId||""))))).not.toBe(before);
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""))).not.toBe(before);
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
