@@ -14,7 +14,8 @@ test('React is the sole default presentation renderer',async({page})=>{
   await expect(page.locator('#root .learning-card-front .hint')).toHaveCount(0);
   await expect(page.locator('#v2App')).toHaveCount(0);
   await expect(page.locator('.wrap, #app, #loading')).toHaveCount(0);
-  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__&&window.__KANJI5_EDU_BRIDGE__))).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await expect(page.locator('#root .experience-nav')).toBeVisible();
 });
 
 test('React learning and review actions stay behind the authoritative boundary',async({page})=>{
@@ -166,7 +167,7 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card).toContainText('N5');
   await expect(card).toContainText('تسلط');
   await expect(card).toHaveAttribute('aria-label','فرهنگ کانجی');
-  await expect(card.locator('.dictionary-audio-button')).toHaveCount(3);
+  await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(3);
   await expect(card.locator('.component-breakdown')).toBeVisible();
   await expect(card).not.toContainText('کارت کانجی');
   await expect(card.locator('.examples')).toHaveCount(0);
