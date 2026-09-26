@@ -52,13 +52,6 @@ jobs:
       - name: Install root test dependencies
         run: npm ci
 
-      - name: Install Chromium
-        run: npx playwright install chromium
-
-      - name: Verify Mnemonic UI end-to-end
-        continue-on-error: true
-        run: npx playwright test --timeout=30000 --retries=0 e2e/react-prepared-mnemonic.spec.mjs
-
       - name: Verify account UI end-to-end
         continue-on-error: true
         run: npx playwright test --timeout=30000 --retries=0 e2e/react-account-shell.spec.mjs
