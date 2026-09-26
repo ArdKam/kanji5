@@ -6,11 +6,15 @@ import { DictionaryAudio } from "./DictionaryPrimitives";
 export function VocabularyExamples({ character: kanjiCharacter, language, catalog, onSelectKanji }: { character: string; language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const [items, setItems] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllExamples, setShowAllExamples] = useState(false);
+  const [showAllGraph, setShowAllGraph] = useState(false);
 
   useEffect(() => {
     let active = true;
     setItems([]);
     setLoading(true);
+    setShowAllExamples(false);
+    setShowAllGraph(false);
     void getVocabulary(kanjiCharacter).then(result => {
       if (active) setItems((result.items ?? []).slice(0, 8));
     }).catch(() => {
@@ -39,7 +43,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
       {!loading && items.length ? (
         <>
           <div className="dictionary-vocabulary-list">
-            {items.map(item => (
+            {visibleItems.map(item => (
               <div className="dictionary-vocabulary-item" key={item.word + "-" + item.reading}>
                 <div className="dictionary-vocabulary-main">
                   <strong lang="ja">{item.word}</strong>
@@ -60,7 +64,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
                 <span className="vocabulary-learning-graph-root" lang="ja">{kanjiCharacter}</span>
               </div>
               <div className="vocabulary-learning-graph-list" role="list">
-                {vocabularyEdges.filter(edge => edge.related.length).slice(0, 6).map(edge => (
+                {visibleGraphEdges.map(edge => (
                   <div className="vocabulary-learning-graph-edge" key={edge.word + "-" + edge.reading} role="listitem">
                     <span className="vocabulary-learning-graph-word" lang="ja">{edge.word}</span>
                     <span className="vocabulary-learning-graph-arrow" aria-hidden="true">→</span>
