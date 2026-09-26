@@ -71,7 +71,7 @@ test("real KanjiVG trace reaches the React handwriting grader", async ({ page })
 
   const dialog = page.locator(".dictionary-card-dialog:visible");
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: "تمرین دست‌خط" }).click();
+  await dialog.locator(".handwriting-header").click();
   const canvas = dialog.locator("canvas.handwriting-canvas");
   await expect(canvas).toBeVisible();
   await expect(dialog.locator(".handwriting-stroke-count")).toContainText("۸");
