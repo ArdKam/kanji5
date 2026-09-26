@@ -87,6 +87,12 @@ jobs:
       - name: Run handwriting grader unit contract
         working-directory: .
         run: node scripts/test-handwriting-grader.mjs
+      - name: Run handwriting grader integration gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
+      - name: Run handwriting legacy benchmark
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
       - name: Validate migration boundary
         working-directory: .
         run: node scripts/test-react-migration.mjs
@@ -114,12 +120,6 @@ jobs:
       - name: Run Lovable-style experience navigation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
-      - name: Run handwriting grader integration gate
-        working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
-      - name: Run handwriting legacy benchmark
-        working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
       - name: Run account shell gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
