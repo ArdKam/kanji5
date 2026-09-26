@@ -9,7 +9,8 @@ const deck=[
  {id:"学",character:"学",meaning:["study"],on:["ガク"],kun:["まな.ぶ"],strokes:8,grade:1,jlpt:"N5",frequency:1,order:1,radical:{classical:39}},
  {id:"語",character:"語",meaning:["language"],on:["ゴ"],kun:["かた.る"],strokes:14,grade:2,jlpt:"N4",frequency:2,order:2,radical:{classical:149}},
  {id:"議",character:"議",meaning:["discussion"],on:["ギ"],kun:[""],strokes:20,grade:4,jlpt:"N3",frequency:3,order:3,radical:{classical:149}},
- {id:"海",character:"海",meaning:["sea"],on:["カイ"],kun:["うみ"],strokes:9,grade:2,jlpt:"N4",frequency:4,order:4,radical:{classical:85}}
+ {id:"海",character:"海",meaning:["sea"],on:["カイ"],kun:["うみ"],strokes:9,grade:2,jlpt:"N4",frequency:4,order:4,radical:{classical:85}},
+ {id:"湖",character:"湖",meaning:["lake"],on:["コ"],kun:["みずうみ"],strokes:12,grade:3,jlpt:"N3",frequency:5,order:5,radical:{classical:85}}
 ];
 let fetchCount=0;
 const sandbox={
