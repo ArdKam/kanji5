@@ -38,35 +38,41 @@ function drawReferenceStrokes(ctx: CanvasRenderingContext2D, paths: StrokePath[]
 
 function sampleReferenceStrokes(svgText: string, paths: StrokePath[], pointCount = 48): HandwritingStroke[] {
   if (typeof document === "undefined" || !svgText || !paths.length) return [];
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(svgText, "image/svg+xml");
-  const source = doc.documentElement;
-  if (!source || source.nodeName.toLowerCase() !== "svg") return [];
 
+  const SVG_NS = "http://www.w3.org/2000/svg";
   const holder = document.createElement("div");
   holder.setAttribute("aria-hidden", "true");
   holder.style.cssText = "position:absolute;left:-10000px;top:-10000px;width:109px;height:109px;visibility:hidden;";
-  const svg = document.importNode(source, true);
+
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 109 109");
+  svg.setAttribute("width", "109");
+  svg.setAttribute("height", "109");
+
+  const sourceByStroke = new Map<number, SVGPathElement>();
+  const pattern = /<path\\s+[^>]*\\bid="([^"]+-s(\\d+))"[^>]*\\bd="([^"]+)"[^>]*\\/?/g;
+  for (const match of svgText.matchAll(pattern)) {
+    const strokeNumber = Number(match[2]);
+    const d = String(match[3] || "").trim();
+    if (!Number.isInteger(strokeNumber) || strokeNumber < 1 || !d) continue;
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("id", match[1]);
+    path.setAttribute("d", d);
+    svg.appendChild(path);
+    sourceByStroke.set(strokeNumber, path);
+  }
+
+  if (!sourceByStroke.size) return [];
+
   holder.appendChild(svg);
   document.body.appendChild(holder);
-
   try {
-    const byStroke = new Map(
-      [...holder.querySelectorAll("path[id]")]
-        .map(node => {
-          const id = node.getAttribute("id") || "";
-          const match = id.match(/-s(\d+)$/);
-          return match ? [Number(match[1]), node as SVGPathElement] as const : null;
-        })
-        .filter((entry): entry is readonly [number, SVGPathElement] => Boolean(entry)),
-    );
-
+    const count = Math.max(8, Math.min(96, Math.round(pointCount)));
     return paths.map(path => {
-      const sourcePath = byStroke.get(path.strokeNumber);
+      const sourcePath = sourceByStroke.get(path.strokeNumber);
       if (!sourcePath) return [];
       const total = sourcePath.getTotalLength();
       if (!Number.isFinite(total) || total <= 0) return [];
-      const count = Math.max(8, Math.min(96, Math.round(pointCount)));
       return Array.from({ length: count }, (_, index) => {
         const point = sourcePath.getPointAtLength((total * index) / Math.max(1, count - 1));
         return { x: point.x, y: point.y } as HandwritingPoint;
@@ -76,7 +82,6 @@ function sampleReferenceStrokes(svgText: string, paths: StrokePath[], pointCount
     holder.remove();
   }
 }
-
 export function HandwritingPractice({ character, language }: { character: string; language: Language }) {
   const normalized = normalizeStrokeOrderCharacter(character);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
