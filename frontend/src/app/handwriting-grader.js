@@ -305,11 +305,11 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
     const curvature=curvatureScore(aligned[i],reference[i]);
     const lengthInfo=meaningfulLengthPenalty(aligned[i],reference[i]);
     const baseSimilarity=clamp(
-      shape*0.50+
+      shape*0.55+
       endpoints*0.15+
       length*0.10+
-      direction*0.15+
-      curvature*0.10
+      direction*0.16+
+      curvature*0.04
     );
     const similarity=clamp(baseSimilarity*lengthInfo.penalty);
     perStroke.push({
