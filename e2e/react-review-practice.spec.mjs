@@ -83,7 +83,8 @@ test('correct production answer turns the card green and advances once',async({p
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
   const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.contentId));
-  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.character));
+  const character=await page.evaluate(async()=>{const ex=(await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise??{};return String(ex.answerHint||ex.character||'').trim();});
+  await expect(character).not.toBe('');
   await page.locator('#root #exercise .production-choice').filter({hasText:character}).first().click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
   await expect(page.locator('#root .actions')).toHaveCount(0);
