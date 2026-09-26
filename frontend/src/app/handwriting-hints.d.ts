@@ -5,6 +5,7 @@ export type HandwritingGradeLike = { overallSimilarity?: number; scoreReliabilit
 export function normalizeHintLevel(value: unknown): number;
 export function initialHintLevel(signal?: HandwritingLearningSignal): number;
 export function adaptHintLevel(level: unknown, grade?: HandwritingGradeLike): number;
+export function shouldPresentStrokeFeedback(grade?: HandwritingGradeLike & { similarity?: number; feedbackCode?: string; actionable?: boolean }): boolean;
 export function requestMoreHelp(level: unknown): number;
 export function hintLevelName(level: unknown): string;
 export function hintProfile(level: unknown, options?: {currentStrokeIndex?: number; referenceLength?: number}): {level:number;name:string;referenceMode:"all"|"current"|"none";opacity:number;currentStroke:number;showStart:boolean;showDirection:boolean;showNumber:boolean};
