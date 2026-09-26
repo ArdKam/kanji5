@@ -837,3 +837,23 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 .production-recall-revealed>strong{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:clamp(72px,14vw,108px);line-height:.95;direction:ltr;}
 .production-recall-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;margin-top:4px;}
 @media(max-width:760px){.production-recall-revealed{padding:16px 12px}.production-recall-actions{grid-template-columns:1fr;}}
+
+
+/* Prepared mnemonic presentation */
+.mnemonic-prepared{grid-column:1 / -1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px;min-height:34px;padding:5px 7px;border:1px solid var(--line);border-radius:9px;background:var(--paper);}
+.mnemonic-prepared-copy{min-width:0;display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.mnemonic-prepared-copy strong{font-size:8px;color:var(--shu);font-weight:800;margin-inline-end:5px;}
+.mnemonic-prepared-copy p{display:inline;margin:0;font-size:9px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mnemonic-prepared-use{min-height:30px;height:30px;padding:4px 7px;font-size:8.5px;white-space:nowrap;}
+.mnemonic-prepared-library-more{min-height:38px;width:100%;margin-top:8px;}
+/* Dense learning-card fit guard: keep core identity readable while preventing back-page overflow. */
+.learning-card[data-card-density="dense"] .learning-back-identity{gap:4px;}
+.learning-card[data-card-density="dense"] .learning-back-identity-visual{min-height:60px;}
+.learning-card[data-card-density="dense"] .learning-back-tools{gap:4px;}
+.learning-card[data-card-density="dense"] .learning-back-identity .readings-header{margin-top:0;}
+.learning-card[data-card-density="dense"] .learning-card-back .reading{min-height:38px;padding:4px 6px;}
+.learning-card[data-card-density="dense"] .learning-card-back .stroke-order-panel{padding:6px;gap:4px;}
+.learning-card[data-card-density="dense"] .component-breakdown{gap:3px;}
+.learning-card[data-card-density="dense"] .component-breakdown-visual{gap:4px;}
+.learning-card[data-card-density="dense"] .component-breakdown-target{font-size:32px;}
+.learning-card[data-card-density="dense"] .component-breakdown-part{min-width:27px;min-height:27px;padding:3px 4px;font-size:14px;}
