@@ -196,10 +196,9 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
       speak:(utterance)=>{calls.push({type:'speak',text:utterance.text,lang:utterance.lang,rate:utterance.rate});utterance.onstart?.();},
     }});
     Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
-      text:string;lang='';rate=1;onstart?:()=>void;onend?:()=>void;onerror?:()=>void;
-      constructor(text:string){this.text=text;}
+      constructor(text){this.text=text;this.lang='';this.rate=1;this.onstart=null;this.onend=null;this.onerror=null;}
     }});
-    (window as unknown as {_KANJI5_SPEECH_CALLS__?:unknown[]})._KANJI5_SPEECH_CALLS__=calls;
+    window.__KANJI5_SPEECH_CALLS__=calls;
   });
   const speak=lab.getByRole('button',{name:'خواندن متن',exact:true});
   const stop=lab.getByRole('button',{name:'توقف خواندن',exact:true});
@@ -208,7 +207,7 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await lab.locator('.reading-lab-speech-rate select').selectOption('1');
   await speak.click();
   await expect(speak).toHaveText('در حال خواندن…');
-  const calls=await page.evaluate(()=>((window as unknown as {_KANJI5_SPEECH_CALLS__?:any[]})._KANJI5_SPEECH_CALLS__||[]));
+  const calls=await page.evaluate(()=>(window.__KANJI5_SPEECH_CALLS__||[]));
   expect(calls.some(call=>call.type==='speak'&&call.text.includes('日本語')&&call.lang==='ja-JP'&&call.rate===1)).toBe(true);
   await expect(stop).toBeEnabled();
   await stop.click();
