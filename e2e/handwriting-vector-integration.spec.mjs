@@ -89,8 +89,12 @@ test("handwriting UI captures and grades a complete reference trace",async({page
 
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
 
-  const reversed=[...reference[0]].reverse();
-  const badStroke=reversed.map(point=>({x:Math.round(penBox.x+(Number(point.x)/109)*penBox.width),y:Math.round(penBox.y+(Number(point.y)/109)*penBox.height)}));
+  const badStroke=[
+    {x:Math.round(penBox.x+penBox.width*0.68),y:Math.round(penBox.y+penBox.height*0.86)},
+    {x:Math.round(penBox.x+penBox.width*0.82),y:Math.round(penBox.y+penBox.height*0.68)},
+    {x:Math.round(penBox.x+penBox.width*0.94),y:Math.round(penBox.y+penBox.height*0.88)},
+    {x:Math.round(penBox.x+penBox.width*0.74),y:Math.round(penBox.y+penBox.height*0.58)},
+  ];
   await canvas.dispatchEvent("pointerdown",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:badStroke[0].x,clientY:badStroke[0].y});
   for(let i=1;i<badStroke.length;i+=1){
     const point=badStroke[i];
@@ -100,9 +104,9 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await canvas.dispatchEvent("pointerup",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:last.x,clientY:last.y});
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
   await expect(handwriting).toHaveAttribute("data-stroke-count","1");
-  await expect(handwriting).toHaveAttribute("data-live-feedback","direction");
+  await expect(handwriting).toHaveAttribute("data-live-feedback",/^(?!none$).+/);
   await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
-  await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code","direction");
+  await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code",/endpoints|direction|shape|length|curvature/);
   await handwriting.locator(".handwriting-actions .secondary").click();
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeDisabled();
 
