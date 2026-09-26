@@ -76,6 +76,16 @@ v1.8 سه mode واقعی learner-facing را به جریان آموزشی اض�
 - **Learning UX:** feedback حداقلی و توضیح کوتاه دربارهٔ دلیل انتخاب تمرین، بدون dashboard پیچیده
 - **Offline/runtime quality:** graderهای v1.8 و UX runtime در service worker precache شده‌اند و shell cache نسخه‌بندی شده است
 
+## Mnemonic & memory-aid system
+
+- **Comprehensive coverage:** every one of the ۲۱۳۶ Jōyō kanji receives a memory-aid entry.
+- **Curated vs guided:** curated prepared mnemonics are kept separate from deterministic guided scaffolds; scaffolds are prompts for creating a personal cue, not personal mnemonics themselves.
+- **Reading support:** phonetic keyword hooks are used when a curated sound anchor exists, with conservative vocabulary matching to avoid attaching an unrelated reading example.
+- **Confusion network:** common lookalikes are represented as auditable bidirectional groups with target-specific visual contrasts.
+- **Adaptive disclosure:** memory support expands for new/recovery states, collapses as recall stabilizes, and is hidden for sufficiently mastered meaning/reading.
+- **Personal-first persistence:** curated prepared mnemonics can be adopted directly; generated scaffolds are labeled and route the learner toward creating their own mnemonic.
+- **Offline support:** component data used by the memory-aid layer is included in the service-worker data cache.
+
 ## v2 — Presentation Layer
 
 v2.0 replaces the legacy v1 presentation as the default browser experience while keeping the v1.9 learning engine authoritative.

@@ -1,43 +1,6 @@
-export type PreparedMnemonic = { fa: string; en: string };
-
-export const PREPARED_MNEMONICS: Record<string, PreparedMnemonic[]> = {
-  "日":[{fa:"یک خورشید مربعی؛ شکلش مثل پنجره‌ای رو به نور روز است.",en:"A square sun; its shape is a window filled with daylight."}],
-  "月":[{fa:"هلال ماه را در ذهن بگیر؛ 月 مثل یک ماه باریک و کشیده است.",en:"Picture a crescent moon; 月 is a slim, curved moon shape."}],
-  "火":[{fa:"دو شعلهٔ آتش را ببین که در 火 به طرف بالا می‌پرند.",en:"Picture two flames leaping upward in 火."}],
-  "水":[{fa:"یک جریان آب را تصور کن که از مرکز 水 به دو طرف پخش می‌شود.",en:"Picture water flowing from the center and splitting outward in 水."}],
-  "木":[{fa:"یک درخت با تنه و دو شاخه؛ 木 ساده‌ترین تصویر یک درخت است.",en:"A tree with a trunk and two branches; 木 looks like a simple tree."}],
-  "金":[{fa:"گنجی از فلز و طلا را زیر یک سقف تصور کن؛ 金 یادآور طلاست.",en:"Picture metal and gold treasured together under a roof; 金 points to gold."}],
-  "土":[{fa:"یک تپهٔ کوچک از خاک روی زمین؛ 土 مثل خاکی است که از زمین بالا آمده.",en:"A small mound of earth on the ground; 土 looks like soil rising from the earth."}],
-  "人":[{fa:"دو خط مثل دو پا که یک انسان ایستاده را نشان می‌دهند.",en:"Two strokes like two legs forming a standing person."}],
-  "大":[{fa:"آدمی را با دست‌های کاملاً باز تصور کن؛ 大 یعنی بزرگ و گسترده.",en:"Picture a person stretching both arms wide; 大 feels big and expansive."}],
-  "小":[{fa:"یک چیز خیلی کوچک با دو ذرهٔ ریز کنارش؛ 小 را کوچک ببین.",en:"Picture something tiny with two little dots beside it; 小 feels small."}],
-  "中":[{fa:"یک خط مستقیم که درست از وسط قاب می‌گذرد؛ 中 یعنی وسط.",en:"A straight line passing through the exact center; 中 means middle."}],
-  "上":[{fa:"یک خط پایه و چیزی بالای آن؛ 上 یعنی بالا.",en:"A baseline with something above it; 上 means up/above."}],
-  "下":[{fa:"یک خط بالا و چیزی آویزان زیر آن؛ 下 یعنی پایین.",en:"A top line with something hanging below it; 下 means down/below."}],
-  "左":[{fa:"دستی که چیزی را نگه می‌دارد و به سمت چپ اشاره می‌کند؛ 左 را سمت چپ بگیر.",en:"A hand guiding you left; 左 is your left side."}],
-  "右":[{fa:"دستی که به سمت راست راهنمایی می‌کند؛ 右 را سمت راست به خاطر بسپار.",en:"A hand guiding you right; 右 is your right side."}],
-  "山":[{fa:"سه قلهٔ کوه کنار هم؛ 山 خودش شبیه رشته‌کوه است.",en:"Three mountain peaks together; 山 looks like a mountain range."}],
-  "川":[{fa:"سه جریان آب که کنار هم پایین می‌روند؛ 川 مثل رودخانه‌های موازی است.",en:"Three streams flowing side by side; 川 looks like parallel river channels."}],
-  "田":[{fa:"یک مزرعهٔ برنج که به چهار قسمت تقسیم شده؛ 田 مثل قطعه‌زمین شالیزار است.",en:"A rice field divided into four plots; 田 looks like a boxed field."}],
-  "口":[{fa:"یک دهان باز به شکل مربع؛ 口 یعنی دهان.",en:"An open square mouth; 口 means mouth."}],
-  "目":[{fa:"چشم را داخل یک قاب کشیده تصور کن؛ 目 شکل یک چشم است.",en:"Picture an eye inside a frame; 目 resembles an eye."}],
-  "耳":[{fa:"لالهٔ گوش کشیده و جمع‌وجور؛ 耳 را مثل یک گوش ببین.",en:"A compact outline of an ear; 耳 can be pictured as an ear."}],
-  "手":[{fa:"کف دست و انگشتانی که رو به پایین باز شده‌اند؛ 手 یادآور دست است.",en:"An open hand with fingers reaching down; 手 can be pictured as a hand."}],
-  "足":[{fa:"پای راست و ساق را تصور کن؛ 足 را با راه رفتن و پا به هم وصل کن.",en:"Picture a leg and foot; connect 足 with walking and feet."}],
-  "力":[{fa:"بازویی که نیرو وارد می‌کند؛ 力 را با قدرت عضلانی گره بزن.",en:"An arm exerting force; connect 力 with physical strength."}],
-  "女":[{fa:"یک پیکرهٔ نشسته و متعادل؛ 女 را به یک زن آرام ربط بده.",en:"A balanced seated figure; connect 女 with a woman."}],
-  "男":[{fa:"مردی که روی مزرعه کار می‌کند؛ 男 را به مرد و کار در مزرعه وصل کن.",en:"Picture a man working in a field; connect 男 with a man and farm work."}],
-  "子":[{fa:"یک کودک با دست‌های باز؛ 子 را با کودک به خاطر بسپار.",en:"A child with arms reaching out; connect 子 with a child."}],
-  "学":[{fa:"کودکی که زیر سقف در حال یادگیری است؛ 学 را به مطالعه وصل کن.",en:"A child learning under a roof; connect 学 with studying."}],
-  "生":[{fa:"یک جوانه که از خاک بیرون می‌آید؛ 生 را با رشد و زندگی گره بزن.",en:"A sprout emerging from the earth; connect 生 with life and growth."}],
-  "先":[{fa:"کسی جلوتر از بقیه راه می‌رود؛ 先 را با «اول/پیش‌تر» به خاطر بسپار.",en:"Someone walking ahead of the others; connect 先 with being ahead/first."}],
-  "年":[{fa:"چرخهٔ کشاورزی که یک بار کامل می‌شود؛ 年 یعنی یک سال.",en:"Picture a full farming cycle; 年 is one year."}],
-  "今":[{fa:"همین لحظه را بین دو طرف نگه داشته‌ای؛ 今 یعنی اکنون.",en:"Hold this exact moment in your mind; 今 means now."}],
-  "時":[{fa:"خورشید در یک لحظهٔ مشخص؛ 時 را با زمان و ساعت گره بزن.",en:"The sun at a specific moment; connect 時 with time."}],
-  "前":[{fa:"چیزی درست جلوی تو قرار دارد؛ 前 یعنی جلو/قبل.",en:"Something is directly in front of you; 前 means front/before."}],
-  "後":[{fa:"چیزی که پشت سرت مانده؛ 後 یعنی عقب/بعد.",en:"Something left behind you; 後 means behind/after."}],
-  "東":[{fa:"طلوع خورشید در سمت شرق؛ 東 را با طلوع گره بزن.",en:"The sun rising in the east; connect 東 with sunrise."}],
-  "西":[{fa:"غروب خورشید در غرب؛ 西 را با پایان روز به خاطر بسپار.",en:"The sun setting in the west; connect 西 with the end of day."}],
-  "南":[{fa:"به سمت گرم و آفتابی جنوب فکر کن؛ 南 یعنی جنوب.",en:"Think of the warm, sunny south; 南 means south."}],
-  "北":[{fa:"باد سرد شمال را پشت سرت احساس کن؛ 北 یعنی شمال.",en:"Feel the cold northern wind behind you; 北 means north."}],
+export { CURATED_PREPARED_MNEMONICS as PREPARED_MNEMONICS, buildPreparedMnemonic, buildPreparedMnemonicEntries, preparedMnemonicCoverage, preparedMnemonicQualityReport, PREPARED_MNEMONIC_VERSION } from "./prepared-mnemonic-core.js";
+export type PreparedMnemonic = {
+  fa: string;
+  en: string;
+  source: "curated" | "generated";
 };
