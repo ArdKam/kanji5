@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 const FIXTURE = JSON.parse(await readFile(new URL("./fixtures/handwriting-kanjivg.json", import.meta.url), "utf8"));
 
 function legacyScoreSource(source) {
-  const match = source.match(/function scoreDrawing\([\s\S]*?\n}\n\nexport function HandwritingPractice/);
+  const match = source.match(/function drawUserStrokes[\s\S]*?\n}\n\nexport function HandwritingPractice/);
   if (!match) throw new Error("Current HandwritingPractice.tsx legacy scorer was not found.");
   return match[0]
     .replace(/\n\nexport function HandwritingPractice[\s\S]*$/, "")
