@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
+import { StructureExplorer } from "./StructureExplorer";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getMnemonic, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type VocabularyItem } from "./engine";
+import { getComponentInfo, getMnemonic, getRadicalInfo, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type RadicalInfo, type VocabularyItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
@@ -378,9 +379,10 @@ function ComponentLearningPath({
   );
 }
 
-function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }: { item: KanjiCatalogItem; language: Language; onClose: () => void; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
+function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji, onExploreStructure }: { item: KanjiCatalogItem; language: Language; onClose: () => void; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void; onExploreStructure: (mode: "radical" | "component", query: string) => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
+  const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -389,6 +391,17 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }
       if (active) setComponentInfo(info);
     }).catch(() => {
       if (active) setComponentInfo(null);
+    });
+    return () => { active = false; };
+  }, [item.character]);
+
+  useEffect(() => {
+    let active = true;
+    setRadicalInfo(null);
+    void getRadicalInfo(item.character).then((info) => {
+      if (active) setRadicalInfo(info);
+    }).catch(() => {
+      if (active) setRadicalInfo(null);
     });
     return () => { active = false; };
   }, [item.character]);
@@ -407,12 +420,22 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }
         </div>
         <HandwritingPractice character={item.character} language={language} />
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
+        {radicalInfo?.available ? (
+          <div className="dictionary-card-structure-line">
+            <span>{language === "fa" ? "رادیکال سنتی" : "Traditional radical"}</span>
+            <button type="button" className="dictionary-structure-link" onClick={() => onExploreStructure("radical", String(radicalInfo.radicalId))}>
+              <span className="dictionary-structure-glyph" lang="ja">{radicalInfo.radical?.canonicalGlyph}</span>
+              <span>#{formatNumber(radicalInfo.radicalId ?? 0, language)}</span>
+            </button>
+          </div>
+        ) : null}
         {componentInfo?.available && componentInfo.components.length ? (
           <ComponentBreakdown
             info={componentInfo}
             title={language === "fa" ? "ساختار کانجی" : "Kanji structure"}
             note={language === "fa" ? "اجزای دیداری" : "Visual components"}
             ariaLabel={language === "fa" ? "ساختار دیداری کانجی" : "Kanji visual structure"}
+            onComponentClick={(component) => onExploreStructure("component", component)}
           />
         ) : null}
         {componentInfo?.available && componentInfo.components.length ? (
@@ -595,6 +618,10 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
   const [customFocus, setCustomFocus] = useState<CustomStudyFilter["focus"]>("available");
   const [customLimit, setCustomLimit] = useState(20);
   const [customMessage, setCustomMessage] = useState("");
+  const [structureRequest, setStructureRequest] = useState<{ mode: "radical" | "component"; query: string; nonce: number } | null>(null);
+  const openStructureExplorer = (mode: "radical" | "component", query: string) => {
+    setStructureRequest(previous => ({ mode, query, nonce: (previous?.nonce ?? 0) + 1 }));
+  };
 
   useEffect(() => {
     let active = true;
@@ -699,6 +726,8 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("dictionaryPlaceholder", language)} aria-label={t("dictionaryPlaceholder", language)} />
       </label>
 
+      <StructureExplorer language={language} catalog={catalog} onSelectKanji={(item) => setSelected(item)} request={structureRequest} />
+
       <div className="dictionary-controls">
         <div className="dictionary-level-filter" role="group" aria-label={t("dictionaryLevel", language)}>
           {(["all", "N5", "N4", "N3", "N2", "N1"] as LevelFilter[]).map((value) => (
@@ -791,7 +820,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         </>
       ) : null}
 
-      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} /> : null}
+      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} onExploreStructure={(mode, query) => { setSelected(null); openStructureExplorer(mode, query); }} /> : null}
     </section>
   );
 }
