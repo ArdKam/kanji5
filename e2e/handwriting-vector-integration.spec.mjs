@@ -71,20 +71,24 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
   await handwriting.locator(".handwriting-actions .secondary").click();
 
-  const reference=await page.evaluate(paths=>paths.map(row=>{
+  const reference=await page.evaluate(paths=>{
     const holder=document.createElement("div"),svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
     holder.style.cssText="position:absolute;left:-10000px;top:-10000px;width:109px;height:109px;visibility:hidden";
     svg.setAttribute("viewBox","0 0 109 109");holder.appendChild(svg);document.body.appendChild(holder);
-    const out=[];
-    for(const row of paths){
-      const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d",row.d);svg.appendChild(path);
-      const total=path.getTotalLength(),count=48;
-      out.push(Array.from({length:count},(_,i)=>{const p=path.getPointAtLength((total*i)/47);return{x:p.x,y:p.y};}));
-      path.remove();
-    }
-    holder.remove();
-    return out;
-  }),FIXTURE.characters["学"].paths);
+    try{
+      return paths.map(row=>{
+        const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d",row.d);svg.appendChild(path);
+        const total=path.getTotalLength(),count=48;
+        const points=Array.from({length:count},(_,i)=>{
+          const p=path.getPointAtLength((total*i)/Math.max(1,count-1));
+          return {x:p.x,y:p.y};
+        });
+        path.remove();
+        return points;
+      });
+    }finally{holder.remove();}
+  },FIXTURE.characters["学"].paths);
 
   await drawReference(page,canvas,reference);
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
