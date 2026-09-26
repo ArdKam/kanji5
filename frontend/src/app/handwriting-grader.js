@@ -11,8 +11,6 @@ const DEFAULTS = Object.freeze({
   resamplePoints: 32,
   minPointDistance: 0.25,
   smoothing: 0.12,
-  translationTolerance: 18,
-  placementTolerance: 22,
   sizeTolerance: 0.42,
 });
 
