@@ -688,7 +688,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("dictionaryPlaceholder", language)} aria-label={t("dictionaryPlaceholder", language)} />
       </label>
 
-      <StructureExplorer language={language} catalog={catalog} onSelectKanji={(item) => setSelected(item)} request={structureRequest} />
+      <StructureExplorer key={structureRequest?.nonce ?? 0} language={language} catalog={catalog} onSelectKanji={(item) => setSelected(item)} request={structureRequest} />
 
       <div className="dictionary-controls">
         <div className="dictionary-level-filter" role="group" aria-label={t("dictionaryLevel", language)}>
