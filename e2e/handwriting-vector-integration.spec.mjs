@@ -118,7 +118,12 @@ test("handwriting UI remains usable in English and reduced-motion mode",async({p
   await settings.getByRole("button",{name:"English",exact:true}).click();
   await settings.getByRole("button",{name:"Close",exact:true}).last().click();
   await page.emulateMedia({reducedMotion:"reduce"});
+  await page.setViewportSize({width:390,height:844});
   const handwriting=await openSchoolHandwriting(page);
+  const canvasBox=await handwriting.locator(".handwriting-canvas-wrap").boundingBox();
+  expect(canvasBox?.width??999).toBeLessThanOrEqual(286);
+  const actionBoxes=await handwriting.locator(".handwriting-actions .button").evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
+  expect(actionBoxes.every(height=>height>=42)).toBe(true);
   const help=handwriting.locator(".handwriting-help");
   await expect(help).toHaveText(/mouse|touch|stylus/i);
   await expect(handwriting.locator(".handwriting-ink-canvas")).toHaveAttribute("aria-label","Handwriting practice");
