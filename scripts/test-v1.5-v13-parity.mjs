@@ -9,5 +9,5 @@ assert.match(p0,/function enhanceRecall\(\)/);assert.match(ui,/renderChoices\(ch
 for(const file of ['v1.3-production-ui.js','v1.3-education-v2.js','v1.3-dont-know.js','v1.3-smart-distractors.js','scripts/apply-smart-distractors.mjs','v1.5-education-choice-enforcer.js','app-bootstrap-v115.js','tmp.md'])assert.equal(fs.existsSync(file),false,`Dead/redundant file remains: ${file}`);
 for(const dead of ['./v1.3-perf.js','./v1.3-settings.js','./v1.8-learning-ux.js','./v1.9-recovery-ui.js'])assert.equal(sw.includes(`"${dead}"`),false,`${dead} remains in sw`);
 assert.match(sw,/const CACHE='kanji5-shell-v[0-9A-Za-z._-]+'/);assert.match(sw,/"\.\/v1\.5-state\.js"/);assert.match(sw,/"\.\/v1\.5-education-ui\.js"/);assert(fs.existsSync('scripts/build-kanji-data.mjs'));assert(build.includes('kanji-data.json'));assert.ok(sync.includes('MAX_SYNC_ATTEMPTS'));assert.ok(syncCore.includes('mergeReviewEvents'));assert.ok(educationSyncCore.includes('byDevice'));assert.ok(core.includes('chooseDistractors'));
-for(const source of [runtime,sw,core,ui,p0,production,vocabulary,context,boundary])new vm.Script(source.replace(/\\bexport\\s+/g,''));
+for(const source of [runtime,sw,core,ui,p0,production,vocabulary,context,boundary])new vm.Script(source.replace(/\bexport\s+/g,''));
 console.log('Kanji 5 startup parity and legacy-boundary checks passed.');
