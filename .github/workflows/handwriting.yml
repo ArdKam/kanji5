@@ -52,6 +52,8 @@ jobs:
         run: npm run build
       - name: Install root test dependencies
         run: npm ci
+      - name: Run complete repository test suite
+        run: npm test
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Run handwriting vector calibration
