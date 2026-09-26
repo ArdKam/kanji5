@@ -3,7 +3,7 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StructureExplorer } from "./StructureExplorer";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getMnemonic, getRadicalInfo, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type RadicalInfo, type VocabularyItem } from "./engine";
+import { getComponentInfo, getKanjiByComponent, getKanjiByRadical, getMnemonic, getRadicalInfo, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type KanjiDictionaryResult, type RadicalInfo, type VocabularyItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
@@ -580,9 +580,18 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
   const [customFocus, setCustomFocus] = useState<CustomStudyFilter["focus"]>("available");
   const [customLimit, setCustomLimit] = useState(20);
   const [customMessage, setCustomMessage] = useState("");
-  const [structureRequest, setStructureRequest] = useState<{ mode: "radical" | "component"; query: string; nonce: number } | null>(null);
-  const openStructureExplorer = (mode: "radical" | "component", query: string) => {
-    setStructureRequest(previous => ({ mode, query, nonce: (previous?.nonce ?? 0) + 1 }));
+  const [structureRequest, setStructureRequest] = useState<{ mode: "radical" | "component"; query: string; nonce: number; prefetchedResults?: KanjiDictionaryResult[] } | null>(null);
+  const openStructureExplorer = async (mode: "radical" | "component", query: string) => {
+    try {
+      const value = mode === "component"
+        ? await getKanjiByComponent(query, true, 80)
+        : await getKanjiByRadical(Number(query), 80);
+      setSelected(null);
+      setStructureRequest(previous => ({ mode, query, nonce: (previous?.nonce ?? 0) + 1, prefetchedResults: value.results ?? [] }));
+    } catch {
+      setSelected(null);
+      setStructureRequest(previous => ({ mode, query, nonce: (previous?.nonce ?? 0) + 1 }));
+    }
   };
 
   useEffect(() => {
@@ -782,7 +791,7 @@ export function DictionaryPage({ language, onStartCustomStudy }: { language: Lan
         </>
       ) : null}
 
-      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} onExploreStructure={(mode, query) => { setSelected(null); openStructureExplorer(mode, query); }} /> : null}
+      {selected ? <DictionaryKanjiCard item={selected} catalog={catalog} language={language} onClose={() => setSelected(null)} onSelectKanji={setSelected} onExploreStructure={(mode, query) => { void openStructureExplorer(mode, query); }} /> : null}
     </section>
   );
 }
