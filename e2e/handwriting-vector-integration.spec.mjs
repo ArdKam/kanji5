@@ -72,7 +72,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await canvas.dispatchEvent("pointermove",{pointerId:73,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:penX+12,clientY:penY+8});
   await canvas.dispatchEvent("pointerup",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:penX+12,clientY:penY+8});
   await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
-  await handwriting.locator(".handwriting-actions .secondary").click();
+  await handwriting.getByRole("button",{name:"پاک کردن",exact:true}).click();
 
   const reference=await page.evaluate(paths=>{
     const holder=document.createElement("div"),svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
