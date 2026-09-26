@@ -45,6 +45,8 @@ jobs:
 
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
+      - name: Verify Mnemonic support is present in shipped React artifact
+        run: node -e "const fs=require('fs'); const js=fs.readFileSync('react-dist/kanji5-react.js','utf8'); if(!js.includes('mnemonic-support') || !js.includes('mnemonic-prepared')) process.exit(1); console.log('Mnemonic support is present in the shipped React bundle.');"
 
       - name: Install root test dependencies
         run: npm ci
