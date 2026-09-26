@@ -19,11 +19,11 @@ let reactStylesheet=document.querySelector('link[data-kanji5-react-styles]');
 if(!reactStylesheet){
   reactStylesheet=document.createElement('link');
   reactStylesheet.rel='stylesheet';
-  reactStylesheet.href='./react-dist/kanji5-react.css?v=20260926-release15';
+  reactStylesheet.href='./react-dist/kanji5-react.css?v=20260926-release16';
   reactStylesheet.dataset.kanji5React='true';
   document.head.appendChild(reactStylesheet);
 }
-import('./react-dist/kanji5-react.js?v=20260926-release15')
+import('./react-dist/kanji5-react.js?v=20260926-release16')
   .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 
 function mountAccountFallback(){
