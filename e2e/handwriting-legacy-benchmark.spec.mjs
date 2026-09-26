@@ -48,7 +48,7 @@ async function readStrokes(page, codePointHex) {
   }, svgText);
 }
 
-async function legacyScore(page, target, user) {
+async function legacyScore(page, target, user, userLineWidth = 8) {
   return page.evaluate(({ target, user }) => {
     const size = 220;
     const targetCanvas = document.createElement("canvas");
@@ -70,7 +70,7 @@ async function legacyScore(page, target, user) {
     userCtx.save();
     userCtx.scale(scale, scale);
     userCtx.strokeStyle = "#1c1a17";
-    userCtx.lineWidth = 8;
+    userCtx.lineWidth = userLineWidth;
     userCtx.lineCap = "round";
     userCtx.lineJoin = "round";
     for (const stroke of user) {
@@ -138,6 +138,18 @@ test("legacy handwriting grader baseline exposes the current scoring defects", a
     gakuen,
     ko.map(stroke => ({ points: stroke.points })),
   );
+  const thinUser = await legacyScore(
+    page,
+    gakuen,
+    gakuen.map(stroke => ({ points: stroke.points })),
+    4,
+  );
+  const thickUser = await legacyScore(
+    page,
+    gakuen,
+    gakuen.map(stroke => ({ points: stroke.points })),
+    16,
+  );
 
   console.log(JSON.stringify({
     grader: "legacy-v1",
@@ -146,6 +158,8 @@ test("legacy handwriting grader baseline exposes the current scoring defects", a
     reversedStrokeOrder: reversedOrder,
     missingLastStroke: missingStroke,
     unrelatedKanjiTrace: wrongKanji,
+    thinReferenceTrace: thinUser,
+    thickReferenceTrace: thickUser,
   }, null, 2));
 
   expect(perfect).toBeLessThan(80);
