@@ -690,6 +690,10 @@
   display:grid;
   gap:6px;
 }
+.component-learning-path-node{display:grid;gap:5px;min-width:0}
+.component-learning-path-children{display:grid;gap:5px;margin-inline-start:14px;padding-inline-start:9px;border-inline-start:2px solid color-mix(in srgb,var(--line) 80%,transparent)}
+.component-learning-path-node.depth-1 .component-learning-path-item{background:color-mix(in srgb,var(--paper) 82%,var(--washi))}
+.component-learning-path-node.depth-2 .component-learning-path-item{background:color-mix(in srgb,var(--paper) 68%,var(--washi))}
 .component-learning-path-item{
   display:flex;
   align-items:center;
