@@ -274,6 +274,14 @@ export function HandwritingPractice({ character, language }: { character: string
     redrawCanvas();
   };
 
+  const cancelStroke = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (drawingPointerIdRef.current !== event.pointerId) return;
+    currentStrokeRef.current = [];
+    drawingPointerIdRef.current = null;
+    try { event.currentTarget.releasePointerCapture(event.pointerId); } catch {}
+    redrawCanvas();
+  };
+
   const clear = () => {
     strokesRef.current = [];
     currentStrokeRef.current = [];
@@ -319,7 +327,7 @@ export function HandwritingPractice({ character, language }: { character: string
                   onPointerDown={startStroke}
                   onPointerMove={moveStroke}
                   onPointerUp={finishStroke}
-                  onPointerCancel={finishStroke}
+                  onPointerCancel={cancelStroke}
                 />
               </div>
               <div className="handwriting-actions">
