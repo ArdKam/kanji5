@@ -1219,6 +1219,53 @@ const ENRICHED_PREPARED_MNEMONICS_6 = Object.freeze({
   ]
 });
 
+const ENRICHED_PREPARED_MNEMONICS_7 = Object.freeze({
+  "休": [{ fa: "یک نفر 人 زیر درخت 木 نشسته؛ خستگی‌اش را همان‌جا زمین گذاشته و استراحت می‌کند.", en: "A person 人 sits under a tree 木; they drop their fatigue there and rest.", source: "curated" }],
+  "暗": [{ fa: "خورشید 日 پشت 音 پنهان شده؛ نور قطع شده و فضا تاریک است.", en: "The sun 日 is hidden behind 音; the light is blocked and the scene turns dark.", source: "curated" }],
+  "晴": [{ fa: "خورشید 日 بعد از باران 青 بیرون آمده؛ آسمان صاف و هوا آفتابی است.", en: "The sun 日 comes out after 青's rain-soaked scene; the sky clears and the weather is sunny.", source: "curated" }],
+  "夜": [{ fa: "یک آدم 人 زیر سقف 亠، در تاریکی شب قدم می‌زند؛ شب را با سکوتش به خاطر بسپار.", en: "A person 人 walks under 亠 in the dark; remember night as that quiet scene.", source: "curated" }],
+  "春": [{ fa: "خورشید 日 روی جوانه‌ها و گیاهان تازه می‌تابد؛ همه‌چیز دوباره زنده شده است.", en: "The sun 日 shines on fresh sprouts and plants; everything has come alive again.", source: "curated" }],
+  "夏": [{ fa: "آدمی در گرمای شدید زیر آفتاب عرق می‌کند؛ تابستان را به گرمای چسبناک گره بزن.", en: "A person sweats under fierce sunlight; tie summer to that sticky heat.", source: "curated" }],
+  "秋": [{ fa: "غلهٔ 禾 در باد تکان می‌خورد و محصول رسیده آمادهٔ برداشت است؛ پاییز آمده.", en: "Grain 禾 sways in the wind, ripe and ready to harvest; autumn has arrived.", source: "curated" }],
+  "冬": [{ fa: "در پایان فصل، یک تکه یخ و قطرهٔ آب جمع شده‌اند؛ سرمای زمستان را حس کن.", en: "At the season's end, ice and frozen drops gather; feel the cold of winter.", source: "curated" }],
+  "空": [{ fa: "زیر سقف 穴، چیزی نیست؛ فضای خالی و باز باقی مانده است.", en: "Under the roof-like 穴, nothing remains; only empty open space is left.", source: "curated" }],
+  "湖": [{ fa: "آب 氵 دور یک خانهٔ قدیمی قرار گرفته؛ یک پهنهٔ آرام آب، دریاچه است.", en: "Water 氵 surrounds an old home-like structure; a calm body of water is a lake.", source: "curated" }],
+  "池": [{ fa: "آب 氵 کنار چیزی که خزیده است؛ یک گودال آب کوچک کنار زمین شکل گرفته.", en: "Water 氵 beside something crawling; a small pool has formed beside the ground.", source: "curated" }],
+  "波": [{ fa: "آب 氵 با پوست/سطحی که بالا و پایین می‌رود برخورد می‌کند؛ موج‌ها روی آب می‌دوند.", en: "Water 氵 meets a rising-and-falling surface; waves run across the water.", source: "curated" }],
+  "洗": [{ fa: "آب 氵 روی پا 先 ریخته می‌شود؛ پا را می‌شویی تا تمیز شود.", en: "Water 氵 is poured over the foot 先; you wash it until it is clean.", source: "curated" }],
+  "温": [{ fa: "آب 氵 در ظرفی گرم نگه داشته شده؛ نه سرد است نه داغ، بلکه گرم است.", en: "Water 氵 is kept warm in a container; it is neither cold nor hot, but warm.", source: "curated" }],
+  "電": [{ fa: "باران 雨 بالای یک وسیلهٔ برق‌دار می‌بارد؛ جرقه‌ها برق را تداعی می‌کنند.", en: "Rain 雨 falls over an electrical device; the sparks evoke electricity.", source: "curated" }],
+  "雲": [{ fa: "بخار و آب زیر باران جمع شده‌اند و توده‌ای در آسمان ساخته‌اند؛ ابر را ببین.", en: "Water vapor gathers under the rain and forms a mass in the sky; see a cloud.", source: "curated" }],
+  "雪": [{ fa: "باران 雨 به‌جای قطره، دانه‌های سفید می‌ریزد؛ برف همه‌جا را می‌پوشاند.", en: "Rain 雨 falls as white flakes instead of drops; snow covers everything.", source: "curated" }],
+  "風": [{ fa: "چیزی در قاب 風 می‌چرخد و هوا را به حرکت می‌اندازد؛ باد را مثل یک نیروی نامرئی تصور کن.", en: "Something spins within 風 and sets the air moving; picture wind as an invisible force.", source: "curated" }],
+  "花": [{ fa: "گیاه 艹 باز می‌شود و شکل زیبایی پیدا می‌کند؛ یک گل تازه شکفته را ببین.", en: "The plant 艹 opens into a beautiful form; picture a fresh flower blooming.", source: "curated" }],
+  "草": [{ fa: "گیاه 艹 از صبح تا شب روی زمین رشد می‌کند؛ علف‌ها همه‌جا را می‌گیرند.", en: "Plants 艹 grow across the ground from morning to night; grass takes over the field.", source: "curated" }],
+  "林": [{ fa: "دو درخت 木 کنار هم؛ وقتی درخت‌ها جمع می‌شوند، یک بیشه شکل می‌گیرد.", en: "Two trees 木 stand together; when trees gather, a grove appears.", source: "curated" }],
+  "森": [{ fa: "سه درخت 木 پشت سر هم؛ این‌بار بیشه آن‌قدر بزرگ است که جنگل شده.", en: "Three trees 木 stand together; now the grove is large enough to be a forest.", source: "curated" }],
+  "石": [{ fa: "یک سنگ بزرگ زیر دهانهٔ صخره نشسته؛ سخت و سنگین، مثل خودِ 石.", en: "A large stone sits beneath a rocky opening; hard and heavy, just like 石.", source: "curated" }],
+  "鉄": [{ fa: "فلز 金 را کنار تکه‌ای سیاه و سخت تصور کن؛ آهنِ سنگین و صنعتی را ببین.", en: "Put metal 金 beside a dark, hard lump; picture heavy industrial iron.", source: "curated" }],
+  "銀": [{ fa: "فلز 金 با درخششی سرد و نقره‌ای برق می‌زند؛ یک تکه نقره را در دست بگیر.", en: "Metal 金 flashes with a cool silver shine; hold a piece of silver in your hand.", source: "curated" }],
+  "遠": [{ fa: "یک مسیر 辶 آن‌قدر ادامه دارد که مقصد محو می‌شود؛ راه دور است.", en: "A path 辶 keeps going until the destination fades away; the distance is far.", source: "curated" }],
+  "駅": [{ fa: "یک وسیلهٔ نقلیه کنار جایگاه مخصوصش ایستاده؛ جایی که قطار می‌ایستد، ایستگاه است.", en: "A vehicle waits at its designated place; where the train stops is a station.", source: "curated" }],
+  "店": [{ fa: "زیر پناهگاه 广، چیزی برای فروش چیده شده؛ وارد مغازه شو.", en: "Under a shelter 广, goods are arranged for sale; step into the shop.", source: "curated" }],
+  "館": [{ fa: "ساختمانی بزرگ با غذا و اتاق‌های مختلف؛ مردم وارد یک بنا برای ماندن یا استفاده می‌شوند.", en: "A large building with food and rooms; people enter a place meant for staying or use.", source: "curated" }],
+  "室": [{ fa: "یک سقف 宀 بالای فضایی بسته؛ اتاقی امن و مشخص برای خودت ساخته‌ای.", en: "A roof 宀 sits over an enclosed space; you have made a defined room for yourself.", source: "curated" }],
+  "庭": [{ fa: "در حیاط زیر پناهگاه 广، زمین باز برای ایستادن و قدم‌زدن داری.", en: "In a yard under 广, there is open ground for standing and walking.", source: "curated" }],
+  "門": [{ fa: "دو لنگهٔ دروازه کنار هم ایستاده‌اند؛ خودِ شکل، یک دروازهٔ بزرگ است.", en: "Two gate leaves stand side by side; the shape itself is a large gate.", source: "curated" }],
+  "閉": [{ fa: "دو لنگهٔ 門 بسته شده‌اند و چیزی بینشان راه ندارد؛ در کاملاً بسته است.", en: "The two leaves of 門 are shut with no way through; the gate is closed.", source: "curated" }],
+  "買": [{ fa: "یک شبکهٔ چشم‌گیر با 貝 جلوی توست؛ پول می‌دهی و چیزی را می‌خری.", en: "A display with shell-money 貝 is in front of you; you pay and buy something.", source: "curated" }],
+  "食": [{ fa: "سقف و ظرف غذا جلوی آدم است؛ چیزی را بردار و بخور.", en: "A roof-like cover and a meal are before a person; pick it up and eat.", source: "curated" }],
+  "飲": [{ fa: "دهان 口 دنبال یک نوشیدنی است و خم می‌شود تا آن را بنوشد.", en: "The mouth 口 leans toward a drink; it is ready to drink.", source: "curated" }],
+  "飯": [{ fa: "غذا در کنار ظرف و دست آماده است؛ برنج و غذای پخته برای خوردن روی میز است.", en: "Food is set beside a bowl and hand; cooked rice and a meal are ready on the table.", source: "curated" }],
+  "読": [{ fa: "گفتار 言 روی صفحهٔ کتاب دنبال می‌شود؛ چشم‌ها خط‌به‌خط می‌خوانند.", en: "Speech 言 is followed across a page; the eyes read it line by line.", source: "curated" }],
+  "聞": [{ fa: "گوش 耳 پشت دروازه 門 ایستاده و صدا را می‌شنود؛ گوش دادن یعنی از پشت در گوش بدهی.", en: "An ear 耳 waits at a 門 gate and hears a sound; listening means hearing through the gate.", source: "curated" }],
+  "忘": [{ fa: "قلب 心 چیزی را رها می‌کند و از ذهن می‌رود؛ همان لحظه‌ای که فراموش می‌کنی.", en: "The heart 心 lets something slip away and it leaves the mind; that is forgetting.", source: "curated" }],
+  "楽": [{ fa: "درخت 木 و ابزارهای موسیقی کنار هم‌اند؛ صدایی می‌سازی که لذت می‌دهد.", en: "A tree 木 and musical instruments stand together; you make a sound that brings pleasure.", source: "curated" }],
+  "歌": [{ fa: "دهان 口 باز می‌شود و صدا بالا می‌رود؛ یک آهنگ را با صدایت می‌خوانی.", en: "The mouth 口 opens and the voice rises; you sing a song with your voice.", source: "curated" }],
+  "音": [{ fa: "چیزی بالای 日 قرار گرفته و صدایش شنیده می‌شود؛ یک صدای مشخص در فضا می‌پیچد.", en: "Something sits above 日 and produces sound; a distinct sound rings through the space.", source: "curated" }],
+  "声": [{ fa: "صدایی از یک دهان یا منبع بیرون می‌آید؛ آن را بگیر و به آواز یا صدا وصل کن.", en: "A sound comes from a mouth or source; catch it and connect it with a voice.", source: "curated" }]
+});
+
 export const CURATED_PREPARED_MNEMONICS = Object.freeze({
   ...BASE_CURATED_PREPARED_MNEMONICS,
   ...ENRICHED_PREPARED_MNEMONICS_1,
@@ -1227,6 +1274,7 @@ export const CURATED_PREPARED_MNEMONICS = Object.freeze({
   ...ENRICHED_PREPARED_MNEMONICS_4,
   ...ENRICHED_PREPARED_MNEMONICS_5,
   ...ENRICHED_PREPARED_MNEMONICS_6,
+  ...ENRICHED_PREPARED_MNEMONICS_7,
 });
 
 const FA_SCENE_CUES = /(?:تصور|ببین|داخل|کنار|روبه|ایستاده|می‌بینی|می‌زنی|می‌گذاری|می‌کنی|می‌شود|جمع|حرکت|می‌رود|می‌رسد|می‌گیرد|می‌شمارد|می‌پیچی|می‌شنوی|بساز|نگه|هل|باز|بسته|پرتاب|ضربه|بررسی|صف|میز|دست|می‌چسبانی|می‌دوانی|می‌کشی|شکل|مثل|خط|خورشید|ماه|آتش|آب|درخت|تپه|کوه|رود|مزرعه|دهان|چشم|گوش|پا|آدم|کودک|زن|مرد|جوانه|سقف|دروازه|تبر|نخ|جواهر|برنج)/;
