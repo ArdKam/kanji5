@@ -21,7 +21,7 @@
     "name": "anzumura/kanji-tools",
     "radicalsFile": {
       "path": "data/radicals.txt",
-      "commit": "b1b9d16ef3f11c737578706633bc7cfc6e41d6f0"
+      "commit": "7f00ff21f80e479fc74c26fdaf084764df09587d"
     },
     "joyoFile": {
       "path": "data/jouyou.txt",
