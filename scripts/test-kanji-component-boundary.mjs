@@ -23,7 +23,7 @@ const sandbox = {
     __KANJI5_STATE__: {
       readDeck() {
         return [
-          {id:"学",character:"学",meaning:["study","learning"],on:["ガク"],kun:["まな.ぶ"],strokes:8,grade:1,jlpt:"N5",frequency:100,order:100},
+          {id:"学",character:"学",meaning:["study","learning"],on:["ガク"],kun:["まな.ぶ"],strokes:8,grade:1,jlpt:"N5",frequency:100,order:100,radical:{classical:39,nelson:null}},
           {id:"校",character:"校",meaning:["school"],on:["コウ"],kun:[],strokes:10,grade:1,jlpt:"N5",frequency:110,order:110},
           {id:"語",character:"語",meaning:["word","language"],on:["ゴ"],kun:["かた.る"],strokes:14,grade:2,jlpt:"N4",frequency:120,order:120}
         ];
@@ -41,12 +41,17 @@ const sandbox = {
     }
   },
   setTimeout() {},
-  fetch: async () => {
+  fetch: async (url) => {
     fetchCount += 1;
+    const radicalUrl=String(url||"").includes("kanji-radicals.json");
     return {
       ok: true,
       async json() {
-        return fixture;
+        return radicalUrl
+          ? {version:1,schema:"kanji-radicals/v1",system:"Kangxi",count:214,source:{name:"Unicode Kangxi Radicals"},radicals:[
+              {id:39,glyph:"⼦",unicode:"U+2F26",unicodeName:"KANGXI RADICAL CHILD",names:{en:[],ja:[],fa:[]},variants:[],strokeCount:3}
+            ]}
+          : fixture;
       }
     };
   }
@@ -55,7 +60,7 @@ const sandbox = {
 vm.runInNewContext(boundarySource, sandbox, { filename: "v1.9-v2-boundary.js" });
 
 const api = sandbox.window.__KANJI5_V19_V2_BOUNDARY__;
-if (!api?.getComponentInfo) throw new Error("Component boundary API was not published");
+if (!api?.getComponentInfo || !api?.getRadicalInfo) throw new Error("Component/radical boundary API was not published");
 
 const [known, missing] = await Promise.all([
   api.getComponentInfo("語"),
@@ -71,6 +76,10 @@ if (!missing.sourceGap || missing.available || missing.components.length !== 0) 
 }
 if (known.coverage?.available !== 2100 || known.coverage?.total !== 2136) {
   throw new Error("Coverage metadata was not preserved");
+}
+const radical=await api.getRadicalInfo("学");
+if (!radical.available || radical.radical?.id !== 39 || radical.radical?.glyph !== "⼦") {
+  throw new Error(`Canonical radical lookup failed: ${JSON.stringify(radical)}`);
 }
 
 const exact=await api.searchKanji("学");
