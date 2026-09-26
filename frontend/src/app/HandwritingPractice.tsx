@@ -192,17 +192,20 @@ export function HandwritingPractice({ character, language }: { character: string
     y: ((clientY - rect.top) / Math.max(1, rect.height)) * CANVAS_COORDINATE_SIZE,
   }), []);
 
-  const appendPointerPoints = useCallback((event: PointerEvent<HTMLCanvasElement>) => {
+  const appendPointerPoints = useCallback((event: PointerEvent<HTMLCanvasElement>): HandwritingPoint[] => {
     const nativeEvent = event.nativeEvent as globalThis.PointerEvent;
     const coalesced = typeof nativeEvent.getCoalescedEvents === "function" ? nativeEvent.getCoalescedEvents() : [];
     const events = coalesced.length ? [...coalesced, nativeEvent] : [nativeEvent];
     const rect = event.currentTarget.getBoundingClientRect();
     const points = events.map(point => pointFromClient(point.clientX, point.clientY, rect));
+    const appended: HandwritingPoint[] = [];
     for (const point of points) {
       const previous = currentStrokeRef.current.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) < 0.25) continue;
       currentStrokeRef.current.push(point);
+      appended.push(point);
     }
+    return appended;
   }, [pointFromClient]);
 
   const startStroke = (event: PointerEvent<HTMLCanvasElement>) => {
@@ -218,16 +221,16 @@ export function HandwritingPractice({ character, language }: { character: string
   const moveStroke = (event: PointerEvent<HTMLCanvasElement>) => {
     if (drawingPointerIdRef.current !== event.pointerId || !currentStrokeRef.current.length) return;
     const previous = currentStrokeRef.current.at(-1);
-    appendPointerPoints(event);
-    const next = currentStrokeRef.current.at(-1);
-    if (!previous || !next || previous === next) return;
+    const appended = appendPointerPoints(event);
+    if (!previous || !appended.length) return;
 
-    const ctx = event.currentTarget.getContext("2d");
+    const canvas = event.currentTarget;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const rect = event.currentTarget.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     const size = Math.max(1, rect.width);
     const scale = size / CANVAS_COORDINATE_SIZE;
-    const ratio = event.currentTarget.width / Math.max(1, size);
+    const ratio = canvas.width / Math.max(1, size);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.save();
     ctx.scale(scale, scale);
@@ -236,8 +239,13 @@ export function HandwritingPractice({ character, language }: { character: string
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.beginPath();
-    ctx.moveTo(previous.x, previous.y);
-    ctx.lineTo(next.x, next.y);
+    let from = previous;
+    for (const point of appended) {
+      if (from.x === point.x && from.y === point.y) continue;
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(point.x, point.y);
+      from = point;
+    }
     ctx.stroke();
     ctx.restore();
   };
