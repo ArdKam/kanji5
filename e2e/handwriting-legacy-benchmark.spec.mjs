@@ -116,8 +116,16 @@ test("legacy handwriting grader exposes the current scoring defects",async({page
   const thin=await thickness(4),thick=await thickness(16);
 
   console.log(JSON.stringify({grader:"legacy-v1",character:"学",perfect,translated,scaled,reversedOrder,missing,extra,wrongShape,wrongKanji,thin,thick},null,2));
-  expect(perfect).toBeLessThan(80);
-  expect(reversedOrder).toBe(perfect);
-  expect(missing).toBeLessThan(perfect);
-  expect(extra).toBeLessThan(perfect);
+  expect({perfect,translated,scaled,reversedOrder,missing,extra,wrongShape,wrongKanji,thin,thick}).toEqual({
+    perfect:52,
+    translated:50,
+    scaled:56,
+    reversedOrder:52,
+    missing:50,
+    extra:49,
+    wrongShape:51,
+    wrongKanji:17,
+    thin:55,
+    thick:43,
+  });
 });
