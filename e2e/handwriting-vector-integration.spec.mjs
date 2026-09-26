@@ -80,13 +80,13 @@ test("real KanjiVG trace reaches the React handwriting grader", async ({ page })
   await dialog.getByRole("button", { name: "ارزیابی دست‌خط" }).click();
   const result = dialog.locator(".handwriting-result");
   await expect(result).toBeVisible();
-  const perfectScore = Number((await result.locator("strong").textContent()).replace(/\D/g, ""));
+  const perfectScore = Number(await result.getAttribute("data-score"));
   expect(perfectScore).toBeGreaterThanOrEqual(94);
 
   await dialog.getByRole("button", { name: "پاک کردن" }).click();
   await drawStrokes(page, canvas, strokes, [...strokes].reverse());
   await dialog.getByRole("button", { name: "ارزیابی دست‌خط" }).click();
-  const reversedScore = Number((await result.locator("strong").textContent()).replace(/\D/g, ""));
+  const reversedScore = Number(await result.getAttribute("data-score"));
   expect(reversedScore).toBeLessThan(perfectScore - 20);
   await expect(result).toHaveAttribute("role", "status");
 });
