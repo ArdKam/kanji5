@@ -30,6 +30,9 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
     const related = [...new Set(Array.from(item.word).filter(char => char !== kanjiCharacter && catalogByCharacter.has(char)))].slice(0, 5);
     return { ...item, related };
   }), [catalogByCharacter, items, kanjiCharacter]);
+  const visibleItems = showAllExamples ? items : items.slice(0, 3);
+  const graphEdges = vocabularyEdges.filter(edge => edge.related.length);
+  const visibleGraphEdges = showAllGraph ? graphEdges : graphEdges.slice(0, 3);
 
   return (
     <section className="dictionary-vocabulary" aria-label={t("dictionaryVocabulary", language)}>
@@ -54,7 +57,12 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
               </div>
             ))}
           </div>
-          {items.length > 3 ? (\n            <button className="dictionary-vocabulary-more" type="button" onClick={() => setShowAllExamples(current => !current)} aria-expanded={showAllExamples}>\n              {showAllExamples ? (language === "fa" ? "نمایش کمتر" : "Show less") : (language === "fa" ? `نمایش همهٔ نمونه‌ها (${items.length})` : `Show all examples (${items.length})`)}\n            </button>\n          ) : null}\n          {graphEdges.length ? (
+          {items.length > 3 ? (
+            <button className="dictionary-vocabulary-more" type="button" onClick={() => setShowAllExamples(current => !current)} aria-expanded={showAllExamples}>
+              {showAllExamples ? (language === "fa" ? "نمایش کمتر" : "Show less") : (language === "fa" ? `نمایش همهٔ نمونه‌ها (${items.length})` : `Show all examples (${items.length})`)}
+            </button>
+          ) : null}
+          {graphEdges.length ? (
             <section className="vocabulary-learning-graph" aria-label={t("vocabularyLearningGraph", language)}>
               <div className="vocabulary-learning-graph-header">
                 <div>
@@ -88,6 +96,11 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
                   </div>
                 ))}
               </div>
+              {graphEdges.length > 3 ? (
+                <button className="dictionary-vocabulary-more" type="button" onClick={() => setShowAllGraph(current => !current)} aria-expanded={showAllGraph}>
+                  {showAllGraph ? (language === "fa" ? "نمایش کمتر" : "Show less") : (language === "fa" ? `نمایش شبکهٔ کامل (${graphEdges.length})` : `Show full vocabulary network (${graphEdges.length})`)}
+                </button>
+              ) : null}
             </section>
           ) : null}
         </>
