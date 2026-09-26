@@ -27,10 +27,13 @@ assert.equal(entries.length, 2136, "Prepared mnemonic library must expose every 
 assert.equal(new Set(entries.map(entry => entry.character)).size, 2136, "Prepared mnemonic library contains duplicate characters");
 
 const coverage = core.preparedMnemonicCoverage(catalog);
-assert.ok(Math.abs(coverage.coverage - (259 / 2136)) < 1e-12, `Coverage ratio must be curated/total; got ${coverage.coverage}`);\nassert.deepEqual({ total: coverage.total, curated: coverage.curated, generated: coverage.generated }, { total: 2136, curated: 259, generated: 1877 });
+assert.ok(Math.abs(coverage.coverage - (259 / 2136)) < 1e-12, `Coverage ratio must be curated/total; got ${coverage.coverage}`);
+assert.deepEqual({ total: coverage.total, curated: coverage.curated, generated: coverage.generated }, { total: 2136, curated: 259, generated: 1877 });
 
 const quality = core.preparedMnemonicQualityReport(catalog);
-assert.equal(quality.generatedSceneV2, 1877, "Every non-curated Jōyō kanji must use the scene-v2 fallback");\nassert.equal(quality.generatedGenericTemplateLeaks, 0, "Scene-v2 fallbacks must not use the retired generic templates");\nassert.equal(quality.criticalFailures, 0, "Curated mnemonics must satisfy the core validity contract");
+assert.equal(quality.generatedSceneV2, 1877, "Every non-curated Jōyō kanji must use the scene-v2 fallback");
+assert.equal(quality.generatedGenericTemplateLeaks, 0, "Scene-v2 fallbacks must not use the retired generic templates");
+assert.equal(quality.criticalFailures, 0, "Curated mnemonics must satisfy the core validity contract");
 assert.equal(quality.genericTemplateLeaks, 0, "Curated mnemonics must not fall back to generic templates");
 assert.ok(quality.concreteAnchorFaRate >= 0.8, `At least 80% of curated Persian mnemonics should contain a concrete anchor; got ${quality.concreteAnchorFaRate}`);
 assert.ok(quality.concreteAnchorEnRate >= 0.9, `At least 90% of curated English mnemonics should contain a concrete anchor; got ${quality.concreteAnchorEnRate}`);
@@ -40,7 +43,12 @@ assert.ok(quality.actionSceneEnRate >= 0.25, `Curated English mnemonics should c
 
 const generatedTarget = catalog.find(item => !core.CURATED_PREPARED_MNEMONICS[item.character]);
 assert.ok(generatedTarget, "At least one Jōyō kanji must remain on generated fallback coverage");
-const generatedSample = core.buildPreparedMnemonic(generatedTarget, ["木", "氵"]);\nassert.equal(generatedSample.source, "generated");\nassert.equal(generatedSample.generationStrategy, "scene-v2");\nassert.doesNotMatch(generatedSample.fa, /یک تصویر واحد از/);\nassert.doesNotMatch(generatedSample.en, /Picture the visual anchors/);\nassert.match(generatedSample.fa, /درخت|آب|جزء/);
+const generatedSample = core.buildPreparedMnemonic(generatedTarget, ["木", "氵"]);
+assert.equal(generatedSample.source, "generated");
+assert.equal(generatedSample.generationStrategy, "scene-v2");
+assert.doesNotMatch(generatedSample.fa, /یک تصویر واحد از/);
+assert.doesNotMatch(generatedSample.en, /Picture the visual anchors/);
+assert.match(generatedSample.fa, /درخت|آب|جزء/);
 
 for (const character of Object.keys(core.CURATED_PREPARED_MNEMONICS)) {
   const entry = core.CURATED_PREPARED_MNEMONICS[character]?.[0];
@@ -50,7 +58,17 @@ for (const character of Object.keys(core.CURATED_PREPARED_MNEMONICS)) {
   assert.doesNotMatch(entry.en, /Picture the visual anchors/);
 }
 
-const scorerCases = [\n  { entry: { fa: "یک صحنهٔ واقعی با درخت که حرکت می‌کند.", en: "A real scene with a tree that moves.", source: "curated" }, expected: { valid: true, minLength: true, concreteAnchorFa: true, concreteAnchorEn: true, actionSceneFa: true, actionSceneEn: true, genericTemplate: false } },\n  { entry: { fa: "یک تصویر واحد از «木» بساز.", en: "Picture the visual anchors 木.", source: "generated" }, expected: { genericTemplate: true } },\n  { entry: { fa: "کوتاه", en: "short", source: "curated" }, expected: { minLength: false } }\n];\nfor (const testCase of scorerCases) {\n  const score = core.scorePreparedMnemonic(testCase.entry, "木", ["木"]);\n  for (const [key, value] of Object.entries(testCase.expected)) assert.equal(score[key], value, `Scorer regression for ${key}`);\n}\n\nconsole.log("Curated enrichment contract: PASS (259 curated; 220 new high-frequency enrichments)");
+const scorerCases = [
+  { entry: { fa: "یک صحنهٔ واقعی با درخت که حرکت می‌کند.", en: "A real scene with a tree that moves.", source: "curated" }, expected: { valid: true, minLength: true, concreteAnchorFa: true, concreteAnchorEn: true, actionSceneFa: true, actionSceneEn: true, genericTemplate: false } },
+  { entry: { fa: "یک تصویر واحد از «木» بساز.", en: "Picture the visual anchors 木.", source: "generated" }, expected: { genericTemplate: true } },
+  { entry: { fa: "کوتاه", en: "short", source: "curated" }, expected: { minLength: false } }
+];
+for (const testCase of scorerCases) {
+  const score = core.scorePreparedMnemonic(testCase.entry, "木", ["木"]);
+  for (const [key, value] of Object.entries(testCase.expected)) assert.equal(score[key], value, `Scorer regression for ${key}`);
+}
+
+console.log("Curated enrichment contract: PASS (259 curated; 220 new high-frequency enrichments)");
 console.log(`Mnemonic quality gate: PASS (${quality.concreteAnchorFa}/${quality.curated} fa concrete anchors; ${quality.concreteAnchorEn}/${quality.curated} en concrete anchors; ${quality.actionSceneFa}/${quality.curated} fa action scenes; ${quality.actionSceneEn}/${quality.curated} en action scenes)`);
 
 console.log("Prepared mnemonic coverage: PASS (2136/2136; 259 curated + 1877 generated fallbacks)");
