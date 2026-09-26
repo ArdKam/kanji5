@@ -75,11 +75,25 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
   },[revealed]);
   useEffect(()=>{
     let active=true;
-    if(!revealed||!card.character){setComponentInfo(null);return ()=>{active=false};}
+    if(!revealed||!card.character){
+      setComponentInfo(null);
+      setPreparedMnemonic(null);
+      return ()=>{active=false};
+    }
     setComponentInfo(null);
-    void getComponentInfo(card.character).then(info=>{if(active)setComponentInfo(info)}).catch(()=>{if(active)setComponentInfo(null)});
+    setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
+    void getComponentInfo(card.character).then(info=>{
+      if(!active)return;
+      setComponentInfo(info);
+      setPreparedMnemonic(buildPreparedMnemonic(
+        {character:card.character,meanings:card.meanings??[]},
+        info.components??[]
+      ));
+    }).catch(()=>{
+      if(active)setComponentInfo(null);
+    });
     return ()=>{active=false};
-  },[revealed,card.character]);
+  },[revealed,card.character,card.meanings]);
   const mnemonicToolRef=useRef<HTMLElement|null>(null);
   const scrollMnemonicEditorIntoView=useCallback(()=>{
     const target=mnemonicToolRef.current;
@@ -107,31 +121,20 @@ function Learning({card,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>
     let active=true;
     setPersonalMnemonic("");
     setMnemonicDraft("");
-    setPreparedMnemonic(null);
     setMnemonicEditing(false);
     setMnemonicBusy(false);
     setMnemonicError("");
     if(!revealed||!card.character)return ()=>{active=false};
-    void Promise.all([
-      getMnemonic(card.character),
-      getComponentInfo(card.character)
-    ]).then(([value,componentInfo])=>{
+    void getMnemonic(card.character).then(value=>{
       if(!active)return;
       const next=String(value?.text??"");
       setPersonalMnemonic(next);
       setMnemonicDraft(next);
-      setPreparedMnemonic(buildPreparedMnemonic(
-        {character:card.character,meanings:card.meanings??[]},
-        componentInfo?.components??[]
-      ));
     }).catch(()=>{
-      if(active){
-        setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
-        setMnemonicError(t("mnemonicLoadError"));
-      }
+      if(active)setMnemonicError(t("mnemonicLoadError"));
     });
     return ()=>{active=false};
-  },[revealed,card.character,card.meanings]);
+  },[revealed,card.character]);
   const handleSaveMnemonic=useCallback(async()=>{
     if(!card.character||mnemonicBusy)return;
     const next=mnemonicDraft.trim().slice(0,600);
