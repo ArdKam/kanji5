@@ -321,7 +321,6 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
   const trigger = card.locator(".stroke-order-tool-trigger");
   await expect(trigger).toBeVisible();
-  const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
 
   await page.evaluate(() => {
     const calls = [];
