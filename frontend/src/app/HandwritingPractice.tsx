@@ -294,7 +294,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const tone=result?(result.overallSimilarity>=88?"great":result.overallSimilarity>=70?"good":"retry"):"";
 
   return(
-    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)}>
+    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"}>
       <button
         className="handwriting-header"
         type="button"
