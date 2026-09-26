@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { t, type Language } from "./i18n";
-import type { Settings, Snapshot } from "./engine";
+import { MnemonicBackup } from "./MnemonicBackup";
+import type { KanjiCatalogItem, Settings, Snapshot } from "./engine";
 
 function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}) {
   return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>;
@@ -16,6 +17,7 @@ export function SettingsDialog({
   onSave,
   onReset,
   onRetakePlacement,
+  mnemonicCatalog,
 }: {
   open: boolean;
   snapshot: Snapshot;
@@ -26,6 +28,7 @@ export function SettingsDialog({
   onSave: (s: Settings) => void;
   onReset: () => void;
   onRetakePlacement: () => void;
+  mnemonicCatalog: KanjiCatalogItem[];
 }) {
   const s: Settings = { dailyNew:5, retention:.9, dailyGoal:20, leechThreshold:8, production:true, vocabulary:true, context:true, ...(snapshot.settings ?? {}) };
   const [draft, setDraft] = useState<Settings>(s);
@@ -50,6 +53,11 @@ export function SettingsDialog({
         {([["production",t("productionKanji")],["vocabulary",t("completeVocabulary")],["context",t("contextRecall")]] as const).map(([k,l]) => (
           <label className="setting-row" key={k}><span>{l}</span><input type="checkbox" checked={draft[k]} onChange={e => setDraft({...draft,[k]:e.target.checked})}/></label>
         ))}
+        <div className="settings-section mnemonic-backup-settings-section">
+          <div className="settings-section-title">{t("contentBackup", language)}</div>
+          <p>{t("contentBackupHint", language)}</p>
+          <MnemonicBackup catalog={mnemonicCatalog} language={language} />
+        </div>
         <div className="settings-section placement-settings-section">
           <div className="settings-section-title">{t("placementDiagnostic", language)}</div>
           <p>{t("placementDiagnosticHint", language)}</p>
