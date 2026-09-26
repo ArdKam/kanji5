@@ -3,12 +3,52 @@ import { readFile } from "node:fs/promises";
 
 const FIXTURE = JSON.parse(await readFile(new URL("./fixtures/handwriting-kanjivg.json", import.meta.url), "utf8"));
 
-function legacyScoreSource(source) {
-  const match = source.match(/function drawUserStrokes[\s\S]*?\n}\n\nexport function HandwritingPractice/);
-  if (!match) throw new Error("Current HandwritingPractice.tsx legacy scorer was not found.");
-  return match[0]
-    .replace(/\n\nexport function HandwritingPractice[\s\S]*$/, "")
-    .replace(/: [A-Za-z_$][A-Za-z0-9_$<>\[\].]*/g, "");
+function legacyScoreSource() {
+  return `
+function drawUserStrokes(ctx,strokes,scale){
+  ctx.save();
+  ctx.scale(scale,scale);
+  ctx.strokeStyle="#1c1a17";
+  ctx.lineWidth=8;
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  for(const stroke of strokes){
+    if(!stroke.length)continue;
+    ctx.beginPath();
+    ctx.moveTo(stroke[0].x,stroke[0].y);
+    for(let i=1;i<stroke.length;i++)ctx.lineTo(stroke[i].x,stroke[i].y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function scoreDrawing(strokes,paths,size){
+  if(!strokes.length||!paths.length)return 0;
+  const target=document.createElement("canvas"),user=document.createElement("canvas");
+  target.width=target.height=user.width=user.height=size;
+  const targetCtx=target.getContext("2d"),userCtx=user.getContext("2d");
+  if(!targetCtx||!userCtx)return 0;
+  targetCtx.fillStyle="#1c1a17";
+  const scale=size/109;
+  targetCtx.save();
+  targetCtx.scale(scale,scale);
+  for(const path of paths)targetCtx.fill(new Path2D(path.d));
+  targetCtx.restore();
+  drawUserStrokes(userCtx,strokes,scale);
+  const targetPixels=targetCtx.getImageData(0,0,size,size).data;
+  const userPixels=userCtx.getImageData(0,0,size,size).data;
+  let targetCount=0,userCount=0,intersection=0;
+  for(let i=3;i<targetPixels.length;i+=4){
+    const targetInk=targetPixels[i]>20,userInk=userPixels[i]>20;
+    if(targetInk)targetCount++;
+    if(userInk)userCount++;
+    if(targetInk&&userInk)intersection++;
+  }
+  if(!targetCount||!userCount||!intersection)return 0;
+  const overlapScore=2*intersection/(targetCount+userCount);
+  const strokeRatio=Math.min(strokes.length,paths.length)/Math.max(strokes.length,paths.length);
+  return Math.round((overlapScore*.82+strokeRatio*.18)*100);
+}
+`;
 }
 
 async function sampleReferenceStrokes(page, paths) {
