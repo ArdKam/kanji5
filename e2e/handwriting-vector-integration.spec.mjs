@@ -80,6 +80,8 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await page.mouse.move(penX,penY+45);
   await page.mouse.move(penX,penY+70);
   await page.mouse.up();
+  await expect(handwriting).toHaveAttribute("data-stroke-count","1");
+  await expect(handwriting).toHaveAttribute("data-live-feedback",/^(?!none$).+/);
   await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
   await expect(handwriting.locator(".handwriting-live-feedback")).toHaveAttribute("data-feedback-code",/endpoints|direction|shape|length|curvature/);
   await handwriting.locator(".handwriting-actions .secondary").click();
