@@ -207,9 +207,6 @@ html[dir="ltr"] .header-tools-menu{inset-inline-start:0;inset-inline-end:auto;bo
   .header{padding-right:56px;}
   .header-tools{top:0;right:0;}
   .header-menu-trigger{display:inline-grid;place-items:center;}
-  .header-tools-menu{position:absolute;top:calc(100% + 8px);right:0;display:none;grid-template-columns:1fr;min-width:150px;padding:8px;border:1px solid var(--line);border-radius:16px;background:var(--paper);box-shadow:0 18px 42px -24px #1c1a1780;}
-  .header-tools-menu.open{display:grid;}
-  .header-tools-menu .button{width:100%;min-height:44px;}
   .header-actions{display:flex;align-items:center;width:100%;padding-right:0;}
   .header-actions .session-progress{width:100%;}
   .learning-card{height:min(640px,calc(100dvh - 32px));min-height:0;}
