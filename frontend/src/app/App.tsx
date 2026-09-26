@@ -627,7 +627,7 @@ function LoadingInsights(){
 function App(){
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[placementRequest,setPlacementRequest]=useState(0),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[language,setLanguageState]=useState<Language>(()=>getLanguage());
   useEffect(()=>applyLanguage(language),[language]);
-  useEffect(()=>{if(!settingsOpen||mnemonicCatalog.length)return;let active=true;void listKanji().then(value=>{if(active)setMnemonicCatalog(value.results)}).catch(()=>{});return()=>{active=false}},[settingsOpen,mnemonicCatalog.length]);
+  useEffect(()=>{if((!settingsOpen&&!mnemonicsOpen)||mnemonicCatalog.length)return;let active=true;void listKanji().then(value=>{if(active)setMnemonicCatalog(value.results)}).catch(()=>{});return()=>{active=false}},[settingsOpen,mnemonicsOpen,mnemonicCatalog.length]);
   const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
   useEffect(()=>{let mounted=true;void startLearningExperience().catch(()=>{});const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d)setSnapshot(d)};void refresh().then(()=>document.addEventListener("kanji5:v1.9-v2-view-models",listener)).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});return()=>{mounted=false;document.removeEventListener("kanji5:v1.9-v2-view-models",listener)}},[refresh]);
@@ -642,7 +642,7 @@ function App(){
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setStatsOpen(true);setHeaderMenuOpen(false)}}>{t("stats")}</button>
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setGrammarOpen(true);setHeaderMenuOpen(false)}}>{t("grammarGuide")}</button>
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setReadingLabOpen(true);setHeaderMenuOpen(false)}}>{t("readingLab")}</button>
-  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setMnemonicsOpen(true);setHeaderMenuOpen(false)}}>{t("preparedMnemonicLibrary")}</button>
+  <button className="button secondary" type="button" disabled={busy} onClick={()=>{setMnemonicsOpen(true);setHeaderMenuOpen(false)}}>{language==="fa"?"یادسپارها":"Mnemonics"}</button>
   <button className="button secondary" type="button" disabled={busy} onClick={()=>{setSettingsOpen(true);setHeaderMenuOpen(false)}}>{t("settings")}</button>
 </div></div><AccountButton language={language} onClick={()=>setAccountOpen(true)}/></div>
     </header>
