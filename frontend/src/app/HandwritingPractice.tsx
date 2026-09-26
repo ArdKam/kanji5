@@ -50,7 +50,7 @@ function sampleReferenceStrokes(svgText: string, paths: StrokePath[], pointCount
   svg.setAttribute("height", "109");
 
   const sourceByStroke = new Map<number, SVGPathElement>();
-  const pattern = /<path\\s+[^>]*\\bid="([^"]+-s(\\d+))"[^>]*\\bd="([^"]+)"[^>]*\\/?/g;
+  const pattern = /<path\s+id="([^"]+-s(\d+))"[^>]*\bd="([^"]+)"/g;
   for (const match of svgText.matchAll(pattern)) {
     const strokeNumber = Number(match[2]);
     const d = String(match[3] || "").trim();
