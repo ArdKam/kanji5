@@ -10,7 +10,8 @@
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui",
     "test:v1.6:release": "node scripts/test-v1.6-release.mjs",
-    "test:v1.9:release": "node scripts/test-v1.9-release.mjs"
+    "test:v1.9:release": "node scripts/test-v1.9-release.mjs",
+    "test:architecture": "node scripts/test-architecture-hygiene.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.59.0"

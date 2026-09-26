@@ -46,6 +46,9 @@ jobs:
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
 
+      - name: Validate architecture hygiene boundary
+        run: npm run test:architecture
+
       - name: Install root test dependencies
         run: npm ci
 

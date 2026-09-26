@@ -8,6 +8,7 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
+      - "scripts/test-architecture-hygiene.mjs"
       - "e2e/react-presentation-migration.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
@@ -52,7 +53,7 @@ on:
       - "sw.js"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -79,6 +80,9 @@ jobs:
       - name: Install Chromium
         working-directory: .
         run: npx playwright install chromium
+      - name: Validate architecture hygiene boundary
+        working-directory: .
+        run: npm run test:architecture
       - name: Validate migration boundary
         working-directory: .
         run: node scripts/test-react-migration.mjs
