@@ -88,11 +88,11 @@ test.describe('Kanji 5 browser smoke', () => {
     });
     expect(lastAttempt).toMatchObject({ character: firstKanji, correct: false, unknown: true, hadAttempt: true });
 
-    const componentEvidence = await page.evaluate(() => {
+    const attributeRecallEvidence = await page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1.5-components');
       return raw ? JSON.parse(raw) : {};
     });
-    const entry = componentEvidence[firstKanji || ''];
+    const entry = attributeRecallEvidence[firstKanji || ''];
     expect(entry).toBeTruthy();
     const componentStats = Object.values(entry?.meaning || {}).concat(Object.values(entry?.reading || {}));
     expect(componentStats.some(stat => Number(stat?.attempts) >= 1 && Number(stat?.unknown) >= 1)).toBe(true);
