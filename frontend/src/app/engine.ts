@@ -114,9 +114,20 @@ export type CustomStudyFocus = "available" | "due" | "new" | "weak";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number };
 
 export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
+export type RadicalInfo = {
+  id: number;
+  glyph: string;
+  unicode?: string;
+  unicodeName?: string;
+  names?: { en?: string[]; ja?: string[]; fa?: string[] };
+  variants?: string[];
+  strokeCount?: number | null;
+  source?: string;
+};
 export type ComponentInfo = {
   character: string;
   available: boolean;
+  radical?: RadicalInfo | null;
   components: string[];
   sourceGap: boolean;
   coverage?: { available?: number; total?: number; fraction?: number } | null;
@@ -127,6 +138,12 @@ export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
+  getRadicalInfo: (character: string) => Promise<{
+    character: string;
+    available: boolean;
+    radical?: RadicalInfo | null;
+    reason?: string;
+  }>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
