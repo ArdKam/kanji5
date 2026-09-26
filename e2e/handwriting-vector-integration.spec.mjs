@@ -18,7 +18,7 @@ async function clean(page){
 async function openSchoolHandwriting(page){
   await page.locator(".experience-nav .experience-tab").nth(2).click();
   await expect(page.locator(".dictionary-page")).toBeVisible({timeout:10000});
-  const search=page.getByRole("textbox",{name:"کانجی، خوانش یا معنی را جست‌وجو کن"});
+  const search=page.locator(".dictionary-page-search input");
   await search.fill("学");
   const tile=page.locator(".kanji-catalog-tile").filter({hasText:"学"}).first();
   await expect(tile).toBeVisible({timeout:10000});
