@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getMnemonic, getVocabulary, listKanji, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type KanjiCatalogItem, type VocabularyItem } from "./engine";
+import { getComponentInfo, getHandwritingSkill, getMnemonic, getVocabulary, listKanji, recordHandwritingGrade, saveMnemonic, type ComponentInfo, type CustomStudyFilter, type HandwritingSkill, type KanjiCatalogItem, type VocabularyItem } from "./engine";
 import { PREPARED_MNEMONICS, type PreparedMnemonic } from "./mnemonic-library";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { ReadingLab } from "./ReadingLab";
@@ -381,10 +381,17 @@ function ComponentLearningPath({
 function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }: { item: KanjiCatalogItem; language: Language; onClose: () => void; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
+  const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
 
   useEffect(() => {
     let active = true;
     setComponentInfo(null);
+    setHandwritingSkill(null);
+    void getHandwritingSkill(item.character).then((skill) => {
+      if (active) setHandwritingSkill(skill);
+    }).catch(() => {
+      if (active) setHandwritingSkill(null);
+    });
     void getComponentInfo(item.character).then((info) => {
       if (active) setComponentInfo(info);
     }).catch(() => {
@@ -405,7 +412,17 @@ function DictionaryKanjiCard({ item, language, onClose, catalog, onSelectKanji }
           <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
           <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
         </div>
-        <HandwritingPractice character={item.character} language={language} />
+        <HandwritingPractice
+          character={item.character}
+          language={language}
+          learningSignal={handwritingSkill ? { state: handwritingSkill.state, confidence: handwritingSkill.confidence, score: handwritingSkill.score } : undefined}
+          onGradeRecorded={(grade) => recordHandwritingGrade(item.character, grade).then(async saved => {
+            if (!saved) return false;
+            const skill = await getHandwritingSkill(item.character);
+            setHandwritingSkill(skill);
+            return true;
+          })}
+        />
         {item.meanings.length ? <div className="dictionary-card-section"><span>{t("meaning", language)}</span><strong>{item.meanings.join(" · ")}</strong></div> : null}
         {componentInfo?.available && componentInfo.components.length ? (
           <ComponentBreakdown

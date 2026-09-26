@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import { getHandwritingSkill, recordHandwritingGrade, type HandwritingSkill } from "./engine";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
 import { sampleSvgStrokePaths } from "./handwriting-reference";
@@ -121,9 +120,10 @@ function drawSegment(canvas:HTMLCanvasElement,wrap:HTMLElement,dpr:number,from:P
   ctx.stroke();
 }
 
-type HandwritingLearningSignal={state?:string;confidence?:number;mastery?:number};
+type HandwritingLearningSignal={state?:string;confidence?:number;mastery?:number;score?:number};
+type HandwritingGradeCommit = HandwritingGrade;
 
-export function HandwritingPractice({ character, language, learningSignal }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal }){
+export function HandwritingPractice({ character, language, learningSignal, onGradeRecorded }: { character:string; language:Language; learningSignal?:HandwritingLearningSignal; onGradeRecorded?:(grade:HandwritingGradeCommit)=>void|Promise<unknown> }){
   const normalized=normalizeStrokeOrderCharacter(character);
   const wrapRef=useRef<HTMLDivElement|null>(null);
   const guideCanvasRef=useRef<HTMLCanvasElement|null>(null);
@@ -140,7 +140,6 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const [liveFeedback,setLiveFeedback]=useState<{strokeNumber:number;grade:HandwritingStrokeGrade}|null>(null);
   const [expanded,setExpanded]=useState(false);
   const [hintLevel,setHintLevel]=useState(()=>initialHintLevel(learningSignal));
-  const [resolvedSkill,setResolvedSkill]=useState<HandwritingSkill|null>(null);
 
   useEffect(()=>{
     let active=true;
@@ -153,9 +152,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     setLiveFeedback(null);
     setError("");
     setHintLevel(initialHintLevel(learningSignal));
-    setResolvedSkill(null);
     if(!normalized)return()=>{active=false};
-    void getHandwritingSkill(normalized).then(skill=>{if(!active||!skill)return;setResolvedSkill(skill);setHintLevel(initialHintLevel({state:skill.state,confidence:skill.confidence,mastery:skill.score}))});
     setLoading(true);
     fetch(kanjiSvgUrl(normalized),{cache:"force-cache"})
       .then(response=>{
@@ -309,7 +306,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
     setLiveFeedback(null);
     setResult(next);
     setHintLevel(current=>adaptHintLevel(current,next));
-    void recordHandwritingGrade(normalized,next).then(async saved=>{if(!saved)return;const skill=await getHandwritingSkill(normalized);if(skill)setResolvedSkill(skill)});
+    void onGradeRecorded?.(next);
   };
 
   const messageKey=(code:HandwritingGrade["feedbackCode"])=>{
@@ -334,7 +331,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
   const tone=result?(result.overallSimilarity>=88?"great":result.overallSimilarity>=70?"good":"retry"):"";
 
   return(
-    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"} data-feedback-stroke={result?.feedbackStroke??(liveFeedback?liveFeedback.strokeNumber:null)??"none"} data-feedback-focus={feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode)} data-handwriting-skill-state={resolvedSkill?.state||"unavailable"} data-handwriting-skill-score={Number.isFinite(Number(resolvedSkill?.score))?String(resolvedSkill?.score):"unavailable"}>
+    <section className={"handwriting-practice "+(expanded?"is-expanded":"is-collapsed")} aria-label={t("handwritingPractice",language)} data-hint-level={hintLevel} data-hint-mode={hintLevelName(hintLevel)} data-stroke-count={strokes.length} data-live-feedback={liveFeedback?liveFeedback.grade.feedbackCode:"none"} data-feedback-stroke={result?.feedbackStroke??(liveFeedback?liveFeedback.strokeNumber:null)??"none"} data-feedback-focus={feedbackFocusKind(result?.feedbackCode||liveFeedback?.grade?.feedbackCode)} data-handwriting-skill-state={learningSignal?.state||"unavailable"} data-handwriting-skill-score={Number.isFinite(Number(learningSignal?.score))?String(learningSignal?.score):"unavailable"}>
       <button
         className="handwriting-header"
         type="button"
