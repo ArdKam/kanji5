@@ -1,10 +1,24 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
-import { gradeHandwriting, type HandwritingPoint, type HandwritingStroke } from "./handwriting-grader";
+import { gradeHandwriting, type HandwritingFeedbackCode, type HandwritingPoint, type HandwritingStroke } from "./handwriting-grader";
 
 const CANVAS_COORDINATE_SIZE = 109;
 const USER_STROKE_WIDTH = 5;
+
+function handwritingFeedback(code: HandwritingFeedbackCode, language: Language): string {
+  switch (code) {
+    case "stroke-count": return t("handwritingFeedbackStrokeCount", language);
+    case "stroke-order": return t("handwritingFeedbackOrder", language);
+    case "placement": return t("handwritingFeedbackPlacement", language);
+    case "endpoints": return t("handwritingFeedbackEndpoints", language);
+    case "length": return t("handwritingFeedbackLength", language);
+    case "direction": return t("handwritingFeedbackDirection", language);
+    case "curvature": return t("handwritingFeedbackCurvature", language);
+    case "shape": return t("handwritingFeedbackShape", language);
+    default: return "";
+  }
+}
 
 function drawUserStrokes(ctx: CanvasRenderingContext2D, strokes: HandwritingStroke[], scale: number) {
   ctx.save();
@@ -257,7 +271,7 @@ export function HandwritingPractice({ character, language }: { character: string
   };
 
   return (
-    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)} data-handwriting-grader="vector-v1" data-stroke-count={String(strokeCount)}>
+    <section className={"handwriting-practice " + (expanded ? "is-expanded" : "is-collapsed")} aria-label={t("handwritingPractice", language)} data-handwriting-grader="vector-v1" data-stroke-count={String(strokeCount)} data-feedback-code={result?.feedbackCode ?? ""} data-feedback-stroke={result?.feedbackStroke == null ? "" : String(result.feedbackStroke + 1)}>
       <button
         className="handwriting-header"
         type="button"
@@ -296,14 +310,22 @@ export function HandwritingPractice({ character, language }: { character: string
               </div>
               {result !== null ? (
                 <div className={"handwriting-result " + (result.score >= 82 ? "great" : result.score >= 65 ? "good" : "retry")} role="status" data-score={String(result.score)}>
-                  <strong>{formatNumber(result.score, language)}%</strong>
-                  <span>{result.feedbackCode === "stroke-count"
-                    ? t("handwritingRetry", language)
-                    : result.score >= 82
+                  <strong>{t("handwritingSimilarity", language)} {formatNumber(result.score, language)}%</strong>
+                  <span>
+                    {result.score >= 82
                       ? t("handwritingGreat", language)
                       : result.score >= 65
                         ? t("handwritingGood", language)
-                        : t("handwritingRetry", language)}</span>
+                        : t("handwritingRetry", language)}
+                  </span>
+                  {result.feedbackCode !== "good" && result.feedbackCode !== "improve" && result.feedbackCode !== "empty" && result.feedbackCode !== "unavailable" ? (
+                    <small className="handwriting-feedback-detail">
+                      {result.feedbackStroke !== null
+                        ? (language === "fa" ? "حرکت " : "Stroke ") + formatNumber(result.feedbackStroke + 1, language) + ": "
+                        : ""}
+                      {handwritingFeedback(result.feedbackCode, language)}
+                    </small>
+                  ) : null}
                 </div>
               ) : null}
             </>
