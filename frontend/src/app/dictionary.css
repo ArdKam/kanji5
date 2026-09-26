@@ -1571,3 +1571,113 @@
 }
 
 .vocabulary-learning-graph{display:grid;gap:8px;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--washi) 70%,var(--paper))}.vocabulary-learning-graph-header{display:flex;align-items:center;justify-content:space-between;gap:8px}.vocabulary-learning-graph-header h4{margin:0 0 3px;font-size:10px}.vocabulary-learning-graph-header p{margin:0;color:var(--mute);font-size:8.5px;line-height:1.5}.vocabulary-learning-graph-root{display:grid;place-items:center;width:34px;height:34px;flex:0 0 auto;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-family:"Noto Serif JP",serif;font-size:1.05rem}.vocabulary-learning-graph-list{display:grid;gap:5px}.vocabulary-learning-graph-edge{display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:6px;padding:6px 7px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.vocabulary-learning-graph-word{font-family:"Noto Serif JP",serif;font-size:1rem;white-space:nowrap}.vocabulary-learning-graph-arrow{color:var(--mute);font-size:11px}.vocabulary-learning-graph-related{display:flex;flex-wrap:wrap;gap:4px;min-width:0}.vocabulary-learning-graph-kanji{display:grid;place-items:center;min-width:32px;height:32px;padding:0 6px;border:1px solid var(--line);border-radius:9px;background:var(--washi);color:var(--ink);font-family:"Noto Serif JP",serif;font-size:1rem;cursor:pointer}.vocabulary-learning-graph-kanji:hover{border-color:color-mix(in srgb,var(--shu) 35%,var(--line))}@media(max-width:520px){.vocabulary-learning-graph-edge{grid-template-columns:1fr;gap:4px}.vocabulary-learning-graph-arrow{display:none}.vocabulary-learning-graph-word{font-size:.95rem}}
+
+
+/* Dictionary IA migration: compact contextual sections and Practice Home. */
+.practice-home {
+  display: grid;
+  gap: 1rem;
+}
+.practice-home-hero {
+  display: grid;
+  gap: .65rem;
+  align-items: start;
+}
+.practice-home-hero h2,
+.practice-home-hero p {
+  margin: 0;
+}
+.practice-start-button {
+  justify-self: start;
+}
+.practice-home-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.practice-home-section-heading > div {
+  min-width: 0;
+}
+.practice-home-section-heading h3,
+.practice-home-section-heading p {
+  margin: 0;
+}
+.practice-home-section-heading p + p {
+  margin-top: .35rem;
+}
+.custom-study-secondary-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.practice-placement-card {
+  display: grid;
+  gap: 1rem;
+}
+.practice-placement-card .placement-panel {
+  margin-top: 0;
+}
+
+.dictionary-card-accordion {
+  display: grid;
+  gap: .5rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--border, rgba(31, 38, 46, .12));
+}
+.dictionary-accordion-section {
+  border-bottom: 1px solid var(--border, rgba(31, 38, 46, .12));
+}
+.dictionary-accordion-trigger {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .9rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-align: start;
+  cursor: pointer;
+}
+.dictionary-accordion-trigger:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: .35rem;
+}
+.dictionary-accordion-chevron {
+  opacity: .65;
+  flex: 0 0 auto;
+}
+.dictionary-accordion-panel {
+  padding: 0 0 1rem;
+}
+.dictionary-accordion-panel > :first-child {
+  margin-top: 0;
+}
+.stats-mastery-summary {
+  margin-top: 1rem;
+}
+.secondary-surface-dialog {
+  width: min(760px, calc(100vw - 2rem));
+}
+.secondary-surface-dialog .grammar-guide,
+.secondary-surface-dialog .reading-lab {
+  margin-top: 1rem;
+}
+@media (max-width: 640px) {
+  .practice-home-section-heading {
+    flex-direction: column;
+  }
+  .practice-start-button {
+    width: 100%;
+  }
+  .custom-study-secondary-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
