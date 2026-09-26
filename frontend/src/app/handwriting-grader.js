@@ -153,12 +153,13 @@ function curvatureScore(user,reference){
   const a=turningAngles(user), b=turningAngles(reference);
   if(!a.length||!b.length) return 0.5;
   const count=Math.min(a.length,b.length);
+  const tolerance=0.10;
   let error=0;
   for(let i=0;i<count;i+=1){
     const ai=a[Math.floor(i*a.length/count)], bi=b[Math.floor(i*b.length/count)];
-    error += Math.abs(ai-bi);
+    error += Math.max(0,Math.abs(ai-bi)-tolerance);
   }
-  return clamp(1-(error/count)/Math.PI);
+  return clamp(1-(error/count)/1.20);
 }
 
 function nearestMean(source,target){
@@ -172,15 +173,27 @@ function nearestMean(source,target){
   return sum/source.length;
 }
 
+function percentile(values,q){
+  if(!values.length)return 0;
+  const sorted=[...values].sort((a,b)=>a-b);
+  const index=(sorted.length-1)*q;
+  const lower=Math.floor(index),upper=Math.ceil(index);
+  if(lower===upper)return sorted[lower];
+  const weight=index-lower;
+  return sorted[lower]+(sorted[upper]-sorted[lower])*weight;
+}
+
 function shapeScore(user,reference,diagonal){
   const count=Math.min(user.length,reference.length);
   if(!count) return 0;
-  let indexed=0;
-  for(let i=0;i<count;i+=1) indexed+=distance(user[i],reference[i]);
-  indexed/=count;
+  const errors=[];
+  for(let i=0;i<count;i+=1)errors.push(distance(user[i],reference[i]));
+  const indexed=errors.reduce((sum,value)=>sum+value,0)/count;
+  const p90=percentile(errors,0.90);
   const chamfer=(nearestMean(user,reference)+nearestMean(reference,user))/2;
-  const error=(indexed*0.65+chamfer*0.35)/Math.max(diagonal,1);
-  return Math.exp(-error*5.8);
+  const scale=Math.max(pathLength(reference)*0.28,diagonal*0.035,1);
+  const error=(indexed*0.52+chamfer*0.26+p90*0.22)/scale;
+  return Math.exp(-error*2.7);
 }
 
 function endpointScore(user,reference,diagonal){
