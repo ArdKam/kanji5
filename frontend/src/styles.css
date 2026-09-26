@@ -452,7 +452,7 @@ html[dir="ltr"] .skip-link{right:auto;left:10px}html[dir="ltr"] .session-progres
 
 /* Dense desktop micro-compaction. */
 @media(min-width:761px){
-  .learning-card[data-card-density="dense"] .learning-back-scroll{padding-top:2px;padding-bottom:4px;}
+  .learning-card[data-card-density="dense"] .learning-back-scroll{padding-top:0;padding-bottom:0;}
   .learning-card[data-card-density="dense"] .stroke-order-panel{gap:4px;padding:5px;}
   .learning-card[data-card-density="dense"] .stroke-order-stage svg{width:min(44px,14vw);}
   .learning-card[data-card-density="dense"] .stroke-order-progress{font-size:8px;}
