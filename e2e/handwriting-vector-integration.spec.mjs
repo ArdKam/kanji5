@@ -115,4 +115,18 @@ test("real KanjiVG trace reaches the React handwriting grader", async ({ page })
   await expect(dialog.locator(".handwriting-practice")).toHaveAttribute("data-feedback-code", "stroke-order");
   await expect(result).toContainText("شباهت");
   await expect(result).toHaveAttribute("role", "status");
+
+  await dialog.locator(".handwriting-actions .button").first().click();
+  const beforeCancel = await dialog.locator(".handwriting-practice").getAttribute("data-stroke-count");
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("Handwriting canvas has no layout box for cancel test");
+  await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.4);
+  await page.dispatchEvent("canvas.handwriting-canvas", "pointercancel", {
+    bubbles: true,
+    pointerId: 1,
+    pointerType: "mouse",
+  });
+  await expect(dialog.locator(".handwriting-practice")).toHaveAttribute("data-stroke-count", beforeCancel || "0");
 });
