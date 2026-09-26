@@ -22,7 +22,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
     }).finally(() => {
       if (active) setLoading(false);
     });
-    const visibleItems = showAllExamples ? items : items.slice(0, 3);\n  const graphEdges = vocabularyEdges.filter(edge => edge.related.length);\n  const visibleGraphEdges = showAllGraph ? graphEdges : graphEdges.slice(0, 3);\n\n  return () => { active = false; };
+    return () => { active = false; };
   }, [kanjiCharacter]);
 
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
