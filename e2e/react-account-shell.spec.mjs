@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('account control exposes email, magic-link, and Google entry points', async ({ page }) => {
   await page.goto('/');
+  console.log('ACCOUNT_DIAGNOSTIC', await page.evaluate(() => { const el=document.querySelector('#kanji5-account-launcher'); if(!el)return {exists:false, bodyButtons:[...document.querySelectorAll('button')].map(b=>({id:b.id,className:b.className,text:b.textContent?.trim(),rect:(()=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}})(),display:getComputedStyle(b).display,visibility:getComputedStyle(b).visibility,opacity:getComputedStyle(b).opacity}) )}; const cs=getComputedStyle(el); const r=el.getBoundingClientRect(); return {exists:true, className:el.className, rect:{x:r.x,y:r.y,w:r.width,h:r.height},display:cs.display,visibility:cs.visibility,opacity:cs.opacity,position:cs.position,zIndex:cs.zIndex,parent:el.parentElement?.id||el.parentElement?.tagName}; }));
   await expect(page.locator('.account-button:visible')).toBeVisible({ timeout: 15000 });
   await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
