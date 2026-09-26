@@ -17,3 +17,4 @@
   .component-breakdown-part{min-width:34px;min-height:34px;padding:5px 7px;font-size:19px}
   .component-breakdown-plus{font-size:13px}
 }
+.component-breakdown-part-button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--washi);color:var(--sumi)}.component-breakdown-part-button:hover{transform:translateY(-1px)}.component-breakdown-part-button:focus-visible{outline:3px solid var(--accent,var(--shu));outline-offset:2px}
