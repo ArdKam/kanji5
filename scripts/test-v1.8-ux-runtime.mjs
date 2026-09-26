@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const ux=fs.readFileSync('v1.8-learning-ux.js','utf8');
+const ux=fs.existsSync('v1.8-learning-ux.js')?fs.readFileSync('v1.8-learning-ux.js','utf8'):'';
 const feedback=fs.readFileSync('v1.6-session-feedback.js','utf8');
 const session=fs.readFileSync('v1.6-session.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
