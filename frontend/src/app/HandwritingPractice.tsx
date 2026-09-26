@@ -180,7 +180,8 @@ export function HandwritingPractice({ character, language }: { character: string
 
   const appendPointerPoints = useCallback((event: PointerEvent<HTMLCanvasElement>) => {
     const nativeEvent = event.nativeEvent as globalThis.PointerEvent;
-    const events = typeof nativeEvent.getCoalescedEvents === "function" ? nativeEvent.getCoalescedEvents() : [nativeEvent];
+    const coalesced = typeof nativeEvent.getCoalescedEvents === "function" ? nativeEvent.getCoalescedEvents() : [];
+    const events = coalesced.length ? [...coalesced, nativeEvent] : [nativeEvent];
     const rect = event.currentTarget.getBoundingClientRect();
     const points = events.map(point => pointFromClient(point.clientX, point.clientY, rect));
     for (const point of points) {
