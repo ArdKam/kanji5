@@ -39,6 +39,8 @@ jobs:
         working-directory: frontend
         run: npm run typecheck
 
+      - name: Rebuild pinned Jōyō data with radical metadata
+        run: node scripts/build-kanji-data.mjs
       - name: Build shipped React artifact from source
         working-directory: frontend
         run: npm run build
