@@ -375,6 +375,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   const revealedAnswer=!result?.correct?(result?.answerHint||ex.answerHint||ex.character):undefined;
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   const disabled=busy||lockedRef.current||Boolean(result);
+  const productionRecall=production&&!showProductionOptions;
 
   return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"surface card exercise-card"+resultClass} tabIndex={-1}>
     <div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div>
