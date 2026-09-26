@@ -895,7 +895,7 @@ type ConfusableGroup = {
   readonly id: string;
   readonly basis: ConfusableBasis;
   readonly members: readonly string[];
-  readonly cues: Readonly<Record<string, { readonly fa: string; readonly en: string }>>;
+  readonly cues: Readonly<Record<string, { readonly fa: string; readonly en: string } | undefined>>;
 };
 
 export const CONFUSABLE_GROUPS: Readonly<ConfusableGroup[]> = Object.freeze([
