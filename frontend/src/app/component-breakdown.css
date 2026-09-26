@@ -1,4 +1,7 @@
 .component-breakdown{display:grid;gap:7px;margin:0;min-width:0;padding:0}
+.component-breakdown-radical{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin:0 auto 1px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--washi);color:var(--mute);font-size:9px;font-weight:700}
+.component-breakdown-radical strong{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:20px;line-height:1;color:var(--sumi)}
+.component-breakdown-radical-label{font-weight:850}
 .component-breakdown-header{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
 .component-breakdown-title{margin:0;color:var(--mute);font-size:10px;font-weight:850}
 .component-breakdown-note{color:var(--mute);font-size:9px}
@@ -16,4 +19,6 @@
   .component-breakdown-target{font-size:44px}
   .component-breakdown-part{min-width:34px;min-height:34px;padding:5px 7px;font-size:19px}
   .component-breakdown-plus{font-size:13px}
+  .component-breakdown-radical{font-size:8px}
+  .component-breakdown-radical strong{font-size:18px}
 }
