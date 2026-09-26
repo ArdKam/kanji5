@@ -11,6 +11,7 @@ function loadNetwork(){
   return networkPromise||(networkPromise=import('./v1.5-network.js')).catch(error=>{networkPromise=null;throw error});
 }
 let componentDataPromise=null;
+let radicalDataPromise=null;
 async function ensureEducationRuntime(){
   if(window.__KANJI5_EDU_BRIDGE__?.start)return true;
   if(educationRuntimePromise)return educationRuntimePromise;
@@ -53,6 +54,14 @@ function loadComponentData(){
     return response.json();
   }).catch(()=>null);
   return componentDataPromise;
+}
+function loadRadicalData(){
+  if(radicalDataPromise)return radicalDataPromise;
+  radicalDataPromise=fetch('./kanji-radicals.json',{cache:'no-store'}).then(response=>{
+    if(!response.ok)throw new Error('KANJI5_RADICAL_DATA_UNAVAILABLE');
+    return response.json();
+  }).catch(()=>null);
+  return radicalDataPromise;
 }
 function normalizeDictionaryQuery(value){
   return String(value||'').trim().replace(/[ァ-ヺ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).toLowerCase();
@@ -171,6 +180,23 @@ async function getComponentInfo(character){
     sourceGap:Array.isArray(data.missing)&&data.missing.includes(normalized),
     coverage:data.coverage||null,
     source:data.source||null
+  };
+}
+async function getRadicalInfo(character){
+  const normalized=String(character||'').trim();
+  const data=await loadRadicalData();
+  if(!data||!normalized)return {character:normalized,available:false};
+  const mapping=data.kanjiToRadical?.[normalized];
+  if(!mapping||!Number.isInteger(Number(mapping.radicalId)))return {character:normalized,available:false};
+  const radical=Array.isArray(data.radicals)?data.radicals.find(item=>Number(item?.id)===Number(mapping.radicalId)):null;
+  if(!radical)return {character:normalized,available:false,radicalId:Number(mapping.radicalId)};
+  return {
+    character:normalized,
+    available:true,
+    radicalId:Number(mapping.radicalId),
+    radical,
+    source:data.radicalSource||null,
+    mappingSource:data.mappingSource||null
   };
 }
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
