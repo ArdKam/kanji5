@@ -145,6 +145,77 @@ async function getKanjiByComponent(glyph,recursive=true,limit=80){
   const characters=Array.isArray(index?.[normalized])?index[normalized]:[];
   return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-kanji',glyph:normalized,recursive:Boolean(recursive),results:kanjiResultsByCharacters(characters,deck,limit)};
 }
+function learnerState(character, model){
+  const attrs=model?.kanji?.[character]?.attributes||{};
+  const states=Object.values(attrs).map(value=>String(value?.state||'')).filter(Boolean);
+  return states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'recovering':states.includes('weak')?'weak':states.includes('learning')?'learning':states.includes('introduced')?'introduced':'unseen';
+}
+function structureMasteryBand(mastery){
+  if(!(Number(mastery)>0)) return 'new';
+  if(Number(mastery)<.5) return 'weak';
+  return 'familiar';
+}
+async function getStructureInsights(character){
+  const normalized=String(character||'').trim();
+  const radicalData=await loadRadicalData();
+  const componentData=await loadComponentData();
+  const deck=state.readDeck?.()||[];
+  const knowledge=state.readKnowledge?.()||{};
+  const model=learner()||{};
+  if(!normalized||!radicalData||!componentData)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'structure-insights',character:normalized,available:false,directComponents:[],recursiveComponents:[],familiarity:{directJoyoCount:0,familiarDirectCount:0,weakDirectCount:0,newDirectCount:0,fraction:0}};
+  const base=deck.find(item=>String(item?.character||item?.id||'').trim()===normalized);
+  const radicalId=Number(base?.radical?.classical);
+  const radical=lookupRadical(radicalData,radicalId);
+  const byCharacter=new Map(deck.map(item=>[String(item?.character||item?.id||'').trim(),item]));
+  const masteryFor=glyph=>kanjiMastery(glyph,knowledge,model);
+  const insightFor=(glyph,relation)=>({
+    glyph,
+    isJoyoKanji:byCharacter.has(glyph),
+    available:Object.prototype.hasOwnProperty.call(componentData.components||{},glyph),
+    mastery:byCharacter.has(glyph)?masteryFor(glyph):undefined,
+    state:byCharacter.has(glyph)?learnerState(glyph,model):undefined,
+    relation
+  });
+  const direct=Array.isArray(componentData.components?.[normalized])?[...new Set(componentData.components[normalized])]:[];
+  const recursiveRoots=Array.isArray(componentData.recursive?.[normalized])?componentData.recursive[normalized]:[];
+  const seen=new Set();
+  const recursive=[];
+  const visit=(node,relation='recursive')=>{
+    const glyph=String(node?.glyph||'').trim();
+    if(!glyph||seen.has(glyph))return;
+    seen.add(glyph);
+    if(!direct.includes(glyph))recursive.push(insightFor(glyph,relation));
+    for(const child of Array.isArray(node?.children)?node.children:[])visit(child,'recursive');
+  };
+  for(const node of recursiveRoots)visit(node);
+  const directJoyo=direct.filter(glyph=>byCharacter.has(glyph));
+  const familiarDirect=directJoyo.filter(glyph=>structureMasteryBand(masteryFor(glyph))==='familiar');
+  const weakDirect=directJoyo.filter(glyph=>structureMasteryBand(masteryFor(glyph))==='weak');
+  const newDirect=directJoyo.filter(glyph=>structureMasteryBand(masteryFor(glyph))==='new');
+  let radicalSummary;
+  if(radical){
+    const family=deck.filter(item=>Number(item?.radical?.classical)===radicalId);
+    const studied=family.filter(item=>masteryFor(String(item?.character||item?.id||''))>0);
+    const average=family.length?family.reduce((sum,item)=>sum+masteryFor(String(item?.character||item?.id||'')),0)/family.length:0;
+    radicalSummary={id:radicalId,glyph:String(radical.canonicalGlyph||''),familySize:family.length,studiedCount:studied.length,masteryAverage:average};
+  }
+  return {
+    contractVersion:'1.9.0-v2-boundary-contract',
+    kind:'structure-insights',
+    character:normalized,
+    available:Boolean(base||componentData.components?.[normalized]||radical),
+    radical:radicalSummary,
+    directComponents:direct.map(glyph=>insightFor(glyph,'direct')),
+    recursiveComponents:recursive,
+    familiarity:{
+      directJoyoCount:directJoyo.length,
+      familiarDirectCount:familiarDirect.length,
+      weakDirectCount:weakDirect.length,
+      newDirectCount:newDirect.length,
+      fraction:directJoyo.length?familiarDirect.length/directJoyo.length:1
+    }
+  };
+}
 async function getKanjiByComponents(glyphs,recursive=true,limit=80){
   const normalized=[...new Set((Array.isArray(glyphs)?glyphs:[]).map(value=>String(value||'').trim()).filter(Boolean))];
   if(!normalized.length)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'component-intersection',glyphs:[],recursive:Boolean(recursive),results:[]};
@@ -297,7 +368,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,listRadicals,getKanjiByRadical,getKanjiByComponent,getKanjiByComponents,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,listRadicals,getKanjiByRadical,getKanjiByComponent,getKanjiByComponents,getStructureInsights,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
