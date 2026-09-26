@@ -8,9 +8,7 @@ function legacyScoreSource(source) {
   if (!match) throw new Error("Current HandwritingPractice.tsx legacy scorer was not found.");
   return match[0]
     .replace(/\n\nexport function HandwritingPractice[\s\S]*$/, "")
-    .replace(/: Point\[\]\[\]/g, "")
-    .replace(/: StrokePath\[\]/g, "")
-    .replace(/: number/g, "");
+    .replace(/: [A-Za-z_$][A-Za-z0-9_$<>\[\].]*/g, "");
 }
 
 async function sampleReferenceStrokes(page, paths) {
