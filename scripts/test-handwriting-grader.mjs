@@ -23,6 +23,8 @@ assert.equal(perfect.score, 100, "perfect reference trace must score 100");
 assert.equal(perfect.strokeCount.ratio, 1);
 assert.equal(perfect.scoreReliability, "high");
 assert.equal(perfect.lengthIntegrity, 1);
+assert.equal(perfect.perStroke.length, reference.length);
+assert.ok(perfect.perStroke.every(stroke => stroke.score > 0.99), "perfect trace should produce high per-stroke scores");
 
 const translated = reference.map(stroke => stroke.map(p => point(p.x + 3, p.y + 2)));
 const translatedGrade = gradeHandwriting(translated, reference);
