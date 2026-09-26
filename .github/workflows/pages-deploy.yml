@@ -42,7 +42,10 @@ jobs:
 
       - name: Build shipped React artifact from source
         working-directory: frontend
-        run: npm run build
+        run: |
+          npm run build
+          cp ../react-dist/kanji5-react.js ../react-dist/kanji5-react-release18.js
+          cp ../react-dist/kanji5-react.css ../react-dist/kanji5-react-release18.css
 
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
@@ -53,7 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add react-dist/kanji5-react.js react-dist/kanji5-react.css
+          git add react-dist/kanji5-react.js react-dist/kanji5-react.css react-dist/kanji5-react-release18.js react-dist/kanji5-react-release18.css
           if git diff --cached --quiet; then
             echo "Generated React artifact already matches the repository."
           else
