@@ -197,7 +197,7 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
     setStatus("");
     setBusyIndex(index);
     try {
-      const current = await getMnemonic(character);
+      const current = await getMnemonic(item.character);
       const existing = String(current.text ?? "").trim();
       if (existing && existing !== (language === "fa" ? prepared.fa : prepared.en)) {
         const message = t("mnemonicOverwriteConfirm", language);
