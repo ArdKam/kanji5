@@ -6,9 +6,10 @@ export type ComponentBreakdownProps = {
   title: string;
   note?: string;
   ariaLabel: string;
+  onComponentClick?: (component: string) => void;
 };
 
-export function ComponentBreakdown({ info, title, note, ariaLabel }: ComponentBreakdownProps) {
+export function ComponentBreakdown({ info, title, note, ariaLabel, onComponentClick }: ComponentBreakdownProps) {
   if (!info.available || !info.components.length) return null;
 
   return (
@@ -23,7 +24,7 @@ export function ComponentBreakdown({ info, title, note, ariaLabel }: ComponentBr
         {info.components.map((component, index) => (
           <span className="component-breakdown-part-wrap" role="listitem" key={component + "-" + index}>
             {index > 0 ? <span className="component-breakdown-plus" aria-hidden="true">+</span> : null}
-            <span className="component-breakdown-part" lang="ja">{component}</span>
+            onComponentClick ? <button className="component-breakdown-part component-breakdown-part-button" type="button" lang="ja" onClick={() => onComponentClick(component)}>{component}</button> : <span className="component-breakdown-part" lang="ja">{component}</span>
           </span>
         ))}
       </div>
