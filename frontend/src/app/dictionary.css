@@ -990,6 +990,52 @@
 .handwriting-production-prompt-cue{color:var(--ink);font-size:13px;line-height:1.4;}
 .handwriting-production-prompt-japanese{font-family:"Noto Serif JP",serif;font-weight:600;}
 .handwriting-production-prompt small{color:var(--mute);font-size:9px;line-height:1.45;}
+.handwriting-hint-control{
+  position:relative;
+  display:flex;
+  justify-content:flex-end;
+  min-height:30px;
+}
+.handwriting-info-button{
+  width:26px;
+  height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--line);
+  border-radius:50%;
+  background:var(--paper);
+  color:var(--mute);
+  font:700 13px/1 Inter,system-ui,sans-serif;
+  cursor:pointer;
+  transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease;
+}
+.handwriting-info-button:hover,
+.handwriting-info-button[aria-expanded="true"]{
+  border-color:color-mix(in srgb,var(--shu) 35%,var(--line));
+  background:var(--washi);
+  color:var(--ink);
+}
+.handwriting-info-button[aria-expanded="true"]{transform:scale(1.02);}
+.handwriting-hints-popover{
+  position:absolute;
+  top:31px;
+  right:0;
+  z-index:3;
+  width:min(330px,calc(100vw - 56px));
+  padding:9px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+  box-shadow:0 12px 28px -18px rgb(0 0 0 / .42);
+}
+.handwriting-hints-popover .handwriting-hint-row{
+  min-height:28px;
+}
+.handwriting-hints-popover .handwriting-hint-button{
+  min-height:30px;
+  padding:4px 8px;
+}
 .handwriting-hint-row{
   display:flex;
   align-items:center;
