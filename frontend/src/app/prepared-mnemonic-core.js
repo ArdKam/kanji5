@@ -1310,28 +1310,49 @@ const PREPARED_COMPONENT_LABELS = Object.freeze({
   "女": { fa: "زن", en: "woman" }, "金": { fa: "فلز/طلا", en: "metal/gold" }
 });
 
+const MEANING_SCENE_PROFILES = Object.freeze([
+  { keys: /\b(?:person|people|man|woman|child|human|friend|family|someone|self)\b/i, fa: "یک آدم مشخص", en: "a specific person", actionFa: "وارد صحنه می‌شود و کاری روشن انجام می‌دهد", actionEn: "enters the scene and performs one clear action" },
+  { keys: /\b(?:move|go|come|walk|run|leave|enter|return|travel|road|path|far|near|front|back|up|down)\b/i, fa: "یک مسافر", en: "a traveler", actionFa: "راه می‌افتد، جلو می‌رود و به مقصد می‌رسد", actionEn: "sets off, moves forward, and reaches a destination" },
+  { keys: /\b(?:water|river|sea|lake|rain|snow|cloud|wet|wash|drink|flow|wave)\b/i, fa: "یک صحنهٔ آبی", en: "a water scene", actionFa: "آب حرکت می‌کند و چیزی را خیس یا جابه‌جا می‌کند", actionEn: "water moves and wets or carries something" },
+  { keys: /\b(?:fire|hot|heat|burn|light|sun|bright|dark|night|day|weather|wind|spring|summer|autumn|winter)\b/i, fa: "یک صحنهٔ طبیعی", en: "a natural scene", actionFa: "نور یا نیرو ناگهان تغییر می‌کند و صحنه را عوض می‌کند", actionEn: "the light or force suddenly changes the scene" },
+  { keys: /\b(?:eat|food|drink|rice|meal|buy|sell|money|work|shop|store|use|make|build|school|study|learn|read|write|book)\b/i, fa: "یک کار روزمره", en: "an everyday task", actionFa: "فرد آن را انجام می‌دهد و نتیجهٔ قابل‌دیدنی ایجاد می‌کند", actionEn: "someone performs it and creates a visible result" },
+  { keys: /\b(?:see|look|eye|hear|ear|mouth|hand|foot|head|body|heart|voice|sound|speak|say|listen|sing)\b/i, fa: "یک کنش بدنی", en: "a bodily action", actionFa: "یک عضو بدن حرکت می‌کند و واکنش واضحی نشان می‌دهد", actionEn: "a body part moves and produces a clear reaction" },
+  { keys: /\b(?:happy|sad|anger|fear|love|hate|forget|remember|think|feel|mind|heart|fun|easy|difficult|quiet|calm)\b/i, fa: "یک آدم با واکنش شدید", en: "a person with a strong reaction", actionFa: "واکنشی ناگهانی نشان می‌دهد که معنی را برجسته می‌کند", actionEn: "shows a sudden reaction that makes the meaning vivid" },
+  { keys: /\b(?:place|country|room|house|home|building|station|gate|door|city|shop|yard|garden|school)\b/i, fa: "یک مکان مشخص", en: "a specific place", actionFa: "کسی وارد آن می‌شود، کاری انجام می‌دهد و دوباره بیرون می‌آید", actionEn: "someone enters, does something, and comes back out" },
+  { keys: /\b(?:big|small|many|few|one|two|three|middle|same|different|first|last|long|short|new|old|young)\b/i, fa: "یک مقایسهٔ دیداری", en: "a visual comparison", actionFa: "دو چیز کنار هم قرار می‌گیرند و تفاوتشان فوراً دیده می‌شود", actionEn: "two things are placed together so the difference is instantly visible" }
+]);
+
+const resolveMeaningProfile = meaning => {
+  const text = String(meaning ?? "");
+  return MEANING_SCENE_PROFILES.find(profile => profile.keys.test(text)) ?? {
+    fa: "یک شیء یا موقعیت مشخص",
+    en: "one specific object or situation",
+    actionFa: "حرکت یا تغییر واضحی رخ می‌دهد و معنی را برجسته می‌کند",
+    actionEn: "a clear movement or change happens and makes the meaning vivid"
+  };
+};
+
 const generatedScene = (character, meaning, components) => {
   const unique = [...new Set((Array.isArray(components) ? components : []).filter(Boolean))]
     .filter(c => c !== character).slice(0, 3);
-  const labelsFa = unique.map(c => PREPARED_COMPONENT_LABELS[c]?.fa ?? ("جزء " + c));
-  const labelsEn = unique.map(c => PREPARED_COMPONENT_LABELS[c]?.en ?? ("component " + c));
-  if (!unique.length) {
-    return {
-      fa: "کانجی «" + character + "» را در یک صحنهٔ واقعی برای «" + meaning + "» ببین؛ یک شیء مشخص را انتخاب کن و شکل کانجی را به همان شیء وصل کن تا با دیدنش «" + meaning + "» فوراً برگردد.",
-      en: "Put " + character + " into a concrete scene for “" + meaning + "”: choose one vivid object and bind the character's shape to it so seeing it brings “" + meaning + "” back."
-    };
-  }
+  const labels = unique.map(c => ({
+    fa: PREPARED_COMPONENT_LABELS[c]?.fa ?? "جزء دیداری «" + c + "»",
+    en: PREPARED_COMPONENT_LABELS[c]?.en ?? "visual component “" + c + "”"
+  }));
+  const profile = resolveMeaningProfile(meaning);
+  const anchorsFa = labels.length ? labels.map(label => label.fa).join("، ") : "شکل «" + character + "»";
+  const anchorsEn = labels.length ? labels.map(label => label.en).join(", ") : "the shape of " + character;
+  const index = (character.codePointAt(0) ?? 0) % 3;
   const faScenes = [
-    "«" + labelsFa.join("»، «") + "» را در یک صحنهٔ واحد کنار هم بگذار؛ یکی را بزرگ و جلوی چشم قرار بده و " + (labelsFa.length > 1 ? "بقیه را در حال تعامل با آن" : "همان را در حال حرکت") + " تصور کن. نتیجه را مستقیم به «" + meaning + "» وصل کن و شکل " + character + " را قاب همان صحنه بدان.",
-    "یک صحنهٔ کوتاه بساز: " + labelsFa.join("، ") + " در آن حضور دارند و اتفاقی روشن برایشان می‌افتد. در لحظهٔ اوج صحنه، " + character + " را ببین و «" + meaning + "» را مثل برچسب روی همان تصویر بچسبان.",
-    "برای «" + meaning + "» یک تصویر متحرک بساز که در آن " + labelsFa.join(" و ") + " نقش اصلی دارند. حرکت یا برخوردشان را با خطوط " + character + " یکی کن تا شکل کانجی بخشی از داستان باشد، نه یک علامت جدا."
+    profile.fa + " را کنار " + anchorsFa + " بگذار. " + profile.actionFa + "؛ درست در لحظهٔ اوج، «" + meaning + "» را روی این تصویر قفل کن و شکل " + character + " را قاب صحنه بدان.",
+    "صحنه را کوتاه نگه دار: " + anchorsFa + " حضور دارند و " + profile.fa + " " + profile.actionFa + ". وقتی تصویر به اوج رسید، «" + meaning + "» را بگو و " + character + " را داخل همان صحنه ببین.",
+    "یک تصویر متحرک برای «" + meaning + "» بساز: " + profile.fa + " با " + anchorsFa + " درگیر است و " + profile.actionFa + "؛ خطوط " + character + " بخشی از همان حرکت‌اند."
   ];
   const enScenes = [
-    "Put “" + labelsEn.join("”, “") + "” into one scene; make one vivid and foregrounded, with " + (labelsEn.length > 1 ? "the others interacting with it" : "it moving") + ". Tie the whole scene directly to “" + meaning + "”, and use " + character + " as the frame for the image.",
-    "Build a short scene: " + labelsEn.join(", ") + " are present and something clear happens. At the peak of the scene, see " + character + " and attach the label “" + meaning + "” to that single image.",
-    "Create a moving image for “" + meaning + "” in which " + labelsEn.join(" and ") + " drive the action. Fuse their interaction with the strokes of " + character + " so the kanji becomes part of the story, not a separate symbol."
+    "Put " + profile.en + " beside " + anchorsEn + ". " + profile.actionEn + "; at the peak, lock “" + meaning + "” onto the image and use " + character + " as the scene's frame.",
+    "Keep the scene short: " + anchorsEn + " are present while " + profile.en + " " + profile.actionEn + ". When the image peaks, say “" + meaning + "” and see " + character + " inside the same scene.",
+    "Build a moving image for “" + meaning + "”: " + profile.en + " interacts with " + anchorsEn + " and " + profile.actionEn + "; make the strokes of " + character + " part of that movement."
   ];
-  const index = character.codePointAt(0) % 3;
   return { fa: faScenes[index], en: enScenes[index] };
 };
 
