@@ -22,7 +22,6 @@ document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(()=>{voi
 document.addEventListener('kanji5:v1.6-education-result',e=>{const d=e?.detail||{};writeEvidence(String(d.character||''),d);setTimeout(()=>{void updateCore()},0)});
 void import('./v1.9-adaptive-planner.js').catch(()=>{});
 void import('./v1.9-recovery.js').catch(()=>{});
-void import('./v1.9-recovery-ui.js').catch(()=>{});
 void import('./v1.9-learning-evaluation.js').catch(()=>{});
 void import('./v1.9-v2-boundary.js').catch(()=>{});
 })();
