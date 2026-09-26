@@ -14,7 +14,11 @@ for(const file of files){
 }
 
 const dictionary=fs.readFileSync("frontend/src/app/DictionaryPage.tsx","utf8");
-assert.match(dictionary,/HandwritingPractice/,"Dictionary must retain handwriting utility integration.");
+const dictionaryCard=fs.readFileSync("frontend/src/app/DictionaryKanjiCard.tsx","utf8");
+assert.match(dictionary,/DictionaryKanjiCard/,"Dictionary must retain the handwriting-capable card integration.");
 assert.doesNotMatch(dictionary,/gradeHandwriting|handwriting-grader/,"DictionaryPage must not own handwriting grading logic.");
+assert.match(dictionaryCard,/HandwritingPractice/,"Dictionary card must retain handwriting practice integration.");
+assert.match(dictionaryCard,/getHandwritingSkill/,"Dictionary card must resolve handwriting learner skill through the presentation adapter.");
+assert.match(dictionaryCard,/recordHandwritingGrade/,"Dictionary card must record handwriting grading through the presentation adapter.");
 
 console.log("Handwriting architecture boundary contract passed.");
