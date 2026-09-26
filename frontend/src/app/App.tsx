@@ -342,7 +342,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                                     </button>}
                             </div>
                           </details>
-                        :null
+                        :null}
                       <button
                         className="mnemonic-trigger"
                         type="button"
