@@ -168,17 +168,16 @@ export function HandwritingPractice({ character, language }: { character: string
     redrawCanvas();
   }, [expanded, redrawCanvas]);
 
-  const pointFromEvent = useCallback((event: PointerEvent<HTMLCanvasElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / Math.max(1, rect.width)) * CANVAS_COORDINATE_SIZE;
-    const y = ((event.clientY - rect.top) / Math.max(1, rect.height)) * CANVAS_COORDINATE_SIZE;
-    return { x, y };
-  }, []);
+  const pointFromClient = useCallback((clientX: number, clientY: number, rect: DOMRect) => ({
+    x: ((clientX - rect.left) / Math.max(1, rect.width)) * CANVAS_COORDINATE_SIZE,
+    y: ((clientY - rect.top) / Math.max(1, rect.height)) * CANVAS_COORDINATE_SIZE,
+  }), []);
 
   const appendPointerPoints = useCallback((event: PointerEvent<HTMLCanvasElement>) => {
     const nativeEvent = event.nativeEvent as globalThis.PointerEvent;
     const events = typeof nativeEvent.getCoalescedEvents === "function" ? nativeEvent.getCoalescedEvents() : [nativeEvent];
-    const points = events.map(pointFromEvent);
+    const rect = event.currentTarget.getBoundingClientRect();
+    const points = events.map(point => pointFromClient(point.clientX, point.clientY, rect));
     for (const point of points) {
       const previous = currentStrokeRef.current.at(-1);
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) < 0.25) continue;
