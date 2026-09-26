@@ -187,6 +187,16 @@ test("handwriting is an optional skill-building layer inside Practice",async({pa
   await expect(page.locator(".practice-handwriting")).toHaveCount(0);
   await page.locator(".experience-nav .experience-tab").nth(1).click();
   await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await page.evaluate(async()=>{
+    await window.__KANJI5_V19_V2_BOUNDARY__.setExercise({
+      mode:"production",
+      prompt:"Write the Kanji",
+      character:"学",
+      contentId:"handwriting-practice-fixture",
+      provenance:"test"
+    });
+  });
   await expect.poll(async()=>page.locator(".practice-handwriting").count()).toBeGreaterThan(0);
   const practiceHandwriting=page.locator(".practice-handwriting");
   await expect(practiceHandwriting).toHaveAttribute("data-experience","practice");
