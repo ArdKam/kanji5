@@ -39,7 +39,7 @@ test('radical and component explorer support lookup, intersection, and structure
   await page.locator('.kanji-catalog-tile').filter({ hasText: '湖' }).click();
   const dialog = page.locator('.dictionary-card-dialog');
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator('.dictionary-card-structure-line')).toContainText('85|Traditional radical');
+  await expect(dialog.locator('.dictionary-card-structure-line')).toContainText(/85|رادیکال سنتی|Traditional radical/);
   await expect(dialog.locator('.component-breakdown')).toBeVisible();
 
   const componentButton = dialog.locator('.component-breakdown-part-button').filter({ hasText: '氵' });
