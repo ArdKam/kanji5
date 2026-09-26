@@ -74,8 +74,8 @@ test("vector grader calibrates across real KanjiVG characters", async ({ page })
 
     const score = (strokes) => page.evaluate(({ source, strokes, reference }) => {
       const executable = source
-        .replace(/export\\s+const\\s+/g, "const ")
-        .replace(/export\\s+function\\s+/g, "function ");
+        .replace(/export\s+const\s+/g, "const ")
+        .replace(/export\s+function\s+/g, "function ");
       return new Function("strokes", "reference", executable + "\nreturn gradeHandwriting(strokes, reference);")(strokes, reference);
     }, { source: graderSource, strokes, reference });
 
