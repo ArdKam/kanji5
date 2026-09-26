@@ -60,6 +60,14 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   const handwriting=await openSchoolHandwriting(page);
   const canvas=handwriting.locator(".handwriting-ink-canvas");
   await expect(handwriting.locator(".handwriting-guide-canvas")).toBeVisible();
+  const penBox=await canvas.boundingBox();
+  if(!penBox)throw new Error("handwriting canvas has no bounding box");
+  const penX=penBox.x+penBox.width*0.4, penY=penBox.y+penBox.height*0.4;
+  await canvas.dispatchEvent("pointerdown",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:penX,clientY:penY});
+  await canvas.dispatchEvent("pointermove",{pointerId:73,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:penX+12,clientY:penY+8});
+  await canvas.dispatchEvent("pointerup",{pointerId:73,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:penX+12,clientY:penY+8});
+  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
+  await handwriting.locator(".handwriting-actions .secondary").click();
 
   const reference=await page.evaluate(paths=>paths.map(row=>{
     const holder=document.createElement("div"),svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
