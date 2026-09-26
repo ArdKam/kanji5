@@ -120,6 +120,24 @@ test('Production Recall unknown self-grade records unknown and advances once',as
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
+test('production recall reveals the answer without typing and uses self-grade',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
+  await expect(page.locator('#root #exercise .production-recall')).toBeVisible();
+  await expect(page.locator('#root #exercise .answer-area')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'نمایش پاسخ',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'کمک: نمایش گزینه‌ها',exact:true})).toBeVisible();
+  await expect.poll(async()=>forcedTargetCharacter(page),{timeout:5000}).not.toBe('');
+  const character=await forcedTargetCharacter(page);
+  await page.getByRole('button',{name:'نمایش پاسخ',exact:true}).click();
+  await expect(page.locator('#root #exercise .production-recall-kanji')).toHaveText(character);
+  await expect(page.getByRole('button',{name:'بلد بودم',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'نمی‌دانستم',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'بلد بودم',exact:true}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
+});
+
 test('typed reading answer submits through the grading path and shows feedback',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
