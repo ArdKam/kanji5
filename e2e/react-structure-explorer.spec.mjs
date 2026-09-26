@@ -70,6 +70,7 @@ test('radical and component explorer support lookup, intersection, and structure
   });
   console.log("STRUCTURE_POSTLINK", JSON.stringify(postLinkBoundary));
   expect(postLinkBoundary.hasLake).toBe(true);
+  await expect(explorer.locator('.structure-result-kanji').first()).toHaveText('湖');
 
 
   await expect(explorer.locator('.structure-result-kanji').filter({ hasText: '湖' })).toBeVisible({ timeout: 10_000 });
