@@ -397,7 +397,28 @@
   .kanji-catalog-tile{transition:none;}
 }
 
-.dictionary-card-dialog .dialog-close{position:absolute;top:8px;inset-inline-start:8px;z-index:3;background:color-mix(in srgb, var(--paper) 86%, transparent);border-radius:12px;}
+.dictionary-card-dialog .dialog-close{
+  position:sticky;
+  top:4px;
+  inset-inline-start:auto;
+  z-index:8;
+  float:inline-start;
+  width:44px;
+  height:44px;
+  margin:0 0 -44px 0;
+  background:color-mix(in srgb,var(--paper) 94%,transparent);
+  border:1px solid var(--line);
+  border-radius:12px;
+  box-shadow:0 5px 16px -13px rgb(0 0 0 / .5);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+.dictionary-card-top{
+  padding-inline-start:52px;
+}
+.experience-nav{
+  z-index:30;
+}
 
 .dictionary-audio-button{flex:0 0 auto;}
 .dictionary-readings-header{margin-top:15px;padding-top:13px;border-top:1px solid var(--line);}
