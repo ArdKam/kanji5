@@ -381,21 +381,39 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     <div className="card-topline"><span className="badge">{skillLabel(ex.mode??"")}</span><span>{t("activeRecallLabel")}</span></div>
     <h2>{t("currentExercise")}</h2>
     <p className="prompt">{localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"))}</p>
-    {!ex.mode?<div className="empty-state">{t("exerciseReady")}: production;<Stimulus ex={ex}/>{result?<div className="exercise-feedback" role="status"><strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>{revealedAnswer?<div className="exercise-correct-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}</div>:production?<div className="production-recall">
-          <p className="production-recall-instruction">{t("productionRecallInstruction")}</p>
-          {!productionRevealed?<button className="button primary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>:<div className="production-recall-revealed" aria-live="polite">
-              <span>{t("revealedAnswer")}</span>
-              <strong lang="ja">{text(ex.character||"—")}</strong>
-              <div className="actions production-recall-actions">
-                <button className="button primary" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(true)}>{t("iKnewIt")}</button>
-                <button className="button secondary" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(false)}>{t("iDidntKnow")}</button>
+    {!ex.mode
+      ? <div className="empty-state">{t("exerciseReady")}</div>
+      : <>
+          <Stimulus ex={ex}/>
+          {result
+            ? <div className="exercise-feedback" role="status">
+                <strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>
+                {revealedAnswer?<div className="exercise-correct-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}
               </div>
-            </div>}
-        </div>:<label className="answer-area"><span>{t("answerYourself")}</span><input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/></label>}
-      {production?null:<div className="actions"><button className="button primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button><button className="button secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button></div>}
-    </>}
+            : production
+              ? <div className="production-recall">
+                  <p className="production-recall-instruction">{t("productionRecallInstruction")}</p>
+                  {!productionRevealed
+                    ? <button className="button primary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>
+                    : <div className="production-recall-revealed" aria-live="polite">
+                        <span>{t("revealedAnswer")}</span>
+                        <strong lang="ja">{text(ex.character||"—")}</strong>
+                        <div className="actions production-recall-actions">
+                          <button className="button primary" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(true)}>{t("iKnewIt")}</button>
+                          <button className="button secondary" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(false)}>{t("iDidntKnow")}</button>
+                        </div>
+                      </div>}
+                </div>
+              : <label className="answer-area">
+                  <span>{t("answerYourself")}</span>
+                  <input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/>
+                </label>}
+          {!result&&!production?<div className="actions">
+            <button className="button primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>
+            <button className="button secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button>
+          </div>:null}
+        </>}
   </section>
-}
 function Panel({title,children}:{title:string;children:ReactNode}){return <section className="surface insight-panel"><h3>{title}</h3>{children}</section>}
 function MasteryOverview({snapshot}:{snapshot:Snapshot}){
   return <Panel title={t("masteryOverview")}><div className="mastery-grid">{skillKeys.map(k=>{
