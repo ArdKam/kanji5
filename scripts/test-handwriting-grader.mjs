@@ -70,6 +70,37 @@ assert.ok(wrongKanjiGrade.score < 65, `unrelated character geometry must not sco
 const wrongCount = gradeHandwriting([reference[0]], reference);
 assert.ok(wrongCount.score < 40, `severe stroke-count mismatch must score low; got ${wrongCount.score}`);
 
+
+const reversedStroke = reference.map(stroke => stroke.slice().reverse());
+const reversedStrokeGrade = gradeHandwriting(reversedStroke, reference);
+assert.ok(reversedStrokeGrade.score < 80, `reversing stroke direction must be penalized; got ${reversedStrokeGrade.score}`);
+
+const shortStroke = [
+  line(20, 20, 38, 20),
+  ...reference.slice(1),
+];
+const shortStrokeGrade = gradeHandwriting(shortStroke, reference);
+assert.ok(shortStrokeGrade.score < 80, `a materially short stroke must not receive a good score; got ${shortStrokeGrade.score}`);
+
+const largeScale = reference.map(stroke => stroke.map(p => point(
+  54.5 + (p.x - 54.5) * 1.45,
+  54.5 + (p.y - 54.5) * 1.45,
+)));
+const largeScaleGrade = gradeHandwriting(largeScale, reference);
+assert.ok(largeScaleGrade.score < 85, `large scale deviation must be visible; got ${largeScaleGrade.score}`);
+
+const rotated = reference.map(stroke => stroke.map(p => point(
+  54.5 - (p.y - 54.5),
+  54.5 + (p.x - 54.5),
+)));
+const rotatedGrade = gradeHandwriting(rotated, reference);
+assert.ok(rotatedGrade.score < 65, `90-degree rotation must not score as a good match; got ${rotatedGrade.score}`);
+
+const highPointStroke = line(20, 20, 50, 20, 1000);
+const highPointInput = [highPointStroke, ...reference.slice(1)];
+const highPointGrade = gradeHandwriting(highPointInput, reference);
+assert.ok(Number.isFinite(highPointGrade.score), "high-point input must remain gradeable");
+assert.equal(highPointGrade.strokeCount.user, reference.length);
 const empty = gradeHandwriting([], reference);
 assert.equal(empty.score, 0);
 assert.equal(empty.feedbackCode, "empty");
