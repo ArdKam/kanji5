@@ -289,7 +289,7 @@ export function HandwritingPractice({ character, language }: { character: string
                 <button className="button primary" type="button" onClick={grade} disabled={!strokeCount}>{t("gradeDrawing", language)}</button>
               </div>
               {result !== null ? (
-                <div className={"handwriting-result " + (result.score >= 82 ? "great" : result.score >= 65 ? "good" : "retry")} role="status">
+                <div className={"handwriting-result " + (result.score >= 82 ? "great" : result.score >= 65 ? "good" : "retry")} role="status" data-score={String(result.score)}>
                   <strong>{formatNumber(result.score, language)}%</strong>
                   <span>{result.feedbackCode === "stroke-count"
                     ? t("handwritingRetry", language)
