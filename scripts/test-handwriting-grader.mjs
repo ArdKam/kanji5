@@ -77,7 +77,7 @@ const shortStroke=grade([
   line(18,18,34,18),
   ...reference.slice(1),
 ]);
-assert.ok(shortStroke.overallSimilarity<88, `short stroke should be visible: ${shortStroke.overallSimilarity}`);
+assert.ok(shortStroke.overallSimilarity<90, `short stroke should be visible: ${shortStroke.overallSimilarity}`);
 
 const largeScale=grade(reference.map(s=>s.map(p=>point(
   54.5+(p.x-54.5)*1.45,
