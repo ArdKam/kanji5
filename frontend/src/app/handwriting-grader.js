@@ -233,6 +233,13 @@ function placementScore(user,reference){
   return clamp(centerScore*0.58+sizeScore*0.42);
 }
 
+function meaningfulLengthPenalty(user,reference){
+  const ratio=Math.max(EPSILON,pathLength(user))/Math.max(EPSILON,pathLength(reference));
+  const deviation=Math.abs(Math.log(ratio));
+  const severity=clamp((deviation-0.08)/0.50);
+  return { ratio, penalty: 1-0.35*severity };
+}
+
 function featureIssue(features){
   if(features.endpoints<0.60) return "endpoints";
   if(features.direction<0.62) return "direction";
@@ -283,19 +290,22 @@ export function gradeHandwriting(userStrokes,referenceStrokes,options={}){
     const length=lengthScore(aligned[i],reference[i]);
     const direction=directionScore(aligned[i],reference[i]);
     const curvature=curvatureScore(aligned[i],reference[i]);
-    const similarity=clamp(
+    const lengthInfo=meaningfulLengthPenalty(aligned[i],reference[i]);
+    const baseSimilarity=clamp(
       shape*0.45+
       endpoints*0.15+
       length*0.10+
       direction*0.15+
       curvature*0.15
     );
+    const similarity=clamp(baseSimilarity*lengthInfo.penalty);
     perStroke.push({
       strokeNumber:i+1,
       similarity,
       shape,
       endpoints,
       length,
+      lengthRatio:lengthInfo.ratio,
       direction,
       curvature,
       feedbackCode:featureIssue({shape,endpoints,length,direction,curvature}),
