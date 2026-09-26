@@ -64,8 +64,17 @@ const boot=()=>{
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
   const wait=()=>{
     const reactAccount=document.querySelector('#root .account-button');
-    positionLauncher();
-    btn.classList.add('is-ready');
+    if(reactAccount){
+      btn.classList.add('is-shadowed');
+      btn.style.setProperty('visibility','hidden','important');
+      btn.style.setProperty('pointer-events','none','important');
+    }else{
+      btn.classList.remove('is-shadowed');
+      btn.style.setProperty('visibility','visible','important');
+      btn.style.setProperty('pointer-events','auto','important');
+      positionLauncher();
+      btn.classList.add('is-ready');
+    }
     const a=api();
     if(a&&!unsubscribe._attached){unsubscribe=a.subscribe(render);unsubscribe._attached=true;render();}
     if(document.body.contains(btn))window.setTimeout(wait,150);
