@@ -67,7 +67,7 @@ test("legacy handwriting grader exposes the current scoring defects",async({page
     const tc=target.getContext("2d"),uc=user.getContext("2d"),scale=size/109;
     tc.fillStyle="#1c1a17";tc.save();tc.scale(scale,scale);for(const path of reference)tc.fill(new Path2D(path.d));tc.restore();
     uc.save();uc.scale(scale,scale);uc.strokeStyle="#1c1a17";uc.lineWidth=lineWidth;uc.lineCap="round";uc.lineJoin="round";
-    for(const s of base){uc.beginPath();uc.moveTo(s.points[0].x,s.points[0].y);for(let i=1;i<s.points.length;i++)uc.lineTo(s.points[i].x,s.points[i].y);uc.stroke();}uc.restore();
+    for(const s of base){uc.beginPath();uc.moveTo(s[0].x,s[0].y);for(let i=1;i<s.length;i++)uc.lineTo(s[i].x,s[i].y);uc.stroke();}uc.restore();
     const a=tc.getImageData(0,0,size,size).data,b=uc.getImageData(0,0,size,size).data;let t=0,u=0,i=0;
     for(let p=3;p<a.length;p+=4){const x=a[p]>20,y=b[p]>20;if(x)t++;if(y)u++;if(x&&y)i++;}
     if(!t||!u||!i)return 0;
