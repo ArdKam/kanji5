@@ -4,10 +4,6 @@ const FALLBACK_DELAY=1500;
 const boot=()=>{
   const reactAccount=document.querySelector('#root .account-button');
   const launcher=document.querySelector('#kanji5-account-launcher');
-  if(reactAccount){
-    reactAccount.style.setProperty('visibility','hidden','important');
-    reactAccount.style.setProperty('pointer-events','none','important');
-  }
   if(launcher){
     launcher.classList.remove('is-shadowed');
     launcher.classList.add('is-ready');
@@ -68,10 +64,6 @@ const boot=()=>{
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
   const wait=()=>{
     const reactAccount=document.querySelector('#root .account-button');
-    if(reactAccount){
-      reactAccount.style.setProperty('visibility','hidden','important');
-      reactAccount.style.setProperty('pointer-events','none','important');
-    }
     positionLauncher();
     btn.classList.add('is-ready');
     const a=api();
