@@ -183,7 +183,7 @@ export function HandwritingPractice({ character, language }: { character: string
       if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) < 0.25) continue;
       currentStrokeRef.current.push(point);
     }
-  }, [pointFromEvent]);
+  }, [pointFromClient]);
 
   const startStroke = (event: PointerEvent<HTMLCanvasElement>) => {
     if (loading || error || !paths.length || !referenceStrokes.length) return;
