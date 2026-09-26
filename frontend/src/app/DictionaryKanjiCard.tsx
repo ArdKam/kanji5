@@ -59,7 +59,7 @@ export function DictionaryKanjiCard({
     return () => { active = false; };
   }, [item.character, openSection]);
 
-  const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>) => {
+  const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>, behavior: ScrollBehavior = "smooth") => {
     const target = sectionRefs.current[section];
     const scrollContainer = target?.closest<HTMLElement>(".dictionary-card");
     if (!target || !scrollContainer) return;
@@ -74,20 +74,51 @@ export function DictionaryKanjiCard({
 
     scrollContainer.scrollTo({
       top: nextScrollTop,
-      behavior: reducedMotion ? "auto" : "smooth",
+      behavior: reducedMotion ? "auto" : behavior,
     });
   };
 
   useEffect(() => {
     if (!openSection) return;
+    const target = sectionRefs.current[openSection];
+    if (!target) return;
+
     let frame = 0;
     let nextFrame = 0;
-    frame = window.requestAnimationFrame(() => {
-      nextFrame = window.requestAnimationFrame(() => {
-        scrollOpenSectionIntoView(openSection);
-      });
-    });
+    let settleTimer = 0;
+    let observer: ResizeObserver | null = null;
+    let observationStopTimer = 0;
+
+    const scheduleScroll = (behavior: ScrollBehavior) => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        frame = window.requestAnimationFrame(() => {
+          nextFrame = window.requestAnimationFrame(() => {
+            scrollOpenSectionIntoView(openSection, behavior);
+          });
+        });
+      }, 180);
+    };
+
+    const handleResize = () => {
+      scheduleScroll("auto");
+    };
+
+    scheduleScroll("smooth");
+
+    if ("ResizeObserver" in window) {
+      observer = new ResizeObserver(handleResize);
+      observer.observe(target);
+      observationStopTimer = window.setTimeout(() => {
+        observer?.disconnect();
+        observer = null;
+      }, 1800);
+    }
+
     return () => {
+      window.clearTimeout(settleTimer);
+      window.clearTimeout(observationStopTimer);
+      observer?.disconnect();
       window.cancelAnimationFrame(frame);
       window.cancelAnimationFrame(nextFrame);
     };
