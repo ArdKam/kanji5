@@ -9,10 +9,12 @@ function StatRow({ label, value }: { label: string; value: string }) {
 export function StatsDialog({ open, snapshot, language, onClose }: { open: boolean; snapshot: Snapshot; language: Language; onClose: () => void }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
-    if (!open || catalog.length || loading) return;
+    if (!open || catalog.length || loading || attempted) return;
     let active = true;
+    setAttempted(true);
     setLoading(true);
     void listKanji().then(result => {
       if (active) setCatalog(result.results);
@@ -22,7 +24,7 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, [open, catalog.length, loading]);
+  }, [open, catalog.length, loading, attempted]);
 
   const mastery = useMemo(() => {
     const total = catalog.length;
