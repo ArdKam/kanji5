@@ -43,6 +43,8 @@ jobs:
       - name: Typecheck frontend
         working-directory: frontend
         run: npm run typecheck
+      - name: Run handwriting architecture boundary
+        run: node scripts/test-handwriting-boundary.mjs
       - name: Run pure grader contract
         run: node scripts/test-handwriting-grader.mjs
       - name: Build React artifact
