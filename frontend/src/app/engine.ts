@@ -114,6 +114,25 @@ export type CustomStudyFocus = "available" | "due" | "new" | "weak";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number };
 
 export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
+export type RadicalEntry = {
+  id: number;
+  canonicalGlyph: string;
+  radicalCharacter: string;
+  codePoint: string;
+  variants: string[];
+  names?: { ja?: string };
+  readings?: { ja?: string[] };
+};
+
+export type RadicalInfo = {
+  character: string;
+  available: boolean;
+  radicalId?: number;
+  radical?: RadicalEntry;
+  source?: { name?: string; version?: string; url?: string } | null;
+  mappingSource?: { name?: string; via?: string; commit?: string; field?: string; semantics?: string } | null;
+};
+
 export type ComponentInfo = {
   character: string;
   available: boolean;
@@ -127,6 +146,7 @@ export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
+  getRadicalInfo: (character: string) => Promise<RadicalInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
@@ -304,4 +324,8 @@ export async function getVocabulary(character: string): Promise<{ character: str
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
+}
+
+export async function getRadicalInfo(character: string): Promise<RadicalInfo> {
+  return (await waitForEngine()).getRadicalInfo(character);
 }
