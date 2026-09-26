@@ -3,7 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
 import { sampleSvgStrokePaths } from "./handwriting-reference";
-import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, requestMoreHelp } from "./handwriting-hints";
+import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, requestMoreHelp, shouldPresentStrokeFeedback } from "./handwriting-hints";
 
 type Point = { x:number; y:number };
 
@@ -241,7 +241,7 @@ export function HandwritingPractice({ character, language, learningSignal }: { c
       const reference=referenceStrokes[strokeNumber-1];
       if(reference){
         const strokeGrade=gradeHandwritingStroke(committed,reference);
-        setLiveFeedback(strokeGrade.actionable?{strokeNumber,grade:strokeGrade}:null);
+        setLiveFeedback(shouldPresentStrokeFeedback(strokeGrade)?{strokeNumber,grade:strokeGrade}:null);
       }else setLiveFeedback(null);
     }else if(inkCanvasRef.current&&wrapRef.current){
       redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current);
