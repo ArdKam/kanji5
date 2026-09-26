@@ -65,7 +65,7 @@ test('wrong production answer turns the card red once and then advances once',as
   await startForcedExercise(page,'production');
   await expect(page.locator('#root #exercise .production-choice')).toHaveCount(4,{timeout:10000});
   const before=await page.evaluate(async()=>{const s=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return String(s.exercise.contentId)});
-  const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.character));
+  const character=await page.evaluate(()=>String(window.__KANJI5_EDU_UI_API__?.getState?.().item?.character||"").trim());
   const wrong=page.locator('#root #exercise .production-choice').filter({hasNotText:character}).first();
   await wrong.click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
@@ -83,7 +83,7 @@ test('correct production answer turns the card green and advances once',async({p
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
   const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise.contentId));
-  const character=await page.evaluate(async()=>{const ex=(await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise??{};return String(ex.answerHint||ex.character||'').trim();});
+  const character=await page.evaluate(()=>String(window.__KANJI5_EDU_UI_API__?.getState?.().item?.character||"").trim());
   await expect(character).not.toBe('');
   await page.locator('#root #exercise .production-choice').filter({hasText:character}).first().click();
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
