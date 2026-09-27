@@ -207,7 +207,7 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
 
   const singleColumnLayout = await card.evaluate(() => {
     const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel.is-expanded");
-    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length : 0;
+    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length : 0;
     return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
   });
   expect(singleColumnLayout.strokePanelColumns).toBe(1);
