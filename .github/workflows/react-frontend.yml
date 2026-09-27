@@ -74,6 +74,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
@@ -107,7 +108,7 @@ jobs:
         run: node scripts/test-react-migration.mjs
       - name: Run React presentation E2E
         working-directory: .
-        run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
+        run: timeout 120s npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
       - name: Run prepared mnemonic E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-prepared-mnemonic.spec.mjs
