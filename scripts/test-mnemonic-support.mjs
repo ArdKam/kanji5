@@ -221,7 +221,8 @@ const groupEnd = support.indexOf("\nconst CONFUSABLE_CUES", groupStart);
 assert.ok(groupStart >= 0 && groupEnd > groupStart, "Confusion group source must be present");
 const groupCode = support
   .slice(groupStart, groupEnd)
-  .replace("export const CONFUSABLE_GROUPS: Readonly<ConfusableGroup[]> =", "const CONFUSABLE_GROUPS =");
+  .replace("export const CONFUSABLE_GROUPS: Readonly<ConfusableGroup[]> = Object.freeze(CONFUSABLE_GROUPS_DATA);", "const CONFUSABLE_GROUPS = Object.freeze(CONFUSABLE_GROUPS_DATA);")
+  .replace("const CONFUSABLE_GROUPS_DATA: ConfusableGroup[] = [", "const CONFUSABLE_GROUPS_DATA = [");
 const confusionGroups = Function(`${groupCode}; return CONFUSABLE_GROUPS;`)();
 const confusionCharacters = new Set(confusionGroups.flatMap(group => group.members));
 assert.equal(confusionGroups.length, 29, "Confusion network group count must remain explicit and auditable");
