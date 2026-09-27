@@ -925,6 +925,7 @@ html[lang="fa"] .kanji-stimulus,html[lang="fa"] .first-readings,html[lang="fa"] 
 
 .learning-back-page .learning-back-scroll{padding:14px 4px 18px;display:flex;flex-direction:column;justify-content:flex-start;gap:18px;}
 .learning-back-page .mnemonic-page,.learning-back-page .stroke-page,.learning-back-page .readings-page{width:100%;min-height:100%;display:flex;flex-direction:column;gap:16px;}
+.learning-back-page .mnemonic-page{padding-bottom:var(--space-3);}
 .learning-back-page .readings-page .readings{width:100%;}
 .learning-back-page .stroke-page{align-items:stretch;}
 .learning-back-page .stroke-page>*{width:100%;}
