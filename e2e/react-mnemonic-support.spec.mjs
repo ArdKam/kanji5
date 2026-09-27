@@ -1,3 +1,5 @@
+test.use({ serviceWorkers: "allow" });
+
 import { test, expect } from "@playwright/test";
 
 test("learning card exposes reading and vocabulary memory bridges without altering grading", async ({ page }) => {
@@ -15,7 +17,7 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
   const support = card.locator(".mnemonic-support");
   await expect(support).toBeVisible();
   await expect(support).toHaveAttribute("data-hint-stage", /^(new|recovery|early|stable)$/);
-  await expect(support.locator(".mnemonic-support-reading")).toHaveText(/\\S+/);
+  await expect(support.locator(".mnemonic-support-reading")).toHaveText(/\S+/);
   await expect(support.locator(".mnemonic-support-item p")).not.toHaveCount(0);
  
   await expect(card.locator(".learning-back-meaning")).toBeVisible();
