@@ -812,9 +812,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   min-height:42px;
 }
 .account-button{
-  position:absolute;
-  left:0;
-  top:0;
+  position:relative;
   z-index:2;
   min-height:42px;
   height:42px;
