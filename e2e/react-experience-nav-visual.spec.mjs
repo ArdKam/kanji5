@@ -61,7 +61,7 @@ test('Learning, Active Recall and Dictionary use a persistent Lovable-style bott
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
   await tabs.nth(1).click();
   await expect(tabs.nth(1)).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('#exercise')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 10000 });
 
   await tabs.nth(0).click();
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
