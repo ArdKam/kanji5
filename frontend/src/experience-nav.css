@@ -2,11 +2,11 @@
 .experience-nav{
   position:fixed;
   top:auto !important;
-  height:auto !important;
-  max-height:96px !important;
+  height:var(--nav-bar-height) !important;
+  max-height:none !important;
   inset-block-start:auto !important;
   left:50%;
-  bottom:max(1rem, env(safe-area-inset-bottom));
+  bottom:max(14px, env(safe-area-inset-bottom));
   z-index:40;
   width:min(calc(100% - 2rem), 880px);
   transform:translateX(-50%);
@@ -23,13 +23,13 @@
 }
 .experience-tab{position:relative;min-height:54px;border:0;border-radius:var(--radius-lg);background:transparent;color:var(--mute);font:inherit;font-size:var(--text-sm);font-weight:700;cursor:pointer;transition:background-color .18s ease, color .18s ease, transform .18s ease;}
 .experience-tab::before{display:block;margin-bottom:2px;font-family:inherit;font-size:var(--text-md);line-height:1.1;color:currentColor;}
-.experience-tab:nth-child(1)::before{content:"学";}
-.experience-tab:nth-child(2)::before{content:"想";}
-.experience-tab:nth-child(3)::before{content:"字";}
-.experience-tab.active{background:var(--washi);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+.experience-tab:nth-of-type(1)::before{content:"学";}
+.experience-tab:nth-of-type(2)::before{content:"想";}
+.experience-tab:nth-of-type(3)::before{content:"字";}
+.experience-tab.active{background:transparent;color:var(--paper);box-shadow:none;}
 .experience-tab.active::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--shu);transform:translateX(-50%);}
 .experience-tab:focus-visible{outline:3px solid color-mix(in srgb, var(--shu) 45%, transparent);outline-offset:2px;}
-.experience-tab:active{transform:scale(.985);}
+.experience-tab:active:not(:disabled){transform:scale(.97);transition:transform .1s ease;}
 .experience-tab:disabled{cursor:wait;opacity:.55;}
   .content{min-height:calc(100dvh + 12rem);padding-bottom:12rem;scroll-padding-bottom:12rem;}
 .content button{scroll-margin-bottom:7.5rem;}
@@ -42,3 +42,30 @@ html{scroll-padding-bottom:12rem;}
   html{scroll-padding-bottom:11rem;}
 }
 @media (prefers-reduced-motion:reduce){.experience-tab{transition:none;}}
+
+.experience-nav{isolation:isolate;}
+.experience-tab-indicator{
+  position:absolute;
+  inset-block:6px;
+  inset-inline-start:6px;
+  width:calc((100% - 24px) / 3);
+  border-radius:var(--radius-md);
+  background:var(--sumi);
+  z-index:0;
+  transform:translateX(0);
+  transition:transform .28s cubic-bezier(.2,.7,.2,1);
+  pointer-events:none;
+}
+.experience-nav.active-tab-review .experience-tab-indicator{transform:translateX(0);}
+.experience-nav.active-tab-practice .experience-tab-indicator{transform:translateX(calc(100% + 6px));}
+.experience-nav.active-tab-dictionary .experience-tab-indicator{transform:translateX(calc(200% + 12px));}
+html[dir="rtl"] .experience-nav.active-tab-practice .experience-tab-indicator{transform:translateX(calc(-100% - 6px));}
+html[dir="rtl"] .experience-nav.active-tab-dictionary .experience-tab-indicator{transform:translateX(calc(-200% - 12px));}
+.experience-tab{z-index:1;}
+@media(max-width:520px){
+  .experience-nav{bottom:max(14px,env(safe-area-inset-bottom));height:var(--nav-bar-height) !important;}
+}
+@media(prefers-reduced-motion:reduce){
+  .experience-tab-indicator{transition:none;}
+  .experience-tab:active:not(:disabled){transition:none;}
+}
