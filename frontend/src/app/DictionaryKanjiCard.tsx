@@ -31,6 +31,16 @@ export function DictionaryKanjiCard({
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
   useEffect(() => {
     let active = true;
+    setComponentInfo(null);
+    getComponentInfo(item.character).then(info => {
+      if (active) setComponentInfo(info);
+    }).catch(() => {
+      if (active) setComponentInfo(null);
+    });
+    return () => { active = false; };
+  }, [item.character]);
+  useEffect(() => {
+    let active = true;
     setRadicalInfo(null);
     getRadicalInfo(item.character).then(info => {
       if (active) setRadicalInfo(info);
