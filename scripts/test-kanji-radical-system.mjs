@@ -58,7 +58,7 @@ const sandbox={
   document:{addEventListener(){},dispatchEvent(){}},
   CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},
   setTimeout(){},
-  fetch:async url=>({ok:true,json:async()=>String(url).includes("kanji-radicals")?fixture:{kanji:{"語":149},coverage:fixture.coverage,source:fixture.source}}),
+  fetch:async url=>({ok:true,json:async()=>String(url).includes("kanji-radicals.json")?fixture:{kanji:{"語":149},coverage:fixture.coverage,source:fixture.source}}),
   console:{error(){}},
   performance:{now(){return 0}},
   sessionStorage:{removeItem(){}},
