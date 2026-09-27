@@ -10,6 +10,9 @@ on:
       - "scripts/test-react-shipped-artifact.mjs"
       - "scripts/test-prepared-mnemonics.mjs"
       - "scripts/test-mnemonic-support.mjs"
+      - "scripts/test-kanji-radical-system.mjs"
+      - "kanji-radicals.json"
+      - "kanji-radical-map.json"
       - "frontend/src/app/mnemonic-support.ts"
       - "frontend/src/app/MnemonicSupport.tsx"
       - "frontend/src/app/mnemonic-support.css"
@@ -86,6 +89,9 @@ jobs:
       - name: Run prepared mnemonic coverage test
         working-directory: .
         run: node scripts/test-prepared-mnemonics.mjs
+      - name: Run traditional radical contract test
+        working-directory: .
+        run: node scripts/test-kanji-radical-system.mjs
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
