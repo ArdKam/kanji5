@@ -729,8 +729,8 @@ function App(){
         setExperience("dictionary");
       }}
     /></Suspense>:null}
-    {grammarOpen?<Suspense fallback={null}><LazyGrammarDialog open={grammarOpen} language={language} onClose={()=>setGrammarOpen(false)}/>
-    <ReadingLabDialog
+    {grammarOpen?<Suspense fallback={null}><LazyGrammarDialog open language={language} onClose={()=>setGrammarOpen(false)}/></Suspense>:null}
+    {readingLabOpen?<Suspense fallback={null}><LazyReadingLabDialog
       open={readingLabOpen}
       language={language}
       onClose={()=>setReadingLabOpen(false)}
