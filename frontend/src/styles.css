@@ -585,6 +585,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .mnemonic-tool .mnemonic-saved{grid-area:saved;min-width:0;padding:0;border:0;background:transparent;grid-template-columns:auto minmax(0,1fr);gap:6px;align-items:center;}
 .mnemonic-tool .mnemonic-saved>span{font-size:13px;}
 .mnemonic-tool .mnemonic-saved p{font-size:10px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mnemonic-tool > .mnemonic-prepared{grid-area:prepared;}
 .mnemonic-editor{grid-area:editor;display:grid;gap:6px;min-width:0;}
 .mnemonic-editor-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--mute);font-size:9px;}
 .mnemonic-editor-heading strong{color:var(--sumi);font-size:10px;}
