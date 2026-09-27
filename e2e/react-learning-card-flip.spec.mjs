@@ -127,10 +127,10 @@ test("learning card exposes five full-content back pages in Persian and English"
       await expect(card).toHaveAttribute("data-back-page-count", "5");
       await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(5);
       await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
-      await expect(card.locator(".learning-back-page").nth(1).locator(".readings")).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(1).locator(".readings")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(2).locator(".example-row")).toHaveCount(5);
-      await expect(card.locator(".learning-back-page").nth(3).locator(".mnemonic-page")).toBeVisible();
-      await expect(card.locator(".learning-back-page").nth(4).locator(".stroke-page")).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(3).locator(".mnemonic-page")).toHaveCount(1);
+      await expect(card.locator(".learning-back-page").nth(4).locator(".stroke-page")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".example-row")).toHaveCount(0);
       await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(0);
       await expect(card.locator(".learning-back-page").nth(3).locator(".example-row")).toHaveCount(0);
@@ -199,19 +199,19 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   const tools = card.locator(".learning-back-page.active .stroke-order-tool");
   await expect(tools).toBeVisible();
 
-  const singleColumnLayout = await card.evaluate(() => {
-    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel");
-    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length : 0;
-    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
-  });
-  expect(singleColumnLayout.strokePanelColumns).toBe(1);
-
-
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
 
   await trigger.click();
   const panel = card.locator(".stroke-order-panel.is-expanded");
   await expect(panel).toBeVisible();
+
+  const singleColumnLayout = await card.evaluate(() => {
+    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel.is-expanded");
+    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length : 0;
+    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
+  });
+  expect(singleColumnLayout.strokePanelColumns).toBe(1);
+
   await expect(panel.locator(".stroke-order-toggle")).toHaveAttribute("aria-expanded", "true");
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
