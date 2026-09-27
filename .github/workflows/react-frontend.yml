@@ -88,6 +88,11 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
+      - name: Materialize release18 React artifact for E2E
+        working-directory: .
+        run: |
+          cp react-dist/kanji5-react.js react-dist/kanji5-react-release18.js
+          cp react-dist/kanji5-react.css react-dist/kanji5-react-release18.css
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
