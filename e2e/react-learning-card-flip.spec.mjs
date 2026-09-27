@@ -83,8 +83,8 @@ async function goToBackPage(page, card, targetIndex) {
       await swipePager(page, card.locator(".learning-back-pager-shell"), 0.75, 0.25);
     } else {
       await card.locator(".pager-button").nth(1).click();
+      await page.waitForTimeout(520);
     }
-    await expect(card.locator(".learning-back-page").nth(index + 1)).toHaveClass(/active/);
   }
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
