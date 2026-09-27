@@ -10,7 +10,7 @@ let networkPromise=null;
 function loadNetwork(){
   return networkPromise||(networkPromise=import('./v1.5-network.js')).catch(error=>{networkPromise=null;throw error});
 }
-let componentDataPromise=null;
+let componentDataPromise=null;let radicalDataPromise=null;
 async function ensureEducationRuntime(){
   if(window.__KANJI5_EDU_BRIDGE__?.start)return true;
   if(educationRuntimePromise)return educationRuntimePromise;
@@ -54,6 +54,8 @@ function loadComponentData(){
   }).catch(()=>null);
   return componentDataPromise;
 }
+function loadRadicalData(){if(radicalDataPromise)return radicalDataPromise;radicalDataPromise=Promise.all([fetch('./kanji-radicals.json',{cache:'no-store'}),fetch('./kanji-radical-map.json',{cache:'no-store'})]).then(async([catalogResponse,mapResponse])=>{if(!catalogResponse.ok||!mapResponse.ok)throw new Error('KANJI5_RADICAL_DATA_UNAVAILABLE');return {catalog:await catalogResponse.json(),map:await mapResponse.json()}}).catch(()=>null);return radicalDataPromise;}
+async function getRadicalInfo(character){const normalized=Array.from(String(character||'').trim()).slice(0,1).join('');const data=await loadRadicalData();if(!data||!normalized)return {character:normalized,available:false,radicalId:null,radical:null,coverage:data?.map?.coverage||null,source:data?.catalog?.source||null};const id=Number(data.map?.kanji?.[normalized]);const radical=Number.isInteger(id)?data.catalog?.radicals?.find(item=>Number(item.id)===id)||null:null;return {character:normalized,available:Boolean(radical&&Number.isInteger(id)),radicalId:Number.isInteger(id)?id:null,radical,coverage:data.map?.coverage||null,source:data.catalog?.source||null};}
 function normalizeDictionaryQuery(value){
   return String(value||'').trim().replace(/[ァ-ヺ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).toLowerCase();
 }
@@ -222,7 +224,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary, snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
