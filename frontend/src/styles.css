@@ -87,7 +87,7 @@ html[dir="rtl"] .learning-back-page{direction:rtl;}
 html[dir="ltr"] .learning-back-page{direction:ltr;}
 .learning-back-page{flex:0 0 100%;min-width:100%;min-height:0;visibility:hidden;pointer-events:none;overflow:hidden;}
 .learning-back-page.active{visibility:visible;pointer-events:auto;}
-.learning-back-page .learning-back-scroll{height:100%;width:100%;overflow-y:auto;overscroll-behavior:contain;}
+.learning-back-page .learning-back-scroll{height:100%;width:100%;overflow-y:auto;overscroll-behavior:contain;scroll-padding-block:var(--space-3);}
 .learning-back-page.active .learning-back-scroll{animation:learningPagerContentIn .36s cubic-bezier(.22,1,.36,1) both;}
 .learning-back-page-nav{display:grid;grid-template-columns:44px auto 44px;align-items:center;justify-content:center;gap:8px;margin:0 0 7px;}
 .pager-button{width:44px;height:44px;min-height:44px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--paper);color:var(--sumi);font-size:var(--text-2xl);display:grid;place-items:center;padding:0;}
