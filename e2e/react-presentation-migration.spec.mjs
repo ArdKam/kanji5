@@ -8,6 +8,14 @@ async function clean(page){
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
+async function seedSeenCard(page){
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  await page.locator('#root .learning-card .button.wide').click();
+  await expect(page.locator('#root .learning-card .rating-good')).toBeVisible({timeout:5000});
+  await page.locator('#root .learning-card .rating-good').click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+}
+
 
 test('React is the sole default presentation renderer',async({page})=>{
   await clean(page);
@@ -31,7 +39,9 @@ test('React learning and review actions stay behind the authoritative boundary',
 });
 
 test('React exercise path can start and expose a boundary-backed exercise',async({page})=>{
+  test.setTimeout(40000);
   await clean(page);
+  await seedSeenCard(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
@@ -187,8 +197,8 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
 
 test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'More',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'Reading Lab',exact:true}).click();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Reading Lab'});
   await expect(dialog).toBeVisible({timeout:10000});
   const lab=dialog.locator('.reading-lab');
