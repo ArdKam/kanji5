@@ -172,7 +172,7 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
   .learning-card-face{padding:14px 16px;gap:7px;}
   .learning-card-front .kanji-row{min-height:125px;}
   .learning-card-front .kanji-display{font-size:92px;}
-  .learning-back-scroll{padding-right:2px;}
+  .learning-back-scroll{padding-inline-end:2px;}
 }
 @media(max-width:380px){
   .learning-back-footer .rating-grid{gap:6px;}
@@ -204,10 +204,10 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .learning-card-back .rating-grid{bottom:16px;}
 .compact-examples{margin-bottom:76px;padding-bottom:0;}
 @media(max-width:760px){
-  .header{padding-right:56px;}
+  .header{padding-inline-end:56px;}
   .header-tools{top:0;right:0;}
   .header-menu-trigger{display:inline-grid;place-items:center;}
-  .header-actions{display:flex;align-items:center;width:100%;padding-right:0;}
+  .header-actions{display:flex;align-items:center;width:100%;padding-inline-end:0;}
   .header-actions .session-progress{width:100%;}
   .learning-card{height:min(640px,calc(100dvh - 32px));min-height:0;}
   .learning-card-back .rating-title{bottom:112px;}
@@ -266,7 +266,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .dictionary-search{display:block;margin:0 0 10px;}
 .dictionary-search input{width:100%;min-height:50px;border:1px solid var(--line);border-radius:14px;background:var(--washi);padding:10px 14px;color:var(--sumi);direction:inherit;}
 .dictionary-hint{margin:8px 0 0;color:var(--mute);font-size:12px;line-height:1.7;}
-.dictionary-results{display:grid;gap:8px;max-height:62vh;overflow:auto;padding-right:2px;}
+.dictionary-results{display:grid;gap:8px;max-height:62vh;overflow:auto;padding-inline-end:2px;}
 .dictionary-result{display:grid;grid-template-columns:82px 1fr;gap:14px;padding:13px;border:1px solid var(--line);border-radius:18px;background:var(--washi);align-items:start;}
 .dictionary-character{display:grid;place-items:center;min-height:82px;border:1px solid var(--line);border-radius:16px;background:var(--paper);font-family:"Noto Serif JP",serif;font-size:48px;line-height:1;direction:ltr;}
 .dictionary-detail{min-width:0;display:grid;gap:7px;}
