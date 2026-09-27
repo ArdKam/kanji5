@@ -692,6 +692,7 @@ function App(){
         return Boolean(result?.started);
       }}
     />
+    </Suspense>
   )
 ) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
