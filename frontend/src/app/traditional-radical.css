@@ -1,11 +1,11 @@
-.traditional-radical{display:grid;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--washi) 68%,transparent)}
+.traditional-radical{display:grid;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:color-mix(in srgb,var(--washi) 68%,transparent)}
 .traditional-radical-header{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
-.traditional-radical-header h3{margin:0;color:var(--sumi);font-size:11px;font-weight:850}
-.traditional-radical-header p{margin:3px 0 0;color:var(--mute);font-size:8px;line-height:1.5}
-.traditional-radical-id{flex:0 0 auto;padding:4px 7px;border:1px solid var(--line);border-radius:999px;color:var(--mute);font-size:8px;font-weight:850}
+.traditional-radical-header h3{margin:0;color:var(--sumi);font-size:var(--text-xs);font-weight:850}
+.traditional-radical-header p{margin:3px 0 0;color:var(--mute);font-size:var(--text-xs);line-height:1.5}
+.traditional-radical-id{flex:0 0 auto;padding:4px 7px;border:1px solid var(--line);border-radius:var(--radius-xl);color:var(--mute);font-size:var(--text-xs);font-weight:850}
 .traditional-radical-body{display:flex;align-items:center;gap:11px;min-width:0}
-.traditional-radical-glyph{width:48px;height:48px;display:grid;place-items:center;border-radius:12px;background:var(--paper);border:1px solid var(--line);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:31px;line-height:1;color:var(--sumi)}
+.traditional-radical-glyph{width:48px;height:48px;display:grid;place-items:center;border-radius:var(--radius-md);background:var(--paper);border:1px solid var(--line);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:var(--text-2xl);line-height:1;color:var(--sumi)}
 .traditional-radical-copy{display:grid;gap:4px;min-width:0}
-.traditional-radical-copy strong{color:var(--sumi);font-size:11px;line-height:1.5}
-.traditional-radical-copy span{color:var(--mute);font-size:8px}
-@media(max-width:520px){.traditional-radical{padding:10px}.traditional-radical-glyph{width:44px;height:44px;font-size:28px}.traditional-radical-header p{font-size:7px}.traditional-radical-copy strong{font-size:10px}}
+.traditional-radical-copy strong{color:var(--sumi);font-size:var(--text-xs);line-height:1.5}
+.traditional-radical-copy span{color:var(--mute);font-size:var(--text-xs)}
+@media(max-width:520px){.traditional-radical{padding:10px}.traditional-radical-glyph{width:44px;height:44px;font-size:var(--text-2xl)}.traditional-radical-header p{font-size:var(--text-xs)}.traditional-radical-copy strong{font-size:var(--text-xs)}}
