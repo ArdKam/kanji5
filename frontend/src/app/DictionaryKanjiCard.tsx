@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
+import { TraditionalRadical } from "./TraditionalRadical";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryAudio, DictionaryReading } from "./DictionaryPrimitives";
 import { VocabularyExamples } from "./VocabularyExamples";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getHandwritingSkill, recordHandwritingGrade, type ComponentInfo, type HandwritingSkill, type KanjiCatalogItem } from "./engine";
+import { getComponentInfo, getRadicalInfo, getHandwritingSkill, recordHandwritingGrade, type ComponentInfo, type HandwritingSkill, type KanjiCatalogItem, type RadicalInfo } from "./engine";
 
 type SectionKey = "structure" | "writing" | "vocabulary" | "mnemonic" | null;
 
@@ -27,6 +28,17 @@ export function DictionaryKanjiCard({
 }) {
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
+  const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
+  useEffect(() => {
+    let active = true;
+    setRadicalInfo(null);
+    getRadicalInfo(item.character).then(info => {
+      if (active) setRadicalInfo(info);
+    }).catch(() => {
+      if (active) setRadicalInfo(null);
+    });
+    return () => { active = false; };
+  }, [item.character]);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   useEffect(() => {
     let active = true;
@@ -194,6 +206,7 @@ export function DictionaryKanjiCard({
           <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "structure"}>
             {openSection === "structure" ? (
               <div id="dictionary-section-panel-structure" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "ساختار" : "Structure"}>
+                {radicalInfo?.available ? <TraditionalRadical info={radicalInfo} language={language} /> : null}
                 {componentInfo?.available && componentInfo.components.length ? (
                   <>
                     <ComponentBreakdown
