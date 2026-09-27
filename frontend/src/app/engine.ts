@@ -218,6 +218,12 @@ export async function startLearningExperience(): Promise<void> {
   if (session?.startExperience) await session.startExperience("review");
 }
 
+export async function startPracticeExperience(): Promise<void> {
+  await waitForEngine();
+  const session = window.__KANJI5_V16_SESSION_API__;
+  if (session?.startExperience) await session.startExperience("practice");
+}
+
 export async function startExercise(): Promise<void> {
   const boundary = await waitForEngine();
   await boundary.clearCustomStudyFilter?.();
