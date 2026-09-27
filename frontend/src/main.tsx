@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
+import "vazirmatn/Vazirmatn-Variable-font-face.css";
 import "./styles.css";
 import "./experience-nav.css";
 import "./app/dictionary.css";
