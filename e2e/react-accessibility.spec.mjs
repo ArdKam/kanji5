@@ -46,6 +46,11 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   expect(motion.matches).toBe(true);
   expect(parseFloat(motion.progressTransition)).toBeLessThanOrEqual(0.01);
 
+  // Establish the documented education precondition: active recall requires at least one seen kanji.
+  const reveal=page.locator('#root .learning-card-front .button.primary.wide');
+  await expect(reveal).toBeVisible();
+  await reveal.click();
+  await page.getByRole('button',{name:'خوب',exact:true}).click();
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
