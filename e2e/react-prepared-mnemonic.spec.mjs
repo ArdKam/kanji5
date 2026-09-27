@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 
+async function goToBackPage(card, targetIndex) {
+  for (let index = 0; index < targetIndex; index += 1) {
+    await card.locator(".pager-button").nth(1).click();
+  }
+  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+}
+
 test("prepared mnemonic is available on every learning card and can be saved as personal", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
@@ -12,6 +19,7 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
+  await goToBackPage(card, 3);
   const prepared = card.locator(".mnemonic-prepared");
   await expect(prepared).toBeVisible();
   await prepared.scrollIntoViewIfNeeded();

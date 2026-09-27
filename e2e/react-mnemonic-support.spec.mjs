@@ -2,6 +2,13 @@ test.use({ serviceWorkers: "allow" });
 
 import { test, expect } from "@playwright/test";
 
+async function goToBackPage(card, targetIndex) {
+  for (let index = 0; index < targetIndex; index += 1) {
+    await card.locator(".pager-button").nth(1).click();
+  }
+  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+}
+
 test("learning card exposes reading and vocabulary memory bridges without altering grading", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
@@ -14,14 +21,17 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  const support = card.locator(".mnemonic-support");
+  await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-meaning")).toBeVisible();
+  await card.locator(".pager-button").nth(1).click();
+  await expect(card.locator(".learning-back-page").nth(1).locator(".learning-back-readings")).toBeVisible();
+  await card.locator(".pager-button").nth(1).click();
+  await card.locator(".pager-button").nth(1).click();
+  const support = card.locator(".learning-back-page.active .mnemonic-support");
   await expect(support).toBeVisible();
   await expect(support).toHaveAttribute("data-hint-stage", /^(new|recovery|early|stable)$/);
   await expect(support.locator(".mnemonic-support-reading")).toHaveText(/\S+/);
   await expect(support.locator(".mnemonic-support-item p")).not.toHaveCount(0);
  
-  await expect(card.locator(".learning-back-meaning")).toBeVisible();
-  await expect(card.locator(".learning-back-readings")).toBeVisible();
 });
 
 

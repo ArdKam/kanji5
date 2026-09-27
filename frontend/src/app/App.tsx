@@ -211,7 +211,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const densityScore=exampleCount*2+Math.min(readingCount,6);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const hasExamplesPage=exampleCount>2||(density==="dense"&&exampleCount>0);
-  const backPageCount=hasExamplesPage?2:1;
+  const backPageCount=5;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;lastX:number;lastTime:number;active:boolean}>({startX:0,lastX:0,lastTime:0,active:false});
@@ -260,10 +260,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     const shouldAdvance=(!cancelled&&Math.abs(delta)>=threshold)||(!cancelled&&Math.abs(velocity)>=0.55&&Math.abs(delta)>=20);
     const target=shouldAdvance?Math.max(0,Math.min(backPageCount-1,backPage+(delta<0?1:-1))):backPage;
     const track=pagerTrackRef.current;
-    if(track){
-      track.style.transition="";
-      requestAnimationFrame(()=>{track.style.transform="translate3d(-"+target*100+"%,0,0)";});
-    }
+    if(track){track.style.transition="";requestAnimationFrame(()=>{track.style.transform="translate3d(-"+target*100+"%,0,0)";});}
     try{if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(_){/* no active capture */}
     if(target!==backPage)setBackPage(target);
   };
@@ -283,22 +280,38 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
         <div className="card-topline"><span className="badge badge-red">学習</span><span>{t("cardBack")}</span></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
-            <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={getLanguage()==="fa"?"صفحه اطلاعات اصلی":"Core information"} aria-hidden={backPage!==0}>
+            <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={getLanguage()==="fa"?"معنی و ساختار":"Meaning & structure"} aria-hidden={backPage!==0}>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
                     <div className="learning-back-identity-visual">
-                    {componentInfo?.available&&componentInfo.components.length
-                      ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
-                      : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
+                      {componentInfo?.available&&componentInfo.components.length
+                        ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
+                        : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
                     </div>
                     {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
-                    <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
-                    <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
-                    <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
-                    <div className="learning-back-tools">
-                      {card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}
-                      <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={getLanguage()==="fa"?"خوانش‌ها":"Readings"} aria-hidden={backPage!==1}>
+              <div className="learning-back-scroll">
+                <div className="readings-page">
+                  <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
+                  <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                </div>
+              </div>
+            </div>
+            <div className={"learning-back-page"+(backPage===2?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==2}>
+              <div className="learning-back-scroll">
+                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
+              </div>
+            </div>
+            <div className={"learning-back-page"+(backPage===3?" active":"")} aria-label={getLanguage()==="fa"?"یادسپار":"Mnemonic"} aria-hidden={backPage!==3}>
+              <div className="learning-back-scroll">
+                <div className="mnemonic-page">
+                  <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
+                  <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
                       {!mnemonicEditing&&preparedMnemonic&&mnemonicHintPlan.preparedMode!=="hidden"?
                         mnemonicHintPlan.preparedMode==="expanded"?
                           <div className="mnemonic-prepared" data-mnemonic-source={preparedMnemonic.source}>
@@ -377,20 +390,14 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                         </div>
                         :null}
                     </section>
-                    </div>
-                  </div>
                 </div>
-                {!hasExamplesPage&&card.examples?.length?<div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>:null}
               </div>
             </div>
-            {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1}>
+            <div className={"learning-back-page"+(backPage===4?" active":"")} aria-label={getLanguage()==="fa"?"ترتیب نوشتن":"Stroke order"} aria-hidden={backPage!==4}>
               <div className="learning-back-scroll">
-                <div className="examples compact-examples">
-                  <h3>{t("vocabularyExamples")}</h3>
-                  {card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}
-                </div>
+                <div className="stroke-page">{card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
               </div>
-            </div>:null}
+            </div>
           </div>
         </div>
         <div className="learning-back-footer">
