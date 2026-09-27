@@ -278,7 +278,7 @@ assert.deepEqual(hintFns.getMnemonicHintPlan("mastered", "both"), { stage: "mast
 const adaptivePlanSource = support.slice(hintStart, hintEnd);
 assert.match(adaptivePlanSource, /preparedMode: "expanded"/);
 assert.match(adaptivePlanSource, /preparedMode: "collapsed"/);
-assert.match(adaptivePlanSource, /preparedMode: "hidden"/);
+assert.match(adaptivePlanSource, /PreparedMnemonicPresentationMode[^;]*"hidden"/);
 assert.match(adaptivePlanSource, /repeatedFailure/);
 assert.match(adaptivePlanSource, /errorStreak/);
 assert.match(adaptivePlanSource, /momentum/);
