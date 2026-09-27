@@ -199,7 +199,7 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'Reading Lab'});
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
   await expect(dialog).toBeVisible({timeout:10000});
   const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible();
