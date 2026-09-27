@@ -84,6 +84,7 @@ async function goToBackPage(page, card, targetIndex) {
     } else {
       await card.locator(".pager-button").nth(1).click();
     }
+    await expect(card.locator(".learning-back-page").nth(index + 1)).toHaveClass(/active/);
   }
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
