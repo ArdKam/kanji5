@@ -116,6 +116,7 @@ export type CustomStudyFocus = "available" | "due" | "new" | "weak";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number };
 
 export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
+export type RadicalInfo = { character:string; available:boolean; radicalId:number|null; radical:{id:number;glyph:string;strokeCount:number;meanings:string[];sourceForms?:string[]}|null; coverage?:{available?:number;total?:number;fraction?:number}|null; source?:{name?:string;upstreamVersion?:string;license?:string;radicalDefinitionsRevision?:number}|null; };
 export type ComponentInfo = {
   character: string;
   available: boolean;
@@ -129,6 +130,7 @@ export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
+  getRadicalInfo: (character: string) => Promise<RadicalInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
@@ -307,6 +309,10 @@ export async function getVocabulary(character: string): Promise<{ character: str
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
+}
+
+export async function getRadicalInfo(character: string): Promise<RadicalInfo> {
+  return (await waitForEngine()).getRadicalInfo(character);
 }
 
 export async function getHandwritingSkill(character:string):Promise<HandwritingSkill|null>{const key=String(character||"").trim();if(!key)return null;const started=performance.now();while(performance.now()-started<6000){const api=window.__KANJI5_V19_LEARNER_MODEL__;if(api?.project){try{return(await api.project(key))?.skills?.handwriting??null}catch{return null}}await new Promise(resolve=>window.setTimeout(resolve,50))}return null}
