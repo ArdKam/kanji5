@@ -6,6 +6,9 @@ const readJSON=async path=>JSON.parse(await readFile(new URL("../"+path,import.m
 const catalog=await readJSON("kanji-radicals.json");
 const map=await readJSON("kanji-radical-map.json");
 const kanji=await readJSON("kanji-data.json");
+const sw=await readFile(new URL("../sw.js",import.meta.url),"utf8");
+const boundary=await readFile(new URL("../v1.9-v2-boundary.js",import.meta.url),"utf8");
+const card=await readFile(new URL("../frontend/src/app/DictionaryKanjiCard.tsx",import.meta.url),"utf8");
 
 assert.equal(catalog.schema,"kanji-radicals/v1");
 assert.equal(catalog.radicals.length,214);
@@ -16,6 +19,12 @@ assert.equal(Object.keys(map.kanji).length,2136);
 assert.equal(map.coverage.available,2136);
 assert.equal(map.coverage.total,2136);
 assert.equal(kanji.kanji.length,2136);
+assert.match(sw,/\.\/kanji-radicals\.json/);
+assert.match(sw,/\.\/kanji-radical-map\.json/);
+assert.match(boundary,/function getRadicalInfo\(character\)/);
+assert.match(boundary,/getRadicalInfo,getComponentInfo|getComponentInfo,getRadicalInfo/);
+assert.match(card,/TraditionalRadical/);
+assert.match(card,/getRadicalInfo\(item\.character\)/);
 
 const byId=new Map(catalog.radicals.map(r=>[r.id,r]));
 for(const [character,id] of Object.entries(map.kanji)){
