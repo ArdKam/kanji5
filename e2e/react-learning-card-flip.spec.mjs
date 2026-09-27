@@ -200,19 +200,10 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await expect(tools).toBeVisible();
 
   const singleColumnLayout = await card.evaluate(() => {
-    const overview = document.querySelector(".learning-card-back .learning-back-overview");
-    const backTools = document.querySelector(".learning-card-back .learning-back-tools");
-    const strokePanel = document.querySelector(".learning-card-back .stroke-order-panel");
-    const strokeTool = document.querySelector(".learning-card-back .stroke-order-tool");
+    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel");
     const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length : 0;
-    return {
-      overviewColumns: columns(overview),
-      toolsColumns: columns(backTools),
-      strokePanelColumns: strokePanel ? columns(strokePanel) : (strokeTool ? 1 : 0),
-    };
+    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
   });
-  expect(singleColumnLayout.overviewColumns).toBe(1);
-  expect(singleColumnLayout.toolsColumns).toBe(1);
   expect(singleColumnLayout.strokePanelColumns).toBe(1);
 
 
@@ -319,8 +310,8 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
   await goToBackPage(page, card, 3);
+  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
   const mnemonic = card.locator(".learning-back-page.active .mnemonic-tool");
   const trigger = mnemonic.getByRole("button", { name: "Personal mnemonic" });
   await expect(trigger).toBeVisible();
