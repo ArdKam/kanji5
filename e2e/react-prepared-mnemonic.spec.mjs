@@ -37,6 +37,34 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   expect(preparedViewport.opacity).toBeGreaterThan(0);
   expect(preparedViewport.top).toBeGreaterThanOrEqual(preparedViewport.scrollTop - 1);
   expect(preparedViewport.bottom).toBeLessThanOrEqual(preparedViewport.scrollBottom + 1);
+  const mnemonicGeometry = await card.evaluate(() => {
+    const root = document.querySelector(".mnemonic-tool");
+    if (!root) throw new Error("mnemonic tool missing");
+    const selectors = [".mnemonic-prepared", ".mnemonic-trigger", ".mnemonic-saved", ".mnemonic-editor"];
+    const visible = selectors
+      .map(selector => document.querySelector(selector))
+      .filter(el => {
+        if (!(el instanceof HTMLElement)) return false;
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      })
+      .map(el => {
+        const rect = el.getBoundingClientRect();
+        return { name: el.className, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+      });
+    const overlaps = [];
+    for (let i = 0; i < visible.length; i += 1) {
+      for (let j = i + 1; j < visible.length; j += 1) {
+        const a = visible[i], b = visible[j];
+        const overlap = Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1
+          && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1;
+        if (overlap) overlaps.push([a.name, b.name]);
+      }
+    }
+    return { visible, overlaps };
+  });
+  expect(mnemonicGeometry.overlaps).toEqual([]);
   const preparedText = prepared.locator(".mnemonic-prepared-copy p");
   await expect(preparedText).toHaveText(/\S+/);
 
