@@ -4,7 +4,7 @@
 .component-breakdown-note{color:var(--mute);font-size:var(--text-xs)}
 .component-breakdown-visual{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;min-width:0;direction:ltr}
 .component-breakdown-target,.component-breakdown-part{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;line-height:1}
-.component-breakdown-target{font-size:clamp(38px,7vw,60px);font-weight:700;color:var(--sumi)}
+.component-breakdown-target{font-size:var(--text-display-compact);font-weight:700;color:var(--sumi)}
 .component-breakdown-part{min-width:38px;min-height:38px;padding:6px 9px;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--washi);font-size:var(--text-lg);color:var(--sumi)}
 .component-breakdown-plus{color:var(--mute);font-size:var(--text-base);font-weight:800}
 @media (max-width:520px){
