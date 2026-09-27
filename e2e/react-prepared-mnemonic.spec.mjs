@@ -22,7 +22,7 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   await goToBackPage(card, 3);
   const prepared = card.locator(".mnemonic-prepared");
   await expect(prepared).toBeVisible();
-  await prepared.scrollIntoViewIfNeeded();
+  await prepared.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" }));
   const preparedViewport = await prepared.evaluate((el) => {
     const rect = el.getBoundingClientRect();
     const style = getComputedStyle(el);
