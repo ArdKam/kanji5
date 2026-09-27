@@ -134,27 +134,26 @@ test("learning card keeps dense information on separate back pages in Persian an
     const pageMetrics = await card.locator(".learning-back-page").evaluateAll((pages) =>
       pages.map((page) => {
         const scroll = page.querySelector(".learning-back-scroll");
+        const pageRect = page.getBoundingClientRect();
+        const scrollRect = scroll?.getBoundingClientRect();
         return {
           visible: getComputedStyle(page).visibility,
           clientHeight: scroll?.clientHeight ?? 0,
           scrollHeight: scroll?.scrollHeight ?? 0,
+          pageTop: pageRect.top,
+          pageBottom: pageRect.bottom,
+          scrollTop: scrollRect?.top ?? 0,
+          scrollBottom: scrollRect?.bottom ?? 0,
         };
       }),
     );
     expect(pageMetrics[0].visible).toBe("visible");
     expect(pageMetrics[1].visible).toBe("hidden");
-    for (let index = 0; index < pageMetrics.length; index += 1) {
-      const metrics = pageMetrics[index];
-      if (metrics.scrollHeight > metrics.clientHeight + 2) {
-        const children = await card.locator(".learning-back-page").nth(index).locator(".learning-back-overview").evaluate((el) =>
-          Array.from(el.children).map((child) => {
-            const r = child.getBoundingClientRect();
-            const style = getComputedStyle(child);
-            return { className: child.className, top: r.top, height: r.height, bottom: r.bottom, marginTop: style.marginTop, marginBottom: style.marginBottom, display: style.display };
-          })
-        );
-        throw new Error("page "+index+" overflow: "+JSON.stringify({ metrics, children }));
-      }
+    for (const metrics of pageMetrics) {
+      expect(metrics.scrollBottom).toBeLessThanOrEqual(metrics.pageBottom + 1);
+      expect(metrics.scrollTop).toBeGreaterThanOrEqual(metrics.pageTop - 1);
+      expect(metrics.clientHeight).toBeGreaterThan(0);
+      expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
     }
 
     await assertCardBounds(card);
