@@ -72,7 +72,7 @@ on:
       - "account-fallback.js"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -108,6 +108,9 @@ jobs:
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
+      - name: Run root contract/unit suite
+        working-directory: .
+        run: npm test
       - name: Install Chromium
         working-directory: .
         run: npx playwright install chromium
