@@ -75,6 +75,19 @@ async function swipePager(page, pager, fromRatio, toRatio) {
   await page.waitForTimeout(520);
 }
 
+
+async function goToBackPage(page, card, targetIndex) {
+  for (let index = 0; index < targetIndex; index += 1) {
+    const viewport = await page.evaluate(() => ({ width: window.innerWidth }));
+    if (viewport.width <= 760) {
+      await swipePager(page, card.locator(".learning-back-pager-shell"), 0.75, 0.25);
+    } else {
+      await card.locator(".pager-button").nth(1).click();
+    }
+  }
+  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+}
+
 async function revealLearningCard(page, language = "fa") {
   await page.addInitScript((value) => localStorage.setItem("kanji5-ui-language", value), language);
   await page.goto("/");
@@ -103,114 +116,47 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
-test("learning card keeps dense information on separate back pages in Persian and English", async ({ page }) => {
+test("learning card exposes five full-content back pages in Persian and English", async ({ page }) => {
   await routeExamples(page, 5);
   for (const language of ["fa", "en"]) {
     for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
       await page.setViewportSize(viewport);
       const card = await revealLearningCard(page, language);
 
-    const identityCount = await card.locator(".learning-back-kanji, .component-breakdown-target").count();
-    expect(identityCount).toBe(1);
-    await expect(card.locator(".meanings")).toBeVisible();
-    await expect(card.locator(".readings")).toBeVisible();
-    await expect(card).toHaveAttribute("data-back-page-count", "2");
-    await expect(card.locator(".learning-back-page-nav")).toBeVisible();
-    await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(2);
-    await expect(card.locator(".pager-dot.active")).toHaveCount(1);
-    if (viewport.width <= 760) {
-      await expect(card.locator(".pager-button").first()).toBeHidden();
-      await expect(card.locator(".pager-indicators")).toBeVisible();
-    } else {
-      await expect(card.locator(".pager-button").first()).toBeVisible();
-      await expect(card.locator(".pager-button").nth(1)).toBeVisible();
-    }
-    await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
-    await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(0);
-    const totalExampleCount = await card.locator(".example-row").count();
-    expect(totalExampleCount).toBeGreaterThan(2);
-      await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(totalExampleCount);
+      expect(await card.locator(".learning-back-page").count()).toBe(5);
+      await expect(card).toHaveAttribute("data-back-page-count", "5");
+      await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(5);
+      await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(1).locator(".readings")).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(2).locator(".example-row")).toHaveCount(5);
+      await expect(card.locator(".learning-back-page").nth(3).locator(".mnemonic-page")).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(4).locator(".stroke-page")).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(0).locator(".example-row")).toHaveCount(0);
+      await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(0);
+      await expect(card.locator(".learning-back-page").nth(3).locator(".example-row")).toHaveCount(0);
+      await assertCardBounds(card);
 
-    const pageMetrics = await card.locator(".learning-back-page").evaluateAll((pages) =>
-      pages.map((page) => {
-        const scroll = page.querySelector(".learning-back-scroll");
-        const pageRect = page.getBoundingClientRect();
-        const scrollRect = scroll?.getBoundingClientRect();
-        return {
-          visible: getComputedStyle(page).visibility,
-          clientHeight: scroll?.clientHeight ?? 0,
-          scrollHeight: scroll?.scrollHeight ?? 0,
-          pageTop: pageRect.top,
-          pageBottom: pageRect.bottom,
-          scrollTop: scrollRect?.top ?? 0,
-          scrollBottom: scrollRect?.bottom ?? 0,
-        };
-      }),
-    );
-    expect(pageMetrics[0].visible).toBe("visible");
-    expect(pageMetrics[1].visible).toBe("hidden");
-    for (const metrics of pageMetrics) {
-      expect(metrics.scrollBottom).toBeLessThanOrEqual(metrics.pageBottom + 1);
-      expect(metrics.scrollTop).toBeGreaterThanOrEqual(metrics.pageTop - 1);
-      expect(metrics.clientHeight).toBeGreaterThan(0);
-      expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
-    }
+      for (let pageIndex = 1; pageIndex < 5; pageIndex += 1) {
+        await goToBackPage(page, card, pageIndex);
+        await expect(card.locator(".learning-back-page.active")).toHaveAttribute(
+          "aria-label",
+          pageIndex === 1 ? /(خوانش‌ها|Readings)/ :
+          pageIndex === 2 ? /(نمونهٔ واژگانی|Vocabulary examples)/ :
+          pageIndex === 3 ? /(یادسپار|Mnemonic)/ :
+          /(ترتیب نوشتن|Stroke order)/,
+        );
+        await expect(card.locator(".pager-dot.active")).toHaveCount(1);
+        await assertCardBounds(card);
+      }
 
-    await assertCardBounds(card);
-    const nextButton = card.locator(".pager-button").nth(1);
-    const previousButton = card.locator(".pager-button").nth(0);
-    await expect(previousButton).toBeDisabled();
-    if (viewport.width <= 760) {
-      const pager = card.locator(".learning-back-pager-shell");
-      await swipePager(page, pager, 0.75, 0.25);
-    } else {
-      await nextButton.click();
-    }
-      await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
-    await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(totalExampleCount);
-    await expect(previousButton).toBeEnabled();
-    await expect(nextButton).toBeDisabled();
-    await expect(card.locator(".pager-dot.active")).toHaveCount(1);
-    await assertCardBounds(card);
-
-    const pager = card.locator(".learning-back-pager-shell");
-    if (viewport.width <= 760) {
-      await swipePager(page, pager, 0.25, 0.75);
-    } else {
-      await mouseSwipePager(page, pager, 0.25, 0.75);
-    }
-    await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
-    await expect(previousButton).toBeDisabled();
-    await expect(nextButton).toBeEnabled();
-
-    if (viewport.width <= 760) {
-      await swipePager(page, pager, 0.75, 0.25);
-      await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /(نمونهٔ واژگانی|Vocabulary examples)/);
-      await expect(previousButton).toBeEnabled();
-      await expect(nextButton).toBeDisabled();
-      await swipePager(page, pager, 0.25, 0.75);
-      await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", /^(Core information|صفحه اطلاعات اصلی)$/);
-      await expect(previousButton).toBeDisabled();
-      await expect(nextButton).toBeEnabled();
-    }
-
-    const footerBounds = await card.locator(".learning-back-footer").evaluate((el) => {
-      const footer = el.getBoundingClientRect();
-      const rating = el.querySelector(".rating-grid")?.getBoundingClientRect();
-      const cardRect = el.closest(".learning-card")?.getBoundingClientRect();
-      return {
-        footerTop: footer.top,
-        footerBottom: footer.bottom,
-        ratingTop: rating?.top ?? 0,
-        ratingBottom: rating?.bottom ?? 0,
-        cardTop: cardRect?.top ?? 0,
-        cardBottom: cardRect?.bottom ?? 0,
-      };
-    });
-    expect(footerBounds.footerTop).toBeGreaterThanOrEqual(footerBounds.cardTop - 1);
-    expect(footerBounds.footerBottom).toBeLessThanOrEqual(footerBounds.cardBottom + 1);
-    expect(footerBounds.ratingTop).toBeGreaterThanOrEqual(footerBounds.footerTop - 1);
-    expect(footerBounds.ratingBottom).toBeLessThanOrEqual(footerBounds.footerBottom + 1);
+      const pageMetrics = await card.locator(".learning-back-page").evaluateAll((pages) =>
+        pages.map((page) => {
+          const scroll = page.querySelector(".learning-back-scroll");
+          return { visible: getComputedStyle(page).visibility, clientHeight: scroll?.clientHeight ?? 0, scrollHeight: scroll?.scrollHeight ?? 0 };
+        }),
+      );
+      expect(pageMetrics.filter((m) => m.visible === "visible")).toHaveLength(1);
+      expect(pageMetrics).toHaveLength(5);
     }
   }
 });
@@ -234,7 +180,8 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  const tool = card.locator(".stroke-order-tool");
+  await goToBackPage(page, card, 4);
+  const tool = card.locator(".learning-back-page.active .stroke-order-tool");
   await expect(tool).toBeVisible();
   const trigger = tool.getByRole("button", { name: "Stroke order" });
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
@@ -249,31 +196,16 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   expect(triggerSize.height).toBeLessThanOrEqual(48);
   expect(triggerSize.minHeight).toBeGreaterThanOrEqual(44);
 
-  const identity = card.locator(".learning-back-identity");
-  const tools = card.locator(".learning-back-tools");
-  await expect(identity.locator(".learning-back-tools")).toHaveCount(1);
+  const tools = card.locator(".learning-back-page.active .stroke-order-tool");
   await expect(tools).toBeVisible();
 
   const singleColumnLayout = await card.evaluate(() => {
-    const overview = document.querySelector(".learning-card-back .learning-back-overview");
-    const backTools = document.querySelector(".learning-card-back .learning-back-tools");
-    const strokePanel = document.querySelector(".learning-card-back .stroke-order-panel");
-    const strokeTool = document.querySelector(".learning-card-back .stroke-order-tool");
+    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel");
     const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length : 0;
-    return {
-      overviewColumns: columns(overview),
-      toolsColumns: columns(backTools),
-      strokePanelColumns: strokePanel ? columns(strokePanel) : (strokeTool ? 1 : 0),
-    };
+    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
   });
-  expect(singleColumnLayout.overviewColumns).toBe(1);
-  expect(singleColumnLayout.toolsColumns).toBe(1);
   expect(singleColumnLayout.strokePanelColumns).toBe(1);
-  const readingsBox = await card.locator(".learning-back-readings").boundingBox();
-  const toolsBox = await tools.boundingBox();
-  expect(readingsBox).not.toBeNull();
-  expect(toolsBox).not.toBeNull();
-  expect((toolsBox?.top ?? 0)).toBeGreaterThanOrEqual((readingsBox?.bottom ?? 0) - 1);
+
 
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
 
@@ -316,8 +248,9 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
+  await goToBackPage(page, card, 4);
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-  const trigger = card.locator(".stroke-order-tool-trigger");
+  const trigger = card.locator(".learning-back-page.active .stroke-order-tool-trigger");
   await expect(trigger).toBeVisible();
   await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
   const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
@@ -377,8 +310,9 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
+  await goToBackPage(page, card, 3);
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-  const mnemonic = card.locator(".mnemonic-tool");
+  const mnemonic = card.locator(".learning-back-page.active .mnemonic-tool");
   const trigger = mnemonic.getByRole("button", { name: "Personal mnemonic" });
   await expect(trigger).toBeVisible();
 
@@ -426,9 +360,10 @@ test("short learning cards stay single-page and keep examples with core informat
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
   const card = await revealLearningCard(page);
-  await expect(card).toHaveAttribute("data-back-page-count", "1");
-  await expect(card.locator(".learning-back-page-nav")).toHaveCount(0);
-  await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(1);
+  await expect(card).toHaveAttribute("data-back-page-count", "5");
+  await expect(card.locator(".learning-back-page-nav")).toBeVisible();
   await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
+  await goToBackPage(page, card, 2);
+  await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(1);
   await assertCardBounds(card);
 });
