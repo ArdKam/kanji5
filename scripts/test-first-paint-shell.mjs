@@ -3,12 +3,12 @@ import fs from "node:fs";
 
 const read = path => fs.readFileSync(path, "utf8");
 const index = read("index.html");
-const entry = read("react-entry.js");
+const entry = read("react-entry-release18.js");
 const sw = read("sw.js");
 
 assert.match(index, /id="kanji5-startup-shell"/, "index must ship an immediate startup shell");
 assert.match(index, /href="\.\/startup-shell\.css"/, "startup shell stylesheet must be linked from the HTML shell");
-assert.match(index, /rel="modulepreload"[^>]+react-dist\/kanji5-react\.js/, "React bundle should be hinted before dynamic import");
+assert.match(index, /rel="modulepreload"[^>]+react-dist\/kanji5-react-release18\.js/, "release React bundle should be hinted before dynamic import");
 assert.match(index, /<div id="root"><\/div>/, "React root must remain available");
 assert.match(entry, /new MutationObserver\(\(\)=>\{/, "React entry must observe the root for first committed UI");
 assert.match(entry, /#root \.app-shell/, "startup shell must wait for the real app shell");
