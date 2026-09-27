@@ -1,4 +1,7 @@
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const css=fs.readFileSync("react-dist/kanji5-react.css","utf8");
 const entry=fs.readFileSync("react-entry.js","utf8");
@@ -15,10 +18,15 @@ if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react
 }
 console.log("React entry uses cache-busted shipped runtime assets.");
 const reactJs=fs.readFileSync("react-dist/kanji5-react.js","utf8");
+const syntaxFile=path.join(os.tmpdir(),"kanji5-react-shipped-check.mjs");
 try{
-  new Function(reactJs);
+  fs.writeFileSync(syntaxFile,reactJs,"utf8");
+  const syntaxCheck=spawnSync(process.execPath,["--check",syntaxFile],{encoding:"utf8"});
+  if(syntaxCheck.status!==0)throw new Error(String(syntaxCheck.stderr||syntaxCheck.stdout||"unknown syntax error").trim());
 }catch(error){
   throw new Error("SHIPPED_REACT_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));
+}finally{
+  try{fs.unlinkSync(syntaxFile)}catch{}
 }
 if(/getVocabulary\(t===`fa`\?character:character\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_UNDEFINED_VOCABULARY_CHARACTER_REFERENCE");
 const vocabularyBlock=reactJs.slice(reactJs.indexOf("function VocabularyExamples"),reactJs.indexOf("function je("));
