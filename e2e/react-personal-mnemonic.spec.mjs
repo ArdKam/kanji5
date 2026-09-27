@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 
+async function goToBackPage(card, targetIndex) {
+  for (let index = 0; index < targetIndex; index += 1) {
+    await card.locator(".pager-button").nth(1).click();
+  }
+  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+}
+
 test("personal mnemonic can be saved, edited, cleared, and survives a reload", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
   await page.goto("/");
@@ -8,6 +15,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  await goToBackPage(card, 3);
   await card.getByRole("button", { name: "Personal mnemonic" }).click();
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
@@ -22,6 +30,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   if (!(await reloadedCard.evaluate((el) => el.classList.contains("is-revealed")))) {
     await reloadedCard.getByRole("button", { name: "Show kanji information" }).click();
   }
+  await goToBackPage(reloadedCard, 3);
   await expect(reloadedCard.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
 
   await reloadedCard.getByRole("button", { name: "Edit" }).click();
