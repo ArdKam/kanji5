@@ -27,6 +27,7 @@ import {
   snapshot as readSnapshot,
   revealLearning,
   startExercise,
+  startPracticeExperience,
   startLearningExperience,
   startCustomStudy,
   submitExercise,
@@ -650,7 +651,7 @@ function App(){
   </div>
 </aside></>:null}</div><AccountButton language={language} onClick={()=>setAccountOpen(true)}/></div>
     </header>
-    <nav className="experience-nav" aria-label={t("learningPath",language)}><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startLearningExperience();await clearTransient();setExperience("review")})}>{t("learning",language)}</button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>{setExperience("practice");setPracticeMode(snapshot?.exercise?.mode?"exercise":"home")}}>{t("activeRecall",language)}</button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} disabled={busy} onClick={()=>{setExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}>{t("dictionary",language)}</button></nav><main id="primary-content" className="content mobile-study-flow">
+    <nav className="experience-nav" aria-label={t("learningPath",language)}><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startLearningExperience();await clearTransient();setExperience("review")})}>{t("learning",language)}</button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>void action(async()=>{await startPracticeExperience();setExperience("practice");setPracticeMode(snapshot?.exercise?.mode?"exercise":"home")})}>{t("activeRecall",language)}</button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} disabled={busy} onClick={()=>{setExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}>{t("dictionary",language)}</button></nav><main id="primary-content" className="content mobile-study-flow">
       {showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top"><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
