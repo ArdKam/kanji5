@@ -60,6 +60,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   }));
   await clean(page);
   const handwriting=await openSchoolHandwriting(page);
+  await expect.poll(async()=>handwriting.getAttribute("data-handwriting-skill-state")).not.toBe("unavailable");
   await expect(handwriting).toHaveAttribute("data-hint-level","0");
   await expect(handwriting).toHaveAttribute("data-hint-mode","trace");
   await expect(handwriting.getByRole("button",{name:"راهنمای بیشتر"})).toBeDisabled();
