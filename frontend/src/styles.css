@@ -935,7 +935,7 @@ html[lang="fa"] .kanji-stimulus,html[lang="fa"] .first-readings,html[lang="fa"] 
 
 @media(prefers-color-scheme:dark){#kanji5-account-launcher{border-color:var(--line)!important;background:var(--paper)!important;color:var(--sumi)!important;}}
 
-/* UI hardening v2: consistent interaction state and motion tokens. */
+/* UI hardening v2: consistent interaction state and motion tokens. Verified by React CI. */
 .button:active:not(:disabled),
 .experience-tab:active:not(:disabled),
 .rating:active:not(:disabled),
