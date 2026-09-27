@@ -16,6 +16,12 @@ for(const viewport of viewports){
     await expect(learning).toHaveAttribute('aria-current','page');
     await expect(page.locator('.audio-button').first()).toBeVisible();
 
+    // Establish the documented education precondition: active recall requires at least one seen kanji.
+    const reveal=page.locator('#root .learning-card-front .button.primary.wide');
+    await expect(reveal).toBeVisible();
+    await reveal.click();
+    await page.getByRole('button',{name:'خوب',exact:true}).click();
+
     await recall.click();
     await expect(recall).toHaveAttribute('aria-current','page');
     await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
