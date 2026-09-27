@@ -847,7 +847,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 /* Header/account placement: fallback and React account controls share the same top-left header anchor. */
 .header{padding-bottom:6px;margin-bottom:6px;}
 .header-actions{min-height:42px;}
-#kanji5-account-launcher,.header .account-button{position:absolute!important;left:0!important;top:0!important;z-index:46!important;}
+/* Desktop account control stays in the header-actions flex row; mobile positioning is handled below. */
 .header-menu-trigger{height:42px;min-height:42px;}
 .app-shell{padding-top:10px;}
 .content{gap:12px;}
