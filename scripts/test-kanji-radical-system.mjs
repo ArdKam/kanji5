@@ -33,7 +33,7 @@ expect("海",85,"水");
 expect("学",39,"子");
 expect("病",104,"疒");
 expect("金",167,"金");
-expect("亀",211,"齒");
+expect("亀",5,"乙");
 
 const source=await readFile(new URL("../v1.9-v2-boundary.js",import.meta.url),"utf8");
 const fixture={
