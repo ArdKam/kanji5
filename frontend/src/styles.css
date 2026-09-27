@@ -981,8 +981,8 @@ html[dir="rtl"] .experience-nav.active-tab-dictionary .experience-tab-indicator{
 }
 @media(max-width:760px){
   .header-actions .session-progress{font-size:var(--text-xs);gap:var(--space-1);}
-  .header-tools{top:auto;right:auto;}
-  .header{padding-inline-end:0;}
+  .header-tools{position:absolute;top:0;right:0;}
+  .header{padding-inline-end:56px;}
 }
 @media(prefers-reduced-motion:reduce){
   .experience-tab-indicator{transition:none;}
