@@ -28,6 +28,16 @@ export function DictionaryKanjiCard({
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
+  useEffect(() => {
+    let active = true;
+    setHandwritingSkill(null);
+    getHandwritingSkill(item.character).then(skill => {
+      if (active) setHandwritingSkill(skill);
+    }).catch(() => {
+      if (active) setHandwritingSkill(null);
+    });
+    return () => { active = false; };
+  }, [item.character]);
   const [openSection, setOpenSection] = useState<SectionKey>(null);
   const sectionRefs = useRef<Partial<Record<Exclude<SectionKey, null>, HTMLElement>>>({});
 
