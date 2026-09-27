@@ -859,6 +859,13 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .content{gap:7px}
 @media(max-width:760px){.app-shell{padding-top:3px}.header{height:54px;min-height:54px;max-height:54px;padding-bottom:0;margin-bottom:0}.header-actions{position:absolute;inset:0;height:54px;min-height:54px;display:block;pointer-events:none}.header-actions .header-tools,.header-actions .account-button{pointer-events:auto;flex:0 0 auto}.header-actions .session-progress{position:absolute;top:0;left:50%;width:110px;transform:translateX(-50%);margin:0;font-size:var(--text-xs);gap:3px}.header-actions .progress{height:5px}.header .account-button{left:0;top:0;width:38px;min-width:38px;height:38px;min-height:38px;padding:3px}.header-menu-trigger{width:38px;height:38px;min-height:38px}.content{gap:6px}}
 
+/* Desktop header hardening: keep Account and More controls in one non-overlapping flex row. */
+@media(min-width:761px){
+  .header-actions{position:static;display:flex;align-items:center;justify-content:flex-end;gap:var(--space-2);margin-inline-start:auto;min-width:0;}
+  .header-actions .header-tools{position:static!important;inset:auto!important;flex:0 0 auto;}
+  .header-actions .account-button{position:static!important;inset:auto!important;left:auto!important;top:auto!important;flex:0 0 auto;}
+}
+
 /* Keep Practice card above the fixed bottom navigation. */
 .content > .exercise-card{max-height:calc(100dvh - 155px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;}
 @media(max-width:760px){.content > .exercise-card{max-height:calc(100dvh - 145px);}}
