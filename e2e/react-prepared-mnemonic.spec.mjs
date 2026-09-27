@@ -25,9 +25,7 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   await prepared.evaluate((el) => {
     const scroll = el.closest(".learning-back-scroll");
     if (!(scroll instanceof HTMLElement)) return;
-    const rect = el.getBoundingClientRect();
-    const viewport = scroll.getBoundingClientRect();
-    scroll.scrollTop += rect.bottom - viewport.bottom;
+    scroll.scrollTop = scroll.scrollHeight - scroll.clientHeight;
   });
   const preparedViewport = await prepared.evaluate((el) => {
     const rect = el.getBoundingClientRect();
