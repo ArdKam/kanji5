@@ -77,15 +77,19 @@ async function swipePager(page, pager, fromRatio, toRatio) {
 
 
 async function goToBackPage(page, card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    const viewport = await page.evaluate(() => ({ width: window.innerWidth }));
-    if (viewport.width <= 760) {
-      await swipePager(page, card.locator(".learning-back-pager-shell"), 0.75, 0.25);
-    } else {
-      await card.locator(".pager-button").nth(1).click();
-      await page.waitForTimeout(520);
-    }
+  const currentIndex = await card.locator(".learning-back-page.active").evaluate((el) =>
+    Array.from(el.parentElement?.children ?? []).indexOf(el),
+  );
+  const delta = targetIndex - currentIndex;
+  const direction = delta >= 0 ? 1 : -1;
+  const steps = Math.abs(delta);
+  for (let index = 0; index < steps; index += 1) {
+    const button = card.locator(".pager-button").nth(direction > 0 ? 1 : 0);
+    await expect(button).toBeEnabled();
+    await button.click();
+    await page.waitForTimeout(520);
   }
+  await expect(card.locator(".learning-back-page").nth(targetIndex)).toHaveClass(/active/);
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
 
