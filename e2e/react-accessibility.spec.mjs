@@ -206,7 +206,7 @@ test('English dictionary presentation localizes card controls and uses the share
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.dictionary-section-nav')).toHaveAttribute('aria-label','Card options');
   await expect(dialog.getByRole('button',{name:'Structure'})).toBeVisible();
-  await expect(dialog.getByRole('button',{name:'Practice writing'})).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'Handwriting practice'})).toBeVisible();
   await expect(dialog.getByRole('button',{name:'Vocabulary'})).toBeVisible();
   await expect(dialog.getByRole('button',{name:'Personal mnemonic'})).toHaveCount(1);
   await expect(dialog.locator('.dictionary-audio-button svg')).toHaveCount(1);
