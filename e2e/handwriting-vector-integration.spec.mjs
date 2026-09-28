@@ -30,7 +30,6 @@ async function openSchoolHandwriting(page){
   await handwritingTab.click();
   const handwriting=dialog.locator(".handwriting-practice");
   await expect(handwriting).toBeVisible();
-  await handwriting.locator(".handwriting-header").click();
   await expect(handwriting.locator(".handwriting-ink-canvas")).toBeVisible({timeout:10000});
   return handwriting;
 }
