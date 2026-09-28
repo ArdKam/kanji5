@@ -7,7 +7,7 @@
   inset-block-start:auto !important;
   left:50%;
   bottom:max(14px, env(safe-area-inset-bottom));
-  z-index:40;
+  z-index:var(--z-nav);
   width:min(calc(100% - 2rem), 880px);
   transform:translateX(-50%);
   display:grid;
