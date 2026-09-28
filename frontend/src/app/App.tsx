@@ -215,7 +215,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const backPageCount=hasExamplesPage?5:4;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
-  const swipeRef=useRef<{startX:number;lastX:number;lastTime:number;active:boolean}>({startX:0,lastX:0,lastTime:0,active:false});
+  const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,active:false,axis:null});
   useEffect(()=>setBackPage(0),[card.character]);
   const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
   const snapPagerTrack=useCallback((page:number)=>{
@@ -229,17 +229,20 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     if(backPageCount<2)return;
     if((event.target as HTMLElement|null)?.closest?.("button,input,textarea,select,a"))return;
     if(event.pointerType==="mouse"&&event.button!==0)return;
-    swipeRef.current={startX:event.clientX,lastX:event.clientX,lastTime:performance.now(),active:true};
-    const track=pagerTrackRef.current;
-    if(track)track.style.transition="none";
-    try{event.currentTarget.setPointerCapture?.(event.pointerId)}catch(_){/* synthetic touch events may not support capture */}
+    swipeRef.current={startX:event.clientX,startY:event.clientY,lastX:event.clientX,lastTime:performance.now(),active:true,axis:null};
   };
   const handleBackPointerMove=(event:PointerEvent<HTMLDivElement>)=>{
     const swipe=swipeRef.current;
     if(backPageCount<2||!swipe.active)return;
     const shell=event.currentTarget;
+    const dx=event.clientX-swipe.startX;
+    const dy=event.clientY-swipe.startY;
+    if(!swipe.axis && Math.max(Math.abs(dx),Math.abs(dy))>=8) swipe.axis=Math.abs(dx)>Math.abs(dy)?"x":"y";
+    if(swipe.axis!=="x") return;
     const width=Math.max(1,shell.getBoundingClientRect().width);
-    let delta=event.clientX-swipe.startX;
+    let delta=dx;
+    const track=pagerTrackRef.current;
+    if(track&&swipe.lastX===swipe.startX){track.style.transition="none";try{shell.setPointerCapture?.(event.pointerId)}catch(_){}}
     const atFirst=backPage===0&&delta>0;
     const atLast=backPage===backPageCount-1&&delta<0;
     if(atFirst||atLast)delta*=0.28;
@@ -253,7 +256,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     const swipe=swipeRef.current;
     if(backPageCount<2||!swipe.active)return;
     swipe.active=false;
-    const delta=cancelled?0:event.clientX-swipe.startX;
+    const delta=cancelled||swipe.axis!=="x"?0:event.clientX-swipe.startX;
     const elapsed=Math.max(16,performance.now()-swipe.lastTime);
     const velocity=cancelled?0:(event.clientX-swipe.lastX)/elapsed;
     const width=Math.max(1,event.currentTarget.getBoundingClientRect().width);
@@ -277,17 +280,17 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
-        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{getLanguage()==="fa"?"اطلاعات کانجی":"Kanji information"}</span>
-        <div className="card-topline"><span className="badge badge-red">学習</span><span>{t("cardBack")}</span></div>
+        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><span>{t("cardBack")}</span></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
-            <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={getLanguage()==="fa"?"معنی و ساختار":"Meaning & structure"} aria-hidden={backPage!==0} inert={backPage!==0}>
+            <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
                     <div className="learning-back-identity-visual">
                       {componentInfo?.available&&componentInfo.components.length
-                        ? <ComponentBreakdown info={componentInfo} title={getLanguage()==="fa"?"ساختار کانجی":"Kanji structure"} note={getLanguage()==="fa"?"اجزای دیداری":"Visual components"} ariaLabel={getLanguage()==="fa"?"ساختار دیداری کانجی":"Kanji visual structure"}/>
+                        ? <ComponentBreakdown info={componentInfo} title={t("kanjiStructure")} note={t("visualComponents")} ariaLabel={t("visualKanjiStructure")}/>
                         : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
                     </div>
                     {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
@@ -295,10 +298,10 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                 </div>
               </div>
             </div>
-            <div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={getLanguage()==="fa"?"خوانش‌ها":"Readings"} aria-hidden={backPage!==1} inert={backPage!==1}>
+            <div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("readings")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
                 <div className="readings-page">
-                  <div className="readings-header"><span>{getLanguage()==="fa"?"خوانش‌ها":"Readings"}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?(getLanguage()==="fa"?"نمایش کاتاکانا":"Show Katakana"):(getLanguage()==="fa"?"نمایش هیراگانا":"Show Hiragana")}</button></div>
+                  <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                   <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
                 </div>
               </div>
@@ -308,7 +311,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                 <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
               </div>
             </div>:null}
-            <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={getLanguage()==="fa"?"یادسپار":"Mnemonic"} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
+            <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
                 <div className="mnemonic-page">
                   <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
@@ -395,7 +398,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                 </div>
               </div>
             </div>
-            <div className={"learning-back-page"+(backPage===(hasExamplesPage?4:3)?" active":"")} aria-label={getLanguage()==="fa"?"ترتیب نوشتن":"Stroke order"} aria-hidden={backPage!==(hasExamplesPage?4:3)} inert={backPage!==(hasExamplesPage?4:3)}>
+            <div className={"learning-back-page"+(backPage===(hasExamplesPage?4:3)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?4:3)} inert={backPage!==(hasExamplesPage?4:3)}>
               <div className="learning-back-scroll">
                 <div className="stroke-page">{card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
               </div>
@@ -409,7 +412,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
               {Array.from({length:backPageCount},(_,index)=><span key={index} className={"pager-dot"+(index===backPage?" active":"")} />)}
             </span>
             <span className="pager-current sr-only" aria-live="polite">
-              {getLanguage()==="fa"?`صفحه ${fa(backPage+1)} از ${fa(backPageCount)}`:`Page ${backPage+1} of ${backPageCount}`}
+              {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
             <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
           </div>:null}
@@ -685,7 +688,7 @@ function App(){
   </div>
 </aside></>:null}</div><AccountButton language={language} onClick={()=>setAccountOpen(true)}/></div>
     </header>
-    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} disabled={busy} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">\n      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{language==="fa"?"خطا در عملیات":"Action failed"}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
+    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} disabled={busy} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} disabled={busy} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} disabled={busy} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">\n      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
@@ -721,7 +724,7 @@ function App(){
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
       </>}
     </main>
-<footer className="footer">{language==="fa"?"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.":"Keep your learning short, consistent, and focused."}</footer>
+<footer className="footer">{t("footerTagline",language)}</footer>
     <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={()=>setStatsOpen(false)}/>
     <SettingsDialog
       open={settingsOpen}
