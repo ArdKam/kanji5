@@ -99,6 +99,8 @@ test('dictionary card uses stable tabs with one active content viewport', async 
 
   const dialog=page.locator('.dictionary-card-dialog:visible');
   await expect(dialog).toBeVisible();
+  const dialogBounds=await dialog.boundingBox();
+  expect(dialogBounds?.height ?? 0).toBeGreaterThan(400);
   const tabs=dialog.getByRole('tab');
   await expect(tabs).toHaveCount(5);
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
