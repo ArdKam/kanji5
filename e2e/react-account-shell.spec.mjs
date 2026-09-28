@@ -11,7 +11,22 @@ test('account control exposes email, magic-link, and Google entry points', async
   await expect(page.locator('input[type="email"]')).toBeVisible();
   await expect(page.locator('input[type="password"]')).toBeVisible();
   await expect(page.getByRole('button', { name: /ورود با Google به‌زودی فعال می‌شود\.|Google sign-in will be enabled soon\./ })).toBeDisabled();
-  await page.getByRole('tab', { name: /لینک ورود|Magic link/ }).click();
+  const authTabs = page.locator('.account-auth-tabs [role="tab"]');
+  await expect(authTabs.nth(0)).toHaveAttribute('tabindex', '0');
+  await expect(authTabs.nth(1)).toHaveAttribute('tabindex', '-1');
+  await authTabs.nth(0).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(authTabs.nth(1)).toBeFocused();
+  await expect(authTabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('Home');
+  await expect(authTabs.nth(0)).toBeFocused();
+  await expect(authTabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('End');
+  await expect(authTabs.nth(1)).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(authTabs.nth(0)).toBeFocused();
+
+  await authTabs.nth(1).click();
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /ارسال لینک ورود|Send magic link/ })).toBeVisible();
 });
