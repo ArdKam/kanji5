@@ -393,7 +393,6 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
               <button className="account-link-button" type="button" disabled={busy} onClick={() => { setSetPasswordOnly(true); setSecurityEditing(false); setAuthMessage(null); }}>{t("setPassword", language)}</button>
             </div>
           </div>}
-          {authMessage ? <p className="account-message" role="status">{authMessage}</p> : null}
         </section>
 
         <section className="account-section">
