@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
@@ -60,7 +60,7 @@ const outcomeLabel=(key:string)=>({correct:t("correct"),wrong:t("wrong"),unknown
 
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
 function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
-function HighlightedKanji({word,character}:{word:string;character?:string}){const value=String(word??"");const target=String(character??"").trim();if(!value||!target)return <>{value}</>;return <>{value.split(target).map((part,index)=><React.Fragment key={index}>{index>0?<mark className="kanji-highlight">{target}</mark>:null}{part}</React.Fragment>)}</>}
+function HighlightedKanji({word,character}:{word:string;character?:string}){const value=String(word??"");const target=String(character??"").trim();if(!value||!target)return <>{value}</>;return <>{value.split(target).map((part,index)=><Fragment key={index}>{index>0?<mark className="kanji-highlight">{target}</mark>:null}{part}</Fragment>)}</>}
 
 const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
 
