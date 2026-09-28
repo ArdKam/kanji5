@@ -1265,3 +1265,9 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .learning-card-back .learning-back-footer .learning-back-page-nav > *{
   pointer-events:auto;
 }
+
+/* Footer background must never become a click shield; only its actual controls receive input. */
+.learning-card-back .learning-back-footer{pointer-events:none!important;}
+.learning-card-back .learning-back-footer .rating-grid,
+.learning-card-back .learning-back-footer .rating-grid *,
+.learning-card-back .learning-back-footer .learning-back-page-nav > *{pointer-events:auto;}
