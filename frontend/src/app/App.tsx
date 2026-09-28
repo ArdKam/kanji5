@@ -247,7 +247,6 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     const atLast=backPage===backPageCount-1&&delta<0;
     if(atFirst||atLast)delta*=0.28;
     delta=Math.max(-width*0.92,Math.min(width*0.92,delta));
-    const track=pagerTrackRef.current;
     if(track)track.style.transform="translate3d(calc(-"+backPage*100+"% + "+delta+"px),0,0)";
     swipe.lastX=event.clientX;
     swipe.lastTime=performance.now();
