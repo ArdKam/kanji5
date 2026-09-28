@@ -172,3 +172,22 @@ test('dictionary search exposes a stable no-results state and selection dialog r
   await expect(dialog).toBeHidden();
   await expect(tile).toBeFocused();
 });
+
+
+test('React presentation stays usable at the narrow 320px boundary without horizontal overflow',async({page})=>{
+  await clean(page);
+  await page.setViewportSize({width:320,height:800});
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  const metrics=await page.evaluate(()=>({
+    viewport:document.documentElement.clientWidth,
+    scrollWidth:document.documentElement.scrollWidth,
+    bodyScrollWidth:document.body.scrollWidth,
+    contentWidth:document.querySelector('.app-shell')?.getBoundingClientRect().width??0,
+  }));
+  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport+1);
+  expect(metrics.bodyScrollWidth).toBeLessThanOrEqual(metrics.viewport+1);
+  expect(metrics.contentWidth).toBeLessThanOrEqual(metrics.viewport+1);
+  await expect(page.locator('.experience-nav')).toBeVisible();
+  await expect(page.getByRole('button',{name:'یادآوری فعال'})).toBeVisible();
+});
