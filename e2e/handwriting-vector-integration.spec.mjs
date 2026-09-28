@@ -227,3 +227,20 @@ test("handwriting prompts reuse active exercise stimuli",async({page})=>{
     await expect(handwriting.locator(".handwriting-production-prompt-cue")).toHaveText(fixture.stimulus.primary);
   }
 });
+
+test('handwriting vector loading failure exposes retry and recovers on the next attempt',async({page})=>{
+  let attempts=0;
+  await page.route('**/kanji/05b66.svg',async route=>{
+    attempts+=1;
+    if(attempts===1){await route.abort('failed');return;}
+    await route.fulfill({status:200,contentType:'image/svg+xml',body:svgFor('学')});
+  });
+  await clean(page);
+  const handwriting=await openSchoolHandwriting(page);
+  await expect(handwriting.locator('.handwriting-error')).toBeVisible({timeout:10000});
+  await expect(handwriting.getByRole('button',{name:'تلاش دوباره',exact:true})).toBeEnabled();
+  await handwriting.getByRole('button',{name:'تلاش دوباره',exact:true}).click();
+  await expect(handwriting.locator('.handwriting-error')).toHaveCount(0);
+  await expect(handwriting.locator('.handwriting-ink-canvas')).toBeVisible({timeout:10000});
+  expect(attempts).toBeGreaterThanOrEqual(2);
+});
