@@ -1,4 +1,5 @@
 import { t, type Language } from "./i18n";
+import { UiIcon } from "./UiIcon";
 
 export function DictionaryAudio({ value, label }: { value: string; label: string }) {
   const unsupported = typeof window.speechSynthesis?.speak !== "function" || typeof window.SpeechSynthesisUtterance !== "function";
@@ -17,7 +18,7 @@ export function DictionaryAudio({ value, label }: { value: string; label: string
         window.speechSynthesis.speak(utterance);
       }}
     >
-      🔊
+      <UiIcon name="audio" />
     </button>
   );
 }
