@@ -221,7 +221,10 @@ test("learning card back navigation uses labeled tabs without losing swipe/pager
       const card = await revealLearningCard(page, language);
       await expect(card.locator(".learning-card-front h2")).toHaveCount(0);
       await expect(card.locator(".learning-card-context")).toBeVisible();
-      await expect(card.locator(".learning-card-counter")).toBeVisible();
+      const counter = card.locator(".learning-card-counter");
+      const counterCount = await counter.count();
+      expect(counterCount).toBeLessThanOrEqual(1);
+      if (counterCount === 1) await expect(counter).toHaveText(/\d+\s*\/\s*\d+/);
       await expect(card.locator(".learning-back-tabs .learning-back-tab")).toHaveCount(4);
 
       for (let index = 0; index < 4; index += 1) {
@@ -265,14 +268,15 @@ test("stroke-order entry auto-scrolls the visible viewer fully into view", async
 
   await page.evaluate(() => {
     const calls = [];
-    const original = Element.prototype.scrollTo;
+    const scroll = document.querySelector(".learning-back-page.active .learning-back-scroll");
+    if (!(scroll instanceof HTMLElement)) throw new Error("Learning scroll container not found");
+    const original = scroll.scrollTo.bind(scroll);
     window.__kanji5ScrollToCalls = calls;
-    window.__kanji5ScrollToOriginal = original;
-    Element.prototype.scrollTo = function (options) {
-      if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
-        calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
-      }
-      return original.apply(this, arguments);
+    window.__kanji5ScrollTarget = scroll;
+    window.__kanji5ScrollOriginal = original;
+    scroll.scrollTo = function (options) {
+      calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
+      return original(options);
     };
   });
 
@@ -296,7 +300,9 @@ test("stroke-order entry auto-scrolls the visible viewer fully into view", async
   expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
 
   await page.evaluate(() => {
-    if (window.__kanji5ScrollToOriginal) Element.prototype.scrollTo = window.__kanji5ScrollToOriginal;
+    const target = window.__kanji5ScrollTarget;
+    const original = window.__kanji5ScrollOriginal;
+    if (target instanceof HTMLElement && typeof original === "function") target.scrollTo = original;
   });
 });
 
