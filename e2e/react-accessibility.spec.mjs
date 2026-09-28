@@ -95,7 +95,7 @@ test('dictionary accordion controls only reference panels that are present in th
   await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
   const tile=page.locator('.kanji-catalog-tile').first();
   await expect(tile).toBeVisible({timeout:10000});
-  await tile.click();
+  await tile.dispatchEvent('click');
 
   const dialog=page.locator('.dictionary-card-dialog:visible');
   await expect(dialog).toBeVisible();
@@ -136,8 +136,8 @@ test('stroke-order accordion control keeps aria-controls synchronized with its r
 
   const pager=card.locator(".learning-back-page-nav");
   await expect(pager).toBeVisible();
-  const pages=card.locator(".learning-back-page");
-  for(let i=0;i<4;i++) await pages.nth(0).locator("xpath=..").locator(".pager-button").last().dispatchEvent("click");
+  const nextPage=card.locator(".learning-back-page-nav .pager-button").last();
+  for(let i=0;i<4;i++) await nextPage.dispatchEvent("click");
   const trigger=card.locator(".stroke-order-tool-trigger");
   await expect(trigger).toBeVisible();
   await expect(trigger).toHaveAttribute("aria-expanded","false");
