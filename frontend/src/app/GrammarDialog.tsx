@@ -1,6 +1,6 @@
 import { t, type Language } from "./i18n";
 import { GrammarGuide } from "./GrammarGuide";
-import { usePageDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 
 export function GrammarDialog({ open, language, onClose }: { open: boolean; language: Language; onClose: () => void }) {
   const dialogRef = useModalDialog(open, onClose);
