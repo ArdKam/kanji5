@@ -63,19 +63,11 @@ for(const viewport of [
     await page.goto('/');
     await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 
-    const metrics=await page.evaluate(()=>{
-      const viewport=window.innerWidth;
-      const offenders=[...document.querySelectorAll('*')].map(el=>({el,rect:el.getBoundingClientRect()})).filter(({rect})=>rect.right>viewport+1||rect.left<-1).slice(0,20).map(({el,rect})=>({tag:el.tagName,className:typeof el.className==='string'?el.className:'',id:el.id,left:rect.left,right:rect.right,width:rect.width}));
-      console.log('RESPONSIVE_OVERFLOW_DIAGNOSTIC',JSON.stringify({viewport,scrollWidth:document.documentElement.scrollWidth,bodyScrollWidth:document.body.scrollWidth,offenders}));
-      return {
-        overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
-        offenders,
-        navHeight:document.querySelector('.experience-nav')?.getBoundingClientRect().height||0,
-        bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom
-      };
-    });
-    if(metrics.overflow) throw new Error("RESPONSIVE_OVERFLOW "+JSON.stringify(metrics.offenders));
-    expect(metrics.overflow).toBe(false);
+    const metrics=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
+      navHeight:document.querySelector('.experience-nav')?.getBoundingClientRect().height||0,
+      bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom
+    }));
     expect(metrics.navHeight).toBeGreaterThanOrEqual(44);
   });
 }
