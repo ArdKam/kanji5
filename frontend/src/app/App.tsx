@@ -368,6 +368,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                         aria-expanded={mnemonicEditing}
                         aria-controls="personal-mnemonic-editor"
                         onClick={()=>{
+                          setBackPage(hasExamplesPage?3:2);
                           setMnemonicError("");
                           setMnemonicDraft(personalMnemonic);
                           setMnemonicEditing(value=>!value);
