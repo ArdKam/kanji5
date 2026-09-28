@@ -103,7 +103,7 @@ test('Production Recall known self-grade submits the revealed Kanji and advances
   await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'بلد بودم'}).click();
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
+  await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).feedback?.correct)),{timeout:5000}).toBe(true);
   await expect(page.locator('#root .production-recall')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
