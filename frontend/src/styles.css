@@ -11,6 +11,7 @@
   --text-display-md:44px;
   --text-display-xl:80px;
   --text-display-sm:clamp(25px,4vw,34px);
+  --text-display-lg:clamp(78px,14vw,150px);
   --text-display-kanji:clamp(90px,18vw,150px);
   --text-stimulus-kanji:clamp(78px,14vw,110px);
   --text-display-compact:clamp(38px,7vw,62px);
