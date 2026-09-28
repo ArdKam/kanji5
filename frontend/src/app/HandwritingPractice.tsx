@@ -146,6 +146,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
   const [expanded,setExpanded]=useState(defaultExpanded);
   const [hintLevel,setHintLevel]=useState(()=>initialHintLevel(learningSignal));
   const [hintsOpen,setHintsOpen]=useState(false);
+  const [retryKey,setRetryKey]=useState(0);
 
   useEffect(()=>{
     let active=true;
@@ -185,7 +186,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
       })
       .finally(()=>{if(active)setLoading(false)});
     return()=>{active=false};
-  },[language,normalized]);
+  },[language,normalized,retryKey]);
 
   useEffect(()=>{
     if(!expanded)return;
@@ -358,7 +359,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
       {expanded?(
         <>
           {loading?<div className="handwriting-status" role="status">{t("strokeOrderLoading",language)}</div>:null}
-          {!loading&&error?<div className="handwriting-status handwriting-error" role="status">{error}</div>:null}
+          {!loading&&error?<div className="handwriting-status handwriting-error" role="status"><span>{error}</span><button className="button secondary" type="button" onClick={()=>setRetryKey(value=>value+1)}>{t("tryAgain",language)}</button></div>:null}
           {!loading&&!error?(
             <>
               <div className="handwriting-hint-control">
@@ -367,7 +368,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                   type="button"
                   aria-label={language === "fa" ? "نمایش راهنما" : "Show handwriting hints"}
                   aria-expanded={hintsOpen}
-                  aria-controls={"handwriting-hints-"+normalized}
+                  aria-controls={hintsOpen ? "handwriting-hints-"+normalized : undefined}
                   onClick={()=>setHintsOpen(value=>!value)}
                 >
                   <span aria-hidden="true">i</span>
