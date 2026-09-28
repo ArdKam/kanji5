@@ -3,6 +3,18 @@ import { getVocabulary, type KanjiCatalogItem, type VocabularyItem } from "./eng
 import { formatNumber, t, type Language } from "./i18n";
 import { DictionaryAudio } from "./DictionaryPrimitives";
 
+function renderWord(word: string, reading: string, target: string) {
+  const chars = Array.from(word);
+  return (
+    <ruby lang="ja" className="dictionary-vocabulary-ruby" aria-label={word + " " + reading}>
+      {chars.map((char, index) => (
+        <span key={char + "-" + index} className={char === target ? "dictionary-vocabulary-target" : undefined}>{char}</span>
+      ))}
+      {reading ? <rt>{reading}</rt> : null}
+    </ruby>
+  );
+}
+
 export function VocabularyExamples({ character: kanjiCharacter, language, catalog, onSelectKanji }: { character: string; language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const [items, setItems] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,10 +61,9 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
             {visibleItems.map(item => (
               <div className="dictionary-vocabulary-item" key={item.word + "-" + item.reading}>
                 <div className="dictionary-vocabulary-main">
-                  <strong lang="ja">{item.word}</strong>
-                  <span lang="ja">{item.reading}</span>
+                  <strong>{renderWord(item.word, item.reading, kanjiCharacter)}</strong>
                 </div>
-                <p>{item.meaning}</p>
+                <bdi className="dictionary-vocabulary-meaning" dir="auto">{item.meaning}</bdi>
                 <DictionaryAudio value={item.reading} label={t("playWordPronunciation", language) + " " + item.word} />
               </div>
             ))}
@@ -74,7 +85,11 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
               <div className="vocabulary-learning-graph-list" role="list">
                 {visibleGraphEdges.map(edge => (
                   <div className="vocabulary-learning-graph-edge" key={edge.word + "-" + edge.reading} role="listitem">
-                    <span className="vocabulary-learning-graph-word" lang="ja">{edge.word}</span>
+                    <span className="vocabulary-learning-graph-word" lang="ja">
+                      {Array.from(edge.word).map((char, index) => (
+                        <span key={char + "-" + index} className={char === kanjiCharacter ? "dictionary-vocabulary-target" : undefined}>{char}</span>
+                      ))}
+                    </span>
                     <span className="vocabulary-learning-graph-arrow" aria-hidden="true">→</span>
                     <div className="vocabulary-learning-graph-related">
                       {edge.related.map(relatedCharacter => {

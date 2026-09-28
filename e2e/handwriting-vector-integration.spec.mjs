@@ -25,6 +25,9 @@ async function openSchoolHandwriting(page){
   await tile.click();
   const dialog=page.locator(".dictionary-card-dialog");
   await expect(dialog).toBeVisible({timeout:10000});
+  const handwritingTab=dialog.getByRole("tab",{name:"تمرین دست‌خط",exact:true});
+  await expect(handwritingTab).toBeVisible();
+  await handwritingTab.click();
   const handwriting=dialog.locator(".handwriting-practice");
   await expect(handwriting).toBeVisible();
   await handwriting.locator(".handwriting-header").click();

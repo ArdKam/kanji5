@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
 import { TraditionalRadical } from "./TraditionalRadical";
@@ -10,7 +10,15 @@ import { formatNumber, t, type Language } from "./i18n";
 import { useModalDialog } from "./useModalDialog";
 import { getComponentInfo, getRadicalInfo, getHandwritingSkill, recordHandwritingGrade, type ComponentInfo, type HandwritingSkill, type KanjiCatalogItem, type RadicalInfo } from "./engine";
 
-type SectionKey = "structure" | "writing" | "vocabulary" | "mnemonic" | null;
+type SectionKey = "overview" | "structure" | "writing" | "vocabulary" | "mnemonic";
+
+const sectionLabel = (key: SectionKey, language: Language) => {
+  if (key === "overview") return language === "fa" ? "نمای کلی" : "Overview";
+  if (key === "structure") return t("structure", language);
+  if (key === "writing") return t("handwritingPractice", language);
+  if (key === "vocabulary") return t("vocabulary", language);
+  return t("personalMnemonic", language);
+};
 
 export function DictionaryKanjiCard({
   item,
@@ -31,252 +39,232 @@ export function DictionaryKanjiCard({
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
+  const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
+  const [activeSection, setActiveSection] = useState<SectionKey>("overview");
+
   useEffect(() => {
     let active = true;
     setComponentInfo(null);
-    getComponentInfo(item.character).then(info => {
+    void getComponentInfo(item.character).then(info => {
       if (active) setComponentInfo(info);
     }).catch(() => {
       if (active) setComponentInfo(null);
     });
     return () => { active = false; };
   }, [item.character]);
+
   useEffect(() => {
     let active = true;
     setRadicalInfo(null);
-    getRadicalInfo(item.character).then(info => {
+    void getRadicalInfo(item.character).then(info => {
       if (active) setRadicalInfo(info);
     }).catch(() => {
       if (active) setRadicalInfo(null);
     });
     return () => { active = false; };
   }, [item.character]);
-  const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
+
   useEffect(() => {
     let active = true;
     setHandwritingSkill(null);
-    getHandwritingSkill(item.character).then(skill => {
+    void getHandwritingSkill(item.character).then(skill => {
       if (active) setHandwritingSkill(skill);
     }).catch(() => {
       if (active) setHandwritingSkill(null);
     });
     return () => { active = false; };
   }, [item.character]);
-  const [openSection, setOpenSection] = useState<SectionKey>(null);
-  const sectionRefs = useRef<Partial<Record<Exclude<SectionKey, null>, HTMLElement>>>({});
 
-  const [isCloseIdle, setIsCloseIdle] = useState(false);
-  const closeIdleTimerRef = useRef<number | null>(null);
-  const closeWakeTimerRef = useRef<number | null>(null);
-  const armCloseIdleTimer = () => {
-    if (closeIdleTimerRef.current !== null) window.clearTimeout(closeIdleTimerRef.current);
-    closeIdleTimerRef.current = window.setTimeout(() => setIsCloseIdle(true), 4200);
-  };
-  const wakeCloseControl = () => {
-    if (closeIdleTimerRef.current !== null) window.clearTimeout(closeIdleTimerRef.current);
-    if (closeWakeTimerRef.current !== null) window.clearTimeout(closeWakeTimerRef.current);
-    setIsCloseIdle(false);
-    closeWakeTimerRef.current = window.setTimeout(() => {}, 900);
-    armCloseIdleTimer();
-  };
   useEffect(() => {
-    armCloseIdleTimer();
-    return () => {
-      if (closeIdleTimerRef.current !== null) window.clearTimeout(closeIdleTimerRef.current);
-      if (closeWakeTimerRef.current !== null) window.clearTimeout(closeWakeTimerRef.current);
-    };
+    setActiveSection("overview");
   }, [item.character]);
 
-  const handleCardActivity = () => {
-    if (isCloseIdle) wakeCloseControl();
-    else armCloseIdleTimer();
-  };
-
-  const scrollOpenSectionIntoView = (section: Exclude<SectionKey, null>, behavior: ScrollBehavior = "smooth") => {
-    const target = sectionRefs.current[section];
-    const scrollContainer = target?.closest<HTMLElement>(".dictionary-card-dialog");
-    if (!target || !scrollContainer) return;
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const optionNav = scrollContainer.querySelector<HTMLElement>(".dictionary-section-nav");
-    const stickyOffset = (optionNav?.getBoundingClientRect().height ?? 0) + 12;
-    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - stickyOffset;
-    const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
-    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    scrollContainer.scrollTo({ top: nextScrollTop, behavior: reducedMotion ? "auto" : behavior });
-  };
-
   useEffect(() => {
-    if (!openSection) return;
-    const target = sectionRefs.current[openSection];
-    if (!target) return;
-    let frame = 0;
-    let nextFrame = 0;
-    let settleTimer = 0;
-    let observer: ResizeObserver | null = null;
-    let observationStopTimer = 0;
-    const scheduleScroll = (behavior: ScrollBehavior) => {
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => {
-        frame = window.requestAnimationFrame(() => {
-          nextFrame = window.requestAnimationFrame(() => scrollOpenSectionIntoView(openSection, behavior));
-        });
-      }, 180);
-    };
-    scheduleScroll("smooth");
-    if ("ResizeObserver" in window) {
-      observer = new ResizeObserver(() => scheduleScroll("auto"));
-      observer.observe(target);
-      observationStopTimer = window.setTimeout(() => { observer?.disconnect(); observer = null; }, 1800);
-    }
-    return () => {
-      window.clearTimeout(settleTimer);
-      window.clearTimeout(observationStopTimer);
-      observer?.disconnect();
-      window.cancelAnimationFrame(frame);
-      window.cancelAnimationFrame(nextFrame);
-    };
-  }, [openSection, item.character]);
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    dialog.scrollTo({ top: 0, behavior: "auto" });
+  }, [activeSection, item.character]);
 
-  const toggle = (section: Exclude<SectionKey, null>) => {
-    setOpenSection(current => current === section ? null : section);
+  const selectSection = (section: SectionKey) => {
+    if (section === activeSection) return;
+    setActiveSection(section);
   };
 
-  const sectionButton = (key: Exclude<SectionKey, null>, label: string) => (
+  const handleSectionKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const sections: SectionKey[] = ["overview", "structure", "writing", "vocabulary", "mnemonic"];
+    const index = sections.indexOf(activeSection);
+    let nextIndex = index;
+    if (event.key === "ArrowRight") nextIndex = language === "fa" ? (index - 1 + sections.length) % sections.length : (index + 1) % sections.length;
+    if (event.key === "ArrowLeft") nextIndex = language === "fa" ? (index + 1) % sections.length : (index - 1 + sections.length) % sections.length;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = sections.length - 1;
+    if (nextIndex === index) return;
+    event.preventDefault();
+    setActiveSection(sections[nextIndex]);
+    window.requestAnimationFrame(() => {
+      document.getElementById("dictionary-section-tab-" + sections[nextIndex])?.focus();
+    });
+  };
+
+  const tabButton = (key: SectionKey) => (
     <button
-      className={`dictionary-accordion-trigger${openSection === key ? " is-active" : ""}`}
+      id={"dictionary-section-tab-" + key}
+      className={"dictionary-section-tab" + (activeSection === key ? " is-active" : "")}
       type="button"
-      aria-expanded={openSection === key}
-      aria-controls={openSection === key ? `dictionary-section-panel-${key}` : undefined}
-      onClick={() => toggle(key)}
+      role="tab"
+      aria-selected={activeSection === key}
+      aria-controls={"dictionary-section-panel-" + key}
+      tabIndex={activeSection === key ? 0 : -1}
+      onClick={() => selectSection(key)}
+      onKeyDown={handleSectionKeyDown}
     >
-      <span className="dictionary-accordion-label">{label}</span>
-      <span className="dictionary-accordion-state" aria-hidden="true">
-        {openSection === key ? "●" : "○"}
-      </span>
+      <span className="dictionary-section-tab-label">{sectionLabel(key, language)}</span>
     </button>
   );
 
+  const renderOverview = () => (
+    <div
+      id="dictionary-section-panel-overview"
+      className="dictionary-tabpanel"
+      role="tabpanel"
+      aria-labelledby="dictionary-section-tab-overview"
+      tabIndex={0}
+    >
+      <div className="dictionary-stroke-order-wrap">
+        <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
+        <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
+      </div>
+
+      {item.meanings.length ? (
+        <div className="dictionary-card-section">
+          <span className="dictionary-card-section-label">{t("meaning", language)}:</span>
+          <bdi className="dictionary-card-section-value" dir="auto">{item.meanings.join(" · ")}</bdi>
+        </div>
+      ) : null}
+
+      <div className="readings-header dictionary-readings-header">
+        <span>{t("reading", language)}</span>
+      </div>
+      <div className="readings learning-back-readings dictionary-readings">
+        <DictionaryReading title="On’yomi" values={item.on} language={language} />
+        <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
+      </div>
+
+      <div className="dictionary-card-meta">
+        {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
+        {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
+        {item.frequency ? <span>{t("dictionaryFrequency", language)} #{formatNumber(item.frequency, language)}</span> : null}
+      </div>
+    </div>
+  );
+
+  const renderActivePanel = () => {
+    if (activeSection === "overview") return renderOverview();
+    if (activeSection === "structure") {
+      return (
+        <div
+          id="dictionary-section-panel-structure"
+          className="dictionary-tabpanel"
+          role="tabpanel"
+          aria-labelledby="dictionary-section-tab-structure"
+          tabIndex={0}
+        >
+          {radicalInfo?.available ? <TraditionalRadical info={radicalInfo} language={language} /> : null}
+          {componentInfo?.available && componentInfo.components.length ? (
+            <>
+              <ComponentBreakdown
+                info={componentInfo}
+                title={t("kanjiStructure", language)}
+                note={t("visualComponents", language)}
+                ariaLabel={t("visualKanjiStructure", language)}
+              />
+              <ComponentLearningPath
+                character={item.character}
+                components={componentInfo.components}
+                catalog={catalog}
+                language={language}
+                onSelectKanji={onSelectKanji}
+              />
+            </>
+          ) : (
+            <p className="empty-text">{t("structureUnavailable", language)}</p>
+          )}
+        </div>
+      );
+    }
+    if (activeSection === "writing") {
+      return (
+        <div
+          id="dictionary-section-panel-writing"
+          className="dictionary-tabpanel"
+          role="tabpanel"
+          aria-labelledby="dictionary-section-tab-writing"
+          tabIndex={0}
+        >
+          <HandwritingPractice
+            character={item.character}
+            language={language}
+            defaultExpanded={false}
+            learningSignal={handwritingSkill ? { state: handwritingSkill.state, confidence: handwritingSkill.confidence, score: handwritingSkill.score } : undefined}
+            onGradeRecorded={(grade) => recordHandwritingGrade(item.character, grade).then(async saved => {
+              if (!saved) return false;
+              const skill = await getHandwritingSkill(item.character);
+              setHandwritingSkill(skill);
+              return true;
+            })}
+          />
+        </div>
+      );
+    }
+    if (activeSection === "vocabulary") {
+      return (
+        <div
+          id="dictionary-section-panel-vocabulary"
+          className="dictionary-tabpanel"
+          role="tabpanel"
+          aria-labelledby="dictionary-section-tab-vocabulary"
+          tabIndex={0}
+        >
+          <VocabularyExamples character={item.character} language={language} catalog={catalog} onSelectKanji={onSelectKanji} />
+        </div>
+      );
+    }
+    return (
+      <div
+        id="dictionary-section-panel-mnemonic"
+        className="dictionary-tabpanel"
+        role="tabpanel"
+        aria-labelledby="dictionary-section-tab-mnemonic"
+        tabIndex={0}
+      >
+        {mnemonicContent}
+      </div>
+    );
+  };
+
   return (
     <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
-      <div
-        className="dictionary-card"
-        onPointerDown={handleCardActivity}
-        onWheel={handleCardActivity}
-        onKeyDown={handleCardActivity}
-      >
-        <div className={`dictionary-card-close-layer${isCloseIdle ? " is-idle" : " is-waking"}`}>
+      <div className="dictionary-card">
+        <div className="dictionary-card-close-layer">
           <button
             className="dialog-close"
             type="button"
             aria-label={t("close", language)}
             onClick={onClose}
-            aria-hidden="false"
-            onPointerDown={handleCardActivity}
           >×</button>
         </div>
+
         <div className="dictionary-card-top">
           <span className="badge badge-red">{item.jlpt || "—"}</span>
+          {item.grade ? <span className="dictionary-card-grade">G{formatNumber(item.grade, language)}</span> : null}
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
         </div>
 
-        <div className="dictionary-section-nav" role="toolbar" aria-label={t("dictionaryCardOptions", language)}>
-          {sectionButton("structure", t("structure", language))}
-          {sectionButton("writing", t("handwritingPractice", language))}
-          {sectionButton("vocabulary", t("vocabulary", language))}
-          {sectionButton("mnemonic", t("personalMnemonic", language))}
+        <div className="dictionary-section-nav" role="tablist" aria-label={t("dictionaryCardOptions", language)}>
+          {(["overview", "structure", "writing", "vocabulary", "mnemonic"] as SectionKey[]).map(tabButton)}
         </div>
 
-        <div className="dictionary-stroke-order-wrap">
-          <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
-          <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
-        </div>
-
-        {item.meanings.length ? (
-          <div className="dictionary-card-section">
-            <span>{t("meaning", language)}</span>
-            <strong>{item.meanings.join(" · ")}</strong>
-          </div>
-        ) : null}
-
-        <div className="readings-header dictionary-readings-header">
-          <span>{t("reading", language)}</span>
-        </div>
-        <div className="readings learning-back-readings dictionary-readings">
-          <DictionaryReading title="On’yomi" values={item.on} language={language} />
-          <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
-        </div>
-
-        <div className="dictionary-card-meta">
-          {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
-          {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
-          {item.frequency ? <span>{t("dictionaryFrequency", language)} #{formatNumber(item.frequency, language)}</span> : null}
-        </div>
-
-        <div className="dictionary-card-accordion" aria-label={t("additionalInformation", language)}>
-          <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "structure"}>
-            {openSection === "structure" ? (
-              <div id="dictionary-section-panel-structure" className="dictionary-accordion-panel" role="region" aria-label={t("structure", language)}>
-                {radicalInfo?.available ? <TraditionalRadical info={radicalInfo} language={language} /> : null}
-                {componentInfo?.available && componentInfo.components.length ? (
-                  <>
-                    <ComponentBreakdown
-                      info={componentInfo}
-                      title={t("kanjiStructure", language)}
-                      note={t("visualComponents", language)}
-                      ariaLabel={t("visualKanjiStructure", language)}
-                    />
-                    <ComponentLearningPath
-                      character={item.character}
-                      components={componentInfo.components}
-                      catalog={catalog}
-                      language={language}
-                      onSelectKanji={onSelectKanji}
-                    />
-                  </>
-                ) : (
-                  <p className="empty-text">{t("structureUnavailable", language)}</p>
-                )}
-              </div>
-            ) : null}
-          </section>
-
-          <section ref={node => { if (node) sectionRefs.current.writing = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "writing"}>
-            {openSection === "writing" ? (
-              <div id="dictionary-section-panel-writing" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "تمرین نوشتن" : "Practice writing"}>
-                <HandwritingPractice
-                  character={item.character}
-                  language={language}
-                  defaultExpanded
-                  learningSignal={handwritingSkill ? { state: handwritingSkill.state, confidence: handwritingSkill.confidence, score: handwritingSkill.score } : undefined}
-                  onGradeRecorded={(grade) => recordHandwritingGrade(item.character, grade).then(async saved => {
-                    if (!saved) return false;
-                    const skill = await getHandwritingSkill(item.character);
-                    setHandwritingSkill(skill);
-                    return true;
-                  })}
-                />
-              </div>
-            ) : null}
-          </section>
-
-          <section ref={node => { if (node) sectionRefs.current.vocabulary = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "vocabulary"}>
-            {openSection === "vocabulary" ? (
-              <div id="dictionary-section-panel-vocabulary" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "واژگان" : "Vocabulary"}>
-                <VocabularyExamples character={item.character} language={language} catalog={catalog} onSelectKanji={onSelectKanji} />
-              </div>
-            ) : null}
-          </section>
-
-          <section ref={node => { if (node) sectionRefs.current.mnemonic = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "mnemonic"}>
-            {openSection === "mnemonic" ? (
-              <div id="dictionary-section-panel-mnemonic" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "یادسپار" : "Mnemonic"}>
-                {mnemonicContent}
-              </div>
-            ) : null}
-          </section>
-        </div>
+        {renderActivePanel()}
       </div>
     </dialog>
   );
