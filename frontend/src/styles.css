@@ -1517,3 +1517,373 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 @media(prefers-reduced-motion:reduce){
   .header-tools-menu{animation:none!important;}
 }
+
+/* Learning UI hardening: focused card hierarchy, labeled back navigation, and compact mobile grading. */
+.learning-card-front{
+  justify-content:flex-start;
+  gap:0;
+  padding:18px 24px 22px;
+}
+.learning-card-front h2{display:none!important;}
+.learning-card-context{
+  flex:0 0 auto;
+  align-items:center;
+  min-height:36px;
+}
+.learning-card-context-start{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  min-width:0;
+}
+.learning-card-counter{
+  flex:0 0 auto;
+  color:var(--mute);
+  font-size:var(--text-xs);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.01em;
+  white-space:nowrap;
+}
+.kanji-hero{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:8px 0 4px;
+}
+.kanji-hero .kanji-display{
+  width:auto;
+  height:auto;
+  font-size:clamp(82px,10vw,120px);
+  line-height:.92;
+}
+.kanji-hero .audio-button{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+  border-radius:999px;
+  background:var(--washi);
+}
+.learning-reveal-button{
+  flex:0 0 auto;
+  min-height:52px;
+  margin-top:10px;
+  border-radius:14px;
+}
+.learning-card-back{
+  padding:12px 16px 10px;
+}
+.learning-back-topline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:32px;
+  color:var(--mute);
+  font-size:var(--text-xs);
+  flex:0 0 auto;
+}
+.learning-card-back .learning-back-page-nav{
+  pointer-events:auto!important;
+  display:flex;
+  align-items:center;
+  width:100%;
+  min-height:48px;
+  margin:6px 0 4px;
+  padding:4px;
+  gap:4px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--washi);
+  box-shadow:none;
+}
+.learning-back-tabs{
+  flex:1 1 auto;
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+  direction:ltr;
+}
+.learning-back-tab{
+  min-width:0;
+  min-height:38px;
+  padding:6px 5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--mute);
+  font:inherit;
+  font-size:var(--text-xs);
+  font-weight:800;
+  line-height:1.15;
+  cursor:pointer;
+  transition:background-color .18s ease,color .18s ease,transform .1s ease;
+}
+.learning-back-tab:hover:not(.active){background:color-mix(in srgb,var(--paper) 72%,var(--washi));}
+.learning-back-tab:active{transform:scale(.98);}
+.learning-back-tab.active{
+  background:var(--sumi);
+  color:var(--paper);
+}
+.learning-back-tab-index{
+  flex:0 0 auto;
+  opacity:.55;
+  font-size:10px;
+  font-variant-numeric:tabular-nums;
+}
+.learning-back-tab-label{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.learning-card-back .learning-back-page-nav>.pager-button{
+  display:grid!important;
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  min-width:34px;
+  min-height:34px;
+  padding:0;
+  place-items:center;
+  border-radius:10px;
+  font-size:18px;
+}
+.learning-card-back .learning-back-page-nav>.pager-button:disabled{opacity:.3;}
+.learning-card-back .learning-back-pager-shell{
+  flex:1 1 auto;
+  min-height:0;
+}
+.learning-card-back .learning-back-overview{
+  padding-top:4px;
+}
+.learning-card-back .learning-back-identity{
+  display:grid;
+  gap:14px;
+}
+.learning-card-back .learning-back-identity-visual{
+  min-height:0;
+}
+.learning-card-back .learning-back-meaning{
+  font-size:clamp(22px,4vw,30px)!important;
+  font-weight:760!important;
+  line-height:1.2;
+  color:var(--sumi);
+}
+.learning-card-back .learning-back-readings-block{
+  gap:7px;
+  margin-top:2px;
+}
+.learning-card-back .readings-header{
+  min-height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.learning-card-back .readings-header>span{
+  color:var(--mute);
+  font-size:var(--text-sm);
+  font-weight:850;
+}
+.learning-card-back .reading-toggle{
+  min-height:34px;
+  padding:5px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--sumi);
+  font:inherit;
+  font-size:var(--text-xs);
+  font-weight:800;
+}
+.learning-card-back .reading{
+  min-height:74px;
+  padding:10px 12px;
+  background:var(--washi);
+}
+.learning-card-back .reading>strong{font-size:var(--text-md);}
+.learning-card-back .compact-examples h3{
+  margin:0 0 4px;
+}
+.learning-card-back .example-row{
+  min-height:56px;
+  padding:9px 2px;
+  border-bottom-color:var(--line);
+}
+.learning-card-back .example-content{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+.learning-card-back .example-main{
+  display:block;
+  min-width:0;
+  font-size:var(--text-md);
+}
+.learning-card-back .example-reading{
+  color:var(--mute);
+  font-size:var(--text-sm);
+}
+.learning-card-back .example-row .audio-button{
+  flex:0 0 40px;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  min-height:40px;
+  border-radius:999px;
+}
+.kanji-highlight{
+  color:var(--shu);
+  background:color-mix(in srgb,var(--shu) 8%,var(--paper));
+  border-radius:4px;
+  padding-inline:2px;
+  text-decoration:none;
+}
+.learning-card-back .mnemonic-tool{
+  overflow:visible;
+  position:relative;
+  z-index:2;
+}
+.learning-card-back .mnemonic-trigger{
+  border-radius:999px;
+}
+.learning-card-back .mnemonic-prepared,
+.learning-card-back .mnemonic-saved,
+.learning-card-back .mnemonic-editor{
+  background:var(--paper);
+  border-color:var(--line);
+}
+.learning-card-back .mnemonic-prepared{
+  border-radius:var(--radius-lg);
+}
+.learning-card-back .mnemonic-prepared-copy p{
+  line-height:1.7;
+}
+.learning-card-back .mnemonic-saved p{
+  line-height:1.6;
+}
+.learning-card-back .learning-back-footer{
+  margin-top:0;
+  padding:7px 4px calc(4px + max(4px,env(safe-area-inset-bottom)));
+  border-top:1px solid var(--line-soft);
+  background:var(--paper);
+  transform:translateY(calc(-1 * var(--nav-bar-height) - max(14px,env(safe-area-inset-bottom))));
+}
+.learning-card-back .learning-back-footer .rating-grid{
+  pointer-events:auto;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.learning-card-back .learning-back-footer .rating{
+  min-height:52px;
+  padding-inline:6px;
+  border-radius:12px;
+  font-size:var(--text-xs);
+  font-weight:850;
+}
+.learning-card-back .stroke-order-panel.is-expanded{
+  display:grid;
+  gap:10px;
+}
+.learning-card-back .stroke-order-panel.is-expanded .stroke-order-stage{
+  position:relative;
+  min-height:clamp(210px,34vw,300px);
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  background-color:var(--washi);
+  background-image:
+    linear-gradient(to right,color-mix(in srgb,var(--line) 32%,transparent) 0 1px,transparent 1px),
+    linear-gradient(to bottom,color-mix(in srgb,var(--line) 32%,transparent) 0 1px,transparent 1px),
+    linear-gradient(45deg,transparent 49.7%,color-mix(in srgb,var(--line) 20%,transparent) 50%,transparent 50.3%),
+    linear-gradient(-45deg,transparent 49.7%,color-mix(in srgb,var(--line) 20%,transparent) 50%,transparent 50.3%);
+  background-size:50% 100%,100% 50%,100% 100%,100% 100%;
+  background-position:center,center,center,center;
+  background-repeat:no-repeat;
+}
+.learning-card-back .stroke-order-panel.is-expanded .stroke-order-stage svg{
+  width:min(280px,72%);
+  max-height:260px;
+  height:auto;
+}
+.learning-card-back .stroke-order-panel.is-expanded .stroke-order-progress{
+  position:absolute;
+  inset-inline-end:10px;
+  inset-block-end:8px;
+  padding:4px 8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--mute);
+  font-size:var(--text-xs);
+  font-variant-numeric:tabular-nums;
+}
+.learning-card-back .stroke-order-panel.is-expanded .stroke-order-controls{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:6px;
+}
+.learning-card-back .stroke-order-panel.is-expanded .stroke-order-controls .button{
+  min-height:44px;
+}
+.learning-card-back .stroke-order-panel.is-expanded .stroke-order-reset{
+  width:44px;
+  min-width:44px;
+  padding-inline:0;
+}
+@media(max-width:760px){
+  .learning-card-front{padding:14px 16px 16px;}
+  .learning-card-context{min-height:34px;}
+  .kanji-hero{gap:10px;padding-block:4px;}
+  .kanji-hero .kanji-display{font-size:clamp(76px,22vw,96px);}
+  .learning-reveal-button{min-height:50px;margin-top:8px;}
+  .learning-card-back{padding:10px 12px 8px;}
+  .learning-card-back .learning-back-page-nav{min-height:46px;margin-top:4px;padding:3px;}
+  .learning-back-tabs{gap:2px;}
+  .learning-back-tab{min-height:38px;padding-inline:3px;font-size:10px;}
+  .learning-back-tab-index{display:none;}
+  .learning-card-back .learning-back-page-nav>.pager-button{flex-basis:32px;width:32px;min-width:32px;height:32px;min-height:32px;}
+  .learning-card-back .learning-back-scroll{padding-bottom:190px;}
+  .learning-card-back .reading{min-height:64px;}
+  .learning-card-back .example-row{min-height:52px;padding-block:8px;}
+  .learning-card-back .example-main{font-size:var(--text-sm);}
+  .learning-card-back .example-reading{font-size:var(--text-xs);}
+  .learning-card-back .learning-back-footer .rating-grid{gap:5px;}
+  .learning-card-back .learning-back-footer .rating{min-height:50px;padding-inline:4px;font-size:10px;}
+  .learning-card-back .stroke-order-panel.is-expanded .stroke-order-stage{
+    min-height:220px;
+    padding:12px;
+  }
+  .learning-card-back .stroke-order-panel.is-expanded .stroke-order-stage svg{
+    width:min(250px,82%);
+    max-height:220px;
+  }
+  .learning-card-back .stroke-order-panel.is-expanded .stroke-order-controls{
+    grid-template-columns:1fr auto 1fr auto;
+  }
+}
+@media(max-width:380px){
+  .learning-card-back .learning-back-page-nav{gap:2px;}
+  .learning-card-back .learning-back-page-nav>.pager-button{flex-basis:30px;width:30px;min-width:30px;}
+  .learning-card-back .learning-back-tab{font-size:9px;}
+  .learning-card-back .learning-back-footer .rating{font-size:9px;padding-inline:2px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .learning-back-tab{transition:none;}
+}
