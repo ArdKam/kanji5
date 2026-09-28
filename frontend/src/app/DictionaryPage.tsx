@@ -127,10 +127,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     onExternalSelectionConsumed?.();
   }, [catalog, externalSelectedCharacter, onExternalSelectionConsumed]);
 
-  useEffect(() => {
-    if (viewMode === "detailed" && visible.length > 160) setViewMode("matrix");
-  }, [viewMode, visible.length]);
-
   const visible = useMemo(() => {
     const q = normalize(query);
     const filtered = catalog.filter((item) => {
@@ -165,6 +161,10 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     });
     return rows;
   }, [catalog, grade, level, masteryFilter, query, sort]);
+
+  useEffect(() => {
+    if (viewMode === "detailed" && visible.length > 160) setViewMode("matrix");
+  }, [viewMode, visible.length]);
 
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
