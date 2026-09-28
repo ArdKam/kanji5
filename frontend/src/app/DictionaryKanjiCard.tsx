@@ -275,3 +275,4 @@ export function DictionaryKanjiCard({
       </div>
     </dialog>
   );
+}
