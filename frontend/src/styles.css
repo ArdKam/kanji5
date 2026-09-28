@@ -1216,8 +1216,23 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .learning-back-readings-block .readings-header{margin:0;}
 .learning-back-readings-block .learning-back-readings{margin:0;}
 /* The rating footer must clear the fixed bottom navigation rather than sitting underneath it. */
-.learning-card{height:min(590px,calc(100dvh - var(--nav-bar-height) - max(14px,env(safe-area-inset-bottom)) - 32px));}
+.learning-card{height:min(590px,calc(100dvh - 32px));}
 @media(max-width:760px){
-  .learning-card{height:min(640px,calc(100dvh - var(--nav-bar-height) - max(14px,env(safe-area-inset-bottom)) - 32px));}
+  .learning-card{height:min(640px,calc(100dvh - 32px));}
   .learning-back-readings-block{gap:6px;}
+}
+
+/* Feedback controls live above the fixed experience navigation without shrinking the learning surface. */
+.learning-card{position:relative;}
+.learning-card-back .learning-back-footer{
+  position:absolute;
+  inset-inline:0;
+  bottom:calc(var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom)));
+  z-index:4;
+}
+.learning-card-back .learning-back-pager-shell{
+  padding-bottom:118px;
+}
+@media(max-width:760px){
+  .learning-card-back .learning-back-pager-shell{padding-bottom:122px;}
 }
