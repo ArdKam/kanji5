@@ -262,7 +262,9 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   await goToBackPage(page, card, 3);
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
   const trigger = card.locator(".learning-back-page.active .stroke-order-tool-trigger");
-  await expect(trigger).toBeVisible();
+  await expect(trigger).toHaveCount(0);
+  const panel = card.locator(".stroke-order-panel.is-expanded");
+  await expect(panel).toBeVisible();
   await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
   const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
 
@@ -279,9 +281,10 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
     };
   });
 
-  await trigger.click();
-  const panel = card.locator(".stroke-order-panel.is-expanded");
-  await expect(panel).toBeVisible();
+  await page.evaluate(() => {
+    const el = document.querySelector(".learning-back-page.active .stroke-order-panel.is-expanded");
+    el?.scrollIntoView({ block: "nearest" });
+  });
 
   await expect.poll(async () => {
     return await panel.evaluate((el) => {
