@@ -90,6 +90,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<LevelFilter>("all");
   const [sort, setSort] = useState<SortMode>("level-asc");
@@ -111,7 +112,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       }
     });
     return () => { active = false; };
-  }, []);
+  }, [loadAttempt]);
 
   useEffect(() => {
     if (!externalSelectedCharacter) return;
@@ -178,7 +179,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       {!loading && loadError ? (
         <div className="surface dictionary-empty" role="alert">
           <p>{language === "fa" ? "واژه‌نامه در حال حاضر بارگذاری نشد." : "The dictionary could not be loaded."}</p>
-          <button className="button secondary" type="button" onClick={() => window.location.reload()}>{t("tryAgain", language)}</button>
+          <button className="button secondary" type="button" onClick={() => setLoadAttempt(value => value + 1)}>{t("tryAgain", language)}</button>
         </div>
       ) : null}
       {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{t("dictionaryNoResults", language)}</div> : null}
