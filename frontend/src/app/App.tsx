@@ -644,7 +644,30 @@ function App(){
   const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
   async function action<T>(task:()=>Promise<T>):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();setSnapshot(await readSnapshot());return result}catch(e){setError(e instanceof Error?e.message:language==="fa"?"عملیات انجام نشد.":"The operation failed.");return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
-  useEffect(()=>{if(!headerMenuOpen)return;const onKeyDown=(event:KeyboardEvent)=>{if(event.key==="Escape")setHeaderMenuOpen(false)};document.addEventListener("keydown",onKeyDown);const previousOverflow=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.removeEventListener("keydown",onKeyDown);document.body.style.overflow=previousOverflow}},[headerMenuOpen]);
+  useEffect(()=>{
+    if(!headerMenuOpen)return;
+    const opener=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const menu=document.getElementById("header-tools-menu");
+    const getFocusable=()=>Array.from(menu?.querySelectorAll<HTMLElement>('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')??[]);
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){event.preventDefault();setHeaderMenuOpen(false);return;}
+      if(event.key!=="Tab")return;
+      const items=getFocusable();
+      if(!items.length)return;
+      const first=items[0],last=items[items.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    };
+    document.addEventListener("keydown",onKeyDown);
+    const previousOverflow=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    requestAnimationFrame(()=>getFocusable()[0]?.focus());
+    return()=>{
+      document.removeEventListener("keydown",onKeyDown);
+      document.body.style.overflow=previousOverflow;
+      requestAnimationFrame(()=>opener?.focus());
+    };
+  },[headerMenuOpen]);
   if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>{t("learningCoreError")}</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>{t("tryAgain")}</button></section></div>;
   return <div className="app-shell">
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
