@@ -271,9 +271,16 @@ test("stroke-order entry scrolls the visible viewer fully into view", async ({ p
   await otherTab.click();
   await expect(otherTab).toHaveAttribute("aria-selected", "true");
   await scrollContainer.evaluate((el) => {
+    const spacer = document.createElement("div");
+    spacer.setAttribute("data-test-scroll-spacer", "true");
+    spacer.style.height = "420px";
+    spacer.style.flex = "0 0 420px";
+    el.prepend(spacer);
     el.scrollTop = el.scrollHeight;
   });
   const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
+  const maxScroll = await scrollContainer.evaluate((el) => el.scrollHeight - el.clientHeight);
+  expect(maxScroll).toBeGreaterThan(0);
   expect(scrollBefore).toBeGreaterThan(0);
 
   await strokeTab.click();
