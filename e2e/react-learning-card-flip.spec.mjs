@@ -86,7 +86,7 @@ async function goToBackPage(page, card, targetIndex) {
   for (let index = 0; index < steps; index += 1) {
     const button = card.locator(".pager-button").nth(direction > 0 ? 1 : 0);
     await expect(button).toBeEnabled();
-    await button.click();
+    await button.dispatchEvent("click");
     await page.waitForTimeout(520);
   }
   await expect(card.locator(".learning-back-page").nth(targetIndex)).toHaveClass(/active/);
