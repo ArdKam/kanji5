@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { listKanji, type KanjiCatalogItem, type Snapshot } from "./engine";
+import { useModalDialog } from "./useModalDialog";
 
 function StatRow({ label, value }: { label: string; value: string }) {
   return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>;
@@ -47,10 +48,12 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
     };
   }, [catalog, language]);
 
+  const dialogRef = useModalDialog(open, onClose);
+
   if (!open) return null;
 
   return (
-    <dialog open className="dialog stats-dialog" aria-labelledby="stats-title">
+    <dialog ref={dialogRef} className="dialog stats-dialog" aria-labelledby="stats-title">
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="stats-title">{t("stats", language)}</h2>
       <div className="dialog-grid">
