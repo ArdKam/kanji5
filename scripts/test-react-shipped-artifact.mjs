@@ -10,11 +10,11 @@ if(!/\.experience-tab\.active/.test(css)){
 }
 const localCssAssets=[...css.matchAll(/url\(\s*["']?\.\/assets\/([^"')?#\s]+)["']?\s*\)/g)].map(match=>match[1]);
 for(const asset of localCssAssets){
-  if(!fs.existsSync(\`react-dist/assets/\${asset}\`)){
+  if(!fs.existsSync("react-dist/assets/"+asset)){
     throw new Error("SHIPPED_REACT_CSS_MISSING_LOCAL_ASSET: "+asset);
   }
 }
-console.log(\`Shipped React CSS local assets resolved (\${localCssAssets.length}).\`);
+console.log("Shipped React CSS local assets resolved ("+localCssAssets.length+").");
 
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
