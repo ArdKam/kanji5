@@ -88,6 +88,7 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   if (source === "curated") {
     const useButton = prepared.getByRole("button", { name: "Use" });
     await expect(useButton).toBeVisible();
+    await useButton.scrollIntoViewIfNeeded();
     await useButton.click();
     await expect(card.locator(".mnemonic-saved p")).toHaveText(await preparedText.innerText());
   } else {
