@@ -212,3 +212,17 @@ test('English dictionary presentation localizes card controls and uses the share
   await expect(dialog.locator('.dictionary-audio-button svg')).toHaveCount(1);
   await expect(dialog.locator('.dictionary-audio-button')).toHaveAttribute('aria-label',/Play kanji pronunciation/);
 });
+
+
+test('English shell does not retain Persian presentation labels',async({page})=>{
+  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  await expect(page.locator('.header .eyebrow')).toHaveText('Smart learning');
+  await expect(page.locator('.header h1')).toHaveText('Kanji-yar');
+  await expect(page.locator('.daily-summary')).toHaveAttribute('aria-label',"Today’s summary");
+  await expect(page.locator('.header-menu-trigger')).toHaveAttribute('aria-label','More');
+  await page.locator('.header-menu-trigger').click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('button',{name:'Close menu'})).toBeVisible();
+});
