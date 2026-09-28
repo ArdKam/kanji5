@@ -120,7 +120,7 @@ test('dictionary card uses stable tabs with one active content viewport', async 
 
   const structureScroll=await dialog.evaluate((node)=>node.scrollTop);
   expect(structureScroll).toBe(0);
-  await structure.press('ArrowLeft');
+  await structure.press('ArrowRight');
   await expect(overview).toHaveAttribute('aria-selected','true');
 });
 
