@@ -897,7 +897,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   pointer-events:none;
 }
 .header-brand h1{margin:0;font-size:clamp(23px,3.5vw,29px);line-height:1;white-space:nowrap;}
-.header-brand .eyebrow{font-size:8px;line-height:1;margin:0 0 3px;}
+.header-brand .eyebrow{font-size:var(--text-xs);line-height:1;margin:0 0 3px;}
 .header-actions{
   position:absolute;
   inset:0;
