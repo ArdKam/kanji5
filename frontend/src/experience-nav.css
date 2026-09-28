@@ -69,3 +69,5 @@ html[dir="rtl"] .experience-nav.active-tab-dictionary .experience-tab-indicator{
   .experience-tab-indicator{transition:none;}
   .experience-tab:active:not(:disabled){transition:none;}
 }
+
+@media (min-width:521px){.experience-nav{bottom:max(18px,env(safe-area-inset-bottom));}}
