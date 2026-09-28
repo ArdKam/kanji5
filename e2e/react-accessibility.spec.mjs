@@ -102,7 +102,7 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   const tabs=dialog.getByRole('tab');
   await expect(tabs).toHaveCount(5);
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'ساختار',exact:true});
+  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
   await expect(overview).toHaveAttribute('aria-selected','true');
   await expect(structure).toHaveAttribute('aria-selected','false');
   await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
@@ -118,10 +118,15 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   await expect(dialog.locator('#'+controls)).toBeVisible();
   await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
 
-  const structureScroll=await dialog.evaluate((node)=>node.scrollTop);
+  const content=dialog.locator('.dictionary-card-content');
+  await expect(content).toHaveCount(1);
+  const structureScroll=await content.evaluate((node)=>node.scrollTop);
   expect(structureScroll).toBe(0);
   await structure.press('ArrowRight');
-  await expect(overview).toHaveAttribute('aria-selected','true');
+  const writing=dialog.getByRole('tab',{name:'نوشتن',exact:true});
+  await expect(writing).toHaveAttribute('aria-selected','true');
+  await writing.press('ArrowLeft');
+  await expect(structure).toHaveAttribute('aria-selected','true');
 });
 
 test('stroke-order accordion control keeps aria-controls synchronized with its rendered panel', async ({page})=>{
