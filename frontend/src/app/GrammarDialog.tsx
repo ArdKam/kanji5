@@ -3,7 +3,7 @@ import { GrammarGuide } from "./GrammarGuide";
 import { usePageDialog } from "./usePageDialog";
 
 export function GrammarDialog({ open, language, onClose }: { open: boolean; language: Language; onClose: () => void }) {
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
   if (!open) return null;
   return (
     <dialog ref={dialogRef} className="dialog secondary-page-dialog secondary-surface-dialog grammar-dialog" aria-labelledby="grammar-dialog-title">
