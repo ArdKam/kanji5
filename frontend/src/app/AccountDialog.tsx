@@ -206,7 +206,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         <button id="account-tab-sync" className={accountView === "sync" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "sync"} aria-controls="account-panel-sync" tabIndex={accountView === "sync" ? 0 : -1} onKeyDown={e=>handleTabKeyDown(e,3,2,next=>setAccountView(["profile","security","sync"][next] as typeof accountView))} onClick={() => { setAccountView("sync"); setAuthMessage(null); }}>{t("accountSync", language)}</button>
       </div>
 
-      {accountView === "profile" ? <section id="account-panel-profile" role="tabpanel" aria-labelledby="account-tab-profile" className="account-section" aria-labelledby="account-profile-heading">
+      {accountView === "profile" ? <section id="account-panel-profile" role="tabpanel" aria-labelledby="account-tab-profile" className="account-section">
         <div className="account-section-heading">
           <div><h3 id="account-profile-heading">{t("profile", language)}</h3><p>{t("displayNameHint", language)}</p></div>
         </div>
@@ -221,7 +221,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         </form>
       </section> : null}
 
-      {accountView === "security" ? <section id="account-panel-security" role="tabpanel" aria-labelledby="account-tab-security" className="account-section" aria-labelledby="account-security-heading">
+      {accountView === "security" ? <section id="account-panel-security" role="tabpanel" aria-labelledby="account-tab-security" className="account-section">
         <div className="account-section-heading">
           <div><h3 id="account-security-heading">{t("security", language)}</h3><p>{t("passwordHint", language)}</p></div>
         </div>
@@ -240,7 +240,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         </form>
       </section> : null}
 
-      {accountView === "sync" ? <section id="account-panel-sync" role="tabpanel" aria-labelledby="account-tab-sync" className="account-section" aria-labelledby="account-sync-heading">
+      {accountView === "sync" ? <section id="account-panel-sync" role="tabpanel" aria-labelledby="account-tab-sync" className="account-section">
         <div className="account-section-heading">
           <div><h3 id="account-sync-heading">{t("accountSync", language)}</h3><p>{t("accountSyncHint", language)}</p></div>
           <span className={"sync-pill sync-"+state.syncStatus}>{statusLabel || t("syncing", language)}</span>
