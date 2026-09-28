@@ -224,7 +224,7 @@ export async function startPracticeExperience(): Promise<void> {
   if (session?.startExperience) await session.startExperience("practice");
 }
 
-export async function startExercise(): Promise<boolean> {
+export async function startExercise(): Promise<void> {
   const boundary = await waitForEngine();
   await boundary.clearCustomStudyFilter?.();
   const educationReady = await boundary.ensureEducationRuntime();
@@ -243,7 +243,7 @@ export async function startExercise(): Promise<boolean> {
   const started = performance.now();
   while (performance.now() - started < 15000) {
     const current = await snapshot();
-    if (current.exercise?.mode && current.exercise?.prompt && current.exercise?.stimulus) return true;
+    if (current.exercise?.mode && current.exercise?.prompt && current.exercise?.stimulus) return;
     await new Promise((resolve) => window.setTimeout(resolve, 50));
   }
   throw new Error("KANJI5_EXERCISE_READY_TIMEOUT");
