@@ -12,7 +12,7 @@ function ReplayIcon() {
   );
 }
 
-export function StrokeOrderViewer({ character, language, mode = "learning" }: { character: string; language: Language; mode?: "learning" | "dictionary-loop" }) {
+export function StrokeOrderViewer({ character, language, mode = "learning", active }: { character: string; language: Language; mode?: "learning" | "dictionary-loop"; active?: boolean }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -41,6 +41,11 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     setError("");
     const normalized = Array.from(String(character || "").trim()).slice(0, 1).join("");
     if (!normalized) return () => { active = false; };
+
+    if (!compactLoop && active === false) {
+      setLoading(false);
+      return () => { active = false; };
+    }
 
     setLoading(true);
     (async () => {
@@ -76,11 +81,23 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     return () => stopPlayback();
   }, [compactLoop, paths.length, stopPlayback]);
 
+  useEffect(() => {
+    if (compactLoop || typeof active !== "boolean") return;
+    if (!active) {
+      stopPlayback();
+      setExpanded(false);
+      return;
+    }
+    if (!paths.length) return;
+    scrollAfterExpandRef.current = true;
+    setExpanded(true);
+    play(true);
+  }, [active, compactLoop, paths.length, play, stopPlayback]);
+
   const play = useCallback((fromStart = false) => {
     if (!paths.length) return;
     stopPlayback();
-    const start = fromStart || completed >= paths.length ? 0 : completed;
-    setCompleted(start);
+    setCompleted(current => (fromStart || current >= paths.length ? 0 : current));
     timerRef.current = window.setInterval(() => {
       setCompleted(current => {
         const next = current + 1;
@@ -91,7 +108,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         return next;
       });
     }, 720);
-  }, [completed, paths.length, stopPlayback]);
+  }, [paths.length, stopPlayback]);
 
   const scrollExpandedToolIntoView = useCallback(() => {
     const target = viewerRef.current;
@@ -239,8 +256,8 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
               type="button"
               aria-expanded={expanded}
               aria-controls={expanded ? "stroke-order-content" : undefined}
-              onClick={expanded ? closeLearningTool : openLearningTool}
-              title={expanded ? t("strokeOrder", language) : t("strokeOrder", language)}
+              onClick={expanded && typeof active !== "boolean" ? closeLearningTool : () => play(true)}
+              title={t("strokeOrder", language)}
             >
               <ReplayIcon />
               <span>{t("strokeOrder", language)}</span>
