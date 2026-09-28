@@ -362,9 +362,6 @@
 .dictionary-card-top{
   padding-inline-start:0;
 }
-.experience-nav{
-  z-index:20;
-}
 
 .dictionary-audio-button{flex:0 0 auto;}
 .dictionary-readings-header{margin-top:15px;padding-top:13px;border-top:1px solid var(--line);}
