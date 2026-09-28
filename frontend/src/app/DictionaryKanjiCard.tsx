@@ -148,7 +148,7 @@ export function DictionaryKanjiCard({
       className={`dictionary-accordion-trigger${openSection === key ? " is-active" : ""}`}
       type="button"
       aria-expanded={openSection === key}
-      aria-controls={`dictionary-section-panel-${key}`}
+      aria-controls={openSection === key ? `dictionary-section-panel-${key}` : undefined}
       onClick={() => toggle(key)}
     >
       <span className="dictionary-accordion-label">{label}</span>
