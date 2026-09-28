@@ -946,7 +946,7 @@
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:7px;
 }
-.handwriting-actions .button{min-height:42px;padding:6px 10px;font-size:var(--text-xs);}
+.handwriting-actions .button{min-height:44px;padding:6px 10px;font-size:var(--text-xs);}
 .handwriting-status{
   min-height:42px;
   display:grid;
