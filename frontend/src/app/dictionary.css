@@ -236,7 +236,7 @@
   white-space:nowrap;
 }
 .dictionary-sort select{
-  min-height:36px;
+  min-height:44px;
   padding:5px 28px 5px 10px;
   border:1px solid var(--line);
   border-radius:var(--radius-sm);
