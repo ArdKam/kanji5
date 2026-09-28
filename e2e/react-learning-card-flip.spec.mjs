@@ -421,14 +421,69 @@ test("critical header title and drawer direction stay on the correct viewport ed
       await page.waitForTimeout(350);
 
       const drawerBounds = await drawer.boundingBox();
-      if (!drawerBounds) throw new Error("Header drawer bounds unavailable");
-      if (scenario.expectedSide === "left") {
+      const triggerBounds = await page.getByRole("button", { name: scenario.menu, exact: true }).boundingBox();
+      if (!drawerBounds || !triggerBounds) throw new Error("Header menu geometry unavailable");
+      if (viewport.width >= 761) {
+        if (scenario.expectedSide === "left") {
+          expect(Math.abs(drawerBounds.x - triggerBounds.x)).toBeLessThanOrEqual(1);
+        } else {
+          expect(Math.abs((drawerBounds.x + drawerBounds.width) - (triggerBounds.x + triggerBounds.width))).toBeLessThanOrEqual(1);
+        }
+      } else if (scenario.expectedSide === "left") {
         expect(drawerBounds.x).toBeLessThanOrEqual(1);
       } else {
         expect(drawerBounds.x + drawerBounds.width).toBeGreaterThanOrEqual(viewport.width - 1);
       }
     }
   }
+});
+
+test("structured header menu keeps account accessible and exposes inline preferences", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-theme", "light");
+  });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/");
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+
+  await page.getByRole("button", { name: "More", exact: true }).click();
+  const menu = page.locator("#header-tools-menu");
+  await expect(menu).toBeVisible();
+  await expect(page.locator(".account-button:visible")).toBeVisible();
+  await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
+  await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
+  await expect(menu.getByRole("button", { name: "Reading lab", exact: true })).toBeVisible();
+  await expect(menu.getByRole("button", { name: "Prepared mnemonics", exact: true })).toBeVisible();
+  await expect(menu.getByRole("button", { name: "Stats", exact: true })).toBeVisible();
+
+  await menu.getByRole("button", { name: "Dark", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await menu.getByRole("button", { name: "فارسی", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.locator(".account-button:visible")).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
+  await expect(page.getByRole("button", { name: "بیشتر", exact: true })).toBeFocused();
+});
+
+test("mobile menu leaves the account control above the drawer and clickable", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "fa"));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+
+  await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+  await expect(page.locator("#header-tools-menu")).toBeVisible();
+  const account = page.locator(".account-button:visible");
+  await expect(account).toBeVisible();
+
+  const accountBounds = await account.boundingBox();
+  if (!accountBounds) throw new Error("Account bounds unavailable");
+  expect(await account.evaluate((el) => getComputedStyle(el).zIndex)).toBe("130");
+  await account.click();
+  await expect(page.locator(".account-dialog:visible")).toBeVisible();
 });
 
 test("menu sections open as in-flow pages rather than centered overlays", async ({ page }) => {
