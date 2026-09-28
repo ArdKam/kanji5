@@ -147,7 +147,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           <p className="eyebrow red">{t("dictionary", language)}</p>
           <h2 id="dictionary-page-title">{t("dictionaryTitle", language)}</h2>
         </div>
-        <span className="dictionary-count">{formatNumber(visible.length, language)} / {formatNumber(catalog.length || 2136, language)}</span>
+        <span className="dictionary-count">{formatNumber(visible.length, language)} / {formatNumber(catalog.length, language)}</span>
       </div>
 
       <label className="dictionary-page-search">
