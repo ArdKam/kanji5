@@ -238,7 +238,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
               className="stroke-order-toggle"
               type="button"
               aria-expanded={expanded}
-              aria-controls="stroke-order-content"
+              aria-controls={expanded ? "stroke-order-content" : undefined}
               onClick={expanded ? closeLearningTool : openLearningTool}
               title={expanded ? t("strokeOrder", language) : t("strokeOrder", language)}
             >
