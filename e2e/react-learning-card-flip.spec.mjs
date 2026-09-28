@@ -373,3 +373,27 @@ test("short learning cards stay single-page and keep examples with core informat
   await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(1);
   await assertCardBounds(card);
 });
+
+
+test("learning rating feedback controls stay fully inside the card on mobile",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  const card=await revealLearningCard(page,"en");
+  const grid=card.locator(".rating-grid");
+  await expect(grid).toBeVisible();
+  const metrics=await grid.evaluate(el=>{
+    const gridRect=el.getBoundingClientRect();
+    const buttons=[...el.querySelectorAll("button")].map(button=>{
+      const r=button.getBoundingClientRect();
+      return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,visible:r.width>0&&r.height>0};
+    });
+    return {left:gridRect.left,right:gridRect.right,buttons};
+  });
+  expect(metrics.buttons).toHaveLength(4);
+  for(const button of metrics.buttons){
+    expect(button.visible).toBe(true);
+    expect(button.left).toBeGreaterThanOrEqual(metrics.left-1);
+    expect(button.right).toBeLessThanOrEqual(metrics.right+1);
+    expect(button.width).toBeGreaterThanOrEqual(44);
+    expect(button.height).toBeGreaterThanOrEqual(44);
+  }
+});
