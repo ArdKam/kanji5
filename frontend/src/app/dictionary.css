@@ -428,6 +428,27 @@
   text-align:start;
 }
 .kanji-catalog-tile.is-detailed .kanji-catalog-fill{opacity:.35!important;}
+.dictionary-load-more{
+  display:grid;
+  justify-items:center;
+  gap:8px;
+  margin:0 auto 30px;
+  padding:0 2px;
+  text-align:center;
+}
+.dictionary-load-more p{
+  margin:0;
+  color:var(--mute);
+  font-size:var(--text-xs);
+  line-height:1.4;
+}
+.dictionary-load-more-button{
+  width:min(100%,280px);
+  min-height:44px;
+  padding:7px 14px;
+  font-size:var(--text-sm);
+}
+
 .kanji-catalog-tile.is-detailed .kanji-catalog-character{
   grid-row:1 / -1;
   width:58px;

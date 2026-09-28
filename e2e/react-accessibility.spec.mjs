@@ -217,12 +217,15 @@ test('dictionary search clear, detailed bounds, and persistent dismiss affordanc
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136);
 
   const detailed=pageRoot.locator('.dictionary-view-button').filter({hasText:'جزئیات'});
-  await expect(detailed).toBeDisabled();
-  await search.fill('学');
   await expect(detailed).toBeEnabled();
   await detailed.click();
   await expect(pageRoot.locator('.kanji-catalog-grid')).toHaveClass(/is-detailed/);
-  await expect(pageRoot.locator('.kanji-catalog-details')).toHaveCount(1);
+  await expect(pageRoot.locator('.kanji-catalog-tile.is-detailed')).toHaveCount(160);
+  await expect(pageRoot.getByRole('button',{name:'نمایش بیشتر',exact:true})).toBeVisible();
+  await expect(pageRoot.getByText('۱۶۰ از ۲۱۳۶ نتیجه نمایش داده شده',{exact:true})).toBeVisible();
+  await pageRoot.getByRole('button',{name:'نمایش بیشتر',exact:true}).click();
+  await expect(pageRoot.locator('.kanji-catalog-tile.is-detailed')).toHaveCount(320);
+  await expect(pageRoot.getByText('۳۲۰ از ۲۱۳۶ نتیجه نمایش داده شده',{exact:true})).toBeVisible();
 
   const tile=pageRoot.locator('.kanji-catalog-tile.is-detailed').first();
   await tile.click();
