@@ -121,7 +121,7 @@ test("generated mnemonic scaffolds are non-persistent prompts rather than direct
 
   const dialog = page.locator(".dictionary-card-dialog");
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: "Mnemonic", exact: true }).click();
+  await dialog.getByRole("button", { name: /Personal mnemonic|Mnemonic/, exact: true }).click();
   await expect(dialog.getByRole("button", { name: "Mnemonic", exact: true })).toHaveAttribute("aria-expanded", "true");
   const panel = dialog.locator(".prepared-mnemonic-panel");
   await expect(panel).toBeVisible();
