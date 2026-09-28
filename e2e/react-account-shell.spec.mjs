@@ -1,38 +1,43 @@
 import { test, expect } from '@playwright/test';
 
-test('account control exposes email, magic-link, and Google entry points', async ({ page }) => {
+test('account hub exposes a compact auth flow and RTL-safe fields', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'fa'));
   await page.goto('/');
-  console.log('ACCOUNT_GEOMETRY_JSON', await page.evaluate(() => JSON.stringify([...document.querySelectorAll('.header-actions > *')].map(el => { const r=el.getBoundingClientRect(); const s=getComputedStyle(el); return {tag:el.tagName,className:el.className,rect:{x:r.x,y:r.y,w:r.width,h:r.height},position:s.position,display:s.display,flex:s.flex,marginInlineStart:s.marginInlineStart,marginInlineEnd:s.marginInlineEnd}; }))));
-  console.log('ACCOUNT_DIAGNOSTIC', await page.evaluate(() => { const el=document.querySelector('#kanji5-account-launcher'); if(!el)return {exists:false, bodyButtons:[...document.querySelectorAll('button')].map(b=>({id:b.id,className:b.className,text:b.textContent?.trim(),rect:(()=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}})(),display:getComputedStyle(b).display,visibility:getComputedStyle(b).visibility,opacity:getComputedStyle(b).opacity}) )}; const cs=getComputedStyle(el); const r=el.getBoundingClientRect(); return {exists:true, className:el.className, rect:{x:r.x,y:r.y,w:r.width,h:r.height},display:cs.display,visibility:cs.visibility,opacity:cs.opacity,position:cs.position,zIndex:cs.zIndex,parent:el.parentElement?.id||el.parentElement?.tagName}; }));
   await expect(page.locator('.account-button:visible')).toBeVisible({ timeout: 15000 });
   await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
-  await expect(page.locator('.account-auth-tabs')).toBeVisible();
-  await expect(page.locator('input[type="email"]')).toBeVisible();
-  await expect(page.locator('input[type="password"]')).toBeVisible();
-  await expect(page.getByRole('button', { name: /ورود با Google به‌زودی فعال می‌شود\.|Google sign-in will be enabled soon\./ })).toBeDisabled();
-  const authTabs = page.locator('.account-auth-tabs [role="tab"]');
-  await expect(authTabs.nth(0)).toHaveAttribute('tabindex', '0');
-  await expect(authTabs.nth(1)).toHaveAttribute('tabindex', '-1');
-  await authTabs.nth(0).focus();
-  await page.keyboard.press('ArrowRight');
-  await expect(authTabs.nth(1)).toBeFocused();
-  await expect(authTabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await page.keyboard.press('Home');
-  await expect(authTabs.nth(0)).toBeFocused();
-  await expect(authTabs.nth(0)).toHaveAttribute('aria-selected', 'true');
-  await page.keyboard.press('End');
-  await expect(authTabs.nth(1)).toBeFocused();
-  await page.keyboard.press('ArrowLeft');
-  await expect(authTabs.nth(0)).toBeFocused();
+  await expect(page.locator('.account-auth-surface')).toBeVisible();
+  await expect(page.locator('.account-auth-tabs')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Google sign-in will be enabled soon|ورود با Google/ })).toHaveCount(0);
 
-  await authTabs.nth(1).click();
-  await expect(page.locator('input[type="password"]')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /ارسال لینک ورود|Send magic link/ })).toBeVisible();
+  const tabs = page.locator('.account-auth-intent [role="tab"]');
+  await expect(tabs).toHaveCount(2);
+  await expect(tabs.nth(0)).toHaveAttribute('tabindex', '0');
+  await expect(tabs.nth(1)).toHaveAttribute('tabindex', '-1');
+  await tabs.nth(0).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+
+  const email = page.locator('input[name="email"]');
+  const password = page.locator('input[name="password"]');
+  await expect(email).toHaveAttribute('dir', 'ltr');
+  await expect(password).toHaveAttribute('dir', 'ltr');
+  await expect(page.getByRole('button', { name: /نمایش رمز عبور|Show password/ })).toBeVisible();
+  await expect(page.locator('.account-footer')).toContainText('محلی‌اول');
+  await expect(page.locator('.account-footer')).not.toContainText('Local-first');
+
+  await page.getByRole('button', { name: /رمز عبور را فراموش کرده‌ای|Forgot password/ }).click();
+  await expect(page.getByRole('heading', { name: /رمز عبور را فراموش کرده‌ای|Forgot password/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /بازگشت به ورود|Back to sign in/ })).toBeVisible();
+
+  await page.getByRole('button', { name: /بازگشت به ورود|Back to sign in/ }).click();
+  await page.getByRole('button', { name: /ورود با لینک جادویی|Use a magic link/ }).click();
+  await expect(page.locator('input[name="magic-email"]')).toHaveAttribute('dir', 'ltr');
+  await expect(page.getByRole('button', { name: /بازگشت به ورود|Back to sign in/ })).toBeVisible();
 });
 
-
-test('account signup preserves entered credentials and handles a successful signup response', async ({ page }) => {
+test('account signup preserves entered credentials after switching auth intent', async ({ page }) => {
   await page.route('https://vbrtzkejodkddfdbolbo.supabase.co/auth/v1/signup', async route => {
     await route.fulfill({
       status: 200,
@@ -54,18 +59,34 @@ test('account signup preserves entered credentials and handles a successful sign
   await page.goto('/');
   await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
-  await expect(page.locator('.account-dialog .account-auth-form')).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('.account-dialog input[name="email"]')).toBeVisible();
-
   const form = page.locator('.account-dialog .account-auth-form');
   await form.locator('input[name="email"]').fill('test-signup@example.com');
   await form.locator('input[name="password"]').fill('StrongTestPassword123!');
-  await page.locator('.account-text-action:visible').click();
+  await page.getByRole('tab', { name: /ایجاد حساب|Create account/ }).click();
 
   await expect(form.locator('input[name="email"]')).toHaveValue('test-signup@example.com');
   await expect(form.locator('input[name="password"]')).toHaveValue('StrongTestPassword123!');
-  await expect(form.locator('button[type="submit"]')).toHaveText(/ایجاد حساب|ساخت حساب|Create account/);
+  await expect(form.locator('button[type="submit"]')).toHaveText(/ایجاد حساب|Create account/);
 
   await form.locator('button[type="submit"]').click();
   await expect(page.locator('.account-message')).toContainText(/حساب ساخته شد|Account created/);
+});
+
+test('forgot password sends a recovery request and keeps the user in the recovery state', async ({ page }) => {
+  await page.route('https://vbrtzkejodkddfdbolbo.supabase.co/auth/v1/recover', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({})
+    });
+  });
+
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  await page.getByRole('button', { name: /رمز عبور را فراموش کرده‌ای|Forgot password/ }).click();
+  await page.locator('input[name="email"]').fill('reset@example.com');
+  await page.getByRole('button', { name: /ارسال لینک بازنشانی|Send reset link/ }).click();
+
+  await expect(page.locator('.account-message')).toContainText(/لینک بازنشانی رمز به ایمیلت ارسال شد|A password reset link was sent to your email/);
+  await expect(page.locator('.account-auth-surface')).toBeVisible();
 });
