@@ -151,3 +151,24 @@ test('stroke-order accordion control keeps aria-controls synchronized with its r
   await expect(toggle).toHaveAttribute("aria-controls","stroke-order-content");
   await expect(panel.locator("#stroke-order-content")).toHaveCount(1);
 });
+
+test('dictionary search exposes a stable no-results state and selection dialog restores focus',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
+  const search=page.locator('.dictionary-page-search input');
+  await search.fill('zzzzzz-no-kanji');
+  await expect(page.locator('.dictionary-empty[role="status"]')).toBeVisible();
+  await expect(page.locator('.kanji-catalog-tile')).toHaveCount(0);
+  await search.fill('学');
+  const tile=page.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
+  await expect(tile).toBeVisible({timeout:10000});
+  await tile.focus();
+  await tile.click();
+  const dialog=page.locator('.dictionary-card-dialog:visible');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'بستن',exact:true})).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(tile).toBeFocused();
+});
