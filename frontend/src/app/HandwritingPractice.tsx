@@ -3,7 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
 import { sampleSvgStrokePaths } from "./handwriting-reference";
-import { adaptHintLevel, hintProfile, initialHintLevel, shouldPresentStrokeFeedback } from "./handwriting-hints";
+import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, shouldPresentStrokeFeedback } from "./handwriting-hints";
 import { feedbackFocusKind, feedbackMarkerPoints, feedbackStrokeIndex } from "./handwriting-feedback";
 import { deriveHandwritingPrompt, type HandwritingPromptKind } from "./handwriting-prompts";
 
@@ -151,7 +151,6 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
   const [liveFeedback,setLiveFeedback]=useState<{strokeNumber:number;grade:HandwritingStrokeGrade}|null>(null);
   const [expanded,setExpanded]=useState(defaultExpanded);
   const [hintLevel,setHintLevel]=useState(()=>initialHintLevel(learningSignal));
-  const [hintsOpen,setHintsOpen]=useState(false);
   const [retryKey,setRetryKey]=useState(0);
 
   useEffect(()=>{
@@ -165,7 +164,6 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
     setLiveFeedback(null);
     setError("");
     setHintLevel(initialHintLevel(learningSignal));
-    setHintsOpen(false);
     if(!normalized)return()=>{active=false};
     setLoading(true);
     fetch(kanjiSvgUrl(normalized),{cache:"force-cache"})
