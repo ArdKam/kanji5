@@ -124,7 +124,7 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   await expect(overview).toHaveAttribute('aria-selected','true');
 });
 
-test('stroke-order accordion control keeps aria-controls synchronized with its rendered panel', async ({page})=>{
+test('stroke-order page exposes an expanded accessible viewer on entry', async ({page})=>{
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
