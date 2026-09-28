@@ -11,12 +11,15 @@ export function TraditionalRadical({ info, language }: { info: RadicalInfo; lang
       <div className="traditional-radical-header">
         <div>
           <h3>{label}</h3>
-          <p>{language === "fa" ? "طبقه‌بندی Kangxi؛ مستقل از اجزای دیداری" : "Kangxi classification; separate from visual components"}</p>
+          <p>{language === "fa" ? "بخش‌بندی سنتیِ Kangxi؛ جدا از اجزای دیداری" : "Kangxi classification · separate from visual components"}</p>
         </div>
-        <span className="traditional-radical-id">#{formatNumber(info.radicalId, language)}</span>
+        <span className="traditional-radical-seal" aria-hidden="true">部</span>
       </div>
       <div className="traditional-radical-body">
-        <span className="traditional-radical-glyph" lang="ja">{info.radical.glyph}</span>
+        <div className="traditional-radical-stamp">
+          <span className="traditional-radical-glyph" lang="ja">{info.radical.glyph}</span>
+          <span className="traditional-radical-id">#{formatNumber(info.radicalId, language)}</span>
+        </div>
         <div className="traditional-radical-copy">
           <strong>{meaning || (language === "fa" ? "معنا ثبت نشده" : "Meaning not recorded")}</strong>
           <span>{language === "fa" ? formatNumber(info.radical.strokeCount, language) + " ضربه" : info.radical.strokeCount + " strokes"}</span>

@@ -25,12 +25,11 @@ async function openSchoolHandwriting(page){
   await tile.click();
   const dialog=page.locator(".dictionary-card-dialog");
   await expect(dialog).toBeVisible({timeout:10000});
-  const handwritingTab=dialog.getByRole("tab",{name:"تمرین دست‌خط",exact:true});
+  const handwritingTab=dialog.getByRole("tab",{name:/نوشتن|Writing|Handwriting practice/});
   await expect(handwritingTab).toBeVisible();
   await handwritingTab.click();
   const handwriting=dialog.locator(".handwriting-practice");
   await expect(handwriting).toBeVisible();
-  await handwriting.locator(".handwriting-header").click();
   await expect(handwriting.locator(".handwriting-ink-canvas")).toBeVisible({timeout:10000});
   return handwriting;
 }
@@ -63,9 +62,8 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   }));
   await clean(page);
   const handwriting=await openSchoolHandwriting(page);
-  await expect(handwriting).toHaveAttribute("data-hint-level","0");
-  await expect(handwriting).toHaveAttribute("data-hint-mode","trace");
-  await expect(handwriting.getByRole("button",{name:"راهنمای بیشتر"})).toBeDisabled();
+  await expect(handwriting.locator(".handwriting-hint-segment")).toHaveCount(3);
+  await expect(handwriting.locator(".handwriting-hint-segment.is-active")).toBeVisible();
   const canvas=handwriting.locator(".handwriting-ink-canvas");
   await expect(handwriting.locator(".handwriting-guide-canvas")).toBeVisible();
   const penBox=await canvas.boundingBox();
@@ -105,11 +103,13 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   expect(goodScore).toBeGreaterThanOrEqual(95);
   await expect(handwriting).toHaveAttribute("data-feedback-stroke");
   await expect(result).toContainText("%");
+  await expect(handwriting.locator(".handwriting-grade-seal")).toBeVisible();
+  await handwriting.getByRole("radio",{name:"Ghost",exact:true}).click();
   await expect(handwriting).toHaveAttribute("data-hint-level","1");
-  await expect(handwriting).toHaveAttribute("data-hint-mode","ghost");
-  await handwriting.getByRole("button",{name:"راهنمای بیشتر"}).click();
-  await expect(handwriting).toHaveAttribute("data-hint-level","0");
-  await expect(handwriting).toHaveAttribute("data-hint-mode","trace");
+  await handwriting.getByRole("radio",{name:"Guide",exact:true}).click();
+  await expect(handwriting).toHaveAttribute("data-hint-level","2");
+  await handwriting.getByRole("radio",{name:"Free",exact:true}).click();
+  await expect(handwriting).toHaveAttribute("data-hint-level","4");
 
   await handwriting.getByRole("button",{name:"واگردانی آخرین حرکت",exact:true}).click();
   await expect(handwriting).toHaveAttribute("data-stroke-count",String(reference.length-1));
