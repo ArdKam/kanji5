@@ -237,8 +237,7 @@ test("learning card back navigation uses labeled tabs without losing swipe/pager
   }
 });
 
-test("stroke-order replay auto-scrolls the expanded viewer fully into view", async ({ page }) => {
-  // Capture the pre-trigger scroll position so the regression checks both movement and smooth behavior.
+test("stroke-order entry auto-scrolls the visible viewer fully into view", async ({ page }) => {
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
@@ -259,12 +258,8 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  await goToBackPage(page, card, 3);
-  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-  const trigger = card.locator(".learning-back-page.active .stroke-order-tool-trigger");
-  await expect(trigger).toHaveCount(0);
-  const panel = card.locator(".stroke-order-panel.is-expanded");
-  await expect(panel).toBeVisible();
+  const strokePage = card.locator(".learning-back-page").nth(3);
+  const scrollContainer = strokePage.locator(".learning-back-scroll");
   await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
   const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
 
@@ -272,7 +267,7 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
     const calls = [];
     const original = Element.prototype.scrollTo;
     window.__kanji5ScrollToCalls = calls;
-    window.__kanji5OriginalScrollTo = original;
+    window.__kanji5ScrollToOriginal = original;
     Element.prototype.scrollTo = function (options) {
       if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
         calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
@@ -281,10 +276,9 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
     };
   });
 
-  await page.evaluate(() => {
-    const el = document.querySelector(".learning-back-page.active .stroke-order-panel.is-expanded");
-    el?.scrollIntoView({ block: "nearest" });
-  });
+  await card.locator(".learning-back-tab").nth(3).click();
+  const panel = card.locator(".learning-back-page.active .stroke-order-panel.is-expanded");
+  await expect(panel).toBeVisible();
 
   await expect.poll(async () => {
     return await panel.evaluate((el) => {
@@ -302,7 +296,7 @@ test("stroke-order replay auto-scrolls the expanded viewer fully into view", asy
   expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
 
   await page.evaluate(() => {
-    if (window.__kanji5OriginalScrollTo) Element.prototype.scrollTo = window.__kanji5OriginalScrollTo;
+    if (window.__kanji5ScrollToOriginal) Element.prototype.scrollTo = window.__kanji5ScrollToOriginal;
   });
 });
 
