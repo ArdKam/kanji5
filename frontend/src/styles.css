@@ -1887,3 +1887,18 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 @media(prefers-reduced-motion:reduce){
   .learning-back-tab{transition:none;}
 }
+
+/* Learning UI hardening: keep grading controls in normal flow so learning tools never sit beneath them. */
+.learning-card-back .learning-back-footer{
+  flex:0 0 auto;
+  position:relative;
+  inset:auto;
+  margin-top:0;
+  transform:none;
+}
+.learning-card-back .learning-back-scroll{
+  padding-bottom:24px;
+}
+@media(max-width:760px){
+  .learning-card-back .learning-back-scroll{padding-bottom:32px;}
+}
