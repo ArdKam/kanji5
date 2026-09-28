@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { t, type Language } from "./i18n";
 import { listKanji, type KanjiCatalogItem } from "./engine";
 import { ReadingLab } from "./ReadingLab";
-import { usePageDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 
 export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
   open: boolean;
