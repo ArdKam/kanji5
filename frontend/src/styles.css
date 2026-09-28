@@ -1083,3 +1083,19 @@ html[dir="rtl"] .experience-nav.active-tab-dictionary .experience-tab-indicator{
 :root[data-theme="dark"] .account-notice-warning{
   background:color-mix(in srgb,var(--paper) 82%,var(--washi));
 }
+
+.app-error-banner{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:var(--space-4);
+  padding:12px 14px;
+  border-color:color-mix(in srgb,var(--color-danger) 42%,var(--line));
+  background:color-mix(in srgb,var(--color-danger) 7%,var(--paper));
+}
+.app-error-banner strong{color:var(--color-danger);font-size:var(--text-sm);}
+.app-error-banner p{margin:4px 0 0;color:var(--ink);font-size:var(--text-sm);line-height:1.6;overflow-wrap:anywhere;}
+@media(max-width:520px){
+  .app-error-banner{align-items:stretch;flex-direction:column;}
+  .app-error-banner .button{width:100%;}
+}
