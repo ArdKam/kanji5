@@ -113,9 +113,10 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") return;
     event.preventDefault();
     const next = key === "Home" ? 0 : key === "End" ? count - 1 : (index + (key === "ArrowRight" ? 1 : -1) + count) % count;
+    const tabList = event.currentTarget.parentElement;
     activate(next);
     requestAnimationFrame(() => {
-      const tabs = Array.from(event.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []);
+      const tabs = Array.from(tabList?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []);
       tabs[next]?.focus({ preventScroll: true });
     });
   };
