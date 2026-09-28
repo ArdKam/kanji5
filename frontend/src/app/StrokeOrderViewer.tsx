@@ -76,19 +76,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
     return () => stopPlayback();
   }, [compactLoop, paths.length, stopPlayback]);
 
-  useEffect(() => {
-    if (compactLoop || typeof active !== "boolean") return;
-    if (!active) {
-      stopPlayback();
-      setExpanded(false);
-      return;
-    }
-    if (!paths.length) return;
-    scrollAfterExpandRef.current = true;
-    setExpanded(true);
-    play(true);
-  }, [active, compactLoop, paths.length, play, stopPlayback]);
-
   const play = useCallback((fromStart = false) => {
     if (!paths.length) return;
     stopPlayback();
