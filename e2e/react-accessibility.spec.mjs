@@ -218,7 +218,7 @@ test('dictionary search clear, detailed bounds, and persistent dismiss affordanc
 
   const matrix=pageRoot.getByRole('button',{name:'نمای شبکه',exact:true});
   const detailed=pageRoot.getByRole('button',{name:'نمای جزئیات',exact:true});
-  await expect(matrix).toHaveAttribute('aria-pressed','false');
+  await expect(matrix).toHaveAttribute('aria-pressed','true');
   await expect(matrix).toBeVisible();
   await expect(detailed).toBeVisible();
   await expect(matrix.locator('.dictionary-view-icon svg')).toHaveCount(1);
