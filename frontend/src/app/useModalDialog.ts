@@ -14,7 +14,13 @@ export function useModalDialog(open: boolean, onClose: () => void): RefObject<HT
     requestAnimationFrame(() => focusTarget?.focus());
     return () => {
       if (dialog.open) dialog.close();
-      requestAnimationFrame(() => openerRef.current?.focus({ preventScroll: true }));
+      const opener = openerRef.current;
+      openerRef.current = null;
+      requestAnimationFrame(() => {
+        if (opener?.isConnected && !opener.hasAttribute("disabled") && opener.getAttribute("aria-hidden") !== "true") {
+          opener.focus({ preventScroll: true });
+        }
+      });
     };
   }, [open]);
 
