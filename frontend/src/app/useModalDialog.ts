@@ -5,20 +5,29 @@ export function useModalDialog(open: boolean, onClose: () => void): RefObject<HT
   const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    if (!open) return;
     const dialog = ref.current;
-    if (!open || !dialog) return;
+    if (!dialog) return;
     openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     if (!dialog.open) dialog.showModal();
     const focusTarget = dialog.querySelector<HTMLElement>("[autofocus], .dialog-close, button, input, textarea, select, [tabindex]:not([tabindex='-1'])");
     requestAnimationFrame(() => focusTarget?.focus());
-    const onCancel = (event: Event) => { event.preventDefault(); onClose(); };
-    dialog.addEventListener("cancel", onCancel);
     return () => {
-      dialog.removeEventListener("cancel", onCancel);
       if (dialog.open) dialog.close();
-      requestAnimationFrame(() => openerRef.current?.focus());
+      requestAnimationFrame(() => openerRef.current?.focus({ preventScroll: true }));
     };
-  }, [open, onClose]);
+  }, [open]);
+
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    const onCancel = (event: Event) => {
+      event.preventDefault();
+      onClose();
+    };
+    dialog.addEventListener("cancel", onCancel);
+    return () => dialog.removeEventListener("cancel", onCancel);
+  }, [onClose]);
 
   return ref;
 }
