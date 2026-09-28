@@ -56,6 +56,7 @@ test('account signup preserves entered credentials after switching auth intent',
     });
   });
 
+  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'en'));
   await page.goto('/');
   await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
@@ -142,5 +143,6 @@ test('signed-in account hub renders one identity surface, sync metrics, and sepa
 
   await page.getByRole('button', { name: 'Change password', exact: true }).click();
   await expect(page.locator('input[name="currentPassword"]')).toBeVisible();
-  await expect(page.getByRole('button', { name: /Don’t have a password\? Set one|Don't have a password\? Set one/ })).toBeVisible();
+  await expect(page.locator('input[name="newPassword"]')).toBeVisible();
+  await expect(page.locator('input[name="confirmPassword"]')).toBeVisible();
 });
