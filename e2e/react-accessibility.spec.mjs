@@ -88,6 +88,55 @@ test('learning card reveal moves focus out of the aria-hidden face and emits no 
 });
 
 
+test('changing the learning-card information page clears focus before hiding the previous page', async ({page})=>{
+  const ariaWarnings:string[]=[];
+  page.on('console',message=>{
+    if(message.type()==='warning'&&message.text().includes('Blocked aria-hidden')) ariaWarnings.push(message.text());
+  });
+
+  await clean(page);
+  const card=page.locator('#root .learning-card');
+  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await expect(card.locator('.learning-back-page.active')).toBeVisible();
+
+  const overviewAudio=card.locator('.learning-back-page.active .audio-button').first();
+  await expect(overviewAudio).toBeVisible();
+  await overviewAudio.focus();
+  await expect(overviewAudio).toBeFocused();
+
+  await card.locator('.learning-back-page-nav .pager-button').last().click();
+  await expect(card.locator('.learning-back-page.active')).toHaveAttribute('aria-label','نمونهٔ واژگانی');
+  await expect.poll(async()=>page.evaluate(()=>{
+    const active=document.activeElement;
+    const hiddenPage=document.querySelector('.learning-back-page[aria-hidden="true"]');
+    return active instanceof Node&&hiddenPage?.contains(active)===true;
+  })).toBe(false);
+
+  expect(ariaWarnings).toEqual([]);
+});
+
+test('rating a revealed learning card clears focus before the back face is hidden', async ({page})=>{
+  const ariaWarnings:string[]=[];
+  page.on('console',message=>{
+    if(message.type()==='warning'&&message.text().includes('Blocked aria-hidden')) ariaWarnings.push(message.text());
+  });
+
+  await clean(page);
+  const card=page.locator('#root .learning-card');
+  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  const rating=card.getByRole('button',{name:'خوب',exact:true});
+  await rating.focus();
+  await expect(rating).toBeFocused();
+  await rating.click();
+
+  await expect.poll(async()=>page.evaluate(()=>{
+    const active=document.activeElement;
+    const back=document.querySelector('.learning-card-back');
+    return active instanceof Node&&back?.contains(active)===true;
+  })).toBe(false);
+  expect(ariaWarnings).toEqual([]);
+});
+
 test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
   await clean(page);
 
