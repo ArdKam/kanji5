@@ -212,7 +212,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const densityScore=exampleCount*2+Math.min(readingCount,6);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const hasExamplesPage=exampleCount>0;
-  const backPageCount=hasExamplesPage?5:4;
+  const backPageCount=hasExamplesPage?4:3;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,active:false,axis:null});
@@ -293,15 +293,11 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                         : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>}
                     </div>
                     {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
+                    <div className="learning-back-readings-block">
+                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
+                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("readings")} aria-hidden={backPage!==1} inert={backPage!==1}>
-              <div className="learning-back-scroll">
-                <div className="readings-page">
-                  <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
-                  <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
                 </div>
               </div>
             </div>
