@@ -289,6 +289,16 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
           <button className="button primary account-email-button" type="submit" disabled={busy}>{busy ? t("sending", language) : t("sendResetLink", language)}</button>
         </form>
         <button className="account-link-button" type="button" disabled={busy} onClick={() => { setAuthMode("email"); setAuthMessage(null); }}>{t("backToSignIn", language)}</button>
+      </> : authMode === "magic" ? <>
+        <div className="account-auth-intro">
+          <h3>{t("magicLink", language)}</h3>
+          <p>{t("magicLinkHint", language)}</p>
+        </div>
+        <form className="account-auth-form" onSubmit={event => { event.preventDefault(); submitEmailAuth(); }}>
+          <label><span>{t("email", language)}</span><input dir="ltr" name="magic-email" type="email" value={email} onChange={event => setEmail(event.target.value)} autoComplete="email" required placeholder="name@example.com" disabled={busy} /></label>
+          <button className="button primary account-email-button" type="submit" disabled={busy}>{busy ? t("sending", language) : t("sendMagicLink", language)}</button>
+        </form>
+        <button className="account-link-button" type="button" disabled={busy} onClick={() => { setAuthMode("email"); setAuthMessage(null); }}>{t("backToSignIn", language)}</button>
       </> : <>
         <div className="account-auth-intro">
           <h3>{t("accountWelcomeTitle", language)}</h3>
@@ -318,19 +328,8 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         </form>
 
         <div className="account-divider"><span>{t("or", language)}</span></div>
-
-        <button className="account-link-button account-magic-link" type="button" disabled={busy} onClick={() => { setAuthMode("magic"); setAuthMessage(null); }}>
-          {t("useMagicLink", language)}
-        </button>
+        <button className="account-link-button account-magic-link" type="button" disabled={busy} onClick={() => { setAuthMode("magic"); setAuthMessage(null); }}>{t("useMagicLink", language)}</button>
       </>}
-      {authMode === "magic" ? <div className="account-magic-overlay">
-        <div className="account-auth-intro"><h3>{t("magicLink", language)}</h3><p>{t("magicLinkHint", language)}</p></div>
-        <form className="account-auth-form" onSubmit={event => { event.preventDefault(); submitEmailAuth(); }}>
-          <label><span>{t("email", language)}</span><input dir="ltr" name="magic-email" type="email" value={email} onChange={event => setEmail(event.target.value)} autoComplete="email" required placeholder="name@example.com" disabled={busy} /></label>
-          <button className="button primary account-email-button" type="submit" disabled={busy}>{busy ? t("sending", language) : t("sendMagicLink", language)}</button>
-        </form>
-        <button className="account-link-button" type="button" disabled={busy} onClick={() => { setAuthMode("email"); setAuthMessage(null); }}>{t("backToSignIn", language)}</button>
-      </div> : null}
       {authMessage ? <p className="account-message" role="status">{authMessage}</p> : null}
       <p className="account-hint">{t("guestModeHint", language)}</p>
     </section> : null}
