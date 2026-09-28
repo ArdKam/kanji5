@@ -164,7 +164,7 @@ test('Active Recall start failure is recoverable without leaving the practice ho
   await clean(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
-  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_BRIDGE__?.start)),{timeout:5000}).toBe(true);
+  await page.evaluate(async()=>{ const boundary=window.__KANJI5_V19_V2_BOUNDARY__; if(!boundary?.ensureEducationRuntime)throw new Error('education runtime boundary unavailable'); const ready=await boundary.ensureEducationRuntime(); if(!ready)throw new Error('education runtime unavailable'); });
   await page.evaluate(()=>{
     const bridge=window.__KANJI5_EDU_BRIDGE__;
     if(!bridge?.start)throw new Error('education bridge start unavailable');
