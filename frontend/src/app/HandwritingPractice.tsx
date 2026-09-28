@@ -6,6 +6,7 @@ import { sampleSvgStrokePaths } from "./handwriting-reference";
 import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, shouldPresentStrokeFeedback } from "./handwriting-hints";
 import { feedbackFocusKind, feedbackMarkerPoints, feedbackStrokeIndex } from "./handwriting-feedback";
 import { deriveHandwritingPrompt, type HandwritingPromptKind } from "./handwriting-prompts";
+import "./handwriting-practice.css";
 
 type Point = { x:number; y:number };
 
