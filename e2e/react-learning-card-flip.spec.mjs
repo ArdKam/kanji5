@@ -315,7 +315,7 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  await goToBackPage(page, card, 3);
+  await goToBackPage(page, card, 2);
   const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
   const mnemonic = card.locator(".learning-back-page.active .mnemonic-tool");
   const trigger = mnemonic.getByRole("button", { name: "Personal mnemonic" });
