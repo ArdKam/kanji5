@@ -42,11 +42,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
     const normalized = Array.from(String(character || "").trim()).slice(0, 1).join("");
     if (!normalized) return () => { active = false; };
 
-    if (!compactLoop && isActive === false) {
-      setLoading(false);
-      return () => { active = false; };
-    }
-
     setLoading(true);
     (async () => {
       const url = kanjiSvgUrl(normalized);
@@ -65,7 +60,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
       setError(t("strokeOrderUnavailable", language));
     });
     return () => { active = false; };
-  }, [character, language, retryKey, stopPlayback, isActive, compactLoop]);
+  }, [character, language, retryKey, stopPlayback, compactLoop]);
 
   useEffect(() => {
     if (!compactLoop || !paths.length) return;
