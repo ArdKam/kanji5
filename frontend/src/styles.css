@@ -1056,3 +1056,30 @@ html[dir="rtl"] .experience-nav.active-tab-dictionary .experience-tab-indicator{
 :root[data-theme="dark"] .rating-hard{background:#382e16;color:#ffd76f;border-color:#d3a63a;}
 :root[data-theme="dark"] .rating-good{background:#17301f;color:#9be0ad;border-color:#58a96f;}
 :root[data-theme="dark"] .rating-easy{background:#18283b;color:#a9c9f5;border-color:#6e9bd4;}
+
+
+/* Accessibility baseline: one focus language, predictable reduced-motion behavior, and dark-theme surface parity. */
+:where(button,input,textarea,select,summary,a):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--color-focus) 68%,transparent);
+  outline-offset:3px;
+}
+:where(button,input,textarea,select):disabled{
+  cursor:not-allowed;
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important;}
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+  }
+}
+:root[data-theme="dark"] .account-section,
+:root[data-theme="dark"] .account-user-card,
+:root[data-theme="dark"] .account-profile-hero,
+:root[data-theme="dark"] .account-auth-tabs,
+:root[data-theme="dark"] .account-section-tabs,
+:root[data-theme="dark"] .account-notice-warning{
+  background:color-mix(in srgb,var(--paper) 82%,var(--washi));
+}
