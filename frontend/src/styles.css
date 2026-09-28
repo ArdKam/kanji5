@@ -1253,7 +1253,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   bottom:auto;
   z-index:2;
   pointer-events:auto;
-  transform:translateY(calc(-1 * (var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom))));
+  transform:translateY(calc(-1 * var(--nav-bar-height) - max(14px,env(safe-area-inset-bottom))));
 }
 .learning-card-back .learning-back-footer > *{pointer-events:auto;}
 .learning-card-back .learning-back-pager-shell{padding-bottom:0;}
