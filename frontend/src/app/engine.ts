@@ -239,7 +239,9 @@ export async function startExercise(): Promise<void> {
     else if (session?.start && !current?.started && !current?.finished) await session.start();
   }
   const startResult = await bridge.start();
-  if (startResult && typeof startResult === "object" && "started" in startResult && startResult.started === false) {\n    throw new Error("KANJI5_NO_EXERCISE_AVAILABLE");\n  }
+  if (startResult && typeof startResult === "object" && "started" in startResult && startResult.started === false) {
+    throw new Error("KANJI5_NO_EXERCISE_AVAILABLE");
+  }
   const started = performance.now();
   while (performance.now() - started < 15000) {
     const current = await snapshot();
