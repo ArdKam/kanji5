@@ -11,5 +11,5 @@ if(!navCss.includes("backdrop-filter:blur(14px)")) throw new Error("floating nav
 if(!css.includes("--nav-bar-height:66px") && !navCss.includes("--nav-bar-height:66px")) throw new Error("shared navigation height token missing");
 if(!css.includes("calc(var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom))") && !navCss.includes("calc(var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom))")) throw new Error("shared navigation clearance missing");
 const order=(a,b)=>{const i=navCss.indexOf(a),j=navCss.indexOf(b);return i>=0&&j>=0&&i<j};
-if(!order(".experience-nav{position:fixed",".experience-tab{border:0")) throw new Error("nav rules malformed");
+if(!navCss.includes(".experience-tab{height:46px;box-sizing:border-box")) throw new Error("experience tab geometry missing");
 console.log("floating experience nav contract: PASS");
