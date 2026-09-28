@@ -245,12 +245,13 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
           {!loading && !error && paths.length ? (
             <span className="stroke-order-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
           ) : null}
-          {!loading && !error && paths.length ? (
+          {(expanded || (!loading && !error && paths.length)) ? (
             <button
               className="stroke-order-toggle"
               type="button"
               aria-expanded={expanded}
               aria-controls={expanded ? "stroke-order-content" : undefined}
+              disabled={loading}
               onClick={expanded && typeof isActive !== "boolean" ? closeLearningTool : () => play(true)}
               title={t("strokeOrder", language)}
             >
@@ -261,16 +262,16 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
         </div>
       </div>
 
-      {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
-      {!loading && error ? (
-        <div className="stroke-order-error" role="status">
-          <span>{error}</span>
-          <button className="button secondary" type="button" onClick={() => setRetryKey(value => value + 1)}>{t("tryAgain", language)}</button>
-        </div>
-      ) : null}
-
-      {!loading && !error && paths.length && expanded ? (
+      {expanded ? (
         <div id="stroke-order-content">
+          {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
+          {!loading && error ? (
+            <div className="stroke-order-error" role="status">
+              <span>{error}</span>
+              <button className="button secondary" type="button" onClick={() => setRetryKey(value => value + 1)}>{t("tryAgain", language)}</button>
+            </div>
+          ) : null}
+          {!loading && !error && paths.length ? (
           <div className="stroke-order-stage">
             <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
               {paths.map((path, index) => (
@@ -309,6 +310,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
             <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
+          ) : null}
         </div>
       ) : null}
     </section>
