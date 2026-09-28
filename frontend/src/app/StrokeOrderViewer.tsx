@@ -272,6 +272,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
             </div>
           ) : null}
           {!loading && !error && paths.length ? (
+            <>
           <div className="stroke-order-stage">
             <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
               {paths.map((path, index) => (
@@ -310,6 +311,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
             <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
+            </>
           ) : null}
         </div>
       ) : null}
