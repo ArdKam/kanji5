@@ -8,6 +8,14 @@ if(!/\.experience-nav\{[^}]*position:fixed/.test(css)){
 if(!/\.experience-tab\.active/.test(css)){
   throw new Error("SHIPPED_REACT_CSS_MISSING_EXPERIENCE_TAB_STATE");
 }
+const localCssAssets=[...css.matchAll(/url\(\s*["']?\.\/assets\/([^"')?#\s]+)["']?\s*\)/g)].map(match=>match[1]);
+for(const asset of localCssAssets){
+  if(!fs.existsSync(\`react-dist/assets/\${asset}\`)){
+    throw new Error("SHIPPED_REACT_CSS_MISSING_LOCAL_ASSET: "+asset);
+  }
+}
+console.log(\`Shipped React CSS local assets resolved (\${localCssAssets.length}).\`);
+
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
 if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react\.css\?v=/.test(entry)){

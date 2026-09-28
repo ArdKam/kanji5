@@ -59,7 +59,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add react-dist/kanji5-react.js react-dist/kanji5-react.css react-dist/kanji5-react-release18.js react-dist/kanji5-react-release18.css
+          git add react-dist/kanji5-react.js react-dist/kanji5-react.css react-dist/kanji5-react-release18.js react-dist/kanji5-react-release18.css react-dist/assets/
           if git diff --cached --quiet; then
             echo "Generated React artifact already matches the repository."
           else
