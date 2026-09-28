@@ -1230,9 +1230,12 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   bottom:calc(var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom)));
   z-index:4;
 }
-.learning-card-back .learning-back-pager-shell{
-  padding-bottom:118px;
-}
+.learning-card-back .learning-back-pager-shell{padding-bottom:0;}
 @media(max-width:760px){
-  .learning-card-back .learning-back-pager-shell{padding-bottom:122px;}
+  .learning-card-back .learning-back-pager-shell{padding-bottom:0;}
+}
+
+.learning-card-back .learning-back-scroll{padding-bottom:130px;}
+@media(max-width:760px){
+  .learning-card-back .learning-back-scroll{padding-bottom:136px;}
 }
