@@ -22,8 +22,13 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   const [isPlaying, setIsPlaying] = useState(false);
   const compactLoop = mode === "dictionary-loop";
   const timerRef = useRef<number | null>(null);
+  const completedRef = useRef(0);
   const viewerRef = useRef<HTMLElement | null>(null);
   const scrollAfterExpandRef = useRef(false);
+
+  useEffect(() => {
+    completedRef.current = completed;
+  }, [completed]);
 
   const stopPlayback = useCallback(() => {
     if (timerRef.current !== null) {
@@ -67,12 +72,14 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   const play = useCallback((fromStart = false) => {
     if (!paths.length) return;
     stopPlayback();
-    const start = fromStart || completed >= paths.length ? 0 : completed;
+    const start = fromStart || completedRef.current >= paths.length ? 0 : completedRef.current;
+    completedRef.current = start;
     setCompleted(start);
     setIsPlaying(true);
     timerRef.current = window.setInterval(() => {
       setCompleted(current => {
         const next = current + 1;
+        completedRef.current = next;
         if (next >= paths.length) {
           window.clearInterval(timerRef.current ?? undefined);
           timerRef.current = null;
@@ -82,7 +89,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         return next;
       });
     }, 720);
-  }, [completed, paths.length, stopPlayback]);
+  }, [paths.length, stopPlayback]);
 
   const pause = useCallback(() => stopPlayback(), [stopPlayback]);
 
