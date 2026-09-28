@@ -19,8 +19,9 @@ function AccountMark({ user }: { user: AccountState["user"] }) {
 }
 
 function PasswordField({
-  label, value, onChange, autoComplete, disabled, placeholder, showLabel, hideLabel
+  name, label, value, onChange, autoComplete, disabled, placeholder, showLabel, hideLabel
 }: {
+  name: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -36,7 +37,7 @@ function PasswordField({
     <span className="account-password-field">
       <input
         dir="ltr"
-        name={label}
+        name={name}
         type={visible ? "text" : "password"}
         value={value}
         onChange={event => onChange(event.target.value)}
@@ -313,6 +314,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         <form className="account-auth-form" onSubmit={event => { event.preventDefault(); submitEmailAuth(); }}>
           <label><span>{t("email", language)}</span><input dir="ltr" name="email" type="email" value={email} onChange={event => setEmail(event.target.value)} autoComplete="email" required placeholder="name@example.com" disabled={busy} /></label>
           <PasswordField
+            name="password"
             label={t("password", language)}
             value={password}
             onChange={setPassword}
@@ -349,8 +351,8 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
           <div><h3>{t("setNewPassword", language)}</h3><p>{t("setNewPasswordHint", language)}</p></div>
         </div>
         <form className="account-profile-form" onSubmit={event => { event.preventDefault(); submitPassword(); }}>
-          <PasswordField label={t("newPassword", language)} value={newPassword} onChange={setNewPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
-          <PasswordField label={t("confirmPassword", language)} value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
+          <PasswordField name="newPassword" label={t("newPassword", language)} value={newPassword} onChange={setNewPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
+          <PasswordField name="confirmPassword" label={t("confirmPassword", language)} value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
           <button className="button primary" type="submit" disabled={busy}>{busy ? t("saving", language) : t("setPassword", language)}</button>
         </form>
         {authMessage ? <p className="account-message" role="status">{authMessage}</p> : null}
@@ -377,8 +379,8 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
             <div><h3>{t("security", language)}</h3><p>{setPasswordOnly ? t("setPasswordHint", language) : t("passwordHint", language)}</p></div>
           </div>
           {setPasswordOnly ? <form className="account-profile-form" onSubmit={event => { event.preventDefault(); submitPassword(); }}>
-            <PasswordField label={t("newPassword", language)} value={newPassword} onChange={setNewPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
-            <PasswordField label={t("confirmPassword", language)} value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
+            <PasswordField name="newPassword" label={t("newPassword", language)} value={newPassword} onChange={setNewPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
+            <PasswordField name="confirmPassword" label={t("confirmPassword", language)} value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
             <div className="account-inline-actions"><button className="button primary" type="submit" disabled={busy}>{busy ? t("saving", language) : t("setPassword", language)}</button><button className="account-link-button" type="button" disabled={busy} onClick={() => { setSetPasswordOnly(false); setNewPassword(""); setConfirmPassword(""); setAuthMessage(null); }}>{t("cancel", language)}</button></div>
           </form> : <div className="account-security-row">
             <div><strong>{t("password", language)}</strong><span>{t("passwordSetHint", language)}</span></div>
