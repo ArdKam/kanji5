@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
 import { TraditionalRadical } from "./TraditionalRadical";
@@ -83,14 +83,14 @@ export function DictionaryKanjiCard({
     const dialog = dialogRef.current;
     if (!dialog) return;
     dialog.scrollTo({ top: 0, behavior: "auto" });
-  }, [activeSection, item.character, dialogRef]);
+  }, [activeSection, item.character]);
 
   const selectSection = (section: SectionKey) => {
     if (section === activeSection) return;
     setActiveSection(section);
   };
 
-  const handleSectionKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleSectionKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const sections: SectionKey[] = ["overview", "structure", "writing", "vocabulary", "mnemonic"];
     const index = sections.indexOf(activeSection);
     let nextIndex = index;
