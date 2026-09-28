@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type UiIconName = "learning" | "recall" | "dictionary" | "menu" | "close" | "audio" | "settings" | "stats" | "mnemonic" | "writing" | "grammar" | "reading" | "previous" | "next";
+export type UiIconName = "learning" | "recall" | "dictionary" | "menu" | "close" | "audio" | "settings" | "stats" | "mnemonic" | "writing" | "grammar" | "reading" | "previous" | "next" | "user" | "eye" | "eyeOff";
 
 const paths: Record<UiIconName, string[]> = {
   learning:["M4 5h16","M4 10h16","M4 15h10","M4 20h7"],
@@ -16,7 +16,10 @@ const paths: Record<UiIconName, string[]> = {
   grammar:["M5 4h14v16H5z","M8 8h8","M8 12h8","M8 16h5"],
   reading:["M4 5h16v14H4z","M7 9h10","M7 13h7"],
   previous:["m15 18-6-6 6-6"],
-  next:["m9 18 6-6-6-6"]
+  next:["m9 18 6-6-6-6"],
+  user:["M20 21a8 8 0 0 0-16 0","M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"],
+  eye:["M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"],
+  eyeOff:["M3 3l18 18","M10.6 10.6a2 2 0 0 0 2.8 2.8","M9.9 5.2A10.6 10.6 0 0 1 12 5c6 0 9.5 7 9.5 7a17.8 17.8 0 0 1-3.1 4.1","M6.2 6.2C3.9 7.8 2.5 12 2.5 12a17.7 17.7 0 0 0 5.8 5.8"
 };
 
 export function UiIcon({ name, size = 20, ...props }: { name: UiIconName; size?: number } & SVGProps<SVGSVGElement>) {
