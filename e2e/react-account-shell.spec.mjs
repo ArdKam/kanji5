@@ -18,6 +18,7 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   await page.keyboard.press('ArrowRight');
   await expect(tabs.nth(1)).toBeFocused();
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await tabs.nth(0).click();
 
   const email = page.locator('input[name="email"]');
   const password = page.locator('input[name="password"]');
@@ -70,7 +71,7 @@ test('account signup preserves entered credentials after switching auth intent',
   await expect(form.locator('button[type="submit"]')).toHaveText(/ایجاد حساب|Create account/);
 
   await form.locator('button[type="submit"]').click();
-  await expect(page.locator('.account-message')).toContainText(/حساب ساخته شد|Account created/);
+  await expect(page.locator('.account-message')).toContainText(/حساب ساخته شد؛ برای ادامه ایمیلت را تأیید کن|Your account was created. Check your email to continue/);
 });
 
 test('forgot password sends a recovery request and keeps the user in the recovery state', async ({ page }) => {
@@ -94,6 +95,7 @@ test('forgot password sends a recovery request and keeps the user in the recover
 
 
 test('signed-in account hub renders one identity surface, sync metrics, and separate security actions', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'en'));
   await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
   await page.route('**/supabase-sync.js', route => route.fulfill({
     status: 200,
