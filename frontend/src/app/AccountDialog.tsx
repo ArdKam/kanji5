@@ -379,19 +379,16 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
 
         <section className="account-section">
           <div className="account-section-heading">
-            <div><h3>{t("security", language)}</h3><p>{setPasswordOnly ? t("setPasswordHint", language) : t("passwordHint", language)}</p></div>
+            <div><h3>{t("security", language)}</h3><p>{t("passwordHint", language)}</p></div>
           </div>
-{(setPasswordOnly || securityEditing) ? <form className="account-profile-form" onSubmit={event => { event.preventDefault(); submitPassword(); }}>
-            {!setPasswordOnly ? <PasswordField name="currentPassword" label={t("currentPassword", language)} value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} /> : null}
+{securityEditing ? <form className="account-profile-form" onSubmit={event => { event.preventDefault(); submitPassword(); }}>
+            <PasswordField name="currentPassword" label={t("currentPassword", language)} value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
             <PasswordField name="newPassword" label={t("newPassword", language)} value={newPassword} onChange={setNewPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
             <PasswordField name="confirmPassword" label={t("confirmPassword", language)} value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
-            <div className="account-inline-actions"><button className="button primary" type="submit" disabled={busy}>{busy ? t("saving", language) : setPasswordOnly ? t("setPassword", language) : t("changePassword", language)}</button><button className="account-link-button" type="button" disabled={busy} onClick={() => { setSetPasswordOnly(false); setSecurityEditing(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); setAuthMessage(null); }}>{t("cancel", language)}</button></div>
+            <div className="account-inline-actions"><button className="button primary" type="submit" disabled={busy}>{busy ? t("saving", language) : t("changePassword", language)}</button><button className="account-link-button" type="button" disabled={busy} onClick={() => { setSecurityEditing(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); setAuthMessage(null); }}>{t("cancel", language)}</button></div>
           </form> : <div className="account-security-row">
             <div><strong>{t("password", language)}</strong><span>{t("passwordSetHint", language)}</span></div>
-            <div className="account-security-actions">
-              <button className="button secondary" type="button" disabled={busy} onClick={() => { setSecurityEditing(true); setSetPasswordOnly(false); setAuthMessage(null); }}>{t("changePassword", language)}</button>
-              <button className="account-link-button" type="button" disabled={busy} onClick={() => { setSetPasswordOnly(true); setSecurityEditing(false); setAuthMessage(null); }}>{t("setPasswordWithoutCurrent", language)}</button>
-            </div>
+            <button className="button secondary" type="button" disabled={busy} onClick={() => { setSecurityEditing(true); setAuthMessage(null); }}>{t("changePassword", language)}</button>
           </div>}
         </section>
 
