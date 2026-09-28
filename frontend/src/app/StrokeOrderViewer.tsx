@@ -12,7 +12,7 @@ function ReplayIcon() {
   );
 }
 
-export function StrokeOrderViewer({ character, language, mode = "learning", active }: { character: string; language: Language; mode?: "learning" | "dictionary-loop"; active?: boolean }) {
+export function StrokeOrderViewer({ character, language, mode = "learning", active: isActive }: { character: string; language: Language; mode?: "learning" | "dictionary-loop"; active?: boolean }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
     const normalized = Array.from(String(character || "").trim()).slice(0, 1).join("");
     if (!normalized) return () => { active = false; };
 
-    if (!compactLoop && active === false) {
+    if (!compactLoop && isActive === false) {
       setLoading(false);
       return () => { active = false; };
     }
@@ -65,7 +65,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
       setError(t("strokeOrderUnavailable", language));
     });
     return () => { active = false; };
-  }, [character, language, retryKey, stopPlayback]);
+  }, [character, language, retryKey, stopPlayback, isActive, compactLoop]);
 
   useEffect(() => {
     if (!compactLoop || !paths.length) return;
@@ -109,6 +109,19 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
       });
     }, 720);
   }, [paths.length, stopPlayback]);
+
+  useEffect(() => {
+    if (compactLoop || typeof isActive !== "boolean") return;
+    if (!isActive) {
+      stopPlayback();
+      setExpanded(false);
+      return;
+    }
+    if (!paths.length) return;
+    scrollAfterExpandRef.current = true;
+    setExpanded(true);
+    play(true);
+  }, [isActive, compactLoop, paths.length, play, stopPlayback]);
 
   const scrollExpandedToolIntoView = useCallback(() => {
     const target = viewerRef.current;
