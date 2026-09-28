@@ -114,8 +114,10 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     event.preventDefault();
     const next = key === "Home" ? 0 : key === "End" ? count - 1 : (index + (key === "ArrowRight" ? 1 : -1) + count) % count;
     activate(next);
-    const tabs = Array.from(event.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []);
-    tabs[next]?.focus();
+    requestAnimationFrame(() => {
+      const tabs = Array.from(event.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []);
+      tabs[next]?.focus({ preventScroll: true });
+    });
   };
 
   const submitEmailAuth = () => void run(async () => {
