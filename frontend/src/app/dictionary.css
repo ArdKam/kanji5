@@ -623,6 +623,8 @@
   stroke:var(--ink);
   stroke-width:4.8;
 }
+.dictionary-stroke-order .stroke-order-active{animation:none;stroke-dashoffset:0;}
+.dictionary-stroke-order[data-stroke-order-playing="true"] .stroke-order-active{animation:strokeOrderDraw .72s ease both;}
 .dictionary-stroke-order .stroke-order-active{
   stroke:var(--shu);
   stroke-width:5.2;
