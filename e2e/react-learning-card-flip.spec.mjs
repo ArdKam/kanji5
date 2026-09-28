@@ -185,7 +185,7 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  await goToBackPage(page, card, 2);
+  await goToBackPage(page, card, 3);
   const tool = card.locator(".learning-back-page.active .stroke-order-tool");
   await expect(tool).toBeVisible();
   const trigger = tool.getByRole("button", { name: "Stroke order" });
