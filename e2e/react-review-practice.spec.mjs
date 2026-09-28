@@ -68,6 +68,7 @@ test('empty Active Recall state stays responsive before any card is learned',asy
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await expect(page.locator('#root #exercise')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_BRIDGE__?.start)),{timeout:5000}).toBe(true);
   await expect(learning).toBeEnabled();
   await learning.click();
   await expect(learning).toHaveAttribute('aria-current','page');
@@ -164,6 +165,7 @@ test('Active Recall start failure is recoverable without leaving the practice ho
   await clean(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_BRIDGE__?.start)),{timeout:5000}).toBe(true);
   await page.evaluate(()=>{
     const bridge=window.__KANJI5_EDU_BRIDGE__;
     if(!bridge?.start)throw new Error('education bridge start unavailable');

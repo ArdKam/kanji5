@@ -12,7 +12,7 @@ function ReplayIcon() {
   );
 }
 
-export function StrokeOrderViewer({ character, language, mode = "learning" }: { character: string; language: Language; mode?: "learning" | "dictionary-loop" }) {
+export function StrokeOrderViewer({ character, language, mode = "learning", active: isActive }: { character: string; language: Language; mode?: "learning" | "dictionary-loop"; active?: boolean }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
       setError(t("strokeOrderUnavailable", language));
     });
     return () => { active = false; };
-  }, [character, language, retryKey, stopPlayback]);
+  }, [character, language, retryKey, stopPlayback, compactLoop]);
 
   useEffect(() => {
     if (!compactLoop || !paths.length) return;
@@ -79,8 +79,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   const play = useCallback((fromStart = false) => {
     if (!paths.length) return;
     stopPlayback();
-    const start = fromStart || completed >= paths.length ? 0 : completed;
-    setCompleted(start);
+    setCompleted(current => (fromStart || current >= paths.length ? 0 : current));
     timerRef.current = window.setInterval(() => {
       setCompleted(current => {
         const next = current + 1;
@@ -91,7 +90,20 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         return next;
       });
     }, 720);
-  }, [completed, paths.length, stopPlayback]);
+  }, [paths.length, stopPlayback]);
+
+  useEffect(() => {
+    if (compactLoop || typeof isActive !== "boolean") return;
+    if (!isActive) {
+      stopPlayback();
+      setExpanded(false);
+      return;
+    }
+    if (!paths.length) return;
+    scrollAfterExpandRef.current = true;
+    setExpanded(true);
+    play(true);
+  }, [isActive, compactLoop, paths.length, play, stopPlayback]);
 
   const scrollExpandedToolIntoView = useCallback(() => {
     const target = viewerRef.current;
@@ -233,14 +245,15 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           {!loading && !error && paths.length ? (
             <span className="stroke-order-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
           ) : null}
-          {!loading && !error && paths.length ? (
+          {(expanded || (!loading && !error && paths.length)) ? (
             <button
               className="stroke-order-toggle"
               type="button"
               aria-expanded={expanded}
               aria-controls={expanded ? "stroke-order-content" : undefined}
-              onClick={expanded ? closeLearningTool : openLearningTool}
-              title={expanded ? t("strokeOrder", language) : t("strokeOrder", language)}
+              disabled={loading}
+              onClick={expanded && typeof isActive !== "boolean" ? closeLearningTool : () => play(true)}
+              title={t("strokeOrder", language)}
             >
               <ReplayIcon />
               <span>{t("strokeOrder", language)}</span>
@@ -249,16 +262,17 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         </div>
       </div>
 
-      {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
-      {!loading && error ? (
-        <div className="stroke-order-error" role="status">
-          <span>{error}</span>
-          <button className="button secondary" type="button" onClick={() => setRetryKey(value => value + 1)}>{t("tryAgain", language)}</button>
-        </div>
-      ) : null}
-
-      {!loading && !error && paths.length && expanded ? (
+      {expanded ? (
         <div id="stroke-order-content">
+          {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
+          {!loading && error ? (
+            <div className="stroke-order-error" role="status">
+              <span>{error}</span>
+              <button className="button secondary" type="button" onClick={() => setRetryKey(value => value + 1)}>{t("tryAgain", language)}</button>
+            </div>
+          ) : null}
+          {!loading && !error && paths.length ? (
+            <>
           <div className="stroke-order-stage">
             <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
               {paths.map((path, index) => (
@@ -297,6 +311,8 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
             <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
+            </>
+          ) : null}
         </div>
       ) : null}
     </section>

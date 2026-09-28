@@ -27,8 +27,10 @@ assert.match(styles, /grid-template-columns:minmax\(0,1fr\);/);
 assert.doesNotMatch(styles, /\.learning-card\[data-card-density="dense"\] \.learning-back-overview\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
 
 const e2e = await readFile(new URL("../e2e/react-learning-card-flip.spec.mjs", import.meta.url), "utf8");
-assert.match(e2e, /stroke-order replay auto-scrolls the expanded viewer fully into view/);
-assert.match(e2e, /call\.behavior === "smooth"/);
+assert.match(e2e, /stroke-order entry scrolls the visible viewer fully into view/);
 assert.match(e2e, /personal mnemonic editor auto-scrolls fully into view when opened/);
 
 console.log("Stroke-order auto-scroll source and regression contracts passed.");
+
+assert.match(source, /active\?: boolean/);
+assert.match(source, /typeof isActive !== "boolean"/);

@@ -22,3 +22,60 @@
 @media (max-width:520px){
   .component-breakdown-label{max-width:64px;font-size:var(--text-xs)}
 }
+
+/* Learning-card visual polish: quiet component chips rather than formula-like debug geometry. */
+.learning-card-back .component-breakdown{
+  gap:9px;
+  width:100%;
+}
+.learning-card-back .component-breakdown-header{
+  justify-content:flex-start;
+  padding-inline:2px;
+}
+.learning-card-back .component-breakdown-visual{
+  gap:8px;
+  justify-content:center;
+  padding:4px 0;
+}
+.learning-card-back .component-breakdown-target{
+  font-size:clamp(46px,8vw,68px);
+}
+.learning-card-back .component-breakdown-plus{
+  color:var(--mute);
+  font-size:var(--text-sm);
+}
+.learning-card-back .component-breakdown-part-wrap-inner{
+  gap:3px;
+}
+.learning-card-back .component-breakdown-part{
+  min-width:42px;
+  min-height:42px;
+  padding:7px 10px;
+  border-radius:10px;
+  background:var(--washi);
+}
+.learning-card-back .component-breakdown-label{
+  max-width:90px;
+  color:var(--mute);
+  font-size:10px;
+}
+@media(max-width:520px){
+  .learning-card-back .component-breakdown{
+    gap:6px;
+  }
+  .learning-card-back .component-breakdown-visual{
+    gap:6px;
+  }
+  .learning-card-back .component-breakdown-target{
+    font-size:clamp(42px,12vw,56px);
+  }
+  .learning-card-back .component-breakdown-part{
+    min-width:38px;
+    min-height:38px;
+    padding:6px 8px;
+  }
+  .learning-card-back .component-breakdown-label{
+    max-width:72px;
+    font-size:10px;
+  }
+}
