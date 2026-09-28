@@ -7,6 +7,7 @@ import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryAudio, DictionaryReading } from "./DictionaryPrimitives";
 import { VocabularyExamples } from "./VocabularyExamples";
 import { formatNumber, t, type Language } from "./i18n";
+import { useModalDialog } from "./useModalDialog";
 import { getComponentInfo, getRadicalInfo, getHandwritingSkill, recordHandwritingGrade, type ComponentInfo, type HandwritingSkill, type KanjiCatalogItem, type RadicalInfo } from "./engine";
 
 type SectionKey = "structure" | "writing" | "vocabulary" | "mnemonic" | null;
@@ -26,6 +27,7 @@ export function DictionaryKanjiCard({
   onSelectKanji: (item: KanjiCatalogItem) => void;
   mnemonicContent?: ReactNode;
 }) {
+  const dialogRef = useModalDialog(true, onClose);
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
@@ -157,7 +159,7 @@ export function DictionaryKanjiCard({
   );
 
   return (
-    <dialog open className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
+    <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
       <div
         className="dictionary-card"
         onPointerDown={handleCardActivity}
