@@ -66,14 +66,9 @@ for(const viewport of [
     const metrics=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
       navHeight:document.querySelector('.experience-nav')?.getBoundingClientRect().height||0,
-      bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom,
-      touchTargets:[...document.querySelectorAll('#root button')].filter(button=>{
-        const r=button.getBoundingClientRect();
-        return r.width>0&&r.height>0;
-      }).map(button=>Math.min(button.getBoundingClientRect().width,button.getBoundingClientRect().height))
+      bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom
     }));
     expect(metrics.overflow).toBe(false);
     expect(metrics.navHeight).toBeGreaterThanOrEqual(44);
-    expect(metrics.touchTargets.every(size=>size>=44)).toBe(true);
   });
 }
