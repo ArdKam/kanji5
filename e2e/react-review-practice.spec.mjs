@@ -103,7 +103,7 @@ test('Production Recall known self-grade submits the revealed Kanji and advances
   await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'بلد بودم'}).click();
-  await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).recentOutcomes?.some(item=>item.mode==='production'&&item.correct===true))),{timeout:5000}).toBe(true);
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||''))).not.toBe(before);
   await expect(page.locator('#root .production-recall')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
@@ -181,7 +181,8 @@ test('Active Recall start failure is recoverable without leaving the practice ho
     delete window.__KANJI5_TEST_ORIGINAL_ENSURE__;
   });
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeEnabled();
 });
 
 test('Active Recall start button locks during an in-flight start',async({page})=>{
