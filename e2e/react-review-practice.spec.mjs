@@ -186,6 +186,7 @@ test('Active Recall start failure is recoverable without leaving the practice ho
 
 test('Active Recall start button locks during an in-flight start',async({page})=>{
   await clean(page);
+  await seedSeenCard(page);
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.evaluate(()=>{
