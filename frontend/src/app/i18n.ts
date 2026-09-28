@@ -24,6 +24,13 @@ type TranslationKey =
   | "newKanji"
   | "learningReview"
   | "cardBack"
+  | "meaningAndStructure"
+  | "readings"
+  | "showHiragana"
+  | "showKatakana"
+  | "pageOf"
+  | "actionFailed"
+  | "footerTagline"
   | "showKanjiInfo"
   | "again"
   | "hard"
@@ -354,7 +361,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
-    cardBack:"پشت کارت", showKanjiInfo:"نمایش اطلاعات کانجی",
+    cardBack:"پشت کارت", meaningAndStructure:"معنی و ساختار", readings:"خوانش‌ها", showHiragana:"نمایش هیراگانا", showKatakana:"نمایش کاتاکانا", pageOf:"صفحه {page} از {total}", actionFailed:"خطا در عملیات", footerTagline:"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.", showKanjiInfo:"نمایش اطلاعات کانجی",
     again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
     meaning:"معنی", reading:"خوانش", production:"تولید", componentLearningPath:"مسیر یادگیری اجزای کانجی", componentLearningPathHint:"اجزای سازنده را از پایه تا کانجی ببین و برای هر جزء تسلط فعلی را بررسی کن.", componentLearningPathLeaf:"جزء پایه", masteryShort:"تسلط", notInCatalog:"در فهرست نیست", vocabulary:"واژگان", vocabularyLearningGraph:"شبکهٔ واژگانی", vocabularyLearningGraphHint:"واژه‌های نمونه نشان می‌دهند این کانجی با چه کانجی‌های جویو در کنار هم دیده می‌شود.", context:"بافت",
     unknown:"نمی‌دانم", correct:"درست", wrong:"نادرست", nearMiss:"نزدیک بود", empty:"خالی", unavailable:"در دسترس نیست",
@@ -377,7 +384,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"Stats", settings:"Settings", language:"Language", persian:"فارسی", english:"English",
     learning:"Learning", activeRecall:"Active Recall", learningPath:"Learning path", sessionProgress:"Session progress",
     goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"New", learningReview:"Learning review",
-    cardBack:"Card back", showKanjiInfo:"Show kanji information",
+    cardBack:"Card back", meaningAndStructure:"Meaning & structure", readings:"Readings", showHiragana:"Show Hiragana", showKatakana:"Show Katakana", pageOf:"Page {page} of {total}", actionFailed:"Action failed", footerTagline:"Keep your learning short, consistent, and focused.", showKanjiInfo:"Show kanji information",
     again:"Again", hard:"Hard", good:"Good", easy:"Easy",
     meaning:"Meaning", reading:"Reading", production:"Production", componentLearningPath:"Component learning path", componentLearningPathHint:"See the visual building blocks and their current Jōyō mastery.", componentLearningPathLeaf:"Base component", masteryShort:"Mastery", notInCatalog:"Not in catalog", vocabulary:"Vocabulary", vocabularyLearningGraph:"Vocabulary network", vocabularyLearningGraphHint:"See which Jōyō kanji co-occur with this kanji in the shown vocabulary examples.", context:"Context",
     unknown:"I don't know", correct:"Correct", wrong:"Incorrect", nearMiss:"Near miss", empty:"Empty", unavailable:"Unavailable",
