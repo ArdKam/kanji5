@@ -3,7 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
 import { sampleSvgStrokePaths } from "./handwriting-reference";
-import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, requestMoreHelp, shouldPresentStrokeFeedback } from "./handwriting-hints";
+import { adaptHintLevel, hintProfile, initialHintLevel, shouldPresentStrokeFeedback } from "./handwriting-hints";
 import { feedbackFocusKind, feedbackMarkerPoints, feedbackStrokeIndex } from "./handwriting-feedback";
 import { deriveHandwritingPrompt, type HandwritingPromptKind } from "./handwriting-prompts";
 
@@ -40,13 +40,19 @@ function drawGridAndGuide(
   const scale=size/VIEWBOX_SIZE;
   ctx.setTransform(dpr*scale,0,0,dpr*scale,0,0);
 
-  const grid=size/4/scale;
-  ctx.strokeStyle="rgba(116,109,97,.13)";
-  ctx.lineWidth=0.8/scale;
-  for(let i=1;i<4;i+=1){
-    ctx.beginPath();ctx.moveTo(i*grid,0);ctx.lineTo(i*grid,VIEWBOX_SIZE);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,i*grid);ctx.lineTo(VIEWBOX_SIZE,i*grid);ctx.stroke();
-  }
+  const center=VIEWBOX_SIZE/2;
+  ctx.save();
+  ctx.strokeStyle="rgba(116,109,97,.18)";
+  ctx.lineWidth=0.72/scale;
+  ctx.setLineDash([1.8/scale,2.1/scale]);
+  const drawGuide=(fromX:number,fromY:number,toX:number,toY:number)=>{
+    ctx.beginPath();ctx.moveTo(fromX,fromY);ctx.lineTo(toX,toY);ctx.stroke();
+  };
+  drawGuide(center,0,center,VIEWBOX_SIZE);
+  drawGuide(0,center,VIEWBOX_SIZE,center);
+  drawGuide(0,0,VIEWBOX_SIZE,VIEWBOX_SIZE);
+  drawGuide(VIEWBOX_SIZE,0,0,VIEWBOX_SIZE);
+  ctx.restore();
 
   const profile=hintProfile(hintLevel,{currentStrokeIndex,referenceLength:referenceStrokes.length});
   const drawStroke=(stroke:HandwritingStroke,opacity:number,width:number)=>{
@@ -362,29 +368,24 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
           {!loading&&error?<div className="handwriting-status handwriting-error" role="status"><span>{error}</span><button className="button secondary" type="button" onClick={()=>setRetryKey(value=>value+1)}>{t("tryAgain",language)}</button></div>:null}
           {!loading&&!error?(
             <>
-              <div className="handwriting-hint-control">
-                <button
-                  className="handwriting-info-button"
-                  type="button"
-                  aria-label={language === "fa" ? "نمایش راهنما" : "Show handwriting hints"}
-                  aria-expanded={hintsOpen}
-                  aria-controls={hintsOpen ? "handwriting-hints-"+normalized : undefined}
-                  onClick={()=>setHintsOpen(value=>!value)}
-                >
-                  <span aria-hidden="true">i</span>
-                </button>
-                {hintsOpen?(
-                  <div id={"handwriting-hints-"+normalized} className="handwriting-hints-popover" role="note">
-                    <div className="handwriting-hint-row" aria-live="polite">
-                      <span className="handwriting-hint-badge">{t("handwritingHintLevel",language)}: {(() => {const key=hintLevel===0?"handwritingTrace":hintLevel===1?"handwritingGhost":hintLevel===2?"handwritingStrokeGuide":hintLevel===3?"handwritingMinimal":"handwritingRecall";return t(key,language);})()}</span>
-                      <button className="handwriting-hint-button" type="button" onClick={()=>setHintLevel(current=>requestMoreHelp(current))} disabled={hintLevel===0}>{t("handwritingMoreHelp",language)}</button>
-                    </div>
-                    <p id={"handwriting-help-"+normalized} className="handwriting-help">
-                      {t("handwritingPracticeHelp",language)}
-                    </p>
-                  </div>
-                ):null}
+              <div className="handwriting-hint-control" role="radiogroup" aria-label={language === "fa" ? "حالت راهنما" : "Hint mode"}>
+                {([
+                  ["ghost", 1],
+                  ["guide", 2],
+                  ["free", 4],
+                ] as const).map(([modeName, modeLevel]) => {
+                  const isActive = modeName === "ghost" ? hintLevel <= 1 : modeName === "guide" ? hintLevel === 2 || hintLevel === 3 : hintLevel === 4;
+                  const label = language === "fa"
+                    ? (modeName === "ghost" ? "سایه" : modeName === "guide" ? "راهنما" : "آزاد")
+                    : (modeName === "ghost" ? "Ghost" : modeName === "guide" ? "Guide" : "Free");
+                  return (
+                    <button key={modeName} className={"handwriting-hint-segment" + (isActive ? " is-active" : "")} type="button" role="radio" aria-checked={isActive} onClick={() => setHintLevel(modeLevel)}>
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
+              <p id={"handwriting-help-"+normalized} className="handwriting-help">{t("handwritingPracticeHelp",language)}</p>
               <div className="handwriting-canvas-wrap" ref={wrapRef}>
                 <canvas
                   ref={guideCanvasRef}
@@ -434,6 +435,14 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                     </div>
                   ):null}
                   <div className="handwriting-result-score">
+                    {(() => {
+                      const score = Number(result.overallSimilarity) || 0;
+                      const seal = score >= 90 ? "秀" : score >= 75 ? "優" : score >= 60 ? "良" : "再";
+                      const label = language === "fa"
+                        ? (score >= 90 ? "عالی" : score >= 75 ? "خوب" : score >= 60 ? "قبول" : "دوباره")
+                        : (score >= 90 ? "Exceptional" : score >= 75 ? "Good" : score >= 60 ? "Pass" : "Try again");
+                      return <span className="handwriting-grade-seal" aria-label={label}><b>{seal}</b><small>{label}</small></span>;
+                    })()}
                     <strong>{formatNumber(result.overallSimilarity,language)}%</strong>
                     <span>{t("handwritingSimilarity",language)}</span>
                   </div>
