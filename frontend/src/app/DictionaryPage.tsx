@@ -17,42 +17,53 @@ const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
 function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; language: Language }) {
   const [suggestion, setSuggestion] = useState<PreparedMnemonic>(() => buildPreparedMnemonic(item));
-  const [busyIndex, setBusyIndex] = useState<number | null>(null);
+  const [personalMnemonic, setPersonalMnemonic] = useState("");
+  const [mnemonicDraft, setMnemonicDraft] = useState("");
+  const [mnemonicBusy, setMnemonicBusy] = useState(false);
   const [status, setStatus] = useState("");
 
   useEffect(() => {
     let active = true;
     setSuggestion(buildPreparedMnemonic(item));
-    void getComponentInfo(item.character).then(info => {
-      if (active) setSuggestion(buildPreparedMnemonic(item, info.components));
-    }).catch(() => {});
+    setPersonalMnemonic("");
+    setMnemonicDraft("");
+    setStatus("");
+    void Promise.all([
+      getComponentInfo(item.character).then(info => buildPreparedMnemonic(item, info.components)).catch(() => buildPreparedMnemonic(item)),
+      getMnemonic(item.character),
+    ]).then(([prepared, saved]) => {
+      if (!active) return;
+      setSuggestion(prepared);
+      const text = String(saved?.text ?? "");
+      setPersonalMnemonic(text);
+      setMnemonicDraft(text);
+    });
     return () => { active = false; };
   }, [item.character]);
 
   const suggestions = suggestion.fa || suggestion.en ? [suggestion] : [];
+  const curatedText = suggestion.source === "curated" ? (language === "fa" ? suggestion.fa : suggestion.en) : "";
 
-  const applySuggestion = async (prepared: PreparedMnemonic, index: number) => {
-    if (busyIndex !== null) return;
+  const savePersonalMnemonic = async () => {
+    if (mnemonicBusy) return;
+    const next = mnemonicDraft.trim();
+    if (!personalMnemonic && !next) return;
+    setMnemonicBusy(true);
     setStatus("");
-    setBusyIndex(index);
     try {
-      const current = await getMnemonic(item.character);
-      const existing = String(current.text ?? "").trim();
-      if (existing && existing !== (language === "fa" ? prepared.fa : prepared.en)) {
-        const message = t("mnemonicOverwriteConfirm", language);
-        if (!window.confirm(message)) return;
-      }
-      await saveMnemonic(item.character, language === "fa" ? prepared.fa : prepared.en);
+      await saveMnemonic(item.character, next);
+      setPersonalMnemonic(next);
+      setMnemonicDraft(next);
       setStatus(t("mnemonicApplied", language));
     } catch {
       setStatus(t("mnemonicSaveError", language));
     } finally {
-      setBusyIndex(null);
+      setMnemonicBusy(false);
     }
   };
 
   return (
-    <section className="prepared-mnemonic-panel" aria-label={t("preparedMnemonics", language)}>
+    <section className="prepared-mnemonic-panel dictionary-mnemonic-panel" aria-label={t("preparedMnemonics", language)}>
       <div className="prepared-mnemonic-header">
         <div>
           <h3>{suggestion.source === "curated" ? t("preparedMnemonics", language) : t("memoryAid", language)}</h3>
@@ -61,29 +72,45 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
       </div>
       {suggestions.length ? (
         <div className="prepared-mnemonic-list">
-          {suggestions.map((suggestion, index) => {
-            const text = language === "fa" ? suggestion.fa : suggestion.en;
+          {suggestions.map((prepared, index) => {
+            const text = language === "fa" ? prepared.fa : prepared.en;
             return (
-              <div className="prepared-mnemonic-item" key={item.character + "-" + index}>
+              <article className="prepared-mnemonic-item" key={item.character + "-" + index}>
                 <p>{text}</p>
-                {suggestion.source === "curated" ? (
-                  <button
-                    className="button secondary prepared-mnemonic-use"
-                    type="button"
-                    disabled={busyIndex !== null}
-                    onClick={() => void applySuggestion(suggestion, index)}
-                  >
-                    {busyIndex === index ? "…" : t("useMnemonic", language)}
-                  </button>
-                ) : (
-                  <span className="prepared-mnemonic-scaffold-label">{t("preparedMnemonicScaffold", language)}</span>
-                )}
-              </div>
+                <span className="prepared-mnemonic-scaffold-label">{prepared.source === "curated" ? (language === "fa" ? "منتخب" : "Curated") : t("preparedMnemonicScaffold", language)}</span>
+              </article>
             );
           })}
         </div>
       ) : <p className="prepared-mnemonic-empty">{t("preparedMnemonicNone", language)}</p>}
-      {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
+      <section className="dictionary-personal-mnemonic" aria-label={t("personalMnemonic", language)}>
+        <div className="dictionary-personal-mnemonic-heading">
+          <div>
+            <h3>{t("personalMnemonic", language)}</h3>
+            <p>{language === "fa" ? "یادسپار شخصی خودت را همین‌جا بنویس." : "Write your own memory hook here."}</p>
+          </div>
+          <span>{formatNumber(mnemonicDraft.length, language)}/600</span>
+        </div>
+        <textarea
+          className="dictionary-personal-mnemonic-input"
+          value={mnemonicDraft}
+          maxLength={600}
+          onChange={event => setMnemonicDraft(event.target.value)}
+          placeholder={language === "fa" ? "یک تداعی شخصی بنویس…" : "Write a personal memory cue…"}
+          aria-label={t("personalMnemonic", language)}
+        />
+        <div className="dictionary-personal-mnemonic-actions">
+          {curatedText ? (
+            <button className="button secondary" type="button" onClick={() => { setMnemonicDraft(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
+              {language === "fa" ? "کپی داستان منتخب" : "Copy curated story"}
+            </button>
+          ) : <span />}
+          <button className="button primary" type="button" onClick={() => void savePersonalMnemonic()} disabled={mnemonicBusy || (!personalMnemonic && mnemonicDraft.trim().length === 0)}>
+            {mnemonicBusy ? t("saving", language) : t("saveMnemonic", language)}
+          </button>
+        </div>
+        {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
+      </section>
     </section>
   );
 }
