@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { listKanji, type KanjiCatalogItem, type Snapshot } from "./engine";
-import { usePageDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 
 function StatRow({ label, value }: { label: string; value: string }) {
   return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>;
