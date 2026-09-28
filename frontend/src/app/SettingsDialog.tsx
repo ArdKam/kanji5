@@ -4,6 +4,8 @@ import { t, type Language } from "./i18n";
 import { MnemonicBackup } from "./MnemonicBackup";
 import type { KanjiCatalogItem, Settings, Snapshot } from "./engine";
 
+type ThemePreference = "system" | "light" | "dark";
+
 function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}) {
   return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>;
 }
@@ -33,6 +35,14 @@ export function SettingsDialog({
 }) {
   const s: Settings = { dailyNew:5, retention:.9, dailyGoal:20, leechThreshold:8, production:true, vocabulary:true, context:true, ...(snapshot.settings ?? {}) };
   const [draft, setDraft] = useState<Settings>(s);
+  const [theme, setTheme] = useState<ThemePreference>(() => {
+    const saved = typeof window !== "undefined" ? window.localStorage.getItem("kanji5-theme") : null;
+    return saved === "light" || saved === "dark" ? saved : "system";
+  });
+  useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.dataset.theme = theme;
+    if (typeof window !== "undefined") window.localStorage.setItem("kanji5-theme", theme);
+  }, [theme]);
   useEffect(() => { if (open) setDraft(s); }, [open, s.dailyNew, s.retention, s.dailyGoal, s.leechThreshold, s.production, s.vocabulary, s.context]);
 
   const dialogRef = useModalDialog(open, onClose);
@@ -42,6 +52,14 @@ export function SettingsDialog({
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="settings-title">{t("settingsTitle", language)}</h2>
       <form className="settings-form" onSubmit={e => { e.preventDefault(); onSave(draft); }}>
+        <div className="settings-section">
+          <div className="settings-section-title">{language === "fa" ? "ظاهر" : "Appearance"}</div>
+          <div className="settings-language-switcher" role="group" aria-label={language === "fa" ? "حالت ظاهر" : "Theme"}>
+            {([["system",language === "fa" ? "سیستم" : "System"],["light",language === "fa" ? "روشن" : "Light"],["dark",language === "fa" ? "تیره" : "Dark"]] as const).map(([value,label]) =>
+              <button key={value} className={"settings-language-button " + (theme === value ? "active" : "")} type="button" aria-pressed={theme === value} onClick={() => setTheme(value)}>{label}</button>
+            )}
+          </div>
+        </div>
         <div className="settings-section">
           <div className="settings-section-title">{t("language", language)}</div>
           <div className="settings-language-switcher" role="group" aria-label={t("language", language)}>
