@@ -90,3 +90,57 @@ test('forgot password sends a recovery request and keeps the user in the recover
   await expect(page.locator('.account-message')).toContainText(/لینک بازنشانی رمز به ایمیلت ارسال شد|A password reset link was sent to your email/);
   await expect(page.locator('.account-auth-surface')).toBeVisible();
 });
+
+
+test('signed-in account hub renders one identity surface, sync metrics, and separate security actions', async ({ page }) => {
+  await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
+  await page.route('**/supabase-sync.js', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      (() => {
+        let snapshot = {
+          status: 'signed-in',
+          user: { id: 'user-1', email: 'arden@example.com', name: 'Ardin', avatarUrl: null },
+          syncStatus: 'synced',
+          error: null,
+          recoveryPending: false,
+          syncSummary: { activeCards: 24, reviews: 120, personalMnemonics: 3, lastSyncedAt: new Date(Date.now() - 120000).toISOString() }
+        };
+        window.__KANJI5_ACCOUNT__ = {
+          getState: () => ({ ...snapshot, user: { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }),
+          subscribe: listener => { listener(window.__KANJI5_ACCOUNT__.getState()); return () => {}; },
+          signInWithGoogle: async () => {},
+          signInWithPassword: async () => {},
+          signUpWithPassword: async () => ({ needsEmailConfirmation: false }),
+          updateProfile: async name => { snapshot = { ...snapshot, user: { ...snapshot.user, name } }; },
+          updatePassword: async () => {},
+          sendMagicLink: async () => {},
+          sendPasswordReset: async () => {},
+          setPassword: async () => {},
+          signOut: async () => { snapshot = { ...snapshot, status: 'signed-out', user: null }; },
+          syncNow: async () => {},
+          getSyncSummary: () => ({ ...snapshot.syncSummary })
+        };
+      })();
+    `
+  }));
+
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  await expect(page.locator('.account-dialog:visible')).toBeVisible();
+  await expect(page.locator('.account-identity-card')).toHaveCount(1);
+  await expect(page.locator('.account-identity-card')).toContainText('Ardin');
+  await expect(page.locator('.account-identity-card')).toContainText('arden@example.com');
+  await expect(page.locator('.account-section')).toHaveCount(4);
+  await expect(page.locator('.account-section-tabs')).toHaveCount(0);
+  await expect(page.locator('.account-sync-snapshot')).toContainText('24');
+  await expect(page.locator('.account-sync-snapshot')).toContainText('120');
+  await expect(page.locator('.account-sync-snapshot')).toContainText('3');
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sync now', exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Change password', exact: true }).click();
+  await expect(page.locator('input[name="currentPassword"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Don’t have a password\? Set one|Don't have a password\? Set one/ })).toBeVisible();
+});
