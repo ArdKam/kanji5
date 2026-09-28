@@ -3,7 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { getMnemonic, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import { buildPreparedMnemonicEntries } from "./prepared-mnemonic-core";
 import type { PreparedMnemonic } from "./mnemonic-library";
-import { useModalDialog } from "./usePageDialog";
+import { usePageDialog } from "./usePageDialog";
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
@@ -127,7 +127,7 @@ export function MnemonicsDialog({ open, language, catalog, onClose, onSelectKanj
   onClose: () => void;
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   if (!open) return null;
   return (
