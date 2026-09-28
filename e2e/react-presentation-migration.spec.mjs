@@ -181,8 +181,8 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card.getByRole('tab',{name:'ساختار',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);
   await expect(card.locator('.component-learning-path')).toHaveCount(0);
-  await card.getByRole('button',{name:'ساختار',exact:true}).click();
-  await expect(card.getByRole('button',{name:'ساختار',exact:true})).toHaveAttribute('aria-expanded','true');
+  await card.getByRole('tab',{name:'ساختار',exact:true}).click();
+  await expect(card.getByRole('tab',{name:'ساختار',exact:true})).toHaveAttribute('aria-selected','true');
   await expect(card.locator('.component-breakdown')).toBeVisible({timeout:5000});
   await expect(card.locator('.component-learning-path')).toBeVisible({timeout:5000});
   await expect.poll(async()=>card.locator('.component-learning-path-node.depth-0').count(),{timeout:5000}).toBeGreaterThan(0);
