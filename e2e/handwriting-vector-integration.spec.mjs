@@ -174,7 +174,7 @@ test("handwriting UI remains usable in English and reduced-motion mode",async({p
   const canvasBox=await handwriting.locator(".handwriting-canvas-wrap").boundingBox();
   expect(canvasBox?.width??999).toBeLessThanOrEqual(286);
   const actionBoxes=await handwriting.locator(".handwriting-actions .button").evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
-  expect(actionBoxes.every(height=>height>=42)).toBe(true);
+  expect(actionBoxes.every(height=>height>=44)).toBe(true);
   const help=handwriting.locator(".handwriting-help");
   await expect(help).toHaveText(/mouse|touch|stylus/i);
   await expect(handwriting.locator(".handwriting-ink-canvas")).toHaveAttribute("aria-label","Handwriting practice");
