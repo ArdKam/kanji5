@@ -6,11 +6,13 @@ import { PlacementDiagnostic } from "./PlacementDiagnostic";
 
 export function PracticeHome({
   language,
+  busy = false,
   onStartActiveRecall,
   onStartCustomStudy,
   placementRequest = 0,
 }: {
   language: Language;
+  busy?: boolean;
   onStartActiveRecall: () => Promise<void>;
   onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>;
   placementRequest?: number;
@@ -48,7 +50,7 @@ export function PracticeHome({
         <p className="eyebrow red">{t("activeRecallLabel", language)}</p>
         <h2 id="practice-home-title">{t("activeRecall", language)}</h2>
         <p>{language === "fa" ? "تمرین فعال را شروع کنید یا یک جلسهٔ هدفمند بسازید." : "Start active recall or build a focused study session."}</p>
-        <button className="button primary practice-start-button" type="button" onClick={() => void onStartActiveRecall()}>
+        <button className="button primary practice-start-button" type="button" disabled={busy} onClick={() => void onStartActiveRecall()}>
           {t("startExercise", language)}
         </button>
       </section>
