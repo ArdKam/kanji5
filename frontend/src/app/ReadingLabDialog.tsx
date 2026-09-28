@@ -29,7 +29,7 @@ export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
     return () => { active = false; };
   }, [open, catalog.length, loading, attempted]);
 
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   if (!open) return null;
 
