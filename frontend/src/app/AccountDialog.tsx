@@ -63,13 +63,6 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  useEffect(() => {
     if (!open || !state.user) return;
     setDisplayName(state.user.name && state.user.name !== state.user.email ? state.user.name : "");
     setCurrentPassword("");
