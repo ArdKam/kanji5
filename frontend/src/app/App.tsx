@@ -63,6 +63,13 @@ function Audio({value,label}:{value:string;label:string}){const unsupported=type
 
 const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
 
+function blurFocusedDescendant(root:HTMLElement|null){
+  if(!root)return;
+  const active=document.activeElement;
+  if(active instanceof HTMLElement&&root.contains(active))active.blur();
+}
+
+
 function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const preparedMeaningKey=(card.meanings??[]).join("\u0001");
@@ -222,9 +229,19 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const backPageCount=hasExamplesPage?4:3;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
+  const backFaceRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
   useEffect(()=>setBackPage(0),[card.character]);
-  const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
+  const changeBackPage=useCallback((delta:number)=>{
+    const next=Math.max(0,Math.min(backPageCount-1,backPage+delta));
+    if(next===backPage)return;
+    blurFocusedDescendant(pagerTrackRef.current);
+    setBackPage(next);
+  },[backPage,backPageCount]);
+  const handleRate=useCallback((rating:Rating)=>{
+    blurFocusedDescendant(backFaceRef.current);
+    onRate(rating);
+  },[onRate]);
   const snapPagerTrack=useCallback((page:number)=>{
     const track=pagerTrackRef.current;
     if(!track)return;
@@ -288,7 +305,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     const track=pagerTrackRef.current;
     if(track){track.style.transition="";requestAnimationFrame(()=>{track.style.transform="translate3d(-"+target*100+"%,0,0)";});}
     try{if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(_){/* no active capture */}
-    if(target!==backPage)setBackPage(target);
+    if(target!==backPage)changeBackPage(target-backPage);
   };
   const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event);
   const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
@@ -301,7 +318,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
         <div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div>
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
       </div>
-      <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
+      <div ref={backFaceRef} className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
         <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><span>{t("cardBack")}</span></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
@@ -436,7 +453,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
             </span>
             <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
           </div>:null}
-          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
+          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
       </div>
     </div>
