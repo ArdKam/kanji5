@@ -1239,3 +1239,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 @media(max-width:760px){
   .learning-card-back .learning-back-scroll{padding-bottom:200px;}
 }
+
+/* The elevated footer is a visual layer only; its empty area must never block scrollable card content. */
+.learning-card-back .learning-back-footer{pointer-events:none;}
+.learning-card-back .learning-back-footer > *{pointer-events:auto;}
