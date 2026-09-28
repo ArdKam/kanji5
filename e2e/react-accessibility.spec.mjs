@@ -89,7 +89,7 @@ test('learning card reveal moves focus out of the aria-hidden face and emits no 
 
 
 test('changing the learning-card information page clears focus before hiding the previous page', async ({page})=>{
-  const ariaWarnings:string[]=[];
+  const ariaWarnings=[];
   page.on('console',message=>{
     if(message.type()==='warning'&&message.text().includes('Blocked aria-hidden')) ariaWarnings.push(message.text());
   });
@@ -116,7 +116,7 @@ test('changing the learning-card information page clears focus before hiding the
 });
 
 test('rating a revealed learning card clears focus before the back face is hidden', async ({page})=>{
-  const ariaWarnings:string[]=[];
+  const ariaWarnings=[];
   page.on('console',message=>{
     if(message.type()==='warning'&&message.text().includes('Blocked aria-hidden')) ariaWarnings.push(message.text());
   });
