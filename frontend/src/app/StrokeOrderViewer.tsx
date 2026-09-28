@@ -251,7 +251,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning", acti
               type="button"
               aria-expanded={expanded}
               aria-controls={expanded ? "stroke-order-content" : undefined}
-              onClick={expanded && typeof active !== "boolean" ? closeLearningTool : () => play(true)}
+              onClick={expanded && typeof isActive !== "boolean" ? closeLearningTool : () => play(true)}
               title={t("strokeOrder", language)}
             >
               <ReplayIcon />
