@@ -224,7 +224,20 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
   useEffect(()=>setBackPage(0),[card.character]);
-  const changeBackPage=useCallback((delta:number)=>setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta))),[backPageCount]);
+  const clearLearningFocus=useCallback(()=>{
+    const active=document.activeElement;
+    if(!(active instanceof HTMLElement))return;
+    const learningCard=active.closest(".learning-card");
+    if(learningCard)active.blur();
+  },[]);
+  const changeBackPage=useCallback((delta:number)=>{
+    clearLearningFocus();
+    setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta)));
+  },[backPageCount,clearLearningFocus]);
+  const handleRate=useCallback((rating:Rating)=>{
+    clearLearningFocus();
+    onRate(rating);
+  },[clearLearningFocus,onRate]);
   const snapPagerTrack=useCallback((page:number)=>{
     const track=pagerTrackRef.current;
     if(!track)return;
@@ -288,7 +301,10 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     const track=pagerTrackRef.current;
     if(track){track.style.transition="";requestAnimationFrame(()=>{track.style.transform="translate3d(-"+target*100+"%,0,0)";});}
     try{if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(_){/* no active capture */}
-    if(target!==backPage)setBackPage(target);
+    if(target!==backPage){
+      clearLearningFocus();
+      setBackPage(target);
+    }
   };
   const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event);
   const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
@@ -436,7 +452,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
             </span>
             <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
           </div>:null}
-          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>onRate(r)}>{l}</button>)}</div>
+          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
       </div>
     </div>

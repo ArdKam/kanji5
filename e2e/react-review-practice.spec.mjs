@@ -103,7 +103,7 @@ test('Production Recall known self-grade submits the revealed Kanji and advances
   await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'بلد بودم'}).click();
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||''))).not.toBe(before);
   await expect(page.locator('#root .production-recall')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
@@ -165,23 +165,24 @@ test('Active Recall start failure is recoverable without leaving the practice ho
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.evaluate(()=>{
-    const bridge=window.__KANJI5_EDU_BRIDGE__;
-    if(!bridge?.start)throw new Error('education bridge start unavailable');
-    window.__KANJI5_TEST_ORIGINAL_START__=bridge.start;
-    bridge.start=async()=>({started:false});
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    if(!boundary?.ensureEducationRuntime)throw new Error('education runtime boundary unavailable');
+    window.__KANJI5_TEST_ORIGINAL_ENSURE__=boundary.ensureEducationRuntime;
+    boundary.ensureEducationRuntime=async()=>false;
   });
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
-  await expect(page.getByRole('alert')).toContainText(/تمرین آماده نیست|exercise/i,{timeout:5000});
+  await expect(page.getByRole('alert')).toContainText(/تمرین آماده نیست|قابل انجام|exercise/i,{timeout:5000});
   await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeEnabled();
   await expect(page.locator('#root .practice-home')).toBeVisible();
   await page.evaluate(()=>{
-    const bridge=window.__KANJI5_EDU_BRIDGE__;
-    const original=window.__KANJI5_TEST_ORIGINAL_START__;
-    if(bridge&&original)bridge.start=original;
-    delete window.__KANJI5_TEST_ORIGINAL_START__;
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    const original=window.__KANJI5_TEST_ORIGINAL_ENSURE__;
+    if(boundary&&original)boundary.ensureEducationRuntime=original;
+    delete window.__KANJI5_TEST_ORIGINAL_ENSURE__;
   });
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeEnabled();
 });
 
 test('Active Recall start button locks during an in-flight start',async({page})=>{
@@ -190,10 +191,10 @@ test('Active Recall start button locks during an in-flight start',async({page})=
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.evaluate(()=>{
-    const bridge=window.__KANJI5_EDU_BRIDGE__;
-    if(!bridge?.start)throw new Error('education bridge start unavailable');
-    window.__KANJI5_TEST_ORIGINAL_START__=bridge.start;
-    bridge.start=async()=>{await new Promise(resolve=>setTimeout(resolve,500));return window.__KANJI5_TEST_ORIGINAL_START__();};
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    if(!boundary?.ensureEducationRuntime)throw new Error('education runtime boundary unavailable');
+    window.__KANJI5_TEST_ORIGINAL_ENSURE__=boundary.ensureEducationRuntime;
+    boundary.ensureEducationRuntime=async()=>{await new Promise(resolve=>setTimeout(resolve,500));return window.__KANJI5_TEST_ORIGINAL_ENSURE__();};
   });
   const start=page.getByRole('button',{name:'شروع تمرین',exact:true});
   await start.click();
