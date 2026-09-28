@@ -159,3 +159,27 @@ test('typed reading answer submits through the grading path and shows feedback',
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
   await expect(page.locator('#root .actions')).toHaveCount(0);
 });
+
+test('Active Recall start failure is recoverable without leaving the practice home locked',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.evaluate(()=>{
+    const bridge=window.__KANJI5_EDU_BRIDGE__;
+    if(!bridge?.start)throw new Error('education bridge start unavailable');
+    window.__KANJI5_TEST_ORIGINAL_START__=bridge.start;
+    bridge.start=async()=>({started:false});
+  });
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText(/تمرین آماده نیست|exercise/i,{timeout:5000});
+  await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeEnabled();
+  await expect(page.locator('#root .practice-home')).toBeVisible();
+  await page.evaluate(()=>{
+    const bridge=window.__KANJI5_EDU_BRIDGE__;
+    const original=window.__KANJI5_TEST_ORIGINAL_START__;
+    if(bridge&&original)bridge.start=original;
+    delete window.__KANJI5_TEST_ORIGINAL_START__;
+  });
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+});
