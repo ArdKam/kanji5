@@ -699,6 +699,7 @@ function App(){
   ) : (
     <PracticeHome
       language={language}
+      busy={busy}
       placementRequest={placementRequest}
       onStartActiveRecall={async()=>{
         await action(async()=>{
