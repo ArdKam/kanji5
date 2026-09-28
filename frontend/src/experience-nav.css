@@ -22,10 +22,8 @@
   -webkit-backdrop-filter:blur(14px);
 }
 .experience-tab{position:relative;min-height:54px;border:0;border-radius:var(--radius-lg);background:transparent;color:var(--mute);font:inherit;font-size:var(--text-sm);font-weight:700;cursor:pointer;transition:background-color .18s ease, color .18s ease, transform .18s ease;}
-.experience-tab::before{display:block;margin-bottom:2px;font-family:inherit;font-size:var(--text-md);line-height:1.1;color:currentColor;}
-.experience-tab:nth-of-type(1)::before{content:"学";}
-.experience-tab:nth-of-type(2)::before{content:"想";}
-.experience-tab:nth-of-type(3)::before{content:"字";}
+.experience-tab{display:grid;place-items:center;align-content:center;gap:2px;}
+.experience-tab svg{width:20px;height:20px;flex:0 0 auto;}
 .experience-tab.active{background:transparent;color:var(--paper);box-shadow:none;}
 .experience-tab.active::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--shu);transform:translateX(-50%);}
 .experience-tab:focus-visible{outline:3px solid color-mix(in srgb, var(--shu) 45%, transparent);outline-offset:2px;}
