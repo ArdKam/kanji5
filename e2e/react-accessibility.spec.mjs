@@ -216,9 +216,17 @@ test('dictionary search clear, detailed bounds, and persistent dismiss affordanc
   await expect(search).toHaveValue('');
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136);
 
-  const detailed=pageRoot.locator('.dictionary-view-button').filter({hasText:'جزئیات'});
-  await expect(detailed).toBeEnabled();
+  const matrix=pageRoot.getByRole('button',{name:'نمای شبکه',exact:true});
+  const detailed=pageRoot.getByRole('button',{name:'نمای جزئیات',exact:true});
+  await expect(matrix).toHaveAttribute('aria-pressed','false');
+  await expect(matrix).toBeVisible();
+  await expect(detailed).toBeVisible();
+  await expect(matrix.locator('.dictionary-view-icon svg')).toHaveCount(1);
+  await expect(detailed.locator('.dictionary-view-icon svg')).toHaveCount(1);
+  await expect(detailed).toHaveAttribute('aria-pressed','false');
   await detailed.click();
+  await expect(matrix).toHaveAttribute('aria-pressed','false');
+  await expect(detailed).toHaveAttribute('aria-pressed','true');
   await expect(pageRoot.locator('.kanji-catalog-grid')).toHaveClass(/is-detailed/);
   await expect(pageRoot.locator('.kanji-catalog-tile.is-detailed')).toHaveCount(160);
   await expect(pageRoot.getByRole('button',{name:'نمایش بیشتر',exact:true})).toBeVisible();
