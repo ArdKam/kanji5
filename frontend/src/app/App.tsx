@@ -366,7 +366,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                         aria-label={personalMnemonic?t("editMnemonic"):t("personalMnemonic")}
                         title={t("personalMnemonic")}
                         aria-expanded={mnemonicEditing}
-                        aria-controls="personal-mnemonic-editor"
+                        aria-controls={mnemonicEditing ? "personal-mnemonic-editor" : undefined}
                         onClick={()=>{
                           setBackPage(hasExamplesPage?3:2);
                           setMnemonicError("");
