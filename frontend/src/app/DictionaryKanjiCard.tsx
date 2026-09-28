@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
 import { TraditionalRadical } from "./TraditionalRadical";
@@ -13,11 +13,18 @@ import { getComponentInfo, getRadicalInfo, getHandwritingSkill, recordHandwritin
 type SectionKey = "overview" | "structure" | "writing" | "vocabulary" | "mnemonic";
 
 const sectionLabel = (key: SectionKey, language: Language) => {
-  if (key === "overview") return language === "fa" ? "نمای کلی" : "Overview";
-  if (key === "structure") return t("structure", language);
-  if (key === "writing") return t("handwritingPractice", language);
-  if (key === "vocabulary") return t("vocabulary", language);
-  return t("personalMnemonic", language);
+  if (language === "fa") {
+    if (key === "overview") return "نمای کلی";
+    if (key === "structure") return "کالبد";
+    if (key === "writing") return "نوشتن";
+    if (key === "vocabulary") return "واژه";
+    return "یادسپار";
+  }
+  if (key === "overview") return "Overview";
+  if (key === "structure") return "Anatomy";
+  if (key === "writing") return "Writing";
+  if (key === "vocabulary") return "Words";
+  return "Mnemonic";
 };
 
 export function DictionaryKanjiCard({
@@ -79,11 +86,6 @@ export function DictionaryKanjiCard({
     setActiveSection("overview");
   }, [item.character]);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    dialog.scrollTo({ top: 0, behavior: "auto" });
-  }, [activeSection, item.character]);
 
   const selectSection = (section: SectionKey) => {
     if (section === activeSection) return;
@@ -123,33 +125,30 @@ export function DictionaryKanjiCard({
   );
 
   const renderOverview = () => (
-    <div
-      id="dictionary-section-panel-overview"
-      className="dictionary-tabpanel"
-      role="tabpanel"
-      aria-labelledby="dictionary-section-tab-overview"
-      tabIndex={0}
-    >
+    <div id="dictionary-section-panel-overview" className="dictionary-tabpanel dictionary-overview" role="tabpanel" aria-labelledby="dictionary-section-tab-overview" tabIndex={0}>
+      <div className="dictionary-overview-hero">
+        <div className="dictionary-overview-character" lang="ja" aria-label={item.character}>{item.character}</div>
+        <div className="dictionary-overview-copy">
+          <div className="dictionary-overview-reading-line">
+            <span className="dictionary-overview-reading">{item.on.slice(0, 2).join(" · ") || item.kun.slice(0, 2).join(" · ") || "—"}</span>
+            <DictionaryAudio value={item.on[0] || item.kun[0] || item.character} label={t("playKanjiPronunciation", language)} />
+          </div>
+          {item.meanings.length ? (
+            <div className="dictionary-card-section dictionary-overview-meaning" dir="auto">
+              <strong><bdi>{item.meanings[0]}</bdi></strong>
+              {item.meanings.length > 1 ? <span>{item.meanings.slice(1, 4).map((meaning, index) => <bdi key={meaning + "-" + index}>{meaning}</bdi>)}</span> : null}
+            </div>
+          ) : null}
+        </div>
+      </div>
       <div className="dictionary-stroke-order-wrap">
         <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
-        <DictionaryAudio value={item.character} label={t("playKanjiPronunciation", language)} />
       </div>
-
-      {item.meanings.length ? (
-        <div className="dictionary-card-section">
-          <span className="dictionary-card-section-label">{t("meaning", language)}:</span>
-          <bdi className="dictionary-card-section-value" dir="auto">{item.meanings.join(" · ")}</bdi>
-        </div>
-      ) : null}
-
-      <div className="readings-header dictionary-readings-header">
-        <span>{t("reading", language)}</span>
-      </div>
+      <div className="readings-header dictionary-readings-header"><span>{t("reading", language)}</span></div>
       <div className="readings learning-back-readings dictionary-readings">
         <DictionaryReading title="On’yomi" values={item.on} language={language} />
         <DictionaryReading title="Kun’yomi" values={item.kun} language={language} />
       </div>
-
       <div className="dictionary-card-meta">
         {item.strokes ? <span>{t("dictionaryStrokes", language)} {formatNumber(item.strokes, language)}</span> : null}
         {item.grade ? <span>{t("dictionaryGrade", language)} {formatNumber(item.grade, language)}</span> : null}
@@ -204,7 +203,7 @@ export function DictionaryKanjiCard({
           <HandwritingPractice
             character={item.character}
             language={language}
-            defaultExpanded={false}
+            defaultExpanded
             learningSignal={handwritingSkill ? { state: handwritingSkill.state, confidence: handwritingSkill.confidence, score: handwritingSkill.score } : undefined}
             onGradeRecorded={(grade) => recordHandwritingGrade(item.character, grade).then(async saved => {
               if (!saved) return false;
@@ -242,30 +241,37 @@ export function DictionaryKanjiCard({
     );
   };
 
+  const masteryRingCircumference = 2 * Math.PI * 18;
+  const masteryRingOffset = masteryRingCircumference * (1 - mastery / 100);
+  const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
+
   return (
     <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
       <div className="dictionary-card">
-        <div className="dictionary-card-close-layer">
-          <button
-            className="dialog-close"
-            type="button"
-            aria-label={t("close", language)}
-            onClick={onClose}
-          >×</button>
-        </div>
-
-        <div className="dictionary-card-top">
-          <span className="badge badge-red">{item.jlpt || "—"}</span>
-          {item.grade ? <span className="dictionary-card-grade">G{formatNumber(item.grade, language)}</span> : null}
-          <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
-        </div>
-
+        <header className="dictionary-card-header">
+          <div className="dictionary-card-classification">
+            <span className="dictionary-card-jlpt badge badge-red">{item.jlpt || "—"}</span>
+            {item.grade ? <span className="dictionary-card-grade">G{formatNumber(item.grade, language)}</span> : null}
+          </div>
+          <span id="dictionary-card-title" className="dictionary-card-header-character" lang="ja">{item.character}</span>
+          <div className="dictionary-card-header-end">
+            <div className="dictionary-card-mastery" role="img" aria-label={t("dictionaryMastery", language) + " " + formatNumber(mastery, language) + "%"}>
+              <svg className="dictionary-mastery-ring" viewBox="0 0 44 44" aria-hidden="true">
+                <circle className="dictionary-mastery-ring-track" cx="22" cy="22" r="18" />
+                <circle className="dictionary-mastery-ring-value" cx="22" cy="22" r="18" style={masteryRingStyle as CSSProperties} />
+                <text x="22" y="22" textAnchor="middle" dominantBaseline="central">{formatNumber(mastery, language)}</text>
+              </svg>
+              <span className="sr-only">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
+            </div>
+            <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
+          </div>
+        </header>
         <div className="dictionary-section-nav" role="tablist" aria-label={t("dictionaryCardOptions", language)}>
           {(["overview", "structure", "writing", "vocabulary", "mnemonic"] as SectionKey[]).map(tabButton)}
         </div>
-
-        {renderActivePanel()}
+        <div className="dictionary-card-content" key={activeSection} data-active-section={activeSection}>
+          {renderActivePanel()}
+        </div>
       </div>
     </dialog>
   );
-}
