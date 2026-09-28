@@ -74,6 +74,6 @@ for(const viewport of [
     }));
     expect(metrics.overflow).toBe(false);
     expect(metrics.navHeight).toBeGreaterThanOrEqual(44);
-    expect(metrics.touchTargets.every(size=>size>=40)).toBe(true);
+    expect(metrics.touchTargets.every(size=>size>=44)).toBe(true);
   });
 }
