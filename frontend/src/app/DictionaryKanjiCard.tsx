@@ -181,11 +181,11 @@ export function DictionaryKanjiCard({
           <span className="dictionary-card-mastery">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
         </div>
 
-        <div className="dictionary-section-nav" role="toolbar" aria-label={language === "fa" ? "گزینه‌های کارت" : "Card options"}>
-          {sectionButton("structure", language === "fa" ? "ساختار" : "Structure")}
-          {sectionButton("writing", language === "fa" ? "تمرین نوشتن" : "Practice writing")}
-          {sectionButton("vocabulary", language === "fa" ? "واژگان" : "Vocabulary")}
-          {sectionButton("mnemonic", language === "fa" ? "یادسپار" : "Mnemonic")}
+        <div className="dictionary-section-nav" role="toolbar" aria-label={t("dictionaryCardOptions", language)}>
+          {sectionButton("structure", t("structure", language))}
+          {sectionButton("writing", t("handwritingPractice", language))}
+          {sectionButton("vocabulary", t("vocabulary", language))}
+          {sectionButton("mnemonic", t("personalMnemonic", language))}
         </div>
 
         <div className="dictionary-stroke-order-wrap">
@@ -201,7 +201,7 @@ export function DictionaryKanjiCard({
         ) : null}
 
         <div className="readings-header dictionary-readings-header">
-          <span>{language === "fa" ? "خوانش‌ها" : "Readings"}</span>
+          <span>{t("reading", language)}</span>
         </div>
         <div className="readings learning-back-readings dictionary-readings">
           <DictionaryReading title="On’yomi" values={item.on} language={language} />
@@ -214,18 +214,18 @@ export function DictionaryKanjiCard({
           {item.frequency ? <span>{t("dictionaryFrequency", language)} #{formatNumber(item.frequency, language)}</span> : null}
         </div>
 
-        <div className="dictionary-card-accordion" aria-label={language === "fa" ? "اطلاعات تکمیلی" : "Additional information"}>
+        <div className="dictionary-card-accordion" aria-label={t("additionalInformation", language)}>
           <section ref={node => { if (node) sectionRefs.current.structure = node; }} className="dictionary-accordion-section" aria-hidden={openSection !== "structure"}>
             {openSection === "structure" ? (
-              <div id="dictionary-section-panel-structure" className="dictionary-accordion-panel" role="region" aria-label={language === "fa" ? "ساختار" : "Structure"}>
+              <div id="dictionary-section-panel-structure" className="dictionary-accordion-panel" role="region" aria-label={t("structure", language)}>
                 {radicalInfo?.available ? <TraditionalRadical info={radicalInfo} language={language} /> : null}
                 {componentInfo?.available && componentInfo.components.length ? (
                   <>
                     <ComponentBreakdown
                       info={componentInfo}
-                      title={language === "fa" ? "ساختار کانجی" : "Kanji structure"}
-                      note={language === "fa" ? "اجزای دیداری" : "Visual components"}
-                      ariaLabel={language === "fa" ? "ساختار دیداری کانجی" : "Kanji visual structure"}
+                      title={t("kanjiStructure", language)}
+                      note={t("visualComponents", language)}
+                      ariaLabel={t("visualKanjiStructure", language)}
                     />
                     <ComponentLearningPath
                       character={item.character}
@@ -236,7 +236,7 @@ export function DictionaryKanjiCard({
                     />
                   </>
                 ) : (
-                  <p className="empty-text">{language === "fa" ? "اطلاعات ساختار در دسترس نیست." : "Structure information is unavailable."}</p>
+                  <p className="empty-text">{t("structureUnavailable", language)}</p>
                 )}
               </div>
             ) : null}
