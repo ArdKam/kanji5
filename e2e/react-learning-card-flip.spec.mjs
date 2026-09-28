@@ -129,7 +129,7 @@ test("learning card exposes five full-content back pages in Persian and English"
       const card = await revealLearningCard(page, language);
 
       expect(await card.locator(".learning-back-page").count()).toBe(4);
-      await expect(card).toHaveAttribute("data-back-page-count", "5");
+      await expect(card).toHaveAttribute("data-back-page-count", "4");
       await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(4);
       await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
       await expect(card.locator(".learning-back-page").nth(0).locator(".readings")).toHaveCount(1);
@@ -395,4 +395,6 @@ test("learning rating feedback controls stay fully inside the card on mobile",as
     expect(button.width).toBeGreaterThanOrEqual(44);
     expect(button.height).toBeGreaterThanOrEqual(44);
   }
+  const navTop = await page.locator(".experience-nav").evaluate(el => el.getBoundingClientRect().top);
+  expect(Math.max(...metrics.buttons.map(button => button.bottom))).toBeLessThanOrEqual(navTop + 1);
 });
