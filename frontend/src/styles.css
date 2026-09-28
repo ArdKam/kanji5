@@ -1188,3 +1188,9 @@ html[dir="rtl"] .header-tools-menu{inset-inline-start:auto!important;inset-inlin
   .header-actions .header-tools{inset-inline-start:0;inset-inline-end:auto;}
   .header-actions .account-button{inset-inline-start:auto;inset-inline-end:0;}
 }
+
+/* Header controls are independent hit targets; the wrapper must never block the opposite control. */
+.header-actions .header-tools{pointer-events:none;}
+.header-actions .header-tools .header-menu-trigger,
+.header-actions .header-tools .header-menu-scrim,
+.header-actions .header-tools .header-tools-menu{pointer-events:auto;}
