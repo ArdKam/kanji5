@@ -19,6 +19,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const compactLoop = mode === "dictionary-loop";
   const timerRef = useRef<number | null>(null);
   const viewerRef = useRef<HTMLElement | null>(null);
@@ -29,6 +30,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    setIsPlaying(false);
   }, []);
 
   useEffect(() => () => stopPlayback(), [stopPlayback]);
@@ -62,36 +64,27 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     return () => { active = false; };
   }, [character, language, retryKey, stopPlayback]);
 
-  useEffect(() => {
-    if (!compactLoop || !paths.length) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      setCompleted(paths.length);
-      return;
-    }
-    stopPlayback();
-    setCompleted(0);
-    timerRef.current = window.setInterval(() => {
-      setCompleted(current => (current >= paths.length - 1 ? 0 : current + 1));
-    }, 720);
-    return () => stopPlayback();
-  }, [compactLoop, paths.length, stopPlayback]);
-
   const play = useCallback((fromStart = false) => {
     if (!paths.length) return;
     stopPlayback();
     const start = fromStart || completed >= paths.length ? 0 : completed;
     setCompleted(start);
+    setIsPlaying(true);
     timerRef.current = window.setInterval(() => {
       setCompleted(current => {
         const next = current + 1;
         if (next >= paths.length) {
-          stopPlayback();
+          window.clearInterval(timerRef.current ?? undefined);
+          timerRef.current = null;
+          setIsPlaying(false);
           return paths.length;
         }
         return next;
       });
     }, 720);
   }, [completed, paths.length, stopPlayback]);
+
+  const pause = useCallback(() => stopPlayback(), [stopPlayback]);
 
   const scrollExpandedToolIntoView = useCallback(() => {
     const target = viewerRef.current;
@@ -157,6 +150,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         className="stroke-order-panel dictionary-stroke-order"
         aria-label={t("strokeOrderAria", language)}
         data-stroke-order-completed={completed}
+        data-stroke-order-playing={isPlaying ? "true" : "false"}
       >
         {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
         {!loading && error ? (
@@ -166,34 +160,22 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           </div>
         ) : null}
         {!loading && !error && paths.length ? (
-          <div className="stroke-order-stage">
-            <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
-              {paths.map(path => (
-                <path
-                  key={"ghost-" + path.strokeNumber}
-                  className="stroke-order-ghost"
-                  d={path.d}
-                  pathLength={1}
-                />
-              ))}
-              {paths.slice(0, completed).map(path => (
-                <path
-                  key={"done-" + path.strokeNumber}
-                  className="stroke-order-done"
-                  d={path.d}
-                  pathLength={1}
-                />
-              ))}
-              {completed < paths.length ? (
-                <path
-                  key={"active-" + paths[completed].strokeNumber}
-                  className="stroke-order-active"
-                  d={paths[completed].d}
-                  pathLength={1}
-                />
-              ) : null}
-            </svg>
-          </div>
+          <>
+            <div className="stroke-order-stage">
+              <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
+                {paths.map(path => <path key={"ghost-" + path.strokeNumber} className="stroke-order-ghost" d={path.d} pathLength={1} />)}
+                {paths.slice(0, completed).map(path => <path key={"done-" + path.strokeNumber} className="stroke-order-done" d={path.d} pathLength={1} />)}
+                {completed < paths.length ? <path key={"active-" + paths[completed].strokeNumber} className="stroke-order-active" d={paths[completed].d} pathLength={1} /> : null}
+              </svg>
+            </div>
+            <div className="dictionary-stroke-controls" role="group" aria-label={t("strokeOrder", language)}>
+              <button className="button primary" type="button" onClick={() => (isPlaying ? pause() : play())}>
+                {isPlaying ? (language === "fa" ? "مکث" : "Pause") : (completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language))}
+              </button>
+              <button className="button secondary" type="button" onClick={() => play(true)} disabled={isPlaying}>{t("replayStrokeOrder", language)}</button>
+              <span className="dictionary-stroke-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
+            </div>
+          </>
         ) : null}
         <span className="sr-only">KanjiVG · CC BY-SA 3.0</span>
       </section>
