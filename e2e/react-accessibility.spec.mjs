@@ -88,7 +88,7 @@ test('learning card reveal moves focus out of the aria-hidden face and emits no 
 });
 
 
-test('dictionary accordion controls only reference panels that are present in the DOM', async ({page})=>{
+test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
   await clean(page);
 
   await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
@@ -99,20 +99,29 @@ test('dictionary accordion controls only reference panels that are present in th
 
   const dialog=page.locator('.dictionary-card-dialog:visible');
   await expect(dialog).toBeVisible();
-  const structure=dialog.getByRole('button',{name:'ساختار',exact:true});
-  await expect(structure).toHaveAttribute('aria-expanded','false');
-  await expect(structure).not.toHaveAttribute('aria-controls',/.+/);
+  const tabs=dialog.getByRole('tab');
+  await expect(tabs).toHaveCount(5);
+  const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
+  const structure=dialog.getByRole('tab',{name:'ساختار',exact:true});
+  await expect(overview).toHaveAttribute('aria-selected','true');
+  await expect(structure).toHaveAttribute('aria-selected','false');
+  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
+
+  const initialScroll=await dialog.evaluate((node)=>node.scrollTop);
+  expect(initialScroll).toBe(0);
 
   await structure.click();
-  await expect(structure).toHaveAttribute('aria-expanded','true');
+  await expect(structure).toHaveAttribute('aria-selected','true');
+  await expect(overview).toHaveAttribute('aria-selected','false');
   const controls=await structure.getAttribute('aria-controls');
   expect(controls).toBeTruthy();
   await expect(dialog.locator('#'+controls)).toBeVisible();
+  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
 
-  await structure.click();
-  await expect(structure).toHaveAttribute('aria-expanded','false');
-  await expect(dialog.locator('#'+controls)).toHaveCount(0);
-  await expect(structure).not.toHaveAttribute('aria-controls',/.+/);
+  const structureScroll=await dialog.evaluate((node)=>node.scrollTop);
+  expect(structureScroll).toBe(0);
+  await structure.press('ArrowLeft');
+  await expect(overview).toHaveAttribute('aria-selected','true');
 });
 
 test('stroke-order accordion control keeps aria-controls synchronized with its rendered panel', async ({page})=>{
@@ -205,10 +214,11 @@ test('English dictionary presentation localizes card controls and uses the share
   const dialog=page.locator('.dictionary-card-dialog:visible');
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.dictionary-section-nav')).toHaveAttribute('aria-label','Card options');
-  await expect(dialog.getByRole('button',{name:'Structure'})).toBeVisible();
-  await expect(dialog.getByRole('button',{name:'Handwriting practice'})).toBeVisible();
-  await expect(dialog.getByRole('button',{name:'Vocabulary'})).toBeVisible();
-  await expect(dialog.getByRole('button',{name:'Personal mnemonic'})).toHaveCount(1);
+  await expect(dialog.getByRole('tab',{name:'Overview'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Structure'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Handwriting practice'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Vocabulary'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Personal mnemonic'})).toHaveCount(1);
   const dictionaryAudio = dialog.locator('.dictionary-audio-button');
   expect(await dictionaryAudio.count()).toBeGreaterThan(0);
   await expect(dictionaryAudio.first()).toHaveAttribute('aria-label',/Play kanji pronunciation/);
