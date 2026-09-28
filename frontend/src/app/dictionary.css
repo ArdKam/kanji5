@@ -198,6 +198,12 @@
   gap:12px;
   margin-bottom:14px;
 }
+@media(max-width:720px){
+  .dictionary-controls{align-items:stretch;flex-direction:column;}
+  .dictionary-level-filter{justify-content:flex-start;}
+  .dictionary-sort{justify-content:space-between;}
+  .dictionary-sort select{flex:1;min-width:0;}
+}
 .dictionary-level-filter{
   display:flex;
   flex-wrap:wrap;
