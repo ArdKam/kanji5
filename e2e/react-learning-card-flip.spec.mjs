@@ -148,7 +148,7 @@ test("learning card exposes five full-content back pages in Persian and English"
           "aria-label",
           pageIndex === 1 ? /(خوانش‌ها|Readings)/ :
           pageIndex === 2 ? /(نمونهٔ واژگانی|Vocabulary examples)/ :
-          pageIndex === 3 ? /(یادسپار|Mnemonic)/ :
+          pageIndex === 3 ? /(یادسپار|Mnemonic|Personal mnemonic)/ :
           /(ترتیب نوشتن|Stroke order)/,
         );
         await expect(card.locator(".pager-dot.active")).toHaveCount(1);
