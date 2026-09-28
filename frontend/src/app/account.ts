@@ -9,11 +9,20 @@ export type AccountStatus = "loading" | "signed-out" | "signed-in" | "unavailabl
 
 export type SyncStatus = "idle" | "syncing" | "synced" | "error";
 
+export type AccountSyncSummary = {
+  activeCards: number;
+  reviews: number;
+  personalMnemonics: number;
+  lastSyncedAt: string | null;
+};
+
 export type AccountState = {
   status: AccountStatus;
   user: AccountUser | null;
   syncStatus: SyncStatus;
   error: string | null;
+  recoveryPending: boolean;
+  syncSummary: AccountSyncSummary;
 };
 
 export type AccountApi = {
@@ -25,6 +34,8 @@ export type AccountApi = {
   updateProfile: (name: string) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   sendMagicLink: (email: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  setPassword: (newPassword: string) => Promise<void>;
   signOut: () => Promise<void>;
   syncNow: () => Promise<void>;
 };
