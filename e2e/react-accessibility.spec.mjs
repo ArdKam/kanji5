@@ -123,9 +123,8 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   const structureScroll=await content.evaluate((node)=>node.scrollTop);
   expect(structureScroll).toBe(0);
   await structure.press('ArrowRight');
-  const writing=dialog.getByRole('tab',{name:'نوشتن',exact:true});
-  await expect(writing).toHaveAttribute('aria-selected','true');
-  await writing.press('ArrowLeft');
+  await expect(overview).toHaveAttribute('aria-selected','true');
+  await overview.press('ArrowLeft');
   await expect(structure).toHaveAttribute('aria-selected','true');
 });
 
@@ -262,10 +261,10 @@ test('English dictionary presentation localizes card controls and uses the share
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.dictionary-section-nav')).toHaveAttribute('aria-label','Card options');
   await expect(dialog.getByRole('tab',{name:'Overview'})).toBeVisible();
-  await expect(dialog.getByRole('tab',{name:'Structure'})).toBeVisible();
-  await expect(dialog.getByRole('tab',{name:'Handwriting practice'})).toBeVisible();
-  await expect(dialog.getByRole('tab',{name:'Vocabulary'})).toBeVisible();
-  await expect(dialog.getByRole('tab',{name:'Personal mnemonic'})).toHaveCount(1);
+  await expect(dialog.getByRole('tab',{name:'Anatomy'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Writing'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Words'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Mnemonic'})).toHaveCount(1);
   const dictionaryAudio = dialog.locator('.dictionary-audio-button');
   expect(await dictionaryAudio.count()).toBeGreaterThan(0);
   await expect(dictionaryAudio.first()).toHaveAttribute('aria-label',/Play kanji pronunciation/);
