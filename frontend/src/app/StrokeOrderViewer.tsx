@@ -86,6 +86,11 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
 
   const pause = useCallback(() => stopPlayback(), [stopPlayback]);
 
+  useEffect(() => {
+    if (!compactLoop || !paths.length) return;
+    play(true);
+  }, [compactLoop, paths, play]);
+
   const scrollExpandedToolIntoView = useCallback(() => {
     const target = viewerRef.current;
     const scrollContainer = target?.closest<HTMLElement>(".learning-back-scroll");
