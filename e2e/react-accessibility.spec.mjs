@@ -147,7 +147,7 @@ test('stroke-order page exposes an expanded accessible viewer on entry', async (
   await expect(pager).toBeVisible();
   const nextPage=card.locator(".learning-back-page-nav .pager-button").last();
   for(let i=0;i<4;i++) await nextPage.dispatchEvent("click");
-  const panel=card.locator(".learning-back-page.active .stroke-order-panel[data-stroke-order-open="true"]");
+  const panel=card.locator('.learning-back-page.active .stroke-order-panel[data-stroke-order-open="true"]');
   await expect(panel).toBeVisible();
   await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
   const toggle=panel.locator(".stroke-order-toggle");
