@@ -125,8 +125,17 @@ test("generated mnemonic scaffolds are non-persistent prompts rather than direct
   const mnemonicButton = dialog.getByRole("tab", { name: /Personal mnemonic|Mnemonic/, exact: true });
   await mnemonicButton.click();
   await expect(mnemonicButton).toHaveAttribute("aria-selected", "true");
+  let nativeDialogCount = 0;
+  page.on("dialog", async dialogEvent => {
+    nativeDialogCount += 1;
+    await dialogEvent.dismiss();
+  });
   const panel = dialog.locator(".prepared-mnemonic-panel");
   await expect(panel).toBeVisible();
-  await expect(panel.locator(".prepared-mnemonic-scaffold-label")).toHaveText(/Guided scaffold|Scaffold/i);
-  await expect(panel.getByRole("button", { name: "Use" })).toHaveCount(0);
+  await expect(panel.locator(".dictionary-personal-mnemonic-input")).toBeVisible();
+  await expect(panel.getByRole("button",{name:"Save mnemonic",exact:true})).toBeVisible();
+  await expect(panel.getByRole("button",{name:"Use",exact:true})).toHaveCount(0);
+  const copyCurated = panel.getByRole("button",{name:"Copy curated story",exact:true});
+  if (await copyCurated.count()) await copyCurated.click();
+  expect(nativeDialogCount).toBe(0);
 });
