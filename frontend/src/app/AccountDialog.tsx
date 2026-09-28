@@ -390,7 +390,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
             <div><strong>{t("password", language)}</strong><span>{t("passwordSetHint", language)}</span></div>
             <div className="account-security-actions">
               <button className="button secondary" type="button" disabled={busy} onClick={() => { setSecurityEditing(true); setSetPasswordOnly(false); setAuthMessage(null); }}>{t("changePassword", language)}</button>
-              <button className="account-link-button" type="button" disabled={busy} onClick={() => { setSetPasswordOnly(true); setSecurityEditing(false); setAuthMessage(null); }}>{t("setPassword", language)}</button>
+              <button className="account-link-button" type="button" disabled={busy} onClick={() => { setSetPasswordOnly(true); setSecurityEditing(false); setAuthMessage(null); }}>{t("setPasswordWithoutCurrent", language)}</button>
             </div>
           </div>}
         </section>
