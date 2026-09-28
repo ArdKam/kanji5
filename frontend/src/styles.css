@@ -1194,3 +1194,17 @@ html[dir="rtl"] .header-tools-menu{inset-inline-start:auto!important;inset-inlin
 .header-actions .header-tools .header-menu-trigger,
 .header-actions .header-tools .header-menu-scrim,
 .header-actions .header-tools .header-tools-menu{pointer-events:auto;}
+
+/* Final physical-edge fallback: legacy left/right declarations must not affect directional header controls. */
+@media(min-width:761px){
+  .header-actions .header-tools{left:0!important;right:auto!important;}
+  .header-actions .account-button{left:auto!important;right:0!important;}
+}
+@media(max-width:760px){
+  .header-actions .header-tools{left:auto!important;right:0!important;}
+  .header-actions .account-button{left:0!important;right:auto!important;}
+}
+html[dir="ltr"] .header-actions .header-tools{left:0!important;right:auto!important;}
+html[dir="ltr"] .header-actions .account-button{left:auto!important;right:0!important;}
+html[dir="rtl"] .header-actions .header-tools{left:auto!important;right:0!important;}
+html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!important;}
