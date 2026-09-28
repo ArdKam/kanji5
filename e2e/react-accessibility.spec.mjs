@@ -191,3 +191,24 @@ test('React presentation stays usable at the narrow 320px boundary without horiz
   await expect(page.locator('.experience-nav')).toBeVisible();
   await expect(page.getByRole('button',{name:'یادآوری فعال'})).toBeVisible();
 });
+
+
+test('English dictionary presentation localizes card controls and uses the shared audio icon',async({page})=>{
+  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  await page.getByRole('button',{name:'Kanji dictionary'}).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
+  const tile=page.locator('.kanji-catalog-tile').first();
+  await expect(tile).toBeVisible({timeout:10000});
+  await tile.click();
+  const dialog=page.locator('.dictionary-card-dialog:visible');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'Card options'})).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'Structure'})).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'Practice writing'})).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'Vocabulary'})).toBeVisible();
+  await expect(dialog.getByRole('button',{name:'Personal mnemonic'})).toHaveCount(1);
+  await expect(dialog.locator('.dictionary-audio-button svg')).toHaveCount(1);
+  await expect(dialog.locator('.dictionary-audio-button')).toHaveAttribute('aria-label',/Play kanji pronunciation/);
+});
