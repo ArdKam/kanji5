@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { getAccountApi, type AccountState } from "./account";
 import { t, type Language } from "./i18n";
 
@@ -112,7 +112,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         ? t("syncError", language)
         : "";
 
-  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLElement>, count: number, index: number, activate: (next: number) => void) => {
+  const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLElement>, count: number, index: number, activate: (next: number) => void) => {
     const key = event.key;
     if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") return;
     event.preventDefault();
