@@ -840,12 +840,12 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .account-button{
   position:static;
   z-index:2;
-  min-height:42px;
-  height:42px;
+  min-height:44px;
+  height:44px;
 }
 .header-menu-trigger{
-  min-height:42px;
-  height:42px;
+  min-height:44px;
+  height:44px;
 }
 .app-shell{
   padding-top:10px;
@@ -872,7 +872,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .header{padding-bottom:6px;margin-bottom:6px;}
 .header-actions{min-height:42px;}
 /* Desktop account control stays in the header-actions flex row; mobile positioning is handled below. */
-.header-menu-trigger{height:42px;min-height:42px;}
+.header-menu-trigger{height:44px;min-height:44px;}
 .app-shell{padding-top:10px;}
 .content{gap:12px;}
 @media(max-width:760px){.header{padding-bottom:5px;margin-bottom:5px;}.app-shell{padding-top:8px;}#kanji5-account-launcher,.header .account-button{left:0!important;top:0!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:4px!important;}.content{gap:10px;}}
