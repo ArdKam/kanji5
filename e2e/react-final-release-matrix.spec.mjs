@@ -52,3 +52,28 @@ for(const viewport of viewports){
     await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   });
 }
+
+
+for(const viewport of [
+  {name:'tablet',width:768,height:1024},
+  {name:'mobile-landscape',width:844,height:390},
+]){
+  test('final React responsive shell — '+viewport.name,async({page})=>{
+    await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.goto('/');
+    await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+
+    const metrics=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
+      navHeight:document.querySelector('.experience-nav')?.getBoundingClientRect().height||0,
+      bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom,
+      touchTargets:[...document.querySelectorAll('#root button')].filter(button=>{
+        const r=button.getBoundingClientRect();
+        return r.width>0&&r.height>0;
+      }).map(button=>Math.min(button.getBoundingClientRect().width,button.getBoundingClientRect().height))
+    }));
+    expect(metrics.overflow).toBe(false);
+    expect(metrics.navHeight).toBeGreaterThanOrEqual(44);
+    expect(metrics.touchTargets.every(size=>size>=40)).toBe(true);
+  });
+}
