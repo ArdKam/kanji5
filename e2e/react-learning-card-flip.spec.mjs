@@ -130,7 +130,9 @@ test("learning card exposes five full-content back pages in Persian and English"
 
       expect(await card.locator(".learning-back-page").count()).toBe(4);
       await expect(card).toHaveAttribute("data-back-page-count", "4");
-      await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(4);
+      await expect(card.locator(".learning-back-tab")).toHaveCount(4);
+      await expect(card.locator(".learning-back-tab[role="tab"]")).toHaveCount(4);
+      await expect(card.locator(".learning-back-tab.active")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
       await expect(card.locator(".learning-back-page").nth(0).locator(".readings")).toHaveCount(1);
       const exampleCount = await card.locator(".learning-back-page").nth(1).locator(".example-row").count();
@@ -150,7 +152,8 @@ test("learning card exposes five full-content back pages in Persian and English"
           pageIndex === 2 ? /(یادسپار|Mnemonic|Personal mnemonic)/ :
           /(ترتیب نوشتن|Stroke order)/,
         );
-        await expect(card.locator(".pager-dot.active")).toHaveCount(1);
+        await expect(card.locator(".learning-back-tab.active")).toHaveCount(1);
+        await expect(card.locator(".learning-back-tab.active")).toHaveAttribute("aria-selected","true");
         await assertCardBounds(card);
       }
 
@@ -166,7 +169,7 @@ test("learning card exposes five full-content back pages in Persian and English"
   }
 });
 
-test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ page }) => {
+test("learning card exposes an immediately visible KanjiVG stroke-order viewer", async ({ page }) => {
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
@@ -186,49 +189,52 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
   await goToBackPage(page, card, 3);
-  const tool = card.locator(".learning-back-page.active .stroke-order-tool");
-  await expect(tool).toBeVisible();
-  const trigger = tool.getByRole("button", { name: "Stroke order" });
-  await expect(trigger).toHaveAttribute("aria-expanded", "false");
-  await expect(trigger.locator(".stroke-order-replay-icon")).toBeVisible();
-  const triggerSize = await trigger.evaluate((el) => {
-    const style = getComputedStyle(el);
-    return { width: parseFloat(style.width), height: parseFloat(style.height), minHeight: parseFloat(style.minHeight) };
-  });
-  expect(triggerSize.width).toBeGreaterThanOrEqual(32);
-  expect(triggerSize.width).toBeLessThanOrEqual(48);
-  expect(triggerSize.height).toBeGreaterThanOrEqual(32);
-  expect(triggerSize.height).toBeLessThanOrEqual(48);
-  expect(triggerSize.minHeight).toBeGreaterThanOrEqual(44);
-
-  const tools = card.locator(".learning-back-page.active .stroke-order-tool");
-  await expect(tools).toBeVisible();
-
-  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-
-  await trigger.click();
-  const panel = card.locator(".stroke-order-panel.is-expanded");
+  const panel = card.locator(".learning-back-page.active .stroke-order-panel.is-expanded");
   await expect(panel).toBeVisible();
-
-  const singleColumnLayout = await card.evaluate(() => {
-    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel.is-expanded");
-    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length : 0;
-    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
-  });
-  expect(singleColumnLayout.strokePanelColumns).toBe(1);
-
+  await expect(card.locator(".learning-back-page.active .stroke-order-tool")).toHaveCount(0);
   await expect(panel.locator(".stroke-order-toggle")).toHaveAttribute("aria-expanded", "true");
+  await expect(panel.locator(".stroke-order-toggle")).toHaveAttribute("aria-controls", "stroke-order-content");
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
   await expect(panel.locator(".stroke-order-active")).toHaveCount(1);
+
   const expandedStage = await panel.locator(".stroke-order-stage svg").boundingBox();
   expect(expandedStage?.width ?? 0).toBeGreaterThan(120);
-  await expect.poll(async () => panel.getAttribute("data-stroke-order-open"), { timeout: 1000 }).toBe("true");
+  const singleColumnLayout = await card.evaluate(() => {
+    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel.is-expanded");
+    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length : 0;
+    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
+  });
+  expect(singleColumnLayout.strokePanelColumns).toBe(1);
 
   await panel.getByRole("button", { name: "Next" }).click();
   await expect(panel.locator(".stroke-order-progress")).toHaveText("1 / 3");
   await panel.getByRole("button", { name: "Previous" }).click();
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
+});
+
+test("learning card back navigation uses labeled tabs without losing swipe/pager controls", async ({ page }) => {
+  await routeExamples(page, 5);
+  for (const language of ["fa", "en"]) {
+    for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      const card = await revealLearningCard(page, language);
+      await expect(card.locator(".learning-card-front h2")).toHaveCount(0);
+      await expect(card.locator(".learning-card-context")).toBeVisible();
+      await expect(card.locator(".learning-card-counter")).toBeVisible();
+      await expect(card.locator(".learning-back-tabs .learning-back-tab")).toHaveCount(4);
+
+      for (let index = 0; index < 4; index += 1) {
+        const tab = card.locator(".learning-back-tab").nth(index);
+        await expect(tab).toHaveAttribute("role", "tab");
+        await expect(tab).toHaveAttribute("aria-controls", "learning-back-page-"+index);
+        await tab.click();
+        await expect(tab).toHaveAttribute("aria-selected", "true");
+        await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+        await expect(card.locator(".learning-back-page.active")).toHaveAttribute("id", "learning-back-page-"+index);
+      }
+    }
+  }
 });
 
 test("stroke-order replay auto-scrolls the expanded viewer fully into view", async ({ page }) => {
