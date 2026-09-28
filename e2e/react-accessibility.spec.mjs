@@ -202,6 +202,37 @@ test('React presentation stays usable at the narrow 320px boundary without horiz
 });
 
 
+test('dictionary search clear, detailed bounds, and persistent dismiss affordance remain stable',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible({timeout:10000});
+
+  const search=pageRoot.locator('.dictionary-page-search input');
+  await search.fill('学');
+  const clear=pageRoot.getByRole('button',{name:'پاک کردن جست‌وجو',exact:true});
+  await expect(clear).toBeVisible();
+  await clear.click();
+  await expect(search).toHaveValue('');
+  await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136);
+
+  const detailed=pageRoot.locator('.dictionary-view-button').filter({hasText:'جزئیات'});
+  await expect(detailed).toBeDisabled();
+  await search.fill('学');
+  await expect(detailed).toBeEnabled();
+  await detailed.click();
+  await expect(pageRoot.locator('.kanji-catalog-grid')).toHaveClass(/is-detailed/);
+  await expect(pageRoot.locator('.kanji-catalog-details')).toHaveCount(1);
+
+  const tile=pageRoot.locator('.kanji-catalog-tile.is-detailed').first();
+  await tile.click();
+  const dialog=page.locator('.dictionary-card-dialog:visible');
+  const close=dialog.getByRole('button',{name:'بستن',exact:true});
+  await expect(close).toBeVisible();
+  await page.waitForTimeout(4500);
+  await expect(close).toBeVisible();
+});
+
 test('English dictionary presentation localizes card controls and uses the shared audio icon',async({page})=>{
   await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
   await page.goto('/');
