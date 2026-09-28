@@ -20,7 +20,9 @@ const emptyState = {
   status: 'loading',
   user: null,
   syncStatus: 'idle',
-  error: null
+  error: null,
+  recoveryPending: false,
+  syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null }
 };
 
 let state = { ...emptyState };
@@ -43,7 +45,7 @@ function notify() {
 }
 
 function setState(next) {
-  state = { ...state, ...next };
+  state = { ...state, ...next, syncSummary: readSyncSummary() };
   notify();
 }
 
@@ -79,6 +81,23 @@ function localPayload() {
 
 function safeJSON(raw, fallback) {
   try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
+}
+
+function readSyncSummary() {
+  const cards = safeJSON(localStorage.getItem(CARDS_STORAGE_KEY), {});
+  const reviews = safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY), []);
+  const knowledge = safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {});
+  const meta = safeJSON(localStorage.getItem(SYNC_META_KEY), {});
+  const activeCards = cards && typeof cards === 'object' ? Object.values(cards).filter(entry => entry?.card).length : 0;
+  const personalMnemonics = knowledge && typeof knowledge === 'object' && knowledge.v2Mnemonics && typeof knowledge.v2Mnemonics === 'object'
+    ? Object.values(knowledge.v2Mnemonics).filter(value => typeof value === 'string' && value.trim()).length
+    : 0;
+  return {
+    activeCards,
+    reviews: Array.isArray(reviews) ? reviews.length : 0,
+    personalMnemonics,
+    lastSyncedAt: typeof meta?.syncedAt === 'string' ? meta.syncedAt : null
+  };
 }
 
 function writeLocal(payload, remoteUpdatedAt = null) {
@@ -336,27 +355,42 @@ async function boot() {
   }
   try {
     const c = await getClient();
-    const { data, error } = await c.auth.getSession();
-    if (error) throw error;
-    user = data.session?.user || null;
-    setState({ status: user ? 'signed-in' : 'signed-out', user: mapUser(user), syncStatus: user ? 'syncing' : 'idle', error: null });
-    if (user) {
-      await syncNow();
-      startSyncLifecycle();
-    }
-    c.auth.onAuthStateChange((_event, session) => {
+    c.auth.onAuthStateChange((event, session) => {
       user = session?.user || null;
-      setState({ status: user ? 'signed-in' : 'signed-out', user: mapUser(user), syncStatus: user ? 'syncing' : 'idle', error: null });
+      const recoveryPending = event === 'PASSWORD_RECOVERY' ? true : state.recoveryPending;
+      setState({
+        status: user ? 'signed-in' : 'signed-out',
+        user: mapUser(user),
+        syncStatus: user ? 'syncing' : 'idle',
+        recoveryPending,
+        error: null
+      });
       if (user) {
         startSyncLifecycle();
         window.setTimeout(() => { void syncNow(); }, 0);
       } else {
         stopSyncLifecycle();
+        setState({ recoveryPending: false });
       }
     });
+
+    const { data, error } = await c.auth.getSession();
+    if (error) throw error;
+    user = data.session?.user || null;
+    setState({
+      status: user ? 'signed-in' : 'signed-out',
+      user: mapUser(user),
+      syncStatus: user ? 'syncing' : 'idle',
+      recoveryPending: state.recoveryPending,
+      error: null
+    });
+    if (user) {
+      await syncNow();
+      startSyncLifecycle();
+    }
   } catch (error) {
     console.warn('Kanji 5 account unavailable', error);
-    setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE' });
+    setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
 }
 
@@ -439,6 +473,23 @@ const api = {
     });
     if (error) throw error;
   },
+  async sendPasswordReset(email) {
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (!normalizedEmail) throw new Error('AUTH_RESET_EMAIL_REQUIRED');
+    const c = await getClient();
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await c.auth.resetPasswordForEmail(normalizedEmail, { redirectTo });
+    if (error) throw new Error('AUTH_RESET_FAILED');
+  },
+  async setPassword(newPassword) {
+    if (!newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
+    if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
+    const c = await getClient();
+    const { data, error } = await c.auth.updateUser({ password: newPassword });
+    if (error) throw new Error('AUTH_SET_PASSWORD_FAILED');
+    user = data.user || user;
+    setState({ status: 'signed-in', user: mapUser(user), recoveryPending: false, error: null });
+  },
   async signOut() {
     const c = await getClient();
     const { error } = await c.auth.signOut();
@@ -446,6 +497,9 @@ const api = {
   },
   async syncNow() {
     await syncNow();
+  },
+  getSyncSummary() {
+    return { ...readSyncSummary() };
   }
 };
 
