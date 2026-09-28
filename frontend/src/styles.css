@@ -1209,65 +1209,31 @@ html[dir="ltr"] .header-actions .account-button{left:auto!important;right:0!impo
 html[dir="rtl"] .header-actions .header-tools{left:auto!important;right:0!important;}
 html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!important;}
 
-/* Learning card stability: keep primary kanji/meaning typography invariant during reveal. */
+/* Learning card stability and bottom-navigation clearance. */
 .learning-card-back .learning-back-kanji{font-size:var(--text-display-compact)!important;}
 .learning-card-back .meanings{font-size:var(--text-2xl)!important;}
 .learning-back-readings-block{display:grid;gap:8px;margin-top:2px;}
 .learning-back-readings-block .readings-header{margin:0;}
 .learning-back-readings-block .learning-back-readings{margin:0;}
-/* The rating footer must clear the fixed bottom navigation rather than sitting underneath it. */
-.learning-card{height:min(590px,calc(100dvh - 32px));}
-@media(max-width:760px){
-  .learning-card{height:min(640px,calc(100dvh - 32px));}
-  .learning-back-readings-block{gap:6px;}
-}
 
-/* Feedback controls live above the fixed experience navigation without shrinking the learning surface. */
-.learning-card{position:relative;}
-.learning-card-back .learning-back-footer{
-  position:absolute;
-  inset-inline:0;
-  bottom:calc(var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom)));
-  z-index:4;
-}
-.learning-card-back .learning-back-pager-shell{padding-bottom:0;}
-@media(max-width:760px){
-  .learning-card-back .learning-back-pager-shell{padding-bottom:0;}
-}
-
-.learning-card-back .learning-back-scroll{padding-bottom:190px;}
-@media(max-width:760px){
-  .learning-card-back .learning-back-scroll{padding-bottom:200px;}
-}
-
-/* The elevated footer is a visual layer only; its empty area must never block scrollable card content. */
-.learning-card-back .learning-back-footer{pointer-events:none;}
-.learning-card-back .learning-back-footer > *{pointer-events:auto;}
-
-.learning-card-back .mnemonic-prepared-use{position:relative;z-index:6;pointer-events:auto;}
-
-/* Final feedback layout: preserve normal card flow, visually lift the feedback row above the fixed navigation. */
+.learning-card{position:relative;height:min(590px,calc(100dvh - 32px));}
 .learning-card-back .learning-back-footer{
   position:relative;
   inset:auto;
-  bottom:auto;
   z-index:2;
-  pointer-events:auto;
   transform:translateY(calc(-1 * var(--nav-bar-height) - max(14px,env(safe-area-inset-bottom))));
-}
-.learning-card-back .learning-back-footer > *{pointer-events:auto;}
-.learning-card-back .learning-back-pager-shell{padding-bottom:0;}
-.learning-card-back .learning-back-scroll{padding-bottom:150px;}
-
-.learning-card-back .learning-back-footer .learning-back-page-nav{
   pointer-events:none;
 }
-.learning-card-back .learning-back-footer .learning-back-page-nav > *{
-  pointer-events:auto;
-}
-
-/* Footer background must never become a click shield; only its actual controls receive input. */
-.learning-card-back .learning-back-footer{pointer-events:none!important;}
 .learning-card-back .learning-back-footer .rating-grid,
 .learning-card-back .learning-back-footer .rating-grid *,
 .learning-card-back .learning-back-footer .learning-back-page-nav > *{pointer-events:auto;}
+.learning-card-back .learning-back-pager-shell{padding-bottom:0;}
+.learning-card-back .learning-back-scroll{padding-bottom:150px;}
+.learning-card-back .learning-back-page-nav{pointer-events:none;}
+.learning-card-back .mnemonic-prepared-use{position:relative;z-index:6;pointer-events:auto;}
+
+@media(max-width:760px){
+  .learning-card{height:min(640px,calc(100dvh - 32px));}
+  .learning-back-readings-block{gap:6px;}
+  .learning-card-back .learning-back-scroll{padding-bottom:200px;}
+}
