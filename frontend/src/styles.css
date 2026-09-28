@@ -1235,7 +1235,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   .learning-card-back .learning-back-pager-shell{padding-bottom:0;}
 }
 
-.learning-card-back .learning-back-scroll{padding-bottom:130px;}
+.learning-card-back .learning-back-scroll{padding-bottom:190px;}
 @media(max-width:760px){
-  .learning-card-back .learning-back-scroll{padding-bottom:136px;}
+  .learning-card-back .learning-back-scroll{padding-bottom:200px;}
 }
