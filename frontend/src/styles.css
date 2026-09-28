@@ -1881,8 +1881,8 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 @media(max-width:380px){
   .learning-card-back .learning-back-page-nav{gap:2px;}
   .learning-card-back .learning-back-page-nav>.pager-button{flex-basis:30px;width:30px;min-width:30px;}
-  .learning-card-back .learning-back-tab{font-size:9px;}
-  .learning-card-back .learning-back-footer .rating{font-size:9px;padding-inline:2px;}
+  .learning-card-back .learning-back-tab{font-size:10px;}
+  .learning-card-back .learning-back-footer .rating{font-size:10px;padding-inline:2px;}
 }
 @media(prefers-reduced-motion:reduce){
   .learning-back-tab{transition:none;}
