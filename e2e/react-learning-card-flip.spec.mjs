@@ -84,16 +84,10 @@ async function goToBackPage(page, card, targetIndex) {
   const direction = delta >= 0 ? 1 : -1;
   const steps = Math.abs(delta);
   for (let index = 0; index < steps; index += 1) {
-    const viewport = await page.evaluate(() => ({ width: window.innerWidth }));
-    if (viewport.width <= 760) {
-      const pager = card.locator(".learning-back-pager-shell");
-      await swipePager(page, pager, direction > 0 ? 0.75 : 0.25, direction > 0 ? 0.25 : 0.75);
-    } else {
-      const button = card.locator(".pager-button").nth(direction > 0 ? 1 : 0);
-      await expect(button).toBeEnabled();
-      await button.click();
-      await page.waitForTimeout(520);
-    }
+    const button = card.locator(".pager-button").nth(direction > 0 ? 1 : 0);
+    await expect(button).toBeEnabled();
+    await button.click();
+    await page.waitForTimeout(520);
   }
   await expect(card.locator(".learning-back-page").nth(targetIndex)).toHaveClass(/active/);
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
