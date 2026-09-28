@@ -127,6 +127,10 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     onExternalSelectionConsumed?.();
   }, [catalog, externalSelectedCharacter, onExternalSelectionConsumed]);
 
+  useEffect(() => {
+    if (viewMode === "detailed" && visible.length > 160) setViewMode("matrix");
+  }, [viewMode, visible.length]);
+
   const visible = useMemo(() => {
     const q = normalize(query);
     const filtered = catalog.filter((item) => {
