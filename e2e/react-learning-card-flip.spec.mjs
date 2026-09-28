@@ -398,3 +398,67 @@ test("learning rating feedback controls stay fully inside the card on mobile",as
   const navTop = await page.locator(".experience-nav").evaluate(el => el.getBoundingClientRect().top);
   expect(Math.max(...metrics.buttons.map(button => button.bottom))).toBeLessThanOrEqual(navTop + 1);
 });
+
+
+test("critical header title and drawer direction stay on the correct viewport edges", async ({ page }) => {
+  for (const scenario of [
+    { language: "en", menu: "More", expectedSide: "left" },
+    { language: "fa", menu: "بیشتر", expectedSide: "right" },
+  ]) {
+    await page.addInitScript((value) => localStorage.setItem("kanji5-ui-language", value), scenario.language);
+    for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
+      await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+
+      const titleBounds = await page.locator(".header-brand h1").boundingBox();
+      if (!titleBounds) throw new Error("Header title bounds unavailable");
+      expect(Math.abs((titleBounds.x + titleBounds.width / 2) - viewport.width / 2)).toBeLessThanOrEqual(1.5);
+
+      await page.getByRole("button", { name: scenario.menu, exact: true }).click();
+      const drawer = page.locator("#header-tools-menu");
+      await expect(drawer).toBeVisible();
+      await page.waitForTimeout(350);
+
+      const drawerBounds = await drawer.boundingBox();
+      if (!drawerBounds) throw new Error("Header drawer bounds unavailable");
+      if (scenario.expectedSide === "left") {
+        expect(drawerBounds.x).toBeLessThanOrEqual(1);
+      } else {
+        expect(drawerBounds.x + drawerBounds.width).toBeGreaterThanOrEqual(viewport.width - 1);
+      }
+    }
+  }
+});
+
+test("menu sections open as in-flow pages rather than centered overlays", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.goto("/");
+  await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
+
+  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.locator("#header-tools-menu").getByRole("button", { name: "Settings", exact: true }).click();
+
+  const pageDialog = page.locator(".secondary-page-dialog");
+  await expect(pageDialog).toBeVisible();
+  await expect(pageDialog).toHaveAttribute("open", "");
+  await expect(page.locator("#root .learning-card")).toHaveCount(0);
+
+  const position = await pageDialog.evaluate((el) => getComputedStyle(el).position);
+  expect(position).toBe("static");
+
+  await page.getByRole("button", { name: "Back to learning card", exact: true }).click();
+  await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
+  await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+});
+
+test("a short fast horizontal touch flick advances the learning-card pager", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const card = await revealLearningCard(page, "en");
+  const pager = card.locator(".learning-back-pager-shell");
+  await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+
+  await swipePager(page, pager, 0.55, 0.47);
+  await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
+});

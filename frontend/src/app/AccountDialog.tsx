@@ -1,7 +1,7 @@
 import { useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { getAccountApi, type AccountState } from "./account";
 import { t, type Language } from "./i18n";
-import { useModalDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 
 type AuthMode = "email" | "magic";
 type EmailIntent = "sign-in" | "sign-up";
@@ -96,7 +96,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     }
   };
 
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   if (!open) return null;
 
@@ -140,7 +140,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     }
   });
 
-  return <dialog ref={dialogRef} className="dialog account-dialog" aria-labelledby="account-title">
+  return <dialog ref={dialogRef} className="dialog secondary-page-dialog account-dialog" aria-labelledby="account-title">
     <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
     <div className="account-dialog-heading">
       <AccountMark user={state.user} />

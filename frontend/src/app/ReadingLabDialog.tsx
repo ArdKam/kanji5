@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { t, type Language } from "./i18n";
 import { listKanji, type KanjiCatalogItem } from "./engine";
 import { ReadingLab } from "./ReadingLab";
-import { useModalDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 
 export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
   open: boolean;
@@ -29,12 +29,12 @@ export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
     return () => { active = false; };
   }, [open, catalog.length, loading, attempted]);
 
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   if (!open) return null;
 
   return (
-    <dialog ref={dialogRef} className="dialog secondary-surface-dialog reading-lab-dialog" aria-labelledby="reading-lab-dialog-title">
+    <dialog ref={dialogRef} className="dialog secondary-page-dialog secondary-surface-dialog reading-lab-dialog" aria-labelledby="reading-lab-dialog-title">
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="reading-lab-dialog-title">{t("readingLab", language)}</h2>
       {loading && !catalog.length ? <p className="empty-text" role="status">{t("dictionaryLoading", language)}</p> : null}

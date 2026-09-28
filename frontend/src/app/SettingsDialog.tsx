@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useModalDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
 import { MnemonicBackup } from "./MnemonicBackup";
 import type { KanjiCatalogItem, Settings, Snapshot } from "./engine";
@@ -45,10 +45,10 @@ export function SettingsDialog({
   }, [theme]);
   useEffect(() => { if (open) setDraft(s); }, [open, s.dailyNew, s.retention, s.dailyGoal, s.leechThreshold, s.production, s.vocabulary, s.context]);
 
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   return open ? (
-    <dialog ref={dialogRef} className="dialog" aria-labelledby="settings-title">
+    <dialog ref={dialogRef} className="dialog secondary-page-dialog" aria-labelledby="settings-title">
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="settings-title">{t("settingsTitle", language)}</h2>
       <form className="settings-form" onSubmit={e => { e.preventDefault(); onSave(draft); }}>

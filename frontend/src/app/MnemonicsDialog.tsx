@@ -3,7 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { getMnemonic, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import { buildPreparedMnemonicEntries } from "./prepared-mnemonic-core";
 import type { PreparedMnemonic } from "./mnemonic-library";
-import { useModalDialog } from "./useModalDialog";
+import { usePageDialog } from "./usePageDialog";
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
@@ -127,11 +127,11 @@ export function MnemonicsDialog({ open, language, catalog, onClose, onSelectKanj
   onClose: () => void;
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   if (!open) return null;
   return (
-    <dialog ref={dialogRef} className="dialog secondary-surface-dialog mnemonics-dialog" aria-labelledby="mnemonics-dialog-title">
+    <dialog ref={dialogRef} className="dialog secondary-page-dialog secondary-surface-dialog mnemonics-dialog" aria-labelledby="mnemonics-dialog-title">
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="mnemonics-dialog-title">{t("preparedMnemonicLibrary", language)}</h2>
       <p className="secondary-surface-dialog-hint">{t("preparedMnemonicLibraryHint", language)}</p>
