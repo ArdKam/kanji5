@@ -636,7 +636,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   width:15px;
   height:15px;
 }
-.mnemonic-tool{display:grid;grid-template-columns:34px minmax(0,1fr);grid-template-areas:"trigger saved" "prepared prepared" "editor editor";align-items:start;gap:7px;min-width:0;min-height:42px;padding:5px 7px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--washi);overflow:hidden;}
+.mnemonic-tool{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-areas:"trigger saved" "prepared prepared" "editor editor";align-items:start;gap:7px;min-width:0;min-height:44px;padding:5px 7px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--washi);overflow:hidden;}
 .mnemonic-tool:not(.has-value):not(.is-open){background:transparent;border-color:transparent;padding-inline:0;}
 .mnemonic-trigger{grid-area:trigger;width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--sumi);font:inherit;font-size:var(--text-md);line-height:1;cursor:pointer;}
 .mnemonic-trigger:hover{background:var(--washi);}
