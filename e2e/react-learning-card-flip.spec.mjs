@@ -128,27 +128,26 @@ test("learning card exposes five full-content back pages in Persian and English"
       await page.setViewportSize(viewport);
       const card = await revealLearningCard(page, language);
 
-      expect(await card.locator(".learning-back-page").count()).toBe(5);
+      expect(await card.locator(".learning-back-page").count()).toBe(4);
       await expect(card).toHaveAttribute("data-back-page-count", "5");
-      await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(5);
+      await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(4);
       await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
-      await expect(card.locator(".learning-back-page").nth(1).locator(".readings")).toHaveCount(1);
-      const exampleCount = await card.locator(".learning-back-page").nth(2).locator(".example-row").count();
+      await expect(card.locator(".learning-back-page").nth(0).locator(".readings")).toHaveCount(1);
+      const exampleCount = await card.locator(".learning-back-page").nth(1).locator(".example-row").count();
       expect(exampleCount).toBeGreaterThan(2);
-      await expect(card.locator(".learning-back-page").nth(3).locator(".mnemonic-page")).toHaveCount(1);
-      await expect(card.locator(".learning-back-page").nth(4).locator(".stroke-page")).toHaveCount(1);
+      await expect(card.locator(".learning-back-page").nth(2).locator(".mnemonic-page")).toHaveCount(1);
+      await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-page")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".example-row")).toHaveCount(0);
-      await expect(card.locator(".learning-back-page").nth(1).locator(".example-row")).toHaveCount(0);
+      await expect(card.locator(".learning-back-page").nth(2).locator(".example-row")).toHaveCount(0);
       await expect(card.locator(".learning-back-page").nth(3).locator(".example-row")).toHaveCount(0);
       await assertCardBounds(card);
 
-      for (let pageIndex = 1; pageIndex < 5; pageIndex += 1) {
+      for (let pageIndex = 1; pageIndex < 4; pageIndex += 1) {
         await goToBackPage(page, card, pageIndex);
         await expect(card.locator(".learning-back-page.active")).toHaveAttribute(
           "aria-label",
-          pageIndex === 1 ? /(خوانش‌ها|Readings)/ :
-          pageIndex === 2 ? /(نمونهٔ واژگانی|Vocabulary examples)/ :
-          pageIndex === 3 ? /(یادسپار|Mnemonic|Personal mnemonic)/ :
+          pageIndex === 1 ? /(نمونهٔ واژگانی|Vocabulary examples)/ :
+          pageIndex === 2 ? /(یادسپار|Mnemonic|Personal mnemonic)/ :
           /(ترتیب نوشتن|Stroke order)/,
         );
         await expect(card.locator(".pager-dot.active")).toHaveCount(1);
@@ -162,7 +161,7 @@ test("learning card exposes five full-content back pages in Persian and English"
         }),
       );
       expect(pageMetrics.filter((m) => m.visible === "visible")).toHaveLength(1);
-      expect(pageMetrics).toHaveLength(5);
+      expect(pageMetrics).toHaveLength(4);
     }
   }
 });
@@ -186,7 +185,7 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  await goToBackPage(page, card, 4);
+  await goToBackPage(page, card, 3);
   const tool = card.locator(".learning-back-page.active .stroke-order-tool");
   await expect(tool).toBeVisible();
   const trigger = tool.getByRole("button", { name: "Stroke order" });
