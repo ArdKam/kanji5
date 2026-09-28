@@ -1243,3 +1243,5 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 /* The elevated footer is a visual layer only; its empty area must never block scrollable card content. */
 .learning-card-back .learning-back-footer{pointer-events:none;}
 .learning-card-back .learning-back-footer > *{pointer-events:auto;}
+
+.learning-card-back .mnemonic-prepared-use{position:relative;z-index:6;pointer-events:auto;}
