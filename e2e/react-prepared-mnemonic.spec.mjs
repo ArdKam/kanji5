@@ -5,6 +5,10 @@ async function goToBackPage(card, targetIndex) {
     await card.locator(".pager-button").nth(1).click();
   }
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+  await card.locator(".learning-back-page.active .learning-back-scroll").evaluate(async (el) => {
+    const animations = el.getAnimations({ subtree: true });
+    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+  });
 }
 
 test("prepared mnemonic is available on every learning card and can be saved as personal", async ({ page }) => {
@@ -22,7 +26,11 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   await goToBackPage(card, 3);
   const prepared = card.locator(".mnemonic-prepared");
   await expect(prepared).toBeVisible();
-  await prepared.scrollIntoViewIfNeeded();
+  await prepared.evaluate((el) => {
+    const scroll = el.closest(".learning-back-scroll");
+    if (!(scroll instanceof HTMLElement)) return;
+    scroll.scrollTop = scroll.scrollHeight - scroll.clientHeight;
+  });
   const preparedViewport = await prepared.evaluate((el) => {
     const rect = el.getBoundingClientRect();
     const style = getComputedStyle(el);
