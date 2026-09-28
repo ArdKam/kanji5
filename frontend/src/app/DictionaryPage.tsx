@@ -10,6 +10,7 @@ type MasteryFilter = "all" | "unseen" | "learning" | "attention" | "mastered";
 type ViewMode = "matrix" | "detailed";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
 const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
+const DETAILED_PAGE_SIZE = 160;
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
@@ -99,6 +100,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [grade, setGrade] = useState("all");
   const [viewMode, setViewMode] = useState<ViewMode>("matrix");
   const [sort, setSort] = useState<SortMode>("level-asc");
+  const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
 
   useEffect(() => {
@@ -163,8 +165,8 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   }, [catalog, grade, level, masteryFilter, query, sort]);
 
   useEffect(() => {
-    if (viewMode === "detailed" && visible.length > 160) setViewMode("matrix");
-  }, [viewMode, visible.length]);
+    setDetailedVisibleCount(DETAILED_PAGE_SIZE);
+  }, [query, level, masteryFilter, grade, sort]);
 
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
@@ -240,9 +242,10 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               className={"dictionary-view-button" + (viewMode === "detailed" ? " active" : "")}
               type="button"
               aria-pressed={viewMode === "detailed"}
-              disabled={visible.length > 160}
-              title={visible.length > 160 ? (language === "fa" ? "برای نمای جزئی‌تر، جست‌وجو یا فیلتر را محدودتر کن." : "Narrow the search or filters before using detailed view.") : undefined}
-              onClick={() => setViewMode("detailed")}
+              onClick={() => {
+                setDetailedVisibleCount(DETAILED_PAGE_SIZE);
+                setViewMode("detailed");
+              }}
             >
               <span aria-hidden="true">≡</span>{language === "fa" ? "جزئیات" : "Detailed"}
             </button>
@@ -271,7 +274,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       {!loading && visible.length ? (
         <>
           <div className={"kanji-catalog-grid" + (viewMode === "detailed" ? " is-detailed" : "")}>
-          {visible.map((item) => {
+          {visible.slice(0, viewMode === "detailed" ? detailedVisibleCount : visible.length).map((item) => {
             const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
             const fillOpacity = mastery === 0 ? 0 : 0.2 + mastery * 0.8;
             return (
@@ -302,6 +305,20 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             );
           })}
           </div>
+          {viewMode === "detailed" && detailedVisibleCount < visible.length ? (
+            <div className="dictionary-load-more">
+              <p>{language === "fa"
+                ? formatNumber(Math.min(detailedVisibleCount, visible.length), language) + " از " + formatNumber(visible.length, language) + " نتیجه نمایش داده شده"
+                : formatNumber(Math.min(detailedVisibleCount, visible.length), language) + " of " + formatNumber(visible.length, language) + " results shown"}</p>
+              <button
+                className="button secondary dictionary-load-more-button"
+                type="button"
+                onClick={() => setDetailedVisibleCount(count => Math.min(count + DETAILED_PAGE_SIZE, visible.length))}
+              >
+                {language === "fa" ? "نمایش بیشتر" : "Show more"}
+              </button>
+            </div>
+          ) : null}
         </>
       ) : null}
 
