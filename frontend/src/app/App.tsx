@@ -301,12 +301,12 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                 </div>
               </div>
             </div>
-            {hasExamplesPage?<div className={"learning-back-page"+(backPage===2?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==2} inert={backPage!==2}>
+            {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
                 <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
               </div>
             </div>:null}
-            <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
+            <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
                 <div className="mnemonic-page">
                   <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
@@ -366,7 +366,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                         aria-expanded={mnemonicEditing}
                         aria-controls={mnemonicEditing ? "personal-mnemonic-editor" : undefined}
                         onClick={()=>{
-                          setBackPage(hasExamplesPage?3:2);
+                          setBackPage(hasExamplesPage?2:1);
                           setMnemonicError("");
                           setMnemonicDraft(personalMnemonic);
                           setMnemonicEditing(value=>!value);
@@ -393,7 +393,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                 </div>
               </div>
             </div>
-            <div className={"learning-back-page"+(backPage===(hasExamplesPage?4:3)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?4:3)} inert={backPage!==(hasExamplesPage?4:3)}>
+            <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?4:3)}>
               <div className="learning-back-scroll">
                 <div className="stroke-page">{card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
               </div>
