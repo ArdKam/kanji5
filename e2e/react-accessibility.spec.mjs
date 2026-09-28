@@ -91,7 +91,7 @@ test('learning card reveal moves focus out of the aria-hidden face and emits no 
 test('dictionary accordion controls only reference panels that are present in the DOM', async ({page})=>{
   await clean(page);
 
-  await page.getByRole('button',{name:'واژه‌نامه'}).click();
+  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
   await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
   const tile=page.locator('.kanji-catalog-tile').first();
   await expect(tile).toBeVisible({timeout:10000});
