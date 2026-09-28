@@ -938,7 +938,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
     pointer-events:auto;
   }
   .header-actions .header-tools{position:static;}
-  .header-actions .account-button{position:static;}
+  .header-actions .account-button{position:static;inset-inline-start:auto;}
 }
 @media(max-width:760px){
   .header{height:54px;min-height:54px;max-height:54px;margin-bottom:5px;}
