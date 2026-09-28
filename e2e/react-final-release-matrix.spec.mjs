@@ -69,10 +69,12 @@ for(const viewport of [
       console.log('RESPONSIVE_OVERFLOW_DIAGNOSTIC',JSON.stringify({viewport,scrollWidth:document.documentElement.scrollWidth,bodyScrollWidth:document.body.scrollWidth,offenders}));
       return {
         overflow:document.documentElement.scrollWidth>window.innerWidth+1 || document.body.scrollWidth>window.innerWidth+1,
+        offenders,
         navHeight:document.querySelector('.experience-nav')?.getBoundingClientRect().height||0,
         bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom
       };
     });
+    if(metrics.overflow) throw new Error("RESPONSIVE_OVERFLOW "+JSON.stringify(metrics.offenders));
     expect(metrics.overflow).toBe(false);
     expect(metrics.navHeight).toBeGreaterThanOrEqual(44);
   });
