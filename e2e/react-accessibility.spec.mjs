@@ -210,7 +210,6 @@ test('English dictionary presentation localizes card controls and uses the share
   await expect(dialog.getByRole('button',{name:'Vocabulary'})).toBeVisible();
   await expect(dialog.getByRole('button',{name:'Personal mnemonic'})).toHaveCount(1);
   const dictionaryAudio = dialog.locator('.dictionary-audio-button');
-  await expect(dictionaryAudio).toHaveCount(await dictionaryAudio.count());
   expect(await dictionaryAudio.count()).toBeGreaterThan(0);
   await expect(dictionaryAudio.first()).toHaveAttribute('aria-label',/Play kanji pronunciation/);
   await expect(dictionaryAudio.first().locator('svg')).toHaveCount(1);
