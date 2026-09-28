@@ -1902,3 +1902,34 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 @media(max-width:760px){
   .learning-card-back .learning-back-scroll{padding-bottom:32px;}
 }
+
+/* Learning UI hardening: accessible 44px touch targets for new Learning controls. */
+.learning-card-back .learning-back-page-nav>.pager-button{
+  width:44px;
+  min-width:44px;
+  height:44px;
+  min-height:44px;
+}
+.learning-back-tab{
+  min-height:44px;
+}
+.learning-card-back .reading-toggle{
+  min-height:44px;
+}
+@media(max-width:760px){
+  .learning-card-back .learning-back-page-nav>.pager-button{
+    flex-basis:44px;
+    width:44px;
+    min-width:44px;
+    height:44px;
+    min-height:44px;
+  }
+  .learning-card-back .learning-back-tab{min-height:44px;}
+}
+@media(max-width:380px){
+  .learning-card-back .learning-back-page-nav>.pager-button{
+    flex-basis:44px;
+    width:44px;
+    min-width:44px;
+  }
+}
