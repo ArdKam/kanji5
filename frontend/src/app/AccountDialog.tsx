@@ -112,6 +112,16 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         ? t("syncError", language)
         : "";
 
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLElement>, count: number, index: number, activate: (next: number) => void) => {
+    const key = event.key;
+    if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") return;
+    event.preventDefault();
+    const next = key === "Home" ? 0 : key === "End" ? count - 1 : (index + (key === "ArrowRight" ? 1 : -1) + count) % count;
+    activate(next);
+    const tabs = Array.from(event.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []);
+    tabs[next]?.focus();
+  };
+
   const submitEmailAuth = () => void run(async () => {
     const api = await getAccountApi();
     if (authMode === "email") {
@@ -149,10 +159,11 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
       <p className="account-copy">{t("accountIntro", language)}</p>
 
       <div className="account-auth-tabs" role="tablist" aria-label={t("accountMethods", language)}>
-        <button className={authMode === "email" ? "is-active" : ""} type="button" role="tab" aria-selected={authMode === "email"} onClick={() => { setAuthMode("email"); setAuthMessage(null); }}>{t("emailPassword", language)}</button>
-        <button className={authMode === "magic" ? "is-active" : ""} type="button" role="tab" aria-selected={authMode === "magic"} onClick={() => { setAuthMode("magic"); setAuthMessage(null); }}>{t("magicLink", language)}</button>
+        <button id="account-auth-tab-email" className={authMode === "email" ? "is-active" : ""} type="button" role="tab" aria-selected={authMode === "email"} aria-controls="account-auth-panel" tabIndex={authMode === "email" ? 0 : -1} onKeyDown={e=>handleTabKeyDown(e,2,0,next=>setAuthMode(next===0?"email":"magic"))} onClick={() => { setAuthMode("email"); setAuthMessage(null); }}>{t("emailPassword", language)}</button>
+        <button id="account-auth-tab-magic" className={authMode === "magic" ? "is-active" : ""} type="button" role="tab" aria-selected={authMode === "magic"} aria-controls="account-auth-panel" tabIndex={authMode === "magic" ? 0 : -1} onKeyDown={e=>handleTabKeyDown(e,2,1,next=>setAuthMode(next===0?"email":"magic"))} onClick={() => { setAuthMode("magic"); setAuthMessage(null); }}>{t("magicLink", language)}</button>
       </div>
 
+      <div id="account-auth-panel" role="tabpanel" aria-labelledby={authMode === "email" ? "account-auth-tab-email" : "account-auth-tab-magic"}>
       <form className="account-auth-form" onSubmit={event => { event.preventDefault(); submitEmailAuth(); }}>
         <label>
           <span>{t("email", language)}</span>
@@ -169,6 +180,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
           {emailIntent === "sign-in" ? <>{t("createAccount", language)} <strong>{t("createAccountAction", language)}</strong></> : <>{t("alreadyAccount", language)} <strong>{t("signIn", language)}</strong></>}
         </button> : null}
       </form>
+      </div>
 
       <div className="account-divider"><span>{t("or", language)}</span></div>
       <button className="button secondary account-google-button account-google-pending" type="button" disabled>
@@ -193,12 +205,12 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
       <p className="account-copy account-overview-copy">{t("accountOverview", language)}</p>
 
       <div className="account-section-tabs" role="tablist" aria-label={t("account", language)}>
-        <button className={accountView === "profile" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "profile"} onClick={() => { setAccountView("profile"); setAuthMessage(null); }}>{t("profile", language)}</button>
-        <button className={accountView === "security" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "security"} onClick={() => { setAccountView("security"); setAuthMessage(null); }}>{t("security", language)}</button>
-        <button className={accountView === "sync" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "sync"} onClick={() => { setAccountView("sync"); setAuthMessage(null); }}>{t("accountSync", language)}</button>
+        <button id="account-tab-profile" className={accountView === "profile" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "profile"} aria-controls="account-panel-profile" tabIndex={accountView === "profile" ? 0 : -1} onKeyDown={e=>handleTabKeyDown(e,3,0,next=>setAccountView(["profile","security","sync"][next] as typeof accountView))} onClick={() => { setAccountView("profile"); setAuthMessage(null); }}>{t("profile", language)}</button>
+        <button id="account-tab-security" className={accountView === "security" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "security"} aria-controls="account-panel-security" tabIndex={accountView === "security" ? 0 : -1} onKeyDown={e=>handleTabKeyDown(e,3,1,next=>setAccountView(["profile","security","sync"][next] as typeof accountView))} onClick={() => { setAccountView("security"); setAuthMessage(null); }}>{t("security", language)}</button>
+        <button id="account-tab-sync" className={accountView === "sync" ? "is-active" : ""} type="button" role="tab" aria-selected={accountView === "sync"} aria-controls="account-panel-sync" tabIndex={accountView === "sync" ? 0 : -1} onKeyDown={e=>handleTabKeyDown(e,3,2,next=>setAccountView(["profile","security","sync"][next] as typeof accountView))} onClick={() => { setAccountView("sync"); setAuthMessage(null); }}>{t("accountSync", language)}</button>
       </div>
 
-      {accountView === "profile" ? <section className="account-section" aria-labelledby="account-profile-heading">
+      {accountView === "profile" ? <section id="account-panel-profile" role="tabpanel" aria-labelledby="account-tab-profile" className="account-section" aria-labelledby="account-profile-heading">
         <div className="account-section-heading">
           <div><h3 id="account-profile-heading">{t("profile", language)}</h3><p>{t("displayNameHint", language)}</p></div>
         </div>
@@ -213,7 +225,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         </form>
       </section> : null}
 
-      {accountView === "security" ? <section className="account-section" aria-labelledby="account-security-heading">
+      {accountView === "security" ? <section id="account-panel-security" role="tabpanel" aria-labelledby="account-tab-security" className="account-section" aria-labelledby="account-security-heading">
         <div className="account-section-heading">
           <div><h3 id="account-security-heading">{t("security", language)}</h3><p>{t("passwordHint", language)}</p></div>
         </div>
@@ -232,7 +244,7 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
         </form>
       </section> : null}
 
-      {accountView === "sync" ? <section className="account-section" aria-labelledby="account-sync-heading">
+      {accountView === "sync" ? <section id="account-panel-sync" role="tabpanel" aria-labelledby="account-tab-sync" className="account-section" aria-labelledby="account-sync-heading">
         <div className="account-section-heading">
           <div><h3 id="account-sync-heading">{t("accountSync", language)}</h3><p>{t("accountSyncHint", language)}</p></div>
           <span className={"sync-pill sync-"+state.syncStatus}>{statusLabel || t("syncing", language)}</span>
