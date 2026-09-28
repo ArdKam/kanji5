@@ -183,3 +183,19 @@ test('Active Recall start failure is recoverable without leaving the practice ho
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
 });
+
+test('Active Recall start button locks during an in-flight start',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.evaluate(()=>{
+    const bridge=window.__KANJI5_EDU_BRIDGE__;
+    if(!bridge?.start)throw new Error('education bridge start unavailable');
+    window.__KANJI5_TEST_ORIGINAL_START__=bridge.start;
+    bridge.start=async()=>{await new Promise(resolve=>setTimeout(resolve,500));return window.__KANJI5_TEST_ORIGINAL_START__();};
+  });
+  const start=page.getByRole('button',{name:'شروع تمرین',exact:true});
+  await start.click();
+  await expect(start).toBeDisabled();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+});
