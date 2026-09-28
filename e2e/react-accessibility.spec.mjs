@@ -147,14 +147,9 @@ test('stroke-order accordion control keeps aria-controls synchronized with its r
   await expect(pager).toBeVisible();
   const nextPage=card.locator(".learning-back-page-nav .pager-button").last();
   for(let i=0;i<4;i++) await nextPage.dispatchEvent("click");
-  const trigger=card.locator(".stroke-order-tool-trigger");
-  await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveAttribute("aria-expanded","false");
-  await expect(trigger).not.toHaveAttribute("aria-controls",/.+/);
-
-  await trigger.dispatchEvent('click');
-  const panel=card.locator(".stroke-order-panel[data-stroke-order-open=\"true\"]");
-  await expect(panel).toHaveCount(1);
+  const panel=card.locator(".learning-back-page.active .stroke-order-panel[data-stroke-order-open="true"]");
+  await expect(panel).toBeVisible();
+  await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
   const toggle=panel.locator(".stroke-order-toggle");
   await expect(toggle).toHaveAttribute("aria-expanded","true");
   await expect(toggle).toHaveAttribute("aria-controls","stroke-order-content");
