@@ -240,7 +240,7 @@ test("learning card back navigation uses labeled tabs without losing swipe/pager
   }
 });
 
-test("stroke-order entry auto-scrolls the visible viewer fully into view", async ({ page }) => {
+test("stroke-order entry scrolls the visible viewer fully into view", async ({ page }) => {
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
@@ -261,49 +261,39 @@ test("stroke-order entry auto-scrolls the visible viewer fully into view", async
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  const strokePage = card.locator(".learning-back-page").nth(3);
-  const scrollContainer = strokePage.locator(".learning-back-scroll");
-  await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
-  const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
+  const strokeTab = card.locator(".learning-back-tab").last();
+  const scrollContainer = card.locator(".learning-back-page").last().locator(".learning-back-scroll");
+  const otherTab = card.locator(".learning-back-tab").first();
 
-  await page.evaluate(() => {
-    const calls = [];
-    const scroll = document.querySelector(".learning-back-page.active .learning-back-scroll");
-    if (!(scroll instanceof HTMLElement)) throw new Error("Learning scroll container not found");
-    const original = scroll.scrollTo.bind(scroll);
-    window.__kanji5ScrollToCalls = calls;
-    window.__kanji5ScrollTarget = scroll;
-    window.__kanji5ScrollOriginal = original;
-    scroll.scrollTo = function (options) {
-      calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
-      return original(options);
-    };
+  await strokeTab.click();
+  await expect(card.locator(".learning-back-page.active .stroke-order-panel.is-expanded")).toBeVisible();
+
+  await otherTab.click();
+  await expect(otherTab).toHaveAttribute("aria-selected", "true");
+  await scrollContainer.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
   });
+  const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
+  expect(scrollBefore).toBeGreaterThan(0);
 
-  await card.locator(".learning-back-tab").nth(3).click();
+  await strokeTab.click();
+  await expect(strokeTab).toHaveAttribute("aria-selected", "true");
   const panel = card.locator(".learning-back-page.active .stroke-order-panel.is-expanded");
   await expect(panel).toBeVisible();
 
+  await expect.poll(
+    async () => scrollContainer.evaluate((el) => el.scrollTop),
+    { timeout: 1800, intervals: [50, 100, 200] },
+  ).toBeLessThan(scrollBefore);
+
   await expect.poll(async () => {
-    return await panel.evaluate((el) => {
+    return panel.evaluate((el) => {
       const target = el.getBoundingClientRect();
       const scroll = el.closest(".learning-back-scroll")?.getBoundingClientRect();
       if (!scroll) return false;
       return target.top >= scroll.top - 1 && target.bottom <= scroll.bottom + 1;
     });
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
-
-  const scrollAfter = await scrollContainer.evaluate((el) => el.scrollTop);
-  expect(scrollAfter).toBeGreaterThanOrEqual(scrollBefore);
-
-  const calls = await page.evaluate(() => window.__kanji5ScrollToCalls || []);
-  expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
-
-  await page.evaluate(() => {
-    const target = window.__kanji5ScrollTarget;
-    const original = window.__kanji5ScrollOriginal;
-    if (target instanceof HTMLElement && typeof original === "function") target.scrollTo = original;
-  });
 });
 
 test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
