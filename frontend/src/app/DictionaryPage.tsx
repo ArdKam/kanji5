@@ -89,6 +89,7 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
 export function DictionaryPage({ language, externalSelectedCharacter, onExternalSelectionConsumed }: { language: Language; externalSelectedCharacter?: string | null; onExternalSelectionConsumed?: () => void }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<LevelFilter>("all");
   const [sort, setSort] = useState<SortMode>("level-asc");
@@ -97,6 +98,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setLoadError(false);
     void listKanji().then((value) => {
       if (!active) return;
       setCatalog(value.results);
@@ -104,6 +106,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     }).catch(() => {
       if (active) {
         setCatalog([]);
+        setLoadError(true);
         setLoading(false);
       }
     });
@@ -171,8 +174,14 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         </label>
       </div>
 
-      {loading ? <div className="surface loading dictionary-loading">{t("dictionaryLoading", language)}</div> : null}
-      {!loading && !visible.length ? <div className="surface dictionary-empty">{t("dictionaryNoResults", language)}</div> : null}
+      {loading ? <div className="surface loading dictionary-loading" role="status">{t("dictionaryLoading", language)}</div> : null}
+      {!loading && loadError ? (
+        <div className="surface dictionary-empty" role="alert">
+          <p>{language === "fa" ? "واژه‌نامه در حال حاضر بارگذاری نشد." : "The dictionary could not be loaded."}</p>
+          <button className="button secondary" type="button" onClick={() => window.location.reload()}>{t("tryAgain", language)}</button>
+        </div>
+      ) : null}
+      {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
         <>
           <div className="kanji-catalog-grid">
