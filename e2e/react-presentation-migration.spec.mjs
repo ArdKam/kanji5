@@ -174,6 +174,8 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(stroke).toHaveAttribute('data-stroke-order-playing','false');
   await card.locator('.dictionary-stroke-controls .primary').click();
   await expect(stroke).toHaveAttribute('data-stroke-order-playing','true');
+  await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:2500}).toBe('1');
+  await expect(stroke).toHaveAttribute('data-stroke-order-playing','true');
   await card.locator('.dictionary-stroke-controls .primary').click();
   await expect(stroke).toHaveAttribute('data-stroke-order-playing','false');
   await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
