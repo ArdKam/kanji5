@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useModalDialog } from "./useModalDialog";
+import { useModalDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
 import { MnemonicBackup } from "./MnemonicBackup";
 import type { KanjiCatalogItem, Settings, Snapshot } from "./engine";
