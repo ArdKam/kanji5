@@ -1245,3 +1245,16 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .learning-card-back .learning-back-footer > *{pointer-events:auto;}
 
 .learning-card-back .mnemonic-prepared-use{position:relative;z-index:6;pointer-events:auto;}
+
+/* Final feedback layout: preserve normal card flow, visually lift the feedback row above the fixed navigation. */
+.learning-card-back .learning-back-footer{
+  position:relative;
+  inset:auto;
+  bottom:auto;
+  z-index:2;
+  pointer-events:auto;
+  transform:translateY(calc(-1 * (var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom))));
+}
+.learning-card-back .learning-back-footer > *{pointer-events:auto;}
+.learning-card-back .learning-back-pager-shell{padding-bottom:0;}
+.learning-card-back .learning-back-scroll{padding-bottom:18px;}
