@@ -224,7 +224,7 @@ export async function startPracticeExperience(): Promise<void> {
   if (session?.startExperience) await session.startExperience("practice");
 }
 
-export async function startExercise(): Promise<void> {
+export async function startExercise(): Promise<boolean> {
   const boundary = await waitForEngine();
   await boundary.clearCustomStudyFilter?.();
   const educationReady = await boundary.ensureEducationRuntime();
@@ -239,11 +239,11 @@ export async function startExercise(): Promise<void> {
     else if (session?.start && !current?.started && !current?.finished) await session.start();
   }
   const startResult = await bridge.start();
-  if (startResult && typeof startResult === "object" && "started" in startResult && startResult.started === false) return;
+  if (startResult && typeof startResult === "object" && "started" in startResult && startResult.started === false) {\n    throw new Error("KANJI5_NO_EXERCISE_AVAILABLE");\n  }
   const started = performance.now();
   while (performance.now() - started < 15000) {
     const current = await snapshot();
-    if (current.exercise?.mode && current.exercise?.prompt && current.exercise?.stimulus) return;
+    if (current.exercise?.mode && current.exercise?.prompt && current.exercise?.stimulus) return true;
     await new Promise((resolve) => window.setTimeout(resolve, 50));
   }
   throw new Error("KANJI5_EXERCISE_READY_TIMEOUT");
