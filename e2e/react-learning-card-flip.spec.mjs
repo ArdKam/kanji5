@@ -365,10 +365,10 @@ test("short learning cards stay single-page and keep examples with core informat
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
   const card = await revealLearningCard(page);
-  await expect(card).toHaveAttribute("data-back-page-count", "5");
+  await expect(card).toHaveAttribute("data-back-page-count", "4");
   await expect(card.locator(".learning-back-page-nav")).toBeVisible();
   await expect(card.locator(".learning-back-page.active .learning-back-overview")).toBeVisible();
-  await goToBackPage(page, card, 2);
+  await goToBackPage(page, card, 1);
   await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(1);
   await assertCardBounds(card);
 });
