@@ -48,7 +48,7 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
     };
   }, [catalog, language]);
 
-  const dialogRef = useModalDialog(open, onClose);
+  const dialogRef = usePageDialog(open, onClose);
 
   if (!open) return null;
 
