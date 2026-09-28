@@ -235,19 +235,34 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         </div>
         <div className="dictionary-display-row">
           <div className="dictionary-view-toggle" role="group" aria-label={language === "fa" ? "نمایش فرهنگ" : "Dictionary view"}>
-            <button className={"dictionary-view-button" + (viewMode === "matrix" ? " active" : "")} type="button" aria-pressed={viewMode === "matrix"} onClick={() => setViewMode("matrix")}>
-              <span aria-hidden="true">⊞</span>{language === "fa" ? "شبکه" : "Matrix"}
+            <button
+              className={"dictionary-view-button" + (viewMode === "matrix" ? " active" : "")}
+              type="button"
+              aria-pressed={viewMode === "matrix"}
+              aria-label={language === "fa" ? "نمای شبکه" : "Matrix view"}
+              title={language === "fa" ? "نمای شبکه" : "Matrix view"}
+              onClick={() => setViewMode("matrix")}
+            >
+              <span className="dictionary-view-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" focusable="false"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>
+              </span>
+              <span className="sr-only">{language === "fa" ? "شبکه" : "Matrix"}</span>
             </button>
             <button
               className={"dictionary-view-button" + (viewMode === "detailed" ? " active" : "")}
               type="button"
               aria-pressed={viewMode === "detailed"}
+              aria-label={language === "fa" ? "نمای جزئیات" : "Detailed view"}
+              title={language === "fa" ? "نمای جزئیات" : "Detailed view"}
               onClick={() => {
                 setDetailedVisibleCount(DETAILED_PAGE_SIZE);
                 setViewMode("detailed");
               }}
             >
-              <span aria-hidden="true">≡</span>{language === "fa" ? "جزئیات" : "Detailed"}
+              <span className="dictionary-view-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" focusable="false"><path d="M3 4.5h14M3 10h14M3 15.5h14" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8"/></svg>
+              </span>
+              <span className="sr-only">{language === "fa" ? "جزئیات" : "Detailed"}</span>
             </button>
           </div>
           <label className="dictionary-sort">
