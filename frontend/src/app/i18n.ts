@@ -6,6 +6,7 @@ type TranslationKey =
   | "title"
   | "smartLearning"
   | "more"
+  | "moreMenuTitle"
   | "closeMenu"
   | "dailySummary"
   | "of"
@@ -357,7 +358,7 @@ type TranslationKey =
 
 const messages: Record<Language, Record<TranslationKey, string>> = {
   fa: {
-    title:"کانجی ۵", smartLearning:"یادگیری هوشمند", more:"بیشتر", closeMenu:"بستن منو", dailySummary:"خلاصه امروز", of:"از", learningBadge:"یادگیری",
+    title:"کانجی ۵", smartLearning:"یادگیری هوشمند", more:"بیشتر", moreMenuTitle:"منوی بیشتر", closeMenu:"بستن منو", dailySummary:"خلاصه امروز", of:"از", learningBadge:"یادگیری",
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
