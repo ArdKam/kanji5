@@ -1,3 +1,5 @@
+
+
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
@@ -884,7 +886,6 @@ function App(){
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
-        <button className="button secondary secondary-page-back" type="button" onClick={closeSecondaryPage}>{t("backToLearning",language)}</button>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage}/> : null}
         {secondaryPage==="settings" ? <SettingsDialog
           open={settingsOpen}
@@ -894,9 +895,6 @@ function App(){
           onLanguageChange={changeLanguage}
           onClose={closeSecondaryPage}
           onSave={s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()})}
-          onReset={()=>{
-            const message=language==="fa"?"همهٔ پیشرفت یادگیری پاک می‌شود. این کار قابل بازگشت نیست. ادامه می‌دهید؟":"All learning progress will be erased. This cannot be undone. Continue?";
-            if(window.confirm(message))void action(async()=>{resetProgress()});
           }}
           mnemonicCatalog={mnemonicCatalog}
           onRetakePlacement={()=>{
@@ -928,7 +926,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onNext={()=>action(nextExercise)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
