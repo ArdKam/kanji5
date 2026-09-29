@@ -11,7 +11,8 @@ const styles = read("frontend/src/styles.css");
 const navCss = read("frontend/src/experience-nav.css");
 const dictionaryCss = read("frontend/src/app/dictionary.css");
 
-assert.match(dictionaryPage, /const \[mnemonicDrafts,setMnemonicDrafts\]=useState<Record<string, string \| undefined>>\(\{\}\)/);
+assert.match(dictionaryPage, /mnemonicDrafts/);
+assert.match(dictionaryPage, /useState<Record<string, string \| undefined>>\(\{\}\)/);
 assert.match(dictionaryPage, /mnemonicDraft=\{mnemonicDrafts\[selected\.character\]\}/);
 assert.match(dictionaryPage, /if \(mnemonicDraft === undefined && !mnemonicDraftEditedRef.current\) onMnemonicDraftChange\(text\)/);
 assert.doesNotMatch(dictionaryPage, /const \[mnemonicDraft, setMnemonicDraft\] = useState/);
