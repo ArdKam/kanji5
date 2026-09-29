@@ -571,8 +571,6 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
 
     {!ex.mode?<div className="active-recall-empty">{t("exerciseReady")}</div>:<>
       <div className="active-recall-task-header">
-        <span className="active-recall-task-index">{t("currentExercise")}</span>
-        <h2>{taskLabel}</h2>
         <p className="prompt">{taskDescription}</p>
       </div>
 
