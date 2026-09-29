@@ -10,7 +10,6 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const [value, setValue] = useState("");
-  const [readerOpen, setReaderOpen] = useState(true);
   const [audioUrl, setAudioUrl] = useState("");
   const [audioName, setAudioName] = useState("");
   const [speechRate, setSpeechRate] = useState(0.85);
@@ -94,7 +93,6 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
 
   const clearText = () => {
     setValue("");
-    setReaderOpen(true);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -118,7 +116,7 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         aria-label={t("readingTextPlaceholder", language)}
         rows={6}
       />
-      <div className="reading-lab-import-row">
+      <div className="reading-lab-canvas">
         <label className="reading-lab-import">
           <span>{t("importSubtitle", language)}</span>
           <input ref={fileInputRef} type="file" accept=".txt,.srt,.vtt,text/plain,text/vtt" onChange={event => {
@@ -128,7 +126,7 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         </label>
         <button className="button secondary reading-lab-clear" type="button" onClick={clearText} disabled={!value}>{t("clearReadingText", language)}</button>
       </div>
-      <div className="reading-lab-audio-row">
+      <div className="reading-lab-import-row">
         <label className="reading-lab-import">
           <span>{t("importAudio", language)}</span>
           <input type="file" accept="audio/*" onChange={event => {
@@ -182,20 +180,10 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         <p className="reading-lab-empty">{t("readingLabNoKnownKanji", language)}</p>
       ) : null}
       {value.trim() ? (
-        <div className="reading-lab-reader">
-          <button
-            className="reading-lab-reader-toggle"
-            type="button"
-            aria-expanded={readerOpen}
-            onClick={() => setReaderOpen(open => !open)}
-          >
-            <span>{t("readingReader", language)}</span>
-            <span aria-hidden="true">{readerOpen ? "⌃" : "⌄"}</span>
-          </button>
-          {readerOpen ? (
-            <div className="reading-lab-reader-body" role="region" aria-label={t("readingReader", language)}>
-              <p className="reading-lab-reader-hint">{t("readingReaderHint", language)}</p>
-              <div className="reading-lab-reader-text" lang="ja">
+        <div className="reading-lab-reader open">
+          <div className="reading-lab-reader-body" role="region" aria-label={t("readingReader", language)}>
+            <p className="reading-lab-reader-hint">{t("readingReaderHint", language)}</p>
+            <div className="reading-lab-reader-text" lang="ja">
                 {readerCharacters.map(({ character, index, item }) => item ? (
                   <button
                     key={character + "-" + index}
@@ -210,9 +198,8 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
                 ) : (
                   <span key={character + "-" + index}>{character}</span>
                 ))}
-              </div>
             </div>
-          ) : null}
+          </div>
         </div>
       ) : null}
     </section>
