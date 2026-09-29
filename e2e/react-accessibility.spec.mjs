@@ -204,7 +204,7 @@ test('learning-card Stroke Order is directly available and retains accessible se
   const nextPage=card.locator(".learning-back-page-nav .pager-button").last();
   for(let i=0;i<3;i++) await nextPage.click();
 
-  const panel=card.locator(".learning-back-page.active .stroke-order-panel[data-stroke-order-open="true"]");
+  const panel=card.locator('.learning-back-page.active .stroke-order-panel[data-stroke-order-open="true"]');
   await expect(panel).toHaveCount(1);
   await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
   await expect(panel).toHaveAttribute("aria-labelledby","stroke-order-title");
