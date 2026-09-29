@@ -1659,34 +1659,21 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 }
 .active-recall-task-header{
   width:min(100%,600px);
-  margin:clamp(6px,1.5vw,12px) auto 0;
+  margin:clamp(4px,1vw,8px) auto 0;
   text-align:center;
 }
-.active-recall-task-index{
-  display:block;
-  color:var(--mute);
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.04em;
-  margin-bottom:3px;
-}
-.active-recall-task-header h2{
-  margin:0;
-  color:var(--sumi);
-  font-size:clamp(17px,2.2vw,21px);
-  line-height:1.2;
-  letter-spacing:-.025em;
-}
+.active-recall-task-index{display:none;}
+.active-recall-task-header h2{display:none;}
 .active-recall-task-header p{
-  margin:3px auto 0;
+  margin:0 auto;
   max-width:560px;
   color:var(--ink);
   font-size:var(--text-sm);
-  line-height:1.75;
+  line-height:1.6;
 }
 .active-recall-stimulus-wrap{
   width:min(100%,600px);
-  margin:clamp(14px,2.5vw,20px) auto 0;
+  margin:clamp(10px,2vw,16px) auto 0;
 }
 .active-recall-stimulus-wrap .stimulus{
   min-height:clamp(150px,22vw,210px);
