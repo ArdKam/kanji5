@@ -969,8 +969,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   }
 }
 /* Keep Practice card above the fixed bottom navigation. */
-.content > .exercise-card{max-height:calc(100dvh - 155px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;}
-@media(max-width:760px){.content > .exercise-card{max-height:calc(100dvh - 145px);}}
+.content > .exercise-card{max-height:none;overflow:visible;scrollbar-gutter:auto;}
 
 /* Accessible header touch targets: keep the existing layout, raise only the interactive header controls to 44px. */
 .header-menu-trigger,.header .account-button{min-height:44px;height:44px;}
@@ -1604,8 +1603,8 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 /* Active Recall premium surface — intentionally isolated to the Active Recall exercise. */
 .active-recall-shell{
   width:min(100%,720px);
-  margin:clamp(2px,2vw,12px) auto 8px;
-  padding:clamp(18px,3vw,28px) clamp(16px,4vw,32px) calc(20px + env(safe-area-inset-bottom));
+  margin:clamp(2px,2vw,12px) auto calc(var(--nav-bar-height) + max(28px,env(safe-area-inset-bottom)));
+  padding:clamp(10px,2vw,16px) clamp(16px,4vw,32px) 18px;
   border:1px solid color-mix(in srgb,var(--line) 78%,transparent);
   border-radius:28px;
   background:color-mix(in srgb,var(--paper) 94%,var(--washi));
@@ -1660,26 +1659,26 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 }
 .active-recall-task-header{
   width:min(100%,600px);
-  margin:clamp(18px,3vw,28px) auto 0;
+  margin:clamp(6px,1.5vw,12px) auto 0;
   text-align:center;
 }
 .active-recall-task-index{
   display:block;
   color:var(--mute);
-  font-size:var(--text-xs);
-  font-weight:750;
-  letter-spacing:.05em;
-  margin-bottom:5px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.04em;
+  margin-bottom:3px;
 }
 .active-recall-task-header h2{
   margin:0;
   color:var(--sumi);
-  font-size:clamp(20px,3vw,25px);
+  font-size:clamp(17px,2.2vw,21px);
   line-height:1.2;
   letter-spacing:-.025em;
 }
 .active-recall-task-header p{
-  margin:6px auto 0;
+  margin:3px auto 0;
   max-width:560px;
   color:var(--ink);
   font-size:var(--text-sm);
@@ -1687,11 +1686,11 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 }
 .active-recall-stimulus-wrap{
   width:min(100%,600px);
-  margin:clamp(24px,4vw,34px) auto 0;
+  margin:clamp(14px,2.5vw,20px) auto 0;
 }
 .active-recall-stimulus-wrap .stimulus{
-  min-height:clamp(180px,28vw,250px);
-  padding:clamp(24px,5vw,42px) 20px;
+  min-height:clamp(150px,22vw,210px);
+  padding:clamp(18px,3.5vw,30px) 20px;
   border:0;
   border-radius:22px;
   background:var(--washi);
