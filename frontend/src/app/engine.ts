@@ -58,6 +58,8 @@ export type Snapshot = {
     };
     choices?: string[];
     contentId?: string;
+     contentStage?: "introduction" | "guided" | "retrieval";
+     contentState?: string;
   };
   feedback?: {
     outcome?: string;
