@@ -37,7 +37,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
           <strong>{formatNumber(total, language)}</strong>
         </div>
       </div>
-      <div className="activity-chart" role="img" aria-label={days.map(day => text(day.label, "—") + " " + formatNumber(Math.max(0, Number(day.count) || 0), language)).join(" · ")}>
+      <div className="activity-chart" role="img" aria-label={days.map(day => String(day.label ?? "—") + " " + formatNumber(Math.max(0, Number(day.count) || 0), language)).join(" · ")}>
         {days.map((day, index) => {
           const count = Math.max(0, Number(day.count) || 0);
           const height = Math.max(6, Math.round(count / max * 100));
@@ -45,7 +45,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
             <div className="activity-bar-wrap" key={(day.label ?? "") + index}>
               <div className="activity-count">{formatNumber(count, language)}</div>
               <div className="activity-bar-track" aria-hidden="true"><span style={{ height: height + "%" }} /></div>
-              <div className="activity-label">{text(day.label, "—")}</div>
+              <div className="activity-label">{String(day.label ?? "—")}</div>
             </div>
           );
         })}
