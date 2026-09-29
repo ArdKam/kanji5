@@ -237,6 +237,11 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     clearLearningFocus();
     setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta)));
   },[backPageCount,clearLearningFocus]);
+  const jumpToBackPage=useCallback((page:number)=>{
+    const next=Math.max(0,Math.min(backPageCount-1,page));
+    if(next!==backPage)clearLearningFocus();
+    setBackPage(next);
+  },[backPage,backPageCount,clearLearningFocus]);
   const handleRate=useCallback((rating:Rating)=>{
     clearLearningFocus();
     onRate(rating);
@@ -336,6 +341,14 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                           : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>
                         : <div className="learning-back-identity-placeholder" aria-hidden="true"><span /></div>}
                     </div>
+                    <div className="learning-back-utilities" role="group" aria-label={t("cardPage")}>
+                      <button className="learning-back-utility" type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
+                        <UiIcon name="mnemonic" size={18}/>
+                      </button>
+                      <button className="learning-back-utility" type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
+                        <UiIcon name="writing" size={18}/>
+                      </button>
+                    </div>
                     {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
@@ -348,6 +361,14 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
             {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
                 <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
+                <div className="learning-back-utilities" role="group" aria-label={t("cardPage")}>
+                  <button className="learning-back-utility" type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
+                    <UiIcon name="mnemonic" size={18}/>
+                  </button>
+                  <button className="learning-back-utility" type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
+                    <UiIcon name="writing" size={18}/>
+                  </button>
+                </div>
               </div>
             </div>:null}
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
@@ -434,6 +455,11 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                         </div>
                         :null}
                     </section>
+                    <div className="learning-back-utilities" role="group" aria-label={t("cardPage")}>
+                      <button className="learning-back-utility" type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
+                        <UiIcon name="writing" size={18}/>
+                      </button>
+                    </div>
                 </div>
               </div>
             </div>

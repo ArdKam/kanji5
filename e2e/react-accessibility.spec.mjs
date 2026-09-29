@@ -124,6 +124,8 @@ test('rating a revealed learning card clears focus before the back face is hidde
   await clean(page);
   const card=page.locator('#root .learning-card');
   await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
+  await page.waitForTimeout(520);
   const rating=card.locator('.rating-grid button').nth(2);
   await expect(rating).toBeEnabled();
   await rating.focus();
@@ -180,7 +182,7 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   await expect(structure).toHaveAttribute('aria-selected','true');
 });
 
-test('stroke-order accordion control keeps aria-controls synchronized with its rendered panel', async ({page})=>{
+test('learning-card Stroke Order is permanently open and has no accordion trigger', async ({page})=>{
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
@@ -198,23 +200,18 @@ test('stroke-order accordion control keeps aria-controls synchronized with its r
   await expect(card).toBeVisible({timeout:20000});
   await card.getByRole("button",{name:"Show kanji information"}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
-
   const pager=card.locator(".learning-back-page-nav");
-  await expect(pager).toBeVisible();
-  const nextPage=card.locator(".learning-back-page-nav .pager-button").last();
-  for(let i=0;i<4;i++) await nextPage.dispatchEvent("click");
-  const trigger=card.locator(".stroke-order-tool-trigger");
-  await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveAttribute("aria-expanded","false");
-  await expect(trigger).not.toHaveAttribute("aria-controls",/.+/);
+  const nextPage=pager.locator(".pager-button").last();
+  for(let i=0;i<3;i++) await nextPage.dispatchEvent("click");
 
-  await trigger.dispatchEvent('click');
-  const panel=card.locator(".stroke-order-panel[data-stroke-order-open=\"true\"]");
-  await expect(panel).toHaveCount(1);
-  const toggle=panel.locator(".stroke-order-toggle");
-  await expect(toggle).toHaveAttribute("aria-expanded","true");
-  await expect(toggle).toHaveAttribute("aria-controls","stroke-order-content");
+  const panel=card.locator(".learning-back-page.active .stroke-order-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveClass(/is-expanded/);
+  await expect(panel).toHaveAttribute("data-stroke-order-open","true");
+  await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
+  await expect(panel.locator(".stroke-order-toggle")).toHaveCount(0);
   await expect(panel.locator("#stroke-order-content")).toHaveCount(1);
+  await expect(panel).toHaveAttribute("aria-labelledby","stroke-order-title");
 });
 
 test('dictionary search exposes a stable no-results state and selection dialog restores focus',async({page})=>{
