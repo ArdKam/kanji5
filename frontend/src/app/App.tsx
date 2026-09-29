@@ -582,7 +582,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
 
       {result?
         <div className="active-recall-feedback" role="status" aria-live="polite">
-          <div className="active-recall-feedback-mark" aria-hidden="true"><UiIcon name={result.correct?"check":"close"} size={18}/></div>
+          <div className="active-recall-feedback-mark" aria-hidden="true">{result.correct?"✓":<UiIcon name="close" size={18}/>}</div>
           <div className="active-recall-feedback-copy">
             <strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>
             {revealedAnswer?<div className="active-recall-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}
