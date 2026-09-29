@@ -159,6 +159,7 @@ type EducationBridge = {
   start?: () => Promise<EducationStartResult | unknown> | (EducationStartResult | unknown);
   submitValue?: (value: string) => Promise<unknown> | unknown;
   dontKnow?: () => Promise<unknown> | unknown;
+  selfReportProduction?: (knewIt: boolean) => Promise<unknown> | unknown;
   retry?: () => Promise<unknown> | unknown;
   next?: () => Promise<unknown> | unknown;
 };
@@ -276,6 +277,12 @@ export async function dontKnow(): Promise<ExerciseOutcome | unknown> {
   const fn = window.__KANJI5_EDU_BRIDGE__?.dontKnow;
   if (!fn) throw new Error("KANJI5_EDU_DONT_KNOW_UNAVAILABLE");
   return awaitExerciseOutcome(await fn());
+}
+
+export async function selfReportProduction(knewIt: boolean): Promise<ExerciseOutcome | unknown> {
+  const fn = window.__KANJI5_EDU_BRIDGE__?.selfReportProduction;
+  if (!fn) throw new Error("KANJI5_EDU_SELF_REPORT_UNAVAILABLE");
+  return awaitExerciseOutcome(await fn(Boolean(knewIt)));
 }
 
 export async function retryExercise(): Promise<unknown> {
