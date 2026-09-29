@@ -66,7 +66,7 @@ function Audio({value,label}:{value:string;label:string}){const unsupported=type
 
 const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
 
-function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;onReveal:()=>void;onRate:(r:Rating)=>void}){
+function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy:boolean;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const preparedMeaningKey=(card.meanings??[]).join("\u0001");
   const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
@@ -78,6 +78,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
+  const [ratingPending,setRatingPending]=useState(false);
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
@@ -145,6 +146,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   },[mnemonicEditing,scrollMnemonicEditorIntoView]);
 
   useEffect(()=>{setHiraganaReadings(false)},[card.character]);
+  useEffect(()=>{if(!busy)setRatingPending(false)},[busy]);
   useEffect(()=>{
     let active=true;
     setPersonalMnemonic("");
@@ -243,9 +245,11 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     setBackPage(next);
   },[backPage,backPageCount,clearLearningFocus]);
   const handleRate=useCallback((rating:Rating)=>{
+    if(busy||ratingPending)return;
+    setRatingPending(true);
     clearLearningFocus();
     onRate(rating);
-  },[clearLearningFocus,onRate]);
+  },[busy,ratingPending,clearLearningFocus,onRate]);
   const snapPagerTrack=useCallback((page:number)=>{
     const track=pagerTrackRef.current;
     if(!track)return;
@@ -481,7 +485,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
             </span>
             <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
           </div>:null}
-          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>handleRate(r)}>{l}</button>)}</div>
+          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={busy||ratingPending} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
       </div>
     </div>
@@ -882,7 +886,7 @@ function App(){
   </div>
 </aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage("account")}}/></div>
     </header>
-    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
+    {!secondaryPage ? <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav> : null}<main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
         <button className="button secondary secondary-page-back" type="button" onClick={closeSecondaryPage}>{t("backToLearning",language)}</button>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage}/> : null}
@@ -952,7 +956,7 @@ function App(){
       }}
     />
   )
-) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
       </>}
     </main>

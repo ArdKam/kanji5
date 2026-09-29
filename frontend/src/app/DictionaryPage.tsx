@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
@@ -15,18 +15,28 @@ const DETAILED_PAGE_SIZE = 160;
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
 
-function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; language: Language }) {
+function PreparedMnemonicPanel({
+  item,
+  language,
+  mnemonicDraft,
+  onMnemonicDraftChange,
+}: {
+  item: KanjiCatalogItem;
+  language: Language;
+  mnemonicDraft: string | undefined;
+  onMnemonicDraftChange: (value: string) => void;
+}) {
   const [suggestion, setSuggestion] = useState<PreparedMnemonic>(() => buildPreparedMnemonic(item));
   const [personalMnemonic, setPersonalMnemonic] = useState("");
-  const [mnemonicDraft, setMnemonicDraft] = useState("");
   const [mnemonicBusy, setMnemonicBusy] = useState(false);
   const [status, setStatus] = useState("");
+  const mnemonicDraftEditedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
+    mnemonicDraftEditedRef.current = false;
     setSuggestion(buildPreparedMnemonic(item));
     setPersonalMnemonic("");
-    setMnemonicDraft("");
     setStatus("");
     void Promise.all([
       getComponentInfo(item.character).then(info => buildPreparedMnemonic(item, info.components)).catch(() => buildPreparedMnemonic(item)),
@@ -36,7 +46,7 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
       setSuggestion(prepared);
       const text = String(saved?.text ?? "");
       setPersonalMnemonic(text);
-      setMnemonicDraft(text);
+      if (mnemonicDraft === undefined && !mnemonicDraftEditedRef.current) onMnemonicDraftChange(text);
     });
     return () => { active = false; };
   }, [item.character]);
@@ -46,14 +56,14 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
 
   const savePersonalMnemonic = async () => {
     if (mnemonicBusy) return;
-    const next = mnemonicDraft.trim();
+    const next = (mnemonicDraft ?? "").trim();
     if (!personalMnemonic && !next) return;
     setMnemonicBusy(true);
     setStatus("");
     try {
       await saveMnemonic(item.character, next);
       setPersonalMnemonic(next);
-      setMnemonicDraft(next);
+      onMnemonicDraftChange(next);
       setStatus(t("mnemonicApplied", language));
     } catch {
       setStatus(t("mnemonicSaveError", language));
@@ -89,23 +99,26 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
             <h3>{t("personalMnemonic", language)}</h3>
             <p>{language === "fa" ? "یادسپار شخصی خودت را همین‌جا بنویس." : "Write your own memory hook here."}</p>
           </div>
-          <span>{formatNumber(mnemonicDraft.length, language)}/600</span>
+          <span>{formatNumber((mnemonicDraft ?? "").length, language)}/600</span>
         </div>
         <textarea
           className="dictionary-personal-mnemonic-input"
-          value={mnemonicDraft}
+          value={mnemonicDraft ?? ""}
           maxLength={600}
-          onChange={event => setMnemonicDraft(event.target.value)}
+          onChange={event => {
+            mnemonicDraftEditedRef.current = true;
+            onMnemonicDraftChange(event.target.value);
+          }}
           placeholder={language === "fa" ? "یک تداعی شخصی بنویس…" : "Write a personal memory cue…"}
           aria-label={t("personalMnemonic", language)}
         />
         <div className="dictionary-personal-mnemonic-actions">
           {curatedText ? (
-            <button className="button secondary" type="button" onClick={() => { setMnemonicDraft(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
+            <button className="button secondary" type="button" onClick={() => { mnemonicDraftEditedRef.current = true; onMnemonicDraftChange(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
               {language === "fa" ? "کپی داستان منتخب" : "Copy curated story"}
             </button>
           ) : <span />}
-          <button className="button primary" type="button" onClick={() => void savePersonalMnemonic()} disabled={mnemonicBusy || (!personalMnemonic && mnemonicDraft.trim().length === 0)}>
+          <button className="button primary" type="button" onClick={() => void savePersonalMnemonic()} disabled={mnemonicBusy || (!personalMnemonic && (mnemonicDraft ?? "").trim().length === 0)}>
             {mnemonicBusy ? t("saving", language) : t("saveMnemonic", language)}
           </button>
         </div>
@@ -129,6 +142,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
+  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string | undefined>>({});
 
   useEffect(() => {
     let active = true;
@@ -371,7 +385,14 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           language={language}
           onClose={() => setSelected(null)}
           onSelectKanji={setSelected}
-          mnemonicContent={<PreparedMnemonicPanel item={selected} language={language} />}
+          mnemonicContent={
+            <PreparedMnemonicPanel
+              item={selected}
+              language={language}
+              mnemonicDraft={mnemonicDrafts[selected.character]}
+              onMnemonicDraftChange={value => setMnemonicDrafts(previous => ({ ...previous, [selected.character]: value }))}
+            />
+          }
         />
       ) : null}
     </section>

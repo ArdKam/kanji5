@@ -63,6 +63,19 @@ test('Learning, Active Recall and Dictionary use a persistent Lovable-style bott
   await expect(tabs.nth(1)).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 10000 });
 
+  await page.setViewportSize({ width: 390, height: 844 });
+  const customStart = page.locator('.practice-custom-study .custom-study-action .button');
+  await customStart.scrollIntoViewIfNeeded();
+  const practiceClearance = await page.evaluate(() => {
+    const button = document.querySelector('.practice-custom-study .custom-study-action .button');
+    const nav = document.querySelector('.experience-nav');
+    if (!(button instanceof HTMLElement) || !(nav instanceof HTMLElement)) throw new Error('Practice/custom-study geometry missing');
+    const buttonRect = button.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
+    return { buttonBottom: buttonRect.bottom, navTop: navRect.top };
+  });
+  expect(practiceClearance.buttonBottom).toBeLessThanOrEqual(practiceClearance.navTop + 1);
+
   await tabs.nth(0).click();
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.card').first()).toBeVisible();

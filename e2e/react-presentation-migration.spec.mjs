@@ -70,8 +70,11 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true})).toBeVisible();
   await page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true}).click();
   await expect(page.getByRole('dialog').getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
-  await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveText("Learning");
-  await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveAttribute('aria-current','page');
+  await expect(page.locator(".experience-nav")).toHaveCount(0);
+  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).last().click();
+  await expect(page.locator(".experience-nav")).toHaveCount(0);
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true}).click();
   await page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true}).click();
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
@@ -182,7 +185,8 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
   await expect(card).toContainText('N5');
   await expect(card).toContainText('تسلط');
-  await expect(card).toHaveAttribute('aria-label','فرهنگ کانجی');
+  await expect(card).toHaveAttribute('aria-labelledby','dictionary-card-title');
+  await expect(card.locator('#dictionary-card-title')).toHaveText(/\S/);
   await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(1);
   await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);
@@ -247,4 +251,26 @@ test('mastery visualization renders skill signals and seven-day review activity'
   await expect(page.locator('.mastery-track[role="progressbar"]').first()).toHaveAttribute('aria-valuenow');
   await expect(page.locator('.activity-chart')).toBeVisible();
   await expect(page.locator('.activity-bar-wrap')).toHaveCount(7);
+});
+
+
+test("Grammar opens with the first lesson and uses English quiz questions in English mode", async ({ page }) => {
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
+  const settings = page.locator('dialog[aria-labelledby="settings-title"]:visible');
+  await settings.getByRole('button',{name:'English',exact:true}).click();
+  await settings.locator('.dialog-close').click();
+
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Grammar guide',exact:true}).click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.grammar-lesson')).toBeVisible();
+  await expect(dialog.locator('.grammar-lesson').first()).toContainText('Copula');
+  await expect(dialog.locator('.grammar-guide > summary')).toHaveCount(0);
+  await expect(dialog.locator('.grammar-lesson')).toContainText('Which sentence means');
+  await expect(dialog.locator('.grammar-lesson')).not.toContainText('کدام جمله');
 });
