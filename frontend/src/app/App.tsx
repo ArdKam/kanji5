@@ -45,6 +45,7 @@ import {
   recordHandwritingGrade,
   type HandwritingSkill,
   waitForEngine,
+  retryExercise,
   listKanji,
 } from "./engine";
 
@@ -468,7 +469,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
   const ex=snapshot.exercise??{},
     [answer,setAnswer]=useState(""),
-    [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string}|null>(null),
+    [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
     [productionRevealed,setProductionRevealed]=useState(false),
     [showProductionOptions,setShowProductionOptions]=useState(false),
     choices=(ex.choices??[]).slice(0,4),
@@ -855,7 +856,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onNext={()=>action(nextExercise)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
