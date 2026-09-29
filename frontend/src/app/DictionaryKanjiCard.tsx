@@ -246,7 +246,7 @@ export function DictionaryKanjiCard({
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
 
   return (
-    <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-label={t("dictionary", language)}>
+    <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-labelledby="dictionary-card-title">
       <div className="dictionary-card">
         <header className="dictionary-card-header">
           <div className="dictionary-card-classification">
