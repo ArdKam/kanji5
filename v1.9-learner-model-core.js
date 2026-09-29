@@ -2,7 +2,7 @@ export const LEARNER_MODEL_VERSION='1.9.0-learner-model';
 export const ATTRIBUTES=['meaning','reading','production','vocabulary','context'];
 export const STATES=['unseen','introduced','learning','weak','recovering','stable','mastered'];
 
-const DEFAULTS=Object.freeze({recentWindow:4,weakAccuracy:0.6,recoveringAccuracy:0.75,stableAccuracy:0.85,masteryAccuracy:0.92,masteryMinAttempts:6,repeatFailureStreak:2,recoveryMinAttempts:2,confidenceFullAttempts:8,sparseAttempts:2});
+const DEFAULTS=Object.freeze({recentWindow:4,weakAccuracy:0.6,recoveringAccuracy:0.75,stableAccuracy:0.85,masteryAccuracy:0.92,masteryMinAttempts:4,repeatFailureStreak:2,recoveryMinAttempts:2,confidenceFullAttempts:8,sparseAttempts:2});
 const STATE_PRIORITY=Object.freeze({weak:1.5,recovering:1.25,learning:1,introduced:.8,unseen:.6,stable:.2,mastered:.05});
 const STATE_ORDER=Object.freeze({weak:0,recovering:1,learning:2,unseen:3,introduced:4,stable:5,mastered:6});
 function num(v){return Number.isFinite(Number(v))?Number(v):0}
