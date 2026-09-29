@@ -46,6 +46,7 @@ import {
   type HandwritingSkill,
   waitForEngine,
   retryExercise,
+  selfReportProduction,
   listKanji,
 } from "./engine";
 
@@ -469,7 +470,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
-function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
   const ex=snapshot.exercise??{},
     [answer,setAnswer]=useState(""),
     [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
@@ -528,17 +529,11 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:S
     if(!production||!productionRevealed||busy||lockedRef.current||result||!ex.character)return;
     lockedRef.current=true;
     try{
-      if(knewIt){
-        setResult({correct:true,outcome:"correct"});
-        await onSubmit(ex.character);
-        await waitForFeedbackAnimation(true);
-        await onNext();
-      }else{
-        setResult({correct:false,outcome:"unknown",answerHint:ex.character});
-        await onDontKnow();
-        await waitForFeedbackAnimation(false);
-        await onNext();
-      }
+      const raw=await onSelfReport(knewIt);
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
+      setResult({correct:Boolean(feedback?.correct===true),outcome:String(feedback?.outcome??(knewIt?"correct":"unknown")),answerHint:feedback?.answerHint??ex.character});
+      await waitForFeedbackAnimation(knewIt);
+      await onNext();
     }catch(_){
       lockedRef.current=false;
     }
@@ -907,7 +902,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (

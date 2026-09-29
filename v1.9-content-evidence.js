@@ -36,6 +36,8 @@ function normalizeRecord(raw, fallback = {}) {
     correctCount: Math.max(0, Number(source.correctCount) || 0),
     wrongCount: Math.max(0, Number(source.wrongCount) || 0),
     recentWrongCount: Math.max(0, Number(source.recentWrongCount) || 0),
+    independentPracticeCount: Math.max(0, Number(source.independentPracticeCount) || 0),
+    recoveryCount: Math.max(0, Number(source.recoveryCount) || 0),
     currentStreak: Math.max(0, Number(source.currentStreak) || 0),
     lastOutcome: text(source.lastOutcome, 24) || "",
     errorType: text(source.errorType, 40) || "",
@@ -119,6 +121,8 @@ export function createContentEvidenceStore(adapter = {}, options = {}) {
     const all = readAll();
     const existing = normalizeRecord(all[key], { mode, contentId });
     const stamp = now();
+    const recovery = input.recovery === true || input.attemptType === "guided_recovery";
+    const independent = input.independent !== false && !recovery;
     const next = {
       ...existing,
       mode,
@@ -126,27 +130,33 @@ export function createContentEvidenceStore(adapter = {}, options = {}) {
       character: text(input.character || existing.character, 16),
       contentKind: text(input.contentKind || existing.contentKind, 24),
       provenance: text(input.provenance || existing.provenance, 80),
-      practiceCount: existing.practiceCount + 1,
       lastOutcome: outcome,
       updatedAt: stamp
     };
-    if (outcome === "correct") {
-      next.correctCount += 1;
-      next.currentStreak += 1;
-      next.recentWrongCount = 0;
-      next.lastCorrectAt = stamp;
-      next.state = next.correctCount >= 2 ? "stable" : "retrievable";
-      next.errorType = "";
-      next.lastWrongAnswer = "";
-    } else {
-      next.wrongCount += 1;
-      next.recentWrongCount += 1;
-      next.currentStreak = 0;
-      next.lastWrongAnswer = text(input.selectedAnswer, 80);
-      next.firstWrongAt = next.firstWrongAt || stamp;
-      next.lastWrongAt = stamp;
-      next.errorType = outcome === "near_miss" ? "near_miss" : existing.state === "unseen" ? "unseen_content" : next.wrongCount >= 2 ? "repeated_confusion" : "wrong_choice";
-      if (existing.state === "unseen") next.state = "introduced";
+    if (recovery) {
+      next.recoveryCount += 1;
+      next.lastRecoveryAt = stamp;
+    } else if (independent) {
+      next.practiceCount += 1;
+      next.independentPracticeCount += 1;
+      if (outcome === "correct") {
+        next.correctCount += 1;
+        next.currentStreak += 1;
+        next.recentWrongCount = 0;
+        next.lastCorrectAt = stamp;
+        next.state = next.correctCount >= 2 ? "stable" : "retrievable";
+        next.errorType = "";
+        next.lastWrongAnswer = "";
+      } else {
+        next.wrongCount += 1;
+        next.recentWrongCount += 1;
+        next.currentStreak = 0;
+        next.lastWrongAnswer = text(input.selectedAnswer, 80);
+        next.firstWrongAt = next.firstWrongAt || stamp;
+        next.lastWrongAt = stamp;
+        next.errorType = outcome === "near_miss" ? "near_miss" : existing.state === "unseen" ? "unseen_content" : next.wrongCount >= 2 ? "repeated_confusion" : "wrong_choice";
+        if (existing.state === "unseen") next.state = "introduced";
+      }
     }
     const pruned = prune({ ...all, [key]: next });
     persist(pruned);

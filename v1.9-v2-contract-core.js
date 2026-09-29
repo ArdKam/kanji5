@@ -45,7 +45,7 @@ export function buildLearningCardViewModel(input={}){const source=input&&typeof 
 
 export function buildFeedbackViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;const outcome=OUTCOMES.includes(source.outcome)?source.outcome:null;
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'feedback',mode,outcome,correct:bool(source.correct),quality:text(source.quality,80),score:Math.max(0,Math.min(1,finite(source.score,0))),graderVersion:text(source.graderVersion,80),schemaVersion:Math.max(0,finite(source.schemaVersion,0)),reason:text(source.reason,240),recovered:bool(source.recovered),retryCount:Math.max(0,finite(source.retryCount,0)),state:text(source.state,60)})
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'feedback',mode,outcome,correct:bool(source.correct),quality:text(source.quality,80),score:Math.max(0,Math.min(1,finite(source.score,0))),graderVersion:text(source.graderVersion,80),schemaVersion:Math.max(0,finite(source.schemaVersion,0)),reason:text(source.reason,240),recovered:bool(source.recovered),retryCount:Math.max(0,finite(source.retryCount,0)),state:text(source.state,60),attemptType:text(source.attemptType,60),modality:text(source.modality,40),independent:source.independent!==false,sessionEligible:source.sessionEligible!==false,revealed:bool(source.revealed),responseTimeMs:Math.max(0,finite(source.responseTimeMs,0))})
 }
 
 export function buildLearnerSkillSummary(model){
@@ -60,13 +60,13 @@ export function buildSessionSummary(session){
 
 export function buildRecentOutcomesViewModel(input=[]){
   const rows=Array.isArray(input)?input:[];
-  return rows.slice(0,8).map(source=>Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'recent-outcome',character:text(source?.character,16),mode:MODES.includes(source?.mode)?source.mode:null,outcome:OUTCOMES.includes(source?.outcome)?source.outcome:null,correct:bool(source?.correct),quality:text(source?.quality,80),score:Math.max(0,Math.min(1,finite(source?.score,0))),at:text(source?.at,80)}));
+  return rows.slice(0,8).map(source=>Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'recent-outcome',character:text(source?.character,16),mode:MODES.includes(source?.mode)?source.mode:null,outcome:OUTCOMES.includes(source?.outcome)?source.outcome:null,correct:bool(source?.correct),quality:text(source?.quality,80),score:Math.max(0,Math.min(1,finite(source?.score,0))),at:text(source?.at,80),attemptType:text(source?.attemptType,60),modality:text(source?.modality,40),independent:source?.independent!==false,recovery:bool(source?.recovery),revealed:bool(source?.revealed)}));
 }
 
 export function buildAdaptiveReasonViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};const mode=MODES.includes(source.mode)?source.mode:null;
   const reasons=Array.isArray(source.reasons)?source.reasons.filter(v=>typeof v==='string').map(v=>text(v,160)).filter(Boolean).slice(0,5):[];
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'adaptive-reason',mode,action:text(source.action,60),reasons,score:finite(source.score,0)})
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'adaptive-reason',mode,action:text(source.action,60),reasons,score:finite(source.score,0),character:text(source.character,16),contentId:text(source.contentId,120),modality:text(source.modality,40)})
 }
 
 export function buildBoundarySnapshot(input={}){
