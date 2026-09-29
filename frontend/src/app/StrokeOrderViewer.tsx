@@ -91,11 +91,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     setCompleted(current => Math.max(0, Math.min(paths.length, current + delta)));
   }, [paths.length, stopPlayback]);
 
-  const reset = useCallback(() => {
-    stopPlayback();
-    setCompleted(0);
-  }, [stopPlayback]);
-
   if (compactLoop) {
     return (
       <section
@@ -193,7 +188,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
             <button className="button secondary" type="button" onClick={() => step(-1)} disabled={completed === 0}>{t("previousStroke", language)}</button>
             <button className="button primary" type="button" onClick={() => play()}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
             <button className="button secondary" type="button" onClick={() => step(1)} disabled={completed >= paths.length}>{t("nextStroke", language)}</button>
-            <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
           </div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
         </div>
