@@ -6,6 +6,55 @@ import { usePageDialog } from "./usePageDialog";
 function StatRow({ label, value }: { label: string; value: string }) {
   return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>;
 }
+\nfunction SevenDayActivity({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
+  const days = snapshot.stats?.last7 ?? [];
+  const max = Math.max(1, ...days.map(day => Math.max(0, Number(day.count) || 0)));
+  const total = days.reduce((sum, day) => sum + Math.max(0, Number(day.count) || 0), 0);
+
+  if (!days.length) {
+    return (
+      <section className="stats-activity-section" aria-labelledby="stats-seven-day-title">
+        <div className="stats-section-heading">
+          <div>
+            <p className="eyebrow">{language === "fa" ? "فعالیت" : "Activity"}</p>
+            <h3 id="stats-seven-day-title">{t("sevenDayActivity", language)}</h3>
+          </div>
+        </div>
+        <p className="empty-text">{language === "fa" ? "هنوز داده‌ای برای نمایش فعالیت ۷ روز اخیر وجود ندارد." : "There is not enough activity data to show the last 7 days yet."}</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="stats-activity-section" aria-labelledby="stats-seven-day-title">
+      <div className="stats-section-heading">
+        <div>
+          <p className="eyebrow">{language === "fa" ? "فعالیت" : "Activity"}</p>
+          <h3 id="stats-seven-day-title">{t("sevenDayActivity", language)}</h3>
+        </div>
+        <div className="stats-activity-total">
+          <span>{t("reviewsCount", language)}</span>
+          <strong>{formatNumber(total, language)}</strong>
+        </div>
+      </div>
+      <div className="activity-chart" role="img" aria-label={days.map(day => text(day.label, "—") + " " + formatNumber(Math.max(0, Number(day.count) || 0), language)).join(" · ")}>
+        {days.map((day, index) => {
+          const count = Math.max(0, Number(day.count) || 0);
+          const height = Math.max(6, Math.round(count / max * 100));
+          return (
+            <div className="activity-bar-wrap" key={(day.label ?? "") + index}>
+              <div className="activity-count">{formatNumber(count, language)}</div>
+              <div className="activity-bar-track" aria-hidden="true"><span style={{ height: height + "%" }} /></div>
+              <div className="activity-label">{text(day.label, "—")}</div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="stats-chart-note">{language === "fa" ? "تعداد مرورهای ثبت‌شده در هر روز" : "Recorded reviews for each day"}</p>
+    </section>
+  );
+}
+
 
 export function StatsDialog({ open, snapshot, language, onClose }: { open: boolean; snapshot: Snapshot; language: Language; onClose: () => void }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
@@ -64,6 +113,8 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
         <StatRow label={language === "fa" ? "طولانی‌ترین رشته" : "Longest streak"} value={formatNumber(snapshot?.stats?.longestStreak ?? 0, language) + " 🔥"} />
         <StatRow label="Leech" value={formatNumber(snapshot?.stats?.leechCount ?? 0, language)} />
       </div>
+
+      <SevenDayActivity snapshot={snapshot} language={language} />
 
       <section className="mastery-map-summary stats-mastery-summary" aria-labelledby="stats-kanji-mastery-title">
         <div className="mastery-map-summary-head">
