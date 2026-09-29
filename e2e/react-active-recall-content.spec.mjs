@@ -6,10 +6,15 @@ async function installContentFixtures(page){
     window.fetch=async(input,init)=>{
       const url=typeof input==='string'?input:input instanceof Request?input.url:'';
       if(url.includes('kanjiapi.dev/v1/words/')){
-        return new Response(JSON.stringify([{meanings:[{glosses:['student']}],variants:[{written:'学生',pronounced:'がくせい'}]}]),{status:200,headers:{'content-type':'application/json'}});
+        const character=decodeURIComponent(url.split('/').pop()||'').trim()||'学';
+        const word=character+'生';
+        return new Response(JSON.stringify([{meanings:[{glosses:['student']}],variants:[{written:word,pronounced:'がくせい'}]}]),{status:200,headers:{'content-type':'application/json'}});
       }
       if(url.includes('api.tatoeba.org/v1/sentences')){
-        return new Response(JSON.stringify({data:[{id:123456,text:'私は学生です。',translations:[[{text:'I am a student.'}]]}]}),{status:200,headers:{'content-type':'application/json'}});
+        const match=/[?&]q=([^&]+)/.exec(url);
+        const character=match?decodeURIComponent(match[1]).trim():'学';
+        const sentence='私は'+character+'を知っています。';
+        return new Response(JSON.stringify({data:[{id:123456,text:sentence,translations:[[{text:'I know this character.'}]]}]}),{status:200,headers:{'content-type':'application/json'}});
       }
       return originalFetch(input,init);
     };
