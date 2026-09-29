@@ -573,7 +573,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
       <div className="active-recall-task-header">
         <span className="active-recall-task-index">{t("currentExercise")}</span>
         <h2>{taskLabel}</h2>
-        <p>{taskDescription}</p>
+        <p className="prompt">{taskDescription}</p>
       </div>
 
       <div className="active-recall-stimulus-wrap">
@@ -589,7 +589,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
           </div>
         </div>
       :production&&!showProductionOptions?
-        <div className="active-recall-flow">
+        <div className="active-recall-flow production-recall">
           <div className="active-recall-instruction">
             <span>{t("productionRecallInstruction")}</span>
             {keyboardHint?<kbd>{keyboardHint}</kbd>:null}
@@ -618,7 +618,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
       :production?
         <div className="active-recall-flow">
           <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
-          <div className="active-recall-choice-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
+          <div className="active-recall-choice-grid production-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
         </div>
       :
         <div className="active-recall-flow">
