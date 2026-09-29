@@ -70,8 +70,12 @@ test('React presentation can switch between Persian and English and persist the 
   await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true})).toBeVisible();
   await page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true}).click();
   await expect(page.getByRole('dialog').getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator(".experience-nav")).toHaveCount(0);
+  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).last().click();
   await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveText("Learning");
   await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveAttribute('aria-current','page');
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true}).click();
   await page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true}).click();
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
@@ -182,7 +186,8 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
   await expect(card).toContainText('N5');
   await expect(card).toContainText('تسلط');
-  await expect(card).toHaveAttribute('aria-label','فرهنگ کانجی');
+  await expect(card).toHaveAttribute('aria-labelledby','dictionary-card-title');
+  await expect(card.locator('#dictionary-card-title')).toHaveText(/\S/);
   await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(1);
   await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);
@@ -255,9 +260,9 @@ test("Grammar opens with the first lesson and uses English quiz questions in Eng
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
   await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
-  const settings = page.getByRole('dialog');
+  const settings = page.locator('dialog[aria-labelledby="settings-title"]:visible');
   await settings.getByRole('button',{name:'English',exact:true}).click();
-  await settings.getByRole('button',{name:'Close',exact:true}).click();
+  await settings.locator('.dialog-close').click();
 
   await page.getByRole('button',{name:'More',exact:true}).click();
   await page.locator('#header-tools-menu').getByRole('button',{name:'Grammar guide',exact:true}).click();
