@@ -26,7 +26,7 @@ const fourCorrect=projectKanjiAttributes(
   ]}}
 ).attributes.reading;
 assert.equal(fourCorrect.attempts,4);
-assert.equal(fourCorrect.state,'learning');
+assert.equal(fourCorrect.state,'mastered');
 
 const mixedRecovery=projectKanjiAttributes(
   {学:{exposedAt:'2026-09-01T00:00:00.000Z'}},'学',
