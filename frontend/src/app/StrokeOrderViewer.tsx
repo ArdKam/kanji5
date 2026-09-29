@@ -102,6 +102,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         className="stroke-order-panel dictionary-stroke-order"
         aria-label={t("strokeOrderAria", language)}
         data-stroke-order-completed={completed}
+        data-stroke-order-completed={completed}
         data-stroke-order-playing={isPlaying ? "true" : "false"}
       >
         {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
@@ -135,7 +136,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   }
 
   return (
-    <section className="stroke-order-panel is-expanded" aria-labelledby="stroke-order-title" data-stroke-order-open="true">
+    <section className="stroke-order-panel is-expanded" aria-labelledby="stroke-order-title" data-stroke-order-open="true" data-stroke-order-completed={completed} data-stroke-order-playing={isPlaying ? "true" : "false"}>
       <div className="stroke-order-header">
         <div>
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
