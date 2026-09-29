@@ -439,9 +439,6 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .learning-back-overview{grid-template-columns:1fr;gap:10px;}
 .learning-back-scroll > *{width:min(100%,760px);margin-inline:auto;}
 .learning-back-identity{width:min(100%,760px);margin-inline:auto;}
-.learning-back-identity .learning-back-meaning{order:1;}
-.learning-back-readings-block{order:2;}
-.learning-back-identity-visual{order:3;min-height:64px;}
 .learning-back-identity{display:grid;grid-template-columns:1fr;gap:8px;min-width:0;}.learning-back-identity-visual{display:grid;place-items:center;min-width:0;min-height:clamp(72px,12vw,88px);}
 .learning-back-tools{display:grid;grid-template-columns:1fr;gap:8px;min-width:0;width:100%;}
 .learning-back-readings{grid-template-columns:1fr;gap:6px;}
