@@ -479,7 +479,7 @@ test("menu sections open as focused tool dialogs without detached navigation", a
   await expect(page.locator("#root .learning-card")).toHaveCount(0);
 
   const position = await pageDialog.evaluate((el) => getComputedStyle(el).position);
-  expect(position).toBe("absolute");
+  expect(position).toBe("fixed");
   await expect(page.getByRole("button", { name: "Back to learning card", exact: true })).toHaveCount(0);
 
   await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
