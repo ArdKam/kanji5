@@ -30,6 +30,8 @@ assert.equal(store.readiness("vocabulary",wordId),"retrievable","one successful 
 
 store.recordOutcome({mode:"vocabulary",contentId:wordId,character:"学",outcome:"correct",provenance:"kanjiapi"});
 assert.equal(store.readiness("vocabulary",wordId),"stable","repeated successful retrieval should mature the content state");
+const nextUnseen=store.selectContent([word,{word:"学校",reading:"がっこう",meaning:"school"}],"vocabulary",{idOf:item=>"学:"+item.word});
+assert.equal(nextUnseen.word,"学校","new unseen content must remain eligible after an item becomes stable");
 assert.equal(store.get("context",wordId),null,"vocabulary and context must have separate content state");
 
 for(let i=0;i<70;i++){
