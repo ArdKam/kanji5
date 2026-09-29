@@ -312,7 +312,7 @@ test("learning-card pager supports keyboard navigation and direct page indicator
   await expect(indicators.nth(0)).toHaveAttribute("aria-current", "page");
 
   await indicators.nth(2).click();
-  await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "Mnemonic");
+  await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "Personal mnemonic");
   await expect(indicators.nth(2)).toHaveAttribute("aria-current", "page");
 });
 
