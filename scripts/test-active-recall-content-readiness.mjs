@@ -45,11 +45,14 @@ const contract=fs.readFileSync(new URL("../v1.9-v2-contract-core.js",import.meta
 assert(ui.includes("v1.9-content-evidence.js"),"education runtime must load content evidence");
 assert(ui.includes("recordExposure"),"unseen content must be recorded as exposure");
 assert(ui.includes("contentStage==='introduction'"),"education runtime must distinguish content introduction");
+assert(ui.includes("!recoveryTarget&&freshItem"),"fresh Kanji must not jump directly into higher-order recall modes");
+assert(ui.includes("!recoveryTarget&&!((mode==='vocabulary'||mode==='context')&&contentStage==='introduction')"),"recovery/introduction must not consume an ordinary recall slot");
 assert(ui.includes("!((mode==='vocabulary'||mode==='context')&&contentStage==='introduction')"),"introduction must not consume a normal recall slot");
 assert(ui.includes("selectedAnswer"),"content-level selected answers must be carried into evidence");
 assert(app.includes("onRetry"),"Active Recall must expose controlled recovery");
 assert(app.includes("contentIntroductionPrompt"),"Active Recall must present a content introduction state");
 assert(app.includes("yourChoice")&&app.includes("correctChoice"),"wrong feedback must distinguish selected and correct answers");
+assert(app.includes("correctAnswerDisplay"),"choice feedback must show the correct Kanji rather than the full vocabulary answer string");
 assert(app.includes('ex.mode==="vocabulary"||ex.mode==="context"'),"Vocabulary/Context must remain choice-based in V2 when choices are available");
 assert(contract.includes("contentStage")&&contract.includes("contentState"),"V2 exercise contract must expose readiness metadata");
 
