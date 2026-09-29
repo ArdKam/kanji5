@@ -1220,6 +1220,8 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   z-index:2;
   transform:translateY(calc(-1 * var(--nav-bar-height) - max(14px,env(safe-area-inset-bottom))));
   pointer-events:none;
+}.learning-card[data-back-page="0"] .learning-card-back .learning-back-footer{
+  transform:none;
 }
 .learning-card-back .learning-back-footer .rating-grid,
 .learning-card-back .learning-back-footer .rating-grid *,
