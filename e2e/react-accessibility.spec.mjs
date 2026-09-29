@@ -124,6 +124,8 @@ test('rating a revealed learning card clears focus before the back face is hidde
   await clean(page);
   const card=page.locator('#root .learning-card');
   await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
+  await page.waitForTimeout(520);
   const rating=card.locator('.rating-grid button').nth(2);
   await expect(rating).toBeEnabled();
   await rating.focus();
