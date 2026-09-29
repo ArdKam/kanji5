@@ -5,7 +5,7 @@ const planner=fs.readFileSync('v1.9-adaptive-planner.js','utf8');
 const learner=fs.readFileSync('v1.9-learner-model.js','utf8');
 const boundary=fs.readFileSync('v1.9-v2-boundary.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
-assert.match(runtime,/v1\.9-recovery-core\.js/);assert.match(runtime,/sessionStorage/);assert.match(runtime,/v1\.6-education-result/);assert.match(runtime,/consumeRetry/);
+assert.match(runtime,/v1\.9-recovery-core\.js/);assert.match(runtime,/sessionStorage/);assert.match(runtime,/v1\.6-education-result/);assert.match(runtime,/consumeRetry/);assert.match(runtime,/revealed_self_report/);
 assert.match(planner,/__KANJI5_V19_RECOVERY_NEXT_MODE__/);assert.match(planner,/RECOVERY_NEXT_MODE_USED/);assert.match(learner,/v1\.9-recovery\.js/);
 assert.match(boundary,/await import\('\.\/v1\.9-recovery\.js'\)/);
 assert.match(sw,/v1\.9-recovery-core\.js/);assert.match(sw,/v1\.9-recovery\.js/);assert.doesNotMatch(sw,/v1\.9-recovery-ui\.js/);assert.doesNotMatch(learner,/v1\.9-recovery-ui\.js/);
