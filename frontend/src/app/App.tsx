@@ -329,17 +329,17 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
+                    {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
+                    <div className="learning-back-readings-block">
+                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
+                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                    </div>
                     <div className="learning-back-identity-visual" aria-busy={!componentInfoReady}>
                       {componentInfoReady
                         ? componentInfo?.available&&componentInfo.components.length
                           ? <ComponentBreakdown info={componentInfo} title={t("kanjiStructure")} note={t("visualComponents")} ariaLabel={t("visualKanjiStructure")}/>
                           : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>
                         : <div className="learning-back-identity-placeholder" aria-hidden="true"><span /></div>}
-                    </div>
-                    {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
-                    <div className="learning-back-readings-block">
-                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
-                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
                     </div>
                   </div>
                 </div>
