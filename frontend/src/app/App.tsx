@@ -551,7 +551,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     }
   };
 
-  const resultClass=result?(result.correct?" is-correct":" is-wrong"):"";
+  const resultClass=result?(result.correct?" is-correct exercise-result-correct":" is-wrong exercise-result-wrong"):"";
   const revealedAnswer=!result?.correct?(result?.answerHint||ex.answerHint||ex.character):undefined;
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   const disabled=busy||lockedRef.current||Boolean(result);
