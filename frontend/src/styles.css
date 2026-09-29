@@ -1660,7 +1660,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 }
 .active-recall-task-header{
   width:min(100%,600px);
-  margin:clamp(30px,5vw,48px) auto 0;
+  margin:clamp(18px,3vw,28px) auto 0;
   text-align:center;
 }
 .active-recall-task-index{
@@ -1669,17 +1669,17 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   font-size:var(--text-xs);
   font-weight:750;
   letter-spacing:.05em;
-  margin-bottom:7px;
+  margin-bottom:5px;
 }
 .active-recall-task-header h2{
   margin:0;
   color:var(--sumi);
-  font-size:clamp(24px,4vw,32px);
-  line-height:1.15;
+  font-size:clamp(20px,3vw,25px);
+  line-height:1.2;
   letter-spacing:-.025em;
 }
 .active-recall-task-header p{
-  margin:10px auto 0;
+  margin:6px auto 0;
   max-width:560px;
   color:var(--ink);
   font-size:var(--text-sm);
