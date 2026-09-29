@@ -233,11 +233,8 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts with con
     await page.setViewportSize(viewport);
     await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
     await page.goto("/");
-    const card = page.locator("#root .learning-card");
-    await expect(card).toBeVisible({ timeout: 20000 });
-    await card.getByRole("button", { name: "Show kanji information" }).click();
-    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-    await page.waitForTimeout(520);
+    const card = await revealLearningCard(page, "en");
+    await expect(card).toHaveAttribute("data-back-page-count", "4", { timeout: 10000 });
 
     const page1 = card.locator(".learning-back-page").nth(0);
     const page1Utilities = page1.locator(".learning-back-utilities");
