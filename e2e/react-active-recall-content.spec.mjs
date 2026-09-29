@@ -46,7 +46,12 @@ async function startForcedMode(page,mode){
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
-  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+  try{
+    await expect(page.locator('#root #exercise')).toBeVisible({timeout:12000});
+  }catch(error){
+    const diagnostic=await page.locator('#root .app-error-banner, #root .practice-home').allTextContents();
+    throw new Error(`Active Recall did not start in forced ${mode} mode. UI diagnostic: ${diagnostic.join(' | ')}. Original: ${String(error)}`);
+  }
   return character;
 }
 
