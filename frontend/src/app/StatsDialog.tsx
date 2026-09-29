@@ -6,7 +6,7 @@ import { usePageDialog } from "./usePageDialog";
 function StatRow({ label, value }: { label: string; value: string }) {
   return <div className="stat-row"><span>{label}</span><strong>{value}</strong></div>;
 }
-\nfunction SevenDayActivity({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
+function SevenDayActivity({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
   const days = snapshot.stats?.last7 ?? [];
   const max = Math.max(1, ...days.map(day => Math.max(0, Number(day.count) || 0)));
   const total = days.reduce((sum, day) => sum + Math.max(0, Number(day.count) || 0), 0);
