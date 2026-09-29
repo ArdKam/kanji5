@@ -556,7 +556,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   const disabled=busy||lockedRef.current||Boolean(result);
   const taskLabel=skillLabel(ex.mode??"");
-  const taskDescription=production?t("productionRecallInstruction"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
+  const taskDescription=localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
   const keyboardHint=production?(productionRevealed?null:"Space"):null;
 
   return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"active-recall-shell exercise-card"+resultClass} tabIndex={-1}>
