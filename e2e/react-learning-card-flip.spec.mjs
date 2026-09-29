@@ -185,7 +185,7 @@ test("learning card exposes five full-content back pages in Persian and English"
   }
 });
 
-test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ page }) => {
+test("learning card presents Stroke Order immediately with one primary playback control", async ({ page }) => {
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
 <g id="kvg:StrokePaths_05b66">
@@ -205,115 +205,81 @@ test("learning card exposes a playable KanjiVG stroke-order viewer", async ({ pa
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
   await goToBackPage(page, card, 3);
-  const tool = card.locator(".learning-back-page.active .stroke-order-tool");
-  await expect(tool).toBeVisible();
-  const trigger = tool.getByRole("button", { name: "Stroke order" });
-  await expect(trigger).toHaveAttribute("aria-expanded", "false");
-  await expect(trigger.locator(".stroke-order-replay-icon")).toBeVisible();
-  const triggerSize = await trigger.evaluate((el) => {
-    const style = getComputedStyle(el);
-    return { width: parseFloat(style.width), height: parseFloat(style.height), minHeight: parseFloat(style.minHeight) };
-  });
-  expect(triggerSize.width).toBeGreaterThanOrEqual(32);
-  expect(triggerSize.width).toBeLessThanOrEqual(48);
-  expect(triggerSize.height).toBeGreaterThanOrEqual(32);
-  expect(triggerSize.height).toBeLessThanOrEqual(48);
-  expect(triggerSize.minHeight).toBeGreaterThanOrEqual(44);
-
-  const tools = card.locator(".learning-back-page.active .stroke-order-tool");
-  await expect(tools).toBeVisible();
-
-  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-
-  await trigger.click();
-  const panel = card.locator(".stroke-order-panel.is-expanded");
+  const panel = card.locator(".learning-back-page.active .stroke-order-panel");
   await expect(panel).toBeVisible();
-
-  const singleColumnLayout = await card.evaluate(() => {
-    const strokePanel = document.querySelector(".learning-card-back .learning-back-page.active .stroke-order-panel.is-expanded");
-    const columns = (el) => el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length : 0;
-    return { strokePanelColumns: strokePanel ? columns(strokePanel) : 0 };
-  });
-  expect(singleColumnLayout.strokePanelColumns).toBe(1);
-
-  await expect(panel.locator(".stroke-order-toggle")).toHaveAttribute("aria-expanded", "true");
+  await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
-  await expect(panel.locator(".stroke-order-active")).toHaveCount(1);
-  const expandedStage = await panel.locator(".stroke-order-stage svg").boundingBox();
-  expect(expandedStage?.width ?? 0).toBeGreaterThan(120);
-  await expect.poll(async () => panel.getAttribute("data-stroke-order-open"), { timeout: 1000 }).toBe("true");
 
-  await panel.getByRole("button", { name: "Next" }).click();
+  const stage = await panel.locator(".stroke-order-stage svg").boundingBox();
+  expect(stage?.width ?? 0).toBeGreaterThan(120);
+
+  const controls = panel.locator(".stroke-order-controls .button");
+  await expect(controls).toHaveCount(3);
+  await expect(controls.nth(1)).toHaveText("Play");
+
+  await controls.nth(1).click();
+  await expect.poll(async()=>panel.getAttribute("data-stroke-order-playing")).toBe("true");
+  await page.waitForTimeout(800);
   await expect(panel.locator(".stroke-order-progress")).toHaveText("1 / 3");
-  await panel.getByRole("button", { name: "Previous" }).click();
-  await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
+
+  await controls.nth(1).click();
+  await expect.poll(async()=>panel.getAttribute("data-stroke-order-playing")).toBe("false");
+  await expect(controls.nth(1)).toHaveText("Play");
 });
 
-test("stroke-order replay auto-scrolls the expanded viewer fully into view", async ({ page }) => {
-  // Capture the pre-trigger scroll position so the regression checks both movement and smooth behavior.
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg">
-<g id="kvg:StrokePaths_05b66">
-  <path id="kvg:05b66-s1" d="M10,10 L30,30"/>
-  <path id="kvg:05b66-s2" d="M30,30 L50,10"/>
-  <path id="kvg:05b66-s3" d="M50,10 L70,30"/>
-</g>
-</svg>`;
-  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
-    await route.fulfill({ status: 200, contentType: "image/svg+xml", body: svg });
-  });
-  await page.setViewportSize({ width: 390, height: 640 });
-  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
-  await page.goto("/");
+test("learning card exposes compact mnemonic and Stroke Order shortcuts", async ({ page }) => {
+  await routeExamples(page, 5);
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    const card = await revealLearningCard(page, "en");
 
-  const card = page.locator("#root .learning-card");
-  await expect(card).toBeVisible({ timeout: 20000 });
-  await card.getByRole("button", { name: "Show kanji information" }).click();
-  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    const firstPageUtilities = card.locator(".learning-back-page").nth(0).locator(".learning-back-utilities");
+    await expect(firstPageUtilities).toHaveCount(1);
+    await expect(firstPageUtilities.locator(".learning-back-utility")).toHaveCount(2);
 
-  await goToBackPage(page, card, 3);
-  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-  const trigger = card.locator(".learning-back-page.active .stroke-order-tool-trigger");
-  await expect(trigger).toBeVisible();
-  await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
-  const scrollBefore = await scrollContainer.evaluate((el) => el.scrollTop);
+    const utilityMetrics = await firstPageUtilities.locator(".learning-back-utility").evaluateAll((buttons) =>
+      buttons.map((button) => {
+        const style = getComputedStyle(button);
+        const rect = button.getBoundingClientRect();
+        return {
+          borderWidth: style.borderWidth,
+          backgroundColor: style.backgroundColor,
+          width: rect.width,
+          height: rect.height,
+        };
+      }),
+    );
+    for (const metric of utilityMetrics) {
+      expect(metric.borderWidth).toBe("0px");
+      expect(metric.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      expect(metric.width).toBeGreaterThanOrEqual(44);
+      expect(metric.height).toBeGreaterThanOrEqual(44);
+    }
 
-  await page.evaluate(() => {
-    const calls = [];
-    const original = Element.prototype.scrollTo;
-    window.__kanji5ScrollToCalls = calls;
-    window.__kanji5OriginalScrollTo = original;
-    Element.prototype.scrollTo = function (options) {
-      if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
-        calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
-      }
-      return original.apply(this, arguments);
-    };
-  });
+    await firstPageUtilities.locator(".learning-back-utility").nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
+    await expect(card.locator(".learning-back-page").nth(2).locator(".mnemonic-page")).toBeVisible();
 
-  await trigger.click();
-  const panel = card.locator(".stroke-order-panel.is-expanded");
-  await expect(panel).toBeVisible();
+    await card.locator(".learning-back-page-nav .pager-dot").nth(1).click();
+    const secondPageUtilities = card.locator(".learning-back-page").nth(1).locator(".learning-back-utilities");
+    await expect(secondPageUtilities.locator(".learning-back-utility")).toHaveCount(2);
+    await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
+    await page.waitForTimeout(500);
 
-  await expect.poll(async () => {
-    return await panel.evaluate((el) => {
-      const target = el.getBoundingClientRect();
-      const scroll = el.closest(".learning-back-scroll")?.getBoundingClientRect();
-      if (!scroll) return false;
-      return target.top >= scroll.top - 1 && target.bottom <= scroll.bottom + 1;
-    });
-  }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
+    await secondPageUtilities.locator(".learning-back-utility").nth(1).click();
+    await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
+    await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
 
-  const scrollAfter = await scrollContainer.evaluate((el) => el.scrollTop);
-  expect(scrollAfter).toBeGreaterThanOrEqual(scrollBefore);
+    await card.locator(".learning-back-page-nav .pager-dot").nth(2).click();
+    const thirdPageUtilities = card.locator(".learning-back-page").nth(2).locator(".learning-back-utilities");
+    await expect(thirdPageUtilities.locator(".learning-back-utility")).toHaveCount(1);
+    await page.waitForTimeout(500);
+    await thirdPageUtilities.locator(".learning-back-utility").click();
+    await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
 
-  const calls = await page.evaluate(() => window.__kanji5ScrollToCalls || []);
-  expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
-
-  await page.evaluate(() => {
-    if (window.__kanji5OriginalScrollTo) Element.prototype.scrollTo = window.__kanji5OriginalScrollTo;
-  });
+    await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
+  }
 });
 
 test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
@@ -378,6 +344,30 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
       }
     });
   }
+});
+
+test("learning-card pager supports keyboard navigation and direct page indicators", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const card = await revealLearningCard(page, "en");
+  const pager = card.locator(".learning-back-page-nav");
+  await expect(pager).toBeVisible();
+
+  const indicators = pager.locator(".pager-dot");
+  await expect(indicators).toHaveCount(4);
+  await expect(indicators.nth(0)).toHaveAttribute("aria-current", "page");
+
+  await pager.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "Vocabulary examples");
+  await expect(indicators.nth(1)).toHaveAttribute("aria-current", "page");
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(indicators.nth(0)).toHaveAttribute("aria-current", "page");
+
+  await indicators.nth(2).click();
+  await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "Personal mnemonic");
+  await expect(indicators.nth(2)).toHaveAttribute("aria-current", "page");
 });
 
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
