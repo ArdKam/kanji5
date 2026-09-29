@@ -121,6 +121,25 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("learning card stays within a short desktop landscape viewport", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.setViewportSize({ width: 844, height: 390 });
+  const card = await revealLearningCard(page, "en");
+  const metrics = await card.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    return {
+      height: rect.height,
+      viewportHeight: window.innerHeight,
+      minHeight: parseFloat(style.minHeight),
+    };
+  });
+  expect(metrics.height).toBeLessThanOrEqual(metrics.viewportHeight - 32 + 1);
+  expect(metrics.height).toBeGreaterThanOrEqual(300);
+  expect(metrics.minHeight).toBeLessThanOrEqual(metrics.viewportHeight - 32 + 1);
+  await expect(card.locator(".learning-back-page.active")).toBeVisible();
+});
+
 test("learning card exposes five full-content back pages in Persian and English", async ({ page }) => {
   await routeExamples(page, 5);
   for (const language of ["fa", "en"]) {
