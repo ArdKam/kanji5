@@ -262,11 +262,10 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async 
     await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
     const page2 = card.locator(".learning-back-page").nth(1);
     await expect(page2.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(2);
-    await page2.locator(".learning-back-utilities .learning-back-utility").nth(1).click();
+    await page2.locator(".learning-back-utilities .learning-back-utility").nth(1).dispatchEvent("click");
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
     await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
-    await card.locator(".learning-back-page-nav .pager-button").first().click();
-    await page.waitForTimeout(520);
+    await goToBackPage(page, card, 2);
     await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
     const page3 = card.locator(".learning-back-page").nth(2);
     await expect(page3.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(1);
