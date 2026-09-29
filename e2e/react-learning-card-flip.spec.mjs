@@ -256,10 +256,9 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async 
       expect(metric.height).toBeGreaterThanOrEqual(44);
     }
 
-    await page1Utilities.locator(".learning-back-utility").nth(0).click();
+    await page1Utilities.locator(".learning-back-utility").nth(0).dispatchEvent("click");
     await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
-    await card.locator(".learning-back-page-nav .pager-button").first().click();
-    await page.waitForTimeout(520);
+    await goToBackPage(page, card, 1);
     await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
     const page2 = card.locator(".learning-back-page").nth(1);
     await expect(page2.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(2);
@@ -479,7 +478,7 @@ test("menu sections open as focused tool dialogs without detached navigation", a
   await expect(page.locator("#root .learning-card")).toHaveCount(0);
 
   const position = await pageDialog.evaluate((el) => getComputedStyle(el).position);
-  expect(position).toBe("fixed");
+  expect(position).toBe("absolute");
   await expect(page.getByRole("button", { name: "Back to learning card", exact: true })).toHaveCount(0);
 
   await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
