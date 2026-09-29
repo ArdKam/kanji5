@@ -212,7 +212,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   }
 
   return (
-    <section ref={viewerRef} className={"stroke-order-panel"+(expanded ? " is-expanded" : "")} aria-labelledby="stroke-order-title" data-stroke-order-open={expanded ? "true" : "false"}>
+    <section ref={viewerRef} className={"stroke-order-panel"+(expanded ? " is-expanded" : "")} aria-labelledby="stroke-order-title" data-stroke-order-open={expanded ? "true" : "false"} data-stroke-order-completed={completed} data-stroke-order-playing={isPlaying ? "true" : "false"}>
       <div className="stroke-order-header">
         <div>
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
