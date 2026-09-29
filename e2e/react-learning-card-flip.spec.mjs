@@ -258,9 +258,17 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts with con
 
     const readingsBox = await page1.locator(".learning-back-readings-block").boundingBox();
     const utilitiesBox = await page1Utilities.boundingBox();
+    const footerBox = await card.locator(".learning-back-footer").boundingBox();
     expect(readingsBox).not.toBeNull();
     expect(utilitiesBox).not.toBeNull();
+    expect(footerBox).not.toBeNull();
     expect(utilitiesBox.y).toBeGreaterThanOrEqual(readingsBox.y + readingsBox.height - 1);
+    await page1Utilities.scrollIntoViewIfNeeded();
+    const scrolledUtilitiesBox = await page1Utilities.boundingBox();
+    const scrolledFooterBox = await card.locator(".learning-back-footer").boundingBox();
+    expect(scrolledUtilitiesBox).not.toBeNull();
+    expect(scrolledFooterBox).not.toBeNull();
+    expect(scrolledUtilitiesBox.bottom).toBeLessThanOrEqual(scrolledFooterBox.top + 1);
 
     await goToBackPage(page, card, 0);
     await page.waitForTimeout(520);
@@ -500,7 +508,7 @@ test("menu sections open as focused tool dialogs without detached navigation", a
   await expect(page.locator("#root .learning-card")).toHaveCount(0);
 
   const position = await pageDialog.evaluate((el) => getComputedStyle(el).position);
-  expect(position).toBe("fixed");
+  expect(position).toBe("static");
   await expect(page.getByRole("button", { name: "Back to learning card", exact: true })).toHaveCount(0);
 
   await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
