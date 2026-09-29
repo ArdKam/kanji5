@@ -133,12 +133,12 @@ test('Production Recall unknown self-grade records unknown and advances once',as
   await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'نمی‌دانستم'}).click();
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).feedback?.outcome||""))).toBe('unknown');
   await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
   await expect(page.locator('#root .exercise-correct-answer')).toBeVisible();
   await expect(page.locator('#root .exercise-correct-answer b')).toHaveText(character);
   await page.waitForTimeout(1600);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).feedback?.outcome||""))).toBe('unknown');
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
