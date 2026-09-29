@@ -1,5 +1,3 @@
-
-
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
@@ -895,7 +893,7 @@ function App(){
           onLanguageChange={changeLanguage}
           onClose={closeSecondaryPage}
           onSave={s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()})}
-          }}
+          onReset={()=>void action(async()=>{resetProgress()})}
           mnemonicCatalog={mnemonicCatalog}
           onRetakePlacement={()=>{
             closeSecondaryPage();
@@ -926,7 +924,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onNext={()=>action(nextExercise)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
