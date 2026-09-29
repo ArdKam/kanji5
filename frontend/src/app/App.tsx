@@ -358,7 +358,6 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                       <UiIcon name="writing" size={18}/>
                     </button>
                   </div>
-                  </div>
                 </div>
               </div>
             </div>
