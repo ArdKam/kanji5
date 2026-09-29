@@ -56,6 +56,7 @@ const toHiragana=(value:string)=>Array.from(value).map(ch=>{const code=ch.charCo
 const skillLabel=(key:string)=>({meaning:t("meaning"),reading:t("reading"),production:t("production"),vocabulary:t("vocabulary"),context:t("context")} as Record<string,string>)[key]??text(key);
 const stateLabel=(key:string)=>localizeDynamic(key,getLanguage(),text(key));
 const actionLabel=(key:string)=>localizeDynamic(key,getLanguage(),text(key));
+const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==="context"?"برای این جمله گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن.":"برای این واژه گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن."):(mode==="context"?"Not enough safe choices are available for this sentence. Continue to the next exercise.":"Not enough safe choices are available for this word. Continue to the next exercise.");
 const skillKeys=["meaning","reading","production","vocabulary","context"] as const;
 const outcomeLabel=(key:string)=>({correct:t("correct"),wrong:t("wrong"),unknown:t("unknown"),near_miss:t("nearMiss"),empty:t("empty"),invalid:t("unavailable")} as Record<string,string>)[key]??text(key);
 
@@ -669,13 +670,18 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:S
           <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
           <div className="active-recall-choice-grid production-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
         </div>
-      :(ex.mode==="vocabulary"||ex.mode==="context")&&choices.length>=2?
-        <div className="active-recall-flow">
-          <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
-          <div className="active-recall-choice-grid vocabulary-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
-        </div>
-      :
-        <div className="active-recall-flow">
+      :(ex.mode==="vocabulary"||ex.mode==="context")?
+        choices.length>=2?
+          <div className="active-recall-flow">
+            <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
+            <div className="active-recall-choice-grid vocabulary-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
+          </div>
+        :
+          <div className="active-recall-flow active-recall-content-unavailable">
+            <div className="active-recall-instruction"><span>{languageSafeContentUnavailable(ex.mode)}</span></div>
+            <button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>void handleNextFromFeedback()}>{t("nextExercise")}</button>
+          </div>
+      :        <div className="active-recall-flow">
           <label className="active-recall-input-wrap">
             <span>{t("answerYourself")}</span>
             <input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/>

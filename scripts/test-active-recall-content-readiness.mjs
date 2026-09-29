@@ -56,6 +56,10 @@ assert(app.includes("contentIntroductionPrompt"),"Active Recall must present a c
 assert(app.includes("yourChoice")&&app.includes("correctChoice"),"wrong feedback must distinguish selected and correct answers");
 assert(app.includes("correctAnswerDisplay"),"choice feedback must show the correct Kanji rather than the full vocabulary answer string");
 assert(app.includes('ex.mode==="vocabulary"||ex.mode==="context"'),"Vocabulary/Context must remain choice-based in V2 when choices are available");
+assert(!app.includes('<input autoFocus value={answer}') || app.includes('languageSafeContentUnavailable'),"Vocabulary/Context must not rely on Kanji typing as a fallback");
+assert(ui.includes("modality"),"education outcomes must record retrieval modality");
 assert(contract.includes("contentStage")&&contract.includes("contentState"),"V2 exercise contract must expose readiness metadata");
 
-console.log("Active Recall content readiness and bounded mistake-bank checks passed.");
+assert(fs.readFileSync(new URL("../v1.9-learner-model-core.js",import.meta.url),"utf8").includes("modalityStats"),"learner model must project modality-aware evidence");
+assert(fs.readFileSync(new URL("../v2-custom-study-core.js",import.meta.url),"utf8").includes('"mistakes"'),"Custom Study must expose content mistake focus");
+console.log("Active Recall content readiness, modality, and bounded mistake-bank checks passed.");
