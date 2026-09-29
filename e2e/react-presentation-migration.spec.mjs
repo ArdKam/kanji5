@@ -248,3 +248,25 @@ test('mastery visualization renders skill signals and seven-day review activity'
   await expect(page.locator('.activity-chart')).toBeVisible();
   await expect(page.locator('.activity-bar-wrap')).toHaveCount(7);
 });
+
+
+test("Grammar opens with the first lesson and uses English quiz questions in English mode", async ({ page }) => {
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
+  const settings = page.getByRole('dialog');
+  await settings.getByRole('button',{name:'English',exact:true}).click();
+  await settings.getByRole('button',{name:'Close',exact:true}).click();
+
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Grammar guide',exact:true}).click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.grammar-lesson')).toBeVisible();
+  await expect(dialog.locator('.grammar-lesson').first()).toContainText('Copula');
+  await expect(dialog.locator('.grammar-guide > summary')).toHaveCount(0);
+  await expect(dialog.locator('.grammar-lesson')).toContainText('Which sentence means');
+  await expect(dialog.locator('.grammar-lesson')).not.toContainText('کدام جمله');
+});
