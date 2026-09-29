@@ -10,7 +10,7 @@ export function usePageDialog(open: boolean, onClose: () => void): RefObject<HTM
 
     if (open) {
       openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      if (!dialog.open) dialog.show();
+      if (!dialog.open) dialog.showModal();
 
       const focusTarget = dialog.querySelector<HTMLElement>(
         "[autofocus], .dialog-close, button, input, textarea, select, [tabindex]:not([tabindex='-1'])",

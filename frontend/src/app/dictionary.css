@@ -1801,6 +1801,18 @@
 @media(max-width:520px){
   .prepared-mnemonic-library-row{
     grid-template-columns:42px minmax(0,1fr);
+    align-items:start;
+    gap:7px;
+  }
+  .prepared-mnemonic-library-row p{
+    grid-column:1/-1;
+    overflow-wrap:anywhere;
+  }
+  .prepared-mnemonic-library-source{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
   }
   .prepared-mnemonic-library-use{
     grid-column:1/-1;

@@ -10,6 +10,7 @@ const normalize = (value: string) => value.trim().toLocaleLowerCase();
 function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all"|"curated"|"grade1"|"n5">("all");
   const [visibleLimit, setVisibleLimit] = useState(60);
   const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
   const [busyKey, setBusyKey] = useState("");
@@ -40,12 +41,15 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
   const filteredEntries = useMemo(() => {
     const q = normalize(query);
     return entries.filter(entry => {
+      if (filter === "curated" && entry.suggestion.source !== "curated") return false;
+      if (filter === "grade1" && Number(catalogByCharacter.get(entry.character)?.grade) !== 1) return false;
+      if (filter === "n5" && catalogByCharacter.get(entry.character)?.jlpt !== "N5") return false;
       if (!q) return true;
       const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
       return normalize(entry.character).includes(q) || normalize(mnemonic).includes(q);
     });
-  }, [entries, language, query]);
-  useEffect(() => { setVisibleLimit(60); }, [language, query]);
+  }, [entries, language, query, filter]);
+  useEffect(() => { setVisibleLimit(60); }, [language, query, filter]);
   const visible = filteredEntries.slice(0, visibleLimit);
 
   const apply = async (character: string, suggestion: PreparedMnemonic, key: string) => {
@@ -56,9 +60,9 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
       const current = await getMnemonic(character);
       const existing = String(current.text ?? "").trim();
       const next = language === "fa" ? suggestion.fa : suggestion.en;
-      if (existing && existing !== next && !window.confirm(t("mnemonicOverwriteConfirm", language))) return;
+      if (existing && existing !== next) { setStatus(language === "fa" ? "یادسپار شخصی فعلی وجود دارد؛ ابتدا آن را از کارت کانجی تغییر دهید." : "A personal mnemonic already exists. Change it from the kanji card first."); return; }
       await saveMnemonic(character, next);
-      setStatus((language === "fa" ? "یادسپار «" : "Mnemonic for ") + character + (language === "fa" ? "» ذخیره شد." : " saved."));
+      setStatus((language === "fa" ? "✓ یادسپار «" : "✓ Mnemonic for ") + character + (language === "fa" ? "» ذخیره شد." : " saved."));
     } catch {
       setStatus(t("mnemonicSaveError", language));
     } finally {
@@ -67,8 +71,8 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
   };
 
   return (
-    <details className="prepared-mnemonic-library" open>
-      <summary>{t("preparedMnemonicLibrary", language)}</summary>
+    <section className="prepared-mnemonic-library">
+      <div className="prepared-mnemonic-filters" role="group" aria-label={language==="fa"?"فیلتر یادسپارها":"Mnemonic filters"}>{([["all",language==="fa"?"همه":"All"],["curated",language==="fa"?"دست‌چین":"Curated"],["grade1",language==="fa"?"پایه ۱":"Grade 1"],["n5","JLPT N5"]] as const).map(([key,label])=><button key={key} type="button" className={"grammar-chip "+(filter===key?"active":"")} aria-pressed={filter===key} onClick={()=>setFilter(key)}>{label}</button>)}</div>
       <p className="prepared-mnemonic-library-hint">{t("preparedMnemonicLibraryHint", language)}</p>
       <input
         className="prepared-mnemonic-library-search"
@@ -115,7 +119,7 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
         </button>
       ) : null}
       {status ? <p className="prepared-mnemonic-status" role="status">{status}</p> : null}
-    </details>
+    </section>
   );
 }
 

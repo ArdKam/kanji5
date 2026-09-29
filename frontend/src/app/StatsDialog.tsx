@@ -107,11 +107,11 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
       <h2 id="stats-title">{t("stats", language)}</h2>
       <div className="dialog-grid">
         <StatRow label={language === "fa" ? "کل مرورها" : "Total reviews"} value={formatNumber(snapshot?.stats?.totalReviews ?? 0, language)} />
-        <StatRow label={language === "fa" ? "مرورهای غیر Again" : "Non-Again reviews"} value={formatNumber(Math.round(Math.max(0, Math.min(1, Number(snapshot?.stats?.nonAgainRate) || 0)) * 100), language) + (language === "fa" ? "٪" : "%")} />
+        <StatRow label={language === "fa" ? "نرخ تسلط در اولین تلاش" : "First-attempt retention"} value={formatNumber(Math.round(Math.max(0, Math.min(1, Number(snapshot?.stats?.nonAgainRate) || 0)) * 100), language) + (language === "fa" ? "٪" : "%")} />
         <StatRow label={language === "fa" ? "کانجی مطالعه‌شده" : "Kanji studied"} value={formatNumber(snapshot?.stats?.studiedCount ?? 0, language) + " / " + formatNumber(snapshot?.stats?.deckSize ?? 0, language)} />
-        <StatRow label={language === "fa" ? "رشتهٔ فعلی" : "Current streak"} value={formatNumber(snapshot?.stats?.currentStreak ?? 0, language) + " 🔥"} />
-        <StatRow label={language === "fa" ? "طولانی‌ترین رشته" : "Longest streak"} value={formatNumber(snapshot?.stats?.longestStreak ?? 0, language) + " 🔥"} />
-        <StatRow label="Leech" value={formatNumber(snapshot?.stats?.leechCount ?? 0, language)} />
+        <StatRow label={language === "fa" ? "رشتهٔ فعلی" : "Current streak"} value={formatNumber(snapshot?.stats?.currentStreak ?? 0, language) + " · 練"} />
+        <StatRow label={language === "fa" ? "طولانی‌ترین رشته" : "Longest streak"} value={formatNumber(snapshot?.stats?.longestStreak ?? 0, language) + " · 練"} />
+        <StatRow label={language === "fa" ? "کانجی‌های چالش‌برانگیز" : "Challenging kanji"} value={formatNumber(snapshot?.stats?.leechCount ?? 0, language)} />
       </div>
 
       <SevenDayActivity snapshot={snapshot} language={language} />
@@ -134,7 +134,7 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
           <div className="mastery-map-metric"><span className="mastery-swatch attention" aria-hidden="true" /><strong>{formatNumber(mastery.attention, language)}</strong><span>{t("masteryNeedsAttention", language)}</span></div>
           <div className="mastery-map-metric"><span className="mastery-swatch unseen" aria-hidden="true" /><strong>{formatNumber(mastery.unseen, language)}</strong><span>{t("masteryUnseen", language)}</span></div>
         </div>
-        {loading ? <p className="empty-text" role="status">{t("dictionaryLoading", language)}</p> : (
+        {loading ? <div className="mastery-loading-placeholder" aria-hidden="true"><span /><span /><span /></div> : (
           <div className="mastery-distribution" aria-label={t("masteryDistribution", language)}>
             <div className="mastery-distribution-title">{t("masteryDistribution", language)}</div>
             <div className="mastery-distribution-bar" role="img" aria-label={mastery.buckets.map(bucket => bucket.label + " " + formatNumber(bucket.count, language)).join(" · ")}>
