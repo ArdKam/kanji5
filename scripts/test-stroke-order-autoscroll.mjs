@@ -3,14 +3,10 @@ import { readFile } from "node:fs/promises";
 
 const source = await readFile(new URL("../frontend/src/app/StrokeOrderViewer.tsx", import.meta.url), "utf8");
 
-assert.match(source, /viewerRef = useRef<HTMLElement \| null>\(null\)/);
-assert.match(source, /scrollAfterExpandRef = useRef\(false\)/);
-assert.match(source, /closest<HTMLElement>\("\.learning-back-scroll"\)/);
-assert.match(source, /behavior: reducedMotion \? "auto" : "smooth"/);
-assert.match(source, /scrollContainer\.scrollTo\(\{/);
-assert.match(source, /requestAnimationFrame\(\(\) => \{/);
-assert.match(source, /const targetTop = scrollContainer\.scrollTop \+ \(targetRect\.top - containerRect\.top\) - edgePadding/);
-assert.match(source, /ref=\{viewerRef\}/);
+assert.doesNotMatch(source, /stroke-order-tool-trigger/);
+assert.doesNotMatch(source, /setExpanded\(/);
+assert.match(source, /className="stroke-order-panel is-expanded"/);
+assert.match(source, /data-stroke-order-open="true"/);
 
 const app = await readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8");
 assert.match(app, /mnemonicToolRef=useRef<HTMLElement\|null>\(null\)/);
