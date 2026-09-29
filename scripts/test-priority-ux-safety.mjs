@@ -28,7 +28,7 @@ assert.match(app, /function Learning\(\{card,snapshot,busy,onReveal,onRate\}/);
 assert.match(app, /const \[ratingPending,setRatingPending\]=useState\(false\)/);
 assert.match(app, /if\(busy\|\|ratingPending\)return/);
 assert.match(app, /disabled=\{busy\|\|ratingPending\}/);
-assert.match(app, /<Learning card=\{snapshot\.learning\} busy=\{busy\}/);
+assert.match(app, /<Learning card=\{snapshot\.learning\}[^>]*busy=\{busy\}/);
 
 assert.match(dictionaryCard, /aria-labelledby="dictionary-card-title"/);
 assert.match(dictionaryCard, /id="dictionary-card-title"/);
