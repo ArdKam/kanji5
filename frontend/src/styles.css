@@ -442,7 +442,6 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 }
 .stroke-order-controls .button{min-height:44px;padding:6px 8px;font-size:var(--text-xs);}
 .stroke-order-controls .button:nth-child(2){grid-column:1 / -1;order:-1;}
-.stroke-order-reset{grid-column:1 / -1;}
 .stroke-order-source{
   color:var(--mute);
   font-size:var(--text-xs);
@@ -572,49 +571,37 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .learning-card-back .stroke-order-controls .button{min-height:44px;padding:5px 7px;font-size:var(--text-xs);}
 .learning-card-back .stroke-order-source{font-size:var(--text-xs);}
 
-/* Learning study tools: collapsed utility buttons that expand only when activated. */
-.learning-card-back .stroke-order-tool{
+/* Learning study-tool shortcuts: compact, borderless navigation affordances. */
+.learning-back-utilities{
   display:flex;
   align-items:center;
-  min-width:0;
-  min-height:42px;
-  padding:5px 7px;
-  border:1px solid transparent;
-  border-radius:var(--radius-md);
-  background:transparent;
+  justify-content:center;
+  gap:2px;
+  width:min(100%,760px);
+  margin:10px auto 1px;
 }
-.learning-card-back .stroke-order-tool-trigger{
+.learning-back-utility{
+  flex:0 0 44px;
   width:44px;
+  max-width:none;
   height:44px;
   min-width:44px;
   min-height:44px;
-  flex:0 0 44px;
+  max-height:44px;
+  box-sizing:border-box;
   padding:0;
   display:grid;
   place-items:center;
-  border:1px solid var(--line);
-  border-radius:var(--radius-sm);
-  background:var(--paper);
-  color:var(--sumi);
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:var(--mute);
   cursor:pointer;
+  transition:color .16s ease,background .16s ease,transform .16s ease;
 }
-.learning-card-back .stroke-order-tool-trigger:hover{background:var(--washi);}
-.learning-card-back .stroke-order-tool-trigger:focus-visible{outline:3px solid rgba(38,64,107,.22);outline-offset:2px;}
-.stroke-order-replay-icon{
-  width:20px;
-  height:20px;
-  overflow:visible;
-}
-.stroke-order-replay-arc,.stroke-order-replay-head{
-  fill:none;
-  stroke:currentColor;
-  stroke-width:2.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-.stroke-order-replay-play{
-  fill:currentColor;
-}
+.learning-back-utility:hover{color:var(--sumi);background:color-mix(in srgb,var(--washi) 72%,transparent);transform:translateY(-1px);}
+.learning-back-utility:active{transform:translateY(0);}
+.learning-back-utility:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 28%,transparent);outline-offset:1px;}
 .learning-card-back .stroke-order-panel.is-expanded{
   width:100%;
   margin-top:0;
@@ -626,16 +613,9 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .learning-card-back .stroke-order-panel.is-expanded .stroke-order-stage svg{
   width:min(180px,48vw);
 }
-.learning-card-back .stroke-order-panel.is-expanded .stroke-order-toggle{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-}
-.learning-card-back .stroke-order-panel.is-expanded .stroke-order-toggle .stroke-order-replay-icon{
-  width:15px;
-  height:15px;
-}
+
+@media(max-width:760px){.learning-back-utilities{margin-top:8px;}}
+@media(prefers-reduced-motion:reduce){.learning-back-utility{transition:none;}}
 .mnemonic-tool{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-areas:"trigger saved" "prepared prepared" "editor editor";align-items:start;gap:7px;min-width:0;min-height:44px;padding:5px 7px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--washi);overflow:hidden;}
 .mnemonic-tool:not(.has-value):not(.is-open){background:transparent;border-color:transparent;padding-inline:0;}
 .mnemonic-trigger{grid-area:trigger;width:44px;height:44px;min-height:44px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--sumi);font:inherit;font-size:var(--text-md);line-height:1;cursor:pointer;}
