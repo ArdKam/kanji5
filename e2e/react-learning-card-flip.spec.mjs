@@ -219,7 +219,7 @@ test("learning card keeps the Stroke Order page directly open", async ({ page })
     expect(stage?.width ?? 0).toBeGreaterThan(120);
 
     const controls = panel.locator(".stroke-order-controls .button");
-    await expect(controls).toHaveCount(4);
+    await expect(controls).toHaveCount(3);
     await controls.nth(1).click();
     await expect.poll(async () => panel.getAttribute("data-stroke-order-playing")).toBe("true");
     await controls.nth(1).click();
