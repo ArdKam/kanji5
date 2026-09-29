@@ -2013,24 +2013,24 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   .active-recall-shell{
     width:100%;
     margin-top:2px;
-    padding:15px 13px calc(16px + env(safe-area-inset-bottom));
+    padding:10px 13px 14px;
     border-radius:22px;
     box-shadow:0 16px 42px -34px rgba(28,26,23,.48);
   }
   .active-recall-task-header{
-    margin-top:26px;
+    margin-top:6px;
   }
-  .active-recall-task-header h2{font-size:25px;}
+  .active-recall-task-header h2{font-size:19px;}
   .active-recall-task-header p{
-    margin-top:8px;
-    line-height:1.65;
+    margin-top:3px;
+    line-height:1.55;
   }
   .active-recall-stimulus-wrap{
-    margin-top:20px;
+    margin-top:12px;
   }
   .active-recall-stimulus-wrap .stimulus{
-    min-height:158px;
-    padding:24px 14px;
+    min-height:140px;
+    padding:18px 14px;
     border-radius:18px;
   }
   .active-recall-stimulus-wrap .stimulus::after{
@@ -2072,7 +2072,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
     padding-inline:30px;
   }
   .active-recall-task-header{
-    margin-top:22px;
+    margin-top:5px;
   }
 }
 @media(prefers-reduced-motion:reduce){
