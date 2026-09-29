@@ -50,7 +50,13 @@ async function startForcedMode(page,mode){
     await expect(page.locator('#root #exercise')).toBeVisible({timeout:12000});
   }catch(error){
     const diagnostic=await page.locator('#root .app-error-banner, #root .practice-home').allTextContents();
-    throw new Error(`Active Recall did not start in forced ${mode} mode. UI diagnostic: ${diagnostic.join(' | ')}. Original: ${String(error)}`);
+    const runtime=await page.evaluate(async()=>({
+      target:window.__KANJI5_V19_RECOVERY_TARGET__||null,
+      bridge:Boolean(window.__KANJI5_EDU_BRIDGE__?.start),
+      exercise:(await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.())?.exercise||null,
+      session:window.__KANJI5_V16_SESSION_API__?.getSession?.()||null
+    }));
+    throw new Error(`Active Recall did not start in forced ${mode} mode. UI diagnostic: ${diagnostic.join(' | ')}. Runtime: ${JSON.stringify(runtime)}. Original: ${String(error)}`);
   }
   return character;
 }
