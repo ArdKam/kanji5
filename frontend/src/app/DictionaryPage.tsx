@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
@@ -30,9 +30,11 @@ function PreparedMnemonicPanel({
   const [personalMnemonic, setPersonalMnemonic] = useState("");
   const [mnemonicBusy, setMnemonicBusy] = useState(false);
   const [status, setStatus] = useState("");
+  const mnemonicDraftEditedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
+    mnemonicDraftEditedRef.current = false;
     setSuggestion(buildPreparedMnemonic(item));
     setPersonalMnemonic("");
     setStatus("");
@@ -44,7 +46,7 @@ function PreparedMnemonicPanel({
       setSuggestion(prepared);
       const text = String(saved?.text ?? "");
       setPersonalMnemonic(text);
-      if (mnemonicDraft === undefined) onMnemonicDraftChange(text);
+      if (mnemonicDraft === undefined && !mnemonicDraftEditedRef.current) onMnemonicDraftChange(text);
     });
     return () => { active = false; };
   }, [item.character]);
@@ -103,7 +105,10 @@ function PreparedMnemonicPanel({
           className="dictionary-personal-mnemonic-input"
           value={mnemonicDraft ?? ""}
           maxLength={600}
-          onChange={event => onMnemonicDraftChange(event.target.value)}
+          onChange={event => {
+            mnemonicDraftEditedRef.current = true;
+            onMnemonicDraftChange(event.target.value);
+          }}
           placeholder={language === "fa" ? "یک تداعی شخصی بنویس…" : "Write a personal memory cue…"}
           aria-label={t("personalMnemonic", language)}
         />
