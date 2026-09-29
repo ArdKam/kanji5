@@ -7,7 +7,7 @@ assert.match(runtime,/import\('\.\/v1\.9-learner-model-core\.js'\)/);
 assert.match(runtime,/readSessionHistory/);
 assert.match(runtime,/readKnowledge/);
 assert.match(runtime,/writeComponents/);
-assert.match(runtime,/const latestComponents=state\.readComponents\?\(\)\|\|\{\}/,'learner-model writes must re-read components before persisting to avoid clobbering concurrent content evidence');
+assert.match(runtime,/const latestComponents=state\.readComponents\?\.\(\)\|\|\{\}/,'learner-model writes must re-read components before persisting to avoid clobbering concurrent content evidence');
 assert.match(runtime,/v19LearnerEvidence/);
 assert.match(runtime,/recordOutcome/);
 assert.match(runtime,/v1\.6-session-finished/);
