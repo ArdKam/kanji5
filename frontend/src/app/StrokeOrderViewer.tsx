@@ -2,29 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 
-function ReplayIcon() {
-  return (
-    <svg className="stroke-order-replay-icon" viewBox="0 0 44 44" aria-hidden="true">
-      <path className="stroke-order-replay-arc" d="M34.5 13.5A15 15 0 1 0 36.2 27" />
-      <path className="stroke-order-replay-head" d="M34 8.5v7h-7" />
-      <path className="stroke-order-replay-play" d="M18.5 16.5 28 22l-9.5 5.5z" />
-    </svg>
-  );
-}
-
 export function StrokeOrderViewer({ character, language, mode = "learning" }: { character: string; language: Language; mode?: "learning" | "dictionary-loop" }) {
   const [paths, setPaths] = useState<StrokePath[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
-  const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const compactLoop = mode === "dictionary-loop";
   const timerRef = useRef<number | null>(null);
   const completedRef = useRef(0);
-  const viewerRef = useRef<HTMLElement | null>(null);
-  const scrollAfterExpandRef = useRef(false);
 
   useEffect(() => {
     completedRef.current = completed;
@@ -98,53 +85,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     play(true);
   }, [compactLoop, paths, play]);
 
-  const scrollExpandedToolIntoView = useCallback(() => {
-    const target = viewerRef.current;
-    const scrollContainer = target?.closest<HTMLElement>(".learning-back-scroll");
-    if (!target || !scrollContainer) return;
-
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const edgePadding = 8;
-    const targetTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - edgePadding;
-    const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
-    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, targetTop));
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-    scrollContainer.scrollTo({
-      top: nextScrollTop,
-      behavior: reducedMotion ? "auto" : "smooth",
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!expanded || !scrollAfterExpandRef.current) return;
-    scrollAfterExpandRef.current = false;
-    let frame = 0;
-    let nextFrame = 0;
-    frame = window.requestAnimationFrame(() => {
-      nextFrame = window.requestAnimationFrame(() => {
-        scrollExpandedToolIntoView();
-      });
-    });
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.cancelAnimationFrame(nextFrame);
-    };
-  }, [expanded, scrollExpandedToolIntoView]);
-
-  const openLearningTool = useCallback(() => {
-    scrollAfterExpandRef.current = true;
-    setExpanded(true);
-    play(true);
-  }, [play]);
-
-  const closeLearningTool = useCallback(() => {
-    stopPlayback();
-    scrollAfterExpandRef.current = false;
-    setExpanded(false);
-  }, [stopPlayback]);
-
   const step = useCallback((delta: number) => {
     if (!paths.length) return;
     stopPlayback();
@@ -194,8 +134,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     );
   }
 
-  if (!expanded && paths.length && !compactLoop) {
-    return (
+  return (
       <section
         ref={viewerRef}
         className="stroke-order-tool"
@@ -217,7 +156,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   }
 
   return (
-    <section ref={viewerRef} className={"stroke-order-panel"+(expanded ? " is-expanded" : "")} aria-labelledby="stroke-order-title" data-stroke-order-open={expanded ? "true" : "false"}>
+    <section className="stroke-order-panel is-expanded" aria-labelledby="stroke-order-title" data-stroke-order-open="true">
       <div className="stroke-order-header">
         <div>
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
@@ -226,19 +165,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         <div className="stroke-order-header-actions">
           {!loading && !error && paths.length ? (
             <span className="stroke-order-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
-          ) : null}
-          {!loading && !error && paths.length ? (
-            <button
-              className="stroke-order-toggle"
-              type="button"
-              aria-expanded={expanded}
-              aria-controls={expanded ? "stroke-order-content" : undefined}
-              onClick={expanded ? closeLearningTool : openLearningTool}
-              title={expanded ? t("strokeOrder", language) : t("strokeOrder", language)}
-            >
-              <ReplayIcon />
-              <span>{t("strokeOrder", language)}</span>
-            </button>
           ) : null}
         </div>
       </div>
@@ -251,7 +177,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
         </div>
       ) : null}
 
-      {!loading && !error && paths.length && expanded ? (
+      {!loading && !error && paths.length ? (
         <div id="stroke-order-content">
           <div className="stroke-order-stage">
             <svg viewBox="0 0 109 109" role="img" aria-label={t("strokeOrderAria", language)}>
