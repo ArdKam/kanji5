@@ -79,7 +79,7 @@
 /* Learning-card flip: stable back-face layout with data-driven adaptive density. */
 .learning-card[data-card-density="dense"] .learning-back-scroll{padding-top:1px;padding-bottom:0;}
 
-.learning-back-page .learning-back-scroll{padding-bottom:12px;}
+.learning-back-page .learning-back-scroll{padding-bottom:12px;scroll-padding-block-end:150px;}
 
 .learning-card{overflow:hidden;perspective:1200px;padding:0;height:min(590px,calc(100dvh - 32px));min-height:min(500px,calc(100dvh - 32px));margin-bottom:calc(var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom)) + var(--space-2));}
 .learning-card-flip{position:relative;height:100%;min-height:0;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.7,.2,1);}
@@ -122,6 +122,7 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 .pager-dot{display:block;width:6px;height:6px;border-radius:50%;background:var(--mute);opacity:.28;transform:scale(.92);transition:transform .2s ease,opacity .2s ease,background-color .2s ease;}
 .pager-dot.active{opacity:.95;transform:scale(1.18);background:var(--sumi);}
 @keyframes learningPagerContentIn{0%{opacity:.72;transform:scale(.985)}100%{opacity:1;transform:scale(1)}}
+.learning-back-page .learning-back-scroll{scroll-padding-block-end:200px;}
 @media(max-width:760px){
   .learning-back-pager-track{transition-duration:.46s;}
   .learning-back-page.active .learning-back-scroll{animation-duration:.4s;}
