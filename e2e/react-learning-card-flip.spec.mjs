@@ -264,6 +264,8 @@ test("learning card exposes compact mnemonic and Stroke Order shortcuts", async 
     await card.locator(".learning-back-page-nav .pager-dot").nth(0).click();
     const secondPageUtilities = card.locator(".learning-back-page").nth(1).locator(".learning-back-utilities");
     await expect(secondPageUtilities.locator(".learning-back-utility")).toHaveCount(2);
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await page.waitForTimeout(500);
 
     await secondPageUtilities.locator(".learning-back-utility").nth(1).click();
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
@@ -272,6 +274,7 @@ test("learning card exposes compact mnemonic and Stroke Order shortcuts", async 
     await card.locator(".learning-back-page-nav .pager-dot").nth(2).click();
     const thirdPageUtilities = card.locator(".learning-back-page").nth(2).locator(".learning-back-utilities");
     await expect(thirdPageUtilities.locator(".learning-back-utility")).toHaveCount(1);
+    await page.waitForTimeout(500);
     await thirdPageUtilities.locator(".learning-back-utility").click();
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
 
