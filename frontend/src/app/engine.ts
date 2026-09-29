@@ -159,6 +159,7 @@ type EducationBridge = {
   start?: () => Promise<EducationStartResult | unknown> | (EducationStartResult | unknown);
   submitValue?: (value: string) => Promise<unknown> | unknown;
   dontKnow?: () => Promise<unknown> | unknown;
+  selfReportProduction?: (knewIt: boolean) => Promise<unknown> | unknown;
   retry?: () => Promise<unknown> | unknown;
   next?: () => Promise<unknown> | unknown;
 };
