@@ -231,9 +231,12 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     const learningCard=active.closest(".learning-card");
     if(learningCard)active.blur();
   },[]);
-  const changeBackPage=useCallback((delta:number)=>{
-    clearLearningFocus();
-    setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta)));
+  const changeBackPage=useCallback((delta:number,clearFocus=true)=>{
+    setBackPage(current=>{
+      const next=Math.max(0,Math.min(backPageCount-1,current+delta));
+      if(next!==current&&clearFocus)clearLearningFocus();
+      return next;
+    });
   },[backPageCount,clearLearningFocus]);
   const handleRate=useCallback((rating:Rating)=>{
     clearLearningFocus();
@@ -452,7 +455,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
               else if(event.key==="ArrowRight"){event.preventDefault();changeBackPage(1);}
             }}
           >
-            <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1)} disabled={backPage===0}><span aria-hidden="true">‹</span></button>
+            <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1,false)} disabled={backPage===0}><span aria-hidden="true">‹</span></button>
             <div className="pager-indicators" aria-label={t("cardPage")}>
               {Array.from({length:backPageCount},(_,index)=><button
                 key={index}
@@ -460,11 +463,11 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
                 type="button"
                 aria-label={pageLabel(index)}
                 aria-current={index===backPage?"page":undefined}
-                onClick={()=>{clearLearningFocus();setBackPage(index);}}
+                onClick={()=>setBackPage(index)}
               ><span aria-hidden="true" /></button>)}
             </div>
             <span className="pager-current sr-only" aria-live="polite">{pageLabel(backPage)}</span>
-            <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}><span aria-hidden="true">›</span></button>
+            <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1,false)} disabled={backPage===backPageCount-1}><span aria-hidden="true">›</span></button>
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
