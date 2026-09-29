@@ -53,7 +53,7 @@ async function start(recoveryOverride=null){
      if(!word){networkSatisfied=false;mode=CORE.chooseBestExercise(item,stats,modes.filter(x=>x!=='vocabulary'),{now:Date.now()})}
      else{contentId=`${item.character}:${word.word}`;contentProvenance='kanjiapi';const readiness=contentStore.readiness('vocabulary',contentId);if(readiness==='unseen'){contentStore.recordExposure({mode:'vocabulary',contentId,character:item.character,contentKind:'vocabulary',provenance:contentProvenance});contentState='introduced';contentStage='introduction'}else{contentState=readiness;contentStage=readiness==='introduced'?'guided':'retrieval'}}
    }else if(mode==='context'){
-     const rows=await api.fetchContextSentences(item.character);
+     const rows=(await api.fetchContextSentences(item.character)).filter(row=>{const text=String(row?.text||'');const english=String(row?.english||'').trim();if(!text||!english||!text.includes(item.character))return false;const otherKanji=[...text].filter(ch=>/[\\u3400-\\u9fff]/.test(ch)&&ch!==item.character).length;return text.length<=48&&otherKanji<=2;});
      sentence=recoveryTarget?.contentId?rows.find(x=>`${item.character}:${x.text}`===recoveryTarget.contentId)||null:null;
      if(!sentence&&rows.length)sentence=contentStore.selectContent(rows,'context',{idOf:x=>`${item.character}:${x.text}`})||api.selectContextSentence?.(rows,{adaptive:true,target:item.character,attempts:Number(stats?.[mode]?.attempts)||0,accuracy:(Number(stats?.[mode]?.correct)||0)/Math.max(1,Number(stats?.[mode]?.attempts)||0)})||rows[0];
      if(!sentence){networkSatisfied=false;mode=CORE.chooseBestExercise(item,stats,modes.filter(x=>x!=='context'),{now:Date.now()})}
