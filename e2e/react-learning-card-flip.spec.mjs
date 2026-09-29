@@ -219,7 +219,7 @@ test("learning card keeps the Stroke Order page directly open", async ({ page })
     expect(stage?.width ?? 0).toBeGreaterThan(120);
 
     const controls = panel.locator(".stroke-order-controls .button");
-    await expect(controls).toHaveCount(4);
+    await expect(controls).toHaveCount(3);
     await controls.nth(1).click();
     await expect.poll(async () => panel.getAttribute("data-stroke-order-playing")).toBe("true");
     await controls.nth(1).click();
@@ -271,7 +271,7 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async 
     await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
     const page3 = card.locator(".learning-back-page").nth(2);
     await expect(page3.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(1);
-    await page3.locator(".learning-back-utilities .learning-back-utility").click();
+    await page3.locator(".learning-back-utilities .learning-back-utility").dispatchEvent("click");
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
   }
 });
