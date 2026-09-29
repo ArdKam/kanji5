@@ -278,10 +278,10 @@ export async function dontKnow(): Promise<ExerciseOutcome | unknown> {
   return awaitExerciseOutcome(await fn());
 }
 
-export async function retryExercise(): Promise<void> {
+export async function retryExercise(): Promise<unknown> {
   const fn = window.__KANJI5_EDU_BRIDGE__?.retry;
   if (!fn) throw new Error("KANJI5_EDU_RETRY_UNAVAILABLE");
-  await fn();
+  return await fn();
 }
 
 export async function nextExercise(): Promise<void> {
