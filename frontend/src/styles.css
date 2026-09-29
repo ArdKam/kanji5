@@ -442,7 +442,6 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 }
 .stroke-order-controls .button{min-height:44px;padding:6px 8px;font-size:var(--text-xs);}
 .stroke-order-controls .button:nth-child(2){grid-column:1 / -1;order:-1;}
-.stroke-order-reset{grid-column:1 / -1;}
 .stroke-order-source{
   color:var(--mute);
   font-size:var(--text-xs);
