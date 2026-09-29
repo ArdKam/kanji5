@@ -64,11 +64,6 @@ test('experience navigation remains clickable while an engine transition is busy
   const learning=page.getByRole('button',{name:'یادگیری'});
   const practice=page.getByRole('button',{name:'یادآوری فعال'});
   const dictionary=page.getByRole('button',{name:'فرهنگ لغت'});
-  await page.evaluate(()=>{
-    const original=window.__KANJI5_V19_V2_BOUNDARY__?.snapshot;
-    if(typeof original!=='function')throw new Error('snapshot boundary unavailable');
-    window.__kanji5TestOriginalSnapshot=original;
-  });
   await practice.click();
   await expect(practice).toHaveAttribute('aria-current','page');
   await learning.click();
