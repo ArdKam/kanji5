@@ -30,7 +30,7 @@
 .experience-tab:active:not(:disabled){transform:scale(.97);transition:transform .1s ease;}
 .experience-tab:disabled{cursor:wait;opacity:.55;}
   .content{min-height:calc(100dvh + var(--nav-clearance));padding-bottom:var(--nav-clearance);scroll-padding-bottom:var(--nav-clearance);}
-.content button{scroll-margin-bottom:7.5rem;}
+.content button{scroll-margin-bottom:var(--nav-clearance);}
 html{scroll-padding-bottom:var(--nav-clearance);}
 @media (max-width:520px){
   .experience-nav{width:calc(100% - 1.25rem);bottom:max(.625rem, env(safe-area-inset-bottom));border-radius:var(--radius-lg);}
