@@ -505,7 +505,12 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     if(!value.trim()||busy||lockedRef.current)return;
     lockedRef.current=true;
     try{
-      const raw=await onSubmit(value);
+      let submission=value;
+      if(ex.mode==="vocabulary"&&ex.stimulus?.kind==="masked-vocabulary"&&value.length===1){
+        const answerWord=String(ex.answerHint??"").split(" · ")[0].trim();
+        if(answerWord&&ex.character)submission=answerWord.replaceAll(ex.character,value);
+      }
+      const raw=await onSubmit(submission);
       const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
       if(feedback&&typeof feedback.correct==="boolean"){
         await finishAndAdvance(feedback);
@@ -617,6 +622,11 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
         <div className="active-recall-flow">
           <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
           <div className="active-recall-choice-grid production-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
+        </div>
+      :(ex.mode==="vocabulary"||ex.mode==="context")&&choices.length>=2?
+        <div className="active-recall-flow">
+          <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
+          <div className="active-recall-choice-grid vocabulary-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
         </div>
       :
         <div className="active-recall-flow">
