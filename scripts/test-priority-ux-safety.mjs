@@ -13,7 +13,7 @@ const dictionaryCss = read("frontend/src/app/dictionary.css");
 
 assert.match(dictionaryPage, /const \[mnemonicDrafts,setMnemonicDrafts\]=useState<Record<string, string \| undefined>>\(\{\}\)/);
 assert.match(dictionaryPage, /mnemonicDraft=\{mnemonicDrafts\[selected\.character\]\}/);
-assert.match(dictionaryPage, /if \(mnemonicDraft === undefined\) onMnemonicDraftChange\(text\)/);
+assert.match(dictionaryPage, /if \(mnemonicDraft === undefined && !mnemonicDraftEditedRef.current\) onMnemonicDraftChange\(text\)/);
 assert.doesNotMatch(dictionaryPage, /const \[mnemonicDraft, setMnemonicDraft\] = useState/);
 
 assert.match(grammar, /<section className="grammar-guide"/);
