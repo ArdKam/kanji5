@@ -99,7 +99,7 @@ function PreparedMnemonicPanel({
             <h3>{t("personalMnemonic", language)}</h3>
             <p>{language === "fa" ? "یادسپار شخصی خودت را همین‌جا بنویس." : "Write your own memory hook here."}</p>
           </div>
-          <span>{formatNumber(mnemonicDraft.length, language)}/600</span>
+          <span>{formatNumber((mnemonicDraft ?? "").length, language)}/600</span>
         </div>
         <textarea
           className="dictionary-personal-mnemonic-input"
@@ -114,7 +114,7 @@ function PreparedMnemonicPanel({
         />
         <div className="dictionary-personal-mnemonic-actions">
           {curatedText ? (
-            <button className="button secondary" type="button" onClick={() => { setMnemonicDraft(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
+            <button className="button secondary" type="button" onClick={() => { mnemonicDraftEditedRef.current = true; onMnemonicDraftChange(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
               {language === "fa" ? "کپی داستان منتخب" : "Copy curated story"}
             </button>
           ) : <span />}
