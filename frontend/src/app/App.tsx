@@ -464,6 +464,8 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
   if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
   if(s.kind==="masked-context")return <div className="stimulus context-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
+  if(s.kind==="vocabulary-intro")return <div className="stimulus text-stimulus content-intro-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
+  if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
 function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
@@ -560,19 +562,23 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     lockedRef.current=true;
     try{
       const raw=await onDontKnow();
-      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string}|null;
-      await finishAndAdvance({correct:false,outcome:String(feedback?.outcome??"unknown")});
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
+      setResult({correct:false,outcome:String(feedback?.outcome??"unknown"),answerHint:feedback?.answerHint??ex.answerHint});
+      await waitForFeedbackAnimation(false);
+      await onNext();
     }catch(_){
       lockedRef.current=false;
     }
   };
 
   const resultClass=result?(result.correct?" is-correct exercise-result-correct":" is-wrong exercise-result-wrong"):"";
-  const revealedAnswer=!result?.correct?(result?.answerHint||ex.answerHint||ex.character):undefined;
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   const disabled=busy||lockedRef.current||Boolean(result);
   const taskLabel=skillLabel(ex.mode??"");
-  const taskDescription=localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
+  const introduction=ex.contentStage==="introduction"&&(ex.mode==="vocabulary"||ex.mode==="context");
+  const taskDescription=introduction?t("contentIntroductionPrompt"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
+  const defaultCorrectAnswer=ex.mode==="vocabulary"?String(ex.answerHint||"").split(" · ")[0].trim():text(ex.character||ex.answerHint);
+  const correctedContent=ex.mode==="vocabulary"?defaultCorrectAnswer:ex.mode==="context"?String(ex.stimulus?.primary||"").replaceAll("＿",text(ex.character||ex.answerHint)):undefined;
   const keyboardHint=production?(productionRevealed?null:"Space"):null;
 
   return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"active-recall-shell exercise-card"+resultClass} tabIndex={-1}>
@@ -588,19 +594,34 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     {!ex.mode?<div className="active-recall-empty">{t("exerciseReady")}</div>:<>
       <div className="active-recall-task-header">
         <p className="prompt">{taskDescription}</p>
+        {introduction?<span className="active-recall-intro-hint">{t("contentIntroductionHint")}</span>:null}
       </div>
 
       <div className="active-recall-stimulus-wrap">
         <Stimulus ex={ex}/>
       </div>
 
-      {result?
+      {introduction?
+        <div className="active-recall-flow active-recall-introduction">
+          <button className="active-recall-primary" type="button" disabled={disabled} onClick={()=>void onNext()}>
+            <span>{t("nextExercise")}</span><UiIcon name="next" size={17}/>
+          </button>
+        </div>
+      :result?
         <div className="active-recall-feedback exercise-feedback" role="status" aria-live="polite">
           <div className="active-recall-feedback-mark" aria-hidden="true">{result.correct?"✓":<UiIcon name="close" size={18}/>}</div>
           <div className="active-recall-feedback-copy">
             <strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>
-            {revealedAnswer?<div className="active-recall-answer exercise-correct-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}
+            {result.submittedAnswer&&!result.correct?<div className="active-recall-answer"><span>{t("yourChoice")}</span><b lang="ja">{text(result.submittedAnswer)}</b></div>:null}
+            {result.answerHint||ex.answerHint?<div className="active-recall-answer exercise-correct-answer"><span>{t("correctChoice")}</span><b lang="ja">{text(result.answerHint||ex.answerHint)}</b></div>:null}
+            {(!result.correct&&correctedContent)?<div className="active-recall-correction-content" lang="ja"><strong>{correctedContent}</strong>{ex.mode==="vocabulary"&&ex.stimulus?.secondary?<span>{ex.stimulus.secondary}</span>:null}{ex.stimulus?.translation?<small>{ex.stimulus.translation}</small>:null}</div>:null}
           </div>
+          {!result.correct&&result.outcome!=="unknown"?
+            <div className="active-recall-feedback-actions">
+              <button className="active-recall-primary" type="button" disabled={busy} onClick={()=>void handleRetry()}>{t("retrySkill")}</button>
+              <button className="active-recall-secondary" type="button" disabled={busy} onClick={()=>void onNext()}>{t("nextExercise")}</button>
+            </div>
+          :null}
         </div>
       :production&&!showProductionOptions?
         <div className="active-recall-flow production-recall">
