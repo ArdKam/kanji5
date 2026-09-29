@@ -114,7 +114,7 @@ export type KanjiDictionaryResult = {
 };
 
 export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:string };
-export type CustomStudyFocus = "available" | "due" | "new" | "weak";
+export type CustomStudyFocus = "available" | "due" | "new" | "weak" | "mistakes";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number };
 
 export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
