@@ -207,7 +207,7 @@ test("learning card presents Stroke Order immediately with one primary playback 
   await goToBackPage(page, card, 3);
   const panel = card.locator(".learning-back-page.active .stroke-order-panel");
   await expect(panel).toBeVisible();
-  await expect(card.locator(".learning-back-page.active .stroke-order-tool-trigger")).toHaveCount(0);
+  await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
   await expect(panel.locator(".stroke-order-count")).toHaveText("3 strokes");
   await expect(panel.locator(".stroke-order-progress")).toHaveText("0 / 3");
 
@@ -226,6 +226,57 @@ test("learning card presents Stroke Order immediately with one primary playback 
   await controls.nth(1).click();
   await expect.poll(async()=>panel.getAttribute("data-stroke-order-playing")).toBe("false");
   await expect(controls.nth(1)).toHaveText("Play");
+});
+
+test("learning card exposes compact mnemonic and Stroke Order shortcuts", async ({ page }) => {
+  await routeExamples(page, 5);
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    const card = await revealLearningCard(page, "en");
+
+    const firstPageUtilities = card.locator(".learning-back-page").nth(0).locator(".learning-back-utilities");
+    await expect(firstPageUtilities).toHaveCount(1);
+    await expect(firstPageUtilities.locator(".learning-back-utility")).toHaveCount(2);
+
+    const utilityMetrics = await firstPageUtilities.locator(".learning-back-utility").evaluateAll((buttons) =>
+      buttons.map((button) => {
+        const style = getComputedStyle(button);
+        const rect = button.getBoundingClientRect();
+        return {
+          borderWidth: style.borderWidth,
+          backgroundColor: style.backgroundColor,
+          width: rect.width,
+          height: rect.height,
+        };
+      }),
+    );
+    for (const metric of utilityMetrics) {
+      expect(metric.borderWidth).toBe("0px");
+      expect(metric.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      expect(metric.width).toBeGreaterThanOrEqual(44);
+      expect(metric.height).toBeGreaterThanOrEqual(44);
+    }
+
+    await firstPageUtilities.locator(".learning-back-utility").nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
+    await expect(card.locator(".learning-back-page").nth(2).locator(".mnemonic-page")).toBeVisible();
+
+    await card.locator(".learning-back-page-nav .pager-dot").nth(0).click();
+    const secondPageUtilities = card.locator(".learning-back-page").nth(1).locator(".learning-back-utilities");
+    await expect(secondPageUtilities.locator(".learning-back-utility")).toHaveCount(2);
+
+    await secondPageUtilities.locator(".learning-back-utility").nth(1).click();
+    await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
+    await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
+
+    await card.locator(".learning-back-page-nav .pager-dot").nth(2).click();
+    const thirdPageUtilities = card.locator(".learning-back-page").nth(2).locator(".learning-back-utilities");
+    await expect(thirdPageUtilities.locator(".learning-back-utility")).toHaveCount(1);
+    await thirdPageUtilities.locator(".learning-back-utility").click();
+    await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
+
+    await expect(card.locator(".stroke-order-tool-trigger")).toHaveCount(0);
+  }
 });
 
 test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
