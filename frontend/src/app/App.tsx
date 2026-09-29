@@ -559,7 +559,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   const taskDescription=production?t("productionRecallInstruction"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
   const keyboardHint=production?(productionRevealed?null:"Space"):null;
 
-  return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"active-recall-shell"+resultClass} tabIndex={-1}>
+  return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"active-recall-shell exercise-card"+resultClass} tabIndex={-1}>
     <div className="active-recall-session-head">
       <div className="active-recall-session-meta">
         <span className="active-recall-kicker">{t("activeRecallLabel")}</span>
@@ -581,11 +581,11 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
       </div>
 
       {result?
-        <div className="active-recall-feedback" role="status" aria-live="polite">
+        <div className="active-recall-feedback exercise-feedback" role="status" aria-live="polite">
           <div className="active-recall-feedback-mark" aria-hidden="true">{result.correct?"✓":<UiIcon name="close" size={18}/>}</div>
           <div className="active-recall-feedback-copy">
             <strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>
-            {revealedAnswer?<div className="active-recall-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}
+            {revealedAnswer?<div className="active-recall-answer exercise-correct-answer"><span>{t("revealedAnswer")}</span><b lang="ja">{text(revealedAnswer)}</b></div>:null}
           </div>
         </div>
       :production&&!showProductionOptions?
@@ -596,16 +596,16 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
           </div>
           {!productionRevealed?
             <div className="active-recall-actions">
-              <button className="active-recall-primary" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>
+              <button className="active-recall-primary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>
                 <span>{t("revealAnswer")}</span><UiIcon name="next" size={17}/>
               </button>
               {choices.length>=4?<button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>setShowProductionOptions(true)}>{t("useOptionsHint")}</button>:null}
             </div>
           :
-            <div className="active-recall-reveal" aria-live="polite">
+            <div className="active-recall-reveal production-recall-revealed" aria-live="polite">
               <span className="active-recall-reveal-label">{t("revealedAnswer")}</span>
-              <strong className="active-recall-answer-kanji" lang="ja">{text(ex.character||"—")}</strong>
-              <div className="active-recall-grade">
+              <strong className="active-recall-answer-kanji production-recall-kanji" lang="ja">{text(ex.character||"—")}</strong>
+              <div className="active-recall-grade production-recall-grade">
                 <button className="active-recall-grade-button known" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(true)}>
                   <span>{t("iKnewIt")}</span><kbd>1</kbd>
                 </button>
