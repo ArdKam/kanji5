@@ -163,11 +163,11 @@ export function createContentEvidenceStore(adapter = {}, options = {}) {
       return { item, contentId, record, state: record?.state || "unseen" };
     }).filter(row => row.contentId);
 
-    const exposed = rows.filter(row => row.state !== "unseen");
-    const pool = exposed.length ? exposed : rows;
-    const mature = pool.some(row => row.state === "introduced" || row.state === "retrievable");
-    const activePool = mature ? pool.filter(row => row.state !== "stable") : pool;
-    const targetPool = activePool.length ? activePool : pool;
+    const recentMistakes = rows.filter(row => (row.record?.recentWrongCount || 0) > 0);
+    const activePool = rows.filter(row => row.state === "introduced" || row.state === "retrievable");
+    const unseenPool = rows.filter(row => row.state === "unseen");
+    const stablePool = rows.filter(row => row.state === "stable");
+    const targetPool = recentMistakes.length ? recentMistakes : activePool.length ? activePool : unseenPool.length ? unseenPool : stablePool;
     const stageRank = { introduced: 4, retrievable: 3, stable: 2, unseen: 1 };
     return targetPool.sort((a, b) => {
       const ar = a.record?.recentWrongCount || 0;
