@@ -34,6 +34,9 @@ if (normalized.level !== "all" || normalized.focus !== "available" || normalized
 }
 
 const n5 = selectCustomStudyItems({ deck, cards, learner, filter: { level: "N5", focus: "available", limit: 20 }, now, dailyNew: 2, todayNew: 0 });
+const mistakes = selectCustomStudyItems({ deck, cards, learner, components: { v19ContentEvidence: { "x": { character: "森", recentWrongCount: 2 }, "y": { character: "語", recentWrongCount: 1 } } }, filter: { focus: "mistakes", limit: 10 }, now });
+if (JSON.stringify(mistakes.characters) !== JSON.stringify(["森", "語"])) throw new Error("Content mistake focus failed");
+
 if (JSON.stringify(n5.characters) !== JSON.stringify(["学", "森"])) {
   throw new Error(`N5 available selection failed: ${JSON.stringify(n5.characters)}`);
 }
