@@ -39,6 +39,8 @@ async function start(recoveryOverride=null){
  const item=recoveryTarget?.character?seen.find(x=>x.character===recoveryTarget.character)||selected:selected;
  const stats=k[item.character]||{},adaptiveApi=await sessionApi();
  let mode=recoveryTarget?.mode||adaptiveApi?.nextMode?.(modes)||CORE.chooseBestExercise(item,stats,modes,{now:Date.now()});
+ const freshItem=!modes.some(candidate=>Number(stats?.[candidate]?.attempts)||0);
+ if(!recoveryTarget&&freshItem&&mode!=='meaning'&&mode!=='reading')mode=adaptiveApi?.nextMode?.(['meaning','reading'])||CORE.chooseBestExercise(item,stats,['meaning','reading'],{now:Date.now()});
  let word=null,sentence=null,networkSatisfied=true,contentId=item.id||item.character,contentStage='retrieval',contentState='',contentProvenance='local';
  const contentModule=await contentEvidencePromise;
  const contentStore=contentModule.createContentEvidenceStore({readComponents:state.readComponents,writeComponents:state.writeComponents});
@@ -58,7 +60,7 @@ async function start(recoveryOverride=null){
      else{contentId=`${item.character}:${sentence.text}`;contentProvenance='tatoeba';const readiness=contentStore.readiness('context',contentId);if(readiness==='unseen'){contentStore.recordExposure({mode:'context',contentId,character:item.character,contentKind:'context',provenance:contentProvenance});contentState='introduced';contentStage='introduction'}else{contentState=readiness;contentStage='guided'}}
    }
  }catch(_){networkSatisfied=false;mode=CORE.chooseBestExercise(item,stats,modes.filter(x=>x==='meaning'||x==='reading'||x==='production'),{now:Date.now()})}
- if(networkSatisfied&&!((mode==='vocabulary'||mode==='context')&&contentStage==='introduction'))adaptiveApi?.consumeMode?.(mode);
+ if(networkSatisfied&&!recoveryTarget&&!((mode==='vocabulary'||mode==='context')&&contentStage==='introduction'))adaptiveApi?.consumeMode?.(mode);
  state.writeKnowledge(CORE.ensureEntry(knowledge(),item.character,true));
  delete window.__KANJI5_V19_RECOVERY_TARGET__;
  edu={item,mode,word,sentence,answered:false,taskId:`${item.character}:${mode}:${contentId}`,contentId,contentStage,contentState};
