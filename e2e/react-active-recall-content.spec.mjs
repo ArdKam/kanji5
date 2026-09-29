@@ -83,11 +83,16 @@ test('unseen vocabulary is introduced before recall and wrong answers support re
   await expect(page.locator('#root .content-intro-stimulus')).toBeVisible();
   await expect(page.locator('#root .active-recall-intro-hint')).toBeVisible();
   await expect(page.getByRole('button',{name:'تمرین بعدی',exact:true})).toBeVisible();
+  const introContentId=intro.exercise.contentId;
   await page.getByRole('button',{name:'تمرین بعدی',exact:true}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
+  await page.evaluate(({character,contentId})=>{window.__KANJI5_V19_RECOVERY_TARGET__={character,mode:'vocabulary',contentId};},{character,contentId:introContentId});
+  await page.evaluate(async()=>await window.__KANJI5_EDU_BRIDGE__.start());
+  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentStage||'')),{timeout:10000}).toBe('guided');
   await expect(page.locator('#root .active-recall-choice-grid')).toBeVisible();
   const guided=await page.evaluate(async()=>await window.__KANJI5_V19_V2_BOUNDARY__.snapshot());
-  expect(guided.exercise.contentStage).not.toBe('introduction');
-  expect(guided.exercise.contentId).toContain(character+':');
+  expect(guided.exercise.contentStage).toBe('guided');
+  expect(guided.exercise.contentId).toBe(introContentId);
   const choiceData=await page.evaluate(async()=>{
     const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();
     return {target:String(snapshot.exercise?.character||''),choices:Array.from(document.querySelectorAll('#root #exercise .active-recall-choice')).map(node=>String(node.textContent||'').replace(/[1-4]/g,'').trim())};
