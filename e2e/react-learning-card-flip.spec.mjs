@@ -275,17 +275,21 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts with con
     await expect(page2.locator(".learning-back-utilities").getByRole("button", { name: "Meaning & structure" })).toHaveCount(1);
     await page2.locator(".learning-back-utilities").getByRole("button", { name: "Meaning & structure" }).click();
     await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
 
     await page1Utilities.getByRole("button", { name: "Personal mnemonic" }).click();
     await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
     const page3 = card.locator(".learning-back-page").nth(2);
     await expect(page3.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
     await expect(page3.locator(".learning-back-utilities").getByRole("button", { name: "Personal mnemonic" })).toHaveCount(0);
     await page3.locator(".learning-back-utilities").getByRole("button", { name: "Vocabulary examples" }).click();
     await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
 
     await page2.locator(".learning-back-utilities").getByRole("button", { name: "Stroke order" }).click();
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
     await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
     const page4 = card.locator(".learning-back-page").nth(3);
     await expect(page4.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
