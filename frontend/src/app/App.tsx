@@ -468,7 +468,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
-function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>}){
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
   const ex=snapshot.exercise??{},
     [answer,setAnswer]=useState(""),
     [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
