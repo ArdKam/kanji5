@@ -79,6 +79,10 @@ type TranslationKey =
   | "unavailable"
   | "activeRecallLabel"
   | "currentExercise"
+  | "contentIntroductionPrompt"
+  | "contentIntroductionHint"
+  | "yourChoice"
+  | "correctChoice"
   | "exerciseReady"
   | "answerYourself"
   | "answerPlaceholder"
@@ -406,7 +410,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
     meaning:"معنی", reading:"خوانش", production:"تولید", componentLearningPath:"مسیر یادگیری اجزای کانجی", componentLearningPathHint:"اجزای سازنده را از پایه تا کانجی ببین و برای هر جزء تسلط فعلی را بررسی کن.", componentLearningPathLeaf:"جزء پایه", masteryShort:"تسلط", notInCatalog:"در فهرست نیست", vocabulary:"واژگان", vocabularyLearningGraph:"شبکهٔ واژگانی", vocabularyLearningGraphHint:"واژه‌های نمونه نشان می‌دهند این کانجی با چه کانجی‌های جویو در کنار هم دیده می‌شود.", context:"بافت",
     unknown:"نمی‌دانم", correct:"درست", wrong:"نادرست", nearMiss:"نزدیک بود", empty:"خالی", unavailable:"در دسترس نیست",
-    activeRecallLabel:"یادآوری فعال", currentExercise:"تمرین فعلی", exerciseReady:"هنوز تمرینی آماده نیست.",
+    activeRecallLabel:"یادآوری فعال", currentExercise:"تمرین فعلی", contentIntroductionPrompt:"این محتوای جدید را یک‌بار با دقت مرور کن.", contentIntroductionHint:"فعلاً از تو پاسخ نمی‌خواهیم؛ فقط این واژه یا جمله را یاد بگیر.", yourChoice:"انتخاب شما", correctChoice:"پاسخ درست", exerciseReady:"هنوز تمرینی آماده نیست.",
     answerYourself:"پاسخ شما", answerPlaceholder:"پاسخ را وارد کنید", checkAnswer:"بررسی پاسخ", dontKnow:"نمی‌دانم", productionRecallInstruction:"اول کانجی را در ذهنت بازیابی کن؛ بعد پاسخ را ببین.", revealAnswer:"نمایش پاسخ", revealedAnswer:"پاسخ درست", iKnewIt:"بلد بودم", iDidntKnow:"نمی‌دانستم", useOptionsHint:"کمک: نمایش گزینه‌ها",
     retrySkill:"تکرار همین مهارت", nextExercise:"تمرین بعدی", backToLearning:"بازگشت به کارت یادگیری",
     sessionDetails:"جزئیات جلسه", learnerSkills:"مهارت‌های یادگیرنده", adaptiveFocus:"تمرکز تطبیقی", sessionSummary:"خلاصه جلسه",
@@ -429,7 +433,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     again:"Again", hard:"Hard", good:"Good", easy:"Easy",
     meaning:"Meaning", reading:"Reading", production:"Production", componentLearningPath:"Component learning path", componentLearningPathHint:"See the visual building blocks and their current Jōyō mastery.", componentLearningPathLeaf:"Base component", masteryShort:"Mastery", notInCatalog:"Not in catalog", vocabulary:"Vocabulary", vocabularyLearningGraph:"Vocabulary network", vocabularyLearningGraphHint:"See which Jōyō kanji co-occur with this kanji in the shown vocabulary examples.", context:"Context",
     unknown:"I don't know", correct:"Correct", wrong:"Incorrect", nearMiss:"Near miss", empty:"Empty", unavailable:"Unavailable",
-    activeRecallLabel:"Active recall", currentExercise:"Current exercise", exerciseReady:"No exercise is ready yet.",
+    activeRecallLabel:"Active recall", currentExercise:"Current exercise", contentIntroductionPrompt:"Review this new item once.", contentIntroductionHint:"No answer yet — just learn this word or sentence first.", yourChoice:"Your choice", correctChoice:"Correct", exerciseReady:"No exercise is ready yet.",
     answerYourself:"Your answer", answerPlaceholder:"Enter your answer", checkAnswer:"Check answer", dontKnow:"I don't know", productionRecallInstruction:"First retrieve the kanji from memory, then reveal the answer.", revealAnswer:"Reveal answer", revealedAnswer:"Correct kanji", iKnewIt:"I knew it", iDidntKnow:"I didn't know it", useOptionsHint:"Hint: show options",
     retrySkill:"Retry this skill", nextExercise:"Next exercise", backToLearning:"Back to learning card",
     sessionDetails:"Session details", learnerSkills:"Learner skills", adaptiveFocus:"Adaptive focus", sessionSummary:"Session summary",
