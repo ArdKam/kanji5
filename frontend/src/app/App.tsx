@@ -590,8 +590,8 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:S
   const taskLabel=skillLabel(ex.mode??"");
   const introduction=ex.contentStage==="introduction"&&(ex.mode==="vocabulary"||ex.mode==="context");
   const taskDescription=introduction?t("contentIntroductionPrompt"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
-  const defaultCorrectAnswer=ex.mode==="vocabulary"?String(ex.answerHint||"").split(" · ")[0].trim():text(ex.character||ex.answerHint);
-  const correctedContent=ex.mode==="vocabulary"?defaultCorrectAnswer:ex.mode==="context"?String(ex.stimulus?.primary||"").replaceAll("＿",text(ex.character||ex.answerHint)):undefined;
+  const correctAnswerDisplay=ex.mode==="vocabulary"||ex.mode==="context"?text(ex.character):text(ex.answerHint||ex.character);
+  const correctedContent=ex.mode==="vocabulary"?String(ex.answerHint||"").split(" · ")[0].trim():ex.mode==="context"?String(ex.stimulus?.primary||"").replaceAll("＿",text(ex.character||ex.answerHint)):undefined;
   const keyboardHint=production?(productionRevealed?null:"Space"):null;
 
   return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"active-recall-shell exercise-card"+resultClass} tabIndex={-1}>
@@ -626,7 +626,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:S
           <div className="active-recall-feedback-copy">
             <strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>
             {result.submittedAnswer&&!result.correct?<div className="active-recall-answer"><span>{t("yourChoice")}</span><b lang="ja">{text(result.submittedAnswer)}</b></div>:null}
-            {result.answerHint||ex.answerHint?<div className="active-recall-answer exercise-correct-answer"><span>{t("correctChoice")}</span><b lang="ja">{text(result.answerHint||ex.answerHint)}</b></div>:null}
+            {correctAnswerDisplay?<div className="active-recall-answer exercise-correct-answer"><span>{t("correctChoice")}</span><b lang="ja">{correctAnswerDisplay}</b></div>:null}
             {(!result.correct&&correctedContent)?<div className="active-recall-correction-content" lang="ja"><strong>{correctedContent}</strong>{ex.mode==="vocabulary"&&ex.stimulus?.secondary?<span>{ex.stimulus.secondary}</span>:null}{ex.stimulus?.translation?<small>{ex.stimulus.translation}</small>:null}</div>:null}
           </div>
           {!result.correct&&result.outcome!=="unknown"?
