@@ -5,7 +5,7 @@ import { nextTask } from '../v1.9-adaptive-planner-core.js';
 import { createContentEvidenceStore } from '../v1.9-content-evidence.js';
 
 const selfReported=projectKanjiAttributes(
-  { 学:{exposedAt:'2026-09-01T00:00:00.000Z',production:{attempts:20,correct:20}} },
+  { 学:{exposedAt:'2026-09-01T00:00:00.000Z',production:{attempts:2,correct:2}} },
   '学',
   {evidenceByMode:{production:[
     {at:'2026-09-01T00:00:00.000Z',mode:'production',modality:'revealed_self_report',attemptType:'revealed_self_report',outcome:'correct',correct:true,independent:false,revealed:true},
