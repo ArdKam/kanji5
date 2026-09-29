@@ -220,6 +220,7 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const hasExamplesPage=exampleCount>0;
   const backPageCount=hasExamplesPage?4:3;
+  const pageLabel=(index:number)=>t("pageOf").replace("{page}",fa(index+1)).replace("{total}",fa(backPageCount));
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
@@ -312,7 +313,6 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
     <div className="learning-card-flip" aria-live="polite">
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline"><span className="badge badge-red">{t("learningBadge")}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
-        <h2>{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
         <div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div>
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
@@ -442,15 +442,29 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
           </div>
         </div>
         <div className="learning-back-footer">
-          {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
-            <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1)} disabled={backPage===0}>‹</button>
-            <span className="pager-indicators" aria-hidden="true">
-              {Array.from({length:backPageCount},(_,index)=><span key={index} className={"pager-dot"+(index===backPage?" active":"")} />)}
-            </span>
-            <span className="pager-current sr-only" aria-live="polite">
-              {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
-            </span>
-            <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}>›</button>
+          {backPageCount>1?<div
+            className="learning-back-page-nav"
+            role="group"
+            aria-label={t("cardPage")}
+            tabIndex={0}
+            onKeyDown={event=>{
+              if(event.key==="ArrowLeft"){event.preventDefault();changeBackPage(-1);}
+              else if(event.key==="ArrowRight"){event.preventDefault();changeBackPage(1);}
+            }}
+          >
+            <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1)} disabled={backPage===0}><span aria-hidden="true">‹</span></button>
+            <div className="pager-indicators" aria-label={t("cardPage")}>
+              {Array.from({length:backPageCount},(_,index)=><button
+                key={index}
+                className={"pager-dot"+(index===backPage?" active":"")}
+                type="button"
+                aria-label={pageLabel(index)}
+                aria-current={index===backPage?"page":undefined}
+                onClick={()=>{clearLearningFocus();setBackPage(index);}}
+              ><span aria-hidden="true" /></button>)}
+            </div>
+            <span className="pager-current sr-only" aria-live="polite">{pageLabel(backPage)}</span>
+            <button className="pager-button" type="button" aria-label={t("nextCardPage")} onClick={()=>changeBackPage(1)} disabled={backPage===backPageCount-1}><span aria-hidden="true">›</span></button>
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
@@ -714,7 +728,6 @@ function LoadingLearning(){
     <div className="learning-card-flip">
       <div className="learning-card-face learning-card-front">
         <div className="card-topline"><span className="loading-block loading-pill"/><span className="loading-block loading-pill-short"/></div>
-        <span className="loading-block loading-heading"/>
         <div className="kanji-row"><span className="loading-kanji"/></div>
         <span className="loading-block loading-reading"/>
         <span className="loading-block loading-button"/>

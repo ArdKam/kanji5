@@ -18,7 +18,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(mode === "learning");
   const [isPlaying, setIsPlaying] = useState(false);
   const compactLoop = mode === "dictionary-loop";
   const timerRef = useRef<number | null>(null);
@@ -151,11 +151,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
     setCompleted(current => Math.max(0, Math.min(paths.length, current + delta)));
   }, [paths.length, stopPlayback]);
 
-  const reset = useCallback(() => {
-    stopPlayback();
-    setCompleted(0);
-  }, [stopPlayback]);
-
   if (compactLoop) {
     return (
       <section
@@ -227,22 +222,8 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           {!loading && !error && paths.length ? (
             <span className="stroke-order-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
           ) : null}
-          {!loading && !error && paths.length ? (
-            <button
-              className="stroke-order-toggle"
-              type="button"
-              aria-expanded={expanded}
-              aria-controls={expanded ? "stroke-order-content" : undefined}
-              onClick={expanded ? closeLearningTool : openLearningTool}
-              title={expanded ? t("strokeOrder", language) : t("strokeOrder", language)}
-            >
-              <ReplayIcon />
-              <span>{t("strokeOrder", language)}</span>
-            </button>
-          ) : null}
         </div>
       </div>
-
       {loading ? <div className="stroke-order-loading" role="status">{t("strokeOrderLoading", language)}</div> : null}
       {!loading && error ? (
         <div className="stroke-order-error" role="status">
@@ -286,10 +267,11 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           </div>
           <div className="stroke-order-controls">
             <button className="button secondary" type="button" onClick={() => step(-1)} disabled={completed === 0}>{t("previousStroke", language)}</button>
-            <button className="button primary" type="button" onClick={() => play()}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
+            <button className="button primary" type="button" onClick={() => (isPlaying ? pause() : play())}>
+              {isPlaying ? (language === "fa" ? "مکث" : "Pause") : (completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language))}
+            </button>
             <button className="button secondary" type="button" onClick={() => step(1)} disabled={completed >= paths.length}>{t("nextStroke", language)}</button>
-            <button className="button secondary stroke-order-reset" type="button" onClick={reset} disabled={completed === 0}>{t("resetStrokeOrder", language)}</button>
-          </div>
+          </div>/div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
         </div>
       ) : null}
