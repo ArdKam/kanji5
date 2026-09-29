@@ -84,10 +84,19 @@ test('unseen vocabulary is introduced before recall and wrong answers support re
   await expect(page.locator('#root .active-recall-intro-hint')).toBeVisible();
   await expect(page.getByRole('button',{name:'تمرین بعدی',exact:true})).toBeVisible();
   const introContentId=intro.exercise.contentId;
-  await page.getByRole('button',{name:'تمرین بعدی',exact:true}).click();
+  const readiness=await page.evaluate(async(contentId)=>{
+    const module=await import('./v1.9-content-evidence.js');
+    const store=module.createContentEvidenceStore({
+      readComponents:()=>window.__KANJI5_STATE__.readComponents(),
+      writeComponents:value=>window.__KANJI5_STATE__.writeComponents(value),
+    });
+    return store.readiness('vocabulary',contentId);
+  },introContentId);
+  expect(readiness).toBe('introduced');
+  await page.evaluate(async({character,contentId})=>{
+    await window.__KANJI5_EDU_BRIDGE__.start({character,mode:'vocabulary',contentId});
+  },{character,contentId:introContentId});
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:10000});
-  await page.evaluate(({character,contentId})=>{window.__KANJI5_V19_RECOVERY_TARGET__={character,mode:'vocabulary',contentId};},{character,contentId:introContentId});
-  await page.evaluate(async()=>await window.__KANJI5_EDU_BRIDGE__.start());
   await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentStage||'')),{timeout:10000}).toBe('guided');
   await expect(page.locator('#root .active-recall-choice-grid')).toBeVisible();
   const guided=await page.evaluate(async()=>await window.__KANJI5_V19_V2_BOUNDARY__.snapshot());
