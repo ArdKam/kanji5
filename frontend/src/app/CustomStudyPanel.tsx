@@ -28,7 +28,8 @@ export function CustomStudyPanel({ language, onStartCustomStudy }: {
             ["available", t("customAvailable", language)],
             ["due", t("customDue", language)],
             ["new", t("customNew", language)],
-            ["weak", t("customWeak", language)],\n            ["mistakes", language === "fa" ? "اشتباهات اخیر" : "Recent mistakes"],
+            ["weak", t("customWeak", language)],
+            ["mistakes", language === "fa" ? "اشتباهات اخیر" : "Recent mistakes"],
           ] as const).map(([value, label]) => (
             <button
               key={value}
