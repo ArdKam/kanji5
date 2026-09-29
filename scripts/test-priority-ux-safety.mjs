@@ -19,7 +19,7 @@ assert.doesNotMatch(dictionaryPage, /const \[mnemonicDraft, setMnemonicDraft\] =
 assert.match(grammar, /<section className="grammar-guide"/);
 assert.doesNotMatch(grammar, /<details className="grammar-guide">/);
 assert.doesNotMatch(grammar, /<summary>\{t\("grammarGuide"/);
-const grammarQuestions = [...grammar.matchAll(/question:"([^"]+)"/g)].map(m => m[1]);
+const grammarQuestions = [...grammar.matchAll(/question:"((?:\\.|[^"])*)"/g)].map(m => m[1]);
 assert.equal(grammarQuestions.length, 12);
 assert.ok(grammarQuestions.every(q => !/[\u0600-\u06FF]/.test(q)), "Grammar quiz questions must be English in source.");
 
