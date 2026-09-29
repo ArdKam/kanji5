@@ -18,7 +18,13 @@ function isDue(card, now) {
   return Number.isFinite(due) && due <= now;
 }
 
-function mistakeCharacters(components) {\n  const all = components?.v19ContentEvidence;\n  if (!all || typeof all !== "object" || Array.isArray(all)) return new Set();\n  return new Set(Object.values(all).filter(row => row && Number(row.recentWrongCount) > 0 && row.character).map(row => String(row.character)));\n}\n\nfunction isWeak(character, learner) {
+function mistakeCharacters(components) {
+  const all = components?.v19ContentEvidence;
+  if (!all || typeof all !== "object" || Array.isArray(all)) return new Set();
+  return new Set(Object.values(all).filter(row => row && Number(row.recentWrongCount) > 0 && row.character).map(row => String(row.character)));
+}
+
+function isWeak(character, learner) {
   const attrs = learner?.kanji?.[character]?.attributes;
   if (!attrs || typeof attrs !== "object") return false;
   return Object.values(attrs).some((attr) => {
@@ -36,7 +42,8 @@ export function selectCustomStudyItems({ deck = [], cards = {}, learner = {}, co
     ? allowed
     : allowed.filter((item) => String(item?.jlpt || "") === normalized.level);
 
-  const mistakeSet = mistakeCharacters(components);\n  const rows = levelFiltered.map((item, index) => {
+  const mistakeSet = mistakeCharacters(components);
+  const rows = levelFiltered.map((item, index) => {
     const id = String(item?.id || item?.character || "").trim();
     const character = String(item?.character || item?.id || "").trim();
     const card = cards?.[id]?.card || cards?.[character]?.card || null;
@@ -48,7 +55,8 @@ export function selectCustomStudyItems({ deck = [], cards = {}, learner = {}, co
   let eligible = rows;
   if (normalized.focus === "due") eligible = rows.filter((row) => row.due);
   else if (normalized.focus === "new") eligible = rows.filter((row) => row.isNew);
-  else if (normalized.focus === "weak") eligible = rows.filter((row) => row.weak && row.due);\n  else if (normalized.focus === "mistakes") eligible = rows.filter((row) => row.mistake);
+  else if (normalized.focus === "weak") eligible = rows.filter((row) => row.weak && row.due);
+  else if (normalized.focus === "mistakes") eligible = rows.filter((row) => row.mistake);
   else eligible = rows.filter((row) => row.due || row.isNew);
 
   eligible.sort((a, b) => {
