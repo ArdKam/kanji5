@@ -491,14 +491,14 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
 
   const waitForFeedbackAnimation=useCallback(async(correct:boolean)=>{
     const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
-    const delay=correct?700:1400;
-    await new Promise(resolve=>window.setTimeout(resolve,reduced?100:delay));
+    const delay=correct?700:900;
+    await new Promise(resolve=>window.setTimeout(resolve,reduced?80:delay));
   },[]);
 
-  const finishAndAdvance=useCallback(async(feedback:{correct?:boolean;outcome?:string;answerHint?:string}|null)=>{
-    if(!feedback||typeof feedback.correct!=="boolean")return;
-    setResult({correct:feedback.correct,outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint});
-    await waitForFeedbackAnimation(feedback.correct);
+  const finishCorrect=useCallback(async(feedback:{correct?:boolean;outcome?:string;answerHint?:string;submittedAnswer?:string}|null)=>{
+    if(!feedback||feedback.correct!==true)return;
+    setResult({correct:true,outcome:String(feedback.outcome??"correct"),answerHint:feedback.answerHint,submittedAnswer:feedback.submittedAnswer});
+    await waitForFeedbackAnimation(true);
     await onNext();
   },[onNext,waitForFeedbackAnimation]);
 
@@ -506,25 +506,21 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     if(!value.trim()||busy||lockedRef.current)return;
     lockedRef.current=true;
     try{
-      let submission=value;
-      if(ex.mode==="vocabulary"&&ex.stimulus?.kind==="masked-vocabulary"&&value.length===1){
-        const answerWord=String(ex.answerHint??"").split(" · ")[0].trim();
-        if(answerWord&&ex.character)submission=answerWord.replaceAll(ex.character,value);
-      }
-      const raw=await onSubmit(submission);
+      const raw=await onSubmit(value);
       const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
       if(feedback&&typeof feedback.correct==="boolean"){
-        await finishAndAdvance(feedback);
+        const nextResult={correct:Boolean(feedback.correct),outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint,submittedAnswer:value};
+        setResult(nextResult);
+        if(feedback.correct===true)await finishCorrect(nextResult);
       }else{
-        setResult({correct:value===ex.character,outcome:value===ex.character?"correct":"wrong",answerHint:value===ex.character?undefined:ex.character});
-        await waitForFeedbackAnimation(value===ex.character);
-        await onNext();
+        const fallback={correct:value===ex.character,outcome:value===ex.character?"correct":"wrong",answerHint:value===ex.character?undefined:ex.character,submittedAnswer:value};
+        setResult(fallback);
+        if(fallback.correct)await finishCorrect(fallback);
       }
     }catch(_){
       lockedRef.current=false;
     }
   };
-
   const handleProductionGrade=async(knewIt:boolean)=>{
     if(!production||!productionRevealed||busy||lockedRef.current||result||!ex.character)return;
     lockedRef.current=true;
@@ -545,6 +541,20 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
     }
   };
 
+  const handleRetry=async()=>{
+    if(busy||lockedRef.current)return;
+    lockedRef.current=true;
+    try{
+      await onRetry();
+      setResult(null);
+      setAnswer("");
+      setProductionRevealed(false);
+      setShowProductionOptions(false);
+      lockedRef.current=false;
+    }catch(_){
+      lockedRef.current=false;
+    }
+  };
   const handleDontKnow=async()=>{
     if(busy||lockedRef.current)return;
     lockedRef.current=true;
