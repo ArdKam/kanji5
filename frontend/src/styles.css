@@ -2082,3 +2082,61 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .active-recall-reveal.production-recall-revealed{border:0;background:transparent;box-shadow:none;padding:4px 0 0}
 .active-recall-feedback.exercise-feedback{min-height:0;font-size:inherit}
 .active-recall-answer.exercise-correct-answer{border:0;background:transparent;padding:0;display:flex;flex-direction:row;gap:8px}
+/* Content-readiness feedback: scoped to Active Recall only. */
+.active-recall-intro-hint{
+  display:block;
+  margin:8px auto 0;
+  max-width:520px;
+  color:var(--mute);
+  font-size:var(--text-xs);
+  line-height:1.65;
+}
+.active-recall-introduction{
+  margin-top:20px;
+}
+.active-recall-feedback-actions{
+  grid-column:2;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:4px;
+}
+.active-recall-feedback-actions .active-recall-primary,
+.active-recall-feedback-actions .active-recall-secondary{
+  min-height:46px;
+}
+.active-recall-correction-content{
+  display:grid;
+  gap:3px;
+  margin-top:4px;
+  padding-top:7px;
+  border-top:1px solid color-mix(in srgb,var(--line-soft) 72%,transparent);
+}
+.active-recall-correction-content strong{
+  color:var(--sumi);
+  font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;
+  font-size:var(--text-md);
+  line-height:1.6;
+}
+.active-recall-correction-content span{
+  color:var(--ink);
+  font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;
+  font-size:var(--text-sm);
+}
+.active-recall-correction-content small{
+  color:var(--mute);
+  font-size:var(--text-xs);
+  line-height:1.6;
+}
+.content-intro-stimulus{
+  animation:activeRecallReveal .24s cubic-bezier(.2,.7,.2,1) both;
+}
+@media(max-width:760px){
+  .active-recall-feedback-actions{
+    grid-column:1 / -1;
+    grid-template-columns:1fr;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .content-intro-stimulus{animation:none;}
+}
