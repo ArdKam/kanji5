@@ -451,8 +451,8 @@ function Learning({card,snapshot,onReveal,onRate}:{card:NonNullable<Snapshot["le
             aria-label={t("cardPage")}
             tabIndex={0}
             onKeyDown={event=>{
-              if(event.key==="ArrowLeft"){event.preventDefault();changeBackPage(-1);}
-              else if(event.key==="ArrowRight"){event.preventDefault();changeBackPage(1);}
+              if(event.key==="ArrowLeft"){event.preventDefault();changeBackPage(-1,false);requestAnimationFrame(()=>event.currentTarget.focus());}
+              else if(event.key==="ArrowRight"){event.preventDefault();changeBackPage(1,false);requestAnimationFrame(()=>event.currentTarget.focus());}
             }}
           >
             <button className="pager-button" type="button" aria-label={t("previousCardPage")} onClick={()=>changeBackPage(-1,false)} disabled={backPage===0}><span aria-hidden="true">‹</span></button>
