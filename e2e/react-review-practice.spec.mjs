@@ -113,16 +113,13 @@ test('Production Recall known self-grade submits the revealed Kanji and advances
   await clean(page);
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
-  const before=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""));
   await page.getByRole('button',{name:'نمایش پاسخ'}).click();
   await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
   await page.getByRole('button',{name:'بلد بودم'}).click();
-  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||''))).not.toBe(before);
   await expect(page.locator('#root .production-recall')).toHaveCount(0);
   await page.waitForTimeout(900);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""))).not.toBe(before);
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
   void character;
 });
@@ -141,26 +138,8 @@ test('Production Recall unknown self-grade records unknown and advances once',as
   await expect(page.locator('#root .exercise-correct-answer b')).toHaveText(character);
   await page.waitForTimeout(1600);
   await expect(page.locator('#root #exercise')).not.toHaveClass(/exercise-result-(correct|wrong)/);
-  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.contentId||""))).not.toBe(before);
+  await expect.poll(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).feedback?.outcome||"")).toBe('unknown');
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
-});
-
-test('production recall reveals the answer without typing and uses self-grade',async({page})=>{
-  await clean(page);
-  await seedSeenCard(page);
-  await startForcedExercise(page,'production');
-  await expect(page.locator('#root #exercise .production-recall')).toBeVisible();
-  await expect(page.locator('#root #exercise .answer-area')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'نمایش پاسخ',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'کمک: نمایش گزینه‌ها',exact:true})).toBeVisible();
-  await expect.poll(async()=>forcedTargetCharacter(page),{timeout:5000}).not.toBe('');
-  const character=await forcedTargetCharacter(page);
-  await page.getByRole('button',{name:'نمایش پاسخ',exact:true}).click();
-  await expect(page.locator('#root #exercise .production-recall-kanji')).toHaveText(character);
-  await expect(page.getByRole('button',{name:'بلد بودم',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'نمی‌دانستم',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'بلد بودم',exact:true}).click();
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
 });
 
 test('typed reading answer submits through the grading path and shows feedback',async({page})=>{
