@@ -264,7 +264,9 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts with con
     expect(utilitiesBox).not.toBeNull();
     expect(utilitiesBox.y).toBeGreaterThanOrEqual(readingsBox.y + readingsBox.height - 1);
 
-    await page1Utilities.getByRole("button", { name: "Vocabulary examples" }).click();
+    await goToBackPage(page, card, 0);
+    await page.waitForTimeout(520);
+    await card.locator(".learning-back-page.active .learning-back-utilities").getByRole("button", { name: "Vocabulary examples" }).click();
     await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
     const page2 = card.locator(".learning-back-page").nth(1);
     await expect(page2.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
