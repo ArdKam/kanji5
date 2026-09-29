@@ -544,7 +544,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
   };
 
   const handleRetry=async()=>{
-    if(busy||lockedRef.current)return;
+    if(busy||!result||result.correct)return;
     lockedRef.current=true;
     try{
       await onRetry();
