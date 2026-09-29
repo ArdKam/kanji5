@@ -557,6 +557,19 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
       lockedRef.current=false;
     }
   };
+  const handleNextFromFeedback=async()=>{
+    if(busy)return;
+    lockedRef.current=true;
+    setResult(null);
+    setAnswer("");
+    setProductionRevealed(false);
+    setShowProductionOptions(false);
+    try{
+      await onNext();
+    }finally{
+      lockedRef.current=false;
+    }
+  };
   const handleDontKnow=async()=>{
     if(busy||lockedRef.current)return;
     lockedRef.current=true;
@@ -619,7 +632,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext}:{snapshot:Snapshot;
           {!result.correct&&result.outcome!=="unknown"?
             <div className="active-recall-feedback-actions">
               <button className="active-recall-primary" type="button" disabled={busy} onClick={()=>void handleRetry()}>{t("retrySkill")}</button>
-              <button className="active-recall-secondary" type="button" disabled={busy} onClick={()=>void onNext()}>{t("nextExercise")}</button>
+              <button className="active-recall-secondary" type="button" disabled={busy} onClick={()=>void handleNextFromFeedback()}>{t("nextExercise")}</button>
             </div>
           :null}
         </div>
