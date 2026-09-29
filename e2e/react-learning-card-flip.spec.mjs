@@ -465,7 +465,7 @@ test("mobile menu leaves the account control above the drawer and clickable", as
   await expect(page.locator(".account-dialog:visible")).toBeVisible();
 });
 
-test("menu sections open as in-flow pages rather than centered overlays", async ({ page }) => {
+test("menu sections open as focused tool dialogs without detached navigation", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
   await page.goto("/");
   await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
@@ -479,11 +479,50 @@ test("menu sections open as in-flow pages rather than centered overlays", async 
   await expect(page.locator("#root .learning-card")).toHaveCount(0);
 
   const position = await pageDialog.evaluate((el) => getComputedStyle(el).position);
-  expect(position).toBe("static");
+  expect(position).toBe("absolute");
+  await expect(page.getByRole("button", { name: "Back to learning card", exact: true })).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Back to learning card", exact: true }).click();
+  await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
   await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
   await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+});
+
+test("tool dialogs remain usable within a narrow mobile viewport", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
+
+  for (const tool of ["Stats", "Grammar guide", "Reading lab", "Prepared mnemonics", "Settings"]) {
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const menu = page.locator("#header-tools-menu");
+    await expect(menu).toBeVisible();
+    await menu.getByRole("button", { name: tool, exact: true }).click();
+
+    const dialog = page.locator(".secondary-page-dialog");
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    const metrics = await dialog.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      return {
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        overflowX: el.scrollWidth > el.clientWidth + 1,
+      };
+    });
+    expect(metrics.left).toBeGreaterThanOrEqual(0);
+    expect(metrics.right).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(metrics.top).toBeGreaterThanOrEqual(0);
+    expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+    expect(metrics.overflowX).toBe(false);
+
+    await dialog.getByRole("button", { name: "Close", exact: true }).first().click();
+    await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+    await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
+  }
 });
 
 test("a short fast horizontal touch flick advances the learning-card pager", async ({ page }) => {
