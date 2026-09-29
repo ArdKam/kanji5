@@ -547,7 +547,8 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onNext,onRetry}:{snapshot:S
     if(busy||!result||result.correct)return;
     lockedRef.current=true;
     try{
-      await onRetry();
+      const retried=await onRetry();
+      if(retried===false){lockedRef.current=false;return;}
       setResult(null);
       setAnswer("");
       setProductionRevealed(false);
