@@ -22,6 +22,7 @@ on:
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
       - "e2e/react-review-practice.spec.mjs"
+      - "e2e/react-active-recall-content.spec.mjs"
       - "e2e/react-learning-card-flip.spec.mjs"
       - "e2e/react-personal-mnemonic.spec.mjs"
       - "e2e/react-prepared-mnemonic.spec.mjs"
@@ -126,6 +127,9 @@ jobs:
       - name: Run React presentation E2E
         working-directory: .
         run: timeout 120s npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
+      - name: Run Active Recall content readiness E2E
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-active-recall-content.spec.mjs
       - name: Run prepared mnemonic E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-prepared-mnemonic.spec.mjs
