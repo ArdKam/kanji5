@@ -135,27 +135,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
   }
 
   return (
-      <section
-        ref={viewerRef}
-        className="stroke-order-tool"
-        aria-label={t("strokeOrder", language)}
-        data-stroke-order-open="false"
-      >
-        <button
-          className="stroke-order-tool-trigger"
-          type="button"
-          aria-label={t("strokeOrder", language)}
-          title={t("strokeOrder", language)}
-          aria-expanded="false"
-          onClick={openLearningTool}
-        >
-          <ReplayIcon />
-        </button>
-      </section>
-    );
-  }
-
-  return (
     <section className="stroke-order-panel is-expanded" aria-labelledby="stroke-order-title" data-stroke-order-open="true">
       <div className="stroke-order-header">
         <div>
