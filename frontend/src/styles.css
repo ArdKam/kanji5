@@ -2089,3 +2089,10 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
     transition:none;
   }
 }
+
+/* Active Recall compatibility overrides. */
+.active-recall-shell.exercise-result-correct,.active-recall-shell.exercise-result-wrong{border:1px solid color-mix(in srgb,var(--line) 78%,transparent);background:color-mix(in srgb,var(--paper) 94%,var(--washi));box-shadow:0 20px 50px -38px rgba(28,26,23,.48)}
+.active-recall-shell.exercise-result-correct::before,.active-recall-shell.exercise-result-wrong::before,.active-recall-shell.exercise-result-correct::after,.active-recall-shell.exercise-result-wrong::after{display:none!important}
+.active-recall-reveal.production-recall-revealed{border:0;background:transparent;box-shadow:none;padding:4px 0 0}
+.active-recall-feedback.exercise-feedback{min-height:0;font-size:inherit}
+.active-recall-answer.exercise-correct-answer{border:0;background:transparent;padding:0;display:flex;flex-direction:row;gap:8px}
