@@ -1,3 +1,4 @@
+@font-face{font-family:"Noto Serif JP";src:url("./assets/NotoSerifJP-Regular.subset.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 :root{font-family:Inter,system-ui,sans-serif;--fa-font:"Vazirmatn",Inter,system-ui,sans-serif;color:#1c1a17;background:#f4efe3;--washi:#f4efe3;--paper:#fbf8f0;--sumi:#1c1a17;--ink:#4a463f;--mute:#746d61;--shu:#c0392b;--ai:#26406b;--matcha:#7e8c5a;--line:#918777;--line-soft:#d1c7b7;--line-interactive:#786d5e;
   --text-xs:11px;
   --text-sm:13px;
