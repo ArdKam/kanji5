@@ -216,9 +216,11 @@ test('learning-card Stroke Order exposes pause and resume while playing', async 
   await card.getByRole("button",{name:"Show kanji information"}).click();
   const pager=card.locator(".learning-back-page-nav");
   const nextPage=pager.locator(".pager-button").last();
-  await nextPage.dispatchEvent("click");
-  await nextPage.dispatchEvent("click");
-  await nextPage.dispatchEvent("click");
+  for(let i=0;i<3;i++){
+    await expect(nextPage).toBeEnabled();
+    await nextPage.click();
+    await page.waitForTimeout(520);
+  }
   const panel=card.locator(".learning-back-page.active .stroke-order-panel");
   await expect(panel).toBeVisible();
   const play=panel.getByRole("button",{name:"Play stroke order"});
@@ -231,7 +233,9 @@ test('learning-card Stroke Order exposes pause and resume while playing', async 
 
 test('secondary pages hide the persistent experience navigation', async ({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'تنظیمات'}).click();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
   await expect(page.locator('.secondary-page-host')).toBeVisible({timeout:5000});
   await expect(page.locator('.experience-nav')).toHaveCount(0);
   const close=page.locator('.secondary-page-host').getByRole('button',{name:'بستن',exact:true});
