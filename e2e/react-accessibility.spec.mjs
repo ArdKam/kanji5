@@ -245,6 +245,42 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   await expect(structure).toHaveAttribute('aria-selected','true');
 });
 
+test('learning-card Stroke Order exposes pause and resume while playing', async ({page})=>{
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg"><g id="kvg:StrokePaths_05b66"><path id="kvg:05b66-s1" d="M10,10 L30,30"/><path id="kvg:05b66-s2" d="M30,30 L50,10"/></g></svg>`;
+  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
+    await route.fulfill({status:200,contentType:"image/svg+xml",body:svg});
+  });
+  await page.addInitScript(()=>localStorage.setItem("kanji5-ui-language","en"));
+  await page.goto("/");
+  const card=page.locator("#root .learning-card");
+  await expect(card).toBeVisible({timeout:20000});
+  await card.getByRole("button",{name:"Show kanji information"}).click();
+  const pager=card.locator(".learning-back-page-nav");
+  const nextPage=pager.locator(".pager-button").last();
+  await nextPage.dispatchEvent("click");
+  await nextPage.dispatchEvent("click");
+  await nextPage.dispatchEvent("click");
+  const panel=card.locator(".learning-back-page.active .stroke-order-panel");
+  await expect(panel).toBeVisible();
+  const play=panel.getByRole("button",{name:"Play stroke order"});
+  await expect(play).toBeVisible();
+  await play.click();
+  await expect(panel.getByRole("button",{name:"Pause"})).toBeVisible();
+  await panel.getByRole("button",{name:"Pause"}).click();
+  await expect(panel.getByRole("button",{name:"Play stroke order"})).toBeVisible();
+});
+
+test('secondary pages hide the persistent experience navigation', async ({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'تنظیمات'}).click();
+  await expect(page.locator('.secondary-page-host')).toBeVisible({timeout:5000});
+  await expect(page.locator('.experience-nav')).toHaveCount(0);
+  const close=page.locator('.secondary-page-host').getByRole('button',{name:'بستن',exact:true});
+  await close.click();
+  await expect(page.locator('.experience-nav')).toBeVisible();
+});
+
 test('learning-card Stroke Order is permanently open and has no accordion trigger', async ({page})=>{
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
