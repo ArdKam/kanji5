@@ -227,7 +227,7 @@ test("learning card keeps the Stroke Order page directly open", async ({ page })
   }
 });
 
-test("learning card exposes compact contextual shortcuts without crowding readings", async ({ page }) => {
+test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async ({ page }) => {
   await routeExamples(page, 5);
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
