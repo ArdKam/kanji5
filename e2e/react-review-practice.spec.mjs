@@ -59,6 +59,24 @@ async function startForcedExercise(page,mode){
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
 }
 
+test('Learning rating is idempotent when submitted concurrently',async({page})=>{
+  await clean(page);
+  const reveal=page.locator('#root .learning-card-front .button.primary.wide');
+  await expect(reveal).toBeVisible();
+  await reveal.click();
+  await expect(page.locator('#root .learning-card .rating-good')).toBeVisible({timeout:10000});
+  const result=await page.evaluate(async()=>{
+    const before=JSON.parse(localStorage.getItem('kanji5-v1-reviews')||'[]').length;
+    await Promise.all([
+      window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.('Good'),
+      window.__KANJI5_V19_V2_BOUNDARY__?.rateLearning?.('Good'),
+    ]);
+    const after=JSON.parse(localStorage.getItem('kanji5-v1-reviews')||'[]').length;
+    return {before,after};
+  });
+  expect(result.after-result.before).toBe(1);
+});
+
 test('experience navigation remains clickable while an engine transition is busy',async({page})=>{
   await clean(page);
   const learning=page.getByRole('button',{name:'یادگیری'});

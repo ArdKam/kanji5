@@ -182,7 +182,8 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
   await expect(card).toContainText('N5');
   await expect(card).toContainText('تسلط');
-  await expect(card).toHaveAttribute('aria-label','فرهنگ کانجی');
+  await expect(card).toHaveAttribute('aria-labelledby','dictionary-card-title');
+  await expect(card.locator('#dictionary-card-title')).toHaveText(/\S/);
   await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(1);
   await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);

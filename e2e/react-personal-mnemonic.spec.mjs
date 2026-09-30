@@ -83,3 +83,24 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await expect(reloadedCard.locator(".mnemonic-editor textarea")).toBeVisible();
   await expect(reloadedCard.locator(".mnemonic-saved")).toHaveCount(0);
 });
+
+test("unsaved dictionary mnemonic drafts survive tab switches", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.goto("/");
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  await page.getByRole("button", { name: "Kanji dictionary" }).click();
+  await expect(page.locator(".dictionary-page")).toBeVisible({ timeout: 10000 });
+  const tile = page.locator(".kanji-catalog-tile").first();
+  await expect(tile).toBeVisible({ timeout: 10000 });
+  await tile.click();
+  const card = page.locator(".dictionary-card-dialog:visible");
+  await expect(card).toBeVisible();
+  await card.getByRole("tab", { name: "Mnemonic", exact: true }).click();
+  const editor = card.locator(".dictionary-personal-mnemonic-input");
+  await expect(editor).toBeVisible({ timeout: 10000 });
+  await editor.fill("Unsaved draft that must survive tab switches.");
+  await card.getByRole("tab", { name: "Words", exact: true }).click();
+  await expect(card.locator(".dictionary-personal-mnemonic-input")).toHaveCount(0);
+  await card.getByRole("tab", { name: "Mnemonic", exact: true }).click();
+  await expect(card.locator(".dictionary-personal-mnemonic-input")).toHaveValue("Unsaved draft that must survive tab switches.");
+});
