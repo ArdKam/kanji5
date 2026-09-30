@@ -132,3 +132,9 @@ When investigating a UI bug, prefer changing the source under `frontend/` rather
 ## GitHub presentation metadata
 
 `.gitattributes` marks `react-dist/` as generated and `vendor/` as vendored for GitHub's repository presentation. This changes repository browsing/statistics only; it does not change runtime behavior.
+
+## Test-tree entry points
+
+For repository tests, start with [`scripts/README.md`](scripts/README.md) before reading the large versioned test tree.
+
+For Playwright/browser coverage, start with [`e2e/README.md`](e2e/README.md) before opening individual specs.
