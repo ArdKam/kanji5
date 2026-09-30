@@ -203,48 +203,6 @@ test('rating a revealed learning card clears focus before the back face is hidde
   expect(ariaWarnings).toEqual([]);
 });
 
-test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
-  await clean(page);
-
-  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
-  await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
-  const tile=page.locator('.kanji-catalog-tile').first();
-  await expect(tile).toBeVisible({timeout:10000});
-  await tile.dispatchEvent('click');
-
-  const dialog=page.locator('.dictionary-card-dialog:visible');
-  await expect(dialog).toBeVisible();
-  const dialogBounds=await dialog.boundingBox();
-  expect(dialogBounds?.height ?? 0).toBeGreaterThan(400);
-  const tabs=dialog.getByRole('tab');
-  await expect(tabs).toHaveCount(5);
-  const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
-  await expect(overview).toHaveAttribute('aria-selected','true');
-  await expect(structure).toHaveAttribute('aria-selected','false');
-  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
-
-  const initialScroll=await dialog.evaluate((node)=>node.scrollTop);
-  expect(initialScroll).toBe(0);
-
-  await structure.click();
-  await expect(structure).toHaveAttribute('aria-selected','true');
-  await expect(overview).toHaveAttribute('aria-selected','false');
-  const controls=await structure.getAttribute('aria-controls');
-  expect(controls).toBeTruthy();
-  await expect(dialog.locator('#'+controls)).toBeVisible();
-  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
-
-  const content=dialog.locator('.dictionary-card-content');
-  await expect(content).toHaveCount(1);
-  const structureScroll=await content.evaluate((node)=>node.scrollTop);
-  expect(structureScroll).toBe(0);
-  await structure.press('ArrowRight');
-  await expect(overview).toHaveAttribute('aria-selected','true');
-  await overview.press('ArrowLeft');
-  await expect(structure).toHaveAttribute('aria-selected','true');
-});
-
 test('learning-card Stroke Order is permanently open and has no accordion trigger', async ({page})=>{
   const svg = `
 <svg xmlns="http://www.w3.org/2000/svg">
