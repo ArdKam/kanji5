@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 
 const profiles = [
   { name: "desktop", width: 1440, height: 900 },
@@ -10,6 +10,11 @@ const artifactBudgets = [
   ["react-dist/kanji5-react.js", 650 * 1024],
   ["react-dist/kanji5-react.css", 220 * 1024],
 ];
+
+test("startup does not block on Supabase UMD", () => {
+  const html = readFileSync("index.html", "utf8");
+  expect(html).not.toContain("@supabase/supabase-js@2.57.4/dist/umd/supabase.js");
+});
 
 test("performance artifact budgets", () => {
   for (const [path, budgetBytes] of artifactBudgets) {
