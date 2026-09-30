@@ -219,7 +219,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const mnemonicHintFocus=getMnemonicHintFocus(mnemonicHintContext);
   const mnemonicHintPlan=getMnemonicHintPlan(mnemonicHintStage,mnemonicHintFocus);
   const readingCount=displayedOn.length+displayedKun.length;
-  const densityScore=exampleCount*2+Math.min(readingCount,6);
+  const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const hasExamplesPage=exampleCount>0;
   const backPageCount=hasExamplesPage?4:3;
