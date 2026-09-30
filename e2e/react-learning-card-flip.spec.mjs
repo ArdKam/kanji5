@@ -133,7 +133,7 @@ test("learning first page keeps readings above the rating footer on desktop", as
   const readingsBounds = await readings.boundingBox();
   const footerBounds = await footer.boundingBox();
   if (!readingsBounds || !footerBounds) throw new Error("Learning readings/footer geometry unavailable");
-  expect(readingsBounds.bottom).toBeLessThanOrEqual(footerBounds.top + 1);
+  expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
 });
 
 test("learning card stays within a short desktop landscape viewport", async ({ page }) => {
