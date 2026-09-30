@@ -1,4 +1,4 @@
-name: Build Kanji 5 v1.7
+name: Build Kanji 5 adaptive recall contracts
 
 on:
   pull_request:
