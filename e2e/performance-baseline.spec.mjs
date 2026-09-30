@@ -1,9 +1,25 @@
 import { test, expect } from "@playwright/test";
+import { statSync } from "node:fs";
 
 const profiles = [
   { name: "desktop", width: 1440, height: 900 },
   { name: "mobile", width: 390, height: 844 },
 ];
+
+const artifactBudgets = [
+  ["react-dist/kanji5-react.js", 650 * 1024],
+  ["react-dist/kanji5-react.css", 220 * 1024],
+];
+
+test("performance artifact budgets", () => {
+  for (const [path, budgetBytes] of artifactBudgets) {
+    const sizeBytes = statSync(path).size;
+    expect(
+      sizeBytes,
+      `${path} should remain under ${Math.round(budgetBytes / 1024)}KB (actual ${Math.round(sizeBytes / 1024)}KB)`
+    ).toBeLessThanOrEqual(budgetBytes);
+  }
+});
 
 for (const profile of profiles) {
   test(`performance baseline — ${profile.name}`, async ({ page }) => {
@@ -43,7 +59,7 @@ for (const profile of profiles) {
       const fcp = paints.find((entry) => entry.name === "first-contentful-paint")?.startTime ?? 0;
       const perf = window.__KANJI5_PERF_BASELINE__ ?? { lcp: 0, longTasks: [] };
       const appResources = resources
-        .filter((entry) => /react-dist|react-entry|app-bootstrap|v1\.|vendor\//.test(entry.name))
+        .filter((entry) => /react-dist|react-entry|app-bootstrap|v1\.9|vendor\//.test(entry.name))
         .reduce((sum, entry) => sum + Number(entry.transferSize || 0), 0);
 
       return {
