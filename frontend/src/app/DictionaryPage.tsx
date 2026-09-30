@@ -18,7 +18,6 @@ const normalize = (value: string) => value.trim().toLocaleLowerCase();
 function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item: KanjiCatalogItem; language: Language; draft?: string; onDraftChange: (value: string) => void }) {
   const [suggestion, setSuggestion] = useState<PreparedMnemonic>(() => buildPreparedMnemonic(item));
   const [personalMnemonic, setPersonalMnemonic] = useState("");
-  const [mnemonicDraft, setMnemonicDraft] = useState("");
   const [mnemonicBusy, setMnemonicBusy] = useState(false);
   const [status, setStatus] = useState("");
 
@@ -105,7 +104,7 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
               {language === "fa" ? "کپی داستان منتخب" : "Copy curated story"}
             </button>
           ) : <span />}
-          <button className="button primary" type="button" onClick={() => void savePersonalMnemonic()} disabled={mnemonicBusy || (!personalMnemonic && mnemonicDraft.trim().length === 0)}>
+          <button className="button primary" type="button" onClick={() => void savePersonalMnemonic()} disabled={mnemonicBusy || (!personalMnemonic && (draft ?? "").trim().length === 0)}>
             {mnemonicBusy ? t("saving", language) : t("saveMnemonic", language)}
           </button>
         </div>
@@ -128,7 +127,8 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [viewMode, setViewMode] = useState<ViewMode>("matrix");
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
-  const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);\n  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
+  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});\n  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
@@ -371,7 +371,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           language={language}
           onClose={() => setSelected(null)}
           onSelectKanji={setSelected}
-          mnemonicContent={<PreparedMnemonicPanel item={selected} language={language} />}
+          mnemonicContent={<PreparedMnemonicPanel item={selected} language={language} draft={mnemonicDrafts[selected.character]} onDraftChange={value => setMnemonicDrafts(previous => ({ ...previous, [selected.character]: value }))} />}
         />
       ) : null}
     </section>
