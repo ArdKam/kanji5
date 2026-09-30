@@ -1225,14 +1225,20 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .learning-card-back .learning-back-footer .rating-grid *,
 .learning-card-back .learning-back-footer .learning-back-page-nav > button{pointer-events:auto;}
 .learning-card-back .learning-back-pager-shell{padding-bottom:0;}
-.learning-card-back .learning-back-scroll{padding-bottom:150px;}
+.learning-card-back .learning-back-scroll{
+  padding-bottom:150px;
+  scroll-padding-block-end:150px;
+}
 .learning-card-back .learning-back-page-nav{pointer-events:none;}
 .learning-card-back .mnemonic-prepared-use{position:relative;z-index:6;pointer-events:auto;}
 
 @media(max-width:760px){
   .learning-card{height:min(640px,calc(100dvh - 32px));}
   .learning-back-readings-block{gap:6px;}
-  .learning-card-back .learning-back-scroll{padding-bottom:200px;}
+  .learning-card-back .learning-back-scroll{
+    padding-bottom:200px;
+    scroll-padding-block-end:200px;
+  }
 }
 
 
