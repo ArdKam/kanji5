@@ -6,9 +6,16 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   await expect(page.locator('.account-button:visible')).toBeVisible({ timeout: 15000 });
   await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
-  const accountDialogBounds = await page.locator('.account-dialog:visible').boundingBox();
+  const accountDialog = page.locator('.account-dialog:visible');
+  await expect(accountDialog).not.toHaveClass(/secondary-page-dialog/);
+  expect(await accountDialog.evaluate((el) => getComputedStyle(el).position)).toBe('fixed');
+  const accountDialogBounds = await accountDialog.boundingBox();
   const accountCloseBounds = await page.locator('.account-dialog-close:visible').boundingBox();
   if (!accountDialogBounds || !accountCloseBounds) throw new Error('Account dialog geometry unavailable');
+  const viewportWidth = await page.evaluate(() => window.innerWidth);
+  const viewportHeight = await page.evaluate(() => window.innerHeight);
+  expect(Math.abs((accountDialogBounds.x + accountDialogBounds.width / 2) - viewportWidth / 2)).toBeLessThanOrEqual(2);
+  expect(Math.abs((accountDialogBounds.y + accountDialogBounds.height / 2) - viewportHeight / 2)).toBeLessThanOrEqual(2);
   expect(accountCloseBounds.x).toBeGreaterThanOrEqual(accountDialogBounds.x);
   expect(accountCloseBounds.x + accountCloseBounds.width).toBeLessThanOrEqual(accountDialogBounds.x + accountDialogBounds.width);
   expect(accountCloseBounds.y).toBeGreaterThanOrEqual(accountDialogBounds.y);
