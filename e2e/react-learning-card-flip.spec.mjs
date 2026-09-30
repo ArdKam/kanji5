@@ -121,6 +121,21 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const card = await revealLearningCard(page, "en");
+  const activePage = card.locator(".learning-back-page").nth(0);
+  const readings = activePage.locator(".learning-back-readings-block");
+  const footer = card.locator(".learning-back-footer");
+  await expect(readings).toBeVisible();
+  await expect(footer).toBeVisible();
+  const readingsBounds = await readings.boundingBox();
+  const footerBounds = await footer.boundingBox();
+  if (!readingsBounds || !footerBounds) throw new Error("Learning readings/footer geometry unavailable");
+  expect(readingsBounds.bottom).toBeLessThanOrEqual(footerBounds.top + 1);
+});
+
 test("learning card stays within a short desktop landscape viewport", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 844, height: 390 });
