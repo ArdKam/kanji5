@@ -119,7 +119,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
               <button className="button primary" type="button" onClick={() => (isPlaying ? pause() : play())}>
                 {isPlaying ? (language === "fa" ? "مکث" : "Pause") : (completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language))}
               </button>
-              <button className="button secondary" type="button" onClick={() => play(true)} disabled={isPlaying}>{t("replayStrokeOrder", language)}</button>
               <span className="dictionary-stroke-count">{formatNumber(paths.length, language)} {t("strokesLabel", language)}</span>
             </div>
           </>
