@@ -369,8 +369,10 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
     });
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
 
-  const calls = await page.evaluate(() => window.__kanji5MnemonicScrollToCalls || []);
-  expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
+  await expect.poll(async () => {
+    const calls = await page.evaluate(() => window.__kanji5MnemonicScrollToCalls || []);
+    return calls.some((call) => call.behavior === "smooth");
+  }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
 
     await page.evaluate(() => {
       if (window.__kanji5MnemonicOriginalScrollTo) {
