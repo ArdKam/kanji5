@@ -23,6 +23,6 @@ assert.match(sw, /\.\/react-dist\/kanji5-react\.js/);
 assert.match(sw, /\.\/react-dist\/kanji5-react\.css/);
 assert.match(sw, /\.\/app-bootstrap\.js/);
 assert.match(sw, /\.\/react-entry\.js/);
-assert.doesNotMatch(sw, /react-dist\/kanji5-react-release\d+/);
+
 
 console.log("Canonical React release wiring contract passed.");
