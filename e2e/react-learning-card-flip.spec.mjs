@@ -242,80 +242,53 @@ test("learning card keeps the Stroke Order page directly open", async ({ page })
   }
 });
 
-test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async ({ page }) => {
+test("learning card replaces passive pager dots with direct page shortcuts", async ({ page }) => {
   await routeExamples(page, 5);
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
     const card = await revealLearningCard(page, "en");
     await expect(card).toHaveAttribute("data-back-page-count", "4", { timeout: 10000 });
 
-    const page1 = card.locator(".learning-back-page").nth(0);
-    const page1Utilities = page1.locator(".learning-back-utilities");
-    await expect(page1Utilities.locator(".learning-back-utility")).toHaveCount(3);
-    await expect(page1Utilities.getByRole("button", { name: "Meaning & structure" })).toHaveCount(0);
-    await expect(page1Utilities.getByRole("button", { name: "Vocabulary examples" })).toHaveCount(1);
-    await expect(page1Utilities.getByRole("button", { name: "Personal mnemonic" })).toHaveCount(1);
-    await expect(page1Utilities.getByRole("button", { name: "Stroke order" })).toHaveCount(1);
+    const nav = card.locator(".learning-back-page-nav");
+    await expect(nav).toBeVisible();
+    const shortcuts = nav.locator(".learning-back-page-shortcut");
+    await expect(shortcuts).toHaveCount(4);
+    await expect(shortcuts.nth(0)).toHaveAttribute("aria-label", "Meaning & structure");
+    await expect(shortcuts.nth(1)).toHaveAttribute("aria-label", "Vocabulary examples");
+    await expect(shortcuts.nth(2)).toHaveAttribute("aria-label", "Personal mnemonic");
+    await expect(shortcuts.nth(3)).toHaveAttribute("aria-label", "Stroke order");
+    await expect(shortcuts.nth(0)).toHaveClass(/active/);
+    await expect(shortcuts.nth(0)).toHaveAttribute("aria-current", "page");
+    await expect(nav.locator(".pager-dot")).toHaveCount(0);
 
-    const utilityMetrics = await page1Utilities.locator(".learning-back-utility").evaluateAll((buttons) =>
-      buttons.map((button) => {
-        const style = getComputedStyle(button);
-        const rect = button.getBoundingClientRect();
-        return { border: style.borderWidth, background: style.backgroundColor, width: rect.width, height: rect.height };
-      }),
-    );
-    for (const metric of utilityMetrics) {
-      expect(metric.border).toBe("0px");
-      expect(metric.background).toBe("rgba(0, 0, 0, 0)");
+    const metrics = await shortcuts.evaluateAll((buttons) => buttons.map((button) => {
+      const style = getComputedStyle(button);
+      const rect = button.getBoundingClientRect();
+      return { width: rect.width, height: rect.height, opacity: style.opacity };
+    }));
+    for (const metric of metrics) {
       expect(metric.width).toBeGreaterThanOrEqual(44);
       expect(metric.height).toBeGreaterThanOrEqual(44);
     }
+    expect(metrics[0].opacity).toBe("1");
+    expect(Number(metrics[1].opacity)).toBeLessThan(1);
 
-    const readingsBox = await page1.locator(".learning-back-readings-block").boundingBox();
-    const utilitiesBox = await page1Utilities.boundingBox();
-    const footerBox = await card.locator(".learning-back-footer").boundingBox();
-    expect(readingsBox).not.toBeNull();
-    expect(utilitiesBox).not.toBeNull();
-    expect(footerBox).not.toBeNull();
-    expect(utilitiesBox.y).toBeGreaterThanOrEqual(readingsBox.y + readingsBox.height - 1);
-
-    await page1Utilities.scrollIntoViewIfNeeded();
-    const scrolledUtilitiesBox = await page1Utilities.boundingBox();
-    const scrolledFooterBox = await card.locator(".learning-back-footer").boundingBox();
-    expect(scrolledUtilitiesBox).not.toBeNull();
-    expect(scrolledFooterBox).not.toBeNull();
-    expect(scrolledUtilitiesBox.y + scrolledUtilitiesBox.height).toBeLessThanOrEqual(scrolledFooterBox.y + 1);
-
-    await page1Utilities.getByRole("button", { name: "Personal mnemonic" }).click();
-    await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
-    await page.waitForTimeout(520);
-
-    const page3 = card.locator(".learning-back-page").nth(2);
-    await expect(page3.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
-    await expect(page3.locator(".learning-back-utilities").getByRole("button", { name: "Personal mnemonic" })).toHaveCount(0);
-    await page3.locator(".learning-back-utilities").getByRole("button", { name: "Vocabulary examples" }).click();
+    await shortcuts.nth(1).click();
     await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
-    await page.waitForTimeout(520);
+    await expect(shortcuts.nth(1)).toHaveClass(/active/);
+    await expect(shortcuts.nth(1)).toHaveAttribute("aria-current", "page");
+    await expect(shortcuts.nth(0)).not.toHaveClass(/active/);
 
-    const page2 = card.locator(".learning-back-page").nth(1);
-    await expect(page2.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
-    await expect(page2.locator(".learning-back-utilities").getByRole("button", { name: "Vocabulary examples" })).toHaveCount(0);
-    await page2.locator(".learning-back-utilities").getByRole("button", { name: "Meaning & structure" }).click();
-    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
-    await page.waitForTimeout(520);
+    await shortcuts.nth(2).click();
+    await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
+    await expect(shortcuts.nth(2)).toHaveClass(/active/);
 
-    await card.locator(".learning-back-page.active .learning-back-utilities").getByRole("button", { name: "Stroke order" }).click();
+    await shortcuts.nth(3).click();
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
-    await page.waitForTimeout(520);
-    await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
-
-    const page4 = card.locator(".learning-back-page").nth(3);
-    await expect(page4.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
-    await expect(page4.locator(".learning-back-utilities").getByRole("button", { name: "Stroke order" })).toHaveCount(0);
-    await page4.locator(".learning-back-utilities").getByRole("button", { name: "Meaning & structure" }).click();
-    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await expect(shortcuts.nth(3)).toHaveClass(/active/);
   }
 });
+
 test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
   await routeExamples(page, 5);
   await page.addInitScript(() => {
