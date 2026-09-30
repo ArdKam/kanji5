@@ -155,6 +155,23 @@ test('dictionary card uses stable tabs with one active content viewport', async 
   expect(dialogBounds?.height ?? 0).toBeGreaterThan(400);
   const tabs=dialog.getByRole('tab');
   await expect(tabs).toHaveCount(5);
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForTimeout(100);
+  const mobileNav=dialog.locator('.dictionary-section-nav');
+  const mobileMetrics=await mobileNav.evaluate((nav)=>({
+    clientWidth:nav.clientWidth,
+    scrollWidth:nav.scrollWidth,
+    tabs:Array.from(nav.querySelectorAll('.dictionary-section-tab')).map((tab)=>{
+      const r=tab.getBoundingClientRect();
+      return {left:r.left,right:r.right,width:r.width};
+    }),
+  }));
+  expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.clientWidth+1);
+  for(const tab of mobileMetrics.tabs){
+    expect(tab.width).toBeGreaterThanOrEqual(40);
+    expect(tab.left).toBeGreaterThanOrEqual(mobileMetrics.tabs[0].left-1);
+    expect(tab.right).toBeLessThanOrEqual(mobileMetrics.tabs[mobileMetrics.tabs.length-1].right+1);
+  }
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
   const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
   await expect(overview).toHaveAttribute('aria-selected','true');
