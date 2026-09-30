@@ -222,7 +222,8 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const hasExamplesData=Array.isArray(card.examples);
-  const hasExamplesPage=exampleCount>0;
+  const examplesLoading=!hasExamplesData;
+  const hasExamplesPage=examplesLoading||exampleCount>0;
   const backPageCount=hasExamplesPage?4:3;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
@@ -459,7 +460,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?2:1)?" active":"")} type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} aria-current={backPage===(hasExamplesPage?2:1)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
               <UiIcon name="mnemonic" size={18}/>
             </button>
-            {hasExamplesPage||!hasExamplesData?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>hasExamplesPage&&jumpToBackPage(1)} disabled={!hasExamplesData}>
+            {hasExamplesPage?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>!examplesLoading&&jumpToBackPage(1)} disabled={examplesLoading}>
               <UiIcon name="reading" size={18}/>
             </button>:null}
             <button className={"learning-back-page-shortcut"+(backPage===0?" active":"")} type="button" aria-label={t("meaningAndStructure")} title={t("meaningAndStructure")} aria-current={backPage===0?"page":undefined} onClick={()=>jumpToBackPage(0)}>
