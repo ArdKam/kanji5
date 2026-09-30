@@ -58,7 +58,7 @@ test("Production Recall Space does not hijack focused native controls",async({pa
   await startProductionExercise(page);
 
   const exercise=page.locator("#root #exercise");
-  const optionsHint=exercise.getByRole("button",{name:/hint|گزینه/}).first();
+  const optionsHint=exercise.getByRole("button",{name:"کمک: نمایش گزینه‌ها"});
   if(await optionsHint.count()){
     await optionsHint.focus();
     await page.keyboard.press("Space");
