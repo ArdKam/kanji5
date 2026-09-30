@@ -59,24 +59,32 @@ test("Production Recall Space does not hijack focused native controls",async({pa
 
   const exercise=page.locator("#root #exercise");
   const optionsHint=exercise.getByRole("button",{name:"کمک: نمایش گزینه‌ها"});
-  if(await optionsHint.count()){
-    await optionsHint.focus();
-    await page.keyboard.press("Space");
-    await expect(exercise.locator(".production-recall-revealed")).toHaveCount(0);
-    await expect(exercise.locator(".production-grid .active-recall-choice")).toHaveCount(4);
-    return;
-  }
-
-  const injectedInput=exercise.locator('input[data-kanji5-test="shortcut-guard"]');
-  await exercise.evaluate(el=>{
-    const input=document.createElement("input");
-    input.setAttribute("data-kanji5-test","shortcut-guard");
-    input.type="text";
-    input.value="";
-    el.appendChild(input);
-  });
-  await injectedInput.focus();
+  await expect(optionsHint).toBeVisible();
+  await optionsHint.focus();
   await page.keyboard.press("Space");
   await expect(exercise.locator(".production-recall-revealed")).toHaveCount(0);
-  await expect(injectedInput).toBeFocused();
+  await expect(exercise.locator(".production-grid .active-recall-choice")).toHaveCount(4);
+});
+
+test("Production Recall Space is ignored from focused text fields",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await clean(page);
+  await seedSeenCard(page);
+  await startProductionExercise(page);
+
+  const exercise=page.locator("#root #exercise");
+  for(const tag of ["input","textarea"]){
+    const field=exercise.locator(tag+'[data-kanji5-test="shortcut-guard"]');
+    await exercise.evaluate((el,fieldTag)=>{
+      const field=document.createElement(fieldTag);
+      field.setAttribute("data-kanji5-test","shortcut-guard");
+      field.setAttribute("aria-label","test shortcut guard");
+      el.appendChild(field);
+    },tag);
+    await field.focus();
+    await page.keyboard.press("Space");
+    await expect(exercise.locator(".production-recall-revealed")).toHaveCount(0);
+    await expect(field).toBeFocused();
+    await field.evaluate(el=>el.remove());
+  }
 });
