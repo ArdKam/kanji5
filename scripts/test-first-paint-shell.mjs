@@ -7,6 +7,8 @@ const entry = read("react-entry.js");
 const sw = read("sw.js");
 
 assert.match(index, /id="kanji5-startup-shell"/, "index must ship an immediate startup shell");
+assert.match(index, /rel="preload"[^>]+href="\.\/startup-shell\.css"[^>]+as="style"/, "startup shell stylesheet should be preloaded for first paint");
+assert.match(index, /fetchpriority="high"/, "startup shell preload should use high fetch priority");
 assert.match(index, /href="\.\/startup-shell\.css"/, "startup shell stylesheet must be linked from the HTML shell");
 assert.match(index, /rel="modulepreload"[^>]+react-dist\/kanji5-react\.js/, "canonical React bundle should be hinted before dynamic import");
 assert.match(index, /<div id="root"><\/div>/, "React root must remain available");
