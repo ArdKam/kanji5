@@ -880,7 +880,7 @@ function App(){
       <button className="menu-nav-item menu-settings-item" type="button" aria-label={t("settings",language)} disabled={busy} onClick={()=>{setSettingsOpen(true);setSecondaryPage("settings");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="settings" size={19}/></span><span className="menu-nav-copy"><strong>{t("settings",language)}</strong><small>{t("menuSettingsHint",language)}</small></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
     </section>
   </div>
-</aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage("account")}}/></div>
+</aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
@@ -952,6 +952,7 @@ function App(){
               {!showExercise?(snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
       </>}
     </main>
+    <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
 <footer className="footer">{t("footerTagline",language)}</footer>
   </div>
 }
