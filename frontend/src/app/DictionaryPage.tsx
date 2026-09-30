@@ -15,7 +15,7 @@ const DETAILED_PAGE_SIZE = 160;
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
 
-function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; language: Language }) {
+function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item: KanjiCatalogItem; language: Language; draft?: string; onDraftChange: (value: string) => void }) {
   const [suggestion, setSuggestion] = useState<PreparedMnemonic>(() => buildPreparedMnemonic(item));
   const [personalMnemonic, setPersonalMnemonic] = useState("");
   const [mnemonicDraft, setMnemonicDraft] = useState("");
@@ -46,7 +46,7 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
 
   const savePersonalMnemonic = async () => {
     if (mnemonicBusy) return;
-    const next = mnemonicDraft.trim();
+    const next = (draft ?? "").trim();
     if (!personalMnemonic && !next) return;
     setMnemonicBusy(true);
     setStatus("");
@@ -89,19 +89,19 @@ function PreparedMnemonicPanel({ item, language }: { item: KanjiCatalogItem; lan
             <h3>{t("personalMnemonic", language)}</h3>
             <p>{language === "fa" ? "یادسپار شخصی خودت را همین‌جا بنویس." : "Write your own memory hook here."}</p>
           </div>
-          <span>{formatNumber(mnemonicDraft.length, language)}/600</span>
+          <span>{formatNumber((draft ?? "").length, language)}/600</span>
         </div>
         <textarea
           className="dictionary-personal-mnemonic-input"
-          value={mnemonicDraft}
+          value={draft ?? ""}
           maxLength={600}
-          onChange={event => setMnemonicDraft(event.target.value)}
+          onChange={event => onDraftChange(event.target.value)}
           placeholder={language === "fa" ? "یک تداعی شخصی بنویس…" : "Write a personal memory cue…"}
           aria-label={t("personalMnemonic", language)}
         />
         <div className="dictionary-personal-mnemonic-actions">
           {curatedText ? (
-            <button className="button secondary" type="button" onClick={() => { setMnemonicDraft(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
+            <button className="button secondary" type="button" onClick={() => { onDraftChange(curatedText); setStatus(""); }} disabled={mnemonicBusy}>
               {language === "fa" ? "کپی داستان منتخب" : "Copy curated story"}
             </button>
           ) : <span />}
@@ -128,7 +128,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [viewMode, setViewMode] = useState<ViewMode>("matrix");
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
-  const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
+  const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);\n  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
