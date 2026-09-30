@@ -167,10 +167,14 @@ test('dictionary card uses stable tabs with one active content viewport', async 
     }),
   }));
   expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.clientWidth+1);
+  const navBounds=await mobileNav.boundingBox();
+  expect(navBounds).not.toBeNull();
+  const navLeft=navBounds?.x ?? 0;
+  const navRight=navLeft+(navBounds?.width ?? 0);
   for(const tab of mobileMetrics.tabs){
     expect(tab.width).toBeGreaterThanOrEqual(40);
-    expect(tab.left).toBeGreaterThanOrEqual(mobileMetrics.tabs[0].left-1);
-    expect(tab.right).toBeLessThanOrEqual(mobileMetrics.tabs[mobileMetrics.tabs.length-1].right+1);
+    expect(tab.left).toBeGreaterThanOrEqual(navLeft-1);
+    expect(tab.right).toBeLessThanOrEqual(navRight+1);
   }
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
   const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
