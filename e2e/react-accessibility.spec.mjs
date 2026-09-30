@@ -223,7 +223,7 @@ test('learning-card Stroke Order exposes pause and resume while playing', async 
   }
   const panel=card.locator(".learning-back-page.active .stroke-order-panel");
   await expect(panel).toBeVisible();
-  const play=panel.getByRole("button",{name:"Play stroke order"});
+  const play=panel.locator(".stroke-order-controls .button.primary");
   await expect(play).toBeVisible();
   await play.click();
   await expect(panel.getByRole("button",{name:"Pause"})).toBeVisible();
@@ -238,7 +238,7 @@ test('secondary pages hide the persistent experience navigation', async ({page})
   await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
   await expect(page.locator('.secondary-page-host')).toBeVisible({timeout:5000});
   await expect(page.locator('.experience-nav')).toHaveCount(0);
-  const close=page.locator('.secondary-page-host').getByRole('button',{name:'بستن',exact:true});
+  const close=page.locator('.secondary-page-host').locator('.dialog-close').first();
   await close.click();
   await expect(page.locator('.experience-nav')).toBeVisible();
 });
