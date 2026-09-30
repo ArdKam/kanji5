@@ -14,7 +14,9 @@ export default defineConfig({
         assetFileNames: (assetInfo) =>
           assetInfo.name?.endsWith(".css")
             ? "kanji5-react.css"
-            : "assets/[name]-[hash][extname]",
+            : assetInfo.name?.includes("NotoSerifJP-Regular.subset")
+              ? "assets/[name][extname]"
+              : "assets/[name]-[hash][extname]",
       },
     },
   },
