@@ -269,7 +269,7 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async 
     const scrolledFooterBox = await card.locator(".learning-back-footer").boundingBox();
     expect(scrolledUtilitiesBox).not.toBeNull();
     expect(scrolledFooterBox).not.toBeNull();
-    expect(scrolledUtilitiesBox.bottom).toBeLessThanOrEqual(scrolledFooterBox.top + 1);
+    expect(scrolledUtilitiesBox.y + scrolledUtilitiesBox.height).toBeLessThanOrEqual(scrolledFooterBox.y + 1);
 
     await page1Utilities.getByRole("button", { name: "Personal mnemonic" }).click();
     await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
