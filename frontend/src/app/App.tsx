@@ -221,6 +221,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
+  const hasExamplesData=Array.isArray(card.examples);
   const hasExamplesPage=exampleCount>0;
   const backPageCount=hasExamplesPage?4:3;
   const [backPage,setBackPage]=useState(0);
@@ -452,17 +453,17 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
         </div>
         <div className="learning-back-footer">
           {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
-            {<button className={"learning-back-page-shortcut"+(backPage===0?" active":"")} type="button" aria-label={t("meaningAndStructure")} title={t("meaningAndStructure")} aria-current={backPage===0?"page":undefined} onClick={()=>jumpToBackPage(0)}>
-              <UiIcon name="learning" size={18}/>
-            </button>}
-            {hasExamplesPage?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>jumpToBackPage(1)}>
-              <UiIcon name="reading" size={18}/>
-            </button>:null}
+            <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
+              <UiIcon name="writing" size={18}/>
+            </button>
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?2:1)?" active":"")} type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} aria-current={backPage===(hasExamplesPage?2:1)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
               <UiIcon name="mnemonic" size={18}/>
             </button>
-            <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
-              <UiIcon name="writing" size={18}/>
+            {hasExamplesPage||!hasExamplesData?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>hasExamplesPage&&jumpToBackPage(1)} disabled={!hasExamplesData}>
+              <UiIcon name="reading" size={18}/>
+            </button>:null}
+            <button className={"learning-back-page-shortcut"+(backPage===0?" active":"")} type="button" aria-label={t("meaningAndStructure")} title={t("meaningAndStructure")} aria-current={backPage===0?"page":undefined} onClick={()=>jumpToBackPage(0)}>
+              <UiIcon name="learning" size={18}/>
             </button>
             <span className="pager-current sr-only" aria-live="polite">
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
