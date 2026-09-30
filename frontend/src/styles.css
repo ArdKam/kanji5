@@ -564,6 +564,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 
 /* Learning card page shortcuts: the old passive pager dots are now direct section controls. */
 .learning-back-page-nav{
+  direction:ltr;
   display:flex;
   align-items:center;
   justify-content:center;
