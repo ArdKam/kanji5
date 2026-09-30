@@ -127,6 +127,9 @@ jobs:
       - name: Run React presentation E2E
         working-directory: .
         run: timeout 120s npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
+      - name: Run startup performance baseline
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/performance-baseline.spec.mjs
       - name: Run Active Recall content readiness E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-active-recall-content.spec.mjs
