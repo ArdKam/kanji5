@@ -74,8 +74,25 @@ function mountAccountFallback(){
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
   dialog.addEventListener('close',()=>render());
   let attached=false;
+  let fallbackObserver=null;
+  const cleanupWhenReactMounts=()=>{
+    const realAccount=document.querySelector('#root .account-button:not([data-kanji5-account-fallback])');
+    if(!realAccount)return false;
+    btn.remove(); dialog.remove(); unsubscribe();
+    fallbackObserver?.disconnect();
+    return true;
+  };
   const attach=()=>{const a=api(); if(!a||attached)return; attached=true; render(); unsubscribe=a.subscribe(render);};
-  const wait=()=>{ if(document.querySelector('#root .account-button')){btn.remove();dialog.remove();unsubscribe();return;} attach(); if(!attached)window.setTimeout(wait,100); };
+  const wait=()=>{
+    if(cleanupWhenReactMounts())return;
+    attach();
+    if(!cleanupWhenReactMounts() && !attached)window.setTimeout(wait,100);
+  };
+  const rootObserverTarget=document.getElementById('root');
+  if(rootObserverTarget){
+    fallbackObserver=new MutationObserver(()=>{cleanupWhenReactMounts();});
+    fallbackObserver.observe(rootObserverTarget,{childList:true,subtree:true});
+  }
   wait();
   window.setTimeout(()=>mountAccountFallback(),500);
 }
