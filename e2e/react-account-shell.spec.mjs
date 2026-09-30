@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test('account hub exposes a compact auth flow and RTL-safe fields', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'fa'));
   await page.goto('/');
-  await expect(page.locator('.account-button:visible')).toHaveCount(1, { timeout: 15000 });
-  await page.locator('#root .account-button:visible').click();
+  await expect(page.locator('#root .account-button:visible')).toHaveCount(1, { timeout: 15000 });
+  await page.locator('#root #root .account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
   const accountDialog = page.locator('.account-dialog:visible');
   await expect(accountDialog).not.toHaveClass(/secondary-page-dialog/);
@@ -73,7 +73,7 @@ test('account signup preserves entered credentials after switching auth intent',
 
   await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'en'));
   await page.goto('/');
-  await page.locator('.account-button:visible').click();
+  await page.locator('#root .account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
   const form = page.locator('.account-dialog .account-auth-form');
   await form.locator('input[name="email"]').fill('test-signup@example.com');
@@ -98,7 +98,7 @@ test('forgot password sends a recovery request and keeps the user in the recover
   });
 
   await page.goto('/');
-  await page.locator('.account-button:visible').click();
+  await page.locator('#root .account-button:visible').click();
   await page.getByRole('button', { name: /رمز عبور را فراموش کرده‌ای|Forgot password/ }).click();
   await page.locator('input[name="email"]').fill('reset@example.com');
   await page.getByRole('button', { name: /ارسال لینک بازنشانی|Send reset link/ }).click();
@@ -144,7 +144,7 @@ test('signed-in account hub renders one identity surface, sync metrics, and sepa
   }));
 
   await page.goto('/');
-  await page.locator('.account-button:visible').click();
+  await page.locator('#root .account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
   await expect(page.locator('.account-identity-card')).toHaveCount(1);
   await expect(page.locator('.account-identity-card')).toContainText('Ardin');
