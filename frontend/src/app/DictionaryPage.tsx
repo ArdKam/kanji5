@@ -25,7 +25,6 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
     let active = true;
     setSuggestion(buildPreparedMnemonic(item));
     setPersonalMnemonic("");
-    setMnemonicDraft("");
     setStatus("");
     void Promise.all([
       getComponentInfo(item.character).then(info => buildPreparedMnemonic(item, info.components)).catch(() => buildPreparedMnemonic(item)),
@@ -35,7 +34,7 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
       setSuggestion(prepared);
       const text = String(saved?.text ?? "");
       setPersonalMnemonic(text);
-      setMnemonicDraft(text);
+      if (draft === undefined) onDraftChange(text);
     });
     return () => { active = false; };
   }, [item.character]);
@@ -52,7 +51,7 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
     try {
       await saveMnemonic(item.character, next);
       setPersonalMnemonic(next);
-      setMnemonicDraft(next);
+      onDraftChange(next);
       setStatus(t("mnemonicApplied", language));
     } catch {
       setStatus(t("mnemonicSaveError", language));
@@ -128,6 +127,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
+  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});\n  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
