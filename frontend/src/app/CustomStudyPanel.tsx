@@ -14,7 +14,9 @@ export function CustomStudyPanel({ language, onStartCustomStudy }: {
   const [customMessage, setCustomMessage] = useState("");
 
   return (
-    <section className="surface card custom-study-panel practice-custom-study" aria-labelledby="custom-study-title">
+    <details open={false} className="surface card custom-study-panel practice-custom-study">
+      <summary className="custom-study-summary"><span><p className="eyebrow">{t("customStudy", language)}</p><strong id="custom-study-title">{t("customStudy", language)}</strong><small>{t("customStudyHint", language)}</small></span><span aria-hidden="true">⌄</span></summary>
+      <div className="custom-study-details" aria-labelledby="custom-study-title">className="surface card custom-study-panel practice-custom-study" aria-labelledby="custom-study-title">
       <div className="custom-study-panel-header">
         <div>
           <p className="eyebrow">{t("customStudy", language)}</p>
