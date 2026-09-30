@@ -109,9 +109,9 @@ jobs:
             echo
             return 1
           }
-          fetch_with_retry "$base/" /tmp/kanji5-root.html "react-entry-release18.js"
-          fetch_with_retry "$base/react-entry-release18.js" /tmp/kanji5-entry.js "kanji5-react-release18.js"
-          fetch_with_retry "$base/sw-release18.js" /tmp/kanji5-sw.js "const CACHE='kanji5-shell-v"
-          fetch_with_retry "$base/react-dist/kanji5-react-release18.js" /tmp/kanji5-react.js "practice-home"
-          fetch_with_retry "$base/react-dist/kanji5-react-release18.css" /tmp/kanji5-react.css "dictionary-card-accordion"
+          fetch_with_retry "$base/" /tmp/kanji5-root.html "react-entry.js"
+          fetch_with_retry "$base/react-entry.js" /tmp/kanji5-entry.js "react-dist/kanji5-react.js"
+          fetch_with_retry "$base/sw.js" /tmp/kanji5-sw.js "react-dist/kanji5-react.js"
+          fetch_with_retry "$base/react-dist/kanji5-react.js" /tmp/kanji5-react.js "practice-home"
+          fetch_with_retry "$base/react-dist/kanji5-react.css" /tmp/kanji5-react.css "dictionary-card"
           echo "LIVE_PAGES_ARTIFACT_VERIFIED"
