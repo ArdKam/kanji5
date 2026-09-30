@@ -5,7 +5,7 @@ const index=await readFile("index.html","utf8");
 const css=await readFile("frontend/src/styles.css","utf8");
 const reactCss=await readFile("react-dist/kanji5-react-release18.css","utf8");
 
-const fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Serif+JP:wght@500;600;700;800&display=swap";
+const fontUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Serif+JP:wght@500;600;700&display=swap";
 const bundledFontMatch=reactCss.match(/@font-face\{[^}]*font-family:Vazirmatn[^}]*src:url\((?:["'])?\.\/(assets\/[^"')?#\\s]+\\.woff2)/);
 assert.ok(bundledFontMatch,"Bundled Vazirmatn @font-face is missing");
 const bundledFontPath=bundledFontMatch[1];
