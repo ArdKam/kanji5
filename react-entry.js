@@ -31,7 +31,11 @@ function mountAccountFallback(){
   const existing=root?.querySelector('.account-button');
   if(existing){ document.querySelector('[data-kanji5-account-fallback]')?.remove(); document.querySelector('[data-kanji5-account-fallback-dialog]')?.remove(); return; }
   const headerActions=document.querySelector('.header-actions');
-  if(!headerActions || document.querySelector('[data-kanji5-account-fallback]')) return;
+  if(document.querySelector('[data-kanji5-account-fallback]')) return;
+  if(!headerActions){
+    window.setTimeout(mountAccountFallback,100);
+    return;
+  }
   const lang=()=>localStorage.getItem('kanji5-ui-language')==='en'?'en':'fa';
   const copy=(key)=>({
     fa:{account:'حساب',signIn:'ورود',create:'ایجاد حساب',email:'ایمیل',password:'رمز عبور',login:'ورود به حساب',signup:'ایجاد حساب',magic:'ارسال لینک ورود',useMagic:'ورود با لینک جادویی',useEmail:'ایمیل و رمز عبور',already:'حساب دارید؟ ورود',newAccount:'حساب ندارید؟ ایجاد حساب',google:'ورود با Google (به‌زودی)',close:'بستن',signedIn:'وارد شده‌اید',syncNow:'همگام‌سازی',signOut:'خروج',synced:'همگام',syncing:'در حال همگام‌سازی',idle:'',unavailable:'حساب در دسترس نیست',unavailableHint:'اتصال سرویس حساب هنوز آماده نشده است.',sent:'لینک ورود به ایمیل شما ارسال شد.',confirm:'حساب ساخته شد؛ ایمیل خود را برای تأیید بررسی کنید.',error:'عملیات حساب انجام نشد.'},
@@ -74,8 +78,30 @@ function mountAccountFallback(){
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
   dialog.addEventListener('close',()=>render());
   let attached=false;
+  let fallbackObserver=null;
+  let waitTimer=null;
+  const cleanupWhenReactMounts=()=>{
+    const realAccount=document.querySelector('#root .account-button:not([data-kanji5-account-fallback])');
+    if(!realAccount)return false;
+    btn.remove();
+    dialog.remove();
+    unsubscribe();
+    if(waitTimer)window.clearTimeout(waitTimer);
+    fallbackObserver?.disconnect();
+    return true;
+  };
   const attach=()=>{const a=api(); if(!a||attached)return; attached=true; render(); unsubscribe=a.subscribe(render);};
-  const wait=()=>{ if(document.querySelector('#root .account-button')){btn.remove();dialog.remove();unsubscribe();return;} attach(); if(!attached)window.setTimeout(wait,100); };
+  const wait=()=>{
+    if(cleanupWhenReactMounts())return;
+    attach();
+    if(cleanupWhenReactMounts())return;
+    waitTimer=window.setTimeout(wait,100);
+  };
+  const rootObserverTarget=document.getElementById('root');
+  if(rootObserverTarget){
+    fallbackObserver=new MutationObserver(()=>{cleanupWhenReactMounts();});
+    fallbackObserver.observe(rootObserverTarget,{childList:true,subtree:true});
+  }
   wait();
   window.setTimeout(()=>mountAccountFallback(),500);
 }
