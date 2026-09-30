@@ -170,7 +170,10 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(stroke).toHaveAttribute('data-stroke-order-completed', '0');
   await expect(stroke.locator('.stroke-order-active')).toHaveCount(1);
   await expect.poll(async()=>stroke.locator('.stroke-order-active').getAttribute('d'), {timeout:2000}).toBe('M10,10 L30,30');
-  await expect(card.locator('.dictionary-stroke-controls')).toBeVisible();
+  const strokeControls = card.locator('.dictionary-stroke-controls');
+  await expect(strokeControls).toBeVisible();
+  await expect(strokeControls.locator('button')).toHaveCount(1);
+  await expect(strokeControls.locator('.primary')).toHaveText('مکث');
   await expect(stroke).toHaveAttribute('data-stroke-order-playing','true');
   await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:2500}).toBe('1');
   await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:3500}).toBe('3');
