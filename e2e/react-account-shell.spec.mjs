@@ -16,10 +16,10 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   const viewportHeight = await page.evaluate(() => window.innerHeight);
   expect(Math.abs((accountDialogBounds.x + accountDialogBounds.width / 2) - viewportWidth / 2)).toBeLessThanOrEqual(2);
   expect(Math.abs((accountDialogBounds.y + accountDialogBounds.height / 2) - viewportHeight / 2)).toBeLessThanOrEqual(2);
-  expect(accountCloseBounds.left).toBeGreaterThanOrEqual(accountDialogBounds.left);
-  expect(accountCloseBounds.right).toBeLessThanOrEqual(accountDialogBounds.x + accountDialogBounds.width);
-  expect(accountCloseBounds.top).toBeGreaterThanOrEqual(accountDialogBounds.top);
-  expect(accountCloseBounds.bottom).toBeLessThanOrEqual(accountDialogBounds.y + accountDialogBounds.height);
+  expect(accountCloseBounds.x).toBeGreaterThanOrEqual(accountDialogBounds.x);
+  expect(accountCloseBounds.x + accountCloseBounds.width).toBeLessThanOrEqual(accountDialogBounds.x + accountDialogBounds.width);
+  expect(accountCloseBounds.y).toBeGreaterThanOrEqual(accountDialogBounds.y);
+  expect(accountCloseBounds.y + accountCloseBounds.height).toBeLessThanOrEqual(accountDialogBounds.y + accountDialogBounds.height);
   await expect(page.locator('.account-auth-surface')).toBeVisible();
   await expect(page.locator('.account-auth-tabs')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Google sign-in will be enabled soon|ورود با Google/ })).toHaveCount(0);
