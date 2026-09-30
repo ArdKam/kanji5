@@ -77,18 +77,10 @@ async function swipePager(page, pager, fromRatio, toRatio) {
 
 
 async function goToBackPage(page, card, targetIndex) {
-  const currentIndex = await card.locator(".learning-back-page.active").evaluate((el) =>
-    Array.from(el.parentElement?.children ?? []).indexOf(el),
-  );
-  const delta = targetIndex - currentIndex;
-  const direction = delta >= 0 ? 1 : -1;
-  const steps = Math.abs(delta);
-  for (let index = 0; index < steps; index += 1) {
-    const button = card.locator(".pager-button").nth(direction > 0 ? 1 : 0);
-    await expect(button).toBeEnabled();
-    await button.dispatchEvent("click");
-    await page.waitForTimeout(520);
-  }
+  const shortcut = card.locator(".learning-back-page-shortcut").nth(targetIndex);
+  await expect(shortcut).toBeVisible();
+  await shortcut.dispatchEvent("click");
+  await page.waitForTimeout(520);
   await expect(card.locator(".learning-back-page").nth(targetIndex)).toHaveClass(/active/);
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
@@ -164,7 +156,8 @@ test("learning card exposes five full-content back pages in Persian and English"
 
       expect(await card.locator(".learning-back-page").count()).toBe(4);
       await expect(card).toHaveAttribute("data-back-page-count", "4");
-      await expect(card.locator(".pager-indicators .pager-dot")).toHaveCount(4);
+      await expect(card.locator(".learning-back-page-shortcut")).toHaveCount(4);
+      await expect(card.locator(".learning-back-page-shortcut.active")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
       await expect(card.locator(".learning-back-page").nth(0).locator(".readings")).toHaveCount(1);
       const exampleCount = await card.locator(".learning-back-page").nth(1).locator(".example-row").count();
