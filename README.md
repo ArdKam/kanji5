@@ -2,6 +2,25 @@
 
 یک PWA شخصی برای یادگیری ۲۱۳۶ کانجی Jōyō ژاپنی، روزانه ۵ کانجی جدید، با مرور فاصله‌دار تطبیقی بر پایهٔ FSRS.
 
+## برای توسعه‌دهنده‌ای که تازه وارد پروژه شده
+
+برای فهم نسخهٔ فعلی لازم نیست history نسخه‌های قدیمی را دنبال کنید. از این مسیر شروع کنید:
+
+- **Presentation فعلی:** `frontend/` — سورس React/TypeScript.
+- **React entry:** `frontend/src/main.tsx`.
+- **App shell/orchestration:** `frontend/src/app/App.tsx`.
+- **Typed engine adapter:** `frontend/src/app/engine.ts`.
+- **Authoritative runtime boundary:** `v1.9-v2-contract-core.js` و `v1.9-v2-boundary.js`.
+- **Review/scheduling runtime:** `review-runtime.js`.
+- **Current service worker:** `sw.js`.
+- **Browser tests:** `e2e/`.
+- **Contract/unit tests:** `scripts/test-*.mjs`.
+- **Generated React output:** `react-dist/` — دستی ویرایش نشود؛ از `frontend/` ساخته می‌شود.
+
+نام `v1.*` به‌تنهایی به معنی legacy نیست؛ بخشی از learning engine فعلی هنوز همین runtimeهای versioned را مصرف می‌کند. برای presentation فعلی، از `frontend/` شروع کنید. مسیر compatibility قدیمی در `index.html` به‌صورت صریح پشت `?legacy=1` قرار دارد.
+
+راهنمای کامل ساختار: **[PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)**
+
 ## ویژگی‌ها
 - پوشش هر ۲۱۳۶ کانجی Jōyō بر اساس رتبهٔ newspaper frequency
 - ۵ کانجی جدید در روز (قابل تنظیم)
