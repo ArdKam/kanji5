@@ -271,7 +271,7 @@ test('Active Recall keeps custom study secondary until explicitly opened', async
   await expect(custom.getByRole('button',{name:'شروع مطالعه',exact:true})).toHaveCount(0);
   await custom.locator('summary').click();
   await expect(custom).toHaveAttribute('open','');
-  await expect(custom.getByRole('button',{name:'شروع تمرین شخصی'})).toBeVisible();
+  await expect(custom.getByRole('button',{name:'شروع مطالعه',exact:true})).toBeVisible();
 });
 
 test('React presentation stays usable at the narrow 320px boundary without horizontal overflow',async({page})=>{
