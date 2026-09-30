@@ -11,10 +11,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         entryFileNames: "kanji5-react.js",
-        assetFileNames: (assetInfo) =>
-          assetInfo.name?.endsWith(".css")
-            ? "kanji5-react.css"
-            : "assets/[name]-[hash][extname]",
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith(".css")) return "kanji5-react.css";
+          if (assetInfo.name?.includes("NotoSerifJP-Regular.subset")) return "assets/[name][extname]";
+          return "assets/[name]-[hash][extname]";
+        },
       },
     },
   },

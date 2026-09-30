@@ -3,14 +3,16 @@ import assert from "node:assert/strict";
 
 const index=await readFile("index.html","utf8");
 const css=await readFile("frontend/src/styles.css","utf8");
+const jpCss=await readFile("frontend/src/noto-serif-jp.css","utf8");
 
 const jpPreload="./react-dist/assets/NotoSerifJP-Regular.subset.woff2";
 const jpPath=jpPreload.slice(2);
 await access(jpPath);
 assert.ok(index.includes('<link rel="preload" href="'+jpPreload+'" as="font" type="font/woff2" crossorigin fetchpriority="high">'),"Bundled Noto Serif JP preload is missing");
 assert.ok(index.indexOf('rel="preload" href="'+jpPreload) < index.indexOf('data-kanji5-react-styles'),"Noto Serif JP preload must be discoverable before the app stylesheet");
-assert.ok(css.includes('@font-face{font-family:"Noto Serif JP";'),"Local Noto Serif JP @font-face is missing");
+assert.ok(jpCss.includes('font-family:"Noto Serif JP"'),"Local Noto Serif JP @font-face is missing");
 assert.doesNotMatch(index,/fonts\.googleapis\.com\/css2\?[^"]*Noto\+Serif\+JP/,"Noto Serif JP must not depend on the Google Fonts CSS request");
+assert.ok(jpCss.includes("./assets/NotoSerifJP-Regular.subset.woff2"),"Local Noto Serif JP source asset path is missing");
 
 const vazirPreloadMatch=index.match(/<link rel="preload" href="(\.\/react-dist\/assets\/[^"?#]+\.woff2)" as="font" type="font\/woff2" crossorigin fetchpriority="high">/);
 assert.ok(vazirPreloadMatch,"Bundled Vazirmatn font preload is missing");
