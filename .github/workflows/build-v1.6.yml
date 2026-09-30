@@ -1,5 +1,5 @@
 # v1.6 validation workflow — deterministic, source-immutable CI
-name: Build Kanji 5 v1.6
+name: Build Kanji 5 shared runtime contracts
 on:
   pull_request:
     branches: [main]
