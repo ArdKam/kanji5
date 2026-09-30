@@ -128,7 +128,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
-  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});\n  const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
