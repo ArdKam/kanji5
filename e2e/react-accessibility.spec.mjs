@@ -58,6 +58,69 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   await expect(page.locator('#exercise')).toHaveAttribute('tabindex','-1');
 });
 
+test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
+  await clean(page);
+
+  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
+  const tile=page.locator('.kanji-catalog-tile').first();
+  await expect(tile).toBeVisible({timeout:10000});
+  await tile.dispatchEvent('click');
+
+  const dialog=page.locator('.dictionary-card-dialog:visible');
+  await expect(dialog).toBeVisible();
+  const dialogBounds=await dialog.boundingBox();
+  expect(dialogBounds?.height ?? 0).toBeGreaterThan(400);
+  const tabs=dialog.getByRole('tab');
+  await expect(tabs).toHaveCount(5);
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForTimeout(100);
+  const mobileNav=dialog.locator('.dictionary-section-nav');
+  const mobileMetrics=await mobileNav.evaluate((nav)=>({
+    clientWidth:nav.clientWidth,
+    scrollWidth:nav.scrollWidth,
+    tabs:Array.from(nav.querySelectorAll('.dictionary-section-tab')).map((tab)=>{
+      const r=tab.getBoundingClientRect();
+      return {left:r.left,right:r.right,width:r.width};
+    }),
+  }));
+  expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.clientWidth+1);
+  const navBounds=await mobileNav.boundingBox();
+  expect(navBounds).not.toBeNull();
+  const navLeft=navBounds?.x ?? 0;
+  const navRight=navLeft+(navBounds?.width ?? 0);
+  for(const tab of mobileMetrics.tabs){
+    expect(tab.width).toBeGreaterThanOrEqual(40);
+    expect(tab.left).toBeGreaterThanOrEqual(navLeft-1);
+    expect(tab.right).toBeLessThanOrEqual(navRight+1);
+  }
+  const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
+  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
+  await expect(overview).toHaveAttribute('aria-selected','true');
+  await expect(structure).toHaveAttribute('aria-selected','false');
+  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
+
+  const initialScroll=await dialog.evaluate((node)=>node.scrollTop);
+  expect(initialScroll).toBe(0);
+
+  await structure.click();
+  await expect(structure).toHaveAttribute('aria-selected','true');
+  await expect(overview).toHaveAttribute('aria-selected','false');
+  const controls=await structure.getAttribute('aria-controls');
+  expect(controls).toBeTruthy();
+  await expect(dialog.locator('#'+controls)).toBeVisible();
+  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
+
+  const content=dialog.locator('.dictionary-card-content');
+  await expect(content).toHaveCount(1);
+  const structureScroll=await content.evaluate((node)=>node.scrollTop);
+  expect(structureScroll).toBe(0);
+  await structure.press('ArrowRight');
+  await expect(overview).toHaveAttribute('aria-selected','true');
+  await overview.press('ArrowLeft');
+  await expect(structure).toHaveAttribute('aria-selected','true');
+});
+
 test('learning card reveal moves focus out of the aria-hidden face and emits no aria-hidden focus warning', async ({page})=>{
   const ariaWarnings=[];
   page.on('console',message=>{
