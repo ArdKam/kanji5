@@ -120,7 +120,7 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 @media(max-width:760px){
   .learning-back-pager-track{transition-duration:.46s;}
   .learning-back-page.active .learning-back-scroll{animation-duration:.4s;}
-  .learning-back-page-nav{margin:0 0 6px;min-height:44px;gap:2px;}
+  .learning-back-page-nav{direction:ltr;margin:0 0 6px;min-height:44px;gap:2px;}
   .learning-back-page-shortcut{flex-basis:44px;width:44px;height:44px;min-width:44px;min-height:44px;}
 }
 @media(prefers-reduced-motion:reduce){
