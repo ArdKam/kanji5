@@ -246,6 +246,8 @@ test("learning card replaces passive pager dots with direct page shortcuts", asy
     await expect(nav).toBeVisible();
     const shortcuts = nav.locator(".learning-back-page-shortcut");
     await expect(shortcuts).toHaveCount(4);
+    await expect(nav).toHaveCSS("direction", "ltr");
+    await expect(shortcuts.nth(2)).toBeEnabled({ timeout: 10000 });
     await expect(shortcuts.nth(0)).toHaveAttribute("aria-label", "Stroke order");
     await expect(shortcuts.nth(1)).toHaveAttribute("aria-label", "Personal mnemonic");
     await expect(shortcuts.nth(2)).toHaveAttribute("aria-label", "Vocabulary examples");
