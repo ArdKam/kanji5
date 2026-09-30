@@ -310,7 +310,7 @@ test('Active Recall keeps custom study secondary until explicitly opened', async
   const custom=page.locator('.practice-custom-study');
   await expect(custom).toBeVisible();
   await expect(custom).not.toHaveAttribute('open');
-  await expect(custom.getByRole('button',{name:'شروع تمرین شخصی'})).toHaveCount(0);
+  await expect(custom.getByRole('button',{name:'شروع مطالعه',exact:true})).toHaveCount(0);
   await custom.locator('summary').click();
   await expect(custom).toHaveAttribute('open','');
   await expect(custom.getByRole('button',{name:'شروع تمرین شخصی'})).toBeVisible();
