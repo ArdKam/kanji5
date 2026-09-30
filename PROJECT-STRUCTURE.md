@@ -86,3 +86,49 @@ npm run build
 This writes the shipped bundle to `react-dist/`.
 
 When investigating a UI bug, prefer changing the source under `frontend/` rather than editing generated JavaScript/CSS in `react-dist/`.
+
+## CI/workflow guide
+
+Workflow filenames preserve their historical names, so the filename alone is not always the best description of scope.
+
+| Workflow file | Actual role |
+| --- | --- |
+| `.github/workflows/react-frontend.yml` | Current React presentation build, shipped-artifact validation, and React/browser release gates. |
+| `.github/workflows/build-v1.8.yml` | v1.8 compatibility plus current v1.9 learning-engine validation and aggregate engine gates. |
+| `.github/workflows/build-v1.7.yml` | Adaptive-recall contract/unit validation retained for that engine layer. |
+| `.github/workflows/build-v1.6.yml` | Broad historical contract/release validation that still checks shared runtime contracts used by current releases. |
+| `.github/workflows/pages-deploy.yml` | Builds the current frontend, syncs generated release artifacts, runs release checks, and deploys GitHub Pages. |
+
+Do not rename or move workflow files merely to make the names prettier without checking path filters, workflow references, and release automation first.
+
+## Generated and compatibility artifacts
+
+The primary generated React files are:
+
+- `react-dist/kanji5-react.js`
+- `react-dist/kanji5-react.css`
+
+The repository also carries release-specific generated/compatibility artifacts such as:
+
+- `react-dist/kanji5-react-release18.js`
+- `react-dist/kanji5-react-release18.css`
+- `sw-release18.js`
+- `sw-release19.js`
+
+These files are part of the current repository/release wiring. Treat them as generated or compatibility outputs rather than source-of-truth UI code.
+
+The React build is produced with:
+
+```bash
+cd frontend
+npm run typecheck
+npm run build
+```
+
+This writes the current React bundle to `react-dist/`.
+
+When investigating a UI bug, prefer changing the source under `frontend/` rather than editing generated JavaScript/CSS in `react-dist/`.
+
+## GitHub presentation metadata
+
+`.gitattributes` marks `react-dist/` as generated and `vendor/` as vendored for GitHub's repository presentation. This changes repository browsing/statistics only; it does not change runtime behavior.
