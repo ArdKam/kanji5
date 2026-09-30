@@ -22,6 +22,7 @@ import {
   clearTransient,
   dontKnow,
   getComponentInfo,
+  getVocabulary,
   getMnemonic,
   nextExercise,
   rateLearning,
@@ -199,14 +200,38 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   },[card.character,mnemonicBusy,personalMnemonic,preparedMnemonic]);
   const displayedOn=(card.on??[]).map(v=>hiraganaReadings?toHiragana(v):v);
   const displayedKun=(card.kun??[]).map(v=>hiraganaReadings?toHiragana(v):v);
-  const exampleCount=(card.examples??[]).length;
+  const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
+  const [examplesResolved,setExamplesResolved]=useState(false);
+  const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
+  useEffect(()=>{
+    let active=true;
+    const directExamples=Array.isArray(card.examples)?card.examples:[];
+    if(directExamples.length>0){
+      setVocabularyExamples(directExamples);
+      setExamplesResolved(true);
+      return ()=>{active=false};
+    }
+    setVocabularyExamples([]);
+    setExamplesResolved(false);
+    if(!card.character){setExamplesResolved(true);return ()=>{active=false};}
+    void getVocabulary(card.character).then(result=>{
+      if(!active)return;
+      const items=Array.isArray(result?.items)?result.items.slice(0,6):[];
+      setVocabularyExamples(items);
+      setExamplesResolved(true);
+    }).catch(()=>{
+      if(active)setExamplesResolved(true);
+    });
+    return ()=>{active=false};
+  },[card.character,card.examples?.length]);
+  const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
   const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
   const mnemonicSupport=buildMnemonicSupport({
     character:card.character??"",
     meanings:card.meanings??[],
     on:displayedOn,
     kun:displayedKun,
-    examples:card.examples??[],
+    examples:displayExamples,
     components:componentInfo?.available?(componentInfo.components??[]):[]
   });
   const mnemonicHintContext={
@@ -221,9 +246,8 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
-  const hasExamplesData=Array.isArray(card.examples);
-  const examplesLoading=!hasExamplesData;
-  const hasExamplesPage=examplesLoading||exampleCount>0;
+  const examplesLoading=!examplesResolved;
+  const hasExamplesPage=examplesLoading||displayExamples.length>0;
   const backPageCount=hasExamplesPage?4:3;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
@@ -355,7 +379,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             </div>
             {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
-                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{card.examples?.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
+                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{displayExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
               </div>
             </div>:null}
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
