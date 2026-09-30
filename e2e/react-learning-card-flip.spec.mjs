@@ -133,7 +133,7 @@ test("learning first page keeps readings above the rating footer on desktop", as
   const readingsBounds = await readings.boundingBox();
   const footerBounds = await footer.boundingBox();
   if (!readingsBounds || !footerBounds) throw new Error("Learning readings/footer geometry unavailable");
-  expect(readingsBounds.bottom).toBeLessThanOrEqual(footerBounds.top + 1);
+  expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
 });
 
 test("learning card stays within a short desktop landscape viewport", async ({ page }) => {
@@ -246,17 +246,17 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async 
   await routeExamples(page, 5);
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
-    await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
-    await page.goto("/");
-    const card = page.locator("#root .learning-card");
-    await expect(card).toBeVisible({ timeout: 20000 });
-    await card.getByRole("button", { name: "Show kanji information" }).click();
-    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-    await page.waitForTimeout(520);
+    const card = await revealLearningCard(page, "en");
+    await expect(card).toHaveAttribute("data-back-page-count", "4", { timeout: 10000 });
 
     const page1 = card.locator(".learning-back-page").nth(0);
     const page1Utilities = page1.locator(".learning-back-utilities");
-    await expect(page1Utilities.locator(".learning-back-utility")).toHaveCount(2);
+    await expect(page1Utilities.locator(".learning-back-utility")).toHaveCount(3);
+    await expect(page1Utilities.getByRole("button", { name: "Meaning & structure" })).toHaveCount(0);
+    await expect(page1Utilities.getByRole("button", { name: "Vocabulary examples" })).toHaveCount(1);
+    await expect(page1Utilities.getByRole("button", { name: "Personal mnemonic" })).toHaveCount(1);
+    await expect(page1Utilities.getByRole("button", { name: "Stroke order" })).toHaveCount(1);
+
     const utilityMetrics = await page1Utilities.locator(".learning-back-utility").evaluateAll((buttons) =>
       buttons.map((button) => {
         const style = getComputedStyle(button);
@@ -271,24 +271,51 @@ test("learning card exposes compact Mnemonic and Stroke Order shortcuts", async 
       expect(metric.height).toBeGreaterThanOrEqual(44);
     }
 
-    await page1Utilities.locator(".learning-back-utility").nth(0).dispatchEvent("click");
+    const readingsBox = await page1.locator(".learning-back-readings-block").boundingBox();
+    const utilitiesBox = await page1Utilities.boundingBox();
+    const footerBox = await card.locator(".learning-back-footer").boundingBox();
+    expect(readingsBox).not.toBeNull();
+    expect(utilitiesBox).not.toBeNull();
+    expect(footerBox).not.toBeNull();
+    expect(utilitiesBox.y).toBeGreaterThanOrEqual(readingsBox.y + readingsBox.height - 1);
+
+    await page1Utilities.scrollIntoViewIfNeeded();
+    const scrolledUtilitiesBox = await page1Utilities.boundingBox();
+    const scrolledFooterBox = await card.locator(".learning-back-footer").boundingBox();
+    expect(scrolledUtilitiesBox).not.toBeNull();
+    expect(scrolledFooterBox).not.toBeNull();
+    expect(scrolledUtilitiesBox.y + scrolledUtilitiesBox.height).toBeLessThanOrEqual(scrolledFooterBox.y + 1);
+
+    await page1Utilities.getByRole("button", { name: "Personal mnemonic" }).click();
     await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
-    await goToBackPage(page, card, 1);
-    await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
-    const page2 = card.locator(".learning-back-page").nth(1);
-    await expect(page2.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(2);
-    await page2.locator(".learning-back-utilities .learning-back-utility").nth(1).dispatchEvent("click");
-    await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
-    await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
-    await goToBackPage(page, card, 2);
-    await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
+
     const page3 = card.locator(".learning-back-page").nth(2);
-    await expect(page3.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(1);
-    await page3.locator(".learning-back-utilities .learning-back-utility").dispatchEvent("click");
+    await expect(page3.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
+    await expect(page3.locator(".learning-back-utilities").getByRole("button", { name: "Personal mnemonic" })).toHaveCount(0);
+    await page3.locator(".learning-back-utilities").getByRole("button", { name: "Vocabulary examples" }).click();
+    await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
+
+    const page2 = card.locator(".learning-back-page").nth(1);
+    await expect(page2.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
+    await expect(page2.locator(".learning-back-utilities").getByRole("button", { name: "Vocabulary examples" })).toHaveCount(0);
+    await page2.locator(".learning-back-utilities").getByRole("button", { name: "Meaning & structure" }).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
+
+    await card.locator(".learning-back-page.active .learning-back-utilities").getByRole("button", { name: "Stroke order" }).click();
     await expect(card.locator(".learning-back-page").nth(3)).toHaveClass(/active/);
+    await page.waitForTimeout(520);
+    await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-order-panel")).toBeVisible();
+
+    const page4 = card.locator(".learning-back-page").nth(3);
+    await expect(page4.locator(".learning-back-utilities .learning-back-utility")).toHaveCount(3);
+    await expect(page4.locator(".learning-back-utilities").getByRole("button", { name: "Stroke order" })).toHaveCount(0);
+    await page4.locator(".learning-back-utilities").getByRole("button", { name: "Meaning & structure" }).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
   }
 });
-
 test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
   await routeExamples(page, 5);
   await page.addInitScript(() => {
