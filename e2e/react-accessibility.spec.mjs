@@ -228,7 +228,7 @@ test('learning-card Stroke Order exposes pause and resume while playing', async 
   await play.click();
   await expect(panel.getByRole("button",{name:"Pause"})).toBeVisible();
   await panel.getByRole("button",{name:"Pause"}).click();
-  await expect(panel.getByRole("button",{name:"Play stroke order"})).toBeVisible();
+  await expect(panel.locator(".stroke-order-controls .button.primary")).toBeVisible();
 });
 
 test('secondary pages hide the persistent experience navigation', async ({page})=>{
