@@ -303,6 +303,19 @@ test('dictionary search exposes a stable no-results state and selection dialog r
 });
 
 
+test('Active Recall keeps custom study secondary until explicitly opened', async ({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('.practice-home')).toBeVisible({timeout:10000});
+  const custom=page.locator('.practice-custom-study');
+  await expect(custom).toBeVisible();
+  await expect(custom).not.toHaveAttribute('open');
+  await expect(custom.getByRole('button',{name:'شروع تمرین شخصی'})).toHaveCount(0);
+  await custom.locator('summary').click();
+  await expect(custom).toHaveAttribute('open','');
+  await expect(custom.getByRole('button',{name:'شروع تمرین شخصی'})).toBeVisible();
+});
+
 test('React presentation stays usable at the narrow 320px boundary without horizontal overflow',async({page})=>{
   await clean(page);
   await page.setViewportSize({width:320,height:800});
