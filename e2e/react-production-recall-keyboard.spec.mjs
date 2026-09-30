@@ -38,8 +38,12 @@ test("Production Recall Space reveals the answer only from the exercise surface"
 
     const exercise=page.locator("#root #exercise");
     await expect(exercise.locator("kbd")).toHaveText("Space");
-    await exercise.focus();
+    await page.evaluate(()=>window.scrollTo({top:Math.min(160,document.documentElement.scrollHeight),behavior:"auto"}));
+    const scrollBefore=await page.evaluate(()=>window.scrollY);
+    await exercise.evaluate(el=>el.focus({preventScroll:true}));
     await page.keyboard.press("Space");
+
+    await expect.poll(async()=>page.evaluate(()=>window.scrollY)).toBe(scrollBefore);
 
     await expect(exercise.locator(".production-recall-revealed")).toBeVisible();
     await expect(exercise.getByRole("button",{name:"بلد بودم"})).toBeVisible();
