@@ -32,15 +32,41 @@ function runtimePresentationData(now=Date.now()){
   const app=state.readAppState?.()||{},deck=state.readDeck?.()||[],cards=app.cards&&typeof app.cards==='object'?app.cards:{};
   const settings={...(state.DEFAULTS||{}),...(app.settings||{}),...(state.readSettings?.()||{})};
   const reviews=state.readReviews?.()||[];
-  const dueCount=deck.filter(item=>{const due=cards[item.id]?.card?.due;const t=due?Date.parse(due):NaN;return Number.isFinite(t)&&t<=now}).length;
-  const newCount=Math.min(Math.max(0,Number(app.todayNew)||0),Math.max(1,Number(settings.dailyNew)||5));
-  const masteredCount=deck.filter(item=>{const card=cards[item.id]?.card;return Boolean(card&&card.state===2&&(Number(card.scheduled_days)||0)>=21)}).length;
-  const upcoming=deck.map(item=>{const due=cards[item.id]?.card?.due;const t=due?Date.parse(due):NaN;return Number.isFinite(t)&&t>now?{character:item.character,dueAt:new Date(t).toISOString()}:null}).filter(Boolean).sort((a,b)=>Date.parse(a.dueAt)-Date.parse(b.dueAt)).slice(0,6);
+  let dueCount=0,masteredCount=0;
+  const upcoming=[];
+  for(const item of deck){
+    const card=cards[item.id]?.card;
+    const due=card?.due;
+    const t=due?Date.parse(due):NaN;
+    if(Number.isFinite(t)){
+      if(t<=now)dueCount++;
+      else upcoming.push({character:item.character,dueAt:new Date(t).toISOString()});
+    }
+    if(card&&card.state===2&&(Number(card.scheduled_days)||0)>=21)masteredCount++;
+  }
+  upcoming.sort((a,b)=>Date.parse(a.dueAt)-Date.parse(b.dueAt));
   const totalReviews=reviews.length;
-  const nonAgainReviews=reviews.filter(item=>String(item.rating||'')!=='Again').length;
+  let nonAgainReviews=0;
   const days=[];
-  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const key=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);days.push({label:new Intl.DateTimeFormat('fa-IR',{weekday:'short'}).format(d),count:reviews.filter(item=>String(item.at||'').slice(0,10)===key).length})}
-  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming,settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:Object.values(cards).filter(item=>item?.leech).length,last7:days}};
+  const keyFormatter=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const labelFormatter=new Intl.DateTimeFormat('fa-IR',{weekday:'short'});
+  const dayBuckets=new Map();
+  for(let i=6;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const key=keyFormatter.format(d);
+    days.push({label:labelFormatter.format(d),count:0,key});
+    dayBuckets.set(key,days.length-1);
+  }
+  for(const item of reviews){
+    if(String(item.rating||'')!=='Again')nonAgainReviews++;
+    const dayIndex=dayBuckets.get(String(item.at||'').slice(0,10));
+    if(dayIndex!==undefined)days[dayIndex].count++;
+  }
+  const trimmedDays=days.map(({label,count})=>({label,count}));
+  let leechCount=0;
+  for(const item of Object.values(cards))if(item?.leech)leechCount++;
+  const newCount=Math.min(Math.max(0,Number(app.todayNew)||0),Math.max(1,Number(settings.dailyNew)||5));
+  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming.slice(0,6),settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount,last7:trimmedDays}};
 }
 
 function activeSession(){const current=window.__KANJI5_V16_SESSION_API__?.getSession?.();if(current?.started&&!current?.finished)return current;const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
