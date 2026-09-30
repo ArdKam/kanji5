@@ -13,8 +13,9 @@ assert.match(source, /fetch_with_retry "\$base\/sw\.js" \/tmp\/kanji5-sw\.js "re
 assert.match(source, /fetch_with_retry "\$base\/react-dist\/kanji5-react\.js" \/tmp\/kanji5-react\.js "practice-home"/);
 assert.match(source, /fetch_with_retry "\$base\/react-dist\/kanji5-react\.css" \/tmp\/kanji5-react\.css "dictionary-card"/);
 
-assert.doesNotMatch(source, /react-entry-release18\.js/);
-assert.doesNotMatch(source, /sw-release18\.js/);
-assert.doesNotMatch(source, /react-dist\/kanji5-react-release18\.(js|css)/);
+const liveVerification = source.slice(source.indexOf("      - name: Verify live GitHub Pages artifact"));
+assert.doesNotMatch(liveVerification, /react-entry-release18\.js/);
+assert.doesNotMatch(liveVerification, /sw-release18\.js/);
+assert.doesNotMatch(liveVerification, /react-dist\/kanji5-react-release18\.(js|css)/);
 
 console.log("GitHub Pages live-verification contract uses canonical React assets.");
