@@ -1500,6 +1500,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 /* Account Hub v2: one coherent surface, restrained Sumi Play hierarchy. */
 .secondary-page-host:has(.account-dialog) > .secondary-page-back{display:none;}
 
+.dialog.secondary-page-dialog.account-dialog{position:relative;}
 .account-dialog{position:relative;max-width:660px;}
 .account-dialog-close{position:absolute!important;inset-block-start:12px;inset-inline-end:12px;float:none!important;border:0!important;background:transparent!important;z-index:2;}
 .account-page-header{display:flex;align-items:center;padding:4px 44px 16px 0;border-bottom:1px solid var(--line);margin-bottom:16px;}
