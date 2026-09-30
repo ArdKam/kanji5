@@ -172,3 +172,6 @@ jobs:
       - name: Run Review/Practice separation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
+      - name: Run Production Recall keyboard gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-production-recall-keyboard.spec.mjs

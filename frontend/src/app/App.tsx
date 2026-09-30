@@ -529,6 +529,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
     choices=(ex.choices??[]).slice(0,4),
     production=ex.mode==="production";
   const lockedRef=useRef(false);
+  const productionRevealKeyConsumedRef=useRef(false);
   const exerciseKey=String(ex.contentId??"")+"|"+String(ex.mode??"")+"|"+String(ex.character??"");
   const previousKeyRef=useRef(exerciseKey);
 
@@ -536,12 +537,31 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
     if(previousKeyRef.current!==exerciseKey){
       previousKeyRef.current=exerciseKey;
       lockedRef.current=false;
+      productionRevealKeyConsumedRef.current=false;
       setAnswer("");
       setResult(null);
       setProductionRevealed(false);
       setShowProductionOptions(false);
     }
   },[exerciseKey]);
+
+  useEffect(()=>{
+    if(!production||productionRevealed||busy||result)return;
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.defaultPrevented||(event.code!=="Space"&&event.key!==" "))return;
+      const active=document.activeElement;
+      if(active instanceof HTMLElement){
+        if(active.isContentEditable)return;
+        if(active.closest("input,textarea,select,button,a,summary,[role],[contenteditable='true']"))return;
+      }
+      if(productionRevealKeyConsumedRef.current)return;
+      productionRevealKeyConsumedRef.current=true;
+      event.preventDefault();
+      setProductionRevealed(true);
+    };
+    window.addEventListener("keydown",onKeyDown);
+    return()=>window.removeEventListener("keydown",onKeyDown);
+  },[busy,production,productionRevealed,result]);
 
   const waitForFeedbackAnimation=useCallback(async(correct:boolean)=>{
     const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
