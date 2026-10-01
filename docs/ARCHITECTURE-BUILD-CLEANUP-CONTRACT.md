@@ -78,6 +78,8 @@ Do not maintain duplicate release18/release19 React artifacts unless an active p
 
 Replace hand-maintained cache-busting where practical with deterministic build/release provenance.
 
+For Pages releases, the exact source commit SHA is the canonical release key and is materialized into build-time placeholders before staging.
+
 Do not introduce cache changes that can serve stale HTML, JS, CSS, fonts, or service-worker manifests.
 
 Verify:
