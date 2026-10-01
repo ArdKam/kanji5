@@ -3,7 +3,13 @@ const IS_LEGACY = new URLSearchParams(location.search).get('legacy') === '1';
 let createEmptyCard, fsrs, Rating;
 const FSRS_URL="./vendor/ts-fsrs-5.4.1.mjs";
 let fsrsPromise=null;
-const loadFsrs=()=>fsrsPromise||(fsrsPromise=(window.__KANJI5_P0_FSRS_PROMISE?window.__KANJI5_P0_FSRS_PROMISE.then(mod=>{if(!mod)throw new Error("FSRS_PREFETCH_FAILED");return mod}):import(FSRS_URL)).then(mod=>({mod,fsrs:mod.fsrs,createEmptyCard:mod.createEmptyCard,Rating:mod.Rating})).catch(error=>{fsrsPromise=null;throw error;}));
+const loadFsrs=()=>{
+  if(fsrsPromise)return fsrsPromise;
+  const shared=window.__KANJI5_P0_FSRS_PROMISE;
+  const loadPromise=shared?shared.then(mod=>{if(!mod)throw new Error("FSRS_PREFETCH_FAILED");return mod}):import(FSRS_URL);
+  fsrsPromise=loadPromise.then(mod=>({mod,fsrs:mod.fsrs,createEmptyCard:mod.createEmptyCard,Rating:mod.Rating})).catch(error=>{fsrsPromise=null;throw error;});
+  return fsrsPromise;
+};
 async function ensureFsrs(){if(fsrs&&createEmptyCard&&Rating)return true;const loaded=await loadFsrs();({createEmptyCard,fsrs,Rating}=loaded);if(!scheduler)initScheduler();return true;}
 const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
