@@ -247,6 +247,12 @@ export function resetProgress(): boolean {
   return Boolean(window.__KANJI5_V19_V2_BOUNDARY__?.resetProgress?.());
 }
 
+export async function startLearningSession(): Promise<void> {
+  await waitForEngine();
+  const session = window.__KANJI5_V16_SESSION_API__;
+  if (session?.startExperience) await session.startExperience("review");
+}
+
 export async function startLearningExperience(): Promise<void> {
   const boundary = await waitForEngine();
   await boundary.clearCustomStudyFilter?.();
