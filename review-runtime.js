@@ -34,7 +34,7 @@ function jlptRank(item){const rank={N5:0,N4:1,N3:2,N2:3,N1:4};return rank[item?.
 function newCardPriority(item,knowledge,now=Date.now()){const entry=knowledge?.[item.character]||{};const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;return educationQueuePriority(item,knowledge,now)+Math.min(1,ageDays/30)*.1}
 function buildDefaultQueue(){
   let knowledge={};
-  try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){}
+  try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}
   const now=Date.now();
   const dueItems=state.deck.filter(item=>state.cards[item.id]?.card&&dueNow(state.cards[item.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));
   dueItems.sort((a,b)=>{
@@ -82,7 +82,7 @@ async function setCustomStudyFilter(filter={}){
 function clearCustomStudyFilter(){
   if(!customStudyFilter)return true;
   customStudyFilter=null;
-  try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){ }
+  try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}
   buildQueue();
   state.current=null;
   state.revealed=false;
