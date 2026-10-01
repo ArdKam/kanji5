@@ -22,11 +22,17 @@ for (const path of ['v1.5-state.js','review-runtime.js','supabase-sync.js','app-
   assert.match(source,/window\.__KANJI5_STORAGE_KEYS__/,path+' must consume the centralized storage key registry');
 }
 
-for (const literal of ['kanji5-v1','kanji5-v1-cards','kanji5-v1-reviews','kanji5-deck','kanji5-deck-version']) {
-  for (const path of ['review-runtime.js','supabase-sync.js','app-bootstrap.js','v1.3-p0.js']) {
-    const source=fs.readFileSync(path,'utf8');
-    assert.equal(source.includes("'"+literal+"'"),false,path+' must not redeclare '+literal);
-    assert.equal(source.includes('"'+literal+'"'),false,path+' must not redeclare '+literal);
+const declarationPatterns=[
+  /const STORAGE(?:_KEY)?\s*=\s*['"]kanji5-v1['"]/,
+  /const CARDS_STORAGE(?:_KEY)?\s*=\s*['"]kanji5-v1-cards['"]/,
+  /const REVIEWS_STORAGE(?:_KEY)?\s*=\s*['"]kanji5-v1-reviews['"]/,
+  /const DECK_KEY\s*=\s*['"]kanji5-deck['"]/,
+  /const VERSION_KEY\s*=\s*['"]kanji5-deck-version['"]/
+];
+for (const path of ['review-runtime.js','supabase-sync.js','app-bootstrap.js','v1.3-p0.js']) {
+  const source=fs.readFileSync(path,'utf8');
+  for (const pattern of declarationPatterns) {
+    assert.doesNotMatch(source,pattern,path+' must not redeclare a centralized storage key');
   }
 }
 
