@@ -21,6 +21,16 @@ test("engine exercise state reaches React and remains isolated from the Learning
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20_000 });
   await waitForBoundary(page);
 
+  await expect(page.locator(".learning-card")).toBeVisible({ timeout: 10_000 });
+  const character = await page.locator(".learning-card .kanji-display").textContent();
+  await page.locator(".learning-card .button.wide").click();
+  await expect(page.locator(".learning-card .rating-good")).toBeVisible({ timeout: 5_000 });
+  await page.locator(".learning-card .rating-good").click();
+  await expect.poll(async () => page.evaluate(async () => Boolean((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).session?.status))).not.toBe("");
+  await page.evaluate((target) => {
+    window.__KANJI5_V19_RECOVERY_TARGET__ = { character: target, mode: "reading", contentId: target };
+  }, String(character || "").trim());
+
   await page.getByRole("button", { name: /Active Recall|یادآوری فعال/i }).click();
   await expect(page.locator(".practice-start-button")).toBeVisible({ timeout: 5_000 });
   await page.locator(".practice-start-button").click();
