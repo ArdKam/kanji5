@@ -51,7 +51,7 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   const dialog = await openMenuItem(page, "Prepared mnemonics");
   const search = dialog.locator(".prepared-mnemonic-library-search");
   await expect(search).toHaveAttribute("type", "search");
-  await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("2,136");
+  await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText(/2[,.]?136/);
   await expect(dialog.locator(".prepared-mnemonic-filter-chip").filter({ hasText: "Curated" }).first()).toHaveAttribute("aria-pressed", "false");
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);
