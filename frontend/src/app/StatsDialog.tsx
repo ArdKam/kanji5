@@ -22,7 +22,7 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
   const todayIndex = Math.max(0, counts.length - 1);
 
   return (
-    <section className="stats-section stats-activity" aria-labelledby="stats-activity-title">
+    <section className="stats-section stats-activity stats-activity-section" aria-labelledby="stats-activity-title">
       <div className="stats-section-heading">
         <div>
           <p className="eyebrow">{language === "fa" ? "فعالیت" : "Activity"}</p>
