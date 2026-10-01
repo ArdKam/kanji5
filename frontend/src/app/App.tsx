@@ -28,6 +28,7 @@ import {
   rateLearning,
   resetProgress,
   snapshot as readSnapshot,
+  startupSnapshot as readStartupSnapshot,
   revealLearning,
   startExercise,
   startPracticeExperience,
@@ -856,7 +857,7 @@ function LoadingInsights(){
 }
 
 function App(){
-  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   useEffect(()=>applyLanguage(language),[language]);
   useEffect(()=>{
     if(!mnemonicsOpen)return;
@@ -890,7 +891,35 @@ function App(){
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
   const experienceRef=useRef<"review"|"practice"|"dictionary">("review");
   const changeExperience=useCallback((next:"review"|"practice"|"dictionary")=>{experienceRef.current=next;setExperience(next)},[]);
-  useEffect(()=>{let mounted=true;void startLearningExperience().then(async()=>{if(!mounted)return;if(experienceRef.current==="practice")await startPracticeExperience();else if(experienceRef.current==="dictionary"){await clearCustomStudyFilter();await clearTransient()}}).catch(()=>{});const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d)setSnapshot(d)};void refresh().then(()=>document.addEventListener("kanji5:v1.9-v2-view-models",listener)).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});return()=>{mounted=false;document.removeEventListener("kanji5:v1.9-v2-view-models",listener)}},[refresh]);
+  useEffect(()=>{
+    let mounted=true;
+    const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d){setSnapshot(d);setSnapshotHydrated(true)}};
+    document.addEventListener("kanji5:v1.9-v2-view-models",listener);
+    void startLearningExperience().then(async()=>{
+      if(!mounted)return;
+      if(experienceRef.current==="practice")await startPracticeExperience();
+      else if(experienceRef.current==="dictionary"){await clearCustomStudyFilter();await clearTransient()}
+    }).catch(()=>{});
+    void readStartupSnapshot().then(s=>{
+      if(!mounted)return;
+      setSnapshot(s);
+      setSnapshotHydrated(false);
+      const schedule=()=>{
+        if(!mounted)return;
+        void refresh().then(full=>{
+          if(!mounted)return;
+          setSnapshot(full);
+          setSnapshotHydrated(true);
+        }).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});
+      };
+      if("requestIdleCallback" in window)window.requestIdleCallback(schedule,{timeout:1800});
+      else window.setTimeout(schedule,120);
+    }).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});
+    return()=>{
+      mounted=false;
+      document.removeEventListener("kanji5:v1.9-v2-view-models",listener);
+    };
+  },[refresh]);
   const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
   async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
@@ -979,9 +1008,9 @@ function App(){
         /> : null}
         {secondaryPage==="account" ? <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/> : null}
       </section></Suspense> : showDictionary?<Suspense fallback={<LoadingLearning/>}><DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
-        {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
-              {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
-              {!showExercise?(snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
+        {!showExercise?(snapshotHydrated&&snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
+              {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
+              {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
