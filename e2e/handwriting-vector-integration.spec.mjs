@@ -52,6 +52,17 @@ async function drawReference(page,canvas,strokes){
   }
 }
 
+async function seedSeenCard(page){
+  const card=page.locator("#root .learning-card");
+  await expect(card).toBeVisible({timeout:10000});
+  const reveal=card.locator(".learning-card-front .button.primary.wide");
+  await expect(reveal).toBeVisible({timeout:10000});
+  await reveal.click();
+  await expect(card.locator(".rating-good")).toBeVisible({timeout:10000});
+  await card.locator(".rating-good").click();
+  await expect(page.locator("#root .learning-card")).toBeVisible({timeout:10000});
+}
+
 test.setTimeout(45000);
 
 test("handwriting UI captures and grades a complete reference trace",async({page})=>{
@@ -167,10 +178,12 @@ test("handwriting UI remains usable in English and reduced-motion mode",async({p
   }));
   await clean(page);
   await page.getByRole("button",{name:"بیشتر",exact:true}).click();
-  await page.locator("#header-tools-menu").getByRole("button",{name:"تنظیمات",exact:true}).click();
-  const settings=page.getByRole("dialog");
-  await settings.getByRole("button",{name:"English",exact:true}).click();
-  await settings.getByRole("button",{name:"Close",exact:true}).last().click();
+  const menu=page.locator("#header-tools-menu");
+  await expect(menu).toHaveClass(/open/);
+  await menu.getByRole("button",{name:"English",exact:true}).click();
+  await expect(page.locator("html")).toHaveAttribute("lang","en");
+  await expect(page.locator("html")).toHaveAttribute("dir","ltr");
+  await menu.getByRole("button",{name:"close",exact:true}).click();
   await page.emulateMedia({reducedMotion:"reduce"});
   await page.setViewportSize({width:390,height:844});
   const handwriting=await openSchoolHandwriting(page);
@@ -187,10 +200,11 @@ test("handwriting UI remains usable in English and reduced-motion mode",async({p
 
 test("handwriting is an optional skill-building layer inside Practice",async({page})=>{
   await clean(page);
+  await seedSeenCard(page);
   await expect(page.locator(".practice-handwriting")).toHaveCount(0);
-  await page.locator(".experience-nav .experience-tab").nth(1).click();
+  await page.getByRole("button",{name:"یادآوری فعال",exact:true}).click();
   await expect(page.locator(".practice-home")).toBeVisible({timeout:20000});
-  await page.locator(".practice-start-button").click();
+  await page.getByRole("button",{name:"شروع تمرین",exact:true}).click();
   await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
   await page.evaluate(async()=>{
@@ -214,9 +228,10 @@ test("handwriting is an optional skill-building layer inside Practice",async({pa
 
 test("handwriting prompts reuse active exercise stimuli",async({page})=>{
   await clean(page);
-  await page.locator(".experience-nav .experience-tab").nth(1).click();
+  await seedSeenCard(page);
+  await page.getByRole("button",{name:"یادآوری فعال",exact:true}).click();
   await expect(page.locator(".practice-home")).toBeVisible({timeout:20000});
-  await page.locator(".practice-start-button").click();
+  await page.getByRole("button",{name:"شروع تمرین",exact:true}).click();
   await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
   const cases=[
@@ -236,18 +251,15 @@ test("handwriting prompts reuse active exercise stimuli",async({page})=>{
 });
 
 test('handwriting vector loading failure exposes retry and recovers on the next attempt',async({page})=>{
-  await page.addInitScript(()=>{
-    const nativeFetch=window.fetch.bind(window);
-    let attempts=0;
-    Object.defineProperty(window,'__KANJI5_HANDWRITING_FETCH_ATTEMPTS',{value:()=>attempts,configurable:true});
-    window.fetch=async(input,init)=>{
-      const url=typeof input==='string'?input:input?.url||'';
-      if(url.endsWith('/kanji/05b66.svg')){
-        attempts+=1;
-        if(attempts===1)throw new TypeError('Failed to fetch');
-      }
-      return nativeFetch(input,init);
-    };
+  let attempts=0;
+  const vectorUrl='https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/05b66.svg';
+  await page.route(vectorUrl,async route=>{
+    attempts+=1;
+    if(attempts===1){
+      await route.fulfill({status:503,contentType:'text/plain',body:'simulated KanjiVG outage'});
+      return;
+    }
+    await route.fulfill({status:200,contentType:'image/svg+xml',body:svgFor('学')});
   });
   await clean(page);
   const handwriting=await openSchoolHandwriting(page);
@@ -256,5 +268,5 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
   await handwriting.getByRole('button',{name:'تلاش دوباره',exact:true}).click();
   await expect(handwriting.locator('.handwriting-error')).toHaveCount(0);
   await expect(handwriting.locator('.handwriting-ink-canvas')).toBeVisible({timeout:10000});
-  expect(await page.evaluate(()=>window.__KANJI5_HANDWRITING_FETCH_ATTEMPTS?.())).toBeGreaterThanOrEqual(2);
+  expect(attempts).toBeGreaterThanOrEqual(2);
 });
