@@ -7,7 +7,7 @@ assert(p0.includes('state.readComponents()'),'Component evidence bridge must rea
 assert(p0.includes('function ensureComponentEntry(character)'),'Component entry initialization missing');
 assert(p0.includes('target.componentEvidence={...componentSignal(entry)'),'Component evidence is not persisted into education knowledge');
 assert(p0.includes('writeSchedulerComponentEvidence(character)'),'Component result is not forwarded to scheduler evidence');
-assert(state.includes('COMPONENT_KEY=\'kanji5-v1.5-components\''),'Canonical component storage key is missing from state module');
+assert(state.includes("components:'kanji5-v1.5-components'"),'Canonical component storage key is missing from state module');
 assert(runtime.includes('entry.componentEvidence?.[mode]?.weakness'),'Education scheduler does not consume component evidence');
 assert(runtime.includes('const componentWeakness=componentValues.length?Math.max(...componentValues):0'),'Component weakness aggregation missing');
 assert(runtime.includes('+componentWeakness*.25'),'Component weakness is not weighted into queue priority');
