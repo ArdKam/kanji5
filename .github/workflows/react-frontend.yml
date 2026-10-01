@@ -131,95 +131,95 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - name: Validate shipped React artifact
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: node scripts/test-react-shipped-artifact.mjs
       - name: Run generated-artifact contracts
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: |
           node scripts/test-performance-font-loading.mjs
           node scripts/test-service-worker-shell.mjs
           node scripts/test-react-release-integrity.mjs
       - name: Run generated-artifact presentation contracts
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: |
           node scripts/test-v2-p3-accessibility.mjs
           node scripts/test-v2-p4-visual.mjs
           node scripts/test-v2-v18-parity.mjs
       - name: Run prepared mnemonic coverage test
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: node scripts/test-prepared-mnemonics.mjs
       - name: Run traditional radical contract test
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: node scripts/test-kanji-radical-system.mjs
       - name: Install root test dependencies
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npm ci
       - name: Run root contract/unit suite
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npm test
       - name: Install Chromium
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright install chromium
       - name: Run engine-to-React boundary gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
       - name: Validate migration boundary
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: node scripts/test-react-migration.mjs
       - name: Run React presentation E2E
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: timeout 120s npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
       - name: Run React secondary experience polish E2E
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-secondary-experience-polish.spec.mjs
       - name: Run startup performance baseline
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/performance-baseline.spec.mjs
       - name: Run Active Recall content readiness E2E
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-active-recall-content.spec.mjs
       - name: Run prepared mnemonic E2E
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-prepared-mnemonic.spec.mjs
       - name: Run mnemonic support E2E
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-mnemonic-support.spec.mjs
       - name: Run React authoritative parity gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-parity.spec.mjs
       - name: Run React offline gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-offline.spec.mjs
       - name: Run Learning/Active Recall session isolation gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-session-isolation.spec.mjs
       - name: Run React accessibility gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-accessibility.spec.mjs
       - name: Run React PWA release gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs
       - name: Run React final release matrix
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-final-release-matrix.spec.mjs
       - name: Run Lovable-style experience navigation gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
       - name: Run account shell gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
       - name: Run statistics dashboard gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/stats-dialog.spec.mjs
       - name: Run learning card flip gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
       - name: Run personal mnemonic gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-personal-mnemonic.spec.mjs
       - name: Run Review/Practice separation gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-review-practice.spec.mjs
       - name: Run Production Recall keyboard gate
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-production-recall-keyboard.spec.mjs
