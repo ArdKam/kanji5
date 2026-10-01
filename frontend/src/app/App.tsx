@@ -483,7 +483,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             </div>
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
-                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
+                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<Suspense fallback={null}><StrokeOrderViewer character={card.character} language={getLanguage()}/></Suspense>:null}</div>
               </div>
             </div>
           </div>
