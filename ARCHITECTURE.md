@@ -29,6 +29,8 @@ The former v1/v2 DOM presentation files and compatibility stylesheet are no long
 
 React build provenance: `frontend/` is the canonical UI source; `react-dist/` is generated only in the build/deploy working tree and is not source-controlled.
 
+Build provenance: deployment assets use the exact source commit SHA as their cache-busting version. The Pages workflow materializes this SHA into HTML/CSS/JS/SW asset references immediately before staging.
+
 ## Dependency direction
 
 The intended direction is:
