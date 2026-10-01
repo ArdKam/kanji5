@@ -784,17 +784,21 @@ function PracticeHandwriting({character,language,exercise}:{character:string;lan
     />
   </div>;
 }
-function SessionFeedback({snapshot}:{snapshot:Snapshot}){
+function SessionFeedback({snapshot,visible}:{snapshot:Snapshot;visible:boolean}){
+  if(!visible)return null;
   const summary=snapshot.sessionSummary??{};
   const attempts=Math.max(0,Number(summary.attempts)||0);
-  if(attempts===0)return null;
   const correct=Math.max(0,Number(summary.correct)||0);
   const accuracy=pct(summary.accuracy);
+  const detail=attempts>0
+NaN
+NaN
   return <section className="session-feedback" aria-label={t("sessionSummary",getLanguage())}>
     <strong>{t("sessionSummary",getLanguage())}</strong>
-    <span>{fa(attempts)} {t("attempts",getLanguage())} · {fa(correct)} {t("right",getLanguage())} · {fa(accuracy)}{getLanguage()==="fa"?"٪":"%"} {t("accuracy",getLanguage())}</span>
+    <span>{detail}</span>
   </section>;
 }
+
 function getInitialSnapshot():Snapshot|null{
   if(typeof window==="undefined")return null;
   const value=(window as Window & {__KANJI5_V19_V2_LAST_SNAPSHOT__?:Snapshot}).__KANJI5_V19_V2_LAST_SNAPSHOT__;
@@ -824,6 +828,7 @@ function LoadingLearning(){
 }
 function App(){
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
+  const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
   useEffect(()=>applyLanguage(language),[language]);
   useEffect(()=>{
     if(!mnemonicsOpen)return;
@@ -1001,8 +1006,8 @@ function App(){
     />
     
   )
-) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
-              {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot}/>:null):null}
+) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+              {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}
       </>}
     </main>
     <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
