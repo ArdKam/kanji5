@@ -140,11 +140,10 @@ for (const profile of profiles) {
 
     console.log(
       [
-        `PERF_BASELINE profile=${profile.name}`,
+        `PERF_BUDGET profile=${profile.name}`,
         `navigation=${metrics.navigationMs.toFixed(0)}ms`,
         `domContentLoaded=${metrics.domContentLoadedMs.toFixed(0)}ms`,
         `load=${metrics.loadEventMs.toFixed(0)}ms`,
-        `FCP=${metrics.fcpMs.toFixed(0)}ms`,
         `FCP=${metrics.fcpMs.toFixed(0)}ms/${startupBudgets.fcpMs}ms`,
         `LCP=${metrics.lcpMs.toFixed(0)}ms/${startupBudgets.lcpMs}ms`,
         `CLS=${metrics.cls.toFixed(3)}/${startupBudgets.cls}`,
