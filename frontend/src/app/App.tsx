@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
-import { DictionaryPage } from "./DictionaryPage";
-import { StatsDialog } from "./StatsDialog";
-import { SettingsDialog } from "./SettingsDialog";
-import { PracticeHome } from "./PracticeHome";
-import { GrammarDialog } from "./GrammarDialog";
-import { ReadingLabDialog } from "./ReadingLabDialog";
-import { MnemonicsDialog } from "./MnemonicsDialog";
-import { HandwritingPractice } from "./HandwritingPractice";
-import { AccountButton, AccountDialog } from "./AccountDialog";
+import { AccountButton } from "./AccountButton";
+
+const DictionaryPage = lazy(() => import("./DictionaryPage").then(m => ({ default: m.DictionaryPage })));
+const StatsDialog = lazy(() => import("./StatsDialog").then(m => ({ default: m.StatsDialog })));
+const SettingsDialog = lazy(() => import("./SettingsDialog").then(m => ({ default: m.SettingsDialog })));
+const PracticeHome = lazy(() => import("./PracticeHome").then(m => ({ default: m.PracticeHome })));
+const GrammarDialog = lazy(() => import("./GrammarDialog").then(m => ({ default: m.GrammarDialog })));
+const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(m => ({ default: m.ReadingLabDialog })));
+const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(m => ({ default: m.MnemonicsDialog })));
+const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(m => ({ default: m.HandwritingPractice })));
+const AccountDialog = lazy(() => import("./AccountDialog").then(m => ({ default: m.AccountDialog })));
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import { getThemePreference, setThemePreference as persistThemePreference, type ThemePreference } from "./ui-preferences";
@@ -917,6 +919,7 @@ function App(){
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
+        <Suspense fallback={null}>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage}/> : null}
         {secondaryPage==="settings" ? <SettingsDialog
           open={settingsOpen}
@@ -950,7 +953,7 @@ function App(){
           onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
         /> : null}
         {secondaryPage==="account" ? <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/> : null}
-      </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
+      </section> : showDictionary?<Suspense fallback={null}><DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
