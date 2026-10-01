@@ -5,7 +5,7 @@ import {
   normalizeVocabularyEvidenceInput,
   projectVocabularyLearning,
   vocabularyEvidenceAccuracy,
-  vocabularyRecentErrorRate,
+  vocabularyErrorRate,
 } from '../v2-vocabulary-learning-core.js';
 
 let components={};
@@ -28,6 +28,9 @@ assert.equal(payload.mode,'vocabulary');
 assert.equal(payload.contentKind,'vocabulary');
 assert.equal(payload.provenance,'kanjiapi.dev');
 assert.equal(payload.character,'学');
+
+const unspecificPayload=normalizeVocabularyEvidenceInput(school,{});
+assert.equal(unspecificPayload.character,undefined,'multi-Kanji vocabulary must not be attributed to an arbitrary first Kanji');
 
 assert.equal(adapter.readiness(school),'unseen');
 adapter.expose(school,{character:'学'});
@@ -80,13 +83,14 @@ assert.equal(secondIndependentCorrect.state,'stable');
 assert.equal(secondIndependentCorrect.practiceCount,3);
 assert.equal(secondIndependentCorrect.correctCount,2);
 assert.equal(vocabularyEvidenceAccuracy(secondIndependentCorrect),2/3);
-assert.equal(vocabularyRecentErrorRate(secondIndependentCorrect),0);
+assert.equal(vocabularyErrorRate(secondIndependentCorrect),1/3);
 
 const projected=adapter.project(school);
 assert.equal(projected.state,'stable');
 assert.equal(projected.evidence.practiceCount,3);
 assert.equal(projected.evidence.recoveryCount,1);
 assert.equal(projected.accuracy,2/3);
+assert.equal(projected.errorRate,1/3);
 
 assert.throws(
   ()=>adapter.outcome(school,{}),
