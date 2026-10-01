@@ -207,7 +207,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
           const attempts = Number(skill.attempts);
           const attemptLabel = Number.isFinite(attempts) && attempts > 0 ? formatNumber(attempts, language) : "—";
           return (
-            <div className="stats-advanced-row" role="listitem" key={key}>
+            <div className="row stats-advanced-row" role="listitem" key={key}>
               <strong>{skillLabels[key]}</strong>
               <span>
                 {language === "fa"
@@ -273,7 +273,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
       </section>
 
       <button
-        className="button stats-advanced-trigger"
+        className="button wide row stats-advanced-trigger"
         type="button"
         aria-expanded={showAdvanced}
         aria-controls="stats-advanced-panel"
