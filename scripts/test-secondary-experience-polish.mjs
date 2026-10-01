@@ -12,7 +12,7 @@ const mnemonics=fs.readFileSync("frontend/src/app/MnemonicsDialog.tsx","utf8");
 
 assert.match(styles,/\.dialog\.secondary-page-dialog\{[\s\S]*?position:fixed;[\s\S]*?inset:50% auto auto 50%;[\s\S]*?transform:translate\(-50%,-50%\)/);
 assert.ok(styles.includes(".stats-hero"),"stats hero hierarchy missing");
-assert.ok(styles.includes(".settings-submit-actions"),"settings sticky action region missing");
+assert.ok(styles.includes(".settings-save-region"),"settings sticky action region missing");
 assert.ok(styles.includes(".reading-lab-analysis"),"reading analysis hierarchy missing");
 assert.ok(styles.includes(".prepared-mnemonic-library-row"),"mnemonic library row polish missing");
 
