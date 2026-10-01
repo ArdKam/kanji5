@@ -160,8 +160,8 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
           </div>
           <span className="reading-lab-step" aria-hidden="true">02</span>
         </div>
-        <div className="reading-lab-listen-controls reading-lab-speech-row" aria-label={t("readingSpeechControls", language)}>
-          <div className="reading-lab-listen-primary">
+        <div className="reading-lab-listen-controls" aria-label={t("readingSpeechControls", language)}>
+          <div className="reading-lab-listen-primary reading-lab-speech-row">
             <button className="button secondary" type="button" disabled={!speechSupported || !value.trim()} onClick={speakText}>
               {isSpeaking ? t("readingSpeaking", language) : t("readingSpeakText", language)}
             </button>
