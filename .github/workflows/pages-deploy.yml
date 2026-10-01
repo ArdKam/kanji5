@@ -67,6 +67,9 @@ jobs:
       - name: Stage production GitHub Pages site
         run: node scripts/stage-pages-site.mjs
 
+      - name: Verify staged production site
+        run: node scripts/verify-pages-site.mjs
+
       - name: Upload freshly built GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
