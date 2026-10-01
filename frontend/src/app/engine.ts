@@ -69,7 +69,7 @@ export type Snapshot = {
     state?: string;
   };
   learner?: {
-    attributes?: Record<string, { state?: string; accuracy?: number; recentAccuracy?: number; confidence?: number; momentum?: number; repeatedFailure?: boolean }>;
+    attributes?: Record<string, { state?: string; accuracy?: number; recentAccuracy?: number; confidence?: number; momentum?: number; attempts?: number; recentAttempts?: number; repeatedFailure?: boolean }>;
   };
   adaptiveReason?: {
     mode?: string;
