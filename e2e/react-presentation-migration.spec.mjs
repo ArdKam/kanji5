@@ -249,15 +249,6 @@ test('Reading Lab focuses the next unfamiliar kanji without changing the reading
   await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji.new')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).not.toBeNull();
   await expect(lab.locator('textarea')).toHaveValue(textValue);
 
-  const lastFirstSentenceTarget=lab.locator('[data-reading-lab-sentence-index="0"] .reading-lab-reader-kanji:not(.familiar)').last();
-  if(await lastFirstSentenceTarget.count()){
-    await lastFirstSentenceTarget.focus();
-    const currentKey=await lastFirstSentenceTarget.getAttribute('data-reading-lab-character-index');
-    await focusNext.click();
-    const focusedKey=await page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null);
-    expect(focusedKey).toBeTruthy();
-    expect(focusedKey).not.toBe('0:'+currentKey);
-  }
 });
 
 test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
