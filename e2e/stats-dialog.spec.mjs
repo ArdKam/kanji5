@@ -30,6 +30,8 @@ test('Statistics dialog exposes a focused progress dashboard',async({page})=>{
   await expect(dialog.locator('.activity-bar-wrap .activity-label')).toHaveCount(7);
   await expect(dialog.locator('.stats-dashboard .dialog-grid')).toHaveCount(0);
   await expect(dialog.locator('.stats-dashboard .stats-hero')).toHaveCount(0);
+  await expect(dialog.locator('.stats-advanced')).toBeVisible();
+  await expect(dialog.locator('.stats-advanced')).not.toHaveAttribute('open', '');
 });
 
 test('Statistics dashboard switches labels consistently to English',async({page})=>{
@@ -60,4 +62,27 @@ test('Learning profile reflects persisted skill data after a real app reload',as
   await expect.poll(async()=>page.evaluate(()=>Number((window.__KANJI5_V19_LEARNER_MODEL__?.read?.().attributes?.meaning?.confidence)||0)),{timeout:10000}).toBeGreaterThan(0);
   const dialog=await openStats(page);
   await expect(dialog.locator('.stats-skill-row').first().locator('strong')).not.toHaveText('۰٪');
+});
+
+
+test('Advanced statistics stay collapsed until explicitly opened',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({
+      学:{exposedAt:at,meaning:{attempts:3,correct:2,lastAt:at,lastCorrect:true}}
+    }));
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  const dialog=await openStats(page);
+  const advanced=dialog.locator('.stats-advanced');
+  await expect(advanced).toBeVisible();
+  await expect(advanced).not.toHaveAttribute('open', '');
+  await advanced.locator('summary').click();
+  await expect(advanced).toHaveAttribute('open', '');
+  await expect(advanced.locator('.stats-advanced-table')).toBeVisible();
+  await expect(advanced).toContainText('Accuracy');
+  await expect(advanced).toContainText('Attempts');
+  await expect(advanced.locator('.stats-advanced-row').nth(1)).toContainText('66%');
 });
