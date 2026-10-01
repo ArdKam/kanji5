@@ -1,3 +1,5 @@
+import { DOMAIN_SCHEMA_VERSION, legacyEducationDefinition } from './v2-domain-core.js';
+
 const OUTCOME_SCHEMA_VERSION = 1;
 const GRADER_VERSION = '1.9.0';
 const MODES = Object.freeze(['meaning','reading','production','vocabulary','context']);
@@ -43,6 +45,11 @@ function normalizeOutcome(mode, result, meta = {}) {
   }
   const outcome = resolveOutcome(source);
   const correct = outcome === 'correct';
+  const definition = legacyEducationDefinition(normalizedMode);
+  const domain = String(meta?.domain || definition.domain).trim().slice(0,40) || definition.domain;
+  const skill = String(meta?.skill || definition.skill).trim().slice(0,80) || definition.skill;
+  const exercise = String(meta?.exercise || definition.exercise).trim().slice(0,80) || definition.exercise;
+  const contentId = typeof meta?.contentId === 'string' ? meta.contentId.trim().slice(0,240) : '';
   const quality = String(source.quality || outcome);
   const evidence = {};
   if (meta?.inputKind) evidence.inputKind = String(meta.inputKind);
@@ -55,10 +62,15 @@ function normalizeOutcome(mode, result, meta = {}) {
   }
   return Object.freeze({
     schemaVersion: OUTCOME_SCHEMA_VERSION,
+    domainSchemaVersion: DOMAIN_SCHEMA_VERSION,
     graderVersion: typeof meta?.graderVersion === 'string' && meta.graderVersion.trim()
       ? String(meta.graderVersion)
       : `${GRADER_VERSION}-${normalizedMode}`,
     mode: normalizedMode,
+    domain,
+    skill,
+    exercise,
+    contentId,
     outcome,
     correct,
     quality,
