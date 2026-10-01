@@ -975,9 +975,9 @@ function App(){
 </aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
-      {secondaryPage ? <Suspense fallback={null}><section className="secondary-page-host" aria-label={t("more",language)}>
-        {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
-        {secondaryPage==="settings" ? <SettingsDialog
+      {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
+        {secondaryPage==="stats" ? <Suspense fallback={null}><StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/></Suspense> : null}
+        {secondaryPage==="settings" ? <Suspense fallback={null}><SettingsDialog
           open={settingsOpen}
           snapshot={snapshot??{}}
           busy={busy}
@@ -985,8 +985,8 @@ function App(){
           onClose={closeSecondaryPage}
           onSave={async s=>{const result=await action(async()=>{await updateSettings(s);return true});if(result)closeSecondaryPage();return result}}
           onReset={()=>void action(async()=>{resetProgress()})}
-        /> : null}
-        {secondaryPage==="mnemonics" ? <MnemonicsDialog
+        /></Suspense> : null}
+        {secondaryPage==="mnemonics" ? <Suspense fallback={null}><MnemonicsDialog
           open={mnemonicsOpen}
           language={language}
           catalog={mnemonicCatalog}
@@ -996,15 +996,15 @@ function App(){
           onRetry={()=>setMnemonicCatalogRetry(value=>value+1)}
           onClose={closeSecondaryPage}
           onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
-        /> : null}
-        {secondaryPage==="grammar" ? <GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/> : null}
-        {secondaryPage==="readingLab" ? <ReadingLabDialog
+        /></Suspense> : null}
+        {secondaryPage==="grammar" ? <Suspense fallback={null}><GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/></Suspense> : null}
+        {secondaryPage==="readingLab" ? <Suspense fallback={null}><ReadingLabDialog
           open={readingLabOpen}
           language={language}
           onClose={closeSecondaryPage}
-        /> : null}
+        /></Suspense> : null}
         {secondaryPage==="account" ? <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/> : null}
-      </section></Suspense> : showDictionary?<Suspense fallback={<LoadingLearning/>}><DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
+      </section> : showDictionary?<Suspense fallback={<LoadingLearning/>}><DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
         {!showExercise?(snapshotHydrated&&snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
