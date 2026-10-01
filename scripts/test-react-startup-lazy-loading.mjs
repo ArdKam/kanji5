@@ -8,7 +8,8 @@ for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDial
   assert.doesNotMatch(source,new RegExp('import \\{ '+name+' \\} from'));
 }
 assert.match(source,/from "react";/);
-assert.match(source,/import \{ PracticeHome \} from "\.\/PracticeHome";/);\nassert.match(source,/import \{ HandwritingPractice \} from "\.\/HandwritingPractice";/);
+assert.match(source,/import \{ PracticeHome \} from "\.\/PracticeHome";/);
+assert.match(source,/import \{ HandwritingPractice \} from "\.\/HandwritingPractice";/);
 assert.match(source,/Suspense/);
 
 console.log('Non-learning UI lazy-loading contract: PASS');
