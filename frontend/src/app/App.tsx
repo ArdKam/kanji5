@@ -119,7 +119,6 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
       if(!active)return;
       setComponentInfo(info);
       setComponentInfoReady(true);
-
     }).catch(()=>{
       if(!active)return;
       setComponentInfo(null);
@@ -244,7 +243,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
       setMnemonicHintPlan(support.getMnemonicHintPlan(stage,focus));
     }).catch(()=>{});
     return ()=>{active=false};
-  },[card.character,preparedMeaningKey,card.isNew,snapshot.recentOutcomes,snapshot.learner?.attributes,displayedOn.join("|"),displayedKun.join("|"),displayExamples.map(e=>String(e.word??"")+"|"+String(e.reading??"")+"|"+String(e.meaning??"")).join("|"),componentInfo?.available,componentInfo?.components?.join("|")]);
+  },[card.character,preparedMeaningKey,card.isNew,displayedOn.join("|"),displayedKun.join("|"),displayExamples.map(e=>String(e.word??"")+"|"+String(e.reading??"")+"|"+String(e.meaning??"")).join("|"),componentInfo?.available,componentInfo?.components?.join("|")]);
   const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
 
   const readingCount=displayedOn.length+displayedKun.length;
