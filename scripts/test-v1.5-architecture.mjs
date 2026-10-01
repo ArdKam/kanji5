@@ -73,13 +73,12 @@ assert.match(sw, /\.clone\(\)/, 'service worker must return independent response
 assert.doesNotMatch(index, /window\.fetch\s*=|globalThis\.fetch\s*=/, 'application shell must not monkey-patch fetch');
 
 assert.match(index, /<script src="\.\/v1\.5-state\.js"><\/script>/, 'state boundary must be loaded before the application runtime');
-assert.match(index, /legacyScripts\s*=\s*\[/, 'legacy compatibility loader must remain explicit');
-assert.match(index, /"\.\/v1\.5-p0\.js"/, 'P0 must remain available to compatibility route');
+assert.doesNotMatch(index, /legacyScripts|legacy=1/, 'legacy presentation loader must be retired');
 assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length, 0, 'P0 must not be directly wired');
 
 assert.match(sw, /"\.\/v1\.5-state\.js"/, 'state module must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-recall-core\.js"/, 'legacy recall core must remain available offline for compatibility');
-assert.match(sw, /"\.\/v1\.5-p0\.js"/, 'legacy P0 must remain available offline for compatibility');
+assert.doesNotMatch(sw, /"\.\/v1\.5-p0\.js"/, 'retired P0 must not be precached');
 assert.match(sw, /"\.\/v1\.5-network\.js"/, 'network adapter must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-education-sync-core\.js"/, 'education sync core must be offline-precached');
 assert.match(sw, /"\.\/v1\.5-sync-core\.js"/, 'sync core must be offline-precached for sync-enabled startup paths');
