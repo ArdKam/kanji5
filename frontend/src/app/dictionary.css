@@ -2294,6 +2294,6 @@
 .reading-word-kanji{display:grid;place-items:center;gap:2px;min-width:50px;min-height:50px;padding:5px 8px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;cursor:pointer;}
 .reading-word-kanji:hover{border-color:var(--shu);background:color-mix(in srgb,var(--shu) 5%,var(--paper));}
 .reading-word-kanji span{font-family:"Noto Serif JP",serif;font-size:var(--text-lg);line-height:1;}
-.reading-word-kanji small{color:var(--mute);font-size:9px;font-weight:850;}
+.reading-word-kanji small{color:var(--mute);font-size:10px;font-weight:850;}
 .reading-word-card-hint{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
 @media(max-width:520px){.reading-lab-heading-line{align-items:flex-start;flex-direction:column;}.reading-word-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}.reading-word-card{padding:18px;}}
