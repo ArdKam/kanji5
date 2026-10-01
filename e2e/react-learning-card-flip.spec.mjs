@@ -336,8 +336,12 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
     });
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
 
-  const calls = await page.evaluate(() => window.__kanji5MnemonicScrollToCalls || []);
-  expect(calls.some((call) => call.behavior === "smooth")).toBe(true);
+  const scrollExpectations = await page.evaluate(() => ({
+    reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true,
+    calls: window.__kanji5MnemonicScrollToCalls || [],
+  }));
+  const expectedBehavior = scrollExpectations.reducedMotion ? "auto" : "smooth";
+  expect(scrollExpectations.calls.some((call) => call.behavior === expectedBehavior)).toBe(true);
 
     await page.evaluate(() => {
       if (window.__kanji5MnemonicOriginalScrollTo) {
