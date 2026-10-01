@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getMnemonic, saveMnemonic, type KanjiCatalogItem } from "./engine";
-import { buildPreparedMnemonicEntries } from "./prepared-mnemonic-core";
+import { buildPreparedMnemonicEntries, CURATED_PREPARED_MNEMONICS } from "./prepared-mnemonic-core";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { usePageDialog } from "./usePageDialog";
 
@@ -18,7 +18,8 @@ function PreparedMnemonicLibrary({
 }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "curated" | "generated" | "grade1" | "n5">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "curated" | "generated">("all");
+  const [levelFilter, setLevelFilter] = useState<"all" | "grade1" | "n5">("all");
   const [visibleLimit, setVisibleLimit] = useState(60);
   const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
   const [busyKey, setBusyKey] = useState("");
@@ -58,10 +59,10 @@ function PreparedMnemonicLibrary({
   const filteredEntries = useMemo(() => {
     const q = normalize(query);
     return entries.filter(entry => {
-      if (filter === "curated" && entry.suggestion.source !== "curated") return false;
-      if (filter === "generated" && entry.suggestion.source !== "generated") return false;
-      if (filter === "grade1" && Number(catalogByCharacter.get(entry.character)?.grade) !== 1) return false;
-      if (filter === "n5" && catalogByCharacter.get(entry.character)?.jlpt !== "N5") return false;
+      if (typeFilter === "curated" && entry.suggestion.source !== "curated") return false;
+      if (typeFilter === "generated" && entry.suggestion.source !== "generated") return false;
+      if (levelFilter === "grade1" && Number(catalogByCharacter.get(entry.character)?.grade) !== 1) return false;
+      if (levelFilter === "n5" && catalogByCharacter.get(entry.character)?.jlpt !== "N5") return false;
       if (!q) return true;
       const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
       const item = catalogByCharacter.get(entry.character);
@@ -74,14 +75,14 @@ function PreparedMnemonicLibrary({
       ].join(" ");
       return normalize(searchable).includes(q);
     });
-  }, [entries, language, query, filter, catalogByCharacter]);
+  }, [entries, language, query, typeFilter, levelFilter, catalogByCharacter]);
 
   useEffect(() => {
     setVisibleLimit(60);
     setAppliedKey("");
     setErrorKey("");
     setErrorMessage("");
-  }, [language, query, filter]);
+  }, [language, query, typeFilter, levelFilter]);
 
   const visible = filteredEntries.slice(0, visibleLimit);
 
@@ -136,14 +137,12 @@ function PreparedMnemonicLibrary({
     ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.searchResults : copy.searchResultsPlural}`
     : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.allResults : copy.allResultsPlural}`;
 
-  const activeFilterLabel =
-    filter === "curated" ? copy.curated :
-    filter === "generated" ? copy.generated :
-    filter === "grade1" ? copy.grade1 :
-    filter === "n5" ? copy.n5 :
-    "";
+  const activeFilterLabel = [
+    typeFilter !== "all" ? (typeFilter === "curated" ? copy.curated : copy.generated) : "",
+    levelFilter !== "all" ? (levelFilter === "grade1" ? copy.grade1 : copy.n5) : ""
+  ].filter(Boolean).join(" · ");
 
-  const chips: Array<[typeof filter, string]> = [
+  const typeChips: Array<["all" | "curated" | "generated", string]> = [
     ["all", copy.all],
     ["curated", copy.curated],
     ["generated", copy.generated]
@@ -168,13 +167,13 @@ function PreparedMnemonicLibrary({
           <div className="prepared-mnemonic-filter-group" role="group" aria-label={copy.filters}>
             <span className="prepared-mnemonic-filter-label">{copy.filters}</span>
             <div className="prepared-mnemonic-filter-chips">
-              {chips.map(([key, label]) => (
+              {typeChips.map(([key, label]) => (
                 <button
                   key={key}
                   type="button"
-                  className={"prepared-mnemonic-filter-chip" + (filter === key ? " active" : "")}
-                  aria-pressed={filter === key}
-                  onClick={() => setFilter(key)}
+                  className={"prepared-mnemonic-filter-chip" + (typeFilter === key ? " active" : "")}
+                  aria-pressed={typeFilter === key}
+                  onClick={() => setTypeFilter(key)}
                 >
                   {label}
                 </button>
@@ -189,13 +188,13 @@ function PreparedMnemonicLibrary({
                 ["all", copy.allLevels],
                 ["grade1", copy.grade1],
                 ["n5", copy.n5]
-              ] as Array<[typeof filter, string]>).map(([key, label]) => (
+              ] as Array<["all" | "grade1" | "n5", string]>).map(([key, label]) => (
                 <button
                   key={key}
                   type="button"
-                  className={"prepared-mnemonic-filter-chip" + (filter === key ? " active" : "")}
-                  aria-pressed={filter === key}
-                  onClick={() => setFilter(key)}
+                  className={"prepared-mnemonic-filter-chip" + (levelFilter === key ? " active" : "")}
+                  aria-pressed={levelFilter === key}
+                  onClick={() => setLevelFilter(key)}
                 >
                   {label}
                 </button>
@@ -293,7 +292,7 @@ function PreparedMnemonicLibrary({
           type="button"
           onClick={() => setVisibleLimit(value => Math.min(value + 60, filteredEntries.length))}
         >
-          {language === "fa" ? "نمایش ۶۰ مورد دیگر" : "Show 60 more"}
+          {language === "fa" ? `نمایش ${formatNumber(Math.min(60, filteredEntries.length - visible.length), language)} مورد دیگر` : `Show ${Math.min(60, filteredEntries.length - visible.length)} more`}
         </button>
       ) : null}
     </section>
@@ -347,7 +346,7 @@ export function MnemonicsDialog({
 
   if (!open) return null;
 
-  const curatedCount = catalog.reduce((count, item) => count + Number(buildPreparedMnemonicEntries([item])[0]?.suggestion?.source === "curated"), 0);
+  const curatedCount = Object.keys(CURATED_PREPARED_MNEMONICS).length;
   return (
     <dialog
       ref={dialogRef}
