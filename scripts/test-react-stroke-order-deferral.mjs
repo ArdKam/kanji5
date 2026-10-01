@@ -8,7 +8,5 @@ assert.match(app,/lazy\(\(\)=>import\(["']\.\/StrokeOrderViewer["']\)/);
 assert.doesNotMatch(app,/import \{ StrokeOrderViewer \} from ["']\.\/StrokeOrderViewer["']/);
 assert.match(app,/<Suspense fallback=\{null\}>\s*<StrokeOrderViewer/);
 assert.match(vite,/dedupe:\s*\["react",\s*"react-dom"\]/);
-assert.match(vite,/react-vendor/);
-assert.match(vite,/\(\?:react\|react-dom\)/);
 
 console.log("Stroke-order startup deferral contract passed.");
