@@ -25,7 +25,7 @@ assert.match(architecture, /## Adaptive recall/);
 assert.match(workflow, /^name: Build Kanji 5 v1\.6$/m);
 assert.match(workflow, /scripts\/test-v1\.6-release\.mjs/);
 assert.doesNotMatch(sw, /v1\.6-ui-hotfix-safe\.js/);
-assert.match(sw, /const CACHE='kanji5-shell-v\d+'/);
+assert.match(sw, /const BUILD_ID='__KANJI5_BUILD_ID__';/);assert.match(sw, /const CACHE='kanji5-shell-v'\+BUILD_ID/);
 assert.equal(fs.existsSync('v1.6-ui-hotfix.js'), false);
 assert.equal(fs.existsSync('v1.6-ui-hotfix-safe.js'), false);
 assert.match(session, /kanji5:v1\.6-session-finished/);

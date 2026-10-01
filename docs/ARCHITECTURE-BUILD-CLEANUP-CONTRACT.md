@@ -76,7 +76,7 @@ Do not maintain duplicate release18/release19 React artifacts unless an active p
 
 ## Phase 2 — Cache/version integrity
 
-Replace hand-maintained cache-busting where practical with deterministic build/release provenance.
+Replace hand-maintained cache-busting with one deterministic build ID. Development uses `dev`; Pages stamps the ID from `KANJI5_BUILD_ID` or `GITHUB_SHA` into `index.html` and `sw.js`. React asset preload/runtime URLs and SW registration derive from that same metadata. Semantic `DATA_CACHE`/`API_CACHE` revisions remain explicit because they represent data/API compatibility rather than build provenance.
 
 Do not introduce cache changes that can serve stale HTML, JS, CSS, fonts, or service-worker manifests.
 

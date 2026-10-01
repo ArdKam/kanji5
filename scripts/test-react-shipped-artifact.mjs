@@ -1,3 +1,4 @@
+// Build-id cache provenance contract: generated artifact URLs must match the staged build metadata.
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 
@@ -19,7 +20,7 @@ console.log("Shipped React CSS local assets resolved ("+localCssAssets.length+")
 
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
-if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react\.css\?v=/.test(entry)){
+if(!/assetVersion='\?v='\+encodeURIComponent\(buildId\)/.test(entry) || !/react-dist\/kanji5-react\.js'\+assetVersion/.test(entry) || !/react-dist\/kanji5-react\.css'\+assetVersion/.test(entry)){
   throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
 }
 console.log("React entry uses cache-busted shipped runtime assets.");
@@ -47,8 +48,8 @@ if(/\\.learning-card\\[data-card-density=dense\\] \\.learning-back-overview\\{[^
 if(!/\.learning-card-back \.learning-back-overview/.test(css)||!/\.learning-card-back \.learning-back-tools/.test(css)) throw new Error("SHIPPED_REACT_CSS_MISSING_ONE_COLUMN_BACK_LAYOUT_GUARD");
 console.log("Shipped React CSS contains the learning-card single-column guard.");
 const reactEntry=fs.readFileSync("react-entry.js","utf8");
-if(!/scheduleAccountFallback/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK_LOADER");
-if(!/account-fallback\.js\?v=20261001/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK_MODULE");
+if(!/function scheduleAccountFallback/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK");
+if(!/account\.button|account-button|data-kanji5-account-fallback/.test(reactEntry)) throw new Error("REACT_ENTRY_ACCOUNT_FALLBACK_GUARD_MISSING");
 console.log("React entry contains account visibility fallback.");
 if(!fs.existsSync("account-fallback.js")) throw new Error("ACCOUNT_FALLBACK_SCRIPT_MISSING");
 if(!/__KANJI5_ACCOUNT__|account-button/.test(fs.readFileSync("account-fallback.js","utf8"))) throw new Error("ACCOUNT_FALLBACK_SCRIPT_INCOMPLETE");
@@ -61,3 +62,6 @@ console.log("Shipped React JS contains Account UI.");
 const accountFallback=fs.readFileSync("account-fallback.js","utf8");
 try{new Function(accountFallback);}catch(error){throw new Error("ACCOUNT_FALLBACK_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));}
 console.log("Account fallback parses as valid JavaScript.");
+
+const html=fs.readFileSync("index.html","utf8");
+if(!/react-dist\/kanji5-react\.js\?v=dev/.test(html)||!/react-dist\/kanji5-react\.css\?v=dev/.test(html)) throw new Error("INDEX_HTML_REACT_HINTS_MISSING_BUILD_VERSION");

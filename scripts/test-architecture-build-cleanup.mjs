@@ -37,3 +37,14 @@ assert.ok(!reactWorkflow.includes("Materialize release18 React artifact"));
 assert.ok(!reactWorkflow.includes("sw-release18.js")&&!reactWorkflow.includes("sw-release19.js"));
 
 console.log("Architecture/build cleanup contract passed.");
+
+assert.ok(index.includes('<meta name="kanji5-build-id" content="dev">'));
+assert.doesNotMatch(index,/202609\d{2}-release\d+/);
+assert.doesNotMatch(entry,/202609\d{2}-release\d+/);
+assert.doesNotMatch(bootstrap,/sw\.js\?v=\d+/);
+
+assert.doesNotMatch(index,/\?v=\d+/);
+assert.doesNotMatch(index,/\?v=20\d{6}(?:-release\d+)?/);
+assert.doesNotMatch(entry,/\?v=20\d{6}(?:-release\d+)?/);
+assert.doesNotMatch(bootstrap,/sw\.js\?v=\d+/);
+assert.doesNotMatch(bootstrap,/sw\.js\?v=20\d{6}(?:-release\d+)?/);

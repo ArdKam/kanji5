@@ -35,3 +35,9 @@ assert.match(source, /path: _site/);
 assert.doesNotMatch(source, /path: \.\s*$/m);
 
 console.log("Pages deployment is single-source and staging includes the service worker shell entry.");
+
+assert.match(source, /node scripts\/verify-pages-site\.mjs/);
+assert.match(source, /node scripts\/stage-pages-site\.mjs/);
+assert.match(source, /path: _site/);
+assert.doesNotMatch(source, /git add react-dist/);
+assert.doesNotMatch(source, /git push origin/);

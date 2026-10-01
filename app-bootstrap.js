@@ -11,9 +11,10 @@ try{
     localStorage.setItem(VERSION_KEY,DATA_VERSION);
   }
 }catch(_){}
+const buildId=(document.querySelector('meta[name="kanji5-build-id"]')?.getAttribute('content')||'dev').trim()||'dev';
 const registerServiceWorker=()=>{
   if(!('serviceWorker' in navigator))return;
-  navigator.serviceWorker.register('./sw.js?v=134').catch(()=>{});
+  navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(buildId)).catch(()=>{});
 };
 if('requestIdleCallback' in window){
   requestIdleCallback(registerServiceWorker,{timeout:2000});
