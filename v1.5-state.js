@@ -20,6 +20,48 @@ const K=Object.freeze({
 window.__KANJI5_STORAGE_KEYS__=K;
 const DEVICE_KEY=K.deviceId,STORAGE=K.state,CARDS_STORAGE=K.cards,REVIEWS_STORAGE=K.reviews,KNOWLEDGE_STORAGE=K.knowledge,COMPONENT_KEY=K.components,LAST_ATTEMPT_KEY=K.lastAttempt,SESSION_HISTORY_KEY=K.sessionHistory,DECK_KEY=K.deck,SETTINGS_KEY=K.educationSettings;
 const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2,SESSION_HISTORY_LIMIT=30,MNEMONIC_SCHEMA_VERSION=1;
+const DOMAIN_IDENTITY_SCHEMA_VERSION=1;
+const VALID_DOMAINS=Object.freeze(['kanji','vocabulary','grammar']);
+function identityText(value,max=240){return String(value??'').trim().slice(0,max)}
+function canonicalIdentityId(domain,sourceId){
+  const d=identityText(domain,40).toLowerCase(),source=identityText(sourceId,200);
+  if(!VALID_DOMAINS.includes(d)||!source)return '';
+  return source.startsWith(d+':')?source:d+':'+source;
+}
+function canonicalIdentityCardId(domain,contentId,skill='integrated',exercise='scheduled-review'){
+  const canonical=canonicalIdentityId(domain,contentId);
+  if(!canonical)return '';
+  const parsed=canonical.split(':');
+  const d=parsed.shift()||'kanji',source=identityText(parsed.join(':'),180)||'unknown';
+  return `card:${d}:${source}:${identityText(skill,64)||'integrated'}:${identityText(exercise,64)||'scheduled-review'}`;
+}
+function inferLegacyIdentity(key,item,record){
+  const domain=VALID_DOMAINS.includes(identityText(record?.domain,40).toLowerCase())?identityText(record.domain,40).toLowerCase():'kanji';
+  const sourceId=identityText(record?.sourceId||item?.character||item?.id||key,200);
+  const contentId=identityText(record?.contentId,240)||canonicalIdentityId(domain,sourceId);
+  const skill=identityText(record?.skill,64)||'integrated';
+  const exercise=identityText(record?.exercise,64)||'scheduled-review';
+  return {identitySchemaVersion:DOMAIN_IDENTITY_SCHEMA_VERSION,domain,contentId,cardId:identityText(record?.cardId,240)||canonicalIdentityCardId(domain,contentId,skill,exercise),skill,exercise};
+}
+function migrateCardRecords(cards,deck=[]){
+  if(!cards||typeof cards!=='object'||Array.isArray(cards))return false;
+  const index=new Map();
+  for(const item of Array.isArray(deck)?deck:[]){
+    const id=identityText(item?.id,200),character=identityText(item?.character,16);
+    if(id)index.set(id,item);
+    if(character)index.set(character,item);
+  }
+  let changed=false;
+  for(const [key,record] of Object.entries(cards)){
+    if(!record||typeof record!=='object'||Array.isArray(record))continue;
+    const identity=inferLegacyIdentity(key,index.get(key),record);
+    for(const [field,value] of Object.entries(identity)){
+      if(record[field]!==value){record[field]=value;changed=true}
+    }
+  }
+  return changed;
+}
+
 const defaults={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
 const educationDefaults={production:true,vocabulary:true,context:true};
 let activeState=null;
@@ -27,7 +69,7 @@ const todayKey=()=>new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digi
 function deviceId(){try{let id=localStorage.getItem(DEVICE_KEY);if(!id){id=crypto.randomUUID?.()||`device-${Date.now()}-${Math.random().toString(36).slice(2)}`;localStorage.setItem(DEVICE_KEY,id)}return id}catch(_){return'legacy'}}
 function eventId(){return crypto.randomUUID?.()||`review-${Date.now()}-${Math.random().toString(36).slice(2)}`}
 function createInitial(overrides={}){const created={schemaVersion:PERSISTENCE_SCHEMA_VERSION,settings:{...defaults,...(overrides.settings||{})},deck:Array.isArray(overrides.deck)?overrides.deck:[],cards:overrides.cards&&typeof overrides.cards==='object'?overrides.cards:{},reviews:Array.isArray(overrides.reviews)?overrides.reviews:[],knowledge:overrides.knowledge&&typeof overrides.knowledge==='object'?overrides.knowledge:{},today:overrides.today||'',todayNew:Number(overrides.todayNew)||0,todayReviewCount:Number(overrides.todayReviewCount)||0,goalCelebrated:Boolean(overrides.goalCelebrated),queue:Array.isArray(overrides.queue)?overrides.queue:[],current:overrides.current||null,revealed:Boolean(overrides.revealed),examples:overrides.examples&&typeof overrides.examples==='object'?overrides.examples:{},streak:{current:0,longest:0,lastActiveDate:null,...(overrides.streak||{})}};activeState=created;return created}
-function normalizeReviewEvent(event){if(!event||typeof event!=='object')return event;const normalized={...event};if(!normalized.eventSchemaVersion)normalized.eventSchemaVersion=1;if(normalized.eventSchemaVersion===1&&normalized.baseRecord&&!normalized.resultRecord)normalized.resultRecord=structuredClone(normalized.baseRecord);return normalized}
+function normalizeReviewEvent(event){if(!event||typeof event!=='object')return event;const normalized={...event};if(!normalized.eventSchemaVersion)normalized.eventSchemaVersion=1;if(normalized.eventSchemaVersion===1&&normalized.baseRecord&&!normalized.resultRecord)normalized.resultRecord=structuredClone(normalized.baseRecord);const legacyId=identityText(normalized.id,200);if(legacyId&&!normalized.contentId){const identity=inferLegacyIdentity(legacyId,null,normalized);Object.assign(normalized,identity)}return normalized}
 function reviewKey(event){return String(event?.eventId||`${event?.id||''}|${event?.at||''}|${event?.rating||''}|${event?.due||''}|${event?.scheduledDays||0}`)}
 const PORTABLE_BACKUP_FORMAT='kanji5-backup',PORTABLE_BACKUP_VERSION=1;
 function compactReviews(reviews,limit=2000){const map=new Map();for(const raw of Array.isArray(reviews)?reviews:[]){const event=normalizeReviewEvent(raw);if(!event||!event.id||!event.at)continue;map.set(reviewKey(event),event)}return[...map.values()].sort((a,b)=>String(a.at||'').localeCompare(String(b.at||''))||reviewKey(a).localeCompare(reviewKey(b))).slice(-Math.max(1,Number(limit)||2000))}
@@ -94,14 +136,14 @@ function writeLegacy(snapshot){const p=snapshot.payload;localStorage.setItem(STO
 function commitSnapshot(state,reviewLimit=2000){const snapshot=makeSnapshot(state,reviewLimit);localStorage.setItem(SNAPSHOT_STORAGE,JSON.stringify(snapshot));localStorage.setItem(SNAPSHOT_COMMIT,JSON.stringify({schemaVersion:PERSISTENCE_SCHEMA_VERSION,checksum:snapshot.checksum,committedAt:new Date().toISOString()}));try{writeLegacy(snapshot)}catch(_){}return snapshot}
 function legacySnapshot(){const parts=readLegacyParts();const x=parts.main;if(!x)return null;const cards=parts.cards??x.cards??{};const reviews=parts.reviews??x.reviews??[];const knowledge=parts.knowledge??x.knowledge??{};if(!cards||typeof cards!=='object'||!Array.isArray(reviews)||!knowledge||typeof knowledge!=='object'||Array.isArray(knowledge))return null;return{schemaVersion:PERSISTENCE_SCHEMA_VERSION,createdAt:null,payload:{settings:x.settings,today:x.today,todayNew:x.todayNew,todayReviewCount:x.todayReviewCount,goalCelebrated:x.goalCelebrated,streak:x.streak,cards,reviews:compactReviews(reviews),knowledge}}}
 function reconcileSnapshot(snapshot){const parts=readLegacyParts();const payload={...snapshot.payload};if(parts.main)for(const field of ['settings','today','todayNew','todayReviewCount','goalCelebrated','streak'])if(parts.main[field]!==undefined)payload[field]=parts.main[field];if(parts.cards)payload.cards=parts.cards;if(parts.reviews&&parts.reviews.length>payload.reviews.length)payload.reviews=compactReviews([...payload.reviews,...parts.reviews]);if(parts.knowledge)payload.knowledge={...payload.knowledge,...parts.knowledge};payload.reviews=compactReviews(payload.reviews);return{...snapshot,payload,checksum:fnv1a(payload)}}
-function save(state=activeState){if(!state||typeof state!=='object')return;activeState=state;state.knowledge={...(safeObject(safeParse(localStorage.getItem(KNOWLEDGE_STORAGE)))||{}),...(state.knowledge||{})};const reviews=compactReviews(state.reviews);state.reviews=reviews;try{commitSnapshot(state,reviews.length);return}catch(error){try{commitSnapshot(state,Math.min(reviews.length,500));return}catch(_){try{const metadata={settings:state.settings,today:state.today,todayNew:state.todayNew,todayReviewCount:state.todayReviewCount,goalCelebrated:state.goalCelebrated,streak:state.streak,cards:state.cards&&typeof state.cards==='object'?state.cards:{}};localStorage.setItem(STORAGE,JSON.stringify(metadata));localStorage.setItem(CARDS_STORAGE,JSON.stringify(metadata.cards));localStorage.setItem(REVIEWS_STORAGE,JSON.stringify(reviews.slice(-500)));localStorage.setItem(KNOWLEDGE_STORAGE,JSON.stringify(state.knowledge||{}));}catch(__){}}}}
+function save(state=activeState){if(!state||typeof state!=='object')return;activeState=state;migrateCardRecords(state.cards,state.deck?.length?state.deck:readDeck());state.knowledge={...(safeObject(safeParse(localStorage.getItem(KNOWLEDGE_STORAGE)))||{}),...(state.knowledge||{})};const reviews=compactReviews(state.reviews).map(normalizeReviewEvent);state.reviews=reviews;try{commitSnapshot(state,reviews.length);return}catch(error){try{commitSnapshot(state,Math.min(reviews.length,500));return}catch(_){try{const metadata={settings:state.settings,today:state.today,todayNew:state.todayNew,todayReviewCount:state.todayReviewCount,goalCelebrated:state.goalCelebrated,streak:state.streak,cards:state.cards&&typeof state.cards==='object'?state.cards:{}};localStorage.setItem(STORAGE,JSON.stringify(metadata));localStorage.setItem(CARDS_STORAGE,JSON.stringify(metadata.cards));localStorage.setItem(REVIEWS_STORAGE,JSON.stringify(reviews.slice(-500)));localStorage.setItem(KNOWLEDGE_STORAGE,JSON.stringify(state.knowledge||{}));}catch(__){}}}}
 function applyLoaded(state,x,defaultsValue){const next={...state,...x,settings:{...defaultsValue,...(x.settings||{})},streak:{current:0,longest:0,lastActiveDate:null,...(x.streak||{})},knowledge:x.knowledge&&typeof x.knowledge==='object'?x.knowledge:{}};next.schemaVersion=PERSISTENCE_SCHEMA_VERSION;if(next.today!==todayKey()){next.today=todayKey();next.todayNew=0;next.todayReviewCount=0;next.goalCelebrated=false}next.reviews=compactReviews(next.reviews);return next}
-function loadSaved(state,defaultsValue=defaults){try{let snapshot=readSnapshot();const fromSnapshot=Boolean(snapshot);if(!snapshot){snapshot=legacySnapshot();}if(!snapshot){const next={...state,today:todayKey(),schemaVersion:PERSISTENCE_SCHEMA_VERSION};activeState=next;return next}if(fromSnapshot)snapshot=reconcileSnapshot(snapshot);const payload=snapshot.payload||{};const next=applyLoaded(state,payload,defaultsValue);try{commitSnapshot(next,next.reviews.length)}catch(_){}activeState=next;return next}catch(_){const next={...state,today:todayKey(),schemaVersion:PERSISTENCE_SCHEMA_VERSION};activeState=next;return next}}
+function loadSaved(state,defaultsValue=defaults){try{let snapshot=readSnapshot();const fromSnapshot=Boolean(snapshot);if(!snapshot){snapshot=legacySnapshot();}if(!snapshot){const next={...state,today:todayKey(),schemaVersion:PERSISTENCE_SCHEMA_VERSION};activeState=next;return next}if(fromSnapshot)snapshot=reconcileSnapshot(snapshot);const payload=snapshot.payload||{};const next=applyLoaded(state,payload,defaultsValue);migrateCardRecords(next.cards,next.deck?.length?next.deck:readDeck());next.reviews=next.reviews.map(normalizeReviewEvent);try{commitSnapshot(next,next.reviews.length)}catch(_){}activeState=next;return next}catch(_){const next={...state,today:todayKey(),schemaVersion:PERSISTENCE_SCHEMA_VERSION};activeState=next;return next}}
 function reviveCard(card){if(!card)return null;const out=structuredClone(card);for(const key of ['due','last_review'])if(out[key])out[key]=new Date(out[key]);return out}
 function hydrateCards(state){for(const id of Object.keys(state.cards||{}))if(state.cards[id])state.cards[id].card=reviveCard(state.cards[id].card);activeState=state;return state}
 function reset(defaultsValue,deck=[]){const next=createInitial({settings:{...defaultsValue},deck,today:todayKey()});try{clearRuntimeKnowledge();writeSessionHistory([]);try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}save(next)}catch(_){}return next}
 function loadState(defaultsValue=defaults){return loadSaved(createInitial({today:todayKey()}),defaultsValue)}
 function saveState(state){save(state);return state}
 function transaction(mutator){if(typeof mutator!=='function')throw new TypeError('transaction requires a function');const current=loadState();const draft=structuredClone(current);const result=mutator(draft)??draft;save(result);return result}
-window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,MNEMONIC_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,readMnemonics,writeMnemonics,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,portableBackup,restorePortableBackup,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
+window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,MNEMONIC_SCHEMA_VERSION,DOMAIN_IDENTITY_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,migrateCardRecords,canonicalIdentityId,canonicalIdentityCardId,readDeck,readKnowledge,writeKnowledge,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,readMnemonics,writeMnemonics,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,portableBackup,restorePortableBackup,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
 })();
