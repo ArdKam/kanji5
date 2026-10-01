@@ -11,13 +11,13 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
-for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
+for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
   assert.match(app,new RegExp('const '+name+' = lazy\\('),`Non-learning surface ${name} must be deferred off the startup renderer bundle`);
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),`Non-learning surface ${name} must not be statically imported`);
 }
 
 
-mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
+assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);\n\nmustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
 assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.js'\)/);
 mustContain(session,'function start(){if(!IS_LEGACY)return;','Legacy dashboard startup must not run in modern mode');
 mustContain(session,'void loadPlanApi()','Session plan API remains available on explicit use');
