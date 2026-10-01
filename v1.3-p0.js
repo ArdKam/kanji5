@@ -16,7 +16,11 @@ if(!hasCachedDeck()&&!window.__KANJI5_P0_DATA_PROMISE){
     return items;
   }).catch(()=>null);
 }
-if(!window.__KANJI5_P0_FSRS_PROMISE)window.__KANJI5_P0_FSRS_PROMISE=import(FSRS_URL).catch(()=>null);
+const prefetchFsrs=()=>{if(!window.__KANJI5_P0_FSRS_PROMISE)window.__KANJI5_P0_FSRS_PROMISE=import(FSRS_URL).catch(()=>null)};
+const isLegacy=new URLSearchParams(location.search).get('legacy')==='1';
+if(isLegacy)prefetchFsrs();
+else if('requestIdleCallback' in window)window.requestIdleCallback(prefetchFsrs,{timeout:2500});
+else window.setTimeout(prefetchFsrs,1200);
 const style=document.createElement('style');style.id='v13-p0-loading';style.textContent='#loading{min-height:0!important;height:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}#loading .spinner{display:none!important}';document.head.appendChild(style);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureStatus,{once:true});else ensureStatus();
 })();
