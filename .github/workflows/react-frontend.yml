@@ -36,7 +36,6 @@ on:
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
-      - "react-dist/**"
       - "sw.js"
       - "account-fallback.js"
   push:
