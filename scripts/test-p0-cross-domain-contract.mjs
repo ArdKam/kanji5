@@ -44,7 +44,7 @@ globalThis.fetch=async url=>{
 };
 try{
   const words=await network.fetchWords('学');
-  assert.match(words[0].contentId,/^vocabulary:[0-9a-f]{8}$/);
+  assert.match(words[0].contentId,/^vocabulary:kanjiapi\.dev:[0-9a-f]{8}$/);
   const sentences=await network.fetchContextSentences('学');
   assert.equal(sentences[0].contentId,'sentence:123');
   assert.equal(sentences[0].id,123);
