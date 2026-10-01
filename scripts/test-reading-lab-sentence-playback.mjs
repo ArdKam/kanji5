@@ -26,8 +26,8 @@ assert.ok(readingLab.includes("setSentenceAutoplay(false);"), "Autoplay must sto
 assert.ok(i18n.includes("readingLabAutoplay"), "Missing autoplay translation key");
 assert.ok(i18n.includes("readingLabRepeatSentence"), "Missing repeat-sentence translation key");
 assert.ok(styles.includes(".reading-lab-sentence-autoplay"), "Missing scoped autoplay styles");
-assert.ok(e2e.includes("reading-lab-sentence-repeat"), "E2E must cover repeat sentence");
-assert.ok(e2e.includes("aria-pressed','true'"), "E2E must cover enabling autoplay");
+assert.ok(e2e.includes("name:'تکرار جمله'"), "E2E must cover repeat sentence");
+assert.ok(e2e.includes("toHaveAttribute('aria-pressed','true')"), "E2E must cover enabling autoplay");
 assert.ok(e2e.includes("__KANJI5_LAST_UTTERANCE__"), "E2E must control TTS completion deterministically");
 
 console.log("Reading Lab sentence playback contract: PASS");
