@@ -46,3 +46,18 @@ test('Statistics dashboard switches labels consistently to English',async({page}
   await expect(englishDialog.locator('.stats-activity')).toContainText('7-day review activity');
   await expect(englishDialog.locator('.stats-overview')).toContainText('Jōyō coverage');
 });
+
+
+test('Learning profile reflects persisted skill data after a real app reload',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({学:{exposedAt:at,meaning:{attempts:1,correct:1,lastAt:at,lastCorrect:true}}}));
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_LEARNER_MODEL__)),{timeout:10000}).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>Number((window.__KANJI5_V19_LEARNER_MODEL__?.read?.().attributes?.meaning?.confidence)||0)),{timeout:10000}).toBeGreaterThan(0);
+  const dialog=await openStats(page);
+  await expect(dialog.locator('.stats-skill-row').first().locator('strong')).not.toHaveText('۰٪');
+});

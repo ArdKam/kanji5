@@ -11,7 +11,7 @@ assert.match(runtime,/const latestComponents=state\.readComponents\?\.\(\)\|\|\{
 assert.match(runtime,/v19LearnerEvidence/);
 assert.match(runtime,/recordOutcome/);
 assert.match(runtime,/v1\.6-session-finished/);
-assert.match(runtime,/v1\.6-education-result/);
+assert.match(runtime,/v1\.6-education-result/);assert.match(runtime,/v1\.9-learning-changed/,'learner-model refreshes must notify the presentation boundary after persisted skill data is rebuilt');
 assert.match(profile,/import\('\.\/v1\.9-learner-model\.js'\)/);
 assert.match(sw,/"\.\/v1\.9-learner-model-core\.js"/);
 assert.match(sw,/"\.\/v1\.9-learner-model\.js"/);
