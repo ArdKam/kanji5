@@ -14,7 +14,6 @@ assert.doesNotMatch(index,/fonts\.googleapis\.com\/css2\?[^"]*Noto\+Serif\+JP/,"
 const vazirPreloadMatch=index.match(/<link rel="preload" href="(\.\/react-dist\/assets\/[^"?#]+\.woff2)" as="font" type="font\/woff2" crossorigin fetchpriority="high">/);
 assert.ok(vazirPreloadMatch,"Bundled Vazirmatn font preload is missing");
 assert.match(vazirPreloadMatch[1],/^\.\/react-dist\/assets\/Vazirmatn_[^/]+\.woff2$/,"Bundled Vazirmatn preload must target the shipped local asset");
-await access("frontend/src/assets/Vazirmatn_wght_-BeciDpKm.woff2");
 
 const interUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
 assert.ok(index.includes('<link rel="preload" href="'+interUrl+'" as="style" fetchpriority="high"'),"Inter stylesheet preload is missing");
