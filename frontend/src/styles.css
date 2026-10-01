@@ -2239,7 +2239,6 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   height:100%;
   border-radius:inherit;
   background:var(--shu);
-  transition:width .25s ease;
 }
 .grammar-lesson{
   margin-top:3px;
@@ -2878,7 +2877,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   height:100%;
   border-radius:inherit;
   background:var(--shu);
-  transition:width .28s ease;
 }
 .stats-metric{
   min-width:0;
@@ -2956,7 +2954,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   border-radius:inherit;
   background:var(--ai);
   opacity:.9;
-  transition:height .28s ease;
 }
 .stats-activity-chart .activity-bar-wrap.is-today .activity-bar-track{
   outline:2px solid color-mix(in srgb,var(--shu) 32%,transparent);
@@ -2994,7 +2991,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
 .stats-mastery-segment{
   display:block;
   min-width:0;
-  transition:width .3s ease;
 }
 .stats-mastery-segment.unseen{background:#d8d0c2}
 .stats-mastery-segment.learning{background:#c7ad72}
@@ -3150,12 +3146,7 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   .stats-skill-state{grid-column:2/3;}
   .stats-attention-row{grid-template-columns:48px minmax(0,1fr) auto;gap:9px;}
 }
-@media(prefers-reduced-motion:reduce){
-  .stats-overview-track span,
-  .stats-activity-chart .activity-bar-track span,
-  .stats-mastery-segment,
-  .stats-skill-track span{transition:none;}
-}
+
 
 /* Prepared Mnemonics Library v2: editorial hierarchy, source clarity, and local action feedback. */
 .dialog.secondary-page-dialog.mnemonics-dialog{
