@@ -50,6 +50,6 @@ export function GrammarGuide({language}:{language:Language}){
      {checked?<div className={"grammar-feedback "+(selectedOption===lesson.answer?"correct":"incorrect")} role="status"><strong>{selectedOption===lesson.answer?(language==="fa"?"درست":"Correct"):(language==="fa"?"نیاز به بازبینی دارد":"Not quite")}</strong><span>{lesson.answer}</span><small>{language==="fa"?lesson.explanationFa:lesson.explanationEn}</small><button className="button secondary grammar-retry" type="button" onClick={retry}>{language==="fa"?"تلاش دوباره":"Try again"}</button></div>:null}
     </div>
    </article>
-   <div className="grammar-navigation"><button className="button secondary" type="button" disabled={index===0} onClick={()=>move(-1)}>{t("previousLesson",language)}</button><button className="button primary" type="button" disabled={!checked||index===LESSONS.length-1} onClick={()=>move(1)}>{t("nextLesson",language)}</button></div>
+   <div className="grammar-navigation"><button className="button secondary" type="button" disabled={index===0} onClick={()=>move(-1)}>{t("previousLesson",language)}</button><button className="button primary" type="button" disabled={!checked||selectedOption!==lesson.answer||index===LESSONS.length-1} onClick={()=>move(1)}>{t("nextLesson",language)}</button></div>
  </section>;
 }
