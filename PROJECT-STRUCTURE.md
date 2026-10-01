@@ -29,7 +29,7 @@ For the current product, read these in order:
 | Browser E2E | `e2e/` | Playwright browser/integration coverage. |
 | Contract/unit tests | `scripts/test-*.mjs` | Repository-level contracts and unit/regression checks. |
 | Generated React bundle | `react-dist/` | Build-only output; ignored by Git and produced from `frontend/`. |
-| Compatibility presentation | `?legacy=1` path in `index.html` | The legacy loader is explicitly gated; inspect the `legacyScripts` list before changing compatibility behavior. |
+| Legacy presentation | retired | The default browser path is React; the former `?legacy=1` compatibility loader is removed. |
 
 ## Current browser path
 
