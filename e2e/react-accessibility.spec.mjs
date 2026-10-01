@@ -264,12 +264,11 @@ test('learning-card Stroke Order is permanently open and has no accordion trigge
   await card.getByRole("button",{name:"Show kanji information"}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   const pager=card.locator(".learning-back-page-nav");
-  const nextPage=pager.locator(".pager-button").last();
-  for(let i=0;i<3;i++){
-    await expect(nextPage).toBeEnabled();
-    await nextPage.dispatchEvent("click");
-    await page.waitForTimeout(520);
-  }
+  const pageShortcuts=pager.locator(".learning-back-page-shortcut");
+  await expect(pageShortcuts).toHaveCount(4);
+  await expect(pageShortcuts.nth(3)).toBeEnabled();
+  await pageShortcuts.nth(3).dispatchEvent("click");
+  await page.waitForTimeout(520);
 
   const panel=card.locator(".learning-back-page.active .stroke-order-panel");
   await expect(panel).toBeVisible();
