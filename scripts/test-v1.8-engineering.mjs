@@ -8,4 +8,8 @@ assert.match(wf,/test-react-migration\.mjs/);
 assert.match(wf,/Legacy DOM browser suites are retired/);
 assert.match(wf,/node --check/);
 assert.match(all,/test-\*\.mjs/);
+assert.doesNotMatch(wf,/build-v1\.6\.yml/);
+assert.doesNotMatch(wf,/build-v1\.7\.yml/);
+assert.equal(fs.existsSync('.github/workflows/build-v1.6.yml'),false);
+assert.equal(fs.existsSync('.github/workflows/build-v1.7.yml'),false);
 console.log('Kanji 5 v1.8 Engineering contract passed.');
