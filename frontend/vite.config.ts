@@ -19,6 +19,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         entryFileNames: "kanji5-react.js",
+        advancedChunks: {
+          groups: [
+            { name: "react-vendor", test: /\/node_modules\/(?:react|react-dom)\// },
+          ],
+        },
         assetFileNames: (assetInfo) =>
           assetInfo.name?.endsWith(".css")
             ? "kanji5-react.css"
