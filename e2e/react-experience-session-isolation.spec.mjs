@@ -17,8 +17,8 @@ test('Learning and Active Recall retain independent active sessions', async ({pa
   const recall=page.getByRole('button',{name:'یادآوری فعال'});
 
   await expect(learning).toHaveAttribute('aria-current','page');
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V16_SESSION_API__?.getSession?.().started)),{timeout:10000}).toBe(true);
   const learningSession=await page.evaluate(()=>window.__KANJI5_V16_SESSION_API__?.getSession?.());
-  expect(learningSession?.started).toBe(true);
   expect(learningSession?.experience).toBe('review');
 
   await recall.click();
