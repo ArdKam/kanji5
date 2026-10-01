@@ -12,6 +12,7 @@ const shell=JSON.parse(match[1]);
 
 const required=new Set([
   "index.html",
+  "sw.js",
   "kanji-data.json",
   "kanji-components.json",
   ...shell.filter(item=>item!=="./").map(item=>String(item).replace(/^\.\//,""))
