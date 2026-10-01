@@ -31,3 +31,17 @@ test('React presentation does not expose a second DOM renderer',async({page})=>{
   await cleanStart(page);
   await expect(page.locator('#v2App, .wrap, #app, #loading')).toHaveCount(0);
 });
+
+test('Learning keeps session feedback compact and does not render analytics details',async({page})=>{
+  await cleanStart(page);
+  await expect(page.locator('#root .insights')).toHaveCount(0);
+  await expect(page.locator('#root .session-feedback')).toHaveCount(0);
+  const card=page.locator('#root .learning-card');
+  await expect(card).toBeVisible({timeout:10000});
+  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
+  await card.locator('.rating-grid button').nth(2).click();
+  await expect(page.locator('#root .session-feedback')).toBeVisible({timeout:10000});
+  await expect(page.locator('#root .session-feedback')).toContainText('خلاصه جلسه');
+  await expect(page.locator('#root .insights')).toHaveCount(0);
+});
