@@ -102,19 +102,10 @@ export function DataBackup({ language }: { language: Language }) {
 
   return (
     <section className="settings-data-backup">
-      <div className="settings-data-backup-heading">
-        <div>
-          <h3>{t("dataBackupTitle", language)}</h3>
-          <p>{t("dataBackupHint", language)}</p>
-        </div>
+      <div className="settings-backup-summary">
+        <span>{language === "fa" ? "دادهٔ فعلی" : "Current data"}</span>
+        <strong>{currentSummary ? summaryLabel(currentSummary, language) : (language === "fa" ? "در حال آماده‌سازی…" : "Preparing…")}</strong>
       </div>
-
-      {currentSummary ? (
-        <div className="settings-backup-summary">
-          <span>{language === "fa" ? "دادهٔ فعلی" : "Current data"}</span>
-          <strong>{summaryLabel(currentSummary, language)}</strong>
-        </div>
-      ) : null}
 
       {lastBackupAt ? (
         <p className="settings-backup-last">
