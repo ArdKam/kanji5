@@ -32,7 +32,7 @@ function writeMnemonics(value){const next=value&&typeof value==='object'&&!Array
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
 function backupSummary(data){const core=data?.core||{};const knowledge=core.knowledge&&typeof core.knowledge==='object'?core.knowledge:{};const mnemonics=knowledge.v2Mnemonics&&typeof knowledge.v2Mnemonics==='object'?knowledge.v2Mnemonics:{};return{cards:Object.keys(core.cards&&typeof core.cards==='object'?core.cards:{}).length,reviews:Array.isArray(core.reviews)?core.reviews.length:0,personalMnemonics:Object.values(mnemonics).filter(value=>typeof value==='string'&&value.trim()).length,completedSessions:Array.isArray(data?.sessionHistory)?data.sessionHistory.length:0}}
-function portableBackup(state=loadState()){
+function portableBackup(state=activeState||loadState()){
   const core=makeSnapshot(state,2000).payload;
   const data={core:{settings:core.settings,today:core.today,todayNew:core.todayNew,todayReviewCount:core.todayReviewCount,goalCelebrated:core.goalCelebrated,streak:core.streak,cards:core.cards,reviews:core.reviews,knowledge:core.knowledge},education:{...readSettings()},sessionHistory:readSessionHistory().filter(row=>row?.status!=='active'),components:readComponents()};
   const metadata={deckVersion:readValue('kanji5-deck-version',null),persistenceSchemaVersion:PERSISTENCE_SCHEMA_VERSION,reviewEventSchemaVersion:REVIEW_EVENT_SCHEMA_VERSION};
