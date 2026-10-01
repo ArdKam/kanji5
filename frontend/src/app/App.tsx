@@ -35,6 +35,8 @@ import {
   submitExercise,
   saveMnemonic,
   updateSettings,
+  createBackup,
+  restoreBackup,
   type Rating,
   type ComponentInfo,
   type Settings,
@@ -935,15 +937,9 @@ function App(){
           busy={busy}
           language={language}
           onClose={closeSecondaryPage}
-          onSave={s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()})}
+          onSave={async s=>{await action(async()=>{await updateSettings(s);closeSecondaryPage()})}}
           onReset={()=>void action(async()=>{resetProgress()})}
           mnemonicCatalog={mnemonicCatalog}
-          onRetakePlacement={()=>{
-            closeSecondaryPage();
-            setExperience("practice");
-            setPracticeMode("home");
-            setPlacementRequest(value=>value+1);
-          }}
         /> : null}
         {secondaryPage==="mnemonics" ? <MnemonicsDialog
           open={mnemonicsOpen}
