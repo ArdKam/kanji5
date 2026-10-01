@@ -649,7 +649,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               <div className="reading-lab-coverage-metrics">
                 <div className="reading-lab-coverage-metric">
                   <strong id="reading-lab-analysis-title">{formatNumber(coverage, language)}%</strong>
-                  <span>{t("readingLabUniqueCoverage", language)}</span>
+                  <span>{t("readingLabCoverage", language)}</span>
                   <small>{formatNumber(counts.familiar, language)} / {formatNumber(extracted.length, language)} {t("readingLabFamiliar", language)}</small>
                 </div>
                 <div className="reading-lab-coverage-metric">
