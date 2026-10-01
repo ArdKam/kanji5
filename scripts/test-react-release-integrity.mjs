@@ -12,8 +12,8 @@ assert.match(index, /href="\.\/react-dist\/kanji5-react\.css" data-kanji5-react-
 assert.match(index, /href="\.\/react-dist\/kanji5-react\.js">/);
 assert.doesNotMatch(index, /release18|release19/);
 
-assert.match(entry, /react-dist\/kanji5-react\.js\?v=/);
-assert.match(entry, /react-dist\/kanji5-react\.css\?v=/);
+assert.match(entry, /buildHash=.*kanji5-build-hash/);
+assert.match(entry, /assetVersion=\/\^\[0-9a-f\]/i);
 assert.doesNotMatch(entry, /react-dist\/kanji5-react-release\d+/);
 
 assert.match(bootstrap, /serviceWorker\.register\('\.\/sw\.js\?v=/);
