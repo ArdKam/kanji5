@@ -1,14 +1,24 @@
 import { test, expect } from "@playwright/test";
 
-async function goToBackPage(card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    await card.locator(".pager-button").nth(1).click();
+async function goToMnemonicPage(card) {
+  const pages = card.locator(".learning-back-page");
+  const count = await pages.count();
+  for (let index = 0; index < count; index += 1) {
+    const page = pages.nth(index);
+    if (await page.locator(".mnemonic-page").count()) {
+      const active = await page.evaluate(el => el.classList.contains("active"));
+      if (!active) {
+        await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(index).click();
+      }
+      await expect(page).toHaveClass(/active/);
+      await page.locator(".learning-back-scroll").evaluate(async el => {
+        const animations = el.getAnimations({ subtree: true });
+        await Promise.all(animations.map(animation => animation.finished.catch(() => undefined)));
+      });
+      return;
+    }
   }
-  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
-  await card.locator(".learning-back-page.active .learning-back-scroll").evaluate(async (el) => {
-    const animations = el.getAnimations({ subtree: true });
-    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
-  });
+  throw new Error("Mnemonic page not found");
 }
 
 test("prepared mnemonic is available on every learning card and can be saved as personal", async ({ page }) => {
@@ -23,7 +33,7 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
-  await goToBackPage(card, 2);
+  await goToMnemonicPage(card);
   const prepared = card.locator(".mnemonic-prepared");
   await expect(prepared).toBeVisible();
   await prepared.evaluate((el) => {
