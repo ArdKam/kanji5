@@ -52,18 +52,19 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await page.evaluate(() => {
     const original = window.__KANJI5_V19_V2_BOUNDARY__;
     if (!original) throw new Error("Boundary missing");
-    const realReadDeck = window.__KANJI5_STATE__?.readDeck;
-    if (typeof realReadDeck !== "function") throw new Error("Deck reader missing");
-    const realDeck = realReadDeck.call(window.__KANJI5_STATE__);
-    let ready = false;
-    window.__KANJI5_TEST_BOUNDARY__ = original;
-    window.__KANJI5_STATE__.readDeck = () => ready ? realDeck : [];
-    setTimeout(() => { ready = true; }, 300);
+    window.__KANJI5_V2_TEST_BOUNDARY__ = original;
+    window.__KANJI5_V19_V2_BOUNDARY__ = Object.freeze({
+      ...original,
+      listKanji: async () => {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        return original.listKanji();
+      }
+    });
   });
 
   const dialogPromise = openMenuItem(page, "Prepared mnemonics");
   const dialog = await dialogPromise;
-  await expect(dialog.locator(".prepared-mnemonic-library-loading")).toBeVisible({ timeout: 1000 });
+  await expect(dialog.locator(".prepared-mnemonic-library-loading")).toBeVisible({ timeout: 500 });
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated").first()).toBeVisible({ timeout: 10000 });
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("259");
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("1877");
