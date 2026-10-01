@@ -56,7 +56,7 @@ Non-test helpers include:
 - `build-kanji-data.mjs` — data/build maintenance.
 - `build-kanji-components.mjs` — component-data maintenance.
 - `serve-static.mjs` — local static serving.
-- `apply-*.mjs` / `v1.5-maintenance*.mjs` — targeted maintenance utilities.
+- `v1.5-maintenance*.mjs` — historical/targeted maintenance utilities; inspect before use.
 
 Do not run maintenance scripts casually against the working tree; inspect the script before using it.
 
