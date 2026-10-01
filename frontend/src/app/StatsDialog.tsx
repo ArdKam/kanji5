@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import { listKanji, type KanjiCatalogItem, type Snapshot } from "./engine";
+import { getStats, listKanji, type KanjiCatalogItem, type Snapshot } from "./engine";
 import { usePageDialog } from "./usePageDialog";
 
 function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
@@ -234,6 +234,23 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
   const [loading, setLoading] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [resolvedStats, setResolvedStats] = useState<Snapshot["stats"]>(snapshot.stats);
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    setResolvedStats(snapshot.stats);
+    setStatsLoading(true);
+    void getStats().then(stats => {
+      if (active) setResolvedStats(stats);
+    }).catch(() => {
+      if (active) setResolvedStats(snapshot.stats);
+    }).finally(() => {
+      if (active) setStatsLoading(false);
+    });
+    return () => { active = false; };
+  }, [open]);
 
   useEffect(() => {
     if (!open || !showAdvanced) return;
@@ -255,17 +272,18 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
     return () => { active = false; };
   }, [open, catalog.length, loading, attempted]);
 
-  const studiedCount = Number(snapshot?.stats?.studiedCount ?? 0);
-  const deckSize = Number(snapshot?.stats?.deckSize ?? 0);
+  const effectiveSnapshot: Snapshot = { ...snapshot, stats: resolvedStats ?? snapshot.stats };
+  const studiedCount = Number(effectiveSnapshot.stats?.studiedCount ?? 0);
+  const deckSize = Number(effectiveSnapshot.stats?.deckSize ?? 0);
   const coverage = deckSize ? Math.round((studiedCount / deckSize) * 100) : 0;
-  const streak = Number(snapshot?.stats?.currentStreak ?? 0);
-  const totalReviews = Number(snapshot?.stats?.totalReviews ?? 0);
+  const streak = Number(effectiveSnapshot.stats?.currentStreak ?? 0);
+  const totalReviews = Number(effectiveSnapshot.stats?.totalReviews ?? 0);
 
   const dialogRef = usePageDialog(open, onClose);
   if (!open) return null;
 
   return (
-    <dialog ref={dialogRef} className="dialog secondary-page-dialog stats-dialog stats-dashboard" aria-labelledby="stats-title">
+    <dialog ref={dialogRef} className="dialog secondary-page-dialog stats-dialog stats-dashboard" aria-labelledby="stats-title" aria-busy={statsLoading}>
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <header className="stats-header">
         <p className="eyebrow">{language === "fa" ? "پیشرفت" : "Progress"}</p>
@@ -297,11 +315,11 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
         <span className="stats-advanced-trigger-action">{showAdvanced ? (language === "fa" ? "بستن" : "Hide") : (language === "fa" ? "مشاهده" : "View")} <span aria-hidden="true">{showAdvanced ? "⌃" : "⌄"}</span></span>
       </button>
 
-      {showAdvanced ? <AdvancedStatsSection snapshot={snapshot} language={language} /> : null}
+      {showAdvanced ? <AdvancedStatsSection snapshot={effectiveSnapshot} language={language} /> : null}
 
-      <ActivitySection snapshot={snapshot} language={language} />
-      <MasterySection snapshot={snapshot} language={language} />
-      <SkillsSection snapshot={snapshot} language={language} />
+      <ActivitySection snapshot={effectiveSnapshot} language={language} />
+      <MasterySection snapshot={effectiveSnapshot} language={language} />
+      <SkillsSection snapshot={effectiveSnapshot} language={language} />
       <AttentionSection catalog={catalog} language={language} onStudyWeak={onStudyWeak} />
     </dialog>
   );

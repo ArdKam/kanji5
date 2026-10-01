@@ -3858,3 +3858,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
 @media(prefers-reduced-motion:reduce){
   .prepared-mnemonic-library-loading span{animation:none;}
 }
+
+/* Learning: keep same-session feedback compact; analytics live in Stats. */
+.session-feedback{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--washi);color:var(--mute);font-size:var(--text-xs)}.session-feedback strong{color:var(--sumi);font-size:var(--text-xs)}.session-feedback span{direction:rtl;text-align:end}@media(max-width:760px){.session-feedback{align-items:flex-start;flex-direction:column;gap:4px}.session-feedback span{text-align:start}}
