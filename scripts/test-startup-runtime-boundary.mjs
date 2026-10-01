@@ -45,6 +45,7 @@ assert.match(entry,/react-dist\/kanji5-react\.js/);
 assert.match(entry,/function scheduleAccountFallback\(\)/);
 assert.doesNotMatch(entry,/function mountAccountFallback\(\)/);
 assert.match(entry,/import\('\.\/account-fallback\.js\?v=20261001'\)/);
+assert.match(entry,/document\.querySelector\('#root \.account-button\(\?:not\(\[data-kanji5-account-fallback\]\)\)'\)/);
 assert.doesNotMatch(index, /<script[^>]+src=["']\.\/account-fallback\.js/);
 assert.match(index, /id="kanji5-account-launcher" class="is-shadowed"/);
 
