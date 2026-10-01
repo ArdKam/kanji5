@@ -38,8 +38,6 @@ on:
       - "react-entry.js"
       - "react-dist/**"
       - "sw.js"
-      - "sw-release18.js"
-      - "sw-release19.js"
       - "account-fallback.js"
   push:
     branches:
