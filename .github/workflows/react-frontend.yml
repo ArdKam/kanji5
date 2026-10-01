@@ -40,7 +40,6 @@ on:
       - "e2e/react-engine-boundary-gate.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
-      - "e2e/react-engine-boundary-gate.spec.mjs"
       - "e2e/stats-dialog.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
