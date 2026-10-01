@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getMnemonic, saveMnemonic, type KanjiCatalogItem } from "./engine";
-import { buildPreparedMnemonicEntries, CURATED_PREPARED_MNEMONICS } from "./prepared-mnemonic-core";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { usePageDialog } from "./usePageDialog";
 
@@ -38,6 +37,17 @@ function PreparedMnemonicLibrary({
   const [appliedKey, setAppliedKey] = useState("");
   const [errorKey, setErrorKey] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [preparedCore, setPreparedCore] = useState<typeof import("./prepared-mnemonic-core") | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void import("./prepared-mnemonic-core").then(module => {
+      if (active) setPreparedCore(module);
+    }).catch(() => {
+      if (active) setPreparedCore(null);
+    });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -57,10 +67,12 @@ function PreparedMnemonicLibrary({
   }, []);
 
   const entries = useMemo(
-    () => buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? [])
-      .sort((a, b) => Number(b.suggestion.source === "curated") - Number(a.suggestion.source === "curated"))
-      .map((entry, index) => ({ ...entry, index })),
-    [catalog, componentMap]
+    () => preparedCore
+      ? preparedCore.buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? [])
+        .sort((a, b) => Number(b.suggestion.source === "curated") - Number(a.suggestion.source === "curated"))
+        .map((entry, index) => ({ ...entry, index }))
+      : [],
+    [catalog, componentMap, preparedCore]
   );
 
   const curatedCount = useMemo(
@@ -193,7 +205,7 @@ function PreparedMnemonicLibrary({
       ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.readyResults : copy.readyResultsPlural}`
       : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.scaffoldResults : copy.scaffoldResultsPlural}`;
 
-  if (loading) {
+  if (loading || !preparedCore) {
     return (
       <section className="prepared-mnemonic-library" aria-busy="true" aria-live="polite">
         <div className="prepared-mnemonic-library-loading">
@@ -464,11 +476,23 @@ export function MnemonicsDialog({
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const dialogRef = usePageDialog(open, onClose);
+  const [curatedCount, setCuratedCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    setCuratedCount(null);
+    void import("./prepared-mnemonic-core").then(module => {
+      if (active) setCuratedCount(Object.keys(module.CURATED_PREPARED_MNEMONICS).length);
+    }).catch(() => {
+      if (active) setCuratedCount(null);
+    });
+    return () => { active = false; };
+  }, [open]);
 
   if (!open) return null;
 
-  const curatedCount = Object.keys(CURATED_PREPARED_MNEMONICS).length;
-  const generatedCount = Math.max(0, catalog.length - curatedCount);
+  const generatedCount = Math.max(0, catalog.length - (curatedCount ?? 0));
 
   return (
     <dialog
@@ -488,7 +512,7 @@ export function MnemonicsDialog({
           </p>
         </div>
         <div className="prepared-mnemonics-dialog-metrics" aria-label={language === "fa" ? "پوشش یادسپارها" : "Mnemonic coverage"}>
-          <span><strong>{formatNumber(curatedCount, language)}</strong>{language === "fa" ? " یادسپار آماده" : " ready-made"}</span>
+          <span><strong>{curatedCount == null ? "…" : formatNumber(curatedCount, language)}</strong>{language === "fa" ? " یادسپار آماده" : " ready-made"}</span>
           <span><strong>{formatNumber(generatedCount, language)}</strong>{language === "fa" ? " سرنخ ساخت" : " build clues"}</span>
         </div>
       </div>

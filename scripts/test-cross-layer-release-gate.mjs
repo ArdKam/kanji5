@@ -22,15 +22,20 @@ for (const pattern of [
 ]) {
   assert.equal(
     reactWorkflow.split(pattern).length - 1,
-    2,
-    `React release workflow must trigger on runtime/data change in both PR and push filters: ${pattern}`,
+    1,
+    `React pull-request release filter must cover runtime/data change: ${pattern}`,
   );
 }
 
+assert.match(
+  reactWorkflow,
+  /push:\s*\n\s+branches:\s*\n\s+- main\s*\n\s*\npermissions:/,
+  "React release workflow must run unconditionally on main pushes",
+);
 assert.equal(
   reactWorkflow.split('      - "e2e/react-engine-boundary-gate.spec.mjs"').length - 1,
-  2,
-  "React boundary gate must be part of both PR and push path filters",
+  1,
+  "React boundary gate must remain covered by the pull-request path filter",
 );
 assert.match(reactWorkflow, /name: Run engine-to-React boundary gate/);
 assert.match(reactWorkflow, /e2e\/react-engine-boundary-gate\.spec\.mjs/);
@@ -42,6 +47,11 @@ assert.ok(
   chromiumGateIndex < stagingIndex,
   "Pages deploy must pass the cross-layer gate before staging the release artifact",
 );
+assert.match(pagesWorkflow, /workflow_run:/, "Pages deployment must be triggered by the verified React workflow");
+assert.match(pagesWorkflow, /React presentation build/, "Pages deployment must depend on the React presentation workflow");
+assert.match(pagesWorkflow, /workflow_run\.head_sha/, "Pages deployment must deploy the exact verified workflow commit");
+assert.match(pagesWorkflow, /A newer main commit exists/, "Pages deployment must refuse stale verified commits");
+assert.match(pagesWorkflow, /npm ci --no-audit --no-fund/, "Pages deployment must use the frontend lockfile reproducibly");
 
 for (const key of [
   "fcpMs",

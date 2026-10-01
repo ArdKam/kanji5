@@ -2,6 +2,8 @@
 'use strict';
 const DATA_URL='./kanji-data.json';
 const FSRS_URL='./vendor/ts-fsrs-5.4.1.mjs';
+const K=window.__KANJI5_STORAGE_KEYS__;
+if(!K)throw new Error('KANJI5_STORAGE_KEYS_NOT_LOADED');
 const ensureStatus=()=>{let loading=document.getElementById('loading');if(!loading)return;let status=document.getElementById('loadStatus');if(!status){status=document.createElement('div');status.id='loadStatus';status.style.cssText='display:none';loading.querySelector(':scope > div')?.appendChild(status)}};
 const hasCachedDeck=()=>{
   try{

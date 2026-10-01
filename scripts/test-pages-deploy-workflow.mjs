@@ -8,8 +8,11 @@ assert.match(source, /Build shipped React artifact from source/);
 assert.match(source, /react-dist\/kanji5-react\.js/);
 assert.match(source, /react-dist\/kanji5-react\.css/);
 assert.match(stagingSource, /"sw\.js"/);
-assert.doesNotMatch(source, /workflow_run:/);
-assert.doesNotMatch(source, /github\.event\.workflow_run/);
+assert.match(source, /workflow_run:/);
+assert.match(source, /github\.event\.workflow_run/);
+assert.match(source, /if: \$\{\{ github\.event\.workflow_run\.conclusion == 'success' \}\}/);
+assert.match(source, /ref: \$\{\{ github\.event\.workflow_run\.head_sha \}\}/);
+assert.match(source, /npm ci --no-audit --no-fund/);
 
 assert.match(source, /fetch_with_retry "\$base\/" \/tmp\/kanji5-root\.html "react-entry\.js"/);
 assert.match(source, /fetch_with_retry "\$base\/react-entry\.js" \/tmp\/kanji5-entry\.js "react-dist\/kanji5-react\.js"/);

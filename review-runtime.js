@@ -13,7 +13,9 @@ const loadFsrs=()=>{
 async function ensureFsrs(){if(fsrs&&createEmptyCard&&Rating)return true;const loaded=await loadFsrs();({createEmptyCard,fsrs,Rating}=loaded);if(!scheduler)initScheduler();return true;}
 const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
-const STORAGE="kanji5-v1";const CARDS_STORAGE="kanji5-v1-cards";const REVIEWS_STORAGE="kanji5-v1-reviews";
+const K=window.__KANJI5_STORAGE_KEYS__;
+if(!K)throw new Error("KANJI5_STORAGE_KEYS_NOT_LOADED");
+const STORAGE=K.state,CARDS_STORAGE=K.cards,REVIEWS_STORAGE=K.reviews;
 const DEFAULTS={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
 const CUSTOM_STUDY_STORAGE='kanji5-v2-custom-study-filter';
 let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;let customStudyCore=null;let customStudyFilter=null;let ratingTransitionLocked=false;let modernStartupReady=false;
@@ -24,7 +26,7 @@ function speak(text){if(!text)return;if(!("speechSynthesis"in window)){toast("م
 function initScheduler(){scheduler=fsrs({request_retention:state.settings.retention,maximum_interval:state.settings.maxInterval,enable_fuzz:true,enable_short_term:true,learning_steps:["1m","10m"],relearning_steps:["10m"]})}
 async function loadDeck(){if(IS_LEGACY&&$("loadStatus"))$("loadStatus").textContent="در حال دریافت فهرست Jōyō...";const prefetched=window.__KANJI5_P0_DATA_PROMISE;if(prefetched){const all=await prefetched;if(Array.isArray(all)&&all.length===2136){state.deck=canonicalizeDeckReadings(all);localStorage.setItem("kanji5-deck",JSON.stringify(state.deck));return}}const res=await fetch(DATA_URL,{cache:"force-cache"});if(!res.ok)throw new Error("Could not load local kanji dataset");const data=await res.json();const all=Array.isArray(data)?data:(data.kanji||[]);if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);state.deck=canonicalizeDeckReadings(all);localStorage.setItem("kanji5-deck",JSON.stringify(state.deck))}
 function canonicalizeDeckReadings(deck){const core=window.__KANJI5_EDU_CORE__;if(!core?.canonicalizeItemReadings||!Array.isArray(deck))return deck;return deck.map(item=>core.canonicalizeItemReadings(item))}
-function loadDeckFromCache(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2136){state.deck=canonicalizeDeckReadings(x);return true}}catch(_){}return false}
+function loadDeckFromCache(){try{const x=JSON.parse(localStorage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2136){state.deck=canonicalizeDeckReadings(x);return true}}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}return false}
 function ensureCard(item){if(!state.cards[item.id])state.cards[item.id]={card:createEmptyCard(),reviews:0,lapses:0,learnedAt:null};return state.cards[item.id]}
 function dueNow(card){return card&&card.due&&new Date(card.due)<=new Date()}
 function educationQueuePriority(item,knowledge,now=Date.now()){const core=window.__KANJI5_EDU_CORE__;if(!core||!item)return 0;const entry=knowledge?.[item.character]||{};const signal=core.educationSchedulerSignal?core.educationSchedulerSignal(entry):null;if(!signal)return 0;const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;const componentValues=['meaning','reading'].map(mode=>Number(entry.componentEvidence?.[mode]?.weakness)).filter(Number.isFinite);const componentWeakness=componentValues.length?Math.max(...componentValues):0;return signal.weakness*.7+(1-signal.weakestSkillMastery)*.3+Math.min(1,ageDays/14)*.15+componentWeakness*.25}
@@ -32,7 +34,7 @@ function jlptRank(item){const rank={N5:0,N4:1,N3:2,N2:3,N1:4};return rank[item?.
 function newCardPriority(item,knowledge,now=Date.now()){const entry=knowledge?.[item.character]||{};const latest=[entry.meaning,entry.reading,entry.production,entry.vocabulary,entry.context].map(s=>s?.lastAt).filter(Boolean).sort().pop()||'';const ageDays=latest?Math.max(0,now-Date.parse(latest))/86400000:0;return educationQueuePriority(item,knowledge,now)+Math.min(1,ageDays/30)*.1}
 function buildDefaultQueue(){
   let knowledge={};
-  try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){}
+  try{knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}')}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}
   const now=Date.now();
   const dueItems=state.deck.filter(item=>state.cards[item.id]?.card&&dueNow(state.cards[item.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));
   dueItems.sort((a,b)=>{
@@ -70,7 +72,7 @@ function buildQueue(){
 async function setCustomStudyFilter(filter={}){
   if(!customStudyCore)customStudyCore=await import('./v2-custom-study-core.js');
   customStudyFilter=customStudyCore.normalizeCustomStudyFilter(filter);
-  try{sessionStorage.setItem(CUSTOM_STUDY_STORAGE,JSON.stringify(customStudyFilter))}catch(_){ }
+  try{sessionStorage.setItem(CUSTOM_STUDY_STORAGE,JSON.stringify(customStudyFilter))}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}
   buildQueue();
   state.current=null;
   state.revealed=false;
@@ -80,7 +82,7 @@ async function setCustomStudyFilter(filter={}){
 function clearCustomStudyFilter(){
   if(!customStudyFilter)return true;
   customStudyFilter=null;
-  try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){ }
+  try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}
   buildQueue();
   state.current=null;
   state.revealed=false;
@@ -90,9 +92,9 @@ function clearCustomStudyFilter(){
 function formatInterval(card){const mins=Math.max(0,Math.round((new Date(card.due)-Date.now())/60000));if(mins<60)return`${Math.max(1,mins)}m`;const h=mins/60;if(h<24)return`${Math.round(h)}h`;return`${Math.round(h/24)}d`}
 function formatMeta(k){const chips=[];if(state.cards[k.id]?.leech)chips.push({t:"🥴 Leech",cls:" leech"});if(k.frequency)chips.push({t:`頻度 #${k.frequency}`});if(k.grade)chips.push({t:`Jōyō grade ${k.grade}`});if(k.jlpt)chips.push({t:k.jlpt});chips.push({t:`${k.strokes} strokes`});return chips.map(x=>`<span class="chip${x.cls||""}">${x.t}</span>`).join("")}
 function exampleComplexity(example,k){const word=String(example?.word||''),reading=String(example?.reading||'');const otherKanji=[...word].filter(ch=>/[\u3400-\u9fff]/.test(ch)&&ch!==k.character).length;return otherKanji*6+Math.max(0,[...word].length-2)*1.5+Math.max(0,[...reading].length-4)*.35}
-async function fetchExamples(k){if(state.examples[k.id])return;try{const res=await fetch(WORDS_URL(k.character),{cache:'force-cache'});if(!res.ok)return;const data=await res.json(),seen=new Set(),candidates=[];for(const e of data){for(const v of(e.variants||[])){const term=String(v.written||''),reading=String(v.pronounced||'');const meaning=(e.meanings||[]).flatMap(m=>m?.glosses||[]).slice(0,2).join('; ');if(!term||!reading||!meaning||!term.includes(k.character)||seen.has(term+'|'+reading))continue;seen.add(term+'|'+reading);candidates.push({word:term,reading,meaning})}}candidates.sort((a,b)=>exampleComplexity(a,k)-exampleComplexity(b,k)||a.word.localeCompare(b.word));state.examples[k.id]=candidates.slice(0,4);save()}catch(_){}}
+async function fetchExamples(k){if(state.examples[k.id])return;try{const res=await fetch(WORDS_URL(k.character),{cache:'force-cache'});if(!res.ok)return;const data=await res.json(),seen=new Set(),candidates=[];for(const e of data){for(const v of(e.variants||[])){const term=String(v.written||''),reading=String(v.pronounced||'');const meaning=(e.meanings||[]).flatMap(m=>m?.glosses||[]).slice(0,2).join('; ');if(!term||!reading||!meaning||!term.includes(k.character)||seen.has(term+'|'+reading))continue;seen.add(term+'|'+reading);candidates.push({word:term,reading,meaning})}}candidates.sort((a,b)=>exampleComplexity(a,k)-exampleComplexity(b,k)||a.word.localeCompare(b.word));state.examples[k.id]=candidates.slice(0,4);save()}catch(_){window.__KANJI5_REVIEW_EXAMPLES_DEGRADED__=true;}}
 function reviewSnapshot(){const id=state.current;if(!id)return{active:false};const item=state.deck.find(x=>x.id===id);if(!item)return{active:false};const rec=state.cards[item.id];return{active:true,character:item.character,isNew:!rec,revealed:Boolean(state.revealed),meanings:Array.isArray(item.meaning)?item.meaning.slice(0,8):[],on:Array.isArray(item.on)?item.on.slice(0,8):[],kun:Array.isArray(item.kun)?item.kun.slice(0,8):[],examples:state.revealed&&Array.isArray(state.examples[item.id])?state.examples[item.id].slice(0,6).map(x=>({word:x.word,reading:x.reading,meaning:x.meaning})):[],hint:rec?'اول خودت معنی یا خوانش را حدس بزن.':'این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر.',revealLabel:rec?'نمایش پاسخ':'نمایش اطلاعات کانجی',contentId:String(item.id||item.character)};}
-function notifyV2Learning(){if(!IS_LEGACY&&!modernStartupReady)return;try{window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.()}catch(_) {}}
+function notifyV2Learning(){if(!IS_LEGACY&&!modernStartupReady)return;try{window.__KANJI5_V19_V2_BOUNDARY__?.refreshLearning?.()}catch(_){window.__KANJI5_REVIEW_BOUNDARY_NOTIFY_FAILED__=true;}}
 function directReveal(){if(!state.current)return false;state.revealed=true;const item=state.deck.find(x=>x.id===state.current);if(item)void fetchExamples(item).then(()=>notifyV2Learning());notifyV2Learning();return true}
 async function directRate(rating){await ensureFsrs();if(!Rating||Rating[rating]===undefined)return false;return review(rating)}
 function updateRuntimeSettings(next={}){state.settings={...state.settings,...next,dailyNew:Math.min(30,Math.max(1,Number(next.dailyNew)||state.settings.dailyNew)),dailyGoal:Math.min(500,Math.max(1,Number(next.dailyGoal)||state.settings.dailyGoal)),leechThreshold:Math.min(30,Math.max(2,Number(next.leechThreshold)||state.settings.leechThreshold))};if(fsrs)initScheduler();save();return true}
@@ -107,7 +109,7 @@ function renderExamples(){const el=$("examples");if(!el||!state.current)return;c
 function next(){if(state.queue.length===0){state.current=null;state.revealed=false;if(IS_LEGACY){renderEmpty();updateStats();}notifyV2Learning();return}state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats();}notifyV2Learning()}
 function learningBridgeSnapshot(){return reviewSnapshot();}
 
-function resetRuntime(){customStudyFilter=null;ratingTransitionLocked=false;try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){ }state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);if(fsrs)initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
+function resetRuntime(){customStudyFilter=null;ratingTransitionLocked=false;try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);if(fsrs)initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
 window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:directReveal,rate:directRate,updateSettings:updateRuntimeSettings,reset:resetRuntime,setCustomStudyFilter,clearCustomStudyFilter});
 window.__KANJI5_V19_REVIEW_BRIDGE__=Object.freeze({snapshot:reviewSnapshot,setCustomStudyFilter,clearCustomStudyFilter,reveal:(direct=false)=>{if(!IS_LEGACY||direct)return directReveal();const button=document.getElementById('revealBtn');if(!button)return false;window.__KANJI5_CANONICAL_REVEAL__=true;button.click();setTimeout(()=>{delete window.__KANJI5_CANONICAL_REVEAL__},0);setTimeout(notifyV2Learning,0);return true;},rate:(rating)=>{if(!IS_LEGACY)return directRate(rating);const button=document.querySelector(`.rate[data-r="${String(rating||'')}"]`);if(!button)return false;button.click();setTimeout(notifyV2Learning,0);return true;}});
 

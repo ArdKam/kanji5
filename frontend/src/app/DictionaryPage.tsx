@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
-import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 
@@ -16,31 +15,39 @@ const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
 
 function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item: KanjiCatalogItem; language: Language; draft?: string; onDraftChange: (value: string) => void }) {
-  const [suggestion, setSuggestion] = useState<PreparedMnemonic>(() => buildPreparedMnemonic(item));
+  const [suggestion, setSuggestion] = useState<PreparedMnemonic | null>(null);
   const [personalMnemonic, setPersonalMnemonic] = useState("");
   const [mnemonicBusy, setMnemonicBusy] = useState(false);
   const [status, setStatus] = useState("");
 
   useEffect(() => {
     let active = true;
-    setSuggestion(buildPreparedMnemonic(item));
+    setSuggestion(null);
     setPersonalMnemonic("");
     setStatus("");
-    void Promise.all([
-      getComponentInfo(item.character).then(info => buildPreparedMnemonic(item, info.components)).catch(() => buildPreparedMnemonic(item)),
-      getMnemonic(item.character),
-    ]).then(([prepared, saved]) => {
+    void import("./prepared-mnemonic-core").then(({ buildPreparedMnemonic }) => {
       if (!active) return;
+      setSuggestion(buildPreparedMnemonic(item));
+      return Promise.all([
+        getComponentInfo(item.character).then(info => buildPreparedMnemonic(item, info.components)).catch(() => buildPreparedMnemonic(item)),
+        getMnemonic(item.character).catch(() => ({ text: "" })),
+      ]);
+    }).then(result => {
+      if (!active || !result) return;
+      const [prepared, saved] = result;
       setSuggestion(prepared);
       const text = String(saved?.text ?? "");
       setPersonalMnemonic(text);
       if (draft === undefined) onDraftChange(text);
+    }).catch(() => {
+      if (!active) return;
+      setSuggestion(null);
     });
     return () => { active = false; };
   }, [item.character]);
 
-  const suggestions = suggestion.fa || suggestion.en ? [suggestion] : [];
-  const curatedText = suggestion.source === "curated" ? (language === "fa" ? suggestion.fa : suggestion.en) : "";
+  const suggestions = suggestion && (suggestion.fa || suggestion.en) ? [suggestion] : [];
+  const curatedText = suggestion?.source === "curated" ? (language === "fa" ? suggestion.fa : suggestion.en) : "";
 
   const savePersonalMnemonic = async () => {
     if (mnemonicBusy) return;
@@ -64,7 +71,7 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
     <section className="prepared-mnemonic-panel dictionary-mnemonic-panel" aria-label={t("preparedMnemonics", language)}>
       <div className="prepared-mnemonic-header">
         <div>
-          <h3>{suggestion.source === "curated" ? t("preparedMnemonics", language) : t("memoryAid", language)}</h3>
+          <h3>{suggestion?.source === "curated" ? t("preparedMnemonics", language) : t("memoryAid", language)}</h3>
           <p>{t("preparedMnemonicsHint", language)}</p>
         </div>
       </div>

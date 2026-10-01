@@ -11,7 +11,7 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `index.html`: minimal application shell and runtime wiring.
 - `react-entry.js`: production presentation bootstrap and React stylesheet loading.
 - `frontend/src/app/App.tsx`: presentation components and interaction state.
-- `frontend/src/app/engine.ts`: typed adapter over authoritative runtime boundaries.
+- `frontend/src/app/engine.ts`: typed adapter over authoritative runtime boundaries; it must not read session, education, learner-model, or persistence globals directly.
 - `review-runtime.js`: shared review/scheduling runtime; React consumes structured review snapshots/actions.
 - `v1.4-education-core.js`: pure education rules, canonical grading, adaptive skill selection, and knowledge recording.
 - `v1.5-education-ui.js`: headless education orchestration/bridge used by the React adapter; it does not own the production presentation.
@@ -21,7 +21,7 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.8-production-core.js`, `v1.8-vocabulary-core.js`, `v1.8-context-core.js`: deterministic grading for learner-facing recall modes.
 - `v1.9-*-core.js`: pure outcome, learner-model, planner, recovery, evaluation, quality and integrity modules.
 - `v1.9-v2-contract-core.js`: stable structured presentation contracts.
-- `v1.9-v2-boundary.js`: browser orchestration boundary that translates authoritative runtime state into structured view models.
+- `v1.9-v2-boundary.js`: browser orchestration boundary that translates authoritative runtime state into structured view models and owns the browser-facing session/exercise/handwriting bridge.
 - `supabase-sync.js`: remote transport only.
 - `sw.js`: offline shell/data/API caching and active runtime precaching.
 

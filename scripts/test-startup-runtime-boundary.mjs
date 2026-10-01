@@ -32,6 +32,11 @@ assert.match(boundary, /await import\('\.\/v1\.4-education-core\.js'\)/);
 assert.match(boundary, /await import\('\.\/v1\.9-recovery\.js'\)/);
 assert.match(boundary, /await import\('\.\/v1\.5-education-ui\.js'\)/);
 assert.match(engine, /ensureEducationRuntime/);
+assert.match(engine, /\(await waitForEngine\(\)\)\.startLearningSession/);
+assert.doesNotMatch(engine, /__KANJI5_(?:EDU_BRIDGE|V16_SESSION_API|V19_LEARNER_MODEL)__/, 'React engine adapter must not access runtime globals directly');
+for (const api of ['startLearningSession','startLearningExperience','startPracticeExperience','startExercise','submitExercise','dontKnowExercise','selfReportProduction','retryExercise','nextExercise','getHandwritingSkill','recordHandwritingGrade'])
+  assert.match(boundary, new RegExp(api), 'boundary must own '+api+' bridge');
+
 assert.doesNotMatch(migration, /import\('\.\/v1\.5-education-ui\.js'\)/);
 assert.doesNotMatch(session, /v1\.8-learning-ux\.js/);
 assert.match(p0, /const hasCachedDeck=\(\)=>/);
@@ -43,7 +48,7 @@ assert.match(bootstrap,/serviceWorker\.register/);
 assert.match(bootstrap,/requestIdleCallback\(registerServiceWorker/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);
 
-for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-perf.js','v1.8-learning-ux.js','v1.9-recovery-ui.js'])
+for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-perf.js','v1.8-learning-ux.js','v1.9-recovery-ui.js','v1.5-education-ui.css','learning-card-flip-runtime.js','learning-card-flip-runtime.css'])
   assert.equal(fs.existsSync(file), false, `retired file still exists: ${file}`);
 
 for (const file of ['v1.4-education-migration.js','v1.4-education-core.js','v1.5-education-ui.js','v1.9-recovery.js'])

@@ -1,12 +1,14 @@
 import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
 
-const STORAGE_KEY = 'kanji5-v1';
-const CARDS_STORAGE_KEY = 'kanji5-v1-cards';
-const REVIEWS_STORAGE_KEY = 'kanji5-v1-reviews';
-const KNOWLEDGE_KEY = 'kanji5-v1.2-knowledge';
-const COMPONENT_KEY = 'kanji5-v1.5-components';
-const SESSION_HISTORY_KEY = 'kanji5-v1.6-session-history';
+const K=window.__KANJI5_STORAGE_KEYS__;
+if(!K)throw new Error("KANJI5_STORAGE_KEYS_NOT_LOADED");
+const STORAGE_KEY=K.state;
+const CARDS_STORAGE_KEY=K.cards;
+const REVIEWS_STORAGE_KEY=K.reviews;
+const KNOWLEDGE_KEY=K.knowledge;
+const COMPONENT_KEY=K.components;
+const SESSION_HISTORY_KEY=K.sessionHistory;
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
