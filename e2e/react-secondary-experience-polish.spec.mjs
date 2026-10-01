@@ -85,3 +85,80 @@ test("Secondary desktop surfaces preserve centered modal geometry after the poli
     await dialog.getByRole("button", { name: "Close", exact: true }).click();
   }
 });
+
+test("Settings is learner-first: placement stays in Active Recall and changes require explicit save", async ({ page }) => {
+  await clean(page, "en");
+
+  const settings = await openMenuItem(page, "Settings");
+  await expect(settings).toHaveClass(/settings-dialog/);
+  await expect(settings.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await expect(settings.getByText("Learning", { exact: true })).toBeVisible();
+  await expect(settings.getByText("Review scheduling", { exact: true })).toBeVisible();
+  await expect(settings.getByText("Data & backup", { exact: true })).toBeVisible();
+  await expect(settings.getByText("Placement check", { exact: true })).toHaveCount(0);
+
+  const dailyNew = settings.getByLabel("New kanji per day", { exact: true });
+  await expect(dailyNew).toHaveValue("5");
+  await expect(settings.getByRole("button", { name: "Save changes", exact: true })).toBeDisabled();
+
+  await dailyNew.fill("7");
+  await expect(settings.getByText("You have unsaved changes.", { exact: true })).toBeVisible();
+  await expect(settings.getByRole("button", { name: "Save changes", exact: true })).toBeEnabled();
+
+  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  const discard = settings.getByRole("alertdialog");
+  await expect(discard).toBeVisible();
+  await discard.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await dailyNew.fill("8");
+  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  await settings.getByRole("alertdialog").getByRole("button", { name: "Discard changes", exact: true }).click();
+
+  const practice = await openMenuItem(page, "Settings");
+  await expect(practice.getByLabel("New kanji per day", { exact: true })).toHaveValue("5");
+  await practice.locator(".dialog-close").click();
+
+  await page.getByRole("button", { name: "Active Recall", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Placement check", exact: true })).toBeVisible();
+});
+
+test("Data backup exports and restores the authoritative learning data", async ({ page }) => {
+  await clean(page, "en");
+  let settings = await openMenuItem(page, "Settings");
+
+  const dailyNew = settings.getByLabel("New kanji per day", { exact: true });
+  await expect(dailyNew).toHaveValue("5");
+
+  const downloadPromise = page.waitForEvent("download");
+  await settings.getByRole("button", { name: "Export backup", exact: true }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^kanji5-backup-\\d{4}-\\d{2}-\\d{2}\\.json$/);
+  const backupPath = await download.path();
+  expect(backupPath).toBeTruthy();
+
+  await dailyNew.fill("9");
+  await settings.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page.locator("#settings-title")).toHaveCount(0);
+
+  settings = await openMenuItem(page, "Settings");
+  await expect(settings.getByLabel("New kanji per day", { exact: true })).toHaveValue("9");
+  await settings.locator(".settings-backup-import input").setInputFiles(backupPath);
+  await expect(settings.getByRole("alert").filter({ hasText: "Restore this Kanji5 backup?" })).toBeVisible();
+  await settings.getByRole("alert").filter({ hasText: "Restore this Kanji5 backup?" }).getByRole("button", { name: "Restore backup", exact: true }).click();
+
+  await expect.poll(async () => page.locator("#root .app-shell").count(), { timeout: 20000 }).toBe(1);
+  settings = await openMenuItem(page, "Settings");
+  await expect(settings.getByLabel("New kanji per day", { exact: true })).toHaveValue("5");
+  await settings.locator(".dialog-close").click();
+});
+
+test("Placement has one discoverable home in Active Recall", async ({ page }) => {
+  await clean(page, "en");
+  const settings = await openMenuItem(page, "Settings");
+  await expect(settings.getByText("Placement check", { exact: true })).toHaveCount(0);
+  await settings.locator(".dialog-close").click();
+
+  await page.getByRole("button", { name: "Active Recall", exact: true }).click();
+  const placement = page.getByRole("heading", { name: "Placement check", exact: true });
+  await expect(placement).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start diagnostic", exact: true })).toBeVisible();
+});
