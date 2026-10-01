@@ -21,5 +21,5 @@ if('requestIdleCallback' in window){
 }else{
   window.setTimeout(registerServiceWorker,1500);
 }
-import('./v1.6-session.js').catch(()=>{});
+if(new URLSearchParams(location.search).get('legacy')==='1')import('./v1.6-session.js').catch(()=>{});
 })();
