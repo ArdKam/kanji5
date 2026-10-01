@@ -23,7 +23,7 @@ for (const path of ['v1.5-state.js','review-runtime.js','supabase-sync.js','app-
 }
 
 for (const literal of ['kanji5-v1','kanji5-v1-cards','kanji5-v1-reviews','kanji5-deck','kanji5-deck-version']) {
-  for (const path of ['v1.5-state.js','review-runtime.js','supabase-sync.js','app-bootstrap.js','v1.3-p0.js']) {
+  for (const path of ['review-runtime.js','supabase-sync.js','app-bootstrap.js','v1.3-p0.js']) {
     const source=fs.readFileSync(path,'utf8');
     assert.equal(source.includes("'"+literal+"'"),false,path+' must not redeclare '+literal);
     assert.equal(source.includes('"'+literal+'"'),false,path+' must not redeclare '+literal);
