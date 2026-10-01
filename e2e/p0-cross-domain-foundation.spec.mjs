@@ -102,11 +102,11 @@ test('P0 network content adapters expose stable content identities',async({page}
   expect(result.sentences[0].contentId).toBe('sentence:123');
 });
 
-test('P0 legacy shell has no horizontal overflow at mobile baselines',async({page})=>{
+test('P0 React shell has no horizontal overflow at mobile baselines',async({page})=>{
   for(const width of [360,375,390]){
     await page.setViewportSize({width,height:844});
-    await page.goto('/?legacy=1');
-    await expect(page.locator('#app')).toBeVisible({timeout:20000});
+    await page.goto('/');
+    await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
     const metrics=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth}));
     expect(metrics.scrollWidth-metrics.clientWidth).toBeLessThanOrEqual(1);
   }
