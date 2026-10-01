@@ -202,7 +202,7 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await expect(dialog).toBeVisible({timeout:10000});
   const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible();
-  await lab.locator('textarea').fill('これは日本語の読み上げテストです。');
+  await lab.locator('textarea').fill('これは日本語の読み上げテストです。二番目の文もここで読みます。');
   await expect(lab.locator('.reading-lab-speech-row')).toBeVisible();
   await page.evaluate(()=>{
     const calls=[];
@@ -229,6 +229,22 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await expect(stop).toBeEnabled();
   await stop.click();
   await expect(speak).toHaveText('خواندن متن');
+  await expect(stop).toBeDisabled();
+
+  const sentences=lab.locator('.reading-lab-reader-sentence');
+  await expect(sentences).toHaveCount(2);
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۱ / ۲');
+  await expect(lab.locator('.reading-lab-sentence-prev')).toBeDisabled();
+  await expect(lab.locator('.reading-lab-sentence-next')).toBeEnabled();
+  await lab.locator('.reading-lab-sentence-next').click();
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(lab.locator('.reading-lab-sentence-prev')).toBeEnabled();
+  const readSentence=lab.getByRole('button',{name:'خواندن جمله',exact:true});
+  await readSentence.click();
+  const sentenceCalls=await page.evaluate(()=>(window.__KANJI5_SPEECH_CALLS__||[]));
+  expect(sentenceCalls.some(call=>call.type==='speak'&&call.text==='二番目の文もここで読みます。'&&call.lang==='ja-JP'&&call.rate===1)).toBe(true);
+  await expect(stop).toBeEnabled();
+  await stop.click();
   await expect(stop).toBeDisabled();
 });
 
