@@ -219,6 +219,38 @@ test('Reading Lab restores the last reading session after closing and reopening'
   await expect(restored.locator('.reading-lab-session-status')).toBeVisible();
 });
 
+test('Reading Lab focuses the next unfamiliar kanji without changing the reading session',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible({timeout:10000});
+  const textValue='今日は学生です。明日は先生です。';
+  await lab.locator('textarea').fill(textValue);
+
+  const targets=lab.locator('.reading-lab-reader-kanji:not(.familiar)');
+  const targetCount=await targets.count();
+  expect(targetCount).toBeGreaterThan(1);
+
+  const focusNext=lab.locator('.reading-lab-focus-button').first();
+  const nextUnknown=lab.locator('.reading-lab-focus-button').nth(1);
+  await expect(focusNext).toBeEnabled();
+  await expect(nextUnknown).toBeEnabled();
+
+  const targetKeys=await targets.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-reading-lab-sentence-index')+':'+node.getAttribute('data-reading-lab-character-index')));
+  await focusNext.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).toBe(targetKeys[0]);
+
+  await focusNext.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).toBe(targetKeys[1]);
+
+  await nextUnknown.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji.new')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).not.toBeNull();
+  await expect(lab.locator('textarea')).toHaveValue(textValue);
+
+});
+
 test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
   await clean(page);
   await page.route('https://kanjiapi.dev/v1/words/%E6%97%A5',async route=>{
