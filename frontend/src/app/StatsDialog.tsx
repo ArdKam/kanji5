@@ -172,8 +172,6 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   const counts = last7.map(day => Math.max(0, Number(day.count) || 0));
   const activeDays = counts.filter(count => count > 0).length;
   const activityTotal = counts.reduce((sum, count) => sum + count, 0);
-  const activityAverage = activityTotal / Math.max(1, counts.length);
-  const mastery = snapshot.stats?.masteryDistribution ?? {};
   const skillKeys = ["meaning", "reading", "production", "vocabulary", "context"] as const;
   const skillLabels: Record<typeof skillKeys[number], string> = {
     meaning: t("meaning", language),
@@ -191,63 +189,40 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   };
 
   return (
-    <section className="stats-advanced" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
-      <div className="stats-advanced-body">
-        <div className="stats-advanced-panel-heading">
-          <div>
-            <p className="eyebrow">{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</p>
-            <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
-          </div>
-          <span>{language === "fa" ? "داده‌های دقیق، بدون شلوغ‌کردن نمای اصلی" : "More detail without cluttering the main view"}</span>
+    <section className="stats-advanced surface" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
+      <div className="stats-section-heading">
+        <div>
+          <p className="eyebrow">{language === "fa" ? "جزئیات" : "Details"}</p>
+          <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
         </div>
-        <section className="stats-advanced-block" aria-labelledby="stats-advanced-activity-title">
-          <div className="stats-advanced-heading">
-            <div>
-              <p className="eyebrow">{language === "fa" ? "فعالیت" : "Activity"}</p>
-              <h4 id="stats-advanced-activity-title">{language === "fa" ? "جزئیات فعالیت اخیر" : "Recent activity details"}</h4>
-            </div>
-          </div>
-          <div className="stats-advanced-metrics">
-            <Metric label={language === "fa" ? "روزهای فعال" : "Active days"} value={formatNumber(activeDays, language)} hint={language === "fa" ? "از ۷ روز" : "of 7 days"} />
-            <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={formatNumber(Number(activityAverage.toFixed(1)), language)} hint={language === "fa" ? "در روز" : "per day"} />
-            <Metric label={language === "fa" ? "سررسید فعلی" : "Due now"} value={formatNumber(Number(snapshot.dailySummary?.dueCount) || 0, language)} />
-            <Metric label={language === "fa" ? "مسلط" : "Mastered"} value={formatNumber(Number(mastery.mastered) || 0, language)} />
-          </div>
-        </section>
-
-        <section className="stats-advanced-block" aria-labelledby="stats-advanced-skills-title">
-          <div className="stats-advanced-heading">
-            <div>
-              <p className="eyebrow">{language === "fa" ? "مهارت‌ها" : "Skills"}</p>
-              <h4 id="stats-advanced-skills-title">{language === "fa" ? "عملکرد و شواهد پاسخ" : "Performance and response evidence"}</h4>
-            </div>
-            <span className="stats-advanced-note">{language === "fa" ? "اعتماد مدل ≠ دقت پاسخ" : "Model confidence ≠ response accuracy"}</span>
-          </div>
-
-          <div className="stats-advanced-table" role="table" aria-label={language === "fa" ? "جزئیات مهارت‌ها" : "Skill details"}>
-            <div className="stats-advanced-row stats-advanced-row-head" role="row">
-              <span role="columnheader">{language === "fa" ? "مهارت" : "Skill"}</span>
-              <span role="columnheader">{language === "fa" ? "دقت" : "Accuracy"}</span>
-              <span role="columnheader">{language === "fa" ? "اخیر" : "Recent"}</span>
-              <span role="columnheader">{language === "fa" ? "تلاش" : "Attempts"}</span>
-              <span role="columnheader">{language === "fa" ? "وضعیت" : "Status"}</span>
-            </div>
-            {skillKeys.map(key => {
-              const skill = (snapshot.learner?.attributes?.[key] ?? {}) as AdvancedSkill;
-              return (
-                <div className="stats-advanced-row" role="row" key={key}>
-                  <strong role="cell">{skillLabels[key]}</strong>
-                  <span role="cell">{formatRate(skill.accuracy, language)}</span>
-                  <span role="cell">{formatRate(skill.recentAccuracy, language)}</span>
-                  <span role="cell">{Number.isFinite(Number(skill.attempts)) && Number(skill.attempts) > 0 ? formatNumber(Number(skill.attempts), language) : "—"}</span>
-                  <span role="cell" className="stats-advanced-status">{stateLabel(skill.state)}</span>
-                </div>
-              );
-            })}
-          </div>
-          <p className="stats-footnote">{language === "fa" ? "اطمینان مدل فقط نشان می‌دهد دادهٔ کافی برای برآورد وجود دارد؛ جای دقت واقعی پاسخ را نمی‌گیرد." : "Model confidence reflects evidence strength; it does not replace observed response accuracy."}</p>
-        </section>
+        <div className="stats-section-summary">
+          <strong>{formatNumber(activeDays, language)}/{formatNumber(7, language)}</strong>
+          <span>{language === "fa" ? "روز فعال · " : "active days · "}{formatNumber(activityTotal, language)} {language === "fa" ? "مرور" : "reviews"}</span>
+        </div>
       </div>
+
+      <div className="stats-advanced-table" role="table" aria-label={language === "fa" ? "جزئیات مهارت‌ها" : "Skill details"}>
+        <div className="stats-advanced-row stats-advanced-row-head" role="row">
+          <span role="columnheader">{language === "fa" ? "مهارت" : "Skill"}</span>
+          <span role="columnheader">{language === "fa" ? "دقت" : "Accuracy"}</span>
+          <span role="columnheader">{language === "fa" ? "اخیر" : "Recent"}</span>
+          <span role="columnheader">{language === "fa" ? "تلاش" : "Attempts"}</span>
+          <span role="columnheader">{language === "fa" ? "وضعیت" : "Status"}</span>
+        </div>
+        {skillKeys.map(key => {
+          const skill = (snapshot.learner?.attributes?.[key] ?? {}) as AdvancedSkill;
+          return (
+            <div className="stats-advanced-row" role="row" key={key}>
+              <strong role="cell">{skillLabels[key]}</strong>
+              <span role="cell">{formatRate(skill.accuracy, language)}</span>
+              <span role="cell">{formatRate(skill.recentAccuracy, language)}</span>
+              <span role="cell">{Number.isFinite(Number(skill.attempts)) && Number(skill.attempts) > 0 ? formatNumber(Number(skill.attempts), language) : "—"}</span>
+              <span role="cell" className="stats-advanced-status">{stateLabel(skill.state)}</span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="stats-footnote">{language === "fa" ? "اعتماد مدل فقط نشان‌دهندهٔ قدرت شواهد است و جای دقت واقعی پاسخ را نمی‌گیرد." : "Model confidence reflects evidence strength; it does not replace observed response accuracy."}</p>
     </section>
   );
 }
@@ -302,7 +277,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
       </section>
 
       <button
-        className="stats-advanced-trigger"
+        className="button stats-advanced-trigger"
         type="button"
         aria-expanded={showAdvanced}
         aria-controls="stats-advanced-panel"
