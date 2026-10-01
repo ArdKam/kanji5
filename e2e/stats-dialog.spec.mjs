@@ -82,7 +82,7 @@ test('Advanced statistics stay collapsed until explicitly opened',async({page})=
   await advanced.locator('summary').click();
   await expect(advanced).toHaveAttribute('open', '');
   await expect(advanced.locator('.stats-advanced-table')).toBeVisible();
-  await expect(advanced).toContainText('Accuracy');
-  await expect(advanced).toContainText('Attempts');
-  await expect(advanced.locator('.stats-advanced-row').nth(1)).toContainText('66%');
+  await expect(advanced).toContainText('دقت');
+  await expect(advanced).toContainText('تلاش');
+  await expect(advanced.locator('.stats-advanced-row').nth(1)).toContainText('۶۷٪');
 });
