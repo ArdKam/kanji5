@@ -5,16 +5,16 @@ import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMne
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
+import { DictionaryPage } from "./DictionaryPage";
+import { PracticeHome } from "./PracticeHome";
+import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton } from "./AccountButton";
 
-const DictionaryPage = lazy(() => import("./DictionaryPage").then(m => ({ default: m.DictionaryPage })));
 const StatsDialog = lazy(() => import("./StatsDialog").then(m => ({ default: m.StatsDialog })));
 const SettingsDialog = lazy(() => import("./SettingsDialog").then(m => ({ default: m.SettingsDialog })));
-const PracticeHome = lazy(() => import("./PracticeHome").then(m => ({ default: m.PracticeHome })));
 const GrammarDialog = lazy(() => import("./GrammarDialog").then(m => ({ default: m.GrammarDialog })));
 const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(m => ({ default: m.ReadingLabDialog })));
 const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(m => ({ default: m.MnemonicsDialog })));
-const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(m => ({ default: m.HandwritingPractice })));
 const AccountDialog = lazy(() => import("./AccountDialog").then(m => ({ default: m.AccountDialog })));
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -954,7 +954,7 @@ function App(){
         /> : null}
         {secondaryPage==="account" ? <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/> : null}
         </Suspense>
-      </section> : showDictionary?<Suspense fallback={null}><DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
+      </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
