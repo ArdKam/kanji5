@@ -6,6 +6,8 @@ const session=await readFile(new URL('../v1.6-session.js',import.meta.url),'utf8
 const review=await readFile(new URL('../review-runtime.js',import.meta.url),'utf8');
 const boundary=await readFile(new URL('../v1.9-v2-boundary.js',import.meta.url),'utf8');
 const engine=await readFile(new URL('../frontend/src/app/engine.ts',import.meta.url),'utf8');
+const p0=await readFile(new URL('../v1.3-p0.js',import.meta.url),'utf8');
+const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url),'utf8');
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
@@ -25,6 +27,8 @@ assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.
 mustContain(session,'function start(){if(!IS_LEGACY)return;','Legacy dashboard startup must not run in modern mode');
 mustContain(session,'void loadPlanApi()','Session plan API remains available on explicit use');
 
+mustContain(review,"const prefetchFsrs=()=>{if(!window.__KANJI5_P0_FSRS_PROMISE)","Review runtime must retain the shared FSRS compatibility path");
+mustContain(review,"window.__KANJI5_P0_FSRS_PROMISE?window.__KANJI5_P0_FSRS_PROMISE.then", "Review runtime must consume the shared FSRS promise when present");
 mustContain(review,"buildQueue();next();document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'))","Review runtime must signal readiness after queue initialization");
 mustContain(boundary,'async function startupSnapshot(){','Boundary must expose a Learning-first snapshot path');
 mustContain(boundary,'async function publishStartupSnapshot(){','Boundary must publish a startup snapshot');
@@ -35,5 +39,9 @@ mustContain(boundary,'startupSnapshot,refreshLearning','Startup snapshot must cr
 
 mustContain(engine,'startupSnapshot: () => Promise<Snapshot>','Boundary type must declare startupSnapshot');
 mustContain(engine,'export async function startupSnapshot(): Promise<Snapshot>','Engine adapter must expose startupSnapshot');
+mustContain(p0,"if(isLegacy)prefetchFsrs();","Legacy mode keeps the eager FSRS path");
+mustContain(p0,"window.requestIdleCallback(prefetchFsrs,{timeout:2500})","Modern mode defers FSRS prefetch");
+mustContain(learner,"window.requestIdleCallback(scheduleLearnerHydration,{timeout:2200})","Modern mode defers learner-model hydration");
+assert.doesNotMatch(learner,/void updateCore\(\);\s*document\.addEventListener/);
 
 console.log('Learning startup path contract: PASS');
