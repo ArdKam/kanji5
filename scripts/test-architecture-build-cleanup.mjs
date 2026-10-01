@@ -30,7 +30,7 @@ for(const retired of [
   assert.equal(fs.existsSync(retired),false,"retired generated artifact still exists: "+retired);
 }
 
-assert.ok(gitignore.split(/\\r?\\n/).includes("/react-dist/"));
+assert.ok(gitignore.split(/\r?\n/).includes("/react-dist/"));
 assert.ok(pages.includes("npm run build"));
 assert.ok(pages.includes("actions/upload-pages-artifact@v4"));
 assert.ok(!pages.includes("git add react-dist/"));
