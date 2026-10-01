@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
-import { StrokeOrderViewer } from "./StrokeOrderViewer";
+const StrokeOrderViewer = lazy(()=>import("./StrokeOrderViewer").then(module=>({default:module.StrokeOrderViewer})));
 import { DictionaryPage } from "./DictionaryPage";
 import { StatsDialog } from "./StatsDialog";
 import { SettingsDialog } from "./SettingsDialog";
@@ -471,7 +471,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             </div>
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
-                <div className="stroke-page">{card.character?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
+                <div className="stroke-page">{card.character?<Suspense fallback={null}><StrokeOrderViewer character={card.character} language={getLanguage()}/></Suspense>:null}</div>
               </div>
             </div>
           </div>
