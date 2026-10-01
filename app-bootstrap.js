@@ -7,7 +7,9 @@ const DECK_KEY='kanji5-deck';
 const VERSION_KEY='kanji5-deck-version';
 try{
   if(localStorage.getItem(VERSION_KEY)!==DATA_VERSION){
-    localStorage.removeItem(DECK_KEY);
+    // Dataset revisions must never destructively erase learner progress.
+    // Keep the existing deck and only advance the dataset marker; future
+    // schema changes must migrate data explicitly rather than wiping it.
     localStorage.setItem(VERSION_KEY,DATA_VERSION);
   }
 }catch(_){}
