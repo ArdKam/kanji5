@@ -59,7 +59,7 @@ test('Learning profile reflects persisted skill data after a real app reload',as
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_LEARNER_MODEL__)),{timeout:10000}).toBe(true);
-  await expect.poll(async()=>page.evaluate(()=>Number((window.__KANJI5_V19_LEARNER_MODEL__?.read?.().attributes?.meaning?.confidence)||0)),{timeout:10000}).toBeGreaterThan(0);
+  await expect.poll(async()=>page.evaluate(()=>Number((window.__KANJI5_V19_LEARNER_MODEL__?.read?.()?.attributes?.meaning?.confidence)||0)),{timeout:10000}).toBeGreaterThan(0);
   const dialog=await openStats(page);
   await expect(dialog.locator('.stats-skill-row').first().locator('strong')).not.toHaveText('۰٪');
 });
