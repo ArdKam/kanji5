@@ -19,7 +19,7 @@ assert.doesNotMatch(ui,/\blocalStorage\b|\bsessionStorage\b/);
 assert.doesNotMatch(ui,/https:\/\/kanjiapi\.dev|https:\/\/api\.tatoeba\.org/);
 assert.match(ui,/import\('\.\/v1\.5-network\.js'\)/);
 assert.match(sw,/"\.\/v1\.5-network\.js"/);
-const cacheVersion=sw.match(/const CACHE='kanji5-shell-v(\d+)'/)?.[1];
-assert.ok(Number(cacheVersion)>=50,'Runtime cache version was not bumped for v1.6');
+const cacheVersion=sw.match(/const CACHE='kanji5-shell-v([^']+)'/)?.[1];
+assert.ok(cacheVersion&&(/^[0-9]+$/.test(cacheVersion)?Number(cacheVersion)>=50:cacheVersion==='__KANJI5_BUILD_HASH__'),'Runtime cache version must use build provenance');
 
 console.log('Kanji 5 v1.6 network boundary checks passed.');
