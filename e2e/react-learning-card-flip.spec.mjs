@@ -476,26 +476,49 @@ test("mobile menu leaves the account control above the drawer and clickable", as
   await expect(page.locator(".account-dialog:visible")).toBeVisible();
 });
 
-test("menu sections open as focused tool dialogs without detached navigation", async ({ page }) => {
+test("menu sections open as centered tool dialogs on desktop", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
   await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
 
-  await page.getByRole("button", { name: "More", exact: true }).click();
-  await page.locator("#header-tools-menu").getByRole("button", { name: "Settings", exact: true }).click();
+  for (const tool of ["Stats", "Grammar guide", "Reading lab", "Prepared mnemonics", "Settings"]) {
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const menu = page.locator("#header-tools-menu");
+    await expect(menu).toBeVisible();
+    await menu.getByRole("button", { name: tool, exact: true }).click();
 
-  const pageDialog = page.locator(".secondary-page-dialog");
-  await expect(pageDialog).toBeVisible();
-  await expect(pageDialog).toHaveAttribute("open", "");
-  await expect(page.locator("#root .learning-card")).toHaveCount(0);
+    const pageDialog = page.locator(".secondary-page-dialog");
+    await expect(pageDialog).toBeVisible();
+    await expect(pageDialog).toHaveAttribute("open", "");
+    await expect(page.locator("#root .learning-card")).toHaveCount(0);
 
-  const position = await pageDialog.evaluate((el) => getComputedStyle(el).position);
-  expect(position).toBe("absolute");
-  await expect(page.getByRole("button", { name: "Back to learning card", exact: true })).toHaveCount(0);
+    const geometry = await page.evaluate(() => {
+      const dialog = document.querySelector(".secondary-page-dialog");
+      if (!(dialog instanceof HTMLElement)) throw new Error("Secondary dialog unavailable");
+      const rect = dialog.getBoundingClientRect();
+      return {
+        position: getComputedStyle(dialog).position,
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+      };
+    });
+    expect(geometry.position).toBe("fixed");
+    expect(Math.abs((geometry.left + geometry.right) / 2 - geometry.viewportWidth / 2)).toBeLessThanOrEqual(2);
+    expect(Math.abs((geometry.top + geometry.bottom) / 2 - geometry.viewportHeight / 2)).toBeLessThanOrEqual(2);
+    expect(geometry.left).toBeGreaterThanOrEqual(0);
+    expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+    expect(geometry.top).toBeGreaterThanOrEqual(0);
+    expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight);
 
-  await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
-  await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
-  await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+    await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
+    await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+    await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
+  }
 });
 
 test("tool dialogs remain usable within a narrow mobile viewport", async ({ page }) => {
