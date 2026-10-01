@@ -1,11 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 async function goToBackPage(card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    const next = card.locator(".pager-button").nth(1);
-    if (!(await next.isEnabled())) break;
-    await next.click();
-  }
+  await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(targetIndex).click();
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
 
