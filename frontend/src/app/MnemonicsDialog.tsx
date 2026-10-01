@@ -195,12 +195,11 @@ function PreparedMnemonicLibrary({
           />
         </label>
 
-        <div className="prepared-mnemonic-mode-row" role="tablist" aria-label={copy.modeLabel}>
+        <div className="prepared-mnemonic-mode-row" role="group" aria-label={copy.modeLabel}>
           <button
             className={"prepared-mnemonic-mode-tab" + (mode === "curated" ? " active" : "")}
             type="button"
-            role="tab"
-            aria-selected={mode === "curated"}
+            aria-pressed={mode === "curated"}
             onClick={() => setMode("curated")}
           >
             <span>{copy.curatedMode}</span>
@@ -209,8 +208,7 @@ function PreparedMnemonicLibrary({
           <button
             className={"prepared-mnemonic-mode-tab is-secondary" + (mode === "generated" ? " active" : "")}
             type="button"
-            role="tab"
-            aria-selected={mode === "generated"}
+            aria-pressed={mode === "generated"}
             onClick={() => setMode("generated")}
           >
             <span>{copy.generatedMode}</span>
