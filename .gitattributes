@@ -1,3 +1,2 @@
 # Keep generated/vendor trees from dominating GitHub source presentation.
-/react-dist/** linguist-generated=true
 /vendor/** linguist-vendored=true
