@@ -189,6 +189,12 @@ export type Boundary = {
 };
 
 
+declare global {
+  interface Window {
+    __KANJI5_V19_V2_BOUNDARY__?: Boundary;
+  }
+}
+
 export async function waitForEngine(timeoutMs = 12000): Promise<Boundary> {
   const started = performance.now();
   while (performance.now() - started < timeoutMs) {
