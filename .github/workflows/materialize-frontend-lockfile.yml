@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - chore/engineering-debt-wave1-20261001
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -14,12 +17,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: chore/engineering-debt-wave1-20261001
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Generate frontend lockfile
         working-directory: frontend
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Validate frontend lockfile with npm ci
+        working-directory: frontend
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Commit generated lockfile
         run: |
           git config user.name "github-actions[bot]"
