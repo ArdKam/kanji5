@@ -10,16 +10,24 @@ function normalizeItems(items){
   return Array.isArray(items)?items.filter(item=>item&&typeof item==='object'):[];
 }
 
+function readRecord(store,item){
+  try{
+    if(typeof store?.get!=='function')return null;
+    if(store.get.length<=1)return store.get(item)||null;
+    return store.get('vocabulary',text(item?.contentId))||null;
+  }catch(_){
+    return null;
+  }
+}
+
 function readRecords(items,store){
   if(!store||typeof store.get!=='function')return {};
   const records={};
   for(const item of items){
     const contentId=text(item?.contentId);
     if(!contentId)continue;
-    try{
-      const record=store.get('vocabulary',contentId);
-      if(record&&typeof record==='object')records[contentId]=record;
-    }catch(_){}
+    const record=readRecord(store,item);
+    if(record&&typeof record==='object')records[contentId]=record;
   }
   return records;
 }
