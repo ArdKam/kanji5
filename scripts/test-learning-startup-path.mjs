@@ -14,6 +14,8 @@ const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
   assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
 }
+assert.match(app,/const StrokeOrderViewer = lazy\(\(\)=>import\(["']\.\/StrokeOrderViewer["']\)/,`Stroke order viewer must be deferred`);
+assert.doesNotMatch(app,/import \{ StrokeOrderViewer \} from ["']\.\/StrokeOrderViewer["']/,`Stroke order viewer must not be statically imported`);
 
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
