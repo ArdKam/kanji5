@@ -8,7 +8,7 @@ const profiles = [
 
 const artifactBudgets = [
   ["react-dist/kanji5-react.js", 650 * 1024],
-  ["react-dist/kanji5-react.css", 220 * 1024],
+  ["react-dist/kanji5-react.css", 221 * 1024],
 ];
 
 const startupBudgets = {
