@@ -121,6 +121,8 @@ export function createVocabularyEvidenceAdapter(store){
 
   const mistakes=(options={})=>store.listMistakes(options);
 
+  const project=item=>projectVocabularyLearning(item,getRecord(item));
+
   return Object.freeze({
     schemaVersion:VOCABULARY_LEARNING_SCHEMA_VERSION,
     domain:'vocabulary',
@@ -131,6 +133,7 @@ export function createVocabularyEvidenceAdapter(store){
     outcome,
     select,
     mistakes,
+    project,
     projectVocabularyLearning
   });
 }
