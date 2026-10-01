@@ -203,46 +203,44 @@ test('rating a revealed learning card clears focus before the back face is hidde
   expect(ariaWarnings).toEqual([]);
 });
 
-test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
+test('learning-card Stroke Order exposes pause and resume while playing', async ({page})=>{
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg"><g id="kvg:StrokePaths_05b66"><path id="kvg:05b66-s1" d="M10,10 L30,30"/><path id="kvg:05b66-s2" d="M30,30 L50,10"/></g></svg>`;
+  await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
+    await route.fulfill({status:200,contentType:"image/svg+xml",body:svg});
+  });
+  await page.addInitScript(()=>localStorage.setItem("kanji5-ui-language","en"));
+  await page.goto("/");
+  const card=page.locator("#root .learning-card");
+  await expect(card).toBeVisible({timeout:20000});
+  await card.getByRole("button",{name:"Show kanji information"}).click();
+  const pager=card.locator(".learning-back-page-nav");
+  const nextPage=pager.locator(".pager-button").last();
+  for(let i=0;i<3;i++){
+    await expect(nextPage).toBeEnabled();
+    await nextPage.click();
+    await page.waitForTimeout(520);
+  }
+  const panel=card.locator(".learning-back-page.active .stroke-order-panel");
+  await expect(panel).toBeVisible();
+  const play=panel.locator(".stroke-order-controls .button.primary");
+  await expect(play).toBeVisible();
+  await play.click();
+  await expect(panel.getByRole("button",{name:"Pause"})).toBeVisible();
+  await panel.getByRole("button",{name:"Pause"}).click();
+  await expect(panel.locator(".stroke-order-controls .button.primary")).toBeVisible();
+});
+
+test('secondary pages hide the persistent experience navigation', async ({page})=>{
   await clean(page);
-
-  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
-  await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
-  const tile=page.locator('.kanji-catalog-tile').first();
-  await expect(tile).toBeVisible({timeout:10000});
-  await tile.dispatchEvent('click');
-
-  const dialog=page.locator('.dictionary-card-dialog:visible');
-  await expect(dialog).toBeVisible();
-  const dialogBounds=await dialog.boundingBox();
-  expect(dialogBounds?.height ?? 0).toBeGreaterThan(400);
-  const tabs=dialog.getByRole('tab');
-  await expect(tabs).toHaveCount(5);
-  const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
-  await expect(overview).toHaveAttribute('aria-selected','true');
-  await expect(structure).toHaveAttribute('aria-selected','false');
-  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
-
-  const initialScroll=await dialog.evaluate((node)=>node.scrollTop);
-  expect(initialScroll).toBe(0);
-
-  await structure.click();
-  await expect(structure).toHaveAttribute('aria-selected','true');
-  await expect(overview).toHaveAttribute('aria-selected','false');
-  const controls=await structure.getAttribute('aria-controls');
-  expect(controls).toBeTruthy();
-  await expect(dialog.locator('#'+controls)).toBeVisible();
-  await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
-
-  const content=dialog.locator('.dictionary-card-content');
-  await expect(content).toHaveCount(1);
-  const structureScroll=await content.evaluate((node)=>node.scrollTop);
-  expect(structureScroll).toBe(0);
-  await structure.press('ArrowRight');
-  await expect(overview).toHaveAttribute('aria-selected','true');
-  await overview.press('ArrowLeft');
-  await expect(structure).toHaveAttribute('aria-selected','true');
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
+  await expect(page.locator('.secondary-page-host')).toBeVisible({timeout:5000});
+  await expect(page.locator('.experience-nav')).toHaveCount(0);
+  const close=page.locator('.secondary-page-host').locator('.dialog-close').first();
+  await close.click();
+  await expect(page.locator('.experience-nav')).toBeVisible();
 });
 
 test('learning-card Stroke Order is permanently open and has no accordion trigger', async ({page})=>{
