@@ -116,7 +116,7 @@ function PreparedMnemonicLibrary({
     filters: "Mnemonic type",
     all: "All",
     curated: "Curated",
-    generated: "Build-your-own",
+    generated: "راهنمای ساخت",
     levels: "Level",
     allLevels: "All",
     grade1: "Grade 1",
@@ -248,7 +248,7 @@ function PreparedMnemonicLibrary({
               <div className="prepared-mnemonic-library-content">
                 <div className="prepared-mnemonic-library-meta">
                   <span className={"prepared-mnemonic-source " + (isCurated ? "curated" : "generated")}>
-                    <span aria-hidden="true">{isCurated ? "✦" : "↗"}</span>
+                    <span aria-hidden="true">{isCurated ? "✦" : "◇"}</span>
                     {isCurated ? copy.curated : copy.scaffold}
                   </span>
                   {meaning ? <span className="prepared-mnemonic-library-meaning">{meaning}</span> : null}
