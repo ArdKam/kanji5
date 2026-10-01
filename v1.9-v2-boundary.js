@@ -275,7 +275,7 @@ let snapshotInFlight=null;async function snapshot(){if(snapshotInFlight)return s
 async function publishStartupSnapshot(){const viewModel=await startupSnapshot();document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-startup-view-model',{detail:viewModel}));return viewModel}
 async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
 async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
-async function rateLearning(rating){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
+async function rateLearning(rating){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(await bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 
 async function publish(){const revision=++publishRevision;const viewModel=await snapshot();if(revision!==publishRevision)return null;window.__KANJI5_V19_V2_LAST_SNAPSHOT__=viewModel;document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-view-models',{detail:viewModel}));return viewModel}
 async function setExercise(input){const core=await load();feedback=null;exercise=core.buildExerciseViewModel(input);await publish();return exercise}
