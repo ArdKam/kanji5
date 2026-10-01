@@ -23,7 +23,7 @@ async function precacheReactEntryDependencies(cache){
     const response=await cache.match(url);
     if(!response)continue;
     const source=await response.clone().text();
-    for(const match of source.matchAll(/from\\s*["'](\\.\\/assets\\/[^"']+\\.js)["']/g)){
+    for(const match of source.matchAll(/from\s*["'](\.\/assets\/[^"']+\.js)["']/g)){
       const assetRelative='./react-dist/'+match[1].slice(2);
       if(seen.has(assetRelative))continue;
       seen.add(assetRelative);
