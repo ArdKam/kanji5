@@ -333,12 +333,15 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
 });
 
-test('mastery visualization renders skill signals and seven-day review activity',async({page})=>{
+test('analytics remain in Stats and Learning keeps only compact session feedback',async({page})=>{
   await clean(page);
-  await page.locator('.insights summary').click();
-  await expect(page.locator('.mastery-grid')).toBeVisible();
-  await expect(page.locator('.mastery-row')).toHaveCount(5);
-  await expect(page.locator('.mastery-track[role="progressbar"]').first()).toHaveAttribute('aria-valuenow');
-  await expect(page.locator('.activity-chart')).toBeVisible();
-  await expect(page.locator('.activity-bar-wrap')).toHaveCount(7);
+  await expect(page.locator('.insights')).toHaveCount(0);
+  await page.getByRole('button',{name:'بیشتر'}).click();
+  await page.getByRole('button',{name:'آمار'}).click();
+  const stats=page.locator('.stats-dashboard');
+  await expect(stats).toBeVisible({timeout:10000});
+  await expect(stats.locator('.stats-activity')).toBeVisible({timeout:10000});
+  await expect(stats.locator('.stats-mastery-bar')).toBeVisible({timeout:10000});
+  await expect(stats.locator('.stats-skills-list').first()).toBeVisible({timeout:10000});
 });
+
