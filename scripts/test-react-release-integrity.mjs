@@ -8,7 +8,7 @@ const sw=fs.readFileSync("sw.js","utf8");
 
 assert.match(index, /<script src="\.\/app-bootstrap\.js"><\/script>/);
 assert.match(index, /<script type="module" src="\.\/react-entry\.js"><\/script>/);
-assert.match(index, /href="\.\/react-dist\/kanji5-react\.css" data-kanji5-react-styles/);
+assert.match(index, /href="\.\/react-dist\/kanji5-react\.css\?v=__KANJI5_BUILD_HASH__" data-kanji5-react-styles/);
 assert.match(index, /href="\.\/react-dist\/kanji5-react\.js">/);
 assert.doesNotMatch(index, /release18|release19/);
 
