@@ -18,7 +18,7 @@ console.log("Shipped React CSS local assets resolved ("+localCssAssets.length+")
 
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
-if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react\.css\?v=/.test(entry)){
+if(!/kanji5-build-hash/.test(entry) || !/assetVersion=/.test(entry)){
   throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
 }
 console.log("React entry uses cache-busted shipped runtime assets.");
