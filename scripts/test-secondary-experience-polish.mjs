@@ -39,6 +39,10 @@ assert.ok(reading.includes("splitReadingSentences"),"Reading Lab sentence segmen
 assert.ok(reading.includes("activeSentenceIndex"),"Reading Lab focused sentence state missing");
 assert.ok(reading.includes("reading-lab-reader-toolbar"),"Reading Lab sentence controls missing");
 assert.ok(reading.includes("speakCurrentSentence"),"Reading Lab sentence playback missing");
+const readingDialog=fs.readFileSync("frontend/src/app/ReadingLabDialog.tsx","utf8");
+assert.ok(readingDialog.includes("DictionaryKanjiCard"),"Reading Lab dictionary should remain an overlay");
+assert.ok(readingDialog.includes("selectedKanji"),"Reading Lab dictionary selection state missing");
+assert.ok(readingDialog.includes("onClose={() => setSelectedKanji(null)}"),"Reading Lab dictionary overlay close should return to the lab");
 
 assert.ok(mnemonics.includes("item?.meanings"),"Mnemonic search does not include meanings");
 assert.ok(mnemonics.includes("item?.on"),"Mnemonic search does not include on readings");
