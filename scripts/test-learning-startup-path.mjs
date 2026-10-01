@@ -30,7 +30,9 @@ mustContain(session,'void loadPlanApi()','Session plan API remains available on 
 
 mustContain(p0,"const prefetchFsrs=()=>{if(!window.__KANJI5_P0_FSRS_PROMISE)","P0 must retain the shared FSRS compatibility path");
 mustContain(review,"window.__KANJI5_P0_FSRS_PROMISE?window.__KANJI5_P0_FSRS_PROMISE.then", "Review runtime must consume the shared FSRS promise when present");
-mustContain(review,"buildQueue();next();document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'))","Review runtime must signal readiness after queue initialization");
+mustContain(review,"let modernStartupReady=false;","Modern review runtime must start with full-snapshot notifications gated");
+mustContain(review,"function notifyV2Learning(){if(!IS_LEGACY&&!modernStartupReady)return;","Pre-ready Learning refreshes must be suppressed");
+mustContain(review,"buildQueue();next();modernStartupReady=true;document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'))","Review runtime must signal readiness only after queue initialization");
 mustContain(boundary,'async function startupSnapshot(){','Boundary must expose a Learning-first snapshot path');
 mustContain(boundary,'async function publishStartupSnapshot(){','Boundary must publish a startup snapshot');
 mustContain(boundary,"document.addEventListener('kanji5:v1.9-review-ready',()=>{void publishStartupSnapshot()},{once:true})","Startup snapshot waits for actual review readiness");
