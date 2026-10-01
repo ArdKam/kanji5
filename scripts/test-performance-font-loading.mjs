@@ -20,7 +20,8 @@ await access(bundledFontPath);
 assert.match(bundledFontPath,/^react-dist\/assets\/Vazirmatn_[^/]+\.woff2$/,"Bundled Vazirmatn preload must target the shipped local asset");
 
 const interUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
-assert.ok(index.includes('<link rel="stylesheet" href="'+interUrl+'">'),"Inter stylesheet link is missing");
+assert.doesNotMatch(index,/fonts\.googleapis\.com\/css2\?family=Inter/,"Inter must not block startup through an external stylesheet request");
+assert.doesNotMatch(index,/fonts\.gstatic\.com/,"Google Fonts static origin must not be required by the startup shell");
 assert.doesNotMatch(css,/^\s*@import\s+url\(["']https:\/\/fonts\.googleapis\.com\//m);
 
 function stylesHasImport(value){ return value.includes('@import "./noto-serif-jp.css";'); }
