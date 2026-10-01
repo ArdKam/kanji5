@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 async function goToMnemonicPage(card) {
-  const mnemonicShortcut = card.getByRole("button", { name: "Personal mnemonic" });
+  const mnemonicShortcut = card.locator('.learning-back-page-shortcut[aria-label="Personal mnemonic"]');
   await expect(mnemonicShortcut).toBeVisible({ timeout: 10000 });
   await mnemonicShortcut.click();
   await expect(card.locator(".learning-back-page.active .mnemonic-page")).toHaveCount(1);
