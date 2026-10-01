@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const registry=fs.readFileSync('v1.5-state.js','utf8');
+const index=fs.readFileSync('index.html','utf8');
 assert.match(registry,/window\.__KANJI5_STORAGE_KEYS__/);
 for (const pair of [
   ['state','kanji5-v1'],
@@ -31,4 +32,8 @@ for (const literal of ['kanji5-v1','kanji5-v1-cards','kanji5-v1-reviews','kanji5
 
 const state=fs.readFileSync('v1.5-state.js','utf8');
 assert.match(state,/function save/);
+const stateScript=index.indexOf('<script src="./v1.5-state.js"></script>');
+for(const consumer of ['<script type="module" src="./review-runtime.js"></script>','<script src="./app-bootstrap.js"></script>','<script src="./supabase-config.js"></script>']){
+  assert.ok(stateScript >= 0 && stateScript < index.indexOf(consumer), 'State storage registry must load before '+consumer);
+}
 console.log('Storage key single-source contract: PASS');
