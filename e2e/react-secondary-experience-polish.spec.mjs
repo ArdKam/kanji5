@@ -46,32 +46,75 @@ test("Grammar behaves like a lesson: persistent progress, retry, and gated next 
   expect(progressText).not.toMatch(/0%/);
 });
 
-test("Prepared Mnemonics search reaches dictionary meaning and reading fields", async ({ page }) => {
+test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, and saved state", async ({ page }) => {
   await clean(page, "en");
-  const dialog = await openMenuItem(page, "Prepared mnemonics");
-  const search = dialog.locator(".prepared-mnemonic-library-search");
-  await expect(search).toHaveAttribute("type", "search");
+
+  await page.evaluate(() => {
+    const original = window.__KANJI5_V19_V2_BOUNDARY__;
+    if (!original) throw new Error("Boundary missing");
+    window.__KANJI5_V2_TEST_BOUNDARY__ = original;
+    window.__KANJI5_V19_V2_BOUNDARY__ = Object.freeze({
+      ...original,
+      listKanji: async () => {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        return original.listKanji();
+      }
+    });
+  });
+
+  const dialogPromise = openMenuItem(page, "Prepared mnemonics");
+  const dialog = await dialogPromise;
+  await expect(dialog.locator(".prepared-mnemonic-library-loading")).toBeVisible({ timeout: 500 });
+  await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated").first()).toBeVisible({ timeout: 10000 });
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("259");
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("1877");
   await expect(dialog.getByText("This is not a review and does not give SRS credit; it simply makes a memory path easier to build.", { exact: true })).toBeVisible();
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").first()).toHaveAttribute("aria-pressed", "true");
-  await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "false");
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated")).toHaveCount(60);
+
+  const search = dialog.locator(".prepared-mnemonic-library-search");
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);
   const curatedRow = dialog.locator(".prepared-mnemonic-library-row.is-curated").first();
   await expect(curatedRow).toContainText(/学|study/i);
-  await expect(curatedRow.locator(".prepared-mnemonic-source.curated")).toBeVisible();
   await expect(curatedRow.locator(".prepared-mnemonic-library-meaning")).toBeVisible();
-  await expect(curatedRow.locator(".prepared-mnemonic-library-use")).toBeVisible();
+  const save = curatedRow.locator(".prepared-mnemonic-library-use");
+  await expect(save).toBeVisible();
+  await save.click();
+  await expect(save).toContainText("Saved to personal mnemonics");
+
   await search.fill("");
   await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "true");
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-generated").first()).toBeVisible();
   await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title").first()).toContainText("not a finished mnemonic");
-  await expect(dialog.getByRole("button", { name: "Build personal mnemonic", exact: true }).first()).toBeVisible();
-  await expect(dialog.locator(".prepared-mnemonic-results-header")).toContainText(/result|clue/i);
+  await expect(dialog.getByRole("button", { name: "Open card to build", exact: true }).first()).toBeVisible();
 });
+
+test("Prepared Mnemonics shows a retry state when the catalog fails to load", async ({ page }) => {
+  await clean(page, "en");
+  await page.evaluate(() => {
+    const original = window.__KANJI5_V19_V2_BOUNDARY__;
+    if (!original) throw new Error("Boundary missing");
+    window.__KANJI5_TEST_BOUNDARY__ = original;
+    window.__KANJI5_V19_V2_BOUNDARY__ = Object.freeze({
+      ...original,
+      listKanji: async () => { throw new Error("forced catalog failure"); },
+      listPersonalMnemonics: async () => ({ mnemonics: {} })
+    });
+  });
+
+  const dialog = await openMenuItem(page, "Prepared mnemonics");
+  await expect(dialog.locator(".prepared-mnemonic-library-error")).toBeVisible({ timeout: 10000 });
+  await expect(dialog.getByRole("button", { name: "Try again", exact: true })).toBeVisible();
+
+  await page.evaluate(() => {
+    window.__KANJI5_V19_V2_BOUNDARY__ = window.__KANJI5_TEST_BOUNDARY__;
+  });
+  await dialog.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated").first()).toBeVisible({ timeout: 10000 });
+});
+
 
 test("Secondary desktop surfaces preserve centered modal geometry after the polish pass", async ({ page }) => {
   await clean(page, "en");

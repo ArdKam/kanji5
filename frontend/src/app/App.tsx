@@ -48,6 +48,7 @@ import {
   retryExercise,
   selfReportProduction,
   listKanji,
+  listPersonalMnemonics,
 } from "./engine";
 
 const fa=(v:number)=>formatNumber(v,getLanguage());
@@ -854,9 +855,29 @@ function LoadingInsights(){
 }
 
 function App(){
-  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   useEffect(()=>applyLanguage(language),[language]);
-  useEffect(()=>{if((!settingsOpen&&!mnemonicsOpen)||mnemonicCatalog.length)return;let active=true;void listKanji().then(value=>{if(active)setMnemonicCatalog(value.results)}).catch(()=>{});return()=>{active=false}},[settingsOpen,mnemonicsOpen,mnemonicCatalog.length]);
+  useEffect(()=>{
+    if(!mnemonicsOpen)return;
+    let active=true;
+    setMnemonicCatalogState("loading");
+    setMnemonicCatalogError("");
+    void Promise.all([listKanji(),listPersonalMnemonics()]).then(([catalog,personal])=>{
+      if(!active)return;
+      setMnemonicCatalog(catalog.results);
+      setMnemonicPersonalMnemonics(personal.mnemonics);
+      setMnemonicCatalogState(catalog.results.length?"ready":"error");
+      if(!catalog.results.length)setMnemonicCatalogError(language==="fa"?"فهرست کانجی بارگذاری نشد. دوباره تلاش کنید.":"The kanji catalog did not load. Please try again.");
+    }).catch(error=>{
+      if(!active)return;
+      setMnemonicCatalogState("error");
+      const code=error instanceof Error?error.message:"";
+      setMnemonicCatalogError(code==="KANJI5_KANJI_CATALOG_UNAVAILABLE"
+        ? (language==="fa"?"دادهٔ کانجی هنوز آماده نشده است. دوباره تلاش کنید.":"The kanji data is not ready yet. Please try again.")
+        : (language==="fa"?"بارگذاری یادسپارها انجام نشد. دوباره تلاش کنید.":"The mnemonic library could not be loaded. Please try again."));
+    });
+    return()=>{active=false};
+  },[mnemonicsOpen,mnemonicCatalogRetry,language]);
   useEffect(()=>{if(!headerMenuOpen)return;setThemePreference(getThemePreference());},[headerMenuOpen]);
   useEffect(()=>{if(!headerMenuOpen||typeof document==="undefined")return;const onKey=(event:KeyboardEvent)=>{if(event.key!=="Escape")return;setHeaderMenuOpen(false);window.requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>(".header-menu-trigger")?.focus());};const onPointerDown=(event:globalThis.PointerEvent)=>{const target=event.target as Node|null;const menu=document.getElementById("header-tools-menu");const trigger=document.querySelector<HTMLButtonElement>(".header-menu-trigger");if(!target||!menu||!trigger)return;if(!menu.contains(target)&&!trigger.contains(target))setHeaderMenuOpen(false);};document.addEventListener("keydown",onKey);document.addEventListener("pointerdown",onPointerDown,true);return()=>{document.removeEventListener("keydown",onKey);document.removeEventListener("pointerdown",onPointerDown,true)}},[headerMenuOpen]);
   const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
@@ -942,6 +963,10 @@ function App(){
           open={mnemonicsOpen}
           language={language}
           catalog={mnemonicCatalog}
+          personalMnemonics={mnemonicPersonalMnemonics}
+          loading={mnemonicCatalogState==="loading"}
+          error={mnemonicCatalogState==="error" ? mnemonicCatalogError : ""}
+          onRetry={()=>setMnemonicCatalogRetry(value=>value+1)}
           onClose={closeSecondaryPage}
           onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
         /> : null}

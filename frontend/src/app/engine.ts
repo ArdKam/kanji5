@@ -160,6 +160,7 @@ export type Boundary = {
   getRadicalInfo: (character: string) => Promise<RadicalInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
+  listPersonalMnemonics?: () => Promise<{ mnemonics: Record<string, string> }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
   createBackup?: () => PortableBackup | null;
   restoreBackup?: (backup: PortableBackup) => BackupSummary;
@@ -329,6 +330,12 @@ export async function searchKanji(query: string, limit = 24): Promise<{ query: s
 
 export async function listKanji(): Promise<{ results: KanjiCatalogItem[] }> {
   return (await waitForEngine()).listKanji();
+}
+
+export async function listPersonalMnemonics(): Promise<{ mnemonics: Record<string, string> }> {
+  const api = await waitForEngine();
+  if (!api.listPersonalMnemonics) return { mnemonics: {} };
+  return api.listPersonalMnemonics();
 }
 
 export async function startCustomStudy(filter: CustomStudyFilter): Promise<{ started: boolean; available: number }> {

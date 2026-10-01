@@ -152,6 +152,15 @@ async function getMnemonic(character){
   const value=typeof mnemonics[key]==='string'?mnemonics[key].trim().slice(0,600):'';
   return {contractVersion:'1.9.0-v2-boundary-contract',kind:'personal-mnemonic',character:key,text:value};
 }
+async function listPersonalMnemonics(){
+  const source=state.readMnemonics?.()||{};
+  const mnemonics={};
+  for(const [character,value] of Object.entries(source)){
+    const text=String(value??'').trim().slice(0,600);
+    if(character&&text)mnemonics[character]=text;
+  }
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'personal-mnemonics',mnemonics};
+}
 async function saveMnemonic(character,value){
   const key=normalizeMnemonicCharacter(character);
   if(!key)throw new Error('KANJI5_MNEMONIC_CHARACTER_REQUIRED');
@@ -178,8 +187,19 @@ function kanjiMastery(character,knowledge,model){
   }
   return total/modes.length;
 }
+async function waitForKanjiDeck(timeoutMs=8000){
+  const started=Date.now();
+  while(Date.now()-started<timeoutMs){
+    const deck=state.readDeck?.();
+    if(Array.isArray(deck)&&deck.length)return deck;
+    await new Promise(resolve=>setTimeout(resolve,50));
+  }
+  const deck=state.readDeck?.();
+  if(Array.isArray(deck)&&deck.length)return deck;
+  throw new Error('KANJI5_KANJI_CATALOG_UNAVAILABLE');
+}
 async function listKanji(){
-  const deck=state.readDeck?.()||[];
+  const deck=await waitForKanjiDeck();
   const knowledge=state.readKnowledge?.()||{};
   const model=learner()||{};
   const results=deck.map(item=>{
@@ -266,7 +286,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary,snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary,snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 setTimeout(()=>{void refreshLearning()},0);
