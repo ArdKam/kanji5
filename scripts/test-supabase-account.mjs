@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const read = path => fs.readFileSync(path, "utf8");
 const index = read("index.html");
+const reactEntry = read("react-entry.js");
 const sync = read("supabase-sync.js");
 const core = read("v1.5-sync-core.js");
 const account = read("frontend/src/app/account.ts");
@@ -10,7 +11,9 @@ const dialog = read("frontend/src/app/AccountDialog.tsx");
 const schema = read("supabase/schema.sql");
 
 assert.match(index, /supabase-config\.js/);
-assert.match(index, /supabase-sync\.js/);
+assert.doesNotMatch(index, /<script[^>]+src=["\']\.\/supabase-sync\.js["\']/);
+assert.match(reactEntry, /import\(["\']\.\/supabase-sync\.js["\']\)/);
+assert.match(reactEntry, /requestIdleCallback/);
 assert.match(sync, /signInWithOAuth\(\{\s*provider:\s*[\'\"]google[\'\"]/);
 assert.match(sync, /__KANJI5_ACCOUNT__/);
 assert.match(sync, /signInWithPassword/);
