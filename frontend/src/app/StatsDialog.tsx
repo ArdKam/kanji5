@@ -197,12 +197,9 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
           <p className="eyebrow">{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</p>
           <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
         </div>
-        <span className="stats-section-summary">
-          <span>{language === "fa" ? "دقت پاسخ، عملکرد اخیر و شواهد تلاش" : "Accuracy, recent performance, and response evidence"}</span>
-        </span>
       </div>
 
-      <div className="stats-advanced-metrics">
+      <div className="stats-overview stats-advanced-metrics">
         <Metric label={language === "fa" ? "روزهای فعال" : "Active days"} value={formatNumber(activeDays, language)} hint={language === "fa" ? "از ۷ روز" : "of 7 days"} />
         <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={formatNumber(Number(activityAverage.toFixed(1)), language)} hint={language === "fa" ? "در روز" : "per day"} />
         <Metric label={language === "fa" ? "سررسید فعلی" : "Due now"} value={formatNumber(Number(snapshot.dailySummary?.dueCount) || 0, language)} />
