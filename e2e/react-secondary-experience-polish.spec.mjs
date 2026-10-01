@@ -121,6 +121,54 @@ test("Settings is learner-first: placement stays in Active Recall and changes re
   await expect(page.getByRole("heading", { name: "Placement check", exact: true })).toBeVisible();
 });
 
+test("Settings skill toggles change the authoritative Active Recall mode set", async ({ page }) => {
+  await clean(page, "en");
+
+  const checks = [
+    { label: "Kanji production", key: "production", mode: "production" },
+    { label: "Complete vocabulary", key: "vocabulary", mode: "vocabulary" },
+    { label: "Context recall", key: "context", mode: "context" },
+  ];
+
+  for (const check of checks) {
+    const settings = await openMenuItem(page, "Settings");
+    const control = settings.getByLabel(check.label, { exact: true });
+    await expect(control).toBeChecked();
+
+    await control.uncheck();
+    await settings.getByRole("button", { name: "Save changes", exact: true }).click();
+    await expect(page.locator("#settings-title")).toHaveCount(0);
+
+    const state = await page.evaluate(async ({ key, mode }) => {
+      const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
+      await boundary?.ensureEducationRuntime?.();
+      const snapshot = await boundary?.snapshot?.();
+      const available = window.__KANJI5_EDU_CORE__?.getAvailableModes?.(snapshot?.settings, true) || [];
+      return {
+        enabled: Boolean(snapshot?.settings?.[key]),
+        includesMode: available.includes(mode),
+        available,
+      };
+    }, check);
+
+    expect(state.enabled).toBe(false);
+    expect(state.includesMode).toBe(false);
+
+    const reopened = await openMenuItem(page, "Settings");
+    await expect(reopened.getByLabel(check.label, { exact: true })).not.toBeChecked();
+    await reopened.getByLabel(check.label, { exact: true }).check();
+    await reopened.getByRole("button", { name: "Save changes", exact: true }).click();
+    await expect(page.locator("#settings-title")).toHaveCount(0);
+  }
+
+  const restored = await page.evaluate(async () => {
+    const snapshot = await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.();
+    const settings = snapshot?.settings || {};
+    return { production: Boolean(settings.production), vocabulary: Boolean(settings.vocabulary), context: Boolean(settings.context) };
+  });
+  expect(restored).toEqual({ production: true, vocabulary: true, context: true });
+});
+
 test("Data backup exports and restores the authoritative learning data", async ({ page }) => {
   await clean(page, "en");
   let settings = await openMenuItem(page, "Settings");
