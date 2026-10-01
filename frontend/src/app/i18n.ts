@@ -110,6 +110,44 @@ type TranslationKey =
   | "recent"
   | "noResults"
   | "upcomingReviews"
+  | "settingsIntro"
+  | "settingsUnsaved"
+  | "settingsDiscardTitle"
+  | "settingsDiscardHint"
+  | "settingsKeepEditing"
+  | "settingsDiscardChanges"
+  | "settingsSaveChanges"
+  | "settingsNoChanges"
+  | "learningSettingsHint"
+  | "reviewSchedulingHint"
+  | "targetRetention"
+  | "targetRetentionHint"
+  | "targetRetentionHelper"
+  | "difficultCardThreshold"
+  | "difficultCardThresholdHint"
+  | "practiceSkillProductionHint"
+  | "practiceSkillVocabularyHint"
+  | "practiceSkillContextHint"
+  | "personalMnemonicBackupTitle"
+  | "personalMnemonicBackupHint"
+  | "dataBackupTitle"
+  | "dataBackupHint"
+  | "dataBackupContains"
+  | "dataBackupLast"
+  | "dataBackupNever"
+  | "exportBackup"
+  | "restoreBackup"
+  | "backupExported"
+  | "backupRestoreConfirmTitle"
+  | "backupRestoreConfirmHint"
+  | "backupRestoreCancel"
+  | "backupRestoreProceed"
+  | "backupRestoreSuccess"
+  | "backupInvalid"
+  | "backupWriteError"
+  | "backupCounts"
+  | "placementLivesInPractice"
+  | "placementLivesInPracticeHint"
   | "settingsTitle"
   | "newKanjiPerDay"
   | "dailyReviewGoal"
@@ -415,7 +453,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     retrySkill:"تکرار همین مهارت", nextExercise:"تمرین بعدی", backToLearning:"بازگشت به کارت یادگیری",
     sessionDetails:"جزئیات جلسه", learnerSkills:"مهارت‌های یادگیرنده", adaptiveFocus:"تمرکز تطبیقی", sessionSummary:"خلاصه جلسه",
     recentResults:"نتایج اخیر", skill:"مهارت", action:"عمل", attempts:"تلاش‌ها", right:"درست", accuracy:"دقت", recent:"اخیر", noResults:"هنوز نتیجه‌ای ثبت نشده است.",
-    upcomingReviews:"مرورهای پیش‌رو", settingsTitle:"تنظیمات", newKanjiPerDay:"کانجی جدید در روز", dailyReviewGoal:"هدف تعداد مرور روزانه", fsrsRetention:"هدف نگهداشت FSRS",
+    upcomingReviews:"مرورهای پیش‌رو", settingsIntro:"کانجی‌یار را با شیوهٔ مطالعهٔ خودت هماهنگ کن.", settingsUnsaved:"تغییرات ذخیره‌نشده دارید.", settingsDiscardTitle:"تغییرات ذخیره‌نشده دور ریخته شود؟", settingsDiscardHint:"تغییرات این صفحه هنوز ذخیره نشده‌اند.", settingsKeepEditing:"ادامهٔ ویرایش", settingsDiscardChanges:"دور انداختن تغییرات", settingsSaveChanges:"ذخیرهٔ تغییرات", settingsNoChanges:"همهٔ تغییرات ذخیره شده‌اند.", learningSettingsHint:"مشخص کن چه چیزهایی وارد برنامهٔ مطالعهٔ روزانه شوند.", reviewSchedulingHint:"مشخص کن کانجی‌یار تا چه حد حفظ بلندمدت را در زمان‌بندی مرور در اولویت قرار دهد.", targetRetention:"هدف ماندگاری", targetRetentionHint:"هدف بالاتر معمولاً به مرورهای پرتکرارتری منجر می‌شود.", targetRetentionHelper:"میزان ماندگاری‌ای که می‌خواهی یک کانجیِ مرورشده داشته باشد.", difficultCardThreshold:"آستانهٔ کانجی‌های دشوار", difficultCardThresholdHint:"کانجی را پس از چند خطای تکراری برای توجه بیشتر علامت‌گذاری کن.", practiceSkillProductionHint:"تمرین‌های تولید کانجی را در تمرین فعال قرار بده.", practiceSkillVocabularyHint:"تمرین یادآوری در سطح واژه را در تمرین فعال قرار بده.", practiceSkillContextHint:"تمرین یادآوری در بافت را در تمرین فعال قرار بده.", personalMnemonicBackupTitle:"پشتیبان یادسپارهای شخصی", personalMnemonicBackupHint:"یادسپارهایی را که خودت ساخته‌ای خروجی بگیر یا بازیابی کن.", dataBackupTitle:"داده و پشتیبان", dataBackupHint:"یک نسخهٔ قابل‌انتقال از پیشرفت یادگیری، سابقهٔ مرور، تنظیمات و یادسپارهای شخصی نگه دار.", dataBackupContains:"شامل پیشرفت یادگیری، سابقهٔ مرور، تنظیمات و یادسپارهای شخصی.", dataBackupLast:"آخرین پشتیبان", dataBackupNever:"هرگز", exportBackup:"خروجی پشتیبان", restoreBackup:"بازیابی پشتیبان", backupExported:"پشتیبان با موفقیت خروجی گرفته شد.", backupRestoreConfirmTitle:"این پشتیبان کانجی‌یار بازیابی شود؟", backupRestoreConfirmHint:"پیشرفت یادگیری، سابقهٔ مرور، تنظیمات و یادسپارهای شخصی فعلی جایگزین می‌شوند. ورود به حساب و cache برنامه تحت‌تأثیر قرار نمی‌گیرند.", backupRestoreCancel:"لغو", backupRestoreProceed:"بازیابی پشتیبان", backupRestoreSuccess:"پشتیبان بازیابی شد. کانجی‌یار برای اعمال آن دوباره بارگذاری می‌شود.", backupInvalid:"فایل پشتیبان نامعتبر است یا نسخهٔ آن پشتیبانی نمی‌شود.", backupWriteError:"پشتیبان اعمال نشد و دادهٔ فعلی دست‌نخورده باقی ماند.", backupCounts:"{cards} کارت · {reviews} مرور · {mnemonics} یادسپار · {sessions} جلسه", placementLivesInPractice:"تعیین سطح در بخش Active Recall است", placementLivesInPracticeHint:"آزمون تعیین سطح را از صفحهٔ شروع Active Recall اجرا کن؛ جای آن در تنظیمات نیست.", settingsTitle:"تنظیمات", newKanjiPerDay:"کانجی جدید در روز", dailyReviewGoal:"هدف تعداد مرور روزانه", fsrsRetention:"هدف نگهداشت FSRS",
     leechThreshold:"آستانهٔ Leech", productionKanji:"تولید کانجی", completeVocabulary:"تکمیل واژه", contextRecall:"یادآوری بافت",
     save:"ذخیره", close:"بستن", resetProgress:"پاک کردن پیشرفت", todayReviews:"مرورهای امروز", todayNewKanji:"کانجی جدید امروز",
     learned:"یادگرفته‌شده", streak:"روز پیاپی", dailyGoal:"هدف روزانه", completed:"تکمیل شد", noSession:"جلسه‌ای برای نمایش وجود ندارد",
@@ -438,7 +476,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     retrySkill:"Retry this skill", nextExercise:"Next exercise", backToLearning:"Back to learning card",
     sessionDetails:"Session details", learnerSkills:"Learner skills", adaptiveFocus:"Adaptive focus", sessionSummary:"Session summary",
     recentResults:"Recent results", skill:"Skill", action:"Action", attempts:"Attempts", right:"Correct", accuracy:"Accuracy", recent:"Recent", noResults:"No results recorded yet.",
-    upcomingReviews:"Upcoming reviews", settingsTitle:"Settings", newKanjiPerDay:"New kanji per day", dailyReviewGoal:"Daily review goal", fsrsRetention:"FSRS retention target",
+    upcomingReviews:"Upcoming reviews", settingsIntro:"Tune Kanji5 to match the way you study.", settingsUnsaved:"You have unsaved changes.", settingsDiscardTitle:"Discard unsaved changes?", settingsDiscardHint:"Your changes on this page have not been saved.", settingsKeepEditing:"Keep editing", settingsDiscardChanges:"Discard changes", settingsSaveChanges:"Save changes", settingsNoChanges:"All changes are saved.", learningSettingsHint:"Choose what enters your daily study plan.", reviewSchedulingHint:"Control how strongly Kanji5 prioritizes long-term retention.", targetRetention:"Target retention", targetRetentionHint:"A higher target usually means more frequent reviews.", targetRetentionHelper:"How strongly you want a reviewed kanji to stay remembered.", difficultCardThreshold:"Difficult-card threshold", difficultCardThresholdHint:"Flag a kanji for extra attention after repeated failures.", practiceSkillProductionHint:"Include kanji-production exercises in practice.", practiceSkillVocabularyHint:"Include word-level recall in practice.", practiceSkillContextHint:"Include contextual recall in practice.", personalMnemonicBackupTitle:"Personal mnemonic backup", personalMnemonicBackupHint:"Export or restore the mnemonics you created yourself.", dataBackupTitle:"Data & backup", dataBackupHint:"Keep a portable copy of your learning progress, review history, settings, and personal mnemonics.", dataBackupContains:"Includes learning progress, review history, settings, and personal mnemonics.", dataBackupLast:"Last backup", dataBackupNever:"Never", exportBackup:"Export backup", restoreBackup:"Restore backup", backupExported:"Backup exported successfully.", backupRestoreConfirmTitle:"Restore this Kanji5 backup?", backupRestoreConfirmHint:"This replaces your current learning progress, review history, settings, and personal mnemonics. Your account sign-in and app cache are not affected.", backupRestoreCancel:"Cancel", backupRestoreProceed:"Restore backup", backupRestoreSuccess:"Backup restored. Kanji5 will reload to apply it.", backupInvalid:"This backup file is invalid or from an unsupported version.", backupWriteError:"The backup could not be applied. Your current data was left unchanged.", backupCounts:"{cards} cards · {reviews} reviews · {mnemonics} mnemonics · {sessions} sessions", placementLivesInPractice:"Placement is available in Active Recall", placementLivesInPracticeHint:"Run the placement check from the Active Recall home screen; it does not belong to Settings.", settingsTitle:"Settings", newKanjiPerDay:"New kanji per day", dailyReviewGoal:"Daily review goal", fsrsRetention:"FSRS retention target",
     leechThreshold:"Leech threshold", productionKanji:"Kanji production", completeVocabulary:"Complete vocabulary", contextRecall:"Context recall",
     save:"Save", close:"Close", resetProgress:"Reset progress", todayReviews:"Today's reviews", todayNewKanji:"New kanji today",
     learned:"Learned", streak:"Streak", dailyGoal:"Daily goal", completed:"Completed", noSession:"There is no session to display",

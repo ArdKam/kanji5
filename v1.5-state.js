@@ -12,6 +12,7 @@ function eventId(){return crypto.randomUUID?.()||`review-${Date.now()}-${Math.ra
 function createInitial(overrides={}){const created={schemaVersion:PERSISTENCE_SCHEMA_VERSION,settings:{...defaults,...(overrides.settings||{})},deck:Array.isArray(overrides.deck)?overrides.deck:[],cards:overrides.cards&&typeof overrides.cards==='object'?overrides.cards:{},reviews:Array.isArray(overrides.reviews)?overrides.reviews:[],knowledge:overrides.knowledge&&typeof overrides.knowledge==='object'?overrides.knowledge:{},today:overrides.today||'',todayNew:Number(overrides.todayNew)||0,todayReviewCount:Number(overrides.todayReviewCount)||0,goalCelebrated:Boolean(overrides.goalCelebrated),queue:Array.isArray(overrides.queue)?overrides.queue:[],current:overrides.current||null,revealed:Boolean(overrides.revealed),examples:overrides.examples&&typeof overrides.examples==='object'?overrides.examples:{},streak:{current:0,longest:0,lastActiveDate:null,...(overrides.streak||{})}};activeState=created;return created}
 function normalizeReviewEvent(event){if(!event||typeof event!=='object')return event;const normalized={...event};if(!normalized.eventSchemaVersion)normalized.eventSchemaVersion=1;if(normalized.eventSchemaVersion===1&&normalized.baseRecord&&!normalized.resultRecord)normalized.resultRecord=structuredClone(normalized.baseRecord);return normalized}
 function reviewKey(event){return String(event?.eventId||`${event?.id||''}|${event?.at||''}|${event?.rating||''}|${event?.due||''}|${event?.scheduledDays||0}`)}
+const PORTABLE_BACKUP_FORMAT='kanji5-backup',PORTABLE_BACKUP_VERSION=1;
 function compactReviews(reviews,limit=2000){const map=new Map();for(const raw of Array.isArray(reviews)?reviews:[]){const event=normalizeReviewEvent(raw);if(!event||!event.id||!event.at)continue;map.set(reviewKey(event),event)}return[...map.values()].sort((a,b)=>String(a.at||'').localeCompare(String(b.at||''))||reviewKey(a).localeCompare(reviewKey(b))).slice(-Math.max(1,Number(limit)||2000))}
 function safeParse(raw){try{return raw?JSON.parse(raw):null}catch(_){return null}}
 function safeObject(value){return value&&typeof value==='object'&&!Array.isArray(value)?value:null}
@@ -30,6 +31,38 @@ function readMnemonics(){const knowledge=readKnowledge();const value=safeObject(
 function writeMnemonics(value){const next=value&&typeof value==='object'&&!Array.isArray(value)?value:{};const knowledge=readKnowledge();knowledge.v2Mnemonics=next;return writeKnowledge(knowledge)}
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
+function backupSummary(data){const core=data?.core||{};const knowledge=core.knowledge&&typeof core.knowledge==='object'?core.knowledge:{};const mnemonics=knowledge.v2Mnemonics&&typeof knowledge.v2Mnemonics==='object'?knowledge.v2Mnemonics:{};return{cards:Object.keys(core.cards&&typeof core.cards==='object'?core.cards:{}).length,reviews:Array.isArray(core.reviews)?core.reviews.length:0,personalMnemonics:Object.values(mnemonics).filter(value=>typeof value==='string'&&value.trim()).length,completedSessions:Array.isArray(data?.sessionHistory)?data.sessionHistory.length:0}}
+function portableBackup(state=activeState||loadState()){
+  const core=makeSnapshot(state,2000).payload;
+  const data={core:{settings:core.settings,today:core.today,todayNew:core.todayNew,todayReviewCount:core.todayReviewCount,goalCelebrated:core.goalCelebrated,streak:core.streak,cards:core.cards,reviews:core.reviews,knowledge:core.knowledge},education:{...readSettings()},sessionHistory:readSessionHistory().filter(row=>row?.status!=='active'),components:readComponents()};
+  const metadata={deckVersion:readValue('kanji5-deck-version',null),persistenceSchemaVersion:PERSISTENCE_SCHEMA_VERSION,reviewEventSchemaVersion:REVIEW_EVENT_SCHEMA_VERSION};
+  const signed={data,metadata};
+  return{format:PORTABLE_BACKUP_FORMAT,version:PORTABLE_BACKUP_VERSION,createdAt:new Date().toISOString(),data,metadata,summary:backupSummary(data),checksum:fnv1a(signed)};
+}
+function validPortableBackup(backup){if(!backup||typeof backup!=='object'||backup.format!==PORTABLE_BACKUP_FORMAT||Number(backup.version)!==PORTABLE_BACKUP_VERSION)return false;const data=safeObject(backup.data),metadata=safeObject(backup.metadata);return !!data&&!!safeObject(data.core)&&!!safeObject(data.education)&&Array.isArray(data.sessionHistory)&&safeObject(data.components)!==null&&safeObject(metadata)!==null&&String(backup.checksum||'')===fnv1a({data,metadata})}
+function clampNumber(value,min,max,fallback){const n=Number(value);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):fallback}
+function sanitizePortableData(backup){
+  const data=backup.data||{},core=data.core||{},education=data.education||{};
+  const statePayload={settings:{...defaults,dailyNew:Math.round(clampNumber(core.settings?.dailyNew,1,30,defaults.dailyNew)),retention:clampNumber(core.settings?.retention,.8,.98,defaults.retention),maxInterval:Math.round(clampNumber(core.settings?.maxInterval,1,36500,defaults.maxInterval)),dailyGoal:Math.round(clampNumber(core.settings?.dailyGoal,1,500,defaults.dailyGoal)),leechThreshold:Math.round(clampNumber(core.settings?.leechThreshold,2,30,defaults.leechThreshold))},today:typeof core.today==='string'?core.today:'',todayNew:Math.max(0,Math.round(Number(core.todayNew)||0)),todayReviewCount:Math.max(0,Math.round(Number(core.todayReviewCount)||0)),goalCelebrated:Boolean(core.goalCelebrated),streak:safeObject(core.streak)||{current:0,longest:0,lastActiveDate:null},cards:safeObject(core.cards)||{},reviews:compactReviews(core.reviews,2000),knowledge:safeObject(core.knowledge)||{}};
+  const educationSettings={production:Boolean(education.production),vocabulary:Boolean(education.vocabulary),context:Boolean(education.context)};
+  const sessionHistory=(Array.isArray(data.sessionHistory)?data.sessionHistory:[]).filter(row=>row&&typeof row==='object'&&row.status!=='active').slice(-SESSION_HISTORY_LIMIT).map(row=>structuredClone(row));
+  const components=safeObject(data.components)||{};
+  const snapshot={schemaVersion:PERSISTENCE_SCHEMA_VERSION,createdAt:typeof backup.createdAt==='string'?backup.createdAt:new Date().toISOString(),payload:statePayload,checksum:fnv1a(statePayload)};
+  return{snapshot,educationSettings,sessionHistory,components,deckVersion:typeof backup.metadata?.deckVersion==='string'?backup.metadata.deckVersion:null,summary:backupSummary({core:statePayload,education:educationSettings,sessionHistory,components})};
+}
+function writeRequiredObject(key,value){if(!writeObject(key,value))throw new Error('KANJI5_BACKUP_WRITE_FAILED')}
+function applyPortableData(prepared){
+  writeRequiredObject(SNAPSHOT_STORAGE,prepared.snapshot);writeRequiredObject(SNAPSHOT_COMMIT,{schemaVersion:PERSISTENCE_SCHEMA_VERSION,checksum:prepared.snapshot.checksum,committedAt:new Date().toISOString()});writeLegacy(prepared.snapshot);writeRequiredObject(SETTINGS_KEY,prepared.educationSettings);writeRequiredObject(SESSION_HISTORY_KEY,prepared.sessionHistory);writeRequiredObject(COMPONENT_KEY,prepared.components);
+  try{localStorage.removeItem(LAST_ATTEMPT_KEY)}catch(_){ }
+  activeState=hydrateCards(applyLoaded(createInitial({today:todayKey()}),prepared.snapshot.payload,defaults));
+  return prepared.summary;
+}
+function restorePortableBackup(backup){
+  if(!validPortableBackup(backup))throw new Error('KANJI5_INVALID_BACKUP');
+  const current=portableBackup();
+  const prepared=sanitizePortableData(backup);
+  try{return applyPortableData(prepared)}catch(error){try{applyPortableData(sanitizePortableData(current))}catch(_){ }throw error}
+}
 function readSessionHistory(){const value=safeParse(readValue(SESSION_HISTORY_KEY,[]));return Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[]}
 function writeSessionHistory(value){const history=Array.isArray(value)?value.filter(item=>item&&typeof item==='object').slice(-SESSION_HISTORY_LIMIT):[];return writeObject(SESSION_HISTORY_KEY,history)}
 function appendSessionSummary(summary){if(!summary||typeof summary!=='object')return false;const history=readSessionHistory();history.push(structuredClone(summary));return writeSessionHistory(history)}
@@ -53,5 +86,5 @@ function reset(defaultsValue,deck=[]){const next=createInitial({settings:{...def
 function loadState(defaultsValue=defaults){return loadSaved(createInitial({today:todayKey()}),defaultsValue)}
 function saveState(state){save(state);return state}
 function transaction(mutator){if(typeof mutator!=='function')throw new TypeError('transaction requires a function');const current=loadState();const draft=structuredClone(current);const result=mutator(draft)??draft;save(result);return result}
-window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,MNEMONIC_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,readMnemonics,writeMnemonics,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
+window.__KANJI5_STATE__=Object.freeze({DEFAULTS:Object.freeze({...defaults}),EDUCATION_DEFAULTS:Object.freeze({...educationDefaults}),STORAGE,CARDS_STORAGE,REVIEWS_STORAGE,KNOWLEDGE_STORAGE,COMPONENT_KEY,LAST_ATTEMPT_KEY,SESSION_HISTORY_KEY,SESSION_HISTORY_LIMIT,DECK_KEY,SETTINGS_KEY,SNAPSHOT_STORAGE,SNAPSHOT_COMMIT,PERSISTENCE_SCHEMA_VERSION,REVIEW_EVENT_SCHEMA_VERSION,MNEMONIC_SCHEMA_VERSION,todayKey,deviceId,eventId,createInitial,normalizeReviewEvent,readDeck,readKnowledge,writeKnowledge,readSettings,writeSettings,readAppState,readReviews,readComponents,writeComponents,readMnemonics,writeMnemonics,writeLastAttempt,readSessionHistory,writeSessionHistory,appendSessionSummary,clearRuntimeKnowledge,portableBackup,restorePortableBackup,save,loadSaved,loadState,saveState,transaction,reviveCard,hydrateCards,reset});
 })();

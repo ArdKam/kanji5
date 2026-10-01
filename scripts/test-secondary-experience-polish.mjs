@@ -4,13 +4,15 @@ import fs from "node:fs";
 const styles=fs.readFileSync("frontend/src/styles.css","utf8");
 const dictionaryCss=fs.readFileSync("frontend/src/app/dictionary.css","utf8");
 const settings=fs.readFileSync("frontend/src/app/SettingsDialog.tsx","utf8");
+const backup=fs.readFileSync("frontend/src/app/DataBackup.tsx","utf8");
+const state=fs.readFileSync("v1.5-state.js","utf8");
 const grammar=fs.readFileSync("frontend/src/app/GrammarGuide.tsx","utf8");
 const reading=fs.readFileSync("frontend/src/app/ReadingLab.tsx","utf8");
 const mnemonics=fs.readFileSync("frontend/src/app/MnemonicsDialog.tsx","utf8");
 
 assert.match(styles,/\.dialog\.secondary-page-dialog\{[\s\S]*?position:fixed;[\s\S]*?inset:50% auto auto 50%;[\s\S]*?transform:translate\(-50%,-50%\)/);
 assert.ok(styles.includes(".stats-hero"),"stats hero hierarchy missing");
-assert.ok(styles.includes(".settings-submit-actions"),"settings sticky action region missing");
+assert.ok(styles.includes(".settings-save-region"),"settings sticky action region missing");
 assert.ok(styles.includes(".reading-lab-analysis"),"reading analysis hierarchy missing");
 assert.ok(styles.includes(".prepared-mnemonic-library-row"),"mnemonic library row polish missing");
 
@@ -36,3 +38,9 @@ assert.ok(mnemonics.includes("item?.on"),"Mnemonic search does not include on re
 assert.ok(mnemonics.includes("item?.kun"),"Mnemonic search does not include kun readings");
 
 console.log("Kanji5 secondary experience polish contract passed.");
+
+assert.ok(settings.includes('DataBackup'),"Settings data backup surface missing");
+assert.ok(!settings.includes('PlacementDiagnostic')&&!settings.includes('onRetakePlacement'),"Placement should not be owned by Settings");
+assert.ok(settings.includes('settingsUnsaved')&&settings.includes('settingsDiscardTitle'),"Settings dirty-state UX missing");
+assert.ok(backup.includes('createBackup')&&backup.includes('restoreBackup'),"Full backup UI actions missing");
+assert.ok(state.includes('PORTABLE_BACKUP_FORMAT')&&state.includes('portableBackup(')&&state.includes('restorePortableBackup('),"Portable backup state contract missing");

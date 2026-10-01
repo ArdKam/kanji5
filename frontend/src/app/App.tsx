@@ -854,7 +854,7 @@ function LoadingInsights(){
 }
 
 function App(){
-  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[placementRequest,setPlacementRequest]=useState(0),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   useEffect(()=>applyLanguage(language),[language]);
   useEffect(()=>{if((!settingsOpen&&!mnemonicsOpen)||mnemonicCatalog.length)return;let active=true;void listKanji().then(value=>{if(active)setMnemonicCatalog(value.results)}).catch(()=>{});return()=>{active=false}},[settingsOpen,mnemonicsOpen,mnemonicCatalog.length]);
   useEffect(()=>{if(!headerMenuOpen)return;setThemePreference(getThemePreference());},[headerMenuOpen]);
@@ -935,15 +935,8 @@ function App(){
           busy={busy}
           language={language}
           onClose={closeSecondaryPage}
-          onSave={s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()})}
+          onSave={async s=>{const result=await action(async()=>{await updateSettings(s);return true});if(result)closeSecondaryPage();return result}}
           onReset={()=>void action(async()=>{resetProgress()})}
-          mnemonicCatalog={mnemonicCatalog}
-          onRetakePlacement={()=>{
-            closeSecondaryPage();
-            setExperience("practice");
-            setPracticeMode("home");
-            setPlacementRequest(value=>value+1);
-          }}
         /> : null}
         {secondaryPage==="mnemonics" ? <MnemonicsDialog
           open={mnemonicsOpen}
@@ -974,7 +967,6 @@ function App(){
     <PracticeHome
       language={language}
       busy={busy}
-      placementRequest={placementRequest}
       onStartActiveRecall={async()=>{
         await action(async()=>{
           await startExercise();

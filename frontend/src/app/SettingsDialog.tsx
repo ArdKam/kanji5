@@ -1,12 +1,104 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
-import { MnemonicBackup } from "./MnemonicBackup";
-import type { KanjiCatalogItem, Settings, Snapshot } from "./engine";
+import { DataBackup } from "./DataBackup";
+import type { Settings, Snapshot } from "./engine";
 
-function Setting({label,value,min,max,onChange}:{label:string;value:number;min:number;max:number;onChange:(v:number)=>void}) {
-  return <label className="setting-row"><span>{label}</span><input type="number" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}/></label>;
+type NumberSettingProps = {
+  label: string;
+  description: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+};
+
+function NumberSetting({ label, description, value, min, max, onChange }: NumberSettingProps) {
+  return (
+    <div className="setting-control-row">
+      <div className="setting-copy">
+        <span className="setting-label">{label}</span>
+        <span className="setting-description">{description}</span>
+      </div>
+      <input
+        className="setting-number-input"
+        type="number"
+        min={min}
+        max={max}
+        inputMode="numeric"
+        value={value}
+        aria-label={label}
+        onChange={event => onChange(Number(event.target.value))}
+      />
+    </div>
+  );
 }
+
+function ToggleSetting({ label, description, checked, onChange }: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label className="setting-control-row setting-toggle-row">
+      <span className="setting-copy">
+        <span className="setting-label">{label}</span>
+        <span className="setting-description">{description}</span>
+      </span>
+      <span className={"setting-toggle-visual " + (checked ? "is-on" : "")} aria-hidden="true">
+        <span />
+      </span>
+      <input
+        className="setting-toggle-input"
+        type="checkbox"
+        checked={checked}
+        aria-label={label}
+        onChange={event => onChange(event.target.checked)}
+      />
+    </label>
+  );
+}
+
+function RetentionSetting({ language, value, onChange }: { language: Language; value: number; onChange: (value: number) => void }) {
+  const percentage = Math.round(value * 100);
+  return (
+    <div className="setting-range-block">
+      <div className="setting-range-header">
+        <div className="setting-copy">
+          <span className="setting-label">{t("targetRetention", language)}</span>
+          <span className="setting-description">{t("targetRetentionHint", language)}</span>
+        </div>
+        <strong className="setting-range-value">{percentage}%</strong>
+      </div>
+      <input
+        className="setting-range-input"
+        type="range"
+        min={80}
+        max={98}
+        step={1}
+        value={percentage}
+        aria-label={t("targetRetention", language)}
+        aria-valuetext={percentage + "%"}
+        onChange={event => onChange(Number(event.target.value) / 100)}
+      />
+      <div className="setting-range-scale" aria-hidden="true"><span>80%</span><span>98%</span></div>
+      <p className="setting-range-helper">{t("targetRetentionHelper", language)}</p>
+    </div>
+  );
+}
+
+const normalizeSettings = (value: Settings): Settings => ({
+  dailyNew: Math.max(1, Math.min(30, Math.round(Number(value.dailyNew) || 5))),
+  retention: Math.max(.8, Math.min(.98, Number(value.retention) || .9)),
+  dailyGoal: Math.max(1, Math.min(500, Math.round(Number(value.dailyGoal) || 20))),
+  leechThreshold: Math.max(2, Math.min(30, Math.round(Number(value.leechThreshold) || 8))),
+  production: Boolean(value.production),
+  vocabulary: Boolean(value.vocabulary),
+  context: Boolean(value.context),
+});
+
+const settingsKey = (value: Settings) => JSON.stringify(normalizeSettings(value));
 
 export function SettingsDialog({
   open,
@@ -16,83 +108,197 @@ export function SettingsDialog({
   onClose,
   onSave,
   onReset,
-  onRetakePlacement,
-  mnemonicCatalog,
 }: {
   open: boolean;
   snapshot: Snapshot;
   busy: boolean;
   language: Language;
   onClose: () => void;
-  onSave: (s: Settings) => void;
-  onReset: () => void;
-  onRetakePlacement: () => void;
-  mnemonicCatalog: KanjiCatalogItem[];
+  onSave: (settings: Settings) => void | Promise<unknown>;
+  onReset: () => void | Promise<unknown>;
 }) {
-  const s: Settings = { dailyNew:5, retention:.9, dailyGoal:20, leechThreshold:8, production:true, vocabulary:true, context:true, ...(snapshot.settings ?? {}) };
-  const [draft, setDraft] = useState<Settings>(s);
-  const [resetArmed, setResetArmed] = useState(false);
-  useEffect(() => { if (open) setDraft(s); }, [open, s.dailyNew, s.retention, s.dailyGoal, s.leechThreshold, s.production, s.vocabulary, s.context]);
+  const persisted = useMemo(() => normalizeSettings({
+    dailyNew: 5,
+    retention: .9,
+    dailyGoal: 20,
+    leechThreshold: 8,
+    production: true,
+    vocabulary: true,
+    context: true,
+    ...(snapshot.settings ?? {}),
+  }), [snapshot.settings]);
 
-  const dialogRef = usePageDialog(open, onClose);
+  const [draft, setDraft] = useState<Settings>(persisted);
+  const [savedKey, setSavedKey] = useState(() => settingsKey(persisted));
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [resetArmed, setResetArmed] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setDraft(persisted);
+    setSavedKey(settingsKey(persisted));
+    setDiscardOpen(false);
+    setResetArmed(false);
+    setSaving(false);
+  }, [open, persisted]);
+
+  const dirty = settingsKey(draft) !== savedKey;
+  const requestClose = () => {
+    if (dirty) setDiscardOpen(true);
+    else onClose();
+  };
+  const requestCloseRef = useRef(requestClose);
+  requestCloseRef.current = requestClose;
+  const stableClose = useCallback(() => requestCloseRef.current(), []);
+
+  const handleSave = async () => {
+    if (saving || !dirty) return;
+    setSaving(true);
+    try {
+      const result = await onSave(normalizeSettings(draft));
+      if (result !== undefined) setSavedKey(settingsKey(draft));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const dialogRef = usePageDialog(open, stableClose);
+  const effectiveBusy = busy || saving;
 
   return open ? (
-    <dialog ref={dialogRef} className="dialog secondary-page-dialog" aria-labelledby="settings-title">
-      <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
-      <h2 id="settings-title">{t("settingsTitle", language)}</h2>
-      <form className="settings-form" onSubmit={e => { e.preventDefault(); onSave(draft); }}>
+    <dialog ref={dialogRef} className="dialog secondary-page-dialog settings-dialog" aria-labelledby="settings-title">
+      <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={requestClose}>×</button>
+
+      <header className="settings-page-header">
+        <p className="eyebrow red">{t("settings", language)}</p>
+        <h2 id="settings-title">{t("settingsTitle", language)}</h2>
+        <p>{t("settingsIntro", language)}</p>
+      </header>
+
+      <form className="settings-form" onSubmit={event => { event.preventDefault(); void handleSave(); }}>
         <section className="settings-section settings-learning-section">
-          <div className="settings-section-title">{language === "fa" ? "یادگیری" : "Learning"}</div>
-          <Setting label={t("newKanjiPerDay")} value={draft.dailyNew} min={1} max={30} onChange={v => setDraft({...draft, dailyNew:v})}/>
-          <p className="settings-help">{language==="fa"?"تعداد کانجی‌های جدیدی که هر روز وارد برنامهٔ یادگیری می‌شوند.":"How many new kanji enter your daily learning plan."}</p>
-          <Setting label={t("dailyReviewGoal")} value={draft.dailyGoal} min={1} max={500} onChange={v => setDraft({...draft, dailyGoal:v})}/>
-          <div className="settings-toggle-list">
-            {([["production",t("productionKanji")],["vocabulary",t("completeVocabulary")],["context",t("contextRecall")]] as const).map(([k,l]) => (
-              <label className="setting-row" key={k}><span>{l}</span><input type="checkbox" checked={draft[k]} onChange={e => setDraft({...draft,[k]:e.target.checked})}/></label>
-            ))}
+          <div className="settings-section-heading">
+            <p className="eyebrow">{language === "fa" ? "یادگیری" : "Learning"}</p>
+            <p>{t("learningSettingsHint", language)}</p>
+          </div>
+
+          <div className="settings-controls">
+            <NumberSetting
+              label={t("newKanjiPerDay", language)}
+              description={language === "fa" ? "تعداد کانجی‌های جدیدی که هر روز وارد برنامهٔ مطالعه می‌شوند." : "How many new kanji enter your daily study plan."}
+              value={draft.dailyNew}
+              min={1}
+              max={30}
+              onChange={value => setDraft(current => ({ ...current, dailyNew: value }))}
+            />
+            <NumberSetting
+              label={t("dailyReviewGoal", language)}
+              description={language === "fa" ? "هدف روزانهٔ مرور برای پیگیری ریتم مطالعه." : "Your target number of reviews for each day."}
+              value={draft.dailyGoal}
+              min={1}
+              max={500}
+              onChange={value => setDraft(current => ({ ...current, dailyGoal: value }))}
+            />
+            <ToggleSetting
+              label={t("productionKanji", language)}
+              description={t("practiceSkillProductionHint", language)}
+              checked={draft.production}
+              onChange={value => setDraft(current => ({ ...current, production: value }))}
+            />
+            <ToggleSetting
+              label={t("completeVocabulary", language)}
+              description={t("practiceSkillVocabularyHint", language)}
+              checked={draft.vocabulary}
+              onChange={value => setDraft(current => ({ ...current, vocabulary: value }))}
+            />
+            <ToggleSetting
+              label={t("contextRecall", language)}
+              description={t("practiceSkillContextHint", language)}
+              checked={draft.context}
+              onChange={value => setDraft(current => ({ ...current, context: value }))}
+            />
           </div>
         </section>
 
         <section className="settings-section settings-scheduling-section">
-          <div className="settings-section-title">{language === "fa" ? "زمان‌بندی مرور" : "Review scheduling"}</div>
-          <p className="settings-help">{language==="fa"?"این گزینه‌ها رفتار زمان‌بندی مرور را کنترل می‌کنند.":"These options control how review scheduling behaves."}</p>
-          <label className="setting-row setting-range-row">
-            <span>{t("fsrsRetention")}</span>
-            <span className="setting-range-value">{Math.round(draft.retention * 100)}%</span>
-            <input type="range" min={80} max={98} step={1} value={Math.round(draft.retention * 100)} onChange={e => setDraft({...draft, retention:Number(e.target.value)/100})}/>
-          </label>
-          <Setting label={t("leechThreshold")} value={draft.leechThreshold} min={2} max={30} onChange={v => setDraft({...draft, leechThreshold:v})}/>
+          <div className="settings-section-heading">
+            <p className="eyebrow">{language === "fa" ? "زمان‌بندی مرور" : "Review scheduling"}</p>
+            <p>{t("reviewSchedulingHint", language)}</p>
+          </div>
+
+          <div className="settings-controls">
+            <RetentionSetting language={language} value={draft.retention} onChange={value => setDraft(current => ({ ...current, retention: value }))} />
+            <NumberSetting
+              label={t("difficultCardThreshold", language)}
+              description={t("difficultCardThresholdHint", language)}
+              value={draft.leechThreshold}
+              min={2}
+              max={30}
+              onChange={value => setDraft(current => ({ ...current, leechThreshold: value }))}
+            />
+          </div>
         </section>
 
         <section className="settings-section settings-data-section">
-          <div className="settings-section-title">{language === "fa" ? "داده و پشتیبان" : "Data & backup"}</div>
-          <p className="settings-help">{t("contentBackupHint", language)}</p>
-          <MnemonicBackup catalog={mnemonicCatalog} language={language} />
+          <div className="settings-section-heading">
+            <p className="eyebrow">{language === "fa" ? "داده و پشتیبان" : "Data & backup"}</p>
+            <p>{t("dataBackupHint", language)}</p>
+          </div>
+          <DataBackup language={language} />
         </section>
 
-        <section className="settings-section settings-advanced-section">
-          <div className="settings-section-title">{t("placementDiagnostic", language)}</div>
-          <p className="settings-help">{t("placementDiagnosticHint", language)}</p>
-          <button className="button secondary" type="button" disabled={busy} onClick={onRetakePlacement}>{t("retakeDiagnostic", language)}</button>
-        </section>
+        <div className="settings-save-region">
+          <div className={"settings-unsaved-state " + (dirty ? "is-dirty" : "")} aria-live="polite">
+            {dirty ? t("settingsUnsaved", language) : t("settingsNoChanges", language)}
+          </div>
+          <div className="settings-save-actions">
+            <button className="button secondary" type="button" onClick={requestClose}>{t("close", language)}</button>
+            <button className="button primary" type="submit" disabled={!dirty || effectiveBusy}>
+              {effectiveBusy ? "…" : t("settingsSaveChanges", language)}
+            </button>
+          </div>
+        </div>
+      </form>
 
-        <div className="actions settings-submit-actions">
-          <button className="button primary" type="submit" disabled={busy}>{t("save", language)}</button>
-          <button className="button secondary" type="button" onClick={onClose}>{t("close", language)}</button>
+      <section className="settings-danger-zone">
+        <div className="settings-danger-heading">
+          <p className="eyebrow">{language === "fa" ? "ناحیهٔ خطر" : "Danger zone"}</p>
+          <h3>{language === "fa" ? "پاک کردن پیشرفت یادگیری" : "Reset learning progress"}</h3>
+          <p>{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه به حالت اولیه برمی‌گردد." : "Reset all learning progress and review history on this device."}</p>
         </div>
 
-        <section className="settings-danger-zone">
-          <strong>{language==="fa"?"منطقهٔ خطر":"Danger zone"}</strong>
-          <p>{language==="fa"?"پاک کردن پیشرفت برگشت‌پذیر نیست.":"Resetting progress cannot be undone."}</p>
-          {resetArmed ? <div className="reset-confirmation">
-            <p>{language==="fa"?"این کار همهٔ پیشرفت یادگیری را پاک می‌کند و قابل بازگشت نیست.":"This permanently removes learning progress and cannot be undone."}</p>
-            <div className="actions">
-              <button className="button danger" type="button" disabled={busy} onClick={() => { setResetArmed(false); onReset(); }}>{language==="fa"?"بله، پاک کن":"Yes, reset progress"}</button>
-              <button className="button secondary" type="button" onClick={() => setResetArmed(false)}>{language==="fa"?"لغو":"Cancel"}</button>
+        {resetArmed ? (
+          <div className="settings-reset-confirmation" role="alert">
+            <strong>{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
+            <p>{language === "fa" ? "این عمل قابل بازگشت نیست." : "This action cannot be undone."}</p>
+            <div className="settings-danger-actions">
+              <button className="button secondary" type="button" onClick={() => setResetArmed(false)} disabled={effectiveBusy}>{t("cancel", language)}</button>
+              <button className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
+                {effectiveBusy ? "…" : (language === "fa" ? "بله، پیشرفت را پاک کن" : "Yes, reset progress")}
+              </button>
             </div>
-          </div> : <button className="button danger" type="button" disabled={busy} onClick={() => setResetArmed(true)}>{t("resetProgress", language)}</button>}
-        </section>
-      </form>
+          </div>
+        ) : (
+          <button className="button danger settings-reset-button" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
+            {language === "fa" ? "پاک کردن پیشرفت" : "Reset progress"}
+          </button>
+        )}
+      </section>
+
+      {discardOpen ? (
+        <div className="settings-discard-dialog" role="alertdialog" aria-labelledby="settings-discard-title" aria-describedby="settings-discard-hint">
+          <div className="settings-discard-dialog-card">
+            <p className="eyebrow red">{language === "fa" ? "تغییر ذخیره‌نشده" : "Unsaved changes"}</p>
+            <h3 id="settings-discard-title">{t("settingsDiscardTitle", language)}</h3>
+            <p id="settings-discard-hint">{t("settingsDiscardHint", language)}</p>
+            <div className="settings-discard-actions">
+              <button className="button secondary" type="button" onClick={() => setDiscardOpen(false)}>{t("settingsKeepEditing", language)}</button>
+              <button className="button danger" type="button" onClick={() => { setDiscardOpen(false); onClose(); }}>{t("settingsDiscardChanges", language)}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </dialog>
   ) : null;
 }

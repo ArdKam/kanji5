@@ -171,4 +171,51 @@ failed.failKeys.clear();
 assert.ok(failed.getItem(failedApi.STORAGE));
 assert.ok(failed.getItem(failedApi.CARDS_STORAGE));
 
+
+const backupStorage = new MemoryStorage();
+const backupApi = boot(backupStorage);
+backupApi.writeSettings({ production: false, vocabulary: true, context: false });
+const backupState = backupApi.createInitial({
+  settings: { dailyNew: 7, dailyGoal: 31 },
+  cards: { a: { card: { due: '2026-09-04T00:00:00.000Z' } } },
+  reviews: [{ id: 'a', eventId: 'backup-e1', at: '2026-09-04T00:00:00.000Z', rating: 'Good' }],
+  knowledge: { v2Mnemonics: { a: 'A personal school memory' } },
+  today: backupApi.todayKey(),
+});
+backupApi.saveState(backupState);
+backupApi.writeSessionHistory([{ status: 'done', sessionId: 'session-1', endedAt: '2026-09-04T00:00:00.000Z', reviews: 1 }]);
+backupApi.writeComponents({ a: { meaning: { school: { attempts: 2 } } } });
+const portable = backupApi.portableBackup();
+assert.equal(portable.format, 'kanji5-backup');
+assert.equal(portable.version, 1);
+assert.equal(portable.summary.cards, 1);
+assert.equal(portable.summary.reviews, 1);
+assert.equal(portable.summary.personalMnemonics, 1);
+assert.equal(portable.summary.completedSessions, 1);
+assert.ok(typeof portable.checksum === 'string' && portable.checksum.length > 0);
+
+const changed = backupApi.loadState();
+changed.settings.dailyNew = 14;
+backupApi.saveState(changed);
+backupApi.writeSettings({ production: true, vocabulary: false, context: true });
+backupApi.writeSessionHistory([]);
+backupApi.writeComponents({});
+const restoredSummary = backupApi.restorePortableBackup(portable);
+assert.deepEqual(restoredSummary, portable.summary);
+const restored = boot(backupStorage).loadState();
+assert.equal(restored.settings.dailyNew, 7);
+assert.equal(restored.settings.dailyGoal, 31);
+assert.equal(JSON.stringify(restored.cards.a), JSON.stringify(backupState.cards.a));
+assert.equal(restored.reviews.length, 1);
+assert.equal(restored.knowledge.v2Mnemonics.a, 'A personal school memory');
+assert.equal(boot(backupStorage).readSettings().production, false);
+assert.equal(boot(backupStorage).readSettings().context, false);
+assert.equal(boot(backupStorage).readSessionHistory().length, 1);
+assert.equal(boot(backupStorage).readComponents().a.meaning.school.attempts, 2);
+
+const tampered = structuredClone(portable);
+tampered.data.core.settings.dailyNew = 99;
+assert.throws(() => boot(backupStorage).restorePortableBackup(tampered), /KANJI5_INVALID_BACKUP/);
+assert.equal(boot(backupStorage).loadState().settings.dailyNew, 7);
+
 console.log('Kanji 5 v1.5 local persistence hardening tests passed.');

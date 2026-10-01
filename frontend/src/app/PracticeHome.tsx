@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { t, type Language } from "./i18n";
 import { listKanji, type CustomStudyFilter, type KanjiCatalogItem } from "./engine";
 import { CustomStudyPanel } from "./CustomStudyPanel";
@@ -9,13 +9,11 @@ export function PracticeHome({
   busy = false,
   onStartActiveRecall,
   onStartCustomStudy,
-  placementRequest = 0,
 }: {
   language: Language;
   busy?: boolean;
   onStartActiveRecall: () => Promise<void>;
   onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>;
-  placementRequest?: number;
 }) {
   const [placementOpen, setPlacementOpen] = useState(false);
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
@@ -36,13 +34,6 @@ export function PracticeHome({
       setLoadingPlacement(false);
     }
   };
-
-  useEffect(() => {
-    if (placementRequest <= 0) return;
-    void loadPlacement();
-    // The request is an explicit one-shot trigger from Settings.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [placementRequest]);
 
   return (
     <section className="practice-home" aria-labelledby="practice-home-title">

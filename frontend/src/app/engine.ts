@@ -128,6 +128,22 @@ export type ComponentInfo = {
   source?: { name?: string; commit?: string; license?: string; semantics?: string } | null;
 };
 
+export type BackupSummary = {
+  cards: number;
+  reviews: number;
+  personalMnemonics: number;
+  completedSessions: number;
+};
+export type PortableBackup = {
+  format: "kanji5-backup";
+  version: 1;
+  createdAt: string;
+  data: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  summary: BackupSummary;
+  checksum: string;
+};
+
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
@@ -136,6 +152,8 @@ export type Boundary = {
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
+  createBackup?: () => PortableBackup | null;
+  restoreBackup?: (backup: PortableBackup) => BackupSummary;
   listKanji: () => Promise<{ results: KanjiCatalogItem[] }>;
   startCustomStudy: (filter: CustomStudyFilter) => Promise<{ started: boolean; available: number }>;
   clearCustomStudyFilter: () => Promise<boolean>;
@@ -318,6 +336,17 @@ export async function getMnemonic(character: string): Promise<{ character: strin
 
 export async function saveMnemonic(character: string, value: string): Promise<{ character: string; text: string }> {
   return (await waitForEngine()).saveMnemonic(character, value);
+}
+export async function createBackup(): Promise<PortableBackup> {
+  const backup = (await waitForEngine()).createBackup?.();
+  if (!backup) throw new Error("KANJI5_BACKUP_UNAVAILABLE");
+  return backup;
+}
+
+export async function restoreBackup(backup: PortableBackup): Promise<BackupSummary> {
+  const summary = (await waitForEngine()).restoreBackup?.(backup);
+  if (!summary) throw new Error("KANJI5_BACKUP_RESTORE_UNAVAILABLE");
+  return summary;
 }
 
 export async function getVocabulary(character: string): Promise<{ character: string; items: VocabularyItem[] }> {

@@ -23,6 +23,7 @@ on:
       - "frontend/src/app/MnemonicSupport.tsx"
       - "frontend/src/app/mnemonic-support.css"
       - "e2e/react-presentation-migration.spec.mjs"
+      - "e2e/react-secondary-experience-polish.spec.mjs"
       - "e2e/react-presentation-parity.spec.mjs"
       - "e2e/react-presentation-offline.spec.mjs"
       - "e2e/react-review-practice.spec.mjs"
@@ -136,6 +137,9 @@ jobs:
       - name: Run React presentation E2E
         working-directory: .
         run: timeout 120s npx playwright test --timeout=20000 --retries=0 e2e/react-presentation-migration.spec.mjs
+      - name: Run React secondary experience polish E2E
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-secondary-experience-polish.spec.mjs
       - name: Run startup performance baseline
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/performance-baseline.spec.mjs
