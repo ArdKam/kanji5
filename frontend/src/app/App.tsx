@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentProps, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
-import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
-import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
@@ -60,6 +58,10 @@ const stateLabel=(key:string)=>localizeDynamic(key,getLanguage(),text(key));
 const actionLabel=(key:string)=>localizeDynamic(key,getLanguage(),text(key));
 const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==="context"?"برای این جمله گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن.":"برای این واژه گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن."):(mode==="context"?"Not enough safe choices are available for this sentence. Continue to the next exercise.":"Not enough safe choices are available for this word. Continue to the next exercise.");
 const skillKeys=["meaning","reading","production","vocabulary","context"] as const;
+type MnemonicSupportValue = ComponentProps<typeof MnemonicSupportPanel>["support"];
+type MnemonicHintStageValue = "new"|"recovery"|"early"|"stable"|"mastered";
+type MnemonicHintFocusValue = "meaning"|"reading"|"both";
+const defaultMnemonicHintPlan = {stage:"stable",focus:"both",expandedByDefault:false,showReading:true,showVocabulary:false,showConfusable:false,preparedMode:"collapsed"} as const;
 const outcomeLabel=(key:string)=>({correct:t("correct"),wrong:t("wrong"),unknown:t("unknown"),near_miss:t("nearMiss"),empty:t("empty"),invalid:t("unavailable")} as Record<string,string>)[key]??text(key);
 
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
@@ -76,6 +78,10 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const [personalMnemonic,setPersonalMnemonic]=useState("");
   const [mnemonicDraft,setMnemonicDraft]=useState("");
   const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
+  const [mnemonicSupport,setMnemonicSupport]=useState<MnemonicSupportValue|null>(null);
+  const [mnemonicHintStage,setMnemonicHintStage]=useState<MnemonicHintStageValue>("stable");
+  const [mnemonicHintFocus,setMnemonicHintFocus]=useState<MnemonicHintFocusValue>("both");
+  const [mnemonicHintPlan,setMnemonicHintPlan]=useState(defaultMnemonicHintPlan);
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
@@ -107,15 +113,13 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     }
     setComponentInfo(null);
     setComponentInfoReady(false);
-    setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
+    setPreparedMnemonic(null);
+    setMnemonicSupport(null);
     void getComponentInfo(card.character).then(info=>{
       if(!active)return;
       setComponentInfo(info);
       setComponentInfoReady(true);
-      setPreparedMnemonic(buildPreparedMnemonic(
-        {character:card.character,meanings:card.meanings??[]},
-        info.components??[]
-      ));
+
     }).catch(()=>{
       if(!active)return;
       setComponentInfo(null);
@@ -225,24 +229,24 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     return ()=>{active=false};
   },[card.character,card.examples?.length]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
+  useEffect(()=>{
+    if(!card.character)return;
+    let active=true;
+    void Promise.all([import("./prepared-mnemonic-core"),import("./mnemonic-support")]).then(([prepared,support])=>{
+      if(!active)return;
+      setPreparedMnemonic(prepared.buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]},componentInfo?.components??[]));
+      setMnemonicSupport(support.buildMnemonicSupport({character:card.character,meanings:card.meanings??[],on:displayedOn,kun:displayedKun,examples:displayExamples,components:componentInfo?.available?(componentInfo.components??[]):[]}));
+      const context={character:card.character,isNew:card.isNew,recentOutcomes:snapshot.recentOutcomes,learner:snapshot.learner?.attributes};
+      const stage=support.getMnemonicHintStage(context);
+      const focus=support.getMnemonicHintFocus(context);
+      setMnemonicHintStage(stage);
+      setMnemonicHintFocus(focus);
+      setMnemonicHintPlan(support.getMnemonicHintPlan(stage,focus));
+    }).catch(()=>{});
+    return ()=>{active=false};
+  },[card.character,preparedMeaningKey,card.isNew,snapshot.recentOutcomes,snapshot.learner?.attributes,displayedOn.join("|"),displayedKun.join("|"),displayExamples.map(e=>String(e.word??"")+"|"+String(e.reading??"")+"|"+String(e.meaning??"")).join("|"),componentInfo?.available,componentInfo?.components?.join("|")]);
   const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
-  const mnemonicSupport=buildMnemonicSupport({
-    character:card.character??"",
-    meanings:card.meanings??[],
-    on:displayedOn,
-    kun:displayedKun,
-    examples:displayExamples,
-    components:componentInfo?.available?(componentInfo.components??[]):[]
-  });
-  const mnemonicHintContext={
-    character:card.character,
-    isNew:card.isNew,
-    recentOutcomes:snapshot.recentOutcomes,
-    learner:snapshot.learner?.attributes
-  };
-  const mnemonicHintStage=getMnemonicHintStage(mnemonicHintContext);
-  const mnemonicHintFocus=getMnemonicHintFocus(mnemonicHintContext);
-  const mnemonicHintPlan=getMnemonicHintPlan(mnemonicHintStage,mnemonicHintFocus);
+
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
@@ -385,7 +389,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
               <div className="learning-back-scroll">
                 <div className="mnemonic-page">
-                  <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
+                  {mnemonicSupport?<MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>:null}
                   <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
                       {!mnemonicEditing&&preparedMnemonic&&mnemonicHintPlan.preparedMode!=="hidden"?
                         mnemonicHintPlan.preparedMode==="expanded"?
