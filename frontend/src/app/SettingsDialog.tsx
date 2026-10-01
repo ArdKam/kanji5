@@ -176,7 +176,8 @@ export function SettingsDialog({
         <p>{t("settingsIntro", language)}</p>
       </header>
 
-      <form className="settings-form" onSubmit={event => { event.preventDefault(); void handleSave(); }}>
+      <form id="settings-form" className="settings-form" onSubmit={event => { event.preventDefault(); void handleSave(); }}>
+        <div className="settings-form-scroll">
         <section className="settings-section settings-learning-section">
           <div className="settings-section-heading">
             <p className="eyebrow">{language === "fa" ? "یادگیری" : "Learning"}</p>
@@ -248,6 +249,28 @@ export function SettingsDialog({
           <DataBackup language={language} />
         </section>
 
+
+        <section className="settings-danger-zone" aria-label={language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}>
+          {resetArmed ? (
+            <div className="settings-reset-confirmation" role="alert">
+              <strong>{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
+              <p>{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
+              <div className="settings-danger-actions">
+                <button className="button secondary" type="button" onClick={() => setResetArmed(false)} disabled={effectiveBusy}>{t("cancel", language)}</button>
+                <button className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
+                  {effectiveBusy ? "…" : (language === "fa" ? "بله، پیشرفت را پاک کن" : "Yes, reset progress")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button className="settings-reset-trigger" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
+              <span>{language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}</span>
+              <span aria-hidden="true">›</span>
+            </button>
+          )}
+        </section>
+        </div>
+
         <div className="settings-save-region">
           <div className={"settings-unsaved-state " + (dirty ? "is-dirty" : "")} aria-live="polite">
             {dirty ? t("settingsUnsaved", language) : t("settingsNoChanges", language)}
@@ -259,29 +282,7 @@ export function SettingsDialog({
             </button>
           </div>
         </div>
-      </form>
-
-      <section className="settings-danger-zone" aria-label={language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}>
-        {resetArmed ? (
-          <div className="settings-reset-confirmation" role="alert">
-            <strong>{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
-            <p>{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
-            <div className="settings-danger-actions">
-              <button className="button secondary" type="button" onClick={() => setResetArmed(false)} disabled={effectiveBusy}>{t("cancel", language)}</button>
-              <button className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
-                {effectiveBusy ? "…" : (language === "fa" ? "بله، پیشرفت را پاک کن" : "Yes, reset progress")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button className="settings-reset-trigger" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
-            <span>{language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}</span>
-            <span aria-hidden="true">›</span>
-          </button>
-        )}
-      </section>
-
-      {discardOpen ? (
+      </form>      {discardOpen ? (
         <div className="settings-discard-dialog" role="alertdialog" aria-labelledby="settings-discard-title" aria-describedby="settings-discard-hint">
           <div className="settings-discard-dialog-card">
             <p className="eyebrow red">{language === "fa" ? "تغییر ذخیره‌نشده" : "Unsaved changes"}</p>

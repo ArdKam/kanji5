@@ -128,6 +128,30 @@ test("Settings is learner-first: placement stays in Active Recall and changes re
   await expect(page.getByRole("heading", { name: "Placement check", exact: true })).toBeVisible();
 });
 
+test("Settings keeps Save changes visible while its content scrolls", async ({ page }) => {
+  await clean(page, "en");
+  await page.setViewportSize({ width: 1280, height: 720 });
+
+  const settings = await openMenuItem(page, "Settings");
+  const scrollRegion = settings.locator(".settings-form-scroll");
+  const saveRegion = settings.locator(".settings-save-region");
+  await expect(scrollRegion).toBeVisible();
+  await expect(saveRegion).toBeVisible();
+
+  const initial = await saveRegion.evaluate(el => el.getBoundingClientRect().toJSON());
+  await scrollRegion.evaluate(el => {
+    el.scrollTop = el.scrollHeight;
+  });
+  await expect.poll(() => scrollRegion.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+
+  const after = await saveRegion.evaluate(el => el.getBoundingClientRect().toJSON());
+  expect(Math.abs(after.top - initial.top)).toBeLessThanOrEqual(2);
+  expect(Math.abs(after.bottom - initial.bottom)).toBeLessThanOrEqual(2);
+  await expect(settings.getByRole("button", { name: "Save changes", exact: true })).toBeVisible();
+
+  await settings.locator(".dialog-close").click();
+});
+
 test("Data backup exports and restores the authoritative learning data", async ({ page }) => {
   await clean(page, "en");
   let settings = await openMenuItem(page, "Settings");
