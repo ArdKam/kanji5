@@ -303,8 +303,8 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
       <ActivitySection snapshot={snapshot} language={language} />
       <MasterySection snapshot={snapshot} language={language} />
       <SkillsSection snapshot={snapshot} language={language} />
-      <AdvancedStatsSection snapshot={snapshot} language={language} />
       <AttentionSection catalog={catalog} language={language} onStudyWeak={onStudyWeak} />
+      <AdvancedStatsSection snapshot={snapshot} language={language} />
     </dialog>
   );
 }
