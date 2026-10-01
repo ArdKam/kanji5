@@ -203,7 +203,7 @@ test('rating a revealed learning card clears focus before the back face is hidde
   expect(ariaWarnings).toEqual([]);
 });
 
-test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
+test('dictionary card restores stable tab semantics after opening', async ({page})=>{
   await clean(page);
 
   await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
