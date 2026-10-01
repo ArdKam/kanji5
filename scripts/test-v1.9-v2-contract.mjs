@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { V2_BOUNDARY_VERSION, MODES, OUTCOMES, buildSessionViewModel, buildExerciseViewModel, buildFeedbackViewModel, buildLearnerSkillSummary, buildSessionSummary, buildAdaptiveReasonViewModel, buildLearningCardViewModel, buildBoundarySnapshot, isV2BoundarySnapshot } from '../v1.9-v2-contract-core.js';
+import { V2_BOUNDARY_VERSION, MODES, OUTCOMES, buildSessionViewModel, buildExerciseViewModel, buildFeedbackViewModel, buildLearnerSkillSummary, buildSessionSummary, buildAdaptiveReasonViewModel, buildLearningCardViewModel, buildStatsViewModel, buildBoundarySnapshot, isV2BoundarySnapshot } from '../v1.9-v2-contract-core.js';
 
 assert.equal(V2_BOUNDARY_VERSION,'1.9.0-v2-boundary-contract');
 assert.deepEqual(MODES,['meaning','reading','production','vocabulary','context']);
@@ -16,6 +16,8 @@ const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:
 assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
 const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,repeatedFailure:true}}});
 assert.equal(learner.modelVersion,'1.9.0-learner-model');assert.equal(learner.attributes.reading.state,'weak');
+const stats=buildStatsViewModel({masteryDistribution:{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21}});
+assert.deepEqual(stats.masteryDistribution,{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21});
 const summary=buildSessionSummary({sessionId:'s1',status:'complete',modeResults:{meaning:{attempts:2,correct:1},reading:{attempts:1,correct:1}}});
 assert.equal(summary.attempts,3);assert.equal(summary.correct,2);assert.equal(summary.completionStatus,'complete');
 const reason=buildAdaptiveReasonViewModel({mode:'reading',action:'repair',reasons:['recent failure','weak recent accuracy'],score:3});
