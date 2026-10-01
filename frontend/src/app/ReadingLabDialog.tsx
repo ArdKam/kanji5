@@ -5,7 +5,7 @@ import { ReadingLab } from "./ReadingLab";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 import { usePageDialog } from "./usePageDialog";
 
-export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
+export function ReadingLabDialog({ open, language, onClose }: {
   open: boolean;
   language: Language;
   onClose: () => void;
