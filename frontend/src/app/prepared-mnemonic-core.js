@@ -1,4 +1,4 @@
-export const PREPARED_MNEMONIC_VERSION = "2.6.0";
+export const PREPARED_MNEMONIC_VERSION = "2.7.0";
 
 const BASE_CURATED_PREPARED_MNEMONICS = Object.freeze({
   "日": [{ fa: "یک خورشید مربعی؛ شکلش مثل پنجره‌ای رو به نور روز است.", en: "A square sun; its shape is a window filled with daylight.", source: "curated" }],
@@ -1219,6 +1219,53 @@ const ENRICHED_PREPARED_MNEMONICS_6 = Object.freeze({
   ]
 });
 
+const ENRICHED_PREPARED_MNEMONICS_7 = Object.freeze({
+  "休": [{ fa: "یک نفر 人 زیر درخت 木 نشسته؛ خستگی‌اش را همان‌جا زمین گذاشته و استراحت می‌کند.", en: "A person 人 sits under a tree 木; they drop their fatigue there and rest.", source: "curated" }],
+  "暗": [{ fa: "خورشید 日 پشت 音 پنهان شده؛ نور قطع شده و فضا تاریک است.", en: "The sun 日 is hidden behind 音; the light is blocked and the scene turns dark.", source: "curated" }],
+  "晴": [{ fa: "خورشید 日 بعد از باران 青 بیرون آمده؛ آسمان صاف و هوا آفتابی است.", en: "The sun 日 comes out after 青's rain-soaked scene; the sky clears and the weather is sunny.", source: "curated" }],
+  "夜": [{ fa: "یک آدم 人 زیر سقف 亠، در تاریکی شب قدم می‌زند؛ شب را با سکوتش به خاطر بسپار.", en: "A person 人 walks under 亠 in the dark; remember night as that quiet scene.", source: "curated" }],
+  "春": [{ fa: "خورشید 日 روی جوانه‌ها و گیاهان تازه می‌تابد؛ همه‌چیز دوباره زنده شده است.", en: "The sun 日 shines on fresh sprouts and plants; everything has come alive again.", source: "curated" }],
+  "夏": [{ fa: "آدمی در گرمای شدید زیر آفتاب عرق می‌کند؛ تابستان را به گرمای چسبناک گره بزن.", en: "A person sweats under fierce sunlight; tie summer to that sticky heat.", source: "curated" }],
+  "秋": [{ fa: "غلهٔ 禾 در باد تکان می‌خورد و محصول رسیده آمادهٔ برداشت است؛ پاییز آمده.", en: "Grain 禾 sways in the wind, ripe and ready to harvest; autumn has arrived.", source: "curated" }],
+  "冬": [{ fa: "در پایان فصل، یک تکه یخ و قطرهٔ آب جمع شده‌اند؛ سرمای زمستان را حس کن.", en: "At the season's end, ice and frozen drops gather; feel the cold of winter.", source: "curated" }],
+  "空": [{ fa: "زیر سقف 穴، چیزی نیست؛ فضای خالی و باز باقی مانده است.", en: "Under the roof-like 穴, nothing remains; only empty open space is left.", source: "curated" }],
+  "湖": [{ fa: "آب 氵 دور یک خانهٔ قدیمی قرار گرفته؛ یک پهنهٔ آرام آب، دریاچه است.", en: "Water 氵 surrounds an old home-like structure; a calm body of water is a lake.", source: "curated" }],
+  "池": [{ fa: "آب 氵 کنار چیزی که خزیده است؛ یک گودال آب کوچک کنار زمین شکل گرفته.", en: "Water 氵 beside something crawling; a small pool has formed beside the ground.", source: "curated" }],
+  "波": [{ fa: "آب 氵 با پوست/سطحی که بالا و پایین می‌رود برخورد می‌کند؛ موج‌ها روی آب می‌دوند.", en: "Water 氵 meets a rising-and-falling surface; waves run across the water.", source: "curated" }],
+  "洗": [{ fa: "آب 氵 روی پا 先 ریخته می‌شود؛ پا را می‌شویی تا تمیز شود.", en: "Water 氵 is poured over the foot 先; you wash it until it is clean.", source: "curated" }],
+  "温": [{ fa: "آب 氵 در ظرفی گرم نگه داشته شده؛ نه سرد است نه داغ، بلکه گرم است.", en: "Water 氵 is kept warm in a container; it is neither cold nor hot, but warm.", source: "curated" }],
+  "電": [{ fa: "باران 雨 بالای یک وسیلهٔ برق‌دار می‌بارد؛ جرقه‌ها برق را تداعی می‌کنند.", en: "Rain 雨 falls over an electrical device; the sparks evoke electricity.", source: "curated" }],
+  "雲": [{ fa: "بخار و آب زیر باران جمع شده‌اند و توده‌ای در آسمان ساخته‌اند؛ ابر را ببین.", en: "Water vapor gathers under the rain and forms a mass in the sky; see a cloud.", source: "curated" }],
+  "雪": [{ fa: "باران 雨 به‌جای قطره، دانه‌های سفید می‌ریزد؛ برف همه‌جا را می‌پوشاند.", en: "Rain 雨 falls as white flakes instead of drops; snow covers everything.", source: "curated" }],
+  "風": [{ fa: "چیزی در قاب 風 می‌چرخد و هوا را به حرکت می‌اندازد؛ باد را مثل یک نیروی نامرئی تصور کن.", en: "Something spins within 風 and sets the air moving; picture wind as an invisible force.", source: "curated" }],
+  "花": [{ fa: "گیاه 艹 باز می‌شود و شکل زیبایی پیدا می‌کند؛ یک گل تازه شکفته را ببین.", en: "The plant 艹 opens into a beautiful form; picture a fresh flower blooming.", source: "curated" }],
+  "草": [{ fa: "گیاه 艹 از صبح تا شب روی زمین رشد می‌کند؛ علف‌ها همه‌جا را می‌گیرند.", en: "Plants 艹 grow across the ground from morning to night; grass takes over the field.", source: "curated" }],
+  "林": [{ fa: "دو درخت 木 کنار هم؛ وقتی درخت‌ها جمع می‌شوند، یک بیشه شکل می‌گیرد.", en: "Two trees 木 stand together; when trees gather, a grove appears.", source: "curated" }],
+  "森": [{ fa: "سه درخت 木 پشت سر هم؛ این‌بار بیشه آن‌قدر بزرگ است که جنگل شده.", en: "Three trees 木 stand together; now the grove is large enough to be a forest.", source: "curated" }],
+  "石": [{ fa: "یک سنگ بزرگ زیر دهانهٔ صخره نشسته؛ سخت و سنگین، مثل خودِ 石.", en: "A large stone sits beneath a rocky opening; hard and heavy, just like 石.", source: "curated" }],
+  "鉄": [{ fa: "فلز 金 را کنار تکه‌ای سیاه و سخت تصور کن؛ آهنِ سنگین و صنعتی را ببین.", en: "Put metal 金 beside a dark, hard lump; picture heavy industrial iron.", source: "curated" }],
+  "銀": [{ fa: "فلز 金 با درخششی سرد و نقره‌ای برق می‌زند؛ یک تکه نقره را در دست بگیر.", en: "Metal 金 flashes with a cool silver shine; hold a piece of silver in your hand.", source: "curated" }],
+  "遠": [{ fa: "یک مسیر 辶 آن‌قدر ادامه دارد که مقصد محو می‌شود؛ راه دور است.", en: "A path 辶 keeps going until the destination fades away; the distance is far.", source: "curated" }],
+  "駅": [{ fa: "یک وسیلهٔ نقلیه کنار جایگاه مخصوصش ایستاده؛ جایی که قطار می‌ایستد، ایستگاه است.", en: "A vehicle waits at its designated place; where the train stops is a station.", source: "curated" }],
+  "店": [{ fa: "زیر پناهگاه 广، چیزی برای فروش چیده شده؛ وارد مغازه شو.", en: "Under a shelter 广, goods are arranged for sale; step into the shop.", source: "curated" }],
+  "館": [{ fa: "ساختمانی بزرگ با غذا و اتاق‌های مختلف؛ مردم وارد یک بنا برای ماندن یا استفاده می‌شوند.", en: "A large building with food and rooms; people enter a place meant for staying or use.", source: "curated" }],
+  "室": [{ fa: "یک سقف 宀 بالای فضایی بسته؛ اتاقی امن و مشخص برای خودت ساخته‌ای.", en: "A roof 宀 sits over an enclosed space; you have made a defined room for yourself.", source: "curated" }],
+  "庭": [{ fa: "در حیاط زیر پناهگاه 广، زمین باز برای ایستادن و قدم‌زدن داری.", en: "In a yard under 广, there is open ground for standing and walking.", source: "curated" }],
+  "門": [{ fa: "دو لنگهٔ دروازه کنار هم ایستاده‌اند؛ خودِ شکل، یک دروازهٔ بزرگ است.", en: "Two gate leaves stand side by side; the shape itself is a large gate.", source: "curated" }],
+  "閉": [{ fa: "دو لنگهٔ 門 بسته شده‌اند و چیزی بینشان راه ندارد؛ در کاملاً بسته است.", en: "The two leaves of 門 are shut with no way through; the gate is closed.", source: "curated" }],
+  "買": [{ fa: "یک شبکهٔ چشم‌گیر با 貝 جلوی توست؛ پول می‌دهی و چیزی را می‌خری.", en: "A display with shell-money 貝 is in front of you; you pay and buy something.", source: "curated" }],
+  "食": [{ fa: "سقف و ظرف غذا جلوی آدم است؛ چیزی را بردار و بخور.", en: "A roof-like cover and a meal are before a person; pick it up and eat.", source: "curated" }],
+  "飲": [{ fa: "دهان 口 دنبال یک نوشیدنی است و خم می‌شود تا آن را بنوشد.", en: "The mouth 口 leans toward a drink; it is ready to drink.", source: "curated" }],
+  "飯": [{ fa: "غذا در کنار ظرف و دست آماده است؛ برنج و غذای پخته برای خوردن روی میز است.", en: "Food is set beside a bowl and hand; cooked rice and a meal are ready on the table.", source: "curated" }],
+  "読": [{ fa: "گفتار 言 روی صفحهٔ کتاب دنبال می‌شود؛ چشم‌ها خط‌به‌خط می‌خوانند.", en: "Speech 言 is followed across a page; the eyes read it line by line.", source: "curated" }],
+  "聞": [{ fa: "گوش 耳 پشت دروازه 門 ایستاده و صدا را می‌شنود؛ گوش دادن یعنی از پشت در گوش بدهی.", en: "An ear 耳 waits at a 門 gate and hears a sound; listening means hearing through the gate.", source: "curated" }],
+  "忘": [{ fa: "قلب 心 چیزی را رها می‌کند و از ذهن می‌رود؛ همان لحظه‌ای که فراموش می‌کنی.", en: "The heart 心 lets something slip away and it leaves the mind; that is forgetting.", source: "curated" }],
+  "楽": [{ fa: "درخت 木 و ابزارهای موسیقی کنار هم‌اند؛ صدایی می‌سازی که لذت می‌دهد.", en: "A tree 木 and musical instruments stand together; you make a sound that brings pleasure.", source: "curated" }],
+  "歌": [{ fa: "دهان 口 باز می‌شود و صدا بالا می‌رود؛ یک آهنگ را با صدایت می‌خوانی.", en: "The mouth 口 opens and the voice rises; you sing a song with your voice.", source: "curated" }],
+  "音": [{ fa: "چیزی بالای 日 قرار گرفته و صدایش شنیده می‌شود؛ یک صدای مشخص در فضا می‌پیچد.", en: "Something sits above 日 and produces sound; a distinct sound rings through the space.", source: "curated" }],
+  "声": [{ fa: "صدایی از یک دهان یا منبع بیرون می‌آید؛ آن را بگیر و به آواز یا صدا وصل کن.", en: "A sound comes from a mouth or source; catch it and connect it with a voice.", source: "curated" }]
+});
+
 export const CURATED_PREPARED_MNEMONICS = Object.freeze({
   ...BASE_CURATED_PREPARED_MNEMONICS,
   ...ENRICHED_PREPARED_MNEMONICS_1,
@@ -1227,12 +1274,89 @@ export const CURATED_PREPARED_MNEMONICS = Object.freeze({
   ...ENRICHED_PREPARED_MNEMONICS_4,
   ...ENRICHED_PREPARED_MNEMONICS_5,
   ...ENRICHED_PREPARED_MNEMONICS_6,
+  ...ENRICHED_PREPARED_MNEMONICS_7,
 });
 
 const FA_SCENE_CUES = /(?:تصور|ببین|داخل|کنار|روبه|ایستاده|می‌بینی|می‌زنی|می‌گذاری|می‌کنی|می‌شود|جمع|حرکت|می‌رود|می‌رسد|می‌گیرد|می‌شمارد|می‌پیچی|می‌شنوی|بساز|نگه|هل|باز|بسته|پرتاب|ضربه|بررسی|صف|میز|دست|می‌چسبانی|می‌دوانی|می‌کشی|شکل|مثل|خط|خورشید|ماه|آتش|آب|درخت|تپه|کوه|رود|مزرعه|دهان|چشم|گوش|پا|آدم|کودک|زن|مرد|جوانه|سقف|دروازه|تبر|نخ|جواهر|برنج)/;
 const EN_SCENE_CUES = /(?:Picture|Imagine|Put|Place|Lay|Close|Open|Push|Throw|Tie|Gather|Move|Walk|Stand|Hold|Receive|Check|Wrap|Count|Pick|Arrange|Under|Beside|Behind|Inside|Facing|Run|Reach|Drop|Guard|Press|Spring|See|Set|Build|Work|Mark|Watch|Keep|Cut|Pull|Pass|Leave|Choose|Carry|Stack|shape|looks like|line|sun|moon|fire|water|tree|mound|mountain|river|field|mouth|eye|ear|hand|foot|person|child|woman|man|sprout|roof|gate|axe|thread|jewel|rice)/i;
 const FA_ACTION_CUES = /(?:می‌دود|می‌دواند|می‌کشد|می‌بُرد|می‌برد|می‌گذارد|می‌زند|می‌افتد|می‌ایستد|می‌گیرد|می‌چرخد|می‌رسد|می‌آید|می‌ماند|می‌ریزد|می‌پرند|می‌وزد|باز می‌شوند|جمع شوند|جمع می‌شوند|حرکت می‌کنند|جلو می‌رود|جدا می‌کند|کنترل می‌کند|شروع می‌کند|منتظر می‌مانی|انتخاب می‌کنی|رد شوی|جا می‌گذاری|بسته‌ای|باز می‌کنی|می‌گردد|می‌نشیند|می‌خواهد|می‌دهد|می‌سازد|ساخته شود|فرو می‌رود|مقایسه می‌کنی)/;
 const EN_ACTION_CUES = /(?:runs|run|pulls|cuts|carries|moves|walks|stands|holds|hits|drops|spins|reaches|comes|stays|falls|flies|blows|gathers|separates|controls|starts|waits|pick|leave|cross|blocks|change|changes|drives|travels|returns|opens|closes|shows|works|turns|sits|asks|calls|keeps|becomes|builds|made|moves|compares)/i;
+
+const PREPARED_COMPONENT_LABELS = Object.freeze({
+  "木": { fa: "درخت", en: "tree" }, "日": { fa: "خورشید", en: "sun" }, "月": { fa: "ماه", en: "moon" },
+  "火": { fa: "آتش", en: "fire" }, "水": { fa: "آب", en: "water" }, "氵": { fa: "آب", en: "water" },
+  "土": { fa: "خاک", en: "earth" }, "山": { fa: "کوه", en: "mountain" }, "川": { fa: "رود", en: "river" },
+  "田": { fa: "مزرعه", en: "field" }, "人": { fa: "انسان", en: "person" }, "亻": { fa: "انسان", en: "person" },
+  "口": { fa: "دهان", en: "mouth" }, "目": { fa: "چشم", en: "eye" }, "耳": { fa: "گوش", en: "ear" },
+  "手": { fa: "دست", en: "hand" }, "扌": { fa: "دست", en: "hand" }, "足": { fa: "پا", en: "foot" },
+  "力": { fa: "نیرو", en: "power" }, "心": { fa: "قلب", en: "heart" }, "忄": { fa: "قلب", en: "heart" },
+  "言": { fa: "گفتار", en: "speech" }, "訁": { fa: "گفتار", en: "speech" }, "刀": { fa: "چاقو", en: "knife" },
+  "刂": { fa: "تیغه", en: "blade" }, "文": { fa: "نوشتار", en: "writing" }, "斤": { fa: "تبر", en: "axe" },
+  "攵": { fa: "ضربه", en: "strike" }, "辶": { fa: "مسیر", en: "path" }, "糸": { fa: "نخ", en: "thread" },
+  "貝": { fa: "پول", en: "money" }, "車": { fa: "وسیله", en: "vehicle" }, "門": { fa: "دروازه", en: "gate" },
+  "宀": { fa: "سقف", en: "roof" }, "阝": { fa: "مکان", en: "place" }, "王": { fa: "پادشاه", en: "king" },
+  "玉": { fa: "جواهر", en: "jewel" }, "石": { fa: "سنگ", en: "stone" }, "雨": { fa: "باران", en: "rain" },
+  "竹": { fa: "بامبو", en: "bamboo" }, "艹": { fa: "گیاه", en: "plant" }, "米": { fa: "برنج", en: "rice" },
+  "禾": { fa: "غله", en: "grain" }, "魚": { fa: "ماهی", en: "fish" }, "鳥": { fa: "پرنده", en: "bird" },
+  "隹": { fa: "پرنده", en: "bird" }, "馬": { fa: "اسب", en: "horse" }, "牛": { fa: "گاو", en: "cow" },
+  "犬": { fa: "سگ", en: "dog" }, "犭": { fa: "حیوان", en: "animal" }, "虫": { fa: "حشره", en: "insect" },
+  "立": { fa: "ایستادن", en: "standing" }, "方": { fa: "جهت", en: "direction" }, "正": { fa: "درست", en: "correct" },
+  "父": { fa: "پدر", en: "father" }, "母": { fa: "مادر", en: "mother" }, "子": { fa: "کودک", en: "child" },
+  "兄": { fa: "برادر بزرگ‌تر", en: "older brother" }, "共": { fa: "باهم", en: "together" }, "用": { fa: "استفاده", en: "use" },
+  "冂": { fa: "قاب", en: "frame" }, "广": { fa: "پناهگاه", en: "shelter" }, "冖": { fa: "پوشش", en: "cover" },
+  "夂": { fa: "گام", en: "step" }, "夕": { fa: "شب", en: "evening" }, "白": { fa: "سفید", en: "white" },
+  "八": { fa: "دو بخش", en: "split" }, "一": { fa: "یک", en: "one" }, "二": { fa: "دو", en: "two" },
+  "十": { fa: "ده", en: "ten" }, "大": { fa: "بزرگ", en: "big" }, "小": { fa: "کوچک", en: "small" },
+  "女": { fa: "زن", en: "woman" }, "金": { fa: "فلز/طلا", en: "metal/gold" }
+});
+
+const MEANING_SCENE_PROFILES = Object.freeze([
+  { keys: /\b(?:person|people|man|woman|child|human|friend|family|someone|self)\b/i, setupFa: "یک آدم مشخص", setupEn: "a specific person", actionFa: "او وارد صحنه می‌شود و کاری روشن انجام می‌دهد", actionEn: "they enter the scene and perform one clear action" },
+  { keys: /\b(?:move|go|come|walk|run|leave|enter|return|travel|road|path|far|near|front|back|up|down)\b/i, setupFa: "یک مسافر", setupEn: "a traveler", actionFa: "مسافر راه می‌افتد، جلو می‌رود و به مقصد می‌رسد", actionEn: "the traveler sets off, moves forward, and reaches a destination" },
+  { keys: /\b(?:water|river|sea|lake|rain|snow|cloud|wet|wash|drink|flow|wave)\b/i, setupFa: "یک صحنهٔ آبی", setupEn: "a water scene", actionFa: "آب حرکت می‌کند و چیزی را خیس یا جابه‌جا می‌کند", actionEn: "water moves and wets or carries something" },
+  { keys: /\b(?:fire|hot|heat|burn|light|sun|bright|dark|night|day|weather|wind|spring|summer|autumn|winter)\b/i, setupFa: "یک صحنهٔ طبیعی", setupEn: "a natural scene", actionFa: "نور یا نیروی طبیعت ناگهان تغییر می‌کند و صحنه را عوض می‌کند", actionEn: "the light or force of nature suddenly changes the scene" },
+  { keys: /\b(?:eat|food|drink|rice|meal|buy|sell|money|work|shop|store|use|make|build|school|study|learn|read|write|book)\b/i, setupFa: "یک کار روزمره", setupEn: "an everyday task", actionFa: "فرد آن کار را انجام می‌دهد و نتیجه‌ای قابل‌دیدن ایجاد می‌کند", actionEn: "someone performs the task and creates a visible result" },
+  { keys: /\b(?:see|look|eye|hear|ear|mouth|hand|foot|head|body|heart|voice|sound|speak|say|listen|sing)\b/i, setupFa: "یک کنش بدنی", setupEn: "a bodily action", actionFa: "عضو بدن حرکت می‌کند و واکنش واضحی نشان می‌دهد", actionEn: "the body part moves and produces a clear reaction" },
+  { keys: /\b(?:happy|sad|anger|fear|love|hate|forget|remember|think|feel|mind|heart|fun|easy|difficult|quiet|calm)\b/i, setupFa: "یک آدم با واکنش شدید", setupEn: "a person with a strong reaction", actionFa: "فرد واکنشی ناگهانی نشان می‌دهد که معنی را برجسته می‌کند", actionEn: "the person shows a sudden reaction that makes the meaning vivid" },
+  { keys: /\b(?:place|country|room|house|home|building|station|gate|door|city|shop|yard|garden|school)\b/i, setupFa: "یک مکان مشخص", setupEn: "a specific place", actionFa: "کسی وارد آن می‌شود، کاری انجام می‌دهد و دوباره بیرون می‌آید", actionEn: "someone enters, does something, and comes back out" },
+  { keys: /\b(?:secret|mystery|unknown|question|answer|hidden|discover|find|solve)\b/i, setupFa: "یک جعبهٔ قفل‌شده", setupEn: "a locked box", actionFa: "فرد قفل را باز می‌کند و راز پنهان را آشکار می‌کند", actionEn: "someone unlocks it and reveals what was hidden" },
+  { keys: /\b(?:big|small|many|few|one|two|three|middle|same|different|first|last|long|short|new|old|young)\b/i, setupFa: "یک مقایسهٔ دیداری", setupEn: "a visual comparison", actionFa: "دو چیز کنار هم قرار می‌گیرند و تفاوتشان فوراً دیده می‌شود", actionEn: "two things are placed together so the difference is instantly visible" },
+  { keys: /\b(?:life|live|grow|birth|die|death|dead|health|sick|ill)\b/i, setupFa: "یک صحنهٔ زندگی", setupEn: "a life scene", actionFa: "چیزی زنده تغییر می‌کند و اثرش فوراً دیده می‌شود", actionEn: "something living changes and its effect is immediately visible" }
+]);
+
+const resolveMeaningProfile = meaning => {
+  const text = String(meaning ?? "");
+  return MEANING_SCENE_PROFILES.find(profile => profile.keys.test(text)) ?? {
+    setupFa: "یک شیء یا موقعیت مشخص",
+    setupEn: "one specific object or situation",
+    actionFa: "آن شیء یا موقعیت حرکت یا تغییر واضحی می‌کند و معنی را برجسته می‌کند",
+    actionEn: "that object or situation makes a clear movement or change that makes the meaning vivid"
+  };
+};
+
+const generatedScene = (character, meaning, components) => {
+  const unique = [...new Set((Array.isArray(components) ? components : []).filter(Boolean))]
+    .filter(c => c !== character).slice(0, 3);
+  const labels = unique.map(c => ({
+    fa: PREPARED_COMPONENT_LABELS[c]?.fa ?? "جزء دیداری «" + c + "»",
+    en: PREPARED_COMPONENT_LABELS[c]?.en ?? "visual component “" + c + "”"
+  }));
+  const profile = resolveMeaningProfile(meaning);
+  const anchorsFa = labels.length ? labels.map(label => label.fa).join("، ") : "شکل «" + character + "»";
+  const anchorsEn = labels.length ? labels.map(label => label.en).join(", ") : "the shape of " + character;
+  const index = (character.codePointAt(0) ?? 0) % 3;
+  const faScenes = [
+    profile.setupFa + " بساز و " + anchorsFa + " را داخل آن قرار بده. " + profile.actionFa + "؛ در لحظهٔ اوج، «" + meaning + "» را روی همان تصویر قفل کن و شکل " + character + " را بخشی از صحنه بدان.",
+    "صحنه را کوتاه نگه دار: " + anchorsFa + " حضور دارند و " + profile.actionFa + ". وقتی اتفاق تمام می‌شود، «" + meaning + "» را بگو و " + character + " را داخل همان تصویر ببین.",
+    "یک تصویر متحرک برای «" + meaning + "» بساز: " + profile.setupFa + ". " + anchorsFa + " هم در صحنه‌اند؛ " + profile.actionFa + " و خطوط " + character + " را بخشی از همان حرکت تصور کن."
+  ];
+  const enScenes = [
+    "Build " + profile.setupEn + " and place " + anchorsEn + " inside it. " + profile.actionEn + "; at the peak, lock “" + meaning + "” onto the image and make " + character + " part of the scene.",
+    "Keep the scene short: " + anchorsEn + " are present and " + profile.actionEn + ". When the action ends, say “" + meaning + "” and see " + character + " inside the same image.",
+    "Create a moving image for “" + meaning + "”: " + profile.setupEn + ". " + anchorsEn + " are also in the scene; " + profile.actionEn + ", and make the strokes of " + character + " part of that movement."
+  ];
+  return { fa: faScenes[index], en: enScenes[index] };
+};
 
 const GENERATED_TEMPLATE_PATTERNS = [
   /یک تصویر واحد از/,
@@ -1270,6 +1394,12 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     const components = componentResolver?.(character) ?? [];
     return scorePreparedMnemonic(CURATED_PREPARED_MNEMONICS[character]?.[0], character, components);
   });
+  const generated = items.filter(item => !CURATED_PREPARED_MNEMONICS[String(item.character)]);
+  const generatedScores = generated.map(item => {
+    const character = String(item.character);
+    const components = componentResolver?.(character) ?? [];
+    return scorePreparedMnemonic(buildPreparedMnemonic(item, components), character, components);
+  });
   const count = scores.length;
   const rate = (key) => count ? scores.filter(score => Boolean(score[key])).length / count : 0;
   const criticalFailures = scores.filter(score => !score.valid || !score.minLength || score.source !== "curated").length;
@@ -1282,6 +1412,8 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     total: items.length,
     curated: count,
     generated: Math.max(0, items.length - count),
+    generatedSceneV2: generated.filter(item => buildPreparedMnemonic(item, componentResolver?.(String(item.character)) ?? []).generationStrategy === "scene-v2").length,
+    generatedGenericTemplateLeaks: generatedScores.filter(score => score.genericTemplate).length,
     criticalFailures,
     genericTemplateLeaks,
     concreteAnchorFa,
@@ -1316,19 +1448,13 @@ export function buildPreparedMnemonic(item, components = []) {
   if (curated) return { ...curated };
 
   const meaning = firstMeaning(item);
-  const anchors = [...new Set((Array.isArray(components) ? components : []).map(value => cleanText(value, 2)).filter(Boolean))]
-    .filter(value => value !== character)
-    .slice(0, 4);
-
-  const anchorText = anchors.length ? anchors.join("・") : character;
-  const fa = anchors.length
-    ? `یک تصویر واحد از «${anchorText}» بساز و آن را مستقیم به معنی «${meaning}» وصل کن؛ هر بار که این شکل را می‌بینی، همان معنی را به یاد بیاور.`
-    : `شکل «${character}» را به یک تصویر ذهنی واضح برای معنی «${meaning}» تبدیل کن؛ شکل کانجی را بخشی از همان تصویر بدان.`;
-  const en = anchors.length
-    ? `Picture the visual anchors ${anchorText} as one scene and connect that scene directly to “${meaning}”; seeing the shape should bring the meaning back.`
-    : `Turn the shape of ${character} into one clear mental image for “${meaning}”; make the character itself part of that image.`;
-
-  return { fa: cleanText(fa, 600), en: cleanText(en, 600), source: "generated" };
+  const scene = generatedScene(character, meaning, components);
+  return {
+    fa: cleanText(scene.fa, 600),
+    en: cleanText(scene.en, 600),
+    source: "generated",
+    generationStrategy: "scene-v2"
+  };
 }
 
 export function buildPreparedMnemonicEntries(catalog = [], componentResolver = null) {
@@ -1343,5 +1469,5 @@ export function buildPreparedMnemonicEntries(catalog = [], componentResolver = n
 export function preparedMnemonicCoverage(catalog = []) {
   const total = Array.isArray(catalog) ? catalog.filter(item => String(item?.character ?? "").trim()).length : 0;
   const curated = Object.keys(CURATED_PREPARED_MNEMONICS).length;
-  return { total, curated, generated: Math.max(0, total - curated), coverage: total ? (total / total) : 0 };
+  return { total, curated, generated: Math.max(0, total - curated), coverage: total ? curated / total : 0 };
 }
