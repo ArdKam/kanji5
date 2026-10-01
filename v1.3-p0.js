@@ -3,8 +3,9 @@
 const DATA_URL='./kanji-data.json';
 const FSRS_URL='./vendor/ts-fsrs-5.4.1.mjs';
 const ensureStatus=()=>{let loading=document.getElementById('loading');if(!loading)return;let status=document.getElementById('loadStatus');if(!status){status=document.createElement('div');status.id='loadStatus';status.style.cssText='display:none';loading.querySelector(':scope > div')?.appendChild(status)}};
+const hasCachedDeck=()=>{try{const raw=localStorage.getItem('kanji5-deck');if(!raw)return false;const deck=JSON.parse(raw);return Array.isArray(deck)&&deck.length===2136}catch(_){return false}};
 if(!window.__KANJI5_P0_DATA_PROMISE){
-  window.__KANJI5_P0_DATA_PROMISE=fetch(DATA_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('KANJI_DATA_PREFETCH_FAILED');return r.json()}).then(data=>{
+  window.__KANJI5_P0_DATA_PROMISE=hasCachedDeck()?Promise.resolve(null):fetch(DATA_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('KANJI_DATA_PREFETCH_FAILED');return r.json()}).then(data=>{
     const items=Array.isArray(data)?data:(data&&Array.isArray(data.kanji)?data.kanji:[]);
     if(items.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${items.length}`);
     window.__KANJI5_P0_DATA=items;
