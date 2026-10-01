@@ -3121,20 +3121,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   color:var(--shu);
   font-size:var(--text-sm);
 }
-.stats-mastery-skeleton{
-  display:grid;
-  gap:11px;
-}
-.stats-mastery-skeleton span{
-  display:block;
-  height:12px;
-  border-radius:999px;
-  background:linear-gradient(90deg,#eee7da,#f8f3e9,#eee7da);
-  background-size:220% 100%;
-  animation:kanji5-loading-shimmer 1.1s linear infinite;
-}
-.stats-mastery-skeleton span:nth-child(2){width:76%}
-.stats-mastery-skeleton span:nth-child(3){width:89%}
 .stats-dashboard .empty-text{
   margin:0;
   padding:8px 0;
@@ -3183,5 +3169,4 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   .stats-activity-chart .activity-bar-track span,
   .stats-mastery-segment,
   .stats-skill-track span{transition:none;}
-  .stats-mastery-skeleton span{animation:none;}
 }
