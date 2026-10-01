@@ -45,6 +45,41 @@ test('P0 persists domain metadata on active sessions',async({page})=>{
   expect(active?.domainSchemaVersion).toBe(1);
 });
 
+test('P0 preserves domain metadata on session mode results',async({page})=>{
+  await cleanStart(page);
+  await expect(page.locator('#v16Start')).toBeVisible({timeout:20000});
+  await page.locator('#v16Start').click();
+  await page.evaluate(()=>{
+    document.dispatchEvent(new CustomEvent('kanji5:v1.6-education-result',{detail:{
+      mode:'vocabulary',
+      domain:'vocabulary',
+      skill:'meaning',
+      exercise:'type-answer',
+      contentId:'vocabulary:test-1',
+      correct:true,
+      outcome:'correct',
+      quality:'exact',
+      score:1,
+      schemaVersion:1,
+      graderVersion:'p0-test',
+      character:'日',
+      sessionEligible:true,
+      independent:true
+    }}));
+  });
+  await expect.poll(async()=>page.evaluate(()=>{
+    const row=JSON.parse(localStorage.getItem('kanji5-v1.6-session-history')||'[]').find(x=>x?.status==='active');
+    return row?.modeResults?.vocabulary?.domain||'';
+  }),{timeout:10000}).toBe('vocabulary');
+  const active=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.6-session-history')||'[]').find(x=>x?.status==='active'));
+  expect(active.modeResults.vocabulary).toMatchObject({
+    domain:'vocabulary',
+    skill:'meaning',
+    exercise:'type-answer',
+    contentId:'vocabulary:test-1'
+  });
+});
+
 test('P0 network content adapters expose stable content identities',async({page})=>{
   await page.route('https://kanjiapi.dev/v1/words/**',route=>route.fulfill({
     status:200,
