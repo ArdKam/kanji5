@@ -237,7 +237,7 @@ test('Reading Lab focuses the next unfamiliar kanji without changing the reading
   await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۱ / ۲');
 
   await focusNext.click();
-  await expect(lab.locator('.reading-lab-reader-kanji').filter({hasText:'日'})).toBeFocused();
+  await expect(lab.locator('[data-reading-lab-sentence-index="0"] .reading-lab-reader-kanji').filter({hasText:'日'})).toBeFocused();
 
   await nextUnknown.click();
   await expect(lab.locator('.reading-lab-reader-kanji').filter({hasText:'学'})).toBeFocused();
