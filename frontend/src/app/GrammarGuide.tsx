@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 
 type GrammarLesson = { title:string; pattern:string; fa:string; en:string; example:string; translation:string; questionFa:string; questionEn:string; options:string[]; answer:string; explanationFa:string; explanationEn:string; };
