@@ -19,9 +19,8 @@ assert.match(bundledFontPath,/^react-dist\/assets\/Vazirmatn_[^/]+\.woff2$/,"Bun
 await access(bundledFontPath);
 
 const interUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
-assert.ok(index.includes('<link rel="preload" href="'+interUrl+'" as="style" fetchpriority="high"'),"Inter stylesheet preload is missing");
-assert.ok(index.includes('<noscript><link rel="stylesheet" href="'+interUrl+'"></noscript>'),"Inter stylesheet noscript fallback is missing");
-assert.ok(index.indexOf('rel="preload" href="'+interUrl) < index.indexOf('data-kanji5-react-styles'),"Inter preload must be discoverable before the app stylesheet");
+assert.doesNotMatch(index,/fonts\.googleapis\.com\/css2\?family=Inter/,"Inter must not block startup through an external stylesheet request");
+assert.doesNotMatch(index,/fonts\.gstatic\.com/,"Google Fonts static origin must not be required by the startup shell");
 assert.doesNotMatch(css,/^\s*@import\s+url\(["']https:\/\/fonts\.googleapis\.com\//m);
 
 function stylesHasImport(value){ return value.includes('@import "./noto-serif-jp.css";'); }
