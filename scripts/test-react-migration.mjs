@@ -15,7 +15,7 @@ assert.match(docs,/presentation-only/);assert.match(engine,/__KANJI5_V19_V2_BOUN
 const shell=fs.readFileSync("index.html","utf8"),bootstrap=fs.readFileSync("app-bootstrap.js","utf8"),entry=fs.readFileSync("react-entry.js","utf8"),sw=fs.readFileSync("sw.js","utf8");
 assert.match(shell,/id="root"/);assert.match(shell,/app-bootstrap\.js/);assert.doesNotMatch(shell,/app-bootstrap-release\d+\.js/);assert.doesNotMatch(shell,/v2-presentation|v2-components|legacy\.css|id="app"|id="loading"/);
 assert.doesNotMatch(bootstrap,/legacy|kanji5-v2-default/);assert.match(bootstrap,/serviceWorker\.register/);assert.match(bootstrap,/v1\.6-session\.js/);
-assert.doesNotMatch(entry,/URLSearchParams|legacy|v2=1|react=0/);assert.match(entry,/react-dist\/kanji5-react\.js\?v=/);assert.match(entry,/react-dist\/kanji5-react\.css\?v=/);assert.doesNotMatch(entry,/react-dist\/kanji5-react-release\d+/);
-assert.match(sw,/\.\/react-dist\/kanji5-react\.js/);assert.match(sw,/\.\/react-dist\/kanji5-react\.css/);
+assert.doesNotMatch(entry,/URLSearchParams|legacy|v2=1|react=0/);assert.match(entry,/meta\[name="kanji5-build-id"\]/);assert.match(entry,/assetVersion/);assert.doesNotMatch(entry,/react-dist\/kanji5-react-release\d+/);
+assert.match(sw,/const BUILD_ID='__KANJI5_BUILD_ID__'/);assert.match(sw,/\.\/react-dist\/kanji5-react\.js/);assert.match(sw,/\.\/react-dist\/kanji5-react\.css/);
 for(const file of ["e2e/react-presentation-migration.spec.mjs","e2e/react-presentation-parity.spec.mjs","e2e/react-presentation-offline.spec.mjs"])assert.ok(fs.existsSync(file),"Missing React verification test: "+file);
 console.log("Kanji 5 React migration boundary contract passed.");
