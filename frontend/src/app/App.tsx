@@ -67,6 +67,8 @@ const outcomeLabel=(key:string)=>({correct:t("correct"),wrong:t("wrong"),unknown
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
 function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
 
+const PAGER_AXIS_LOCK_DISTANCE=12;
+const PAGER_AXIS_RATIO=2;
 const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
 
 function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;onReveal:()=>void;onRate:(r:Rating)=>void}){
@@ -307,9 +309,9 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     const dx=event.clientX-swipe.startX;
     const dy=event.clientY-swipe.startY;
     const absX=Math.abs(dx),absY=Math.abs(dy);
-    if(!swipe.axis&&Math.max(absX,absY)>=5){
-      if(absX>=6&&absX>absY*1.05)swipe.axis="x";
-      else if(absY>=6&&absY>absX*1.05)swipe.axis="y";
+    if(!swipe.axis&&Math.max(absX,absY)>=PAGER_AXIS_LOCK_DISTANCE){
+      if(absX>=PAGER_AXIS_LOCK_DISTANCE&&absX>absY*PAGER_AXIS_RATIO)swipe.axis="x";
+      else if(absY>=PAGER_AXIS_LOCK_DISTANCE&&absY>absX*PAGER_AXIS_RATIO)swipe.axis="y";
     }
     if(swipe.axis!=="x"){
       swipe.lastX=event.clientX;
@@ -338,7 +340,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     const totalDx=event.clientX-swipe.startX;
     const totalDy=event.clientY-swipe.startY;
     const totalAbsX=Math.abs(totalDx),totalAbsY=Math.abs(totalDy);
-    const axis=swipe.axis??(totalAbsX>=6&&totalAbsX>totalAbsY*1.05?"x":null);
+    const axis=swipe.axis??(totalAbsX>=PAGER_AXIS_LOCK_DISTANCE&&totalAbsX>totalAbsY*PAGER_AXIS_RATIO?"x":null);
     const delta=cancelled||axis!=="x"?0:totalDx;
     const totalElapsed=Math.max(16,performance.now()-swipe.startTime);
     const velocity=cancelled?0:delta/totalElapsed;
