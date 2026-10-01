@@ -92,7 +92,7 @@ export function buildLearnerModelFromKanji(kanjiByCharacter={},options={}){
       if((row?.lastCorrect===false)&&successStreak===0){errorStreak++;continue}
       break;
     }
-    const state=deriveState({attempts,accuracy,confidence,errorStreak:0,successStreak,recentAccuracy,momentum},options);
+    const state=deriveState({attempts,accuracy,confidence,errorStreak:0,successStreak,recentAccuracy,momentum},{...DEFAULTS,...options});
     const lastAt=typeof latest?.lastAt==='string'?latest.lastAt:'';
     const lastMs=lastAt?Date.parse(lastAt):NaN;
     const recencyDays=Number.isFinite(lastMs)?Math.max(0,(now-lastMs)/86400000):null;
