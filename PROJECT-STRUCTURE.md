@@ -94,9 +94,7 @@ Workflow filenames preserve their historical names, so the filename alone is not
 | Workflow file | Actual role |
 | --- | --- |
 | `.github/workflows/react-frontend.yml` | Current React presentation build, shipped-artifact validation, and React/browser release gates. |
-| `.github/workflows/build-v1.8.yml` | v1.8 compatibility plus current v1.9 learning-engine validation and aggregate engine gates. |
-| `.github/workflows/build-v1.7.yml` | Adaptive-recall contract/unit validation retained for that engine layer. |
-| `.github/workflows/build-v1.6.yml` | Broad historical contract/release validation that still checks shared runtime contracts used by current releases. |
+| `.github/workflows/build-v1.8.yml` | Consolidated learning-engine compatibility, v1.9 validation, aggregate unit/contract gates, and release checks. |
 | `.github/workflows/pages-deploy.yml` | Builds the current frontend, validates it, packages the generated output, and deploys GitHub Pages. It does not mutate `main`. |
 
 Do not rename or move workflow files merely to make the names prettier without checking path filters, workflow references, and release automation first.
