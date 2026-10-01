@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getVocabulary, type KanjiCatalogItem, type VocabularyItem } from "./engine";
+import "./reading-lab-focus.css";
 
 const isKanji = (value: string) => /\p{Script=Han}/u.test(value);
 const READING_LAB_STORAGE_KEY = "kanji5-reading-lab-session-v1";
