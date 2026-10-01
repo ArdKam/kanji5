@@ -7,7 +7,6 @@ const jpCss=await readFile("frontend/src/noto-serif-jp.css","utf8");
 
 const jpPreload="./react-dist/assets/NotoSerifJP-Regular.subset.woff2";
 await access("frontend/src/assets/NotoSerifJP-Regular.subset.woff2");
-await access(jpPreload.slice(2));
 assert.doesNotMatch(index,/rel="preload" href="\.\/react-dist\/assets\/NotoSerifJP-Regular\.subset\.woff2"/,"Noto Serif JP must not use an unconditional preload; it is loaded on demand by the application stylesheet");
 assert.ok(jpCss.includes('font-family:"Noto Serif JP";'),"Local Noto Serif JP @font-face is missing");
 assert.ok(stylesHasImport(css),"Noto Serif JP stylesheet must be imported by the main stylesheet");
@@ -16,8 +15,8 @@ assert.doesNotMatch(index,/fonts\.googleapis\.com\/css2\?[^"]*Noto\+Serif\+JP/,"
 const vazirPreloadMatch=index.match(/<link rel="preload" href="(\.\/react-dist\/assets\/[^"?#]+\.woff2)" as="font" type="font\/woff2" crossorigin fetchpriority="high">/);
 assert.ok(vazirPreloadMatch,"Bundled Vazirmatn font preload is missing");
 const bundledFontPath=vazirPreloadMatch[1].slice(2);
-await access(bundledFontPath);
 assert.match(bundledFontPath,/^react-dist\/assets\/Vazirmatn_[^/]+\.woff2$/,"Bundled Vazirmatn preload must target the shipped local asset");
+await access(bundledFontPath);
 
 const interUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
 assert.ok(index.includes('<link rel="preload" href="'+interUrl+'" as="style" fetchpriority="high"'),"Inter stylesheet preload is missing");

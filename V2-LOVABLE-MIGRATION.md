@@ -16,7 +16,7 @@ Lovable scheduling semantics are not imported.
 
 ## Current implementation
 
-The production presentation is React/TypeScript under `frontend/`, with the static bundle under `react-dist/`.
+The production presentation is React/TypeScript under `frontend/`, with the generated bundle under `react-dist/` during build (not source-controlled).
 
 The authoritative boundary remains:
 

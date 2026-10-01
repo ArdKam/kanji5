@@ -9,6 +9,10 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
+      - "scripts/test-performance-font-loading.mjs"
+      - "scripts/test-service-worker-shell.mjs"
+      - "scripts/test-react-release-integrity.mjs"
+      - "scripts/test-architecture-build-cleanup.mjs"
       - "scripts/test-prepared-mnemonics.mjs"
       - "scripts/test-mnemonic-support.mjs"
       - "scripts/test-kanji-radical-system.mjs"
@@ -36,10 +40,7 @@ on:
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
-      - "react-dist/**"
       - "sw.js"
-      - "sw-release18.js"
-      - "sw-release19.js"
       - "account-fallback.js"
   push:
     branches:
@@ -51,6 +52,10 @@ on:
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
+      - "scripts/test-performance-font-loading.mjs"
+      - "scripts/test-service-worker-shell.mjs"
+      - "scripts/test-react-release-integrity.mjs"
+      - "scripts/test-architecture-build-cleanup.mjs"
       - "scripts/test-prepared-mnemonics.mjs"
       - "scripts/test-kanji-radical-system.mjs"
       - "scripts/test-floating-experience-nav.mjs"
@@ -72,10 +77,7 @@ on:
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
-      - "react-dist/**"
       - "sw.js"
-      - "sw-release18.js"
-      - "sw-release19.js"
       - "account-fallback.js"
 
 permissions:
@@ -98,14 +100,21 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run build
-      - name: Materialize release18 React artifact for E2E
-        working-directory: .
-        run: |
-          cp react-dist/kanji5-react.js react-dist/kanji5-react-release18.js
-          cp react-dist/kanji5-react.css react-dist/kanji5-react-release18.css
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
+      - name: Run generated-artifact contracts
+        working-directory: .
+        run: |
+          node scripts/test-performance-font-loading.mjs
+          node scripts/test-service-worker-shell.mjs
+          node scripts/test-react-release-integrity.mjs
+      - name: Run generated-artifact presentation contracts
+        working-directory: .
+        run: |
+          node scripts/test-v2-p3-accessibility.mjs
+          node scripts/test-v2-p4-visual.mjs
+          node scripts/test-v2-v18-parity.mjs
       - name: Run prepared mnemonic coverage test
         working-directory: .
         run: node scripts/test-prepared-mnemonics.mjs
