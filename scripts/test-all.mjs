@@ -8,9 +8,9 @@ const allScripts=(await readdir(path.join(root,'scripts')))
   .filter(name=>/^test-.*\.mjs$/.test(name)&&name!=='test-all.mjs')
   .sort();
 
-// Six historical v2 probes target retired files/contracts and are intentionally
-// not part of the authoritative root suite. Keep this list explicit so new
-// v2 tests cannot silently disappear behind a filename-prefix exclusion.
+// Historical probes target retired presentation contracts and are intentionally
+// not part of the authoritative root suite. Keep this list explicit.
+
 const retiredTests=new Set([
   'test-v2-custom-study.mjs',
   'test-v2-lovable-visual-contract.mjs',
@@ -24,10 +24,18 @@ for(const test of retiredTests){
   if(!allScripts.includes(test)) throw new Error(`Retired test is missing from scripts/: ${test}`);
 }
 
-const scripts=allScripts.filter(name=>!retiredTests.has(name));
+// Build-dependent presentation tests are run by the React presentation workflow
+// after the frontend has produced a fresh React distribution.
+const buildDependentTests=new Set([
+  'test-react-shipped-artifact.mjs',
+]);
+
+const scripts=allScripts.filter(name=>!retiredTests.has(name)&&!buildDependentTests.has(name));
+
 
 if(!scripts.length)throw new Error('No scripts/test-*.mjs files found');
-console.log(`Running ${scripts.length} contract/unit tests...`);
+console.log(`Running ${scripts.length} source/contract unit tests...`);
+console.log(`Build-dependent presentation tests are run separately: ${[...buildDependentTests].join(', ')}`);
 
 const failures=[];
 for(const script of scripts){
