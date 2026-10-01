@@ -52,16 +52,23 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   const search = dialog.locator(".prepared-mnemonic-library-search");
   await expect(search).toHaveAttribute("type", "search");
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText(/2[,.]?136/);
-  await expect(dialog.locator(".prepared-mnemonic-filter-chip").filter({ hasText: "Curated" }).first()).toHaveAttribute("aria-pressed", "false");
+  await expect(dialog.getByText("This is not a review and does not give SRS credit; it simply makes a memory path easier to build.", { exact: true })).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-mode-tab").first()).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "false");
+  await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated")).toHaveCount(60);
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);
-  const rows = dialog.locator(".prepared-mnemonic-library-row");
   const curatedRow = dialog.locator(".prepared-mnemonic-library-row.is-curated").first();
   await expect(curatedRow).toContainText(/学|study/i);
   await expect(curatedRow.locator(".prepared-mnemonic-source.curated")).toBeVisible();
   await expect(curatedRow.locator(".prepared-mnemonic-library-meaning")).toBeVisible();
   await expect(curatedRow.locator(".prepared-mnemonic-library-use")).toBeVisible();
-  await expect(dialog.locator(".prepared-mnemonic-results-header")).toContainText(/result/);
+  await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
+  await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog.locator(".prepared-mnemonic-library-row.is-generated").first()).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title").first()).toContainText("not a finished mnemonic");
+  await expect(dialog.getByRole("button", { name: "Build personal mnemonic", exact: true }).first()).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-results-header")).toContainText(/result|clue/i);
 });
 
 test("Secondary desktop surfaces preserve centered modal geometry after the polish pass", async ({ page }) => {
