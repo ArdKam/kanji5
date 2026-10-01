@@ -2303,3 +2303,14 @@
 @media(prefers-reduced-motion:reduce){
   .grammar-progress-track span{transition:none;}
 }
+
+.reading-lab-analysis-empty{
+  display:grid;
+  gap:4px;
+  padding:14px 15px;
+  border:1px dashed var(--line);
+  border-radius:16px;
+  background:color-mix(in srgb,var(--washi) 55%,var(--paper));
+}
+.reading-lab-analysis-empty strong{font-size:var(--text-sm);}
+.reading-lab-analysis-empty span{color:var(--mute);font-size:var(--text-xs);line-height:1.6;}
