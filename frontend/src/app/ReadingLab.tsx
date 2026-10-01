@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getVocabulary, type KanjiCatalogItem, type VocabularyItem } from "./engine";
 import "./reading-lab-focus.css";
+import "./reading-lab-playback.css";
 
 const isKanji = (value: string) => /\p{Script=Han}/u.test(value);
 const READING_LAB_STORAGE_KEY = "kanji5-reading-lab-session-v1";
@@ -156,6 +157,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const [wordLookupKey, setWordLookupKey] = useState<string | null>(null);
   const [showRestoreNotice, setShowRestoreNotice] = useState(Boolean(initialSession?.text));
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [sentenceAutoplay, setSentenceAutoplay] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const audioInputRef = useRef<HTMLInputElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -163,6 +165,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const vocabularyCacheRef = useRef(new Map<string, VocabularyItem[]>());
   const readerKanjiRefs = useRef(new Map<string, HTMLButtonElement>());
   const focusCursorRef = useRef<{ sentenceIndex:number; characterIndex:number } | null>(null);
+  const sentenceAutoplayRef = useRef(false);
   const skipSentenceResetRef = useRef(Boolean(initialSession?.text));
 
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
@@ -245,6 +248,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     if (typeof window === "undefined") return;
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
+    sentenceAutoplayRef.current = false;
+    setSentenceAutoplay(false);
   }, [value]);
 
   useEffect(() => {
@@ -267,6 +272,10 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
       // Reading Lab remains usable when storage is unavailable or full.
     }
   }, [activeSentenceIndex, audioName, speechRate, subtitleCues, value]);
+
+  useEffect(() => {
+    sentenceAutoplayRef.current = sentenceAutoplay;
+  }, [sentenceAutoplay]);
 
   useEffect(() => {
     if (!showRestoreNotice) return;
@@ -292,14 +301,54 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
 
   const speakText = () => speakUtterance(value);
 
+  function speakSentenceAtIndex(index: number) {
+    const sentence = sentences[index];
+    if (!speechSupported || !sentence?.text.trim()) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(sentence.text.trim());
+    utterance.lang = "ja-JP";
+    utterance.rate = speechRate;
+    utterance.onstart = () => {
+      setActiveSentenceIndex(index);
+      setIsSpeaking(true);
+    };
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      if (!sentenceAutoplayRef.current) return;
+      const nextIndex = index + 1;
+      if (nextIndex >= sentences.length) {
+        sentenceAutoplayRef.current = false;
+        setSentenceAutoplay(false);
+        return;
+      }
+      setActiveSentenceIndex(nextIndex);
+      window.setTimeout(() => {
+        if (sentenceAutoplayRef.current) speakSentenceAtIndex(nextIndex);
+      }, 90);
+    };
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  }
+
   const speakCurrentSentence = () => {
-    if (activeSentence) speakUtterance(activeSentence.text);
+    if (activeSentence) speakSentenceAtIndex(activeSentenceIndex);
+  };
+
+  const repeatCurrentSentence = () => {
+    if (!activeSentence) return;
+    if (syncReady) {
+      playCurrentSyncedSentence();
+      return;
+    }
+    speakSentenceAtIndex(activeSentenceIndex);
   };
 
   const stopSpeech = () => {
     if (!speechSupported) return;
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
+    sentenceAutoplayRef.current = false;
+    setSentenceAutoplay(false);
   };
 
   const seekAudioToSentence = (nextIndex: number, play = false) => {
@@ -318,7 +367,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     if (!sentences.length) return;
     const clamped = Math.max(0, Math.min(sentences.length - 1, nextIndex));
     setActiveSentenceIndex(clamped);
-    if (seekAudio && syncReady) seekAudioToSentence(clamped);
+    if (seekAudio && syncReady) seekAudioToSentence(clamped, sentenceAutoplayRef.current);
+    else if (sentenceAutoplayRef.current) speakSentenceAtIndex(clamped);
   };
 
   const playCurrentSyncedSentence = () => {
@@ -331,6 +381,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const stopSyncedAudio = () => {
     audioRef.current?.pause();
     setIsAudioPlaying(false);
+    sentenceAutoplayRef.current = false;
+    setSentenceAutoplay(false);
   };
 
   const handleAudioTimeUpdate = () => {
@@ -374,6 +426,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   };
 
   const clearText = () => {
+    setSentenceAutoplay(false);
+    sentenceAutoplayRef.current = false;
     setValue("");
     setSubtitleCues([]);
     setAudioName("");
@@ -511,7 +565,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               onTimeUpdate={handleAudioTimeUpdate}
               onPlay={() => setIsAudioPlaying(true)}
               onPause={() => setIsAudioPlaying(false)}
-              onEnded={() => setIsAudioPlaying(false)}
+              onEnded={() => { setIsAudioPlaying(false); sentenceAutoplayRef.current = false; setSentenceAutoplay(false); }}
             />
             {syncReady ? <p className="reading-lab-sync-status" data-reading-lab-sync-ready="true">{t("readingLabSyncReady", language)} · {t("readingLabSyncHint", language)}</p> : null}
           </>
@@ -589,10 +643,29 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                     {isAudioPlaying ? t("readingLabStopSynced", language) : t("readingLabPlaySynced", language)}
                   </button>
                 ) : (
-                  <button className="button secondary reading-lab-sentence-read" type="button" disabled={!speechSupported || !activeSentence} onClick={() => activeSentence && speakUtterance(activeSentence.text)}>
+                  <button className="button secondary reading-lab-sentence-read" type="button" disabled={!speechSupported || !activeSentence} onClick={() => activeSentence && speakCurrentSentence()}>
                     {isSpeaking ? t("readingLabSentenceReading", language) : t("readingLabReadSentence", language)}
                   </button>
                 )}
+                <button className="button secondary reading-lab-sentence-repeat" type="button" disabled={!activeSentence || (syncReady ? !activeCue : !speechSupported)} onClick={repeatCurrentSentence} aria-label={t("readingLabRepeatSentence", language)}>
+                  {t("readingLabRepeatSentence", language)}
+                </button>
+                <button className={"button secondary reading-lab-sentence-autoplay" + (sentenceAutoplay ? " is-active" : "")} type="button" disabled={!activeSentence || (syncReady ? !activeCue : !speechSupported)} aria-pressed={sentenceAutoplay} onClick={() => {
+                  const next = !sentenceAutoplayRef.current;
+                  sentenceAutoplayRef.current = next;
+                  setSentenceAutoplay(next);
+                  if (next) {
+                    if (syncReady) playCurrentSyncedSentence();
+                    else speakSentenceAtIndex(activeSentenceIndex);
+                  } else {
+                    if (syncReady) audioRef.current?.pause();
+                    else window.speechSynthesis?.cancel();
+                    setIsAudioPlaying(false);
+                    setIsSpeaking(false);
+                  }
+                }}>
+                  {t("readingLabAutoplay", language)}
+                </button>
                 <button className="button secondary reading-lab-sentence-next" type="button" disabled={activeSentenceIndex >= sentences.length - 1} onClick={() => selectSentence(activeSentenceIndex + 1)} aria-label={t("readingLabNextSentence", language)}>›</button>
               </div>
             </div>

@@ -1,0 +1,22 @@
+/* Sentence playback controls stay scoped to Reading Lab. */
+.reading-lab-sentence-repeat,
+.reading-lab-sentence-autoplay{
+  min-height:36px;
+  padding:5px 9px;
+  font-size:var(--text-xs);
+}
+.reading-lab-sentence-autoplay.is-active{
+  border-color:color-mix(in srgb,var(--shu) 34%,var(--line));
+  background:color-mix(in srgb,var(--shu) 8%,var(--paper));
+  color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--shu) 10%,transparent);
+}
+@media(max-width:640px){
+  .reading-lab-sentence-repeat,
+  .reading-lab-sentence-autoplay{
+    flex:1 1 120px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .reading-lab-sentence-autoplay{transition:none;}
+}
