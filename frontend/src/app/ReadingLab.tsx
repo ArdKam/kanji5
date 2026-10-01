@@ -248,6 +248,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     if (typeof window === "undefined") return;
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
+    sentenceAutoplayRef.current = false;
+    setSentenceAutoplay(false);
   }, [value]);
 
   useEffect(() => {
@@ -320,7 +322,9 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
         return;
       }
       setActiveSentenceIndex(nextIndex);
-      window.setTimeout(() => speakSentenceAtIndex(nextIndex), 90);
+      window.setTimeout(() => {
+        if (sentenceAutoplayRef.current) speakSentenceAtIndex(nextIndex);
+      }, 90);
     };
     utterance.onerror = () => setIsSpeaking(false);
     window.speechSynthesis.speak(utterance);
