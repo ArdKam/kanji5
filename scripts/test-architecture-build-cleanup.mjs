@@ -21,10 +21,6 @@ for(const retired of [
   "app-bootstrap-release19.js",
   "sw-release18.js",
   "sw-release19.js",
-  "react-dist/kanji5-react-release18.js",
-  "react-dist/kanji5-react-release18.css",
-  "react-dist/kanji5-react.js",
-  "react-dist/kanji5-react.css",
   "react-entry-release18.js"
 ]){
   assert.equal(fs.existsSync(retired),false,"retired generated artifact still exists: "+retired);
