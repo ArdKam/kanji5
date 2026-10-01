@@ -38,6 +38,7 @@ on:
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
+      - "e2e/stats-dialog.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
@@ -176,6 +177,9 @@ jobs:
       - name: Run account shell gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
+      - name: Run statistics dashboard gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/stats-dialog.spec.mjs
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
