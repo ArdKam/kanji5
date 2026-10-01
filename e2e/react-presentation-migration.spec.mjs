@@ -49,55 +49,44 @@ test('React exercise path can start and expose a boundary-backed exercise',async
   await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.())?.exercise))).toBe(true);
 });
 
-test('React presentation can switch between Persian and English and persist the choice',async({page})=>{
+test('React presentation can switch language from More Menu and keep Settings focused',async({page})=>{
   await clean(page);
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
-  await expect(page.getByRole('button',{name:'فارسی',exact:true})).toHaveCount(0);
+
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
-  await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true})).toHaveAttribute('aria-pressed','true');
-  await page.getByRole('dialog').getByRole('button',{name:'English',exact:true}).click();
+  const menu=page.locator('#header-tools-menu');
+  await expect(menu).toHaveClass(/open/);
+  await expect(menu.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','false');
+  await menu.getByRole('button',{name:'English',exact:true}).click();
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.locator('html')).toHaveAttribute('dir','ltr');
-  await expect(page.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
-  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).last().click();
+  await expect(menu.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
+
+  await menu.getByRole('button',{name:'Settings',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.settings-language-switcher')).toHaveCount(0);
+  await expect(dialog).not.toContainText('Theme');
+  await expect(dialog).toContainText('Learning');
+  await expect(dialog).toContainText('Review scheduling');
+  await expect(dialog).toContainText('Data & backup');
+  await dialog.getByRole('button',{name:'Close',exact:true}).click();
+
   await page.getByRole('button',{name:'More',exact:true}).click();
   await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
-  await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Stats',exact:true})).toBeVisible();
-  await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true})).toBeVisible();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'Settings',exact:true}).click();
-  await expect(page.getByRole('dialog').getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
-  await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveText("Learning");
-  await expect(page.locator(".experience-nav .experience-tab").nth(0)).toHaveAttribute('aria-current','page');
-  await page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'فارسی',exact:true}).click();
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
-  await page.getByRole('dialog').getByRole('button',{name:'English',exact:true}).click();
-  await expect(page.locator('html')).toHaveAttribute('lang','en');
+
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('lang','en');
-  await expect(page.locator('html')).toHaveAttribute('dir','ltr');
-  await page.getByRole('button',{name:'More',exact:true}).click();
-  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
-  await expect(page.locator('#header-tools-menu').getByRole('button',{name:'Stats',exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Settings',exact:true}).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await page.getByRole('dialog').getByRole('button',{name:'فارسی',exact:true}).click();
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
 });
 
-
 test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
-  await clean(page);
-  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
-  await page.locator('#header-tools-menu').getByRole('button',{name:'تنظیمات',exact:true}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'English',exact:true}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'Close',exact:true}).first().click();
+  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await page.goto('/');
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Show kanji information',exact:true}).click();
   await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
