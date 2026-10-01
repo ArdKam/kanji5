@@ -46,7 +46,9 @@ function PreparedMnemonicLibrary({ language, catalog, onSelectKanji }: { languag
       if (filter === "n5" && catalogByCharacter.get(entry.character)?.jlpt !== "N5") return false;
       if (!q) return true;
       const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
-      return normalize(entry.character).includes(q) || normalize(mnemonic).includes(q);
+      const item = catalogByCharacter.get(entry.character);
+      const searchable = [entry.character, ...(item?.meanings ?? []), ...(item?.on ?? []), ...(item?.kun ?? []), mnemonic].join(" ");
+      return normalize(searchable).includes(q);
     });
   }, [entries, language, query, filter]);
   useEffect(() => { setVisibleLimit(60); }, [language, query, filter]);

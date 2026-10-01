@@ -1,0 +1,38 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const styles=fs.readFileSync("frontend/src/styles.css","utf8");
+const dictionaryCss=fs.readFileSync("frontend/src/app/dictionary.css","utf8");
+const settings=fs.readFileSync("frontend/src/app/SettingsDialog.tsx","utf8");
+const grammar=fs.readFileSync("frontend/src/app/GrammarGuide.tsx","utf8");
+const reading=fs.readFileSync("frontend/src/app/ReadingLab.tsx","utf8");
+const mnemonics=fs.readFileSync("frontend/src/app/MnemonicsDialog.tsx","utf8");
+
+assert.match(styles,/\.dialog\.secondary-page-dialog\{[\s\S]*?position:fixed;[\s\S]*?inset:50% auto auto 50%;[\s\S]*?transform:translate\(-50%,-50%\)/);
+assert.ok(styles.includes(".stats-hero"),"stats hero hierarchy missing");
+assert.ok(styles.includes(".settings-submit-actions"),"settings sticky action region missing");
+assert.ok(styles.includes(".reading-lab-analysis"),"reading analysis hierarchy missing");
+assert.ok(styles.includes(".prepared-mnemonic-library-row"),"mnemonic library row polish missing");
+
+assert.ok(dictionaryCss.includes(".grammar-progress-track"),"grammar progress track missing");
+assert.ok(dictionaryCss.includes(".grammar-feedback.incorrect"),"grammar incorrect feedback state missing");
+assert.ok(dictionaryCss.includes(".reading-lab-analysis"),"reading lab final style override missing");
+
+assert.ok(!settings.includes("ThemePreference"),"Settings should not own theme preference");
+assert.ok(!settings.includes("onLanguageChange"),"Settings should not own language preference");
+for(const heading of ["Learning","Review scheduling","Data & backup"]) {
+  assert.ok(settings.includes(heading),`Settings section missing: ${heading}`);
+}
+
+assert.ok(grammar.includes("GRAMMAR_PROGRESS_KEY"),"Grammar session persistence missing");
+assert.ok(grammar.includes("grammar-retry"),"Grammar retry action missing");
+assert.match(grammar,/disabled=\{!checked\|\|selectedOption!==lesson\.answer/);
+
+assert.ok(reading.includes("reading-lab-analysis"),"Reading Lab learner-facing analysis missing");
+assert.match(reading,/uniqueKanji - knownKanjiCount/);
+
+assert.ok(mnemonics.includes("item?.meanings"),"Mnemonic search does not include meanings");
+assert.ok(mnemonics.includes("item?.on"),"Mnemonic search does not include on readings");
+assert.ok(mnemonics.includes("item?.kun"),"Mnemonic search does not include kun readings");
+
+console.log("Kanji5 secondary experience polish contract passed.");

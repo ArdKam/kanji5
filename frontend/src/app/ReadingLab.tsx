@@ -155,11 +155,25 @@ export function ReadingLab({ catalog, language, onSelectKanji }: {
         {!speechSupported ? <span className="reading-lab-speech-status">{t("readingSpeechUnsupported", language)}</span> : null}
       </div>
       {audioUrl ? <audio className="reading-lab-audio" controls preload="metadata" src={audioUrl} aria-label={t("readingAudio", language)} /> : null}
-      <div className="reading-lab-stats" aria-live="polite">
-        <span>{t("readingLabCharacters", language)} <strong>{formatNumber(inputCharacters, language)}</strong></span>
-        <span>{t("readingLabKanji", language)} <strong>{formatNumber(uniqueKanji, language)}</strong></span>
-        <span>{t("readingLabKnownKanji", language)} <strong>{formatNumber(knownKanjiCount, language)}</strong></span>
-      </div>
+      {value.trim() ? (
+        <section className="reading-lab-analysis" aria-live="polite" aria-label={t("readingLab", language)}>
+          <div className="reading-lab-analysis-copy">
+            <p className="eyebrow">{language === "fa" ? "تحلیل متن" : "Text analysis"}</p>
+            <strong>{formatNumber(uniqueKanji, language)} {language === "fa" ? "کانجی شناسایی شد" : "kanji found"}</strong>
+            <span>{formatNumber(knownKanjiCount, language)} {language === "fa" ? "آشنا" : "familiar"} · {formatNumber(Math.max(0, uniqueKanji - knownKanjiCount), language)} {language === "fa" ? "نیازمند مرور" : "need review"}</span>
+          </div>
+          <div className="reading-lab-stats">
+            <span>{t("readingLabCharacters", language)} <strong>{formatNumber(inputCharacters, language)}</strong></span>
+            <span>{t("readingLabKanji", language)} <strong>{formatNumber(uniqueKanji, language)}</strong></span>
+            <span>{t("readingLabKnownKanji", language)} <strong>{formatNumber(knownKanjiCount, language)}</strong></span>
+          </div>
+        </section>
+      ) : (
+        <div className="reading-lab-analysis-empty">
+          <strong>{language === "fa" ? "متن ژاپنی را وارد کن" : "Add Japanese text to begin"}</strong>
+          <span>{language === "fa" ? "متن را اینجا بچسبان یا از فایل متنی وارد کن؛ بعد تحلیل کانجی‌ها ظاهر می‌شود." : "Paste text above or import a text file. Your kanji analysis will appear here."}</span>
+        </div>
+      )}
       {extracted.length ? (
         <div className="reading-lab-kanji-list" role="list" aria-label={t("readingLabKnownKanji", language)}>
           {extracted.map(item => (

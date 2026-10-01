@@ -105,6 +105,11 @@ export function StatsDialog({ open, snapshot, language, onClose }: { open: boole
     <dialog ref={dialogRef} className="dialog secondary-page-dialog stats-dialog" aria-labelledby="stats-title">
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <h2 id="stats-title">{t("stats", language)}</h2>
+      <section className="stats-hero" aria-label={language === "fa" ? "نمای کلی پیشرفت" : "Progress overview"}>
+        <div className="stats-hero-primary"><p className="eyebrow">{language === "fa" ? "پیشرفت" : "Progress"}</p><strong>{formatNumber(snapshot?.stats?.studiedCount ?? 0, language)} / {formatNumber(snapshot?.stats?.deckSize ?? 0, language)}</strong><span>{language === "fa" ? "کانجی مطالعه‌شده" : "kanji studied"}</span></div>
+        <div className="stats-hero-secondary"><span>{language === "fa" ? "ماندگاری تلاش اول" : "First-try retention"}</span><strong>{formatNumber(Math.round(Math.max(0, Math.min(1, Number(snapshot?.stats?.nonAgainRate) || 0)) * 100), language)}%</strong></div>
+        <div className="stats-hero-secondary"><span>{language === "fa" ? "نیازمند توجه" : "Needs attention"}</span><strong>{formatNumber(snapshot?.stats?.leechCount ?? 0, language)}</strong></div>
+      </section>
       <div className="dialog-grid">
         <StatRow label={language === "fa" ? "کل مرورها" : "Total reviews"} value={formatNumber(snapshot?.stats?.totalReviews ?? 0, language)} />
         <StatRow label={language === "fa" ? "نرخ تسلط در اولین تلاش" : "First-attempt retention"} value={formatNumber(Math.round(Math.max(0, Math.min(1, Number(snapshot?.stats?.nonAgainRate) || 0)) * 100), language) + (language === "fa" ? "٪" : "%")} />

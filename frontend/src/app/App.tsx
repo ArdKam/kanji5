@@ -934,7 +934,6 @@ function App(){
           snapshot={snapshot??{}}
           busy={busy}
           language={language}
-          onLanguageChange={changeLanguage}
           onClose={closeSecondaryPage}
           onSave={s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()})}
           onReset={()=>void action(async()=>{resetProgress()})}
