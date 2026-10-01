@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import { useEffect, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 
