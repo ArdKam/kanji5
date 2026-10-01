@@ -16,7 +16,6 @@ const required=new Set([
   "kanji-components.json",
   ...shell.filter(item=>item!=="./").map(item=>String(item).replace(/^\.\//,""))
 ]);
-required.add("react-dist");
 
 function copy(relative){
   const source=path.join(root,relative);
@@ -26,11 +25,16 @@ function copy(relative){
   fs.cpSync(source,destination,{recursive:true});
 }
 
-for(const relative of required){
-  if(relative==="react-dist"){copy(relative);continue;}
-  copy(relative);
-}
+for(const relative of required)copy(relative);
 
-const entries=fs.readdirSync(site,{withFileTypes:true}).map(x=>x.name).sort();
-console.log("Staged GitHub Pages artifact:");
-console.log(entries.join("\n"));
+const buildId=String(process.env.KANJI5_BUILD_ID||process.env.GITHUB_SHA||"dev").trim().slice(0,40).replace(/[^A-Za-z0-9._-]/g,"-")||"dev";
+const indexPath=path.join(site,"index.html");
+const index=fs.readFileSync(indexPath,"utf8");
+fs.writeFileSync(indexPath,index.replace(/(<meta name="kanji5-build-id" content=")[^"]*(">)/, "$1"+buildId+"$2"));
+
+const swPath=path.join(site,"sw.js");
+const shippedSw=fs.readFileSync(swPath,"utf8");
+if(!shippedSw.includes("const BUILD_ID='__KANJI5_BUILD_ID__';"))throw new Error("SW_BUILD_ID_PLACEHOLDER_MISSING");
+fs.writeFileSync(swPath,shippedSw.replace("const BUILD_ID='__KANJI5_BUILD_ID__';", "const BUILD_ID='"+buildId+"';"));
+
+console.log("Staged GitHub Pages artifact with build ID "+buildId+".");
