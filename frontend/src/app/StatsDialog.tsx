@@ -7,6 +7,8 @@ function Metric({ label, value, hint }: { label: string; value: string; hint?: s
   return <div className="stats-metric"><span>{label}</span><strong>{value}</strong>{hint ? <small>{hint}</small> : null}</div>;
 }
 
+function formatAverage(value: number, language: Language) { return new Intl.NumberFormat(language === "fa" ? "fa-IR" : "en-US", { maximumFractionDigits: 1 }).format(value); }
+
 function DayLabel({ index, language }: { index: number; language: Language }) {
   const date = new Date();
   date.setDate(date.getDate() - (6 - index));
@@ -47,7 +49,7 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
             ))}
           </div>
           <div className="stats-activity-footer">
-            <span>{language === "fa" ? formatNumber(average, language) + " مرور در روز به‌طور میانگین" : average.toFixed(1) + " reviews/day on average"}</span>
+            <span>{language === "fa" ? formatAverage(average, language) + " مرور در روز به‌طور میانگین" : average.toFixed(1) + " reviews/day on average"}</span>
             <span>{language === "fa" ? "امروز" : "Today"} · {formatNumber(counts[todayIndex] ?? 0, language)}</span>
           </div>
         </>
