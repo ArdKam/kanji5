@@ -1,0 +1,80 @@
+/* Coverage refinement stays scoped to Reading Lab. */
+.reading-lab-coverage-metrics{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.reading-lab-coverage-metric{
+  min-width:0;
+  display:grid;
+  gap:3px;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--paper);
+}
+.reading-lab-coverage-metric strong{
+  font-size:clamp(20px,4vw,28px);
+  line-height:1;
+  color:var(--ink);
+}
+.reading-lab-coverage-metric span{
+  color:var(--ink);
+  font-size:var(--text-xs);
+  font-weight:850;
+}
+.reading-lab-coverage-metric small{
+  color:var(--mute);
+  font-size:10px;
+  line-height:1.45;
+}
+.reading-lab-hardest-sentence{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:14px;
+  align-items:center;
+  margin-top:10px;
+  padding:14px;
+  border:1px solid color-mix(in srgb,var(--shu) 24%,var(--line));
+  border-radius:14px;
+  background:color-mix(in srgb,var(--shu) 5%,var(--paper));
+}
+.reading-lab-hardest-copy{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+.reading-lab-hardest-copy .eyebrow{margin:0;}
+.reading-lab-hardest-copy h3{
+  margin:0;
+  font-size:var(--text-sm);
+}
+.reading-lab-hardest-copy p{
+  margin:0;
+}
+.reading-lab-hardest-copy p[lang="ja"]{
+  direction:ltr;
+  font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;
+  font-size:var(--text-md);
+  line-height:1.75;
+}
+.reading-lab-hardest-copy small{
+  color:var(--mute);
+  font-size:10px;
+}
+.reading-lab-focus-target-button{
+  min-height:40px;
+  white-space:nowrap;
+}
+@media(max-width:640px){
+  .reading-lab-coverage-metrics{
+    grid-template-columns:1fr;
+  }
+  .reading-lab-hardest-sentence{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .reading-lab-focus-target-button{
+    width:100%;
+  }
+}
