@@ -72,6 +72,7 @@ async function setCustomStudyFilter(filter={}){
   return state.queue.length;
 }
 function clearCustomStudyFilter(){
+  if(!customStudyFilter)return true;
   customStudyFilter=null;
   try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){ }
   buildQueue();
