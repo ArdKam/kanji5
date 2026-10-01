@@ -1,11 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 async function goToMnemonicPage(card) {
-  const shortcut = card.locator('.learning-back-page-shortcut[aria-label="Personal mnemonic"]');
-  await expect(shortcut).toBeEnabled({ timeout: 10000 });
-  await shortcut.click();
-  await expect(card.locator(".learning-back-page.active")).toHaveAttribute("aria-label", "Personal mnemonic");
+  const mnemonicShortcut = card.getByRole("button", { name: "Personal mnemonic" });
+  await expect(mnemonicShortcut).toBeVisible({ timeout: 10000 });
+  await mnemonicShortcut.click();
+  await expect(card.locator(".learning-back-page.active .mnemonic-page")).toHaveCount(1);
 }
+
 
 test("personal mnemonic can be saved, edited, cleared, and survives a reload", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
