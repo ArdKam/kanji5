@@ -24,7 +24,8 @@ for(const retired of [
   "react-dist/kanji5-react-release18.js",
   "react-dist/kanji5-react-release18.css",
   "react-dist/kanji5-react.js",
-  "react-dist/kanji5-react.css"
+  "react-dist/kanji5-react.css",
+  "react-entry-release18.js"
 ]){
   assert.equal(fs.existsSync(retired),false,"retired generated artifact still exists: "+retired);
 }
