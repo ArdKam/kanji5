@@ -13,7 +13,9 @@ const loadFsrs=()=>{
 async function ensureFsrs(){if(fsrs&&createEmptyCard&&Rating)return true;const loaded=await loadFsrs();({createEmptyCard,fsrs,Rating}=loaded);if(!scheduler)initScheduler();return true;}
 const DATA_URL="./kanji-data.json";
 const WORDS_URL=ch=>"https://kanjiapi.dev/v1/words/"+encodeURIComponent(ch);
-const STORAGE="kanji5-v1";const CARDS_STORAGE="kanji5-v1-cards";const REVIEWS_STORAGE="kanji5-v1-reviews";
+const K=window.__KANJI5_STORAGE_KEYS__;
+if(!K)throw new Error("KANJI5_STORAGE_KEYS_NOT_LOADED");
+const STORAGE=K.state,CARDS_STORAGE=K.cards,REVIEWS_STORAGE=K.reviews;
 const DEFAULTS={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
 const CUSTOM_STUDY_STORAGE='kanji5-v2-custom-study-filter';
 let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;let customStudyCore=null;let customStudyFilter=null;let ratingTransitionLocked=false;let modernStartupReady=false;
