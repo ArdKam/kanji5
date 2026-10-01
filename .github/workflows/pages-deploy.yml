@@ -60,6 +60,10 @@ jobs:
       - name: Run root contract/unit suite
         run: npm test
 
+      - name: Install Chromium for cross-layer release gate
+        run: npx playwright install chromium
+      - name: Run engine-to-React boundary gate
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
       - name: Stage production GitHub Pages site
         run: node scripts/stage-pages-site.mjs
 
