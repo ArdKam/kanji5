@@ -1,0 +1,19 @@
+/* Focus controls stay scoped to Reading Lab so dictionary/mobile workstreams remain isolated. */
+.reading-lab-focus-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+.reading-lab-focus-button{
+  min-height:40px;
+  white-space:nowrap;
+}
+@media(max-width:640px){
+  .reading-lab-focus-controls{
+    width:100%;
+  }
+  .reading-lab-focus-button{
+    flex:1 1 150px;
+  }
+}
