@@ -95,6 +95,12 @@ jobs:
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
+      - name: Run generated-artifact contracts
+        working-directory: .
+        run: |
+          node scripts/test-performance-font-loading.mjs
+          node scripts/test-service-worker-shell.mjs
+          node scripts/test-react-release-integrity.mjs
       - name: Run generated-artifact presentation contracts
         working-directory: .
         run: |
