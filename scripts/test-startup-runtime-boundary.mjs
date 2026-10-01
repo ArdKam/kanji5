@@ -12,16 +12,7 @@ const bootstrap = read('app-bootstrap.js');
 const entry = read('react-entry.js');
 const sw = read('sw.js');
 
-const legacyFiles = [
-  'v1.4-education-migration.js','v1.4-education-core.js','v1.5-p0.js',
-  'v1.2-enhancements.js','v1.2-runtime-fixes.js','v1.9-recovery.js','v1.5-education-ui.js'
-];
-
-for (const file of legacyFiles) {
-  assert.ok(index.includes(`"./${file}"`)||index.includes(`'./${file}'`), `legacy dependency lost ${file}`);
-  assert.doesNotMatch(index, new RegExp(`<script[^>]+src="./${file.replaceAll('.', '\\\.')}"[^>]*><\\/script>`),
-    `legacy file is directly wired into the default shell: ${file}`);
-}
+assert.doesNotMatch(index,/legacyScripts|legacy=1/, 'legacy presentation loader must be retired');
 assert.match(index, /<script src="\.\/v1\.5-state\.js"><\/script>/);
 assert.match(index, /<script src="\.\/v1\.3-p0\.js"><\/script>/);
 assert.doesNotMatch(index, /v1\.3-(?:perf|settings)\.js/);
