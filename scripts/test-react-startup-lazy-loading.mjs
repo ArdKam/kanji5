@@ -13,7 +13,7 @@ assert.match(source,/import \{ PracticeHome \} from "\.\/PracticeHome";/);
 assert.match(source,/import \{ HandwritingPractice \} from "\.\/HandwritingPractice";/);
 assert.match(source,/Suspense/);
 assert.match(vite,/dedupe:\s*\["react",\s*"react-dom"\]/);
-assert.match(vite,/"react": resolve\("node_modules\/react"\)/);
+assert.match(vite,/react:\s+resolve\("node_modules\/react"\)/);
 assert.match(vite,/"react-dom": resolve\("node_modules\/react-dom"\)/);
 
 console.log('Non-learning UI lazy-loading contract: PASS');
