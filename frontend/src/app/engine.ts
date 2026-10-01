@@ -155,6 +155,7 @@ export type PortableBackup = {
 
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
+  startupSnapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   getRadicalInfo: (character: string) => Promise<RadicalInfo>;
@@ -222,6 +223,10 @@ export async function snapshot(): Promise<Snapshot> {
   return (await waitForEngine()).snapshot();
 }
 
+export async function startupSnapshot(): Promise<Snapshot> {
+  return (await waitForEngine()).startupSnapshot();
+}
+
 export async function revealLearning(): Promise<boolean> {
   return (await waitForEngine()).revealLearning();
 }
@@ -240,6 +245,13 @@ export async function clearTransient(): Promise<boolean> {
 
 export function resetProgress(): boolean {
   return Boolean(window.__KANJI5_V19_V2_BOUNDARY__?.resetProgress?.());
+}
+
+export async function startLearningSession(): Promise<void> {
+  await waitForEngine();
+  const session = window.__KANJI5_V16_SESSION_API__;
+  if (session?.start) await session.start();
+  else if (session?.startExperience) await session.startExperience("review");
 }
 
 export async function startLearningExperience(): Promise<void> {
