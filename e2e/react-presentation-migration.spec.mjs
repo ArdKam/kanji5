@@ -246,6 +246,20 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await expect(stop).toBeEnabled();
   await stop.click();
   await expect(stop).toBeDisabled();
+
+  const labText='これは日本語の読み上げテストです。二番目の文もここで読みます。';
+  await expect(lab.locator('textarea')).toHaveValue(labText);
+  await lab.locator('.reading-lab-reader-kanji').first().click();
+  const dictionaryCard=page.locator('.dictionary-card-dialog:visible');
+  await expect(dictionaryCard).toBeVisible({timeout:10000});
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('textarea')).toHaveValue(labText);
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await dictionaryCard.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(dictionaryCard).toBeHidden();
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('textarea')).toHaveValue(labText);
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
 });
 
 test('mastery visualization renders skill signals and seven-day review activity',async({page})=>{
