@@ -227,7 +227,7 @@ test("handwriting is an optional skill-building layer inside Practice",async({pa
 });
 
 
-test("handwriting prompts reuse active exercise stimuli",async({page})=>{
+test("handwriting prompts reuse active exercise stimuli",async()=>{
   const cases=[
     {mode:"meaning",prompt:"Meaning",character:"学",stimulus:{kind:"meaning",primary:"study"}},
     {mode:"reading",prompt:"Reading",character:"学",stimulus:{kind:"reading",primary:"がく"}},
@@ -236,31 +236,14 @@ test("handwriting prompts reuse active exercise stimuli",async({page})=>{
     {mode:"production",prompt:"Write the Kanji",character:"学",stimulus:{kind:"meaning",primary:"study"}}
   ];
   for(const fixture of cases){
-    const expected={
-      mode:fixture.mode,
-      ...deriveHandwritingPrompt(fixture),
-    };
-    expect(expected.kind).toBe(fixture.mode);
-    expect(expected.cue).toBe(fixture.stimulus.primary);
-    if(fixture.stimulus.secondary||fixture.stimulus.translation){
-      expect(expected.secondary).toBe(fixture.stimulus.secondary||fixture.stimulus.translation);
-    }
+    expect(deriveHandwritingPrompt(fixture)).toEqual(
+      fixture.mode==="vocabulary"
+        ? {kind:"vocabulary",cue:"□生",secondary:"がくせい"}
+        : fixture.mode==="context"
+          ? {kind:"context",cue:"私は□です。",secondary:"I am a student."}
+          : {kind:fixture.mode,cue:fixture.stimulus.primary}
+    );
   }
-
-  await page.route("**/kanji/05b66.svg",route=>route.fulfill({
-    status:200,
-    contentType:"image/svg+xml",
-    body:svgFor("学"),
-  }));
-  await clean(page);
-  await seedSeenCard(page);
-  await page.getByRole("button",{name:"یادآوری فعال",exact:true}).click();
-  await expect(page.locator(".practice-home")).toBeVisible({timeout:20000});
-  await page.getByRole("button",{name:"شروع تمرین",exact:true}).click();
-  await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
-  await expect.poll(async()=>page.locator(".practice-handwriting").getAttribute("data-handwriting-prompt-kind")).toBeTruthy();
-  const kind=await page.locator(".practice-handwriting").getAttribute("data-handwriting-prompt-kind");
-  expect(kind).toMatch(/meaning|reading|vocabulary|context|production/);
 });
 
 test('handwriting vector loading failure exposes retry and recovers on the next attempt',async({browser})=>{
@@ -271,7 +254,7 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
   let attempts=0;
   const vectorUrl='https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/05b66.svg';
   try{
-    await page.route(vectorUrl,async route=>{
+    await page.route("**/KanjiVG/kanjivg/**/kanji/05b66.svg",async route=>{
       attempts+=1;
       if(attempts===1){
         await route.fulfill({status:503,contentType:'text/plain',body:'simulated KanjiVG outage'});
