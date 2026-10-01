@@ -34,8 +34,16 @@ for(const forbidden of [
 ]){
   assert.equal(fs.existsSync(path.join(site,forbidden)),false,"PAGES_SITE_CONTAINS_DEV_TREE: "+forbidden);
 }
+const index=fs.readFileSync(path.join(site,"index.html"),"utf8");
+const buildMatch=index.match(/<meta name="kanji5-build-id" content="([^"]+)">/);
+assert.ok(buildMatch&&buildMatch[1],"PAGES_SITE_BUILD_ID_MISSING");
+const buildId=buildMatch[1];
+assert.ok(index.includes("./react-dist/kanji5-react.js?v="+encodeURIComponent(buildId)),"PAGES_SITE_REACT_JS_BUILD_ID_MISMATCH");
+assert.ok(index.includes("./react-dist/kanji5-react.css?v="+encodeURIComponent(buildId)),"PAGES_SITE_REACT_CSS_BUILD_ID_MISMATCH");
 
 const sw=fs.readFileSync(path.join(site,"sw.js"),"utf8");
+assert.ok(sw.includes("const BUILD_ID='"+buildId+"';"),"PAGES_SITE_SW_BUILD_ID_MISMATCH");
+assert.ok(!sw.includes("__KANJI5_BUILD_ID__"),"PAGES_SITE_SW_BUILD_ID_PLACEHOLDER_REMAINED");
 const match=sw.match(/const SHELL=(\[[\s\S]*?\]);/);
 assert.ok(match,"PAGES_SITE_SW_SHELL_MISSING");
 const shell=JSON.parse(match[1]);
