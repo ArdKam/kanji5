@@ -136,7 +136,7 @@ for (const profile of profiles) {
     expect(interactionMs, "interaction timing was not captured").toBeGreaterThan(0);
     expect(interactionMs, `critical navigation interaction exceeded budget: ${interactionMs.toFixed(0)}ms > ${startupBudgets.interactionMs}ms`).toBeLessThanOrEqual(startupBudgets.interactionMs);
     await page.locator(".header-tools-menu-close").click();
-    await expect(page.locator("#header-tools-menu")).not.toHaveClass(/open/);
+    await expect(page.locator("#header-tools-menu")).toHaveCount(0);
 
     console.log(
       [
