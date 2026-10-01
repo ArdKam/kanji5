@@ -19,3 +19,8 @@ assert.doesNotMatch(liveVerification, /sw-release18\.js/);
 assert.doesNotMatch(liveVerification, /react-dist\/kanji5-react-release18\.(js|css)/);
 
 console.log("GitHub Pages live-verification contract uses canonical React assets.");
+
+assert.match(source, /Upload freshly built GitHub Pages artifact/);
+assert.doesNotMatch(source, /git add react-dist/);
+assert.doesNotMatch(source, /git commit -m "chore\(build\): sync generated React artifact"/);
+assert.doesNotMatch(source, /Materialize release18 React artifact for E2E/);
