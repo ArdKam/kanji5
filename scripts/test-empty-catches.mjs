@@ -14,7 +14,7 @@ const files=[
   'frontend/src/app/DictionaryPage.tsx',
 ];
 
-const emptyCatch=/catch\\s*(?:\\([^)]*\\))?\\s*\\{\\s*\\}/;
+const emptyCatch=/catch\s*(?:\([^)]*\))?\s*\{\s*\}/;
 const offenders=[];
 for(const file of files){
   const source=fs.readFileSync(file,'utf8');
