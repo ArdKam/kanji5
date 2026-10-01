@@ -3877,3 +3877,60 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
     transition:none;
   }
 }
+
+
+/* Mnemonic catalog resilience: one scroll owner plus explicit loading/error surfaces. */
+.dialog.secondary-page-dialog.mnemonics-dialog{
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemonic-library{
+  overflow:visible;
+  min-height:0;
+}
+.dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemonic-library-list{
+  overflow:visible;
+  min-height:0;
+}
+.prepared-mnemonic-library-loading,
+.prepared-mnemonic-library-error{
+  display:grid;
+  gap:9px;
+  padding:28px 18px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--washi);
+  color:var(--mute);
+}
+.prepared-mnemonic-library-loading strong,
+.prepared-mnemonic-library-error strong{
+  color:var(--sumi);
+  font-size:var(--text-sm);
+}
+.prepared-mnemonic-library-loading span{
+  display:block;
+  width:100%;
+  height:54px;
+  border-radius:13px;
+  background:linear-gradient(90deg,#eee7da 20%,#f8f3e9 40%,#eee7da 60%);
+  background-size:220% 100%;
+  animation:kanji5-loading-shimmer 1.1s linear infinite;
+}
+.prepared-mnemonic-library-loading span:nth-of-type(2){width:92%}
+.prepared-mnemonic-library-loading span:nth-of-type(3){width:78%}
+.prepared-mnemonic-library-error{
+  justify-items:start;
+  border-color:color-mix(in srgb,var(--shu) 24%,var(--line));
+  background:color-mix(in srgb,var(--shu) 5%,var(--paper));
+}
+.prepared-mnemonic-library-error p{
+  margin:0;
+  font-size:var(--text-xs);
+  line-height:1.65;
+}
+.prepared-mnemonic-library-error .button{
+  min-height:42px;
+}
+@media(prefers-reduced-motion:reduce){
+  .prepared-mnemonic-library-loading span{animation:none;}
+}
