@@ -160,6 +160,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sentenceRefs = useRef<Array<HTMLDivElement | null>>([]);
   const vocabularyCacheRef = useRef(new Map<string, VocabularyItem[]>());
+  const readerKanjiRefs = useRef(new Map<string, HTMLButtonElement>());
   const skipSentenceResetRef = useRef(Boolean(initialSession?.text));
 
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
@@ -385,6 +386,48 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
 
   const inputCharacters = Array.from(value).length;
 
+  const focusableTargets = useMemo(() => {
+    const targets: Array<{ sentenceIndex: number; characterIndex: number; item: KanjiCatalogItem }> = [];
+    sentences.forEach((sentence, sentenceIndex) => {
+      Array.from(sentence.text).forEach((character, characterIndex) => {
+        const item = catalogByCharacter.get(character);
+        if (item && getMasteryBucket(item) !== "familiar") targets.push({ sentenceIndex, characterIndex, item });
+      });
+    });
+    return targets;
+  }, [catalogByCharacter, sentences]);
+
+  const unknownTargets = useMemo(
+    () => focusableTargets.filter(target => getMasteryBucket(target.item) === "new"),
+    [focusableTargets],
+  );
+
+  const focusNextTarget = (unknownOnly = false) => {
+    const candidates = unknownOnly
+      ? unknownTargets
+      : focusableTargets;
+    if (!candidates.length) return;
+    const active = document.activeElement as HTMLElement | null;
+    const activeButton = active?.matches?.(".reading-lab-reader-kanji") ? active : null;
+    const currentSentenceIndex = activeButton?.dataset.readingLabSentenceIndex
+      ? Number(activeButton.dataset.readingLabSentenceIndex)
+      : activeSentenceIndex;
+    const currentCharacterIndex = activeButton?.dataset.readingLabCharacterIndex
+      ? Number(activeButton.dataset.readingLabCharacterIndex)
+      : -1;
+    const next = candidates.find(target =>
+      target.sentenceIndex > currentSentenceIndex
+      || (target.sentenceIndex === currentSentenceIndex && target.characterIndex > currentCharacterIndex)
+    ) ?? candidates[0];
+    const key = next.sentenceIndex + ":" + next.characterIndex;
+    selectSentence(next.sentenceIndex, false);
+    window.requestAnimationFrame(() => {
+      const button = readerKanjiRefs.current.get(key);
+      if (!button) return;
+      button.focus({ preventScroll: true });
+    });
+  };
+
   return (
     <section className="reading-lab">
       <section className="reading-lab-section reading-lab-source" aria-labelledby="reading-lab-source-title">
@@ -530,6 +573,14 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
             </div>
             {wordLookupKey ? <p className="reading-lab-word-status" role="status">{t("readingLabWordLoading", language)}</p> : null}
             <div className="reading-lab-reader-toolbar" aria-label={t("readingLabSentenceMode", language)}>
+              <div className="reading-lab-focus-controls" aria-label={t("readingLabFocusControls", language)}>
+                <button className="button secondary reading-lab-focus-button" type="button" disabled={!focusableTargets.length} onClick={() => focusNextTarget(false)}>
+                  {t("readingLabFocusNext", language)}
+                </button>
+                <button className="button secondary reading-lab-focus-button" type="button" disabled={!unknownTargets.length} onClick={() => focusNextTarget(true)}>
+                  {t("readingLabNextUnknown", language)}
+                </button>
+              </div>
               <div className="reading-lab-sentence-position">
                 <span>{t("readingLabSentence", language)}</span>
                 <strong>{formatNumber(sentences.length ? activeSentenceIndex + 1 : 0, language)} / {formatNumber(sentences.length, language)}</strong>
@@ -561,7 +612,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                     {Array.from(sentence.text).map((character, index) => {
                       const item = isKanji(character) ? catalogByCharacter.get(character) : undefined;
                       return item ? (
-                        <button key={character + "-" + index} type="button" className={"reading-lab-reader-kanji " + getMasteryBucket(item)} onClick={() => void handleReaderKanjiClick(sentenceIndex, index, item)} title={t("readingLabWordLookupHint", language)} aria-label={character + " — " + t("readingLabWordLookupHint", language)} aria-busy={wordLookupKey === sentenceIndex + ":" + index}>
+                        <button key={character + "-" + index} ref={node => { const key = sentenceIndex + ":" + index; if (node) readerKanjiRefs.current.set(key, node); else readerKanjiRefs.current.delete(key); }} data-reading-lab-sentence-index={sentenceIndex} data-reading-lab-character-index={index} type="button" className={"reading-lab-reader-kanji " + getMasteryBucket(item)} onClick={() => void handleReaderKanjiClick(sentenceIndex, index, item)} title={t("readingLabWordLookupHint", language)} aria-label={character + " — " + t("readingLabWordLookupHint", language)} aria-busy={wordLookupKey === sentenceIndex + ":" + index}>
                           {character}
                         </button>
                       ) : <span key={character + "-" + index}>{character}</span>;
