@@ -2,17 +2,18 @@ import { useEffect, useState } from "react";
 import { t, type Language } from "./i18n";
 import { listKanji, type KanjiCatalogItem } from "./engine";
 import { ReadingLab } from "./ReadingLab";
+import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 import { usePageDialog } from "./usePageDialog";
 
 export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
   open: boolean;
   language: Language;
   onClose: () => void;
-  onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [selectedKanji, setSelectedKanji] = useState<KanjiCatalogItem | null>(null);
 
   useEffect(() => {
     if (!open || catalog.length || loading || attempted) return;
@@ -39,7 +40,16 @@ export function ReadingLabDialog({ open, language, onClose, onSelectKanji }: {
       <h2 id="reading-lab-dialog-title">{t("readingLab", language)}</h2>
       {loading && !catalog.length ? <p className="empty-text" role="status">{t("dictionaryLoading", language)}</p> : null}
       {!loading && !catalog.length ? <p className="empty-text" role="status">{language === "fa" ? "دادهٔ فرهنگ لغت در دسترس نیست." : "Dictionary data is unavailable."}</p> : null}
-      {catalog.length ? <ReadingLab catalog={catalog} language={language} onSelectKanji={item => { onSelectKanji(item); onClose(); }} /> : null}
+      {catalog.length ? <ReadingLab catalog={catalog} language={language} onSelectKanji={setSelectedKanji} /> : null}
+      {selectedKanji ? (
+        <DictionaryKanjiCard
+          item={selectedKanji}
+          catalog={catalog}
+          language={language}
+          onClose={() => setSelectedKanji(null)}
+          onSelectKanji={setSelectedKanji}
+        />
+      ) : null}
     </dialog>
   );
 }
