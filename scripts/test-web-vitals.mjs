@@ -6,9 +6,9 @@ const index = read("index.html");
 const app = read("frontend/src/app/App.tsx");
 const css = read("frontend/src/styles.css");
 
-assert.match(index, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/, "Google Fonts origin should be preconnected");
-assert.match(index, /rel="preconnect" href="https:\/\/fonts\.gstatic\.com"/, "Google Fonts static origin should be preconnected");
-assert.match(index, /rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/css2\?family=Inter[^"]+"/, "Web fonts should be discoverable directly from HTML");
+assert.doesNotMatch(index, /fonts\.googleapis\.com/, "External Google Fonts requests must stay off the startup critical path");
+assert.doesNotMatch(index, /fonts\.gstatic\.com/, "Google Fonts static origin must stay off the startup critical path");
+assert.match(index, /rel="preload" href="\.\/react-dist\/assets\/Vazirmatn_wght_-BeciDpKm\.woff2" as="font"/, "Primary local UI font should remain preloaded");
 assert.doesNotMatch(index, /rel="preload"[^>]+kanji-data\.json/, "Kanji data must not use an unused preload hint");
 assert.match(index, /rel="modulepreload" href="\.\/vendor\/ts-fsrs-5\.4\.1\.mjs"/, "FSRS should be module-preloaded");
 assert.match(index, /rel="stylesheet" href="\.\/react-dist\/kanji5-react\.css"[^>]*data-kanji5-react-styles/, "React CSS should use the canonical shipped asset");

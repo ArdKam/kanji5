@@ -12,5 +12,5 @@ try{
   }
 }catch(_){}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=134').catch(()=>{});
-import('./v1.6-session.js').catch(()=>{});
+if(new URLSearchParams(location.search).get('legacy')==='1')import('./v1.6-session.js').catch(()=>{});
 })();
