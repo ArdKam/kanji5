@@ -43,7 +43,8 @@ test("engine exercise state reaches React and remains isolated from the Learning
   expect(snapshot?.exercise?.mode).toBe("reading");
   await expect(page.locator("#exercise")).toBeVisible({ timeout: 5_000 });
   await expect(page.locator(".learning-card")).toHaveCount(0);
-  await expect(page.getByText("Reading", { exact: true })).toBeVisible();
+  await expect(page.locator(".active-recall-task")).toBeVisible();
+  await expect(page.locator(".active-recall-task")).not.toHaveText("");
 });
 
 test("engine feedback is rendered through the React feedback contract", async ({ page }) => {
@@ -81,5 +82,6 @@ test("engine feedback is rendered through the React feedback contract", async ({
 
   expect(snapshot?.feedback?.outcome).toBe("wrong");
   await expect(page.locator("#exercise")).toBeVisible({ timeout: 5_000 });
-  await expect(page.locator("[role='status']").filter({ hasText: "Release gate feedback" })).toBeVisible();
+  await expect(page.locator("#exercise")).toHaveAttribute("data-result", "wrong");
+  await expect(page.locator(".exercise-feedback[role='status']")).toBeVisible();
 });
