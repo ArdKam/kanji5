@@ -834,7 +834,7 @@ function LoadingSummary(){
   return <section className="daily-summary loading-summary" aria-hidden="true">{[0,1,2,3].map(i=><div className="stat-card loading-stat-card" key={i}><span className="loading-block loading-stat-value"/><span className="loading-block loading-stat-label"/></div>)}</section>;
 }
 function LoadingGoal(){
-  return <section className="surface goal loading-goal" aria-hidden="true"><div className="goal-top"><span className="loading-block loading-goal-label"/><span className="loading-block loading-goal-label-short"/></div><div className="progress loading-progress"><span/></div></section>;
+  return <section className="surface goal loading-goal" aria-hidden="true"><div className="goal-top"><span className="loading-block loading-goal-label"/><span className="loading-block loading-goal-label-short"/></div><div className="progress loading-progress" role="progressbar" aria-label={t("dailyGoal")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}><span/></div></section>;
 }
 function LoadingUpcoming(){
   return <section className="surface upcoming loading-upcoming" aria-hidden="true"><div className="loading-upcoming-title"><span className="loading-block"/></div></section>;
