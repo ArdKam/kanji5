@@ -3,7 +3,6 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
-import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
 const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module => ({ default: module.StrokeOrderViewer })));
 const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
 const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
