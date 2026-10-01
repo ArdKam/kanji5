@@ -272,6 +272,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
     return () => { active = false; };
   }, [open, catalog.length, loading, attempted]);
 
+  const effectiveSnapshot: Snapshot = { ...snapshot, stats: resolvedStats ?? snapshot.stats };
   const studiedCount = Number(effectiveSnapshot.stats?.studiedCount ?? 0);
   const deckSize = Number(effectiveSnapshot.stats?.deckSize ?? 0);
   const coverage = deckSize ? Math.round((studiedCount / deckSize) * 100) : 0;
@@ -280,7 +281,6 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
 
   const dialogRef = usePageDialog(open, onClose);
   if (!open) return null;
-  const effectiveSnapshot: Snapshot = { ...snapshot, stats: resolvedStats ?? snapshot.stats };
 
   return (
     <dialog ref={dialogRef} className="dialog secondary-page-dialog stats-dialog stats-dashboard" aria-labelledby="stats-title" aria-busy={statsLoading}>
