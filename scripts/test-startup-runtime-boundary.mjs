@@ -42,6 +42,10 @@ assert.match(bootstrap,/const registerServiceWorker=\(\)=>/);
 assert.match(bootstrap,/serviceWorker\.register/);
 assert.match(bootstrap,/requestIdleCallback\(registerServiceWorker/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);
+assert.match(entry,/function scheduleAccountFallback\(\)/);
+assert.match(entry,/import\('\.\/account-fallback\.js\?v=20261001'\)/);
+assert.doesNotMatch(index, /<script[^>]+src=["']\.\/account-fallback\.js/);
+assert.match(index, /id="kanji5-account-launcher" class="is-shadowed"/);
 
 for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-perf.js','v1.8-learning-ux.js','v1.9-recovery-ui.js'])
   assert.equal(fs.existsSync(file), false, `retired file still exists: ${file}`);
