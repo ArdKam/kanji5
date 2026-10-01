@@ -14,8 +14,8 @@ const learning=buildLearningCardViewModel({active:true,character:'学',isNew:tru
 assert.equal(learning.kind,'learning-card');assert.equal(learning.character,'学');assert.equal(learning.isNew,true);assert.equal(learning.revealed,false);assert.deepEqual(learning.meanings,['study','learning']);
 const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:0.7,retryCount:1,recovered:true});
 assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
-const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,repeatedFailure:true}}});
-assert.equal(learner.modelVersion,'1.9.0-learner-model');assert.equal(learner.attributes.reading.state,'weak');
+const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,attempts:5,recentAttempts:3,repeatedFailure:true}}});
+assert.equal(learner.modelVersion,'1.9.0-learner-model');assert.equal(learner.attributes.reading.state,'weak');assert.equal(learner.attributes.reading.attempts,5);assert.equal(learner.attributes.reading.recentAttempts,3);
 const stats=buildStatsViewModel({masteryDistribution:{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21}});
 assert.deepEqual(stats.masteryDistribution,{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21});
 const summary=buildSessionSummary({sessionId:'s1',status:'complete',modeResults:{meaning:{attempts:2,correct:1},reading:{attempts:1,correct:1}}});
