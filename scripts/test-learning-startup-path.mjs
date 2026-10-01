@@ -17,7 +17,9 @@ for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDial
 }
 
 
-assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);\n\nmustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
+assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);
+
+mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
 assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.js'\)/);
 mustContain(session,'function start(){if(!IS_LEGACY)return;','Legacy dashboard startup must not run in modern mode');
 mustContain(session,'void loadPlanApi()','Session plan API remains available on explicit use');
