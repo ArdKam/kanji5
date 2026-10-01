@@ -172,6 +172,8 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   const counts = last7.map(day => Math.max(0, Number(day.count) || 0));
   const activeDays = counts.filter(count => count > 0).length;
   const activityTotal = counts.reduce((sum, count) => sum + count, 0);
+  const activityAverage = activityTotal / Math.max(1, counts.length);
+  const mastery = snapshot.stats?.masteryDistribution ?? {};
   const skillKeys = ["meaning", "reading", "production", "vocabulary", "context"] as const;
   const skillLabels: Record<typeof skillKeys[number], string> = {
     meaning: t("meaning", language),
@@ -189,36 +191,43 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   };
 
   return (
-    <section className="stats-advanced surface card" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
+    <section className="stats-section stats-advanced" aria-labelledby="stats-advanced-title">
       <div className="stats-section-heading">
         <div>
-          <p className="eyebrow">{language === "fa" ? "جزئیات" : "Details"}</p>
+          <p className="eyebrow">{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</p>
           <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
         </div>
-        <div className="stats-section-summary">
-          <strong>{formatNumber(activeDays, language)}/{formatNumber(7, language)}</strong>
-          <span>{language === "fa" ? "روز فعال · " : "active days · "}{formatNumber(activityTotal, language)} {language === "fa" ? "مرور" : "reviews"}</span>
-        </div>
+        <span className="stats-section-summary">
+          <span>{language === "fa" ? "دقت پاسخ، عملکرد اخیر و شواهد تلاش" : "Accuracy, recent performance, and response evidence"}</span>
+        </span>
       </div>
 
-      <div className="stats-skills-list stats-advanced-table" role="list" aria-label={language === "fa" ? "جزئیات مهارت‌ها" : "Skill details"}>
+      <div className="stats-advanced-metrics">
+        <Metric label={language === "fa" ? "روزهای فعال" : "Active days"} value={formatNumber(activeDays, language)} hint={language === "fa" ? "از ۷ روز" : "of 7 days"} />
+        <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={formatNumber(Number(activityAverage.toFixed(1)), language)} hint={language === "fa" ? "در روز" : "per day"} />
+        <Metric label={language === "fa" ? "سررسید فعلی" : "Due now"} value={formatNumber(Number(snapshot.dailySummary?.dueCount) || 0, language)} />
+        <Metric label={language === "fa" ? "مسلط" : "Mastered"} value={formatNumber(Number(mastery.mastered) || 0, language)} />
+      </div>
+
+      <div className="stats-skills-list stats-advanced-skill-list">
         {skillKeys.map(key => {
           const skill = (snapshot.learner?.attributes?.[key] ?? {}) as AdvancedSkill;
           const attempts = Number(skill.attempts);
-          const attemptLabel = Number.isFinite(attempts) && attempts > 0 ? formatNumber(attempts, language) : "—";
+          const rate = Number(skill.accuracy);
           return (
-            <div className="row stats-advanced-row" role="listitem" key={key}>
-              <strong>{skillLabels[key]}</strong>
+            <div className="stats-skill-row" key={key}>
+              <div className="stats-skill-label"><span>{skillLabels[key]}</span><strong>{formatRate(skill.accuracy, language)}</strong></div>
+              <div className="stats-skill-track" aria-hidden="true"><span style={{ width: (Number.isFinite(rate) ? Math.max(0, Math.min(1, rate)) : 0) * 100 + "%" }} /></div>
               <span className="stats-skill-state">
-                {language === "fa"
-                  ? `دقت ${formatRate(skill.accuracy, language)} · اخیر ${formatRate(skill.recentAccuracy, language)} · ${attemptLabel} تلاش · ${stateLabel(skill.state)}`
-                  : `${formatRate(skill.accuracy, language)} accuracy · ${formatRate(skill.recentAccuracy, language)} recent · ${attemptLabel} attempts · ${stateLabel(skill.state)}`}
+                {Number.isFinite(attempts) && attempts > 0
+                  ? (language === "fa" ? "اخیر " : "Recent ") + formatRate(skill.recentAccuracy, language) + " · " + formatNumber(attempts, language) + " " + (language === "fa" ? "تلاش" : "attempts") + " · " + stateLabel(skill.state)
+                  : language === "fa" ? "داده کافی نیست" : "Not enough data"}
               </span>
             </div>
           );
         })}
       </div>
-      <p className="stats-footnote">{language === "fa" ? "اعتماد مدل فقط نشان‌دهندهٔ قدرت شواهد است و جای دقت واقعی پاسخ را نمی‌گیرد." : "Model confidence reflects evidence strength; it does not replace observed response accuracy."}</p>
+      <p className="stats-footnote">{language === "fa" ? "دقت، عملکرد مشاهده‌شده است؛ اطمینان مدل فقط قدرت شواهد را نشان می‌دهد." : "Accuracy is observed performance; model confidence reflects the strength of the evidence."}</p>
     </section>
   );
 }
