@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const app=fs.readFileSync("frontend/src/app/HandwritingPractice.tsx","utf8");
-const css=fs.readFileSync("frontend/src/app/dictionary.css","utf8");
+const css=fs.readFileSync("frontend/src/app/handwriting-layout.css","utf8");
 
 assert.match(app,/Math\.min\(3,window\.devicePixelRatio\|\|1\)/);
 const feedbackIndex=app.indexOf('className="handwriting-live-feedback"');
