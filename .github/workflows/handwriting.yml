@@ -23,7 +23,6 @@ on:
       - "e2e/fixtures/handwriting-*.json"
       - "scripts/test-handwriting-*.mjs"
       - ".github/workflows/handwriting.yml"
-      - "react-dist/**"
 
 permissions:
   contents: read
