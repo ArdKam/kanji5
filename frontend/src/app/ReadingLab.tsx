@@ -326,7 +326,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   }
 
   const speakCurrentSentence = () => {
-    if (activeSentence) speakUtterance(activeSentence.text);
+    if (activeSentence) speakSentenceAtIndex(activeSentenceIndex);
   };
 
   const repeatCurrentSentence = () => {
