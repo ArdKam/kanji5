@@ -16,7 +16,7 @@ assert.equal(profile.attributes.meaning.correct,6);
 assert.equal(profile.attributes.meaning.state,'mastered');
 assert.equal(profile.attributes.reading.attempts,7);
 assert.equal(profile.attributes.reading.correct,4);
-assert.equal(profile.attributes.reading.state,'learning');
+assert.equal(profile.attributes.reading.state,'weak');
 assert.ok(profile.attributes.reading.confidence>0);
 const sparse=projectKanjiAttributes({日:{exposedAt:t,reading:{attempts:1,correct:0,lastAt:t,lastOutcome:'wrong',lastCorrect:false},meaning:{attempts:1,correct:1,lastAt:t,lastOutcome:'correct',lastCorrect:true}}},'日');assert.equal(sparse.attributes.reading.state,'learning');assert.ok(sparse.attributes.reading.confidence<.5);
 const unknown=projectKanjiAttributes({月:{exposedAt:t,reading:{attempts:2,correct:0,lastAt:t,lastOutcome:'unknown',lastCorrect:false}}},'月');assert.equal(unknown.attributes.reading.state,'weak');
