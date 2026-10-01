@@ -155,6 +155,7 @@ export type PortableBackup = {
 
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
+  startupSnapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
   getRadicalInfo: (character: string) => Promise<RadicalInfo>;
@@ -220,6 +221,10 @@ export async function waitForEngine(timeoutMs = 12000): Promise<Boundary> {
 
 export async function snapshot(): Promise<Snapshot> {
   return (await waitForEngine()).snapshot();
+}
+
+export async function startupSnapshot(): Promise<Snapshot> {
+  return (await waitForEngine()).startupSnapshot();
 }
 
 export async function revealLearning(): Promise<boolean> {
