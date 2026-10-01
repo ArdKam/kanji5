@@ -46,3 +46,16 @@ test('Statistics dashboard switches labels consistently to English',async({page}
   await expect(englishDialog.locator('.stats-activity')).toContainText('7-day review activity');
   await expect(englishDialog.locator('.stats-overview')).toContainText('Jōyō coverage');
 });
+
+
+test('Learning profile refreshes after an education result updates learner data',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({学:{exposedAt:at,meaning:{attempts:1,correct:1,lastAt:at,lastCorrect:true}}}));
+    document.dispatchEvent(new CustomEvent('kanji5:v1.6-education-result',{detail:{character:'学',mode:'meaning',outcome:'correct',correct:true,quality:'exact',score:1,taskId:'stats-live-profile',contentId:'stats-live-profile'}}));
+  });
+  const dialog=await openStats(page);
+  await expect.poll(async()=>page.evaluate(async()=>Number((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).learner?.attributes?.meaning?.confidence||0)),{timeout:10000}).toBeGreaterThan(0);
+  await expect(dialog.locator('.stats-skill-row').first().locator('strong')).not.toHaveText('۰٪');
+});
