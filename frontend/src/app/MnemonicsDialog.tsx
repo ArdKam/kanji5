@@ -13,15 +13,24 @@ type LevelFilter = "all" | "grade1" | "n5";
 function PreparedMnemonicLibrary({
   language,
   catalog,
+  personalMnemonics,
+  loading,
+  error,
+  onRetry,
   onSelectKanji
 }: {
   language: Language;
   catalog: KanjiCatalogItem[];
+  personalMnemonics: Record<string, string>;
+  loading: boolean;
+  error: string;
+  onRetry: () => void;
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<LibraryMode>("curated");
+  const [localPersonalMnemonics, setLocalPersonalMnemonics] = useState(personalMnemonics);
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [visibleLimit, setVisibleLimit] = useState(60);
   const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
@@ -78,6 +87,8 @@ function PreparedMnemonicLibrary({
         ...(item?.meanings ?? []),
         ...(item?.on ?? []),
         ...(item?.kun ?? []),
+        entry.suggestion.fa,
+        entry.suggestion.en,
         mnemonic,
         ...(componentMap[entry.character] ?? [])
       ].join(" ");
@@ -93,6 +104,10 @@ function PreparedMnemonicLibrary({
   }, [language, query, mode, levelFilter]);
 
   const visible = filteredEntries.slice(0, visibleLimit);
+
+  useEffect(() => {
+    setLocalPersonalMnemonics(personalMnemonics);
+  }, [personalMnemonics]);
 
   useEffect(() => {
     if (!appliedKey) return;
@@ -130,8 +145,11 @@ function PreparedMnemonicLibrary({
     scaffoldHint: "از اجزای شکل و این سرنخ به‌عنوان نقطهٔ شروع استفاده کن؛ یادسپار را برای خودت قابل‌معنا کن.",
     components: "اجزای شکل",
     personalExists: "این کانجی از قبل یادسپار شخصی دارد؛ برای جایگزینی، آن را از کارت کانجی ویرایش کن.",
+    edit: "ویرایش یادسپار شخصی",
     emptyTitle: "چیزی پیدا نشد",
-    emptyHint: "عبارت جست‌وجو یا سطح فعلی را تغییر بده."
+    emptyHint: "عبارت جست‌وجو یا سطح فعلی را تغییر بده.",
+    emptyCuratedHint: "برای این کانجی هنوز یادسپار دست‌چین‌شده‌ای در این کتابخانه وجود ندارد؛ سرنخ ساخت را امتحان کن.",
+    emptyGeneratedHint: "برای این جست‌وجو سرنخ ساختی پیدا نشد."
   } : {
     modeLabel: "Memory aid type",
     curatedMode: "Ready-made mnemonics",
@@ -162,8 +180,11 @@ function PreparedMnemonicLibrary({
     scaffoldHint: "Use the shape clues as a starting point, then make the connection meaningful to you.",
     components: "Shape components",
     personalExists: "This kanji already has a personal mnemonic. Edit it from the kanji card before replacing it.",
+    edit: "Edit personal mnemonic",
     emptyTitle: "Nothing found",
-    emptyHint: "Try a different search term or level."
+    emptyHint: "Try a different search term or level.",
+    emptyCuratedHint: "There is no curated mnemonic for this result yet; try Build clues for a starting point.",
+    emptyGeneratedHint: "No build clue matched this search."
   };
 
   const resultLabel = query.trim()
@@ -171,6 +192,31 @@ function PreparedMnemonicLibrary({
     : mode === "curated"
       ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.readyResults : copy.readyResultsPlural}`
       : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.scaffoldResults : copy.scaffoldResultsPlural}`;
+
+  if (loading) {
+    return (
+      <section className="prepared-mnemonic-library" aria-busy="true" aria-live="polite">
+        <div className="prepared-mnemonic-library-loading">
+          <strong>{language === "fa" ? "در حال آماده‌سازی یادسپارها…" : "Loading memory aids…"}</strong>
+          <span />
+          <span />
+          <span />
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="prepared-mnemonic-library">
+        <div className="prepared-mnemonic-library-error" role="alert">
+          <strong>{error}</strong>
+          <p>{language === "fa" ? "دادهٔ کانجی آماده نشد. دوباره تلاش کنید." : "The kanji data is not ready yet. Try loading it again."}</p>
+          <button className="button secondary" type="button" onClick={onRetry}>{t("tryAgain", language)}</button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="prepared-mnemonic-library">
@@ -200,7 +246,7 @@ function PreparedMnemonicLibrary({
             className={"prepared-mnemonic-mode-tab" + (mode === "curated" ? " active" : "")}
             type="button"
             aria-pressed={mode === "curated"}
-            onClick={() => setMode("curated")}
+            onClick={() => { setMode("curated"); setQuery(""); }}
           >
             <span>{copy.curatedMode}</span>
             <strong>{formatNumber(curatedCount, language)}</strong>
@@ -209,7 +255,7 @@ function PreparedMnemonicLibrary({
             className={"prepared-mnemonic-mode-tab is-secondary" + (mode === "generated" ? " active" : "")}
             type="button"
             aria-pressed={mode === "generated"}
-            onClick={() => setMode("generated")}
+            onClick={() => { setMode("generated"); setQuery(""); }}
           >
             <span>{copy.generatedMode}</span>
             <strong>{formatNumber(generatedCount, language)}</strong>
@@ -260,6 +306,7 @@ function PreparedMnemonicLibrary({
           const isBusy = busyKey === key;
           const isApplied = appliedKey === key;
           const hasError = errorKey === key;
+          const hasPersonalMnemonic = Boolean(localPersonalMnemonics[entry.character]);
           const components = (componentMap[entry.character] ?? []).filter(value => value && value !== entry.character).slice(0, 4);
 
           return (
@@ -316,9 +363,15 @@ function PreparedMnemonicLibrary({
                       className="button secondary prepared-mnemonic-library-use"
                       type="button"
                       disabled={busyKey !== "" || isApplied}
-                      onClick={() => void apply(entry.character, entry.suggestion, key)}
+                      onClick={() => {
+                        if (hasPersonalMnemonic) {
+                          if (item) onSelectKanji(item);
+                          return;
+                        }
+                        void apply(entry.character, entry.suggestion, key);
+                      }}
                     >
-                      {isBusy ? copy.saving : isApplied ? copy.saved : copy.save}
+                      {isBusy ? copy.saving : isApplied ? copy.saved : hasPersonalMnemonic ? copy.edit : copy.save}
                     </button>
                     {hasError ? <span className="prepared-mnemonic-row-error" role="status">{errorMessage}</span> : null}
                   </>
@@ -342,7 +395,7 @@ function PreparedMnemonicLibrary({
       {!filteredEntries.length ? (
         <div className="prepared-mnemonic-empty" role="status">
           <strong>{copy.emptyTitle}</strong>
-          <span>{copy.emptyHint}</span>
+          <span>{query.trim() ? copy.emptyHint : mode === "curated" ? copy.emptyCuratedHint : copy.emptyGeneratedHint}</span>
         </div>
       ) : null}
 
@@ -378,6 +431,7 @@ function PreparedMnemonicLibrary({
       }
 
       await saveMnemonic(character, next);
+      setLocalPersonalMnemonics(currentMap => ({ ...currentMap, [character]: next }));
       setAppliedKey(key);
     } catch {
       setErrorKey(key);
@@ -392,12 +446,20 @@ export function MnemonicsDialog({
   open,
   language,
   catalog,
+  personalMnemonics,
+  loading,
+  error,
+  onRetry,
   onClose,
   onSelectKanji
 }: {
   open: boolean;
   language: Language;
   catalog: KanjiCatalogItem[];
+  personalMnemonics: Record<string, string>;
+  loading: boolean;
+  error: string;
+  onRetry: () => void;
   onClose: () => void;
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
@@ -434,6 +496,10 @@ export function MnemonicsDialog({
       <PreparedMnemonicLibrary
         language={language}
         catalog={catalog}
+        personalMnemonics={personalMnemonics}
+        loading={loading}
+        error={error}
+        onRetry={onRetry}
         onSelectKanji={item => {
           onSelectKanji(item);
           onClose();
