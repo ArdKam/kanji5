@@ -65,8 +65,24 @@ function runtimePresentationData(now=Date.now()){
   const trimmedDays=days.map(({label,count})=>({label,count}));
   let leechCount=0;
   for(const item of Object.values(cards))if(item?.leech)leechCount++;
+  const masteryDistribution={unseen:0,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length};
+  let studiedMasteryTotal=0,studiedMasteryCount=0;
+  const model=learner()||{};
+  const knowledge=state.readKnowledge?.()||{};
+  for(const item of deck){
+    const character=String(item?.character||item?.id||'').trim();
+    const attrs=model?.kanji?.[character]?.attributes||{};
+    const states=Object.values(attrs).map(v=>String(v?.state||'')).filter(Boolean);
+    const stateName=states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'attention':states.includes('weak')?'attention':states.includes('learning')?'learning':states.includes('introduced')?'learning':'unseen';
+    masteryDistribution[stateName]++;
+    if(stateName!=='unseen'){
+      studiedMasteryTotal+=kanjiMastery(character,knowledge,model);
+      studiedMasteryCount++;
+    }
+  }
+  masteryDistribution.average=studiedMasteryCount?studiedMasteryTotal/studiedMasteryCount:0;
   const newCount=Math.min(Math.max(0,Number(app.todayNew)||0),Math.max(1,Number(settings.dailyNew)||5));
-  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming.slice(0,6),settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount,last7:trimmedDays}};
+  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming.slice(0,6),settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount,last7:trimmedDays,masteryDistribution}};
 }
 
 function activeSession(){const current=window.__KANJI5_V16_SESSION_API__?.getSession?.();if(current?.started&&!current?.finished)return current;const rows=state.readSessionHistory?.()||[];return[...rows].reverse().find(x=>x?.status==='active')||null}
