@@ -1,0 +1,14 @@
+/* Handwriting feedback placement: keep the live status adjacent to the drawing surface. */
+.handwriting-live-feedback-slot{
+  min-height:38px;
+  display:flex;
+  align-items:stretch;
+  margin-bottom:7px;
+}
+.handwriting-live-feedback-slot:not(.is-active){
+  visibility:hidden;
+  pointer-events:none;
+}
+.handwriting-live-feedback-slot .handwriting-live-feedback{
+  width:100%;
+}
