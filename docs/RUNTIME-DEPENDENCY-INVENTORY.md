@@ -43,6 +43,8 @@ React remains presentation-only.
 The compatibility path is not the default renderer, but those modules are not dead until the compatibility contract is intentionally retired.
 
 ## Retired artifacts
+- `v1.5-education-ui.css`
+- `learning-card-flip-runtime.js`
 
 The following have been proven outside the default production path and are retired from source:
 
