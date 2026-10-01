@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
-import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
+import type { MnemonicHintPlan } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
@@ -13,6 +13,7 @@ import { ReadingLabDialog } from "./ReadingLabDialog";
 import { MnemonicsDialog } from "./MnemonicsDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
+type MnemonicSupportRuntime = typeof import("./mnemonic-support");
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import { getThemePreference, setThemePreference as persistThemePreference, type ThemePreference } from "./ui-preferences";
@@ -77,6 +78,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
+  const [mnemonicSupportRuntime,setMnemonicSupportRuntime]=useState<MnemonicSupportRuntime|null>(null);
   const [mnemonicError,setMnemonicError]=useState("");
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
@@ -159,6 +161,13 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   useEffect(()=>{setHiraganaReadings(false)},[card.character]);
   useEffect(()=>{
     let active=true;
+    setMnemonicSupportRuntime(null);
+    if(!revealed||!card.character)return ()=>{active=false};
+    void import("./mnemonic-support").then(runtime=>{if(active)setMnemonicSupportRuntime(runtime)}).catch(()=>{if(active)setMnemonicSupportRuntime(null)});
+    return ()=>{active=false};
+  },[revealed,card.character]);
+  useEffect(()=>{
+    let active=true;
     setPersonalMnemonic("");
     setMnemonicDraft("");
     setMnemonicEditing(false);
@@ -237,23 +246,27 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   },[card.character,card.examples?.length]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
   const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
-  const mnemonicSupport=buildMnemonicSupport({
-    character:card.character??"",
-    meanings:card.meanings??[],
-    on:displayedOn,
-    kun:displayedKun,
-    examples:displayExamples,
-    components:componentInfo?.available?(componentInfo.components??[]):[]
-  });
   const mnemonicHintContext={
     character:card.character,
     isNew:card.isNew,
     recentOutcomes:snapshot.recentOutcomes,
     learner:snapshot.learner?.attributes
   };
-  const mnemonicHintStage=getMnemonicHintStage(mnemonicHintContext);
-  const mnemonicHintFocus=getMnemonicHintFocus(mnemonicHintContext);
-  const mnemonicHintPlan=getMnemonicHintPlan(mnemonicHintStage,mnemonicHintFocus);
+  const mnemonicHintStage=mnemonicSupportRuntime?.getMnemonicHintStage(mnemonicHintContext)??"stable";
+  const mnemonicHintFocus=mnemonicSupportRuntime?.getMnemonicHintFocus(mnemonicHintContext)??"both";
+  const mnemonicHintPlan:MnemonicHintPlan=mnemonicSupportRuntime
+    ? mnemonicSupportRuntime.getMnemonicHintPlan(mnemonicHintStage,mnemonicHintFocus)
+    : {stage:"stable",focus:"both",expandedByDefault:false,showReading:true,showVocabulary:false,showConfusable:false,preparedMode:"collapsed"};
+  const mnemonicSupport=mnemonicSupportRuntime
+    ? mnemonicSupportRuntime.buildMnemonicSupport({
+        character:card.character??"",
+        meanings:card.meanings??[],
+        on:displayedOn,
+        kun:displayedKun,
+        examples:displayExamples,
+        components:componentInfo?.available?(componentInfo.components??[]):[]
+      })
+    : null;
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
@@ -396,7 +409,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
               <div className="learning-back-scroll">
                 <div className="mnemonic-page">
-                  <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
+                  {mnemonicSupport?<MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus} plan={mnemonicHintPlan}/>:null}
                   <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
                       {!mnemonicEditing&&preparedMnemonic&&mnemonicHintPlan.preparedMode!=="hidden"?
                         mnemonicHintPlan.preparedMode==="expanded"?
