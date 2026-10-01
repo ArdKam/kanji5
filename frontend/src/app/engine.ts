@@ -155,6 +155,7 @@ export type PortableBackup = {
 
 export type Boundary = {
   snapshot: () => Promise<Snapshot>;
+  getStats?: () => Promise<NonNullable<Snapshot["stats"]>>;
   startupSnapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
@@ -226,6 +227,13 @@ export async function snapshot(): Promise<Snapshot> {
 export async function startupSnapshot(): Promise<Snapshot> {
   return (await waitForEngine()).startupSnapshot();
 }
+
+export async function getStats(): Promise<NonNullable<Snapshot["stats"]>> {
+  const stats = await (await waitForEngine()).getStats?.();
+  if (!stats) throw new Error("KANJI5_STATS_UNAVAILABLE");
+  return stats;
+}
+
 
 export async function revealLearning(): Promise<boolean> {
   return (await waitForEngine()).revealLearning();

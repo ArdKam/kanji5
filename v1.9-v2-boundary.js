@@ -28,10 +28,9 @@ async function ensureEducationRuntime(){
   return educationRuntimePromise;
 }
 let publishRevision=0;
-function runtimePresentationData(now=Date.now()){
+function runtimePresentationData(now=Date.now(),includeStats=true){
   const app=state.readAppState?.()||{},deck=state.readDeck?.()||[],cards=app.cards&&typeof app.cards==='object'?app.cards:{};
   const settings={...(state.DEFAULTS||{}),...(app.settings||{}),...(state.readSettings?.()||{})};
-  const reviews=state.readReviews?.()||[];
   let dueCount=0,masteredCount=0;
   const upcoming=[];
   for(const item of deck){
@@ -45,44 +44,50 @@ function runtimePresentationData(now=Date.now()){
     if(card&&card.state===2&&(Number(card.scheduled_days)||0)>=21)masteredCount++;
   }
   upcoming.sort((a,b)=>Date.parse(a.dueAt)-Date.parse(b.dueAt));
-  const totalReviews=reviews.length;
-  let nonAgainReviews=0;
-  const days=[];
-  const keyFormatter=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const labelFormatter=new Intl.DateTimeFormat('fa-IR',{weekday:'short'});
-  const dayBuckets=new Map();
-  for(let i=6;i>=0;i--){
-    const d=new Date(now);d.setDate(d.getDate()-i);
-    const key=keyFormatter.format(d);
-    days.push({label:labelFormatter.format(d),count:0,key});
-    dayBuckets.set(key,days.length-1);
-  }
-  for(const item of reviews){
-    if(String(item.rating||'')!=='Again')nonAgainReviews++;
-    const dayIndex=dayBuckets.get(String(item.at||'').slice(0,10));
-    if(dayIndex!==undefined)days[dayIndex].count++;
-  }
-  const trimmedDays=days.map(({label,count})=>({label,count}));
-  let leechCount=0;
-  for(const item of Object.values(cards))if(item?.leech)leechCount++;
-  const masteryDistribution={unseen:0,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length};
-  let studiedMasteryTotal=0,studiedMasteryCount=0;
-  const model=learner()||{};
-  const knowledge=state.readKnowledge?.()||{};
-  for(const item of deck){
-    const character=String(item?.character||item?.id||'').trim();
-    const attrs=model?.kanji?.[character]?.attributes||{};
-    const states=Object.values(attrs).map(v=>String(v?.state||'')).filter(Boolean);
-    const stateName=states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'attention':states.includes('weak')?'attention':states.includes('learning')?'learning':states.includes('introduced')?'learning':'unseen';
-    masteryDistribution[stateName]++;
-    if(stateName!=='unseen'){
-      studiedMasteryTotal+=kanjiMastery(character,knowledge,model);
-      studiedMasteryCount++;
+  const baseStats={totalReviews:0,nonAgainRate:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:0,last7:[],masteryDistribution:{unseen:deck.length,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length}};
+  let stats=baseStats;
+  if(includeStats){
+    const reviews=state.readReviews?.()||[];
+    const totalReviews=reviews.length;
+    let nonAgainReviews=0;
+    const days=[];
+    const keyFormatter=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'});
+    const labelFormatter=new Intl.DateTimeFormat('fa-IR',{weekday:'short'});
+    const dayBuckets=new Map();
+    for(let i=6;i>=0;i--){
+      const d=new Date(now);d.setDate(d.getDate()-i);
+      const key=keyFormatter.format(d);
+      days.push({label:labelFormatter.format(d),count:0,key});
+      dayBuckets.set(key,days.length-1);
     }
+    for(const item of reviews){
+      if(String(item.rating||'')!=='Again')nonAgainReviews++;
+      const dayIndex=dayBuckets.get(String(item.at||'').slice(0,10));
+      if(dayIndex!==undefined)days[dayIndex].count++;
+    }
+    const trimmedDays=days.map(({label,count})=>({label,count}));
+    let leechCount=0;
+    for(const item of Object.values(cards))if(item?.leech)leechCount++;
+    const masteryDistribution={unseen:0,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length};
+    let studiedMasteryTotal=0,studiedMasteryCount=0;
+    const model=learner()||{};
+    const knowledge=state.readKnowledge?.()||{};
+    for(const item of deck){
+      const character=String(item?.character||item?.id||'').trim();
+      const attrs=model?.kanji?.[character]?.attributes||{};
+      const states=Object.values(attrs).map(v=>String(v?.state||'')).filter(Boolean);
+      const stateName=states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'attention':states.includes('weak')?'attention':states.includes('learning')?'learning':states.includes('introduced')?'learning':'unseen';
+      masteryDistribution[stateName]++;
+      if(stateName!=='unseen'){
+        studiedMasteryTotal+=kanjiMastery(character,knowledge,model);
+        studiedMasteryCount++;
+      }
+    }
+    masteryDistribution.average=studiedMasteryCount?studiedMasteryTotal/studiedMasteryCount:0;
+    stats={totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount,last7:trimmedDays,masteryDistribution};
   }
-  masteryDistribution.average=studiedMasteryCount?studiedMasteryTotal/studiedMasteryCount:0;
   const newCount=Math.min(Math.max(0,Number(app.todayNew)||0),Math.max(1,Number(settings.dailyNew)||5));
-  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming.slice(0,6),settings,stats:{totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount,last7:trimmedDays,masteryDistribution}};
+  return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming.slice(0,6),settings,stats}
 }
 
 function startupPresentationData(){
@@ -271,7 +276,8 @@ async function startupSnapshot(){
   })();
   try{return await startupSnapshotInFlight}finally{startupSnapshotInFlight=null}
 }
-let snapshotInFlight=null;async function snapshot(){if(snapshotInFlight)return snapshotInFlight;snapshotInFlight=(async()=>{const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData();return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime})})();try{return await snapshotInFlight}finally{snapshotInFlight=null}}
+let snapshotInFlight=null;async function snapshot(){if(snapshotInFlight)return snapshotInFlight;snapshotInFlight=(async()=>{const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData(Date.now(),false);return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime})})();try{return await snapshotInFlight}finally{snapshotInFlight=null}}
+let statsInFlight=null;async function getStats(){if(statsInFlight)return statsInFlight;statsInFlight=(async()=>{const core=await load(),runtime=runtimePresentationData();return core.buildStatsViewModel(runtime.stats)})();try{return await statsInFlight}finally{statsInFlight=null}}
 async function publishStartupSnapshot(){const viewModel=await startupSnapshot();document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-startup-view-model',{detail:viewModel}));return viewModel}
 async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
 async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
@@ -307,7 +313,7 @@ async function startCustomStudy(filter={}){
 }
 async function updateSettings(nextValue={}){
   const requested=nextValue&&typeof nextValue==='object'?nextValue:{};
-  const current=runtimePresentationData().settings;
+  const current=runtimePresentationData(Date.now(),false).settings;
   const requestedRetention=Number(requested.retention);
   const retention=Number.isFinite(requestedRetention)?Math.min(.98,Math.max(.8,requestedRetention)):Math.min(.98,Math.max(.8,Number(current.retention)||.9));
   const next={...current,...requested,retention,production:Boolean(requested.production??current.production),vocabulary:Boolean(requested.vocabulary??current.vocabulary),context:Boolean(requested.context??current.context)};
@@ -320,7 +326,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary,snapshot,startupSnapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary,snapshot,getStats,startupSnapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 if(window.__KANJI5_V19_REVIEW_BRIDGE__)void publishStartupSnapshot();else document.addEventListener('kanji5:v1.9-review-ready',()=>{void publishStartupSnapshot()},{once:true});
