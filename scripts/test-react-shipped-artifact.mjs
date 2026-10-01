@@ -48,7 +48,8 @@ if(/\\.learning-card\\[data-card-density=dense\\] \\.learning-back-overview\\{[^
 if(!/\.learning-card-back \.learning-back-overview/.test(css)||!/\.learning-card-back \.learning-back-tools/.test(css)) throw new Error("SHIPPED_REACT_CSS_MISSING_ONE_COLUMN_BACK_LAYOUT_GUARD");
 console.log("Shipped React CSS contains the learning-card single-column guard.");
 const reactEntry=fs.readFileSync("react-entry.js","utf8");
-if(!/mountAccountFallback/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK");
+if(!/function scheduleAccountFallback/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK");
+if(!/account\.button|account-button|data-kanji5-account-fallback/.test(reactEntry)) throw new Error("REACT_ENTRY_ACCOUNT_FALLBACK_GUARD_MISSING");
 console.log("React entry contains account visibility fallback.");
 if(!fs.existsSync("account-fallback.js")) throw new Error("ACCOUNT_FALLBACK_SCRIPT_MISSING");
 if(!/__KANJI5_ACCOUNT__|account-button/.test(fs.readFileSync("account-fallback.js","utf8"))) throw new Error("ACCOUNT_FALLBACK_SCRIPT_INCOMPLETE");
