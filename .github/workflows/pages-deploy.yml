@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout release tree
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -46,6 +48,11 @@ jobs:
       - name: Build shipped React artifact from source
         working-directory: frontend
         run: npm run build
+
+      - name: Materialize automatic build hash
+        env:
+          BUILD_HASH: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+        run: sed -i "s/__KANJI5_BUILD_HASH__/${BUILD_HASH}/g" index.html sw.js
 
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
