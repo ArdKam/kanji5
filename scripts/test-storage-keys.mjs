@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const registry=fs.readFileSync('v1.5-state.js','utf8');
-assert.match(registry,/window\\.__KANJI5_STORAGE_KEYS__/);
+assert.match(registry,/window\.__KANJI5_STORAGE_KEYS__/);
 for (const pair of [
   ['state','kanji5-v1'],
   ['cards','kanji5-v1-cards'],
@@ -18,7 +18,7 @@ for (const pair of [
 
 for (const path of ['v1.5-state.js','review-runtime.js','supabase-sync.js','app-bootstrap.js','v1.3-p0.js']) {
   const source=fs.readFileSync(path,'utf8');
-  assert.match(source,/window\\.__KANJI5_STORAGE_KEYS__/,path+' must consume the centralized storage key registry');
+  assert.match(source,/window\.__KANJI5_STORAGE_KEYS__/,path+' must consume the centralized storage key registry');
 }
 
 for (const literal of ['kanji5-v1','kanji5-v1-cards','kanji5-v1-reviews','kanji5-deck','kanji5-deck-version']) {
