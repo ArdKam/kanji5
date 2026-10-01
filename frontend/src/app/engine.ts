@@ -97,6 +97,15 @@ export type Snapshot = {
     longestStreak?: number;
     leechCount?: number;
     last7?: { label?: string; count?: number }[];
+    masteryDistribution?: {
+      unseen?: number;
+      learning?: number;
+      attention?: number;
+      stable?: number;
+      mastered?: number;
+      average?: number;
+      total?: number;
+    };
   };
   settings?: Settings;
 };
