@@ -46,8 +46,8 @@ for (const file of ['v1.4-education-migration.js','v1.4-education-core.js','v1.5
   assert.ok(sw.includes(`"./${file}"`), `lazy exercise dependency missing from precache: ${file}`);
 for (const file of ['./v1.8-learning-ux.js','./v1.9-recovery-ui.js'])
   assert.equal(sw.includes(`"${file}"`), false, `retired file remains in precache: ${file}`);
-for (const file of ['v1.5-p0.js','v1.5-recall-core.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
-  assert.ok(sw.includes(`"./${file}"`), `legacy compatibility dependency missing from offline cache: ${file}`);
+for (const file of ['v1.5-p0.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
+  assert.equal(sw.includes(`"./${file}"`), false, `retired compatibility dependency remains in offline cache: ${file}`);
 
 assert.match(sw, /const CACHE='kanji5-shell-v[0-9A-Za-z._-]+'/);
 console.log('Kanji 5 startup runtime boundary contract passed.');
