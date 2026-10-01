@@ -63,6 +63,7 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   await expect(curatedRow.locator(".prepared-mnemonic-source.curated")).toBeVisible();
   await expect(curatedRow.locator(".prepared-mnemonic-library-meaning")).toBeVisible();
   await expect(curatedRow.locator(".prepared-mnemonic-library-use")).toBeVisible();
+  await search.fill("");
   await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "true");
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-generated").first()).toBeVisible();
