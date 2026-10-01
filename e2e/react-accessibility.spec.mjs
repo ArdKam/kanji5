@@ -313,8 +313,12 @@ test('React presentation stays usable at the narrow 320px boundary without horiz
     scrollWidth:document.documentElement.scrollWidth,
     bodyScrollWidth:document.body.scrollWidth,
     contentWidth:document.querySelector('.app-shell')?.getBoundingClientRect().width??0,
+    offenders:Array.from(document.querySelectorAll("body *")).map(el=>{
+      const r=el.getBoundingClientRect();
+      return {tag:el.tagName,cls:typeof el.className==="string"?el.className:"",left:r.left,right:r.right,width:r.width};
+    }).filter(item=>item.right>document.documentElement.clientWidth+1||item.left< -1).sort((a,b)=>Math.max(b.right-document.documentElement.clientWidth,-b.left)-Math.max(a.right-document.documentElement.clientWidth,-a.left)).slice(0,8),
   }));
-  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport+1);
+  expect(metrics.scrollWidth, JSON.stringify(metrics.offenders)).toBeLessThanOrEqual(metrics.viewport+1);
   expect(metrics.bodyScrollWidth).toBeLessThanOrEqual(metrics.viewport+1);
   expect(metrics.contentWidth).toBeLessThanOrEqual(metrics.viewport+1);
   await expect(page.locator('.experience-nav')).toBeVisible();
