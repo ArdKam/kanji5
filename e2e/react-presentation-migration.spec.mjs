@@ -249,9 +249,9 @@ test('Reading Lab preserves SRT cue timing and follows audio time',async({page})
   const lab=dialog.locator('.reading-lab');
   await lab.locator('.reading-lab-action-primary input[type=file]').setInputFiles({
     name:'lesson.srt',mimeType:'text/plain',
-    buffer:Buffer.from('1\\n00:00:00,000 --> 00:00:02,000\\n一番目の文。\\n\\n2\\n00:00:02,000 --> 00:00:04,000\\n二番目の文。\\n')
+    buffer:Buffer.from('1\n00:00:00,000 --> 00:00:02,000\n一番目の文。\n\n2\n00:00:02,000 --> 00:00:04,000\n二番目の文。\n')
   });
-  await expect(lab.locator('textarea')).toHaveValue('一番目の文。\\n二番目の文。');
+  await expect(lab.locator('textarea')).toHaveValue('一番目の文。\n二番目の文。');
   await expect(lab.locator('.reading-lab-sentence-list')).toHaveAttribute('data-reading-lab-sync-cue-count','2');
   await lab.locator('.reading-lab-action-audio input[type=file]').setInputFiles({name:'lesson.mp3',mimeType:'audio/mpeg',buffer:Buffer.from([0,1,2,3])});
   await expect(lab.locator('[data-reading-lab-sync-ready="true"]')).toBeVisible();
