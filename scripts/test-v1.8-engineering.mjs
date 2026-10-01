@@ -6,7 +6,7 @@ for(const name of ['test-v1.8-adaptive.mjs','test-v1.8-evaluation.mjs','test-v1.
 assert.match(wf,/npm test/);
 assert.match(wf,/test-react-migration\.mjs/);
 assert.match(wf,/Legacy DOM browser suites are retired/);
-assert.match(wf,/node --check/);
+assert.match(wf,/Validate consolidated engine runtime syntax/);
 assert.match(all,/test-\*\.mjs/);
 assert.doesNotMatch(wf,/build-v1\.6\.yml/);
 assert.doesNotMatch(wf,/build-v1\.7\.yml/);
