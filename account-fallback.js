@@ -2,8 +2,9 @@
 'use strict';
 const FALLBACK_DELAY=1500;
 const boot=()=>{
-  const reactAccount=document.querySelector('#root .account-button');
+  const reactAccount=document.querySelector('#root .account-button:not([data-kanji5-account-fallback])');
   const launcher=document.querySelector('#kanji5-account-launcher');
+  if(reactAccount) return true;
   if(launcher){
     launcher.classList.remove('is-shadowed');
     launcher.classList.add('is-ready');
@@ -17,10 +18,20 @@ const boot=()=>{
   })[lang()][k]||k;
   const existing=document.getElementById('kanji5-account-launcher');
   const btn=existing||document.createElement('button');
+  let reactAccountObserver=null;
   btn.type='button'; btn.className='account-button'; btn.dataset.kanji5AccountFallback='true';
   const dialog=document.createElement('dialog'); dialog.className='dialog account-dialog'; dialog.dataset.kanji5AccountFallbackDialog='true';
   document.body.appendChild(dialog);
   if(btn.parentElement!==document.body) document.body.appendChild(btn);
+  const cleanupWhenReactMounts=()=>{
+    const real=document.querySelector('#root .account-button:not([data-kanji5-account-fallback])');
+    if(!real)return false;
+    btn.remove();
+    dialog.remove();
+    reactAccountObserver?.disconnect();
+    window.removeEventListener('resize',positionLauncher);
+    return true;
+  };
   const positionLauncher=()=>{
     const header=document.querySelector('.header');
     if(!header)return;
@@ -33,6 +44,12 @@ const boot=()=>{
   btn.classList.add('is-ready');
   positionLauncher();
   window.addEventListener('resize',positionLauncher,{passive:true});
+  const root=document.getElementById('root');
+  if(root){
+    reactAccountObserver=new MutationObserver(()=>cleanupWhenReactMounts());
+    reactAccountObserver.observe(root,{childList:true,subtree:true});
+  }
+  cleanupWhenReactMounts();
   let mode='email', intent='sign-in', busy=false, notice='', unsubscribe=()=>{};
   const api=()=>window.__KANJI5_ACCOUNT__;
   const waitForApi=async()=>{for(let i=0;i<120;i+=1){const a=api();if(a)return a;await new Promise(r=>setTimeout(r,100));}throw new Error('KANJI5_ACCOUNT_UNAVAILABLE');};
