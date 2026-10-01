@@ -3,7 +3,7 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
-const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module => ({ default: module.StrokeOrderViewer })));
+import { StrokeOrderViewer } from "./StrokeOrderViewer";
 const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
 const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
 const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({ default: module.SettingsDialog })));
@@ -485,7 +485,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             </div>
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
-                <div className="stroke-page">{card.character?<Suspense fallback={null}><StrokeOrderViewer character={card.character} language={getLanguage()}/></Suspense>:null}</div>
+                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
               </div>
             </div>
           </div>
