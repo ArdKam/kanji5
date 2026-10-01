@@ -2,6 +2,9 @@
 
 ## [Unreleased] — post-release hardening
 
+### Documentation
+- Added `EDUCATIONAL-MODEL-2.0.md` as the canonical educational specification and future-AI handoff for Kanji 5, covering the Kanji knowledge graph, lexicalized reading, graduated retrieval, mastery evidence, planner boundaries, and the post-v2 learning-engine roadmap.
+
 ### Fixed
 - Enforced explicit invalid educational outcomes instead of silently treating malformed grader results as wrong.
 - Bound recovery state and recovery evaluation to the exact task and retry identity.
