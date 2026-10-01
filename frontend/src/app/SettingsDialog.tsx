@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePageDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
 import { DataBackup } from "./DataBackup";
-import type { KanjiCatalogItem, Settings, Snapshot } from "./engine";
+import type { Settings, Snapshot } from "./engine";
 
 type NumberSettingProps = {
   label: string;
@@ -108,7 +108,6 @@ export function SettingsDialog({
   onClose,
   onSave,
   onReset,
-  mnemonicCatalog,
 }: {
   open: boolean;
   snapshot: Snapshot;
@@ -117,7 +116,6 @@ export function SettingsDialog({
   onClose: () => void;
   onSave: (settings: Settings) => void | Promise<unknown>;
   onReset: () => void | Promise<unknown>;
-  mnemonicCatalog: KanjiCatalogItem[];
 }) {
   const persisted = useMemo(() => normalizeSettings({
     dailyNew: 5,
@@ -155,8 +153,8 @@ export function SettingsDialog({
     if (saving || !dirty) return;
     setSaving(true);
     try {
-      await onSave(normalizeSettings(draft));
-      setSavedKey(settingsKey(draft));
+      const result = await onSave(normalizeSettings(draft));
+      if (result !== undefined) setSavedKey(settingsKey(draft));
     } finally {
       setSaving(false);
     }
