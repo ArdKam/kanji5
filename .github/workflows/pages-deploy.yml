@@ -64,10 +64,13 @@ jobs:
       - name: Run root contract/unit suite
         run: npm test
 
+      - name: Stage production GitHub Pages site
+        run: node scripts/stage-pages-site.mjs
+
       - name: Upload freshly built GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
