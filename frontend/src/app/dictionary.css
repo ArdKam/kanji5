@@ -2268,3 +2268,32 @@
     transition:none;
   }
 }
+
+/* Reading Lab context lookup, durable-session feedback, and subtitle/audio sync. */
+.reading-lab-heading-line{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.reading-lab-session-status{flex:0 0 auto;max-width:220px;padding:5px 9px;border:1px solid color-mix(in srgb,var(--shu) 24%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--shu) 7%,var(--paper));color:var(--shu);font-size:10px;font-weight:850;line-height:1.35;}
+.reading-lab-sync-status,.reading-lab-word-status{margin:0;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--washi) 78%,var(--paper));color:var(--mute);font-size:10px;line-height:1.5;}
+.reading-lab-sync-status{color:var(--ai);font-weight:800;}
+.reading-lab-word-status{color:var(--shu);font-weight:800;}
+.reading-lab-reader-kanji[aria-busy="true"]{opacity:.58;text-decoration-style:dotted;}
+.reading-word-dialog{position:fixed;z-index:110;width:min(460px,calc(100vw - 28px));max-width:460px;max-height:min(620px,calc(100dvh - 28px));overflow:auto;overscroll-behavior:contain;padding:0;}
+.reading-word-dialog::backdrop{background:rgb(25 20 16 / .30);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+.reading-word-card{position:relative;display:grid;gap:14px;padding:20px;background:var(--paper);color:var(--ink);}
+.reading-word-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-inline-end:38px;}
+.reading-word-card-header .eyebrow{margin:0 0 4px;color:var(--shu);}
+.reading-word-card-header h2{margin:0;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:clamp(30px,7vw,44px);line-height:1.1;letter-spacing:-.02em;}
+.reading-word-card-reading{margin:4px 0 0;color:var(--mute);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:var(--text-md);}
+.reading-word-card-header .dialog-close{position:absolute;inset-block-start:4px;inset-inline-end:2px;}
+.reading-word-card-section{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--washi);}
+.reading-word-card-section>span{grid-column:1/-1;color:var(--mute);font-size:10px;font-weight:850;}
+.reading-word-card-section>strong{min-width:0;font-size:var(--text-sm);line-height:1.55;}
+.reading-word-card-section .dictionary-audio-button{align-self:center;}
+.reading-word-context p{grid-column:1/-1;margin:0;direction:ltr;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:var(--text-md);line-height:2;overflow-wrap:anywhere;}
+.reading-word-context .is-word{padding:1px 4px;border-radius:6px;background:color-mix(in srgb,var(--shu) 12%,transparent);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--shu) 58%,transparent);text-decoration-thickness:2px;text-underline-offset:4px;}
+.reading-word-kanji-list{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:7px;}
+.reading-word-kanji{display:grid;place-items:center;gap:2px;min-width:50px;min-height:50px;padding:5px 8px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;cursor:pointer;}
+.reading-word-kanji:hover{border-color:var(--shu);background:color-mix(in srgb,var(--shu) 5%,var(--paper));}
+.reading-word-kanji span{font-family:"Noto Serif JP",serif;font-size:var(--text-lg);line-height:1;}
+.reading-word-kanji small{color:var(--mute);font-size:9px;font-weight:850;}
+.reading-word-card-hint{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
+@media(max-width:520px){.reading-lab-heading-line{align-items:flex-start;flex-direction:column;}.reading-word-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}.reading-word-card{padding:18px;}}

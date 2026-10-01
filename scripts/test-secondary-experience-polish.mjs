@@ -39,10 +39,18 @@ assert.ok(reading.includes("splitReadingSentences"),"Reading Lab sentence segmen
 assert.ok(reading.includes("activeSentenceIndex"),"Reading Lab focused sentence state missing");
 assert.ok(reading.includes("reading-lab-reader-toolbar"),"Reading Lab sentence controls missing");
 assert.ok(reading.includes("speakCurrentSentence"),"Reading Lab sentence playback missing");
+assert.ok(reading.includes("getVocabulary"),"Reading Lab contextual vocabulary lookup missing");
+assert.ok(reading.includes("findLongestVocabularyMatch"),"Reading Lab must use longest-match vocabulary resolution");
+assert.ok(reading.includes("READING_LAB_STORAGE_KEY"),"Reading Lab durable session storage missing");
+assert.ok(reading.includes("parseSubtitleCues"),"Reading Lab subtitle cue parsing missing");
+assert.ok(reading.includes("syncReady"),"Reading Lab audio/subtitle synchronization state missing");
 const readingDialog=fs.readFileSync("frontend/src/app/ReadingLabDialog.tsx","utf8");
 assert.ok(readingDialog.includes("DictionaryKanjiCard"),"Reading Lab dictionary should remain an overlay");
 assert.ok(readingDialog.includes("selectedKanji"),"Reading Lab dictionary selection state missing");
 assert.ok(readingDialog.includes("onClose={() => setSelectedKanji(null)}"),"Reading Lab dictionary overlay close should return to the lab");
+assert.ok(readingDialog.includes("ReadingLabWordCard"),"Reading Lab word lookup overlay missing");
+const readingWord=fs.readFileSync("frontend/src/app/ReadingLabWordCard.tsx","utf8");
+assert.ok(readingWord.includes("selection.item.word"),"Reading Lab word card should expose matched vocabulary word");
 
 assert.ok(mnemonics.includes("item?.meanings"),"Mnemonic search does not include meanings");
 assert.ok(mnemonics.includes("item?.on"),"Mnemonic search does not include on readings");
