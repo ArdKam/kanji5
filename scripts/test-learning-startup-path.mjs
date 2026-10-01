@@ -17,7 +17,8 @@ for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDial
 }
 
 
-assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);\nassert.match(app,/import \{ HandwritingPractice \} from "\.\/HandwritingPractice"/);
+assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);
+assert.match(app,/import \{ HandwritingPractice \} from "\.\/HandwritingPractice"/);
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
 assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.js'\)/);
