@@ -675,7 +675,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                 <h3 id="reading-lab-focus-target-title">{t("readingLabFocusTarget", language)}</h3>
                 <p lang="ja">{hardestSentence.text}</p>
                 <small>
-                  {formatNumber(hardestSentence.newCount, language)} {t("readingLabNew", language)} · {formatNumber(hardestSentence.attentionCount, language)} {t("readingLabAttention", language)}
+                  {formatNumber(hardestSentence.newCount, language)} {t("readingLabNew", language)} · {formatNumber(hardestSentence.attentionCount, language)} {t("readingLabAttention", language)} · {formatNumber(hardestSentence.learningCount, language)} {t("readingLabLearning", language)}
                 </small>
               </div>
               <button className="button secondary reading-lab-focus-target-button" type="button" onClick={() => focusSentence(hardestSentence.sentenceIndex)}>
