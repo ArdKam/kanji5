@@ -1,3 +1,4 @@
+// Build-id cache provenance contract: generated artifact URLs must match the staged build metadata.
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 
@@ -19,7 +20,7 @@ console.log("Shipped React CSS local assets resolved ("+localCssAssets.length+")
 
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
-if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react\.css\?v=/.test(entry)){
+if(!/assetVersion='\?v='\+encodeURIComponent\(buildId\)/.test(entry) || !/react-dist\/kanji5-react\.js'\+assetVersion/.test(entry) || !/react-dist\/kanji5-react\.css'\+assetVersion/.test(entry)){
   throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
 }
 console.log("React entry uses cache-busted shipped runtime assets.");
@@ -60,3 +61,6 @@ console.log("Shipped React JS contains Account UI.");
 const accountFallback=fs.readFileSync("account-fallback.js","utf8");
 try{new Function(accountFallback);}catch(error){throw new Error("ACCOUNT_FALLBACK_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));}
 console.log("Account fallback parses as valid JavaScript.");
+
+const html=fs.readFileSync("index.html","utf8");
+if(!/react-dist\/kanji5-react\.js\?v=dev/.test(html)||!/react-dist\/kanji5-react\.css\?v=dev/.test(html)) throw new Error("INDEX_HTML_REACT_HINTS_MISSING_BUILD_VERSION");
