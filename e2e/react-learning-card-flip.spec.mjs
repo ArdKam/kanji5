@@ -177,7 +177,7 @@ test("learning card exposes five full-content back pages in Persian and English"
           pageIndex === 2 ? /(یادسپار|Mnemonic|Personal mnemonic)/ :
           /(ترتیب نوشتن|Stroke order)/,
         );
-        await expect(card.locator(".pager-dot.active")).toHaveCount(1);
+        await expect(card.locator(".learning-back-page-shortcut.active")).toHaveCount(1);
         await assertCardBounds(card);
       }
 
@@ -248,10 +248,10 @@ test("learning card replaces passive pager dots with direct page shortcuts", asy
     await expect(shortcuts).toHaveCount(4);
     await expect(nav).toHaveCSS("direction", "ltr");
     await expect(shortcuts.nth(2)).toBeEnabled({ timeout: 10000 });
-    await expect(shortcuts.nth(0)).toHaveAttribute("aria-label", "Stroke order");
-    await expect(shortcuts.nth(1)).toHaveAttribute("aria-label", "Personal mnemonic");
-    await expect(shortcuts.nth(2)).toHaveAttribute("aria-label", "Vocabulary examples");
-    await expect(shortcuts.nth(3)).toHaveAttribute("aria-label", "Meaning & structure");
+    await expect(shortcuts.nth(0)).toHaveAttribute("aria-label", "Meaning & structure");
+    await expect(shortcuts.nth(1)).toHaveAttribute("aria-label", "Vocabulary examples");
+    await expect(shortcuts.nth(2)).toHaveAttribute("aria-label", "Personal mnemonic");
+    await expect(shortcuts.nth(3)).toHaveAttribute("aria-label", "Stroke order");
     await expect(shortcuts.nth(0)).toHaveClass(/active/);
     await expect(shortcuts.nth(0)).toHaveAttribute("aria-current", "page");
     await expect(nav.locator(".pager-dot")).toHaveCount(0);
