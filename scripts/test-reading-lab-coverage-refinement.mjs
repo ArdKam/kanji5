@@ -32,6 +32,6 @@ for (const key of [
 assert.ok(styles.includes(".reading-lab-coverage-metrics"), "Missing coverage metric styles");
 assert.ok(styles.includes(".reading-lab-hardest-sentence"), "Missing hardest-sentence styles");
 assert.ok(e2e.includes("reading-lab-hardest-sentence"), "E2E must cover the hardest-sentence target");
-assert.ok(e2e.includes("readingLabFocusSentence"), "E2E must exercise the focus-target control");
+assert.ok(e2e.includes("name:'تمرکز روی جمله'"), "E2E must exercise the focus-target control");
 
 console.log("Reading Lab coverage refinement contract: PASS");
