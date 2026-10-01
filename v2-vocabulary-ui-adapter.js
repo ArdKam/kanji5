@@ -1,3 +1,4 @@
+import { normalizeVocabularyItem } from './v2-vocabulary-core.js';
 import { buildVocabularyContract } from './v2-vocabulary-contract-core.js';
 
 export const VOCABULARY_UI_ADAPTER_SCHEMA_VERSION=1;
@@ -7,7 +8,11 @@ const safeObject=value=>value&&typeof value==='object'&&!Array.isArray(value)?va
 const text=(value,limit=240)=>String(value??'').normalize('NFKC').trim().slice(0,limit);
 
 function normalizeItems(items){
-  return Array.isArray(items)?items.filter(item=>item&&typeof item==='object'):[];
+  const out=[];
+  for(const raw of Array.isArray(items)?items:[]){
+    try{out.push(normalizeVocabularyItem(raw));}catch(_){}
+  }
+  return out;
 }
 
 function readRecord(store,item){
