@@ -51,9 +51,13 @@ if(!fs.existsSync("account-fallback.js")) throw new Error("ACCOUNT_FALLBACK_SCRI
 if(!/__KANJI5_ACCOUNT__|account-button/.test(fs.readFileSync("account-fallback.js","utf8"))) throw new Error("ACCOUNT_FALLBACK_SCRIPT_INCOMPLETE");
 console.log("Standalone account fallback is present.");
 
-const accountUi=/account-button|account-dialog|signInWithPassword|sendMagicLink/.test(reactJs);
+const lazyJsAssets=fs.existsSync("react-dist/assets")
+  ? fs.readdirSync("react-dist/assets").filter(name => name.endsWith(".js")).map(name => fs.readFileSync("react-dist/assets/"+name,"utf8"))
+  : [];
+const shippedRuntimeJs=[reactJs,...lazyJsAssets].join("\n");
+const accountUi=/account-button|account-dialog|signInWithPassword|sendMagicLink/.test(shippedRuntimeJs);
 if(!accountUi) throw new Error("SHIPPED_REACT_JS_MISSING_ACCOUNT_UI");
-console.log("Shipped React JS contains Account UI.");
+console.log("Shipped React runtime contains Account UI across the entry and lazy chunks.");
 
 const accountFallback=fs.readFileSync("account-fallback.js","utf8");
 try{new Function(accountFallback);}catch(error){throw new Error("ACCOUNT_FALLBACK_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));}
