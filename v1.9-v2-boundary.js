@@ -289,9 +289,7 @@ async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;co
 window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getVocabulary,snapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
-setTimeout(()=>{void refreshLearning()},0);
-setTimeout(()=>{void refreshLearning()},100);
-setTimeout(()=>{void refreshLearning()},500);
+if(window.__KANJI5_V19_REVIEW_BRIDGE__)void refreshLearning();else document.addEventListener('kanji5:v1.9-review-ready',()=>{void refreshLearning()},{once:true});
 document.addEventListener('kanji5:v1.9-learning-changed',()=>{void refreshLearning()});
 document.addEventListener('kanji5:v1.6-education-result',e=>{void setFeedback(e?.detail||{})});
 document.addEventListener('kanji5:v1.9-feedback',e=>{void setFeedback(e?.detail||{})});
