@@ -112,10 +112,8 @@ The repository also carries release-specific generated/compatibility artifacts s
 
 - `react-dist/kanji5-react-release18.js`
 - `react-dist/kanji5-react-release18.css`
-- `sw-release18.js`
-- `sw-release19.js`
 
-These files are part of the current repository/release wiring. Treat them as generated or compatibility outputs rather than source-of-truth UI code.
+The current release uses the canonical `app-bootstrap.js` and `sw.js`; retired release-specific bootstrap/service-worker variants have been removed. Generated React artifacts remain build outputs and are not source-of-truth UI code.
 
 The React build is produced with:
 
