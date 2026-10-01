@@ -4,6 +4,9 @@ import fs from "node:fs";
 const source=fs.readFileSync(".github/workflows/pages-deploy.yml","utf8");
 
 assert.match(source, /Build shipped React artifact from source/);
+assert.match(source, /workflow_run\.head_sha/);
+assert.match(source, /Materialize automatic build hash/);
+assert.match(source, /__KANJI5_BUILD_HASH__/);
 assert.match(source, /react-dist\/kanji5-react\.js/);
 assert.match(source, /react-dist\/kanji5-react\.css/);
 
