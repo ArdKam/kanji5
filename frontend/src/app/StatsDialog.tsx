@@ -239,6 +239,11 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
+    if (!open || !showAdvanced) return;
+    void import("./StatsAdvanced.css");
+  }, [open, showAdvanced]);
+
+  useEffect(() => {
     if (!open || catalog.length || loading || attempted) return;
     let active = true;
     setAttempted(true);
