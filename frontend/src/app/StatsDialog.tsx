@@ -115,16 +115,19 @@ function SkillsSection({ snapshot, language }: { snapshot: Snapshot; language: L
       <div className="stats-skills-list">
         {skillKeys.map(key => {
           const skill = snapshot.learner?.attributes?.[key] ?? {};
-          const value = Math.round(Math.max(0, Math.min(1, Number(skill.confidence ?? skill.accuracy) || 0)) * 100);
+          const attempts = Number((skill as { attempts?: number }).attempts);
+          const accuracy = Number(skill.accuracy);
+          const hasEvidence = Number.isFinite(accuracy) && attempts > 0;
+          const value = hasEvidence ? Math.round(Math.max(0, Math.min(1, accuracy)) * 100) : null;
           const stateLabel = skill.state === "weak" ? t("masteryNeedsAttention", language) : skill.state === "stable" ? t("masteryStable", language) : skill.state === "mastered" ? t("masteryMastered", language) : t("masteryLearning", language);
           return <div className="stats-skill-row" key={key}>
-            <div className="stats-skill-label"><span>{skillLabels[key]}</span><strong>{formatNumber(value, language)}%</strong></div>
-            <div className="stats-skill-track" aria-hidden="true"><span style={{ width: value + "%" }} /></div>
+            <div className="stats-skill-label"><span>{skillLabels[key]}</span><strong>{value === null ? "—" : formatNumber(value, language) + "%"}</strong></div>
+            <div className="stats-skill-track" aria-hidden="true"><span style={{ width: (value ?? 0) + "%" }} /></div>
             <span className="stats-skill-state">{skill.state ? stateLabel : "—"}</span>
           </div>;
         })}
       </div>
-      <p className="stats-footnote">{t("modelConfidence", language)}</p>
+      <p className="stats-footnote">{language === "fa" ? "درصد اینجا دقت پاسخ‌هاست؛ جزئیات اطمینان مدل و تعداد تلاش‌ها را در آمار پیشرفته ببین." : "This percentage is response accuracy; advanced stats show model confidence and attempt evidence."}</p>
     </section>
   );
 }
@@ -150,10 +153,110 @@ function AttentionSection({ catalog, language, onStudyWeak }: { catalog: KanjiCa
   );
 }
 
+type AdvancedSkill = {
+  state?: string;
+  accuracy?: number;
+  recentAccuracy?: number;
+  confidence?: number;
+  attempts?: number;
+  recentAttempts?: number;
+};
+
+function formatRate(value: unknown, language: Language) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? formatNumber(Math.round(Math.max(0, Math.min(1, numeric)) * 100), language) + "%" : "—";
+}
+
+function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
+  const last7 = snapshot.stats?.last7 ?? [];
+  const counts = last7.map(day => Math.max(0, Number(day.count) || 0));
+  const activeDays = counts.filter(count => count > 0).length;
+  const activityTotal = counts.reduce((sum, count) => sum + count, 0);
+  const activityAverage = activityTotal / Math.max(1, counts.length);
+  const mastery = snapshot.stats?.masteryDistribution ?? {};
+  const skillKeys = ["meaning", "reading", "production", "vocabulary", "context"] as const;
+  const skillLabels: Record<typeof skillKeys[number], string> = {
+    meaning: t("meaning", language),
+    reading: t("reading", language),
+    production: t("production", language),
+    vocabulary: t("vocabulary", language),
+    context: t("context", language),
+  };
+  const stateLabel = (state?: string) => {
+    if (!state) return "—";
+    if (state === "weak" || state === "recovering") return t("masteryNeedsAttention", language);
+    if (state === "stable") return t("masteryStable", language);
+    if (state === "mastered") return t("masteryMastered", language);
+    return t("masteryLearning", language);
+  };
+
+  return (
+    <section className="stats-advanced" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
+      <div className="stats-advanced-body">
+        <div className="stats-advanced-panel-heading">
+          <div>
+            <p className="eyebrow">{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</p>
+            <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
+          </div>
+          <span>{language === "fa" ? "داده‌های دقیق، بدون شلوغ‌کردن نمای اصلی" : "More detail without cluttering the main view"}</span>
+        </div>
+        <section className="stats-advanced-block" aria-labelledby="stats-advanced-activity-title">
+          <div className="stats-advanced-heading">
+            <div>
+              <p className="eyebrow">{language === "fa" ? "فعالیت" : "Activity"}</p>
+              <h4 id="stats-advanced-activity-title">{language === "fa" ? "جزئیات فعالیت اخیر" : "Recent activity details"}</h4>
+            </div>
+          </div>
+          <div className="stats-advanced-metrics">
+            <Metric label={language === "fa" ? "روزهای فعال" : "Active days"} value={formatNumber(activeDays, language)} hint={language === "fa" ? "از ۷ روز" : "of 7 days"} />
+            <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={formatNumber(Number(activityAverage.toFixed(1)), language)} hint={language === "fa" ? "در روز" : "per day"} />
+            <Metric label={language === "fa" ? "سررسید فعلی" : "Due now"} value={formatNumber(Number(snapshot.dailySummary?.dueCount) || 0, language)} />
+            <Metric label={language === "fa" ? "مسلط" : "Mastered"} value={formatNumber(Number(mastery.mastered) || 0, language)} />
+          </div>
+        </section>
+
+        <section className="stats-advanced-block" aria-labelledby="stats-advanced-skills-title">
+          <div className="stats-advanced-heading">
+            <div>
+              <p className="eyebrow">{language === "fa" ? "مهارت‌ها" : "Skills"}</p>
+              <h4 id="stats-advanced-skills-title">{language === "fa" ? "عملکرد و شواهد پاسخ" : "Performance and response evidence"}</h4>
+            </div>
+            <span className="stats-advanced-note">{language === "fa" ? "اعتماد مدل ≠ دقت پاسخ" : "Model confidence ≠ response accuracy"}</span>
+          </div>
+
+          <div className="stats-advanced-table" role="table" aria-label={language === "fa" ? "جزئیات مهارت‌ها" : "Skill details"}>
+            <div className="stats-advanced-row stats-advanced-row-head" role="row">
+              <span role="columnheader">{language === "fa" ? "مهارت" : "Skill"}</span>
+              <span role="columnheader">{language === "fa" ? "دقت" : "Accuracy"}</span>
+              <span role="columnheader">{language === "fa" ? "اخیر" : "Recent"}</span>
+              <span role="columnheader">{language === "fa" ? "تلاش" : "Attempts"}</span>
+              <span role="columnheader">{language === "fa" ? "وضعیت" : "Status"}</span>
+            </div>
+            {skillKeys.map(key => {
+              const skill = (snapshot.learner?.attributes?.[key] ?? {}) as AdvancedSkill;
+              return (
+                <div className="stats-advanced-row" role="row" key={key}>
+                  <strong role="cell">{skillLabels[key]}</strong>
+                  <span role="cell">{formatRate(skill.accuracy, language)}</span>
+                  <span role="cell">{formatRate(skill.recentAccuracy, language)}</span>
+                  <span role="cell">{Number.isFinite(Number(skill.attempts)) && Number(skill.attempts) > 0 ? formatNumber(Number(skill.attempts), language) : "—"}</span>
+                  <span role="cell" className="stats-advanced-status">{stateLabel(skill.state)}</span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="stats-footnote">{language === "fa" ? "اطمینان مدل فقط نشان می‌دهد دادهٔ کافی برای برآورد وجود دارد؛ جای دقت واقعی پاسخ را نمی‌گیرد." : "Model confidence reflects evidence strength; it does not replace observed response accuracy."}</p>
+        </section>
+      </div>
+    </section>
+  );
+}
+
 export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: { open: boolean; snapshot: Snapshot; language: Language; onClose: () => void; onStudyWeak?: () => void }) {
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (!open || catalog.length || loading || attempted) return;
@@ -197,6 +300,22 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
         <Metric label={t("streak", language)} value={formatNumber(streak, language)} hint={language === "fa" ? "روز" : "days"} />
         <Metric label={language === "fa" ? "کل مرورها" : "Total reviews"} value={formatNumber(totalReviews, language)} />
       </section>
+
+      <button
+        className="stats-advanced-trigger"
+        type="button"
+        aria-expanded={showAdvanced}
+        aria-controls="stats-advanced-panel"
+        onClick={() => setShowAdvanced(value => !value)}
+      >
+        <span className="stats-advanced-trigger-copy">
+          <strong>{language === "fa" ? "آمار پیشرفته" : "Advanced stats"}</strong>
+          <small>{language === "fa" ? "جزئیات عملکرد مهارت‌ها و شواهد پاسخ" : "Skill performance and response evidence"}</small>
+        </span>
+        <span className="stats-advanced-trigger-action">{showAdvanced ? (language === "fa" ? "بستن" : "Hide") : (language === "fa" ? "مشاهده" : "View")} <span aria-hidden="true">{showAdvanced ? "⌃" : "⌄"}</span></span>
+      </button>
+
+      {showAdvanced ? <AdvancedStatsSection snapshot={snapshot} language={language} /> : null}
 
       <ActivitySection snapshot={snapshot} language={language} />
       <MasterySection snapshot={snapshot} language={language} />
