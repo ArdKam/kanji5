@@ -23,7 +23,7 @@ test('Statistics dialog exposes a focused progress dashboard',async({page})=>{
   await expect(dialog.locator('.stats-header')).toBeVisible();
   await expect(dialog.locator('.stats-overview')).toBeVisible();
   await expect(dialog.locator('.stats-overview-primary')).toBeVisible();
-  await expect(dialog.locator('.stats-metric')).toHaveCount(3);
+  await expect(dialog.locator('.stats-overview .stats-metric')).toHaveCount(3);
   await expect(dialog.locator('.stats-activity-section')).toBeVisible();
   await expect(dialog.locator('.activity-chart')).toBeVisible();
   await expect(dialog.locator('.activity-bar-wrap')).toHaveCount(7);
