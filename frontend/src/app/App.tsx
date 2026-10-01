@@ -106,15 +106,17 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     }
     setComponentInfo(null);
     setComponentInfoReady(false);
+    const character = card.character;
+    const meanings = card.meanings ?? [];
     void import("./prepared-mnemonic-core").then(({buildPreparedMnemonic})=>{
       if(!active)return;
-      setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
-      return getComponentInfo(card.character).then(info=>{
+      setPreparedMnemonic(buildPreparedMnemonic({character,meanings}));
+      return getComponentInfo(character).then(info=>{
         if(!active)return;
         setComponentInfo(info);
         setComponentInfoReady(true);
         setPreparedMnemonic(buildPreparedMnemonic(
-          {character:card.character,meanings:card.meanings??[]},
+          {character,meanings},
           info.components??[]
         ));
       });
