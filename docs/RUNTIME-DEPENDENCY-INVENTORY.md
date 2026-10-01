@@ -70,3 +70,5 @@ npm run build
 ```
 
 The generated `react-dist/` directory is consumed by CI/deploy from the working tree and is intentionally ignored by Git.
+
+Deployment cache provenance: the Pages workflow uses the exact triggering source commit SHA for React assets and the service-worker registration/cache name.
