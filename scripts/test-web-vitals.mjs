@@ -13,7 +13,7 @@ assert.ok(index.includes('<link rel="preload" href="'+interUrl+'" as="style" fet
 assert.ok(index.includes('<noscript><link rel="stylesheet" href="'+interUrl+'"></noscript>'), "Inter stylesheet should retain a noscript fallback");
 assert.doesNotMatch(index, /rel="preload"[^>]+kanji-data\.json/, "Kanji data must not use an unused preload hint");
 assert.match(index, /rel="modulepreload" href="\.\/vendor\/ts-fsrs-5\.4\.1\.mjs"/, "FSRS should be module-preloaded");
-assert.match(index, /rel="stylesheet" href="\.\/react-dist\/kanji5-react\.css"[^>]*data-kanji5-react-styles/, "React CSS should use the canonical shipped asset");
+assert.match(index, /rel="stylesheet" href="\.\/react-dist\/kanji5-react\.css\?v=dev"[^>]*data-kanji5-react-styles/, "React CSS should use the canonical versioned shipped asset");
 assert.match(app, /useState<Snapshot\|null>\(\(\)=>getInitialSnapshot\(\)\)/, "App should consume a ready snapshot on first render when available");
 assert.match(app, /function LoadingSummary\(\)/, "Review loading state must reserve summary geometry");
 assert.match(app, /function LoadingGoal\(\)/, "Review loading state must reserve goal geometry");
