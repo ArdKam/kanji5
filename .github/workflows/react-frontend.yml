@@ -44,6 +44,18 @@ on:
       - "react-entry.js"
       - "sw.js"
       - "account-fallback.js"
+      - "v1.3-*.js"
+      - "v1.4-*.js"
+      - "v1.5-*.js"
+      - "v1.6-*.js"
+      - "v1.7-*.js"
+      - "v1.8-*.js"
+      - "v1.9-*.js"
+      - "review-runtime.js"
+      - "supabase-sync.js"
+      - "vendor/**"
+      - "kanji-data.json"
+      - "kanji-components.json"
   push:
     branches:
       - main
