@@ -155,7 +155,8 @@ for (const profile of profiles) {
       interactionMs,
       `critical navigation interaction exceeded budget: ${interactionMs.toFixed(0)}ms > ${startupBudgets.interactionMs}ms`
     ).toBeLessThanOrEqual(startupBudgets.interactionMs);
-    await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+    await page.locator(".header-tools-menu-close").click();
+    await expect(page.locator("#header-tools-menu")).not.toHaveClass(/open/);
 
     console.log(
       [
