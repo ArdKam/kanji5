@@ -44,7 +44,7 @@ assert.match(bootstrap,/requestIdleCallback\(registerServiceWorker/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);
 assert.match(entry,/function scheduleAccountFallback\(\)/);
 assert.doesNotMatch(entry,/function mountAccountFallback\(\)/);
-assert.match(entry,/import\('\.\/account-fallback\.js\?v=20261001'\)/);
+assert.match(entry,/import\('\.\/account-fallback\.js'\+assetVersion\)/);
 assert.doesNotMatch(index, /<script[^>]+src=["']\.\/account-fallback\.js/);
 assert.match(index, /id="kanji5-account-launcher" class="is-shadowed"/);
 
@@ -58,5 +58,5 @@ for (const file of ['./v1.8-learning-ux.js','./v1.9-recovery-ui.js'])
 for (const file of ['v1.5-p0.js','v1.5-recall-core.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
   assert.ok(sw.includes(`"./${file}"`), `legacy compatibility dependency missing from offline cache: ${file}`);
 
-assert.match(sw, /const CACHE='kanji5-shell-v[0-9A-Za-z._-]+'/);
+assert.match(sw, /const BUILD_ID='__KANJI5_BUILD_ID__';/);assert.match(sw, /const CACHE='kanji5-shell-v'\+BUILD_ID/);
 console.log('Kanji 5 startup runtime boundary contract passed.');
