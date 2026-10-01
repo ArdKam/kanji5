@@ -1,14 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-async function goToBackPage(card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    const next = card.locator(".pager-button").nth(1);
-    if (!(await next.isEnabled())) break;
-    await next.click();
-  }
-  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
-}
-
 async function goToMnemonicPage(card) {
   const pages = card.locator(".learning-back-page");
   const count = await pages.count();
@@ -41,8 +32,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-  await goToBackPage(card, 2);
-  await card.getByRole("button", { name: "Personal mnemonic" }).click();
+  await goToMnemonicPage(card);
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
 
