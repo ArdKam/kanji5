@@ -11,7 +11,39 @@ const KANJIVG_PATH='/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/ka
 const API_TTL_MS=7*24*60*60*1000;
 const API_MAX_ENTRIES=250;
 const API_INFLIGHT=new Map();
-self.addEventListener('install',e=>e.waitUntil(Promise.all([caches.open(CACHE).then(c=>c.addAll(SHELL)),caches.open(DATA_CACHE).then(c=>c.addAll(['./kanji-data.json','./kanji-components.json'])),caches.open(API_CACHE)]).then(()=>self.skipWaiting())));
+async function precacheReactEntryDependencies(cache){
+  const entryUrl=new URL('./react-dist/kanji5-react.js',self.location.href).href;
+  const entry=await cache.match(entryUrl);
+  if(!entry)return;
+  const queue=['./react-dist/kanji5-react.js'];
+  const seen=new Set(queue);
+  while(queue.length){
+    const relative=queue.shift();
+    const url=new URL(relative,self.location.href).href;
+    const response=await cache.match(url);
+    if(!response)continue;
+    const source=await response.clone().text();
+    for(const match of source.matchAll(/from\s*["'](\.\/assets\/[^"']+\.js)["']/g)){
+      const assetRelative='./react-dist/'+match[1].slice(2);
+      if(seen.has(assetRelative))continue;
+      seen.add(assetRelative);
+      try{
+        const fetched=await fetch(new URL(assetRelative,self.location.href));
+        if(!fetched.ok)continue;
+        await cache.put(new URL(assetRelative,self.location.href),fetched.clone());
+        queue.push(assetRelative);
+      }catch(_){}
+    }
+  }
+}
+self.addEventListener('install',e=>e.waitUntil(Promise.all([
+  caches.open(CACHE).then(async c=>{
+    await c.addAll(SHELL);
+    await precacheReactEntryDependencies(c);
+  }),
+  caches.open(DATA_CACHE).then(c=>c.addAll(['./kanji-data.json','./kanji-components.json'])),
+  caches.open(API_CACHE)
+]).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('kanji5-')&&!([CACHE,DATA_CACHE,API_CACHE].includes(k))).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback,{ignoreSearch:true});if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback,{ignoreSearch:false}))||Response.error()}}
 async function staleWhileRevalidate(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback||req);const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone()).catch(()=>{});return r}).catch(()=>null);if(hit){void update;return hit}const fresh=await update;return fresh||Response.error()}

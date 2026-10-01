@@ -1,9 +1,9 @@
-import { useEffect, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
 import { TraditionalRadical } from "./TraditionalRadical";
 import { HandwritingPractice } from "./HandwritingPractice";
-import { StrokeOrderViewer } from "./StrokeOrderViewer";
+const StrokeOrderViewer = lazy(()=>import("./StrokeOrderViewer").then(module=>({default:module.StrokeOrderViewer})));
 import { DictionaryAudio, DictionaryReading } from "./DictionaryPrimitives";
 import { VocabularyExamples } from "./VocabularyExamples";
 import { formatNumber, t, type Language } from "./i18n";
@@ -142,7 +142,7 @@ export function DictionaryKanjiCard({
         </div>
       </div>
       <div className="dictionary-stroke-order-wrap">
-        <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
+        <Suspense fallback={null}><StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" /></Suspense>
       </div>
       <div className="readings-header dictionary-readings-header"><span>{t("reading", language)}</span></div>
       <div className="readings learning-back-readings dictionary-readings">
