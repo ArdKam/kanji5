@@ -1,19 +1,42 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
-import { StatsDialog } from "./StatsDialog";
-import { SettingsDialog } from "./SettingsDialog";
+
+
 import { PracticeHome } from "./PracticeHome";
-import { GrammarDialog } from "./GrammarDialog";
-import { ReadingLabDialog } from "./ReadingLabDialog";
-import { MnemonicsDialog } from "./MnemonicsDialog";
+
+
+
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
+
+type DeferredDialogProps<P extends object> = {
+  loader: () => Promise<{ default: ComponentType<P> }>;
+  props: P;
+};
+
+function DeferredDialog<P extends object>({ loader, props }: DeferredDialogProps<P>) {
+  const [Dialog, setDialog] = useState<ComponentType<P> | null>(null);
+  useEffect(() => {
+    let active = true;
+    void loader().then(module => {
+      if (active) setDialog(() => module.default);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [loader]);
+  return Dialog ? <Dialog {...props} /> : null;
+}
+
+const loadStatsDialog = () => import("./StatsDialog").then(module => ({ default: module.StatsDialog }));
+const loadSettingsDialog = () => import("./SettingsDialog").then(module => ({ default: module.SettingsDialog }));
+const loadGrammarDialog = () => import("./GrammarDialog").then(module => ({ default: module.GrammarDialog }));
+const loadReadingLabDialog = () => import("./ReadingLabDialog").then(module => ({ default: module.ReadingLabDialog }));
+const loadMnemonicsDialog = () => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog }));
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import { getThemePreference, setThemePreference as persistThemePreference, type ThemePreference } from "./ui-preferences";
 import {
@@ -928,37 +951,11 @@ function App(){
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
-        {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage}/> : null}
-        {secondaryPage==="settings" ? <SettingsDialog
-          open={settingsOpen}
-          snapshot={snapshot??{}}
-          busy={busy}
-          language={language}
-          onClose={closeSecondaryPage}
-          onSave={s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()})}
-          onReset={()=>void action(async()=>{resetProgress()})}
-          mnemonicCatalog={mnemonicCatalog}
-          onRetakePlacement={()=>{
-            closeSecondaryPage();
-            setExperience("practice");
-            setPracticeMode("home");
-            setPlacementRequest(value=>value+1);
-          }}
-        /> : null}
-        {secondaryPage==="mnemonics" ? <MnemonicsDialog
-          open={mnemonicsOpen}
-          language={language}
-          catalog={mnemonicCatalog}
-          onClose={closeSecondaryPage}
-          onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
-        /> : null}
-        {secondaryPage==="grammar" ? <GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/> : null}
-        {secondaryPage==="readingLab" ? <ReadingLabDialog
-          open={readingLabOpen}
-          language={language}
-          onClose={closeSecondaryPage}
-          onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
-        /> : null}
+        {secondaryPage==="stats" ? <DeferredDialog loader={loadStatsDialog} props={{open:statsOpen,snapshot:snapshot??{},language,onClose:closeSecondaryPage}}/> : null}
+        {secondaryPage==="settings" ? <DeferredDialog loader={loadSettingsDialog} props={{open:settingsOpen,snapshot:snapshot??{},busy,language,onLanguageChange:changeLanguage,onClose:closeSecondaryPage,onSave:s=>void action(async()=>{await updateSettings(s);closeSecondaryPage()}),onReset:()=>void action(async()=>{resetProgress()}),mnemonicCatalog,onRetakePlacement:()=>{closeSecondaryPage();setExperience("practice");setPracticeMode("home");setPlacementRequest(value=>value+1)}}}/> : null}
+        {secondaryPage==="mnemonics" ? <DeferredDialog loader={loadMnemonicsDialog} props={{open:mnemonicsOpen,language,catalog:mnemonicCatalog,onClose:closeSecondaryPage,onSelectKanji:(item:KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage()}}}/> : null}
+        {secondaryPage==="grammar" ? <DeferredDialog loader={loadGrammarDialog} props={{open:grammarOpen,language,onClose:closeSecondaryPage}}/> : null}
+        {secondaryPage==="readingLab" ? <DeferredDialog loader={loadReadingLabDialog} props={{open:readingLabOpen,language,onClose:closeSecondaryPage,onSelectKanji:(item:KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage()}}}/> : null}
         {secondaryPage==="account" ? <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/> : null}
       </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
         {!showExercise?(snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
