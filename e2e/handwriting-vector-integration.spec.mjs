@@ -16,7 +16,7 @@ async function clean(page){
   await expect(page.locator("#root .app-shell")).toBeVisible({timeout:20000});
 }
 
-async function openSchoolHandwriting(page){
+async function openSchoolHandwriting(page,{waitForCanvas=true}={}) {
   await page.locator(".experience-nav .experience-tab").nth(2).click();
   await expect(page.locator(".dictionary-page")).toBeVisible({timeout:10000});
   const search=page.locator(".dictionary-page-search input");
@@ -31,7 +31,9 @@ async function openSchoolHandwriting(page){
   await handwritingTab.click();
   const handwriting=dialog.locator(".handwriting-practice");
   await expect(handwriting).toBeVisible();
-  await expect(handwriting.locator(".handwriting-ink-canvas")).toBeVisible({timeout:10000});
+  if(waitForCanvas){
+    await expect(handwriting.locator(".handwriting-ink-canvas")).toBeVisible({timeout:10000});
+  }
   return handwriting;
 }
 
@@ -263,7 +265,7 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
       await route.fulfill({status:200,contentType:'image/svg+xml',body:svgFor('学')});
     });
     await clean(page);
-    const handwriting=await openSchoolHandwriting(page);
+    const handwriting=await openSchoolHandwriting(page,{waitForCanvas:false});
     await expect(handwriting.locator('.handwriting-error')).toBeVisible({timeout:10000});
     await expect(handwriting.getByRole('button',{name:'تلاش دوباره',exact:true})).toBeEnabled();
     await handwriting.getByRole('button',{name:'تلاش دوباره',exact:true}).click();
