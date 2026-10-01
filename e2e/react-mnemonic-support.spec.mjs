@@ -23,8 +23,7 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
 
   await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-meaning")).toBeVisible();
   await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings")).toBeVisible();
-  await card.locator(".pager-button").nth(1).click();
-  await card.locator(".pager-button").nth(1).click();
+  await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(2).click();
   const support = card.locator(".learning-back-page.active .mnemonic-support");
   await expect(support).toBeVisible();
   await expect(support).toHaveAttribute("data-hint-stage", /^(new|recovery|early|stable)$/);
