@@ -18,16 +18,14 @@ async function goToMnemonicPage(card) {
         }
       }
       await expect(page).toHaveClass(/active/);
+      await page.locator(".learning-back-scroll").evaluate(async (el) => {
+        const animations = el.getAnimations({ subtree: true });
+        await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+      });
       return;
     }
   }
   throw new Error("Mnemonic page not found");
-}
-
-  await card.locator(".learning-back-page.active .learning-back-scroll").evaluate(async (el) => {
-    const animations = el.getAnimations({ subtree: true });
-    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
-  });
 }
 
 test("prepared mnemonic is available on every learning card and can be saved as personal", async ({ page }) => {
