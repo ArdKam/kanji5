@@ -67,9 +67,11 @@ function PreparedMnemonicLibrary({
   }, []);
 
   const entries = useMemo(
-    () => preparedCore ? preparedCore.buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? [])
-      .sort((a, b) => Number(b.suggestion.source === "curated") - Number(a.suggestion.source === "curated"))
-      .map((entry, index) => ({ ...entry, index })),
+    () => preparedCore
+      ? preparedCore.buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? [])
+        .sort((a, b) => Number(b.suggestion.source === "curated") - Number(a.suggestion.source === "curated"))
+        .map((entry, index) => ({ ...entry, index }))
+      : [],
     [catalog, componentMap, preparedCore]
   );
 
@@ -474,19 +476,21 @@ export function MnemonicsDialog({
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const dialogRef = usePageDialog(open, onClose);
-
-  if (!open) return null;
-
   const [curatedCount, setCuratedCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
     let active = true;
+    setCuratedCount(null);
     void import("./prepared-mnemonic-core").then(module => {
       if (active) setCuratedCount(Object.keys(module.CURATED_PREPARED_MNEMONICS).length);
+    }).catch(() => {
+      if (active) setCuratedCount(null);
     });
     return () => { active = false; };
   }, [open]);
+
+  if (!open) return null;
 
   const generatedCount = Math.max(0, catalog.length - (curatedCount ?? 0));
 
