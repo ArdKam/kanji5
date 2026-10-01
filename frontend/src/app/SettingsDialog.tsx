@@ -23,7 +23,6 @@ export function SettingsDialog({
   snapshot: Snapshot;
   busy: boolean;
   language: Language;
-  onLanguageChange: (language: Language) => void;
   onClose: () => void;
   onSave: (s: Settings) => void;
   onReset: () => void;
