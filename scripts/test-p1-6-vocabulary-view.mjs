@@ -46,12 +46,13 @@ assert.equal(stable.state,'stable');
 assert.equal(stable.status,'stable');
 assert.equal(stable.evidence.currentStreak,2);
 
+const schoolContentId=adapter.project(school).contentId;
 const records={
-  [school.contentId]:adapter.get(school),
+  [schoolContentId]:adapter.get(school),
 };
 const list=buildVocabularyListViewModel([school,student],records);
 assert.equal(list.length,2);
-assert.equal(list[0].contentId,school.contentId);
+assert.equal(list[0].contentId,schoolContentId);
 assert.equal(list[0].status,'stable');
 assert.equal(list[1].status,'new');
 
