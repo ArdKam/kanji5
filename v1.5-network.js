@@ -1,14 +1,8 @@
 import { validateVocabularyList, validateContextList, selectDeterministic, selectAdaptiveContent } from './v1.9-data-quality-core.js';
+import { normalizeVocabularyItem } from './v2-vocabulary-core.js';
 
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
-function stableContentHash(value){
-  let h=2166136261;
-  const source=String(value??'');
-  for(let i=0;i<source.length;i++){h^=source.charCodeAt(i);h=Math.imul(h,16777619)}
-  return (h>>>0).toString(16).padStart(8,'0');
-}
-function vocabularyContentId(word,reading,meaning){return 'vocabulary:'+stableContentHash(String(word??'')+'|'+String(reading??'')+'|'+String(meaning??''))}
 function sentenceContentId(id,text,english){const stableId=String(id??'').trim();return stableId?'sentence:'+stableId:'sentence:'+stableContentHash(String(text??'')+'|'+String(english??''))}
 
 
@@ -33,7 +27,7 @@ export async function fetchWords(character){
       const meaning=(Array.isArray(entry?.meanings)?entry.meanings:[]).flatMap(m=>Array.isArray(m?.glosses)?m.glosses:[]).slice(0,2).join('; ');
       if(!word.includes(character)||!reading||!meaning||seen.has(word))continue;
       seen.add(word);
-      out.push({word,reading,meaning,contentId:vocabularyContentId(word,reading,meaning),source:'kanjiapi.dev'});
+      out.push(normalizeVocabularyItem({word,reading,meaning,source:'kanjiapi.dev'}));
       if(out.length>=24)break;
     }
     if(out.length>=24)break;
