@@ -3159,7 +3159,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
 
 /* Advanced stats — disclosure control; body reuses existing Stats styles. */
 .stats-advanced-trigger{width:100%;justify-content:space-between;}
-.stats-advanced-metrics{margin-bottom:12px;}
 
 /* Prepared Mnemonics Library v2: editorial hierarchy, source clarity, and local action feedback. */
 .dialog.secondary-page-dialog.mnemonics-dialog{
