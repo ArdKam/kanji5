@@ -7,6 +7,49 @@ import { useModalDialog } from "./useModalDialog";
 type AuthMode = "email" | "magic" | "reset";
 type EmailIntent = "sign-in" | "sign-up";
 
+function PasswordField({
+  name, label, value, onChange, autoComplete, disabled, placeholder, showLabel, hideLabel
+}: {
+  name: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: string;
+  disabled: boolean;
+  placeholder?: string;
+  showLabel: string;
+  hideLabel: string;
+}) {
+  const [visible, setVisible] = useState(false);
+  return <label className="account-password-label">
+    <span>{label}</span>
+    <span className="account-password-field">
+      <input
+        dir="ltr"
+        name={name}
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        autoComplete={autoComplete}
+        minLength={6}
+        required
+        disabled={disabled}
+        placeholder={placeholder}
+      />
+      <button
+        className="account-password-toggle"
+        type="button"
+        aria-label={visible ? hideLabel : showLabel}
+        title={visible ? hideLabel : showLabel}
+        onClick={() => setVisible(next => !next)}
+        disabled={disabled}
+      >
+        <UiIcon name={visible ? "eyeOff" : "eye"} size={17} />
+      </button>
+    </span>
+  </label>;
+}
+
 function formatSyncedAt(value: string | null, language: Language) {
   if (!value) return "";
   const date = new Date(value);
