@@ -28,10 +28,12 @@ for(const test of retiredTests){
 // after the frontend has produced a fresh React distribution.
 const buildDependentTests=new Set([
   'test-react-shipped-artifact.mjs',
+  'test-performance-font-loading.mjs',
+  'test-service-worker-shell.mjs',
   'test-v2-p3-accessibility.mjs',
   'test-v2-p4-visual.mjs',
   'test-v2-v18-parity.mjs',
-  'test-service-worker-shell.mjs',
+  'test-react-release-integrity.mjs',
 ]);
 
 const scripts=allScripts.filter(name=>!retiredTests.has(name)&&!buildDependentTests.has(name));
