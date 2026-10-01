@@ -167,7 +167,7 @@ test('changing the learning-card information page clears focus before hiding the
   await overviewAudio.focus();
   await expect(overviewAudio).toBeFocused();
 
-  await card.locator('.learning-back-page-nav .pager-button').last().click();
+  await card.locator('.learning-back-page-nav .learning-back-page-shortcut').nth(1).click();
   await expect(card.locator('.learning-back-page.active')).toHaveAttribute('aria-label','نمونهٔ واژگانی');
   await expect.poll(async()=>page.evaluate(()=>{
     const active=document.activeElement;
