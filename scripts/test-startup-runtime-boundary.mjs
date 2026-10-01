@@ -34,9 +34,9 @@ assert.match(boundary, /await import\('\.\/v1\.5-education-ui\.js'\)/);
 assert.match(engine, /ensureEducationRuntime/);
 assert.doesNotMatch(migration, /import\('\.\/v1\.5-education-ui\.js'\)/);
 assert.doesNotMatch(session, /v1\.8-learning-ux\.js/);
-assert.match(p0, /__KANJI5_P0_DATA_PROMISE/);
+assert.match(p0, /const hasCachedDeck=\(\)=>/);\nassert.match(p0, /kanji5-deck-version/);\nassert.match(p0, /if\(!hasCachedDeck\(\)&&!window\.__KANJI5_P0_DATA_PROMISE\)/);
 assert.match(p0, /__KANJI5_P0_FSRS_PROMISE/);
-assert.match(bootstrap,/serviceWorker\.register/);
+assert.match(bootstrap,/const registerServiceWorker=\(\)=>/);\nassert.match(bootstrap,/serviceWorker\.register/);\nassert.match(bootstrap,/requestIdleCallback\(registerServiceWorker/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);
 
 for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-perf.js','v1.8-learning-ux.js','v1.9-recovery-ui.js'])
