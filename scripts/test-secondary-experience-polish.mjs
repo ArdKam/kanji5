@@ -31,7 +31,10 @@ assert.ok(grammar.includes("grammar-retry"),"Grammar retry action missing");
 assert.match(grammar,/disabled=\{!checked\|\|selectedOption!==lesson\.answer/);
 
 assert.ok(reading.includes("reading-lab-analysis"),"Reading Lab learner-facing analysis missing");
-assert.match(reading,/uniqueKanji - knownKanjiCount/);
+assert.ok(reading.includes("getMasteryBucket"),"Reading Lab mastery classification missing");
+assert.ok(reading.includes("reading-lab-source")&&reading.includes("reading-lab-listen")&&reading.includes("reading-lab-reader"),"Reading Lab workflow hierarchy missing");
+assert.match(reading,/counts\.familiar \/ extracted\.length/);
+assert.match(reading,/readingLabCoverage/);
 
 assert.ok(mnemonics.includes("item?.meanings"),"Mnemonic search does not include meanings");
 assert.ok(mnemonics.includes("item?.on"),"Mnemonic search does not include on readings");
