@@ -189,15 +189,6 @@ export type Boundary = {
 };
 
 
-declare global {
-  interface Window {
-    __KANJI5_V19_V2_BOUNDARY__?: Boundary;
-    __KANJI5_EDU_BRIDGE__?: EducationBridge;
-    __KANJI5_V16_SESSION_API__?: SessionApi;
-    __KANJI5_V19_LEARNER_MODEL__?: { project?: (character:string)=>Promise<{skills?:{handwriting?:HandwritingSkill}}>; recordOutcome?: (detail:Record<string,unknown>)=>Promise<unknown>|unknown; };
-  }
-}
-
 export async function waitForEngine(timeoutMs = 12000): Promise<Boundary> {
   const started = performance.now();
   while (performance.now() - started < timeoutMs) {
