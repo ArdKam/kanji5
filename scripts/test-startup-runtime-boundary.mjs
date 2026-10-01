@@ -48,7 +48,7 @@ assert.match(bootstrap,/serviceWorker\.register/);
 assert.match(bootstrap,/requestIdleCallback\(registerServiceWorker/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);
 
-for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-perf.js','v1.8-learning-ux.js','v1.9-recovery-ui.js'])
+for (const file of ['app-bootstrap-v115.js','tmp.md','v1.3-settings.js','v1.3-perf.js','v1.8-learning-ux.js','v1.9-recovery-ui.js','v1.5-education-ui.css','learning-card-flip-runtime.js'])
   assert.equal(fs.existsSync(file), false, `retired file still exists: ${file}`);
 
 for (const file of ['v1.4-education-migration.js','v1.4-education-core.js','v1.5-education-ui.js','v1.9-recovery.js'])
