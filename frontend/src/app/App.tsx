@@ -32,6 +32,7 @@ import {
   startExercise,
   startPracticeExperience,
   startLearningExperience,
+  startLearningSession,
   startCustomStudy,
   submitExercise,
   saveMnemonic,
@@ -894,11 +895,7 @@ function App(){
     let mounted=true;
     const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d){setSnapshot(d);setSnapshotHydrated(true)}};
     document.addEventListener("kanji5:v1.9-v2-view-models",listener);
-    void startLearningExperience().then(async()=>{
-      if(!mounted)return;
-      if(experienceRef.current==="practice")await startPracticeExperience();
-      else if(experienceRef.current==="dictionary"){await clearCustomStudyFilter();await clearTransient()}
-    }).catch(()=>{});
+    void startLearningSession().catch(()=>{});
     void readStartupSnapshot().then(s=>{
       if(!mounted)return;
       setSnapshot(s);
