@@ -32,6 +32,11 @@ assert.match(boundary, /await import\('\.\/v1\.4-education-core\.js'\)/);
 assert.match(boundary, /await import\('\.\/v1\.9-recovery\.js'\)/);
 assert.match(boundary, /await import\('\.\/v1\.5-education-ui\.js'\)/);
 assert.match(engine, /ensureEducationRuntime/);
+assert.match(engine, /waitForEngine\(\)\.startLearningSession/);
+assert.doesNotMatch(engine, /__KANJI5_(?:EDU_BRIDGE|V16_SESSION_API|V19_LEARNER_MODEL)__/, 'React engine adapter must not access runtime globals directly');
+for (const api of ['startLearningSession','startLearningExperience','startPracticeExperience','startExercise','submitExercise','dontKnowExercise','selfReportProduction','retryExercise','nextExercise','getHandwritingSkill','recordHandwritingGrade'])
+  assert.match(boundary, new RegExp(api), 'boundary must own '+api+' bridge');
+
 assert.doesNotMatch(migration, /import\('\.\/v1\.5-education-ui\.js'\)/);
 assert.doesNotMatch(session, /v1\.8-learning-ux\.js/);
 assert.match(p0, /const hasCachedDeck=\(\)=>/);
