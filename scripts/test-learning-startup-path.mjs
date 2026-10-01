@@ -11,7 +11,7 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
-for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice','StrokeOrderViewer']) {
+for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
   mustContain(app,`const ${name} = lazy(`,`Learning startup must lazy-load ${name}`);
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),`Eager import remains for ${name}`);
 }
@@ -19,7 +19,8 @@ for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHom
 mustContain(app,'<Suspense fallback={null}>','Secondary pages must be suspense-wrapped');
 mustContain(app,'secondary-page-host','Secondary page host must remain present');
 mustContain(app,'<Suspense fallback={<LoadingLearning/>}><DictionaryPage','Dictionary must not block the Learning bundle');
-mustContain(app,'<Suspense fallback={null}><StrokeOrderViewer','Stroke order must be demand-loaded');
+mustContain(app,'import { StrokeOrderViewer } from "./StrokeOrderViewer";','Stroke Order must remain on the stable React module');
+mustContain(app,'card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer','Stroke Order must mount only on its active page');
 mustContain(app,'<h2>{t("learningCard")}</h2>','Loading Learning surface must expose the same semantic heading early');
 mustContain(app,'startupSnapshot as readStartupSnapshot','React must consume the Learning-first boundary');
 mustContain(app,'startLearningSession','Initial mount must avoid filter-clearing refresh work');
