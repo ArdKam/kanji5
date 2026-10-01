@@ -27,6 +27,4 @@ assert.equal(isV2BoundarySnapshot(snapshot),true);
 assert.equal(snapshot.learning.kind,'learning-card');
 assert.equal(Object.prototype.hasOwnProperty.call(snapshot.session,'rawStorage'),false);
 
-const boundary=Object.freeze({snapshot:async()=>snapshot,getStats:async()=>stats});
-assert.equal(typeof boundary.getStats,'function');
 console.log('Kanji 5 v1.9 v2 boundary contract passed.');
