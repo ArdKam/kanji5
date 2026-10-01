@@ -11,10 +11,15 @@ function normalizeItems(items){
 }
 
 function readRecord(store,item){
+  if(typeof store?.get!=='function')return null;
+  const contentId=text(item?.contentId);
   try{
-    if(typeof store?.get!=='function')return null;
-    if(store.get.length<=1)return store.get(item)||null;
-    return store.get('vocabulary',text(item?.contentId))||null;
+    const adapted=store.get(item);
+    if(adapted&&typeof adapted==='object')return adapted;
+  }catch(_){}
+  try{
+    const direct=store.get('vocabulary',contentId);
+    return direct&&typeof direct==='object'?direct:null;
   }catch(_){
     return null;
   }
@@ -27,7 +32,7 @@ function readRecords(items,store){
     const contentId=text(item?.contentId);
     if(!contentId)continue;
     const record=readRecord(store,item);
-    if(record&&typeof record==='object')records[contentId]=record;
+    if(record)records[contentId]=record;
   }
   return records;
 }
