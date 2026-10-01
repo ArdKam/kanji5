@@ -189,7 +189,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   };
 
   return (
-    <section className="stats-advanced surface" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
+    <section className="stats-advanced surface card" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
       <div className="stats-section-heading">
         <div>
           <p className="eyebrow">{language === "fa" ? "جزئیات" : "Details"}</p>
@@ -201,7 +201,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
         </div>
       </div>
 
-      <div className="stats-advanced-table" role="list" aria-label={language === "fa" ? "جزئیات مهارت‌ها" : "Skill details"}>
+      <div className="stats-skills-list stats-advanced-table" role="list" aria-label={language === "fa" ? "جزئیات مهارت‌ها" : "Skill details"}>
         {skillKeys.map(key => {
           const skill = (snapshot.learner?.attributes?.[key] ?? {}) as AdvancedSkill;
           const attempts = Number(skill.attempts);
@@ -209,7 +209,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
           return (
             <div className="row stats-advanced-row" role="listitem" key={key}>
               <strong>{skillLabels[key]}</strong>
-              <span>
+              <span className="stats-skill-state">
                 {language === "fa"
                   ? `دقت ${formatRate(skill.accuracy, language)} · اخیر ${formatRate(skill.recentAccuracy, language)} · ${attemptLabel} تلاش · ${stateLabel(skill.state)}`
                   : `${formatRate(skill.accuracy, language)} accuracy · ${formatRate(skill.recentAccuracy, language)} recent · ${attemptLabel} attempts · ${stateLabel(skill.state)}`}
