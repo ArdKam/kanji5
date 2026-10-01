@@ -117,6 +117,8 @@ test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await expect(practiceHome).toBeVisible({timeout:10000});
   const panel=practiceHome.locator('.practice-custom-study');
   await expect(panel).toBeVisible();
+  await panel.locator('summary').click();
+  await expect(panel).toHaveAttribute('open','');
   await panel.locator('select').first().selectOption('N5');
   await panel.getByRole('button',{name:'فقط جدیدها',exact:true}).click();
   await panel.getByRole('button',{name:'شروع مطالعه',exact:true}).click();
