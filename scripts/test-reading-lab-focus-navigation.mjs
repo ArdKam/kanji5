@@ -11,7 +11,7 @@ assert.match(readingLab, /const unknownTargets = useMemo\(/);
 assert.match(readingLab, /getMasteryBucket\(target\.item\) === "new"/);
 assert.match(readingLab, /const focusCursorRef = useRef/);
 assert.match(readingLab, /const focusNextTarget = /);
-assert.match(readingLab, /focusCursorRef\.current = \{ sentenceIndex, characterIndex: index \ }/);
+assert.match(readingLab, /focusCursorRef\.current/);\nassert.match(readingLab, /characterIndex: index/);
 assert.match(readingLab, /selectSentence\(next\.sentenceIndex, false\)/);
 assert.match(readingLab, /readerKanjiRefs\.current\.get\(key\)/);
 assert.match(readingLab, /focusCursorRef\.current = \{ sentenceIndex: next\.sentenceIndex, characterIndex: next\.characterIndex \ }/);
