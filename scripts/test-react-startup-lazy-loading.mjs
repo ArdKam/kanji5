@@ -15,5 +15,7 @@ assert.match(source,/Suspense/);
 assert.match(vite,/dedupe:\s*\["react",\s*"react-dom"\]/);
 assert.match(vite,/react:\s+resolve\("node_modules\/react"\)/);
 assert.match(vite,/"react-dom": resolve\("node_modules\/react-dom"\)/);
+assert.match(vite,/name: "react-vendor"/);
+assert.match(vite,/test: \/\\/node_modules\\\/(?:react\|react-dom)\\\//);
 
 console.log('Non-learning UI lazy-loading contract: PASS');
