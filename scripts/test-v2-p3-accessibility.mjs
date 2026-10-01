@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const app=fs.readFileSync('frontend/src/app/App.tsx','utf8');
-const css=fs.readFileSync('react-dist/kanji5-react.css','utf8');
+const css=fs.readFileSync('frontend/src/styles.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
 assert.match(app,/aria-/);assert.match(app,/aria-/);assert.match(app,/button/);
