@@ -7,7 +7,7 @@ const roadmap=fs.readFileSync('V2-ROADMAP.md','utf8');
 assert.match(app,/app-shell/);assert.match(app,/daily-summary/);assert.match(app,/function Learning/);
 for(const token of ['--washi:','--paper:','--sumi:','--ink:','--mute:','--shu:','--ai:','--matcha:','--line:'])assert.ok(css.includes(token),token);
 for(const cls of ['.app-shell','.surface','.card','.daily-summary','.stat-card','.progress','.button','.feedback','.dialog'])assert.ok(css.includes(cls),cls);
-assert.ok(css.includes('focus-visible'));assert.ok(css.includes('prefers-reduced-motion:reduce'));assert.ok(css.includes('@media (width<=760px)'));
+assert.ok(css.includes('focus-visible'));assert.ok(css.includes('prefers-reduced-motion:reduce'));assert.ok(/@media\s*\(max-width:760px\)/.test(css));
 assert.match(sw,/const CACHE='kanji5-shell-v\d+'/);assert.ok(sw.includes('./react-dist/kanji5-react.css'));assert.doesNotMatch(sw,/v2-presentation\.css/);
 assert.match(roadmap,/P4 — Visual System & Polish/);
 console.log('Kanji 5 React visual-system contract passed.');
