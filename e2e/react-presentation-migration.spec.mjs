@@ -311,7 +311,7 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
     const calls=[];
     Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
       cancel:()=>calls.push({type:'cancel'}),
-      speak:(utterance)=>{calls.push({type:'speak',text:utterance.text,lang:utterance.lang,rate:utterance.rate});utterance.onstart?.();},
+      speak:(utterance)=>{window.__KANJI5_LAST_UTTERANCE__=utterance;calls.push({type:'speak',text:utterance.text,lang:utterance.lang,rate:utterance.rate});utterance.onstart?.();},
     }});
     Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
       constructor(text){this.text=text;this.lang='';this.rate=1;this.onstart=null;this.onend=null;this.onerror=null;}
@@ -349,6 +349,26 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await expect(stop).toBeEnabled();
   await stop.click();
   await expect(stop).toBeDisabled();
+
+  const repeatSentence=lab.getByRole('button',{name:'تکرار جمله',exact:true});
+  await expect(repeatSentence).toBeEnabled();
+  await repeatSentence.click();
+  const repeatCalls=await page.evaluate(()=>(window.__KANJI5_SPEECH_CALLS__||[]));
+  expect(repeatCalls.some(call=>call.type==='speak'&&call.text==='二番目の文もここで読みます。'&&call.lang==='ja-JP'&&call.rate===1)).toBe(true);
+  await stop.click();
+
+  await lab.locator('.reading-lab-sentence-prev').click();
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۱ / ۲');
+  const autoplay=lab.getByRole('button',{name:'پخش خودکار',exact:true});
+  await autoplay.click();
+  await expect(autoplay).toHaveAttribute('aria-pressed','true');
+  const autoplayFirst=await page.evaluate(()=>(window.__KANJI5_LAST_UTTERANCE__?.text)||'');
+  expect(autoplayFirst).toBe('これは日本語の読み上げテストです。');
+  await page.evaluate(()=>window.__KANJI5_LAST_UTTERANCE__?.onend?.());
+  await expect.poll(async()=>page.evaluate(()=>(window.__KANJI5_LAST_UTTERANCE__?.text)||''),{timeout:1000}).toBe('二番目の文もここで読みます。');
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await page.evaluate(()=>window.__KANJI5_LAST_UTTERANCE__?.onend?.());
+  await expect(autoplay).toHaveAttribute('aria-pressed','false');
 
   const labText='これは日本語の読み上げテストです。二番目の文もここで読みます。';
   await expect(lab.locator('textarea')).toHaveValue(labText);
