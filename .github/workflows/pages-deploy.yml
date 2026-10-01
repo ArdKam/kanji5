@@ -43,6 +43,11 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Materialize automatic build hash
+        env:
+          BUILD_HASH: ${{ github.sha }}
+        run: sed -i "s/__KANJI5_BUILD_HASH__/${BUILD_HASH}/g" index.html sw.js
+
       - name: Validate shipped React artifact
         run: node scripts/test-react-shipped-artifact.mjs
       - name: Validate generated presentation contracts
