@@ -139,7 +139,7 @@ function PreparedMnemonicLibrary({
     save: "ذخیره در یادسپار شخصی",
     saving: "در حال ذخیره…",
     saved: "✓ در یادسپار شخصی ذخیره شد",
-    build: "ساخت یادسپار شخصی",
+    build: "باز کردن کارت برای ساخت",
     openKanji: "مشاهدهٔ کانجی",
     scaffoldTitle: "این متن یادسپار نهایی نیست",
     scaffoldHint: "از اجزای شکل و این سرنخ به‌عنوان نقطهٔ شروع استفاده کن؛ یادسپار را برای خودت قابل‌معنا کن.",
@@ -174,7 +174,7 @@ function PreparedMnemonicLibrary({
     save: "Save to personal mnemonics",
     saving: "Saving…",
     saved: "✓ Saved to personal mnemonics",
-    build: "Build personal mnemonic",
+    build: "Open card to build",
     openKanji: "Open kanji",
     scaffoldTitle: "This is not a finished mnemonic",
     scaffoldHint: "Use the shape clues as a starting point, then make the connection meaningful to you.",
@@ -502,7 +502,6 @@ export function MnemonicsDialog({
         onRetry={onRetry}
         onSelectKanji={item => {
           onSelectKanji(item);
-          onClose();
         }}
       />
     </dialog>
