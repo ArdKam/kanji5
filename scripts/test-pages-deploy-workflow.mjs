@@ -8,6 +8,8 @@ assert.match(source, /Build shipped React artifact from source/);
 assert.match(source, /react-dist\/kanji5-react\.js/);
 assert.match(source, /react-dist\/kanji5-react\.css/);
 assert.match(stagingSource, /"sw\.js"/);
+assert.doesNotMatch(source, /workflow_run:/);
+assert.doesNotMatch(source, /github\.event\.workflow_run/);
 
 assert.match(source, /fetch_with_retry "\$base\/" \/tmp\/kanji5-root\.html "react-entry\.js"/);
 assert.match(source, /fetch_with_retry "\$base\/react-entry\.js" \/tmp\/kanji5-entry\.js "react-dist\/kanji5-react\.js"/);
@@ -32,4 +34,4 @@ assert.match(source, /node scripts\/stage-pages-site\.mjs/);
 assert.match(source, /path: _site/);
 assert.doesNotMatch(source, /path: \.\s*$/m);
 
-console.log("Pages staging contract includes the service worker shell entry.");
+console.log("Pages deployment is single-source and staging includes the service worker shell entry.");
