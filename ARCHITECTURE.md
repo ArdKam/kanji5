@@ -8,7 +8,7 @@ This document is the living architecture reference for the current release line.
 
 The active browser runtime is intentionally split into narrow responsibilities:
 
-- `index.html`: minimal application shell and runtime wiring.
+- `index.html`: minimal application shell and runtime wiring; no legacy presentation loader.
 - `react-entry.js`: production presentation bootstrap and React stylesheet loading.
 - `frontend/src/app/App.tsx`: presentation components and interaction state.
 - `frontend/src/app/engine.ts`: typed adapter over authoritative runtime boundaries.
@@ -23,9 +23,9 @@ The active browser runtime is intentionally split into narrow responsibilities:
 - `v1.9-v2-contract-core.js`: stable structured presentation contracts.
 - `v1.9-v2-boundary.js`: browser orchestration boundary that translates authoritative runtime state into structured view models.
 - `supabase-sync.js`: remote transport only.
-- `sw.js`: offline shell/data/API caching and active runtime precaching.
+- `sw.js`: the single active service worker for offline shell/data/API caching and runtime precaching.
 
-The former v1/v2 DOM presentation files and compatibility stylesheet are no longer part of the production runtime.
+The former v1/v2 DOM presentation files, legacy `?legacy=1` loader, and release-specific bootstrap/service-worker variants are no longer part of the production runtime.
 
 ## Dependency direction
 
@@ -67,4 +67,4 @@ Meaning, Reading, Production, Vocabulary, and Context grading remain determinist
 
 `npm test` is the local entry point for active contract/unit tests. React-specific browser validation is performed by the React presentation workflow. Obsolete DOM-presentation compatibility suites are retired rather than treated as production gates.
 
-A release should pass syntax validation, active contract/unit tests, React browser E2E, service-worker/runtime wiring, architecture boundaries, and release-contract checks.
+A release should pass syntax validation, active contract/unit tests, React browser E2E, service-worker/runtime wiring, architecture boundaries, and release-contract checks. `react-dist/` is generated during build/deploy and is not committed.
