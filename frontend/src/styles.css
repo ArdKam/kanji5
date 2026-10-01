@@ -2399,6 +2399,25 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .settings-dialog{
   color:var(--ink);
 }
+.settings-dialog{
+  overflow:hidden;
+}
+.settings-form{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  overflow:hidden;
+}
+.settings-form-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  padding-inline:1px;
+}
+
 .settings-page-header{
   padding:2px 42px 20px 0;
 }
@@ -2574,12 +2593,12 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   line-height:1.55;
 }
 .settings-save-region{
-  position:sticky;
-  bottom:0;
+  position:relative;
   z-index:8;
+  flex:0 0 auto;
   display:grid;
   gap:9px;
-  margin:0 -24px -24px;
+  margin:0 -24px 0;
   padding:12px 24px calc(12px + env(safe-area-inset-bottom));
   border-top:1px solid var(--line-soft);
   background:color-mix(in srgb,var(--paper) 96%,transparent);
@@ -2604,6 +2623,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   margin-top:20px;
   border-top:1px solid var(--line-soft);
   padding-top:10px;
+  margin-bottom:4px;
 }
 .settings-reset-trigger{
   width:100%;
@@ -2766,7 +2786,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   .settings-description{max-width:44ch;}
   .settings-save-region{
     margin-inline:-16px;
-    margin-bottom:-16px;
+    margin-bottom:0;
     padding-inline:16px;
   }
   .settings-backup-actions,
