@@ -42,5 +42,7 @@ console.log("Kanji5 secondary experience polish contract passed.");
 assert.ok(settings.includes('DataBackup'),"Settings data backup surface missing");
 assert.ok(!settings.includes('PlacementDiagnostic')&&!settings.includes('onRetakePlacement'),"Placement should not be owned by Settings");
 assert.ok(settings.includes('settingsUnsaved')&&settings.includes('settingsDiscardTitle'),"Settings dirty-state UX missing");
+assert.ok(settings.includes('settings-reset-trigger'),"Compact destructive action trigger missing");
+assert.ok(!settings.includes('ناحیهٔ خطر')&&!settings.includes('Danger zone'),"Destructive section label should not be shown to users");
 assert.ok(backup.includes('createBackup')&&backup.includes('restoreBackup'),"Full backup UI actions missing");
 assert.ok(state.includes('PORTABLE_BACKUP_FORMAT')&&state.includes('portableBackup(')&&state.includes('restorePortableBackup('),"Portable backup state contract missing");
