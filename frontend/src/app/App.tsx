@@ -115,7 +115,8 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     }).catch(()=>{
       if(active)setPreparedMnemonic(null);
     });
-    void getComponentInfo(card.character!).then(info=>{
+    const componentInfoPromise = getComponentInfo(card.character);
+    void componentInfoPromise.then(info=>{
       if(!active)return;
       setComponentInfo(info);
       setComponentInfoReady(true);
