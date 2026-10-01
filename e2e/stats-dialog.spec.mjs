@@ -30,8 +30,8 @@ test('Statistics dialog exposes a focused progress dashboard',async({page})=>{
   await expect(dialog.locator('.activity-bar-wrap .activity-label')).toHaveCount(7);
   await expect(dialog.locator('.stats-dashboard .dialog-grid')).toHaveCount(0);
   await expect(dialog.locator('.stats-dashboard .stats-hero')).toHaveCount(0);
-  await expect(dialog.locator('.stats-advanced')).toBeVisible();
-  await expect(dialog.locator('.stats-advanced')).not.toHaveAttribute('open', '');
+  await expect(dialog.locator('.stats-advanced-trigger')).toBeVisible();
+  await expect(dialog.locator('.stats-advanced')).toHaveCount(0);
 });
 
 test('Statistics dashboard switches labels consistently to English',async({page})=>{
@@ -76,11 +76,14 @@ test('Advanced statistics stay collapsed until explicitly opened',async({page})=
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   const dialog=await openStats(page);
+  const trigger=dialog.locator('.stats-advanced-trigger');
   const advanced=dialog.locator('.stats-advanced');
+  await expect(trigger).toBeVisible();
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await expect(advanced).toHaveCount(0);
+  await trigger.click();
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
   await expect(advanced).toBeVisible();
-  await expect(advanced).not.toHaveAttribute('open', '');
-  await advanced.locator('summary').click();
-  await expect(advanced).toHaveAttribute('open', '');
   await expect(advanced.locator('.stats-advanced-table')).toBeVisible();
   await expect(advanced).toContainText('دقت');
   await expect(advanced).toContainText('تلاش');
