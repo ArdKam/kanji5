@@ -31,3 +31,5 @@ test('React presentation does not expose a second DOM renderer',async({page})=>{
   await cleanStart(page);
   await expect(page.locator('#v2App, .wrap, #app, #loading')).toHaveCount(0);
 });
+
+test('Learning keeps session feedback compact and does not render analytics details',async({page})=>{\n  await cleanStart(page);\n  await expect(page.locator('#root .insights')).toHaveCount(0);\n  await expect(page.locator('#root .session-feedback')).toHaveCount(0);\n  const card=page.locator('#root .learning-card');\n  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();\n  await expect(card).toHaveClass(/is-revealed/,{timeout:10000});\n  await card.locator('.rating-grid button').nth(2).click();\n  await expect(page.locator('#root .session-feedback')).toBeVisible({timeout:10000});\n  await expect(page.locator('#root .insights')).toHaveCount(0);\n});
