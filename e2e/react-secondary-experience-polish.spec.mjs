@@ -110,7 +110,7 @@ test("Settings is learner-first: placement stays in Active Recall and changes re
   await expect(discard).toBeVisible();
   await discard.getByRole("button", { name: "Keep editing", exact: true }).click();
   await dailyNew.fill("8");
-  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  await settings.locator(".dialog-close").click();
   await settings.getByRole("alertdialog").getByRole("button", { name: "Discard changes", exact: true }).click();
 
   const practice = await openMenuItem(page, "Settings");
