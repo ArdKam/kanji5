@@ -132,10 +132,25 @@ for (const profile of profiles) {
       `application transfer budget exceeded: ${metrics.appTransferKB}KB > ${startupBudgets.appTransferKB}KB`
     ).toBeLessThanOrEqual(startupBudgets.appTransferKB);
 
-    const interactionStart = await page.evaluate(() => performance.now());
+    await page.evaluate(() => {
+      window.__KANJI5_PERF_INTERACTION__ = { startedAt: 0, paintedAt: 0 };
+      const button = document.querySelector(".header-menu-trigger");
+      if (button) {
+        button.addEventListener("click", () => {
+          window.__KANJI5_PERF_INTERACTION__.startedAt = performance.now();
+          requestAnimationFrame(() => {
+            window.__KANJI5_PERF_INTERACTION__.paintedAt = performance.now();
+          });
+        }, { once: true });
+      }
+    });
     await page.getByRole("button", { name: "بیشتر", exact: true }).click();
     await expect(page.locator("#header-tools-menu")).toHaveClass(/open/);
-    const interactionMs = await page.evaluate((start) => performance.now() - start, interactionStart);
+    const interactionMs = await page.evaluate(() => {
+      const value = window.__KANJI5_PERF_INTERACTION__;
+      return value?.startedAt && value?.paintedAt ? value.paintedAt - value.startedAt : 0;
+    });
+    expect(interactionMs, "interaction timing was not captured").toBeGreaterThan(0);
     expect(
       interactionMs,
       `critical navigation interaction exceeded budget: ${interactionMs.toFixed(0)}ms > ${startupBudgets.interactionMs}ms`
