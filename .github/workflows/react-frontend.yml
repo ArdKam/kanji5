@@ -152,11 +152,11 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: node scripts/test-kanji-radical-system.mjs
       - name: Install root test dependencies
-        working-directory: ${{ github.workspace }}
-        run: npm ci
+        working-directory: frontend
+        run: npm --prefix "$GITHUB_WORKSPACE" ci
       - name: Run root contract/unit suite
-        working-directory: ${{ github.workspace }}
-        run: npm test
+        working-directory: frontend
+        run: npm --prefix "$GITHUB_WORKSPACE" test
       - name: Install Chromium
         working-directory: ${{ github.workspace }}
         run: npx playwright install chromium
