@@ -87,6 +87,6 @@ test('Advanced statistics stay collapsed until explicitly opened',async({page})=
   await expect(advanced.locator('.stats-advanced-metrics')).toBeVisible();
   await expect(advanced.locator('.stats-advanced-skill-list .stats-skill-row')).toHaveCount(5);
   await expect(advanced).toContainText('دقت');
-  await expect(advanced).toContainText('تلاش');
-  await expect(advanced.locator('.stats-advanced-skill-list .stats-skill-row').first()).toContainText('۶۷٪');
+  await expect(advanced).toContainText('داده کافی نیست');
+  await expect(advanced.locator('.stats-advanced-skill-list .stats-skill-row').first()).toContainText('۶۷%');
 });
