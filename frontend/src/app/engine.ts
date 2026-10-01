@@ -175,6 +175,17 @@ export type Boundary = {
   updateSettings: (value: Settings) => Promise<Snapshot>;
   clearTransient?: () => Promise<boolean>;
   resetProgress?: () => boolean;
+  startLearningSession: () => Promise<void>;
+  startLearningExperience: () => Promise<void>;
+  startPracticeExperience: () => Promise<void>;
+  startExercise: () => Promise<void>;
+  submitExercise: (value:string) => Promise<ExerciseOutcome | unknown>;
+  dontKnowExercise: () => Promise<ExerciseOutcome | unknown>;
+  selfReportProduction: (knewIt:boolean) => Promise<ExerciseOutcome | unknown>;
+  retryExercise: () => Promise<unknown>;
+  nextExercise: () => Promise<void>;
+  getHandwritingSkill: (character:string) => Promise<HandwritingSkill|null>;
+  recordHandwritingGrade: (character:string,grade:HandwritingGradeLike) => Promise<boolean>;
 };
 
 type EducationStartResult = {
@@ -248,94 +259,36 @@ export function resetProgress(): boolean {
 }
 
 export async function startLearningSession(): Promise<void> {
-  await waitForEngine();
-  const session = window.__KANJI5_V16_SESSION_API__;
-  if (session?.start) await session.start();
-  else if (session?.startExperience) await session.startExperience("review");
+  return (await waitForEngine()).startLearningSession();
 }
-
 export async function startLearningExperience(): Promise<void> {
-  const boundary = await waitForEngine();
-  await boundary.clearCustomStudyFilter?.();
-  const session = window.__KANJI5_V16_SESSION_API__;
-  if (session?.startExperience) await session.startExperience("review");
+  return (await waitForEngine()).startLearningExperience();
 }
-
 export async function startPracticeExperience(): Promise<void> {
-  await waitForEngine();
-  const session = window.__KANJI5_V16_SESSION_API__;
-  if (session?.startExperience) await session.startExperience("practice");
+  return (await waitForEngine()).startPracticeExperience();
 }
-
 export async function startExercise(): Promise<void> {
-  const boundary = await waitForEngine();
-  await boundary.clearCustomStudyFilter?.();
-  const educationReady = await boundary.ensureEducationRuntime();
-  if (!educationReady) throw new Error("KANJI5_EDUCATION_RUNTIME_UNAVAILABLE");
-  const bridge = window.__KANJI5_EDU_BRIDGE__;
-  if (!bridge?.start) throw new Error("KANJI5_EDU_BRIDGE_UNAVAILABLE");
-  const session = window.__KANJI5_V16_SESSION_API__;
-  if (session?.startExperience) await session.startExperience("practice");
-  else {
-    const current = session?.getSession?.();
-    if (session?.startReady && !current?.started && !current?.finished) await session.startReady();
-    else if (session?.start && !current?.started && !current?.finished) await session.start();
-  }
-  const startResult = await bridge.start();
-  if (startResult && typeof startResult === "object" && "started" in startResult && startResult.started === false) {
-    throw new Error("KANJI5_NO_EXERCISE_AVAILABLE");
-  }
-  const started = performance.now();
-  while (performance.now() - started < 15000) {
-    const current = await snapshot();
-    if (current.exercise?.mode && current.exercise?.prompt && current.exercise?.stimulus) return;
-    await new Promise((resolve) => window.setTimeout(resolve, 50));
-  }
-  throw new Error("KANJI5_EXERCISE_READY_TIMEOUT");
+  return (await waitForEngine()).startExercise();
 }
 
 type ExerciseOutcome = { correct?: boolean; outcome?: string; quality?: string; score?: number };
 
-async function awaitExerciseOutcome(result: unknown): Promise<ExerciseOutcome | unknown> {
-  if (result && typeof result === "object") return result;
-  const started = performance.now();
-  while (performance.now() - started < 2500) {
-    const feedback = (await snapshot()).feedback;
-    if (feedback?.outcome && typeof feedback.correct === "boolean") return feedback;
-    await new Promise((resolve) => window.setTimeout(resolve, 40));
-  }
-  return result;
-}
-
 export async function submitExercise(value: string): Promise<ExerciseOutcome | unknown> {
-  const fn = window.__KANJI5_EDU_BRIDGE__?.submitValue;
-  if (!fn) throw new Error("KANJI5_EDU_SUBMIT_UNAVAILABLE");
-  return awaitExerciseOutcome(await fn(value));
+  return (await waitForEngine()).submitExercise(value);
 }
-
 export async function dontKnow(): Promise<ExerciseOutcome | unknown> {
-  const fn = window.__KANJI5_EDU_BRIDGE__?.dontKnow;
-  if (!fn) throw new Error("KANJI5_EDU_DONT_KNOW_UNAVAILABLE");
-  return awaitExerciseOutcome(await fn());
+  return (await waitForEngine()).dontKnowExercise();
 }
-
 export async function selfReportProduction(knewIt: boolean): Promise<ExerciseOutcome | unknown> {
-  const fn = window.__KANJI5_EDU_BRIDGE__?.selfReportProduction;
-  if (!fn) throw new Error("KANJI5_EDU_SELF_REPORT_UNAVAILABLE");
-  return awaitExerciseOutcome(await fn(Boolean(knewIt)));
+  return (await waitForEngine()).selfReportProduction(knewIt);
 }
-
 export async function retryExercise(): Promise<unknown> {
-  const fn = window.__KANJI5_EDU_BRIDGE__?.retry;
-  if (!fn) throw new Error("KANJI5_EDU_RETRY_UNAVAILABLE");
-  return await fn();
+  return (await waitForEngine()).retryExercise();
+}
+export async function nextExercise(): Promise<void> {
+  return (await waitForEngine()).nextExercise();
 }
 
-export async function nextExercise(): Promise<void> {
-  const fn = window.__KANJI5_EDU_BRIDGE__?.next;
-  if (!fn) throw new Error("KANJI5_EDU_NEXT_UNAVAILABLE");
-  await fn();
-}
 export async function searchKanji(query: string, limit = 24): Promise<{ query: string; results: KanjiDictionaryResult[] }> {
   return (await waitForEngine()).searchKanji(query, limit);
 }
@@ -389,5 +342,9 @@ export async function getRadicalInfo(character: string): Promise<RadicalInfo> {
   return (await waitForEngine()).getRadicalInfo(character);
 }
 
-export async function getHandwritingSkill(character:string):Promise<HandwritingSkill|null>{const key=String(character||"").trim();if(!key)return null;const started=performance.now();while(performance.now()-started<6000){const api=window.__KANJI5_V19_LEARNER_MODEL__;if(api?.project){try{return(await api.project(key))?.skills?.handwriting??null}catch{return null}}await new Promise(resolve=>window.setTimeout(resolve,50))}return null}
-export async function recordHandwritingGrade(character:string,grade:HandwritingGradeLike):Promise<boolean>{const key=String(character||"").trim(),fn=window.__KANJI5_V19_LEARNER_MODEL__?.recordOutcome;if(!key||!fn)return false;const score=Math.max(0,Math.min(1,Number(grade?.overallSimilarity||0)/100)),evidence:Record<string,unknown>={};const weak=Array.isArray(grade?.perStroke)?grade.perStroke.find(row=>Number(row.strokeNumber)===Number(grade?.feedbackStroke)):null;if(weak)for(const metric of ["shape","endpoints","length","direction","curvature","placement"]){const value=Number(weak[metric]);if(Number.isFinite(value))evidence[metric]=Math.max(0,Math.min(1,value))}if(typeof grade?.feedbackCode==="string")evidence.feedbackCode=grade.feedbackCode;if(Number.isFinite(Number(grade?.feedbackStroke)))evidence.feedbackStroke=Number(grade.feedbackStroke);const outcome=grade?.feedbackCode==="good"||score>=.88?"correct":"wrong";return Boolean(await fn({character:key,mode:"handwriting",outcome,correct:outcome==="correct",quality:outcome==="correct"?"good":"needs-work",score,graderVersion:"handwriting-vector-v2",schemaVersion:1,evidence}))}
+export async function getHandwritingSkill(character:string):Promise<HandwritingSkill|null>{
+  return (await waitForEngine()).getHandwritingSkill(character);
+}
+export async function recordHandwritingGrade(character:string,grade:HandwritingGradeLike):Promise<boolean>{
+  return (await waitForEngine()).recordHandwritingGrade(character,grade);
+}
