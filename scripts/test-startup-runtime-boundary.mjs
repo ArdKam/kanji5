@@ -43,6 +43,7 @@ assert.match(bootstrap,/serviceWorker\.register/);
 assert.match(bootstrap,/requestIdleCallback\(registerServiceWorker/);
 assert.match(entry,/react-dist\/kanji5-react\.js/);
 assert.match(entry,/function scheduleAccountFallback\(\)/);
+assert.doesNotMatch(entry,/function mountAccountFallback\(\)/);
 assert.match(entry,/import\('\.\/account-fallback\.js\?v=20261001'\)/);
 assert.doesNotMatch(index, /<script[^>]+src=["']\.\/account-fallback\.js/);
 assert.match(index, /id="kanji5-account-launcher" class="is-shadowed"/);
