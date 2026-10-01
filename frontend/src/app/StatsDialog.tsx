@@ -183,6 +183,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
     context: t("context", language),
   };
   const stateLabel = (state?: string) => {
+    if (!state) return "—";
     if (state === "weak" || state === "recovering") return t("masteryNeedsAttention", language);
     if (state === "stable") return t("masteryStable", language);
     if (state === "mastered") return t("masteryMastered", language);
