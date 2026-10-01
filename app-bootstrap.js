@@ -3,8 +3,10 @@
 if(window.__KANJI5_BOOTSTRAP__)return;
 window.__KANJI5_BOOTSTRAP__=true;
 const DATA_VERSION='v1.2-dataset-2136';
-const DECK_KEY='kanji5-deck';
-const VERSION_KEY='kanji5-deck-version';
+const K=window.__KANJI5_STORAGE_KEYS__;
+if(!K)throw new Error('KANJI5_STORAGE_KEYS_NOT_LOADED');
+const DECK_KEY=K.deck;
+const VERSION_KEY=K.deckVersion;
 try{
   if(localStorage.getItem(VERSION_KEY)!==DATA_VERSION){
     localStorage.removeItem(DECK_KEY);
