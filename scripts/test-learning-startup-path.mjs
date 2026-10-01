@@ -5,6 +5,7 @@ const app=await readFile(new URL('../frontend/src/app/App.tsx',import.meta.url),
 const session=await readFile(new URL('../v1.6-session.js',import.meta.url),'utf8');
 const review=await readFile(new URL('../review-runtime.js',import.meta.url),'utf8');
 const boundary=await readFile(new URL('../v1.9-v2-boundary.js',import.meta.url),'utf8');
+const engine=await readFile(new URL('../frontend/src/app/engine.ts',import.meta.url),'utf8');
 
 for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice','StrokeOrderViewer']) {
   assert.match(app,new RegExp('const '+name+' = lazy\\('),`Learning startup must lazy-load ${name}`);
@@ -25,5 +26,7 @@ assert.match(review,/buildQueue\(\);next\(\);document\.dispatchEvent\(new Custom
 assert.match(boundary,/if\(window\.__KANJI5_V19_REVIEW_BRIDGE__\)void refreshLearning\(\);else document\.addEventListener\('kanji5:v1\.9-review-ready'/);
 assert.doesNotMatch(boundary,/setTimeout\(\(\)=>\{void refreshLearning\(\)\},100\)/);
 assert.doesNotMatch(boundary,/setTimeout\(\(\)=>\{void refreshLearning\(\)\},500\)/);
+assert.match(engine,/startupSnapshot: \(\) => Promise<Snapshot>/);
+assert.match(engine,/export async function startupSnapshot\(\): Promise<Snapshot>/);
 
 console.log('Learning startup path contract: PASS');
