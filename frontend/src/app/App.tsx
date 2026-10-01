@@ -784,7 +784,18 @@ function PracticeHandwriting({character,language,exercise}:{character:string;lan
     />
   </div>;
 }
-function SessionFeedback({snapshot}:{snapshot:Snapshot}){\n  const summary=snapshot.sessionSummary??{};\n  const attempts=Math.max(0,Number(summary.attempts)||0);\n  if(attempts===0)return null;\n  const correct=Math.max(0,Number(summary.correct)||0);\n  const accuracy=pct(summary.accuracy);\n  return <section className="session-feedback" aria-label={t("sessionSummary",getLanguage())}>\n    <strong>{t("sessionSummary",getLanguage())}</strong>\n    <span>{fa(attempts)} {t("attempts",getLanguage())} · {fa(correct)} {t("right",getLanguage())} · {fa(accuracy)}{getLanguage()==="fa"?"٪":"%"} {t("accuracy",getLanguage())}</span>\n  </section>;\n}\nfunction getInitialSnapshot():Snapshot|null{
+function SessionFeedback({snapshot}:{snapshot:Snapshot}){
+  const summary=snapshot.sessionSummary??{};
+  const attempts=Math.max(0,Number(summary.attempts)||0);
+  if(attempts===0)return null;
+  const correct=Math.max(0,Number(summary.correct)||0);
+  const accuracy=pct(summary.accuracy);
+  return <section className="session-feedback" aria-label={t("sessionSummary",getLanguage())}>
+    <strong>{t("sessionSummary",getLanguage())}</strong>
+    <span>{fa(attempts)} {t("attempts",getLanguage())} · {fa(correct)} {t("right",getLanguage())} · {fa(accuracy)}{getLanguage()==="fa"?"٪":"%"} {t("accuracy",getLanguage())}</span>
+  </section>;
+}
+function getInitialSnapshot():Snapshot|null{
   if(typeof window==="undefined")return null;
   const value=(window as Window & {__KANJI5_V19_V2_LAST_SNAPSHOT__?:Snapshot}).__KANJI5_V19_V2_LAST_SNAPSHOT__;
   return value&&typeof value==="object"?value:null;
