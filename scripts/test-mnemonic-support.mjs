@@ -48,6 +48,24 @@ assert.match(support, /soup/);
 assert.ok((support.match(/^  "[^"]+": \{\n    "reading":/gm) ?? []).length >= 60, "Reading keyword map must remain substantial");
 assert.match(support, /lexical context/);
 
+const readingDataStart = support.indexOf("export const READING_KEYWORDS");
+const componentDataStart = support.indexOf("export const COMPONENT_LABELS");
+assert.ok(readingDataStart >= 0 && componentDataStart > readingDataStart, "Reading keyword data source must be present");
+let readingDataCode = support.slice(readingDataStart, componentDataStart);
+readingDataCode = readingDataCode.replace(
+  "export const READING_KEYWORDS: Readonly<Record<string, ReadingKeyword>> =",
+  "const READING_KEYWORDS ="
+);
+const readingFnStart = support.indexOf("function normalizeKatakana");
+const readingFnEnd = support.indexOf("export type ConfusableBasis", readingFnStart);
+assert.ok(readingFnStart >= 0 && readingFnEnd > readingFnStart, "Reading keyword runtime functions must be present");
+let readingFnCode = support.slice(readingFnStart, readingFnEnd)
+  .replace("function normalizeKatakana(value: string): string", "function normalizeKatakana(value)")
+  .replace("export function getReadingKeyword(reading: string): ReadingKeyword | null", "function getReadingKeyword(reading)");
+const readingRuntime = Function(`${readingDataCode};${readingFnCode}; return { getReadingKeyword };`)();
+assert.equal(readingRuntime.getReadingKeyword("シ")?.keywordEn, "sheep", "Runtime keyword lookup must execute against the real map");
+assert.equal(readingRuntime.getReadingKeyword("shi")?.keywordEn, undefined, "English transliteration is not a reading-key lookup");
+assert.equal(readingRuntime.getReadingKeyword("シ")?.keywordFa, "گوسفند", "Runtime keyword lookup must preserve the curated Persian anchor");
 const qualityHooks = {
   "シ": "sheep",
   "セイ": "sail",
