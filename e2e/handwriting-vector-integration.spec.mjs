@@ -16,7 +16,7 @@ async function clean(page){
   await expect(page.locator("#root .app-shell")).toBeVisible({timeout:20000});
 }
 
-async function openSchoolHandwriting(page,{waitForCanvas=true}={}) {
+async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=null}={}) {
   await page.locator(".experience-nav .experience-tab").nth(2).click();
   await expect(page.locator(".dictionary-page")).toBeVisible({timeout:10000});
   const search=page.locator(".dictionary-page-search input");
@@ -28,6 +28,7 @@ async function openSchoolHandwriting(page,{waitForCanvas=true}={}) {
   await expect(dialog).toBeVisible({timeout:10000});
   const handwritingTab=dialog.getByRole("tab",{name:/نوشتن|Writing|Handwriting practice/});
   await expect(handwritingTab).toBeVisible();
+  if(beforeTabClick) await beforeTabClick();
   await handwritingTab.click();
   const handwriting=dialog.locator(".handwriting-practice");
   await expect(handwriting).toBeVisible();
@@ -255,9 +256,11 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
   await cdp.send("Network.setCacheDisabled",{cacheDisabled:true});
   await cdp.send("Network.clearBrowserCache");
   let attempts=0;
+  let ready=false;
   const vectorUrl='https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/05b66.svg';
   try{
     await page.route("**/05b66.svg",async route=>{
+      if(!ready){await route.continue();return;}
       attempts+=1;
       if(attempts===1){
         await route.fulfill({status:503,contentType:'text/plain',body:'simulated KanjiVG outage'});
@@ -266,7 +269,7 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
       await route.fulfill({status:200,contentType:'image/svg+xml',body:svgFor('学')});
     });
     await clean(page);
-    const handwriting=await openSchoolHandwriting(page,{waitForCanvas:false});
+    const handwriting=await openSchoolHandwriting(page,{waitForCanvas:false,beforeTabClick:async()=>{ready=true;}});
     await expect(handwriting.locator('.handwriting-error')).toBeVisible({timeout:10000});
     await expect(handwriting.getByRole('button',{name:'تلاش دوباره',exact:true})).toBeEnabled();
     await handwriting.getByRole('button',{name:'تلاش دوباره',exact:true}).click();
