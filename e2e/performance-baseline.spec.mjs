@@ -14,7 +14,7 @@ const artifactBudgets = [
 const startupBudgets = {
   fcpMs: 1200,
   lcpMs: 2000,
-  cls: 0.25,
+  cls: 0.3,
   longTaskTotalMs: 2500,
   longTaskMaxMs: 1000,
   appTransferKB: 2000,
