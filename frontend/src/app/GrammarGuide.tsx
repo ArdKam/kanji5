@@ -18,26 +18,38 @@ const LESSONS: GrammarLesson[] = [
   {title:"Want to do",pattern:"～たいです",fa:"たい برای بیان خواستن انجام یک کار استفاده می‌شود و به ریشهٔ فعل متصل می‌شود.",en:"たい expresses the desire to do something and attaches to the verb stem.",example:"日本へ行きたいです。",translation:"I want to go to Japan.",questionFa:"کدام گزینه «می‌خواهم بروم» را درست می‌سازد؟",questionEn:"Which option correctly means “I want to go”?",options:["行きたいです","行くたいです","行ってたいです"],answer:"行きたいです",explanationFa:"たい به ریشهٔ فعل 行き می‌چسبد: 行きたいです.",explanationEn:"たい attaches to the verb stem 行き: 行きたいです."},
 ];
 
+const GRAMMAR_PROGRESS_KEY="kanji5-grammar-progress";
+
+function readGrammarProgress(){
+ try{
+  const raw=sessionStorage.getItem(GRAMMAR_PROGRESS_KEY);
+  const parsed=raw?JSON.parse(raw):[];
+  return Array.isArray(parsed)?parsed.filter((value):value is number=>Number.isInteger(value)&&value>=0&&value<LESSONS.length):[];
+ }catch{return [];}
+}
+
 export function GrammarGuide({language}:{language:Language}){
- const [index,setIndex]=useState(0),[checked,setChecked]=useState(false),[selectedOption,setSelectedOption]=useState(""),[completed,setCompleted]=useState<number[]>([]);
+ const [index,setIndex]=useState(0),[checked,setChecked]=useState(false),[selectedOption,setSelectedOption]=useState(""),[completed,setCompleted]=useState<number[]>(readGrammarProgress);
  const lesson=LESSONS[index], percent=Math.round(completed.length/LESSONS.length*100);
- const remaining=useMemo(()=>LESSONS.length-completed.length,[completed.length]);
+ const remaining=Math.max(0,LESSONS.length-completed.length);
+ useEffect(()=>{try{sessionStorage.setItem(GRAMMAR_PROGRESS_KEY,JSON.stringify(completed));}catch{}},[completed]);
  const selectAnswer=(option:string)=>{setSelectedOption(option);setChecked(true);if(option===lesson.answer)setCompleted(p=>p.includes(index)?p:p.concat(index));};
- const move=(delta:number)=>{setIndex(v=>(v+delta+LESSONS.length)%LESSONS.length);setChecked(false);setSelectedOption("");};
+ const retry=()=>{setChecked(false);setSelectedOption("");};
+ const move=(delta:number)=>{setIndex(v=>Math.max(0,Math.min(LESSONS.length-1,v+delta)));retry();};
  return <section className="grammar-guide">
    <div className="grammar-guide-nav" role="tablist" aria-label={language==="fa"?"انتخاب درس گرامر":"Grammar lessons"}>
     {LESSONS.map((item,i)=><button key={item.pattern} type="button" role="tab" aria-selected={i===index} className={"grammar-chip "+(i===index?"active":"")} onClick={()=>{setIndex(i);setChecked(false);setSelectedOption("")}}>{item.pattern}</button>)}
    </div>
-   <div className="grammar-progress"><span>{t("grammarProgress",language)} {formatNumber(percent,language)}%</span><strong>{formatNumber(remaining,language)} {language==="fa"?"درس باقی‌مانده":"lessons left"}</strong></div>
+   <div className="grammar-progress"><div><span>{t("grammarProgress",language)} {formatNumber(percent,language)}%</span><strong>{formatNumber(remaining,language)} {language==="fa"?"درس باقی‌مانده":"lessons left"}</strong></div><div className="grammar-progress-track" aria-hidden="true"><span style={{width:percent+"%"}}/></div></div>
    <article className="grammar-lesson" aria-live="polite">
     <div className="grammar-lesson-top"><span>{formatNumber(index+1,language)} / {formatNumber(LESSONS.length,language)}</span><b lang="ja">{lesson.pattern}</b></div>
     <h3>{lesson.title}</h3><p>{language==="fa"?lesson.fa:lesson.en}</p>
     <div className="grammar-example" lang="ja"><strong>{lesson.example}</strong><span>{lesson.translation}</span></div>
     <div className="grammar-check"><span>{language==="fa"?lesson.questionFa:lesson.questionEn}</span>
      <div className="grammar-options">{lesson.options.map(option=><button key={option} className={"grammar-option "+(checked?(option===lesson.answer?"correct":option===selectedOption?"wrong":""):"")} type="button" disabled={checked} onClick={()=>selectAnswer(option)}>{option}</button>)}</div>
-     {checked?<p className={"grammar-feedback "+(selectedOption===lesson.answer?"correct":"")}>{lesson.answer}<br/><small>{language==="fa"?lesson.explanationFa:lesson.explanationEn}</small></p>:null}
+     {checked?<div className={"grammar-feedback "+(selectedOption===lesson.answer?"correct":"incorrect")} role="status"><strong>{selectedOption===lesson.answer?(language==="fa"?"درست":"Correct"):(language==="fa"?"نیاز به بازبینی دارد":"Not quite")}</strong><span>{lesson.answer}</span><small>{language==="fa"?lesson.explanationFa:lesson.explanationEn}</small><button className="button secondary grammar-retry" type="button" onClick={retry}>{language==="fa"?"تلاش دوباره":"Try again"}</button></div>:null}
     </div>
    </article>
-   <div className="grammar-navigation"><button className="button secondary" type="button" onClick={()=>move(-1)}>{t("previousLesson",language)}</button><button className="button primary" type="button" onClick={()=>move(1)}>{t("nextLesson",language)}</button></div>
+   <div className="grammar-navigation"><button className="button secondary" type="button" disabled={index===0} onClick={()=>move(-1)}>{t("previousLesson",language)}</button><button className="button primary" type="button" disabled={!checked||index===LESSONS.length-1} onClick={()=>move(1)}>{t("nextLesson",language)}</button></div>
  </section>;
 }
