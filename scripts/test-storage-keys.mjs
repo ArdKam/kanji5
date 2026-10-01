@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const registry=fs.readFileSync('storage-keys.js','utf8');
+const registry=fs.readFileSync('v1.5-state.js','utf8');
 assert.match(registry,/window\\.__KANJI5_STORAGE_KEYS__/);
 for (const pair of [
   ['state','kanji5-v1'],
