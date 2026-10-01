@@ -24,7 +24,17 @@ export function buildSettingsViewModel(input={}){
 }
 export function buildStatsViewModel(input={}){
   const source=input&&typeof input==='object'?input:{};
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',totalReviews:Math.max(0,finite(source.totalReviews,0)),nonAgainRate:Math.max(0,Math.min(1,finite(source.nonAgainRate,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[])});
+  const masterySource=source.masteryDistribution&&typeof source.masteryDistribution==='object'?source.masteryDistribution:{};
+  const masteryDistribution=Object.freeze({
+    unseen:Math.max(0,finite(masterySource.unseen,0)),
+    learning:Math.max(0,finite(masterySource.learning,0)),
+    attention:Math.max(0,finite(masterySource.attention,0)),
+    stable:Math.max(0,finite(masterySource.stable,0)),
+    mastered:Math.max(0,finite(masterySource.mastered,0)),
+    average:Math.max(0,Math.min(1,finite(masterySource.average,0))),
+    total:Math.max(0,finite(masterySource.total,0))
+  });
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',totalReviews:Math.max(0,finite(source.totalReviews,0)),nonAgainRate:Math.max(0,Math.min(1,finite(source.nonAgainRate,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[]),masteryDistribution});
 }
 
 export function buildSessionViewModel(session){
