@@ -13,14 +13,7 @@ async function goToMnemonicPage(card) {
     if (await page.locator(".mnemonic-page").count()) {
       const active = await page.evaluate((el) => el.classList.contains("active"));
       if (!active) {
-        const current = await card.locator(".learning-back-page.active").evaluate((el) =>
-          Array.from(el.parentElement?.children ?? []).indexOf(el),
-        );
-        const delta = index - current;
-        const button = delta >= 0 ? card.locator(".pager-button").nth(1) : card.locator(".pager-button").nth(0);
-        for (let step = 0; step < Math.abs(delta); step += 1) {
-          await button.click();
-        }
+        await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(index).click();
       }
       await expect(page).toHaveClass(/active/);
       return;
