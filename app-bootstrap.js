@@ -12,16 +12,16 @@ try{
     localStorage.removeItem(DECK_KEY);
     localStorage.setItem(VERSION_KEY,DATA_VERSION);
   }
-}catch(_){}
+}catch(_){window.__KANJI5_BOOTSTRAP_STORAGE_DEGRADED__=true;}
 const buildId=(document.querySelector('meta[name="kanji5-build-id"]')?.getAttribute('content')||'dev').trim()||'dev';
 const registerServiceWorker=()=>{
   if(!('serviceWorker' in navigator))return;
-  navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(buildId)).catch(()=>{});
+  navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(buildId)).catch(error=>{window.__KANJI5_SW_REGISTRATION_FAILED__=String(error?.message||error||'unknown');});
 };
 if('requestIdleCallback' in window){
   requestIdleCallback(registerServiceWorker,{timeout:2000});
 }else{
   window.setTimeout(registerServiceWorker,1500);
 }
-import('./v1.6-session.js').catch(()=>{});
+import('./v1.6-session.js').catch(error=>{window.__KANJI5_V16_SESSION_LOAD_FAILED__=String(error?.message||error||'unknown');});
 })();
