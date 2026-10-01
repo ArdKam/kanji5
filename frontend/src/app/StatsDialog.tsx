@@ -190,16 +190,15 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   };
 
   return (
-    <details className="stats-advanced">
-      <summary className="stats-advanced-summary">
-        <span className="stats-advanced-summary-copy">
-          <strong>{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</strong>
-          <small>{language === "fa" ? "عملکرد مهارت‌ها، شواهد پاسخ و فعالیت" : "Skill performance, response evidence, and activity"}</small>
-        </span>
-        <span className="stats-advanced-summary-action">{language === "fa" ? "مشاهده" : "View details"} <span aria-hidden="true">⌄</span></span>
-      </summary>
-
+    <section className="stats-advanced" id="stats-advanced-panel" aria-labelledby="stats-advanced-title">
       <div className="stats-advanced-body">
+        <div className="stats-advanced-panel-heading">
+          <div>
+            <p className="eyebrow">{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</p>
+            <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
+          </div>
+          <span>{language === "fa" ? "داده‌های دقیق، بدون شلوغ‌کردن نمای اصلی" : "More detail without cluttering the main view"}</span>
+        </div>
         <section className="stats-advanced-block" aria-labelledby="stats-advanced-activity-title">
           <div className="stats-advanced-heading">
             <div>
@@ -248,7 +247,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
           <p className="stats-footnote">{language === "fa" ? "اطمینان مدل فقط نشان می‌دهد دادهٔ کافی برای برآورد وجود دارد؛ جای دقت واقعی پاسخ را نمی‌گیرد." : "Model confidence reflects evidence strength; it does not replace observed response accuracy."}</p>
         </section>
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -256,6 +255,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (!open || catalog.length || loading || attempted) return;
@@ -300,11 +300,26 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
         <Metric label={language === "fa" ? "کل مرورها" : "Total reviews"} value={formatNumber(totalReviews, language)} />
       </section>
 
+      <button
+        className="stats-advanced-trigger"
+        type="button"
+        aria-expanded={showAdvanced}
+        aria-controls="stats-advanced-panel"
+        onClick={() => setShowAdvanced(value => !value)}
+      >
+        <span className="stats-advanced-trigger-copy">
+          <strong>{language === "fa" ? "آمار پیشرفته" : "Advanced stats"}</strong>
+          <small>{language === "fa" ? "جزئیات عملکرد مهارت‌ها و شواهد پاسخ" : "Skill performance and response evidence"}</small>
+        </span>
+        <span className="stats-advanced-trigger-action">{showAdvanced ? (language === "fa" ? "بستن" : "Hide") : (language === "fa" ? "مشاهده" : "View")} <span aria-hidden="true">{showAdvanced ? "⌃" : "⌄"}</span></span>
+      </button>
+
+      {showAdvanced ? <AdvancedStatsSection snapshot={snapshot} language={language} /> : null}
+
       <ActivitySection snapshot={snapshot} language={language} />
       <MasterySection snapshot={snapshot} language={language} />
       <SkillsSection snapshot={snapshot} language={language} />
       <AttentionSection catalog={catalog} language={language} onStudyWeak={onStudyWeak} />
-      <AdvancedStatsSection snapshot={snapshot} language={language} />
     </dialog>
   );
 }
