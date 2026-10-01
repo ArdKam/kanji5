@@ -12,7 +12,7 @@ async function goToMnemonicPage(card) {
           Array.from(el.parentElement?.children ?? []).indexOf(el),
         );
         const delta = index - current;
-        const button = delta >= 0 ? card.locator(".pager-button").nth(1) : card.locator(".pager-button").nth(0);
+        const button = delta >= 0 ? card.locator(".learning-back-page-nav .pager-button").last() : card.locator(".learning-back-page-nav .pager-button").first();
         for (let step = 0; step < Math.abs(delta); step += 1) {
           await button.click();
         }
