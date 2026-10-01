@@ -101,6 +101,7 @@ jobs:
           node scripts/test-v2-p3-accessibility.mjs
           node scripts/test-v2-p4-visual.mjs
           node scripts/test-v2-v18-parity.mjs
+          node scripts/test-service-worker-shell.mjs
       - name: Run prepared mnemonic coverage test
         working-directory: .
         run: node scripts/test-prepared-mnemonics.mjs
