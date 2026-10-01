@@ -14,7 +14,7 @@ assert.match(index, /rel="modulepreload" href="\.\/react-dist\/kanji5-react\.js\
 assert.doesNotMatch(index, /release18|release19/);
 
 assert.match(entry, /buildHash=.*kanji5-build-hash/);
-assert.match(entry, /assetVersion=\/\^\[0-9a-f\]\{7,40\}\/i/);
+assert.match(entry, /assetVersion=\/\^\[0-9a-f\]\{7,40\}\$\/i);
 assert.doesNotMatch(entry, /react-dist\/kanji5-react-release\d+/);
 
 assert.match(bootstrap, /buildHash=.*kanji5-build-hash/);
