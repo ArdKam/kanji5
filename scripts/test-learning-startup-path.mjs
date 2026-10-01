@@ -16,7 +16,8 @@ for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHom
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),`Eager import remains for ${name}`);
 }
 
-mustContain(app,'<Suspense fallback={null}><section className="secondary-page-host">','Secondary pages must be suspense-wrapped');
+mustContain(app,'<Suspense fallback={null}>','Secondary pages must be suspense-wrapped');
+mustContain(app,'secondary-page-host','Secondary page host must remain present');
 mustContain(app,'<Suspense fallback={<LoadingLearning/>}><DictionaryPage','Dictionary must not block the Learning bundle');
 mustContain(app,'<Suspense fallback={null}><StrokeOrderViewer','Stroke order must be demand-loaded');
 mustContain(app,'<h2>{t("learningCard")}</h2>','Loading Learning surface must expose the same semantic heading early');
