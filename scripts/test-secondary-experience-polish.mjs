@@ -35,6 +35,10 @@ assert.ok(reading.includes("getMasteryBucket"),"Reading Lab mastery classificati
 assert.ok(reading.includes("reading-lab-source")&&reading.includes("reading-lab-listen")&&reading.includes("reading-lab-reader"),"Reading Lab workflow hierarchy missing");
 assert.match(reading,/counts\.familiar \/ extracted\.length/);
 assert.match(reading,/readingLabCoverage/);
+assert.ok(reading.includes("splitReadingSentences"),"Reading Lab sentence segmentation missing");
+assert.ok(reading.includes("activeSentenceIndex"),"Reading Lab focused sentence state missing");
+assert.ok(reading.includes("reading-lab-reader-toolbar"),"Reading Lab sentence controls missing");
+assert.ok(reading.includes("speakCurrentSentence"),"Reading Lab sentence playback missing");
 
 assert.ok(mnemonics.includes("item?.meanings"),"Mnemonic search does not include meanings");
 assert.ok(mnemonics.includes("item?.on"),"Mnemonic search does not include on readings");
