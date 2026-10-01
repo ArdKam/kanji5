@@ -3158,20 +3158,11 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
 }
 
 /* Advanced stats — compact progressive-disclosure layer. */
-.stats-advanced-trigger{display:flex;align-items:center;justify-content:space-between;text-align:start;}
+.stats-advanced-trigger{text-align:start;}
 .stats-advanced-trigger-copy{display:grid;gap:2px;min-width:0;text-align:start;}
 .stats-advanced-trigger-copy small{color:var(--mute);font-size:var(--text-xs);}
 .stats-advanced-trigger-action{flex:0 0 auto;color:var(--ai);font-size:var(--text-xs);font-weight:850;white-space:nowrap;}
 .stats-advanced-trigger-action span{margin-inline-start:3px;}
-.stats-advanced{padding:14px;}
-.stats-advanced-table{display:grid;margin-top:2px;}
-.stats-advanced-row span{color:var(--mute);font-size:var(--text-xs);line-height:1.5;text-align:end;}
-@media(max-width:760px){
-  .stats-advanced{padding:12px;}
-  .stats-advanced-row{display:grid;gap:3px;align-items:start;}
-  .stats-advanced-row span{text-align:start;}
-}
-
 
 /* Prepared Mnemonics Library v2: editorial hierarchy, source clarity, and local action feedback. */
 .dialog.secondary-page-dialog.mnemonics-dialog{
