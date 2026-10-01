@@ -194,6 +194,77 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card).toBeHidden();
 });
 
+test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible({timeout:10000});
+  const textValue='一番目の文です。二番目の文も続きます。';
+  await lab.locator('textarea').fill(textValue);
+  await lab.locator('.reading-lab-speech-rate select').selectOption('1.15');
+  await lab.locator('.reading-lab-sentence-next').click();
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await dialog.locator('.dialog-close').click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const reopened=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const restored=reopened.locator('.reading-lab');
+  await expect(restored).toBeVisible();
+  await expect(restored.locator('textarea')).toHaveValue(textValue);
+  await expect(restored.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(restored.locator('.reading-lab-speech-rate select')).toHaveValue('1.15');
+  await expect(restored.locator('.reading-lab-session-status')).toBeVisible();
+});
+
+test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
+  await clean(page);
+  await page.route('https://kanjiapi.dev/v1/words/%E6%97%A5',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{variants:[{written:'今日',pronounced:'きょう'}],meanings:[{glosses:['today']}]}])});
+  });
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('textarea').fill('今日は学生です。');
+  await lab.locator('.reading-lab-reader-kanji').filter({hasText:'日'}).first().click();
+  const wordCard=page.locator('.reading-word-dialog:visible');
+  await expect(wordCard).toBeVisible({timeout:10000});
+  await expect(wordCard.locator('#reading-word-title')).toHaveText('今日');
+  await expect(wordCard).toContainText('きょう');
+  await expect(wordCard).toContainText('today');
+  await expect(wordCard.locator('.reading-word-context .is-word')).toHaveText(['今','日']);
+  await wordCard.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('textarea')).toHaveValue('今日は学生です。');
+});
+
+test('Reading Lab preserves SRT cue timing and follows audio time',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('.reading-lab-action-primary input[type=file]').setInputFiles({
+    name:'lesson.srt',mimeType:'text/plain',
+    buffer:Buffer.from('1\n00:00:00,000 --> 00:00:02,000\n一番目の文。\n\n2\n00:00:02,000 --> 00:00:04,000\n二番目の文。\n')
+  });
+  await expect(lab.locator('textarea')).toHaveValue('一番目の文。\n二番目の文。');
+  await expect(lab.locator('.reading-lab-sentence-list')).toHaveAttribute('data-reading-lab-sync-cue-count','2');
+  await lab.locator('.reading-lab-action-audio input[type=file]').setInputFiles({name:'lesson.mp3',mimeType:'audio/mpeg',buffer:Buffer.from([0,1,2,3])});
+  await expect(lab.locator('[data-reading-lab-sync-ready="true"]')).toBeVisible();
+  await page.evaluate(()=>{
+    const audio=document.querySelector('.reading-lab-audio');
+    if(!audio) throw new Error('audio element missing');
+    Object.defineProperty(audio,'currentTime',{configurable:true,value:2.5,writable:true});
+    audio.dispatchEvent(new Event('timeupdate'));
+  });
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(lab.locator('.reading-lab-reader-sentence').nth(1)).toHaveClass(/active/);
+});
+
 test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
