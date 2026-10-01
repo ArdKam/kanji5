@@ -56,7 +56,7 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);
   const rows = dialog.locator(".prepared-mnemonic-library-row");
-  const curatedRow = rows.filter({ has: dialog.locator(".prepared-mnemonic-source.curated") }).first();
+  const curatedRow = dialog.locator(".prepared-mnemonic-library-row.is-curated").first();
   await expect(curatedRow).toContainText(/学|study/i);
   await expect(curatedRow.locator(".prepared-mnemonic-source.curated")).toBeVisible();
   await expect(curatedRow.locator(".prepared-mnemonic-library-meaning")).toBeVisible();
