@@ -12,7 +12,8 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
 for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
-  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
+  assert.match(app,new RegExp('const '+name+' = lazy\\('),`Non-learning surface ${name} must be deferred off the startup renderer bundle`);
+  assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),`Non-learning surface ${name} must not be statically imported`);
 }
 
 
