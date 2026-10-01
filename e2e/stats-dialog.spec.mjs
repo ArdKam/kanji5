@@ -36,9 +36,11 @@ test('Statistics dashboard switches labels consistently to English',async({page}
   await clean(page);
   const dialog=await openStats(page,'fa');
   await expect(dialog).toBeVisible();
+  await dialog.locator('.dialog-close').click();
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   await page.locator('#header-tools-menu').getByRole('button',{name:'English',exact:true}).click();
-  await expect(dialog.locator('.stats-header h2')).toHaveText('Your learning progress');
-  await expect(dialog.locator('.stats-activity')).toContainText('7-day review activity');
-  await expect(dialog.locator('.stats-overview')).toContainText('Jōyō coverage');
+  const englishDialog=await openStats(page,'en');
+  await expect(englishDialog.locator('.stats-header h2')).toHaveText('Your learning progress');
+  await expect(englishDialog.locator('.stats-activity')).toContainText('7-day review activity');
+  await expect(englishDialog.locator('.stats-overview')).toContainText('Jōyō coverage');
 });
