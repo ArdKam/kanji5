@@ -105,7 +105,7 @@ test("Settings is learner-first: placement stays in Active Recall and changes re
   await expect(settings.getByText("You have unsaved changes.", { exact: true })).toBeVisible();
   await expect(settings.getByRole("button", { name: "Save changes", exact: true })).toBeEnabled();
 
-  await settings.getByRole("button", { name: "Close", exact: true }).click();
+  await settings.locator(".dialog-close").click();
   const discard = settings.getByRole("alertdialog");
   await expect(discard).toBeVisible();
   await discard.getByRole("button", { name: "Keep editing", exact: true }).click();
