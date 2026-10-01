@@ -3157,9 +3157,6 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   .stats-skill-track span{transition:none;}
 }
 
-/* Advanced stats — disclosure control; body reuses existing Stats styles. */
-.stats-advanced-trigger{width:100%;justify-content:space-between;}
-
 /* Prepared Mnemonics Library v2: editorial hierarchy, source clarity, and local action feedback. */
 .dialog.secondary-page-dialog.mnemonics-dialog{
   width:min(800px,calc(100vw - 32px));
