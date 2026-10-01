@@ -2,11 +2,20 @@ test.use({ serviceWorkers: "allow" });
 
 import { test, expect } from "@playwright/test";
 
-async function goToBackPage(card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    await card.locator(".pager-button").nth(1).click();
+async function goToMnemonicSupportPage(card) {
+  const pages = card.locator(".learning-back-page");
+  const count = await pages.count();
+  for (let index = 0; index < count; index += 1) {
+    const page = pages.nth(index);
+    if (await page.locator(".mnemonic-support").count()) {
+      if (!(await page.evaluate(el => el.classList.contains("active")))) {
+        await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(index).click();
+      }
+      await expect(page).toHaveClass(/active/);
+      return page;
+    }
   }
-  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+  throw new Error("Mnemonic support page not found");
 }
 
 test("learning card exposes reading and vocabulary memory bridges without altering grading", async ({ page }) => {
@@ -23,9 +32,8 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
 
   await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-meaning")).toBeVisible();
   await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings")).toBeVisible();
-  await card.locator(".pager-button").nth(1).click();
-  await card.locator(".pager-button").nth(1).click();
-  const support = card.locator(".learning-back-page.active .mnemonic-support");
+  const supportPage = await goToMnemonicSupportPage(card);
+  const support = supportPage.locator(".mnemonic-support");
   await expect(support).toBeVisible();
   await expect(support).toHaveAttribute("data-hint-stage", /^(new|recovery|early|stable)$/);
   await expect(support.locator(".mnemonic-support-reading")).toHaveText(/\S+/);

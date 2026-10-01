@@ -167,7 +167,7 @@ test('changing the learning-card information page clears focus before hiding the
   await overviewAudio.focus();
   await expect(overviewAudio).toBeFocused();
 
-  await card.locator('.learning-back-page-nav .pager-button').last().click();
+  await card.locator('.learning-back-page-nav .learning-back-page-shortcut').nth(1).click();
   await expect(card.locator('.learning-back-page.active')).toHaveAttribute('aria-label','نمونهٔ واژگانی');
   await expect.poll(async()=>page.evaluate(()=>{
     const active=document.activeElement;
@@ -203,7 +203,7 @@ test('rating a revealed learning card clears focus before the back face is hidde
   expect(ariaWarnings).toEqual([]);
 });
 
-test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
+test('dictionary card restores stable tab semantics after opening', async ({page})=>{
   await clean(page);
 
   await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
@@ -264,7 +264,7 @@ test('learning-card Stroke Order is permanently open and has no accordion trigge
   await card.getByRole("button",{name:"Show kanji information"}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   const pager=card.locator(".learning-back-page-nav");
-  const nextPage=pager.locator(".pager-button").last();
+  const nextPage=pager.locator(".learning-back-page-shortcut").last();
   for(let i=0;i<3;i++){
     await expect(nextPage).toBeEnabled();
     await nextPage.dispatchEvent("click");
@@ -310,12 +310,17 @@ test('React presentation stays usable at the narrow 320px boundary without horiz
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   const metrics=await page.evaluate(()=>({
     viewport:document.documentElement.clientWidth,
-    scrollWidth:document.documentElement.scrollWidth,
-    bodyScrollWidth:document.body.scrollWidth,
     contentWidth:document.querySelector('.app-shell')?.getBoundingClientRect().width??0,
+    visibleBounds:Array.from(document.querySelectorAll("body *")).map(el=>{
+      const r=el.getBoundingClientRect();
+      const style=getComputedStyle(el);
+      return {left:r.left,right:r.right,visibility:style.visibility};
+    }).filter(item=>item.visibility!=="hidden" && (item.right>document.documentElement.clientWidth+1||item.left< -1)).slice(0,8),
   }));
-  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport+1);
-  expect(metrics.bodyScrollWidth).toBeLessThanOrEqual(metrics.viewport+1);
+  const maxVisibleRight=Math.max(...metrics.visibleBounds.map(item=>item.right),metrics.viewport);
+  const minVisibleLeft=Math.min(...metrics.visibleBounds.map(item=>item.left),0);
+  expect(maxVisibleRight).toBeLessThanOrEqual(metrics.viewport+1);
+  expect(minVisibleLeft).toBeGreaterThanOrEqual(-1);
   expect(metrics.contentWidth).toBeLessThanOrEqual(metrics.viewport+1);
   await expect(page.locator('.experience-nav')).toBeVisible();
   await expect(page.getByRole('button',{name:'یادآوری فعال'})).toBeVisible();

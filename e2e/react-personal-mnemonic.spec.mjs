@@ -1,37 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-async function goToBackPage(card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    const next = card.locator(".pager-button").nth(1);
-    if (!(await next.isEnabled())) break;
-    await next.click();
-  }
-  await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
+async function goToMnemonicPage(card) {
+  const mnemonicShortcut = card.locator('.learning-back-page-shortcut[aria-label="Personal mnemonic"]');
+  await expect(mnemonicShortcut).toBeVisible({ timeout: 10000 });
+  await mnemonicShortcut.click();
+  await expect(card.locator(".learning-back-page.active .mnemonic-page")).toHaveCount(1);
 }
 
-async function goToMnemonicPage(card) {
-  const pages = card.locator(".learning-back-page");
-  const count = await pages.count();
-  for (let index = 0; index < count; index += 1) {
-    const page = pages.nth(index);
-    if (await page.locator(".mnemonic-page").count()) {
-      const active = await page.evaluate((el) => el.classList.contains("active"));
-      if (!active) {
-        const current = await card.locator(".learning-back-page.active").evaluate((el) =>
-          Array.from(el.parentElement?.children ?? []).indexOf(el),
-        );
-        const delta = index - current;
-        const button = delta >= 0 ? card.locator(".pager-button").nth(1) : card.locator(".pager-button").nth(0);
-        for (let step = 0; step < Math.abs(delta); step += 1) {
-          await button.click();
-        }
-      }
-      await expect(page).toHaveClass(/active/);
-      return;
-    }
-  }
-  throw new Error("Mnemonic page not found");
-}
 
 test("personal mnemonic can be saved, edited, cleared, and survives a reload", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
@@ -41,8 +16,8 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
 
   await card.getByRole("button", { name: "Show kanji information" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-  await goToBackPage(card, 2);
-  await card.getByRole("button", { name: "Personal mnemonic" }).click();
+  await goToMnemonicPage(card);
+  await card.locator(".mnemonic-trigger").click();
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
 

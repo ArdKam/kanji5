@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
-import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
@@ -107,15 +106,27 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     }
     setComponentInfo(null);
     setComponentInfoReady(false);
-    setPreparedMnemonic(buildPreparedMnemonic({character:card.character,meanings:card.meanings??[]}));
-    void getComponentInfo(card.character).then(info=>{
+    const character = card.character;
+    const meanings = card.meanings ?? [];
+    const mnemonicModule = import("./prepared-mnemonic-core");
+    void mnemonicModule.then(({buildPreparedMnemonic})=>{
+      if(!active)return;
+      setPreparedMnemonic(buildPreparedMnemonic({character,meanings}));
+    }).catch(()=>{
+      if(active)setPreparedMnemonic(null);
+    });
+    const componentInfoPromise = getComponentInfo(card.character);
+    void componentInfoPromise.then(info=>{
       if(!active)return;
       setComponentInfo(info);
       setComponentInfoReady(true);
-      setPreparedMnemonic(buildPreparedMnemonic(
-        {character:card.character,meanings:card.meanings??[]},
-        info.components??[]
-      ));
+      void mnemonicModule.then(({buildPreparedMnemonic})=>{
+        if(!active)return;
+        setPreparedMnemonic(buildPreparedMnemonic(
+          {character,meanings},
+          info.components??[]
+        ));
+      });
     }).catch(()=>{
       if(!active)return;
       setComponentInfo(null);

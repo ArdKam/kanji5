@@ -26,6 +26,16 @@ if(!reactStylesheet){
 import('./react-dist/kanji5-react.js?v=20260928-release19')
   .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 
+function scheduleAccountSync(){
+  const load=()=>import('./supabase-sync.js').catch(error=>console.error('Kanji 5 account sync failed to boot.',error));
+  if('requestIdleCallback' in window){
+    window.requestIdleCallback(load,{timeout:1500});
+  }else{
+    window.setTimeout(load,0);
+  }
+}
+scheduleAccountSync();
+
 function mountAccountFallback(){
   const root=document.getElementById('root');
   const existing=root?.querySelector('.account-button');
