@@ -791,8 +791,8 @@ function SessionFeedback({snapshot,visible}:{snapshot:Snapshot;visible:boolean})
   const correct=Math.max(0,Number(summary.correct)||0);
   const accuracy=pct(summary.accuracy);
   const detail=attempts>0
-NaN
-NaN
+    ? `${fa(correct)}/${fa(attempts)} · ${fa(accuracy)}%`
+    : "";
   return <section className="session-feedback" aria-label={t("sessionSummary",getLanguage())}>
     <strong>{t("sessionSummary",getLanguage())}</strong>
     <span>{detail}</span>
