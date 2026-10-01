@@ -6,6 +6,8 @@ const source=fs.readFileSync(".github/workflows/pages-deploy.yml","utf8");
 assert.match(source, /Build shipped React artifact from source/);
 assert.match(source, /react-dist\/kanji5-react\.js/);
 assert.match(source, /react-dist\/kanji5-react\.css/);
+assert.doesNotMatch(source, /git add react-dist/);
+assert.doesNotMatch(source, /git commit -m "chore\(build\): sync generated React artifact"/);
 
 assert.match(source, /fetch_with_retry "\$base\/" \/tmp\/kanji5-root\.html "react-entry\.js"/);
 assert.match(source, /fetch_with_retry "\$base\/react-entry\.js" \/tmp\/kanji5-entry\.js "react-dist\/kanji5-react\.js"/);
