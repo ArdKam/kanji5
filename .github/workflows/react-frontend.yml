@@ -38,12 +38,25 @@ on:
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
+      - "e2e/react-engine-boundary-gate.spec.mjs"
       - "e2e/stats-dialog.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
       - "react-entry.js"
       - "sw.js"
       - "account-fallback.js"
+      - "v1.3-*.js"
+      - "v1.4-*.js"
+      - "v1.5-*.js"
+      - "v1.6-*.js"
+      - "v1.7-*.js"
+      - "v1.8-*.js"
+      - "v1.9-*.js"
+      - "review-runtime.js"
+      - "supabase-sync.js"
+      - "vendor/**"
+      - "kanji-data.json"
+      - "kanji-components.json"
   push:
     branches:
       - main
@@ -132,6 +145,9 @@ jobs:
       - name: Install Chromium
         working-directory: .
         run: npx playwright install chromium
+      - name: Run engine-to-React boundary gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
       - name: Validate migration boundary
         working-directory: .
         run: node scripts/test-react-migration.mjs
