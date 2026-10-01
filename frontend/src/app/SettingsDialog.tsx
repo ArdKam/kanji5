@@ -261,17 +261,11 @@ export function SettingsDialog({
         </div>
       </form>
 
-      <section className="settings-danger-zone">
-        <div className="settings-danger-heading">
-          <p className="eyebrow">{language === "fa" ? "ناحیهٔ خطر" : "Danger zone"}</p>
-          <h3>{language === "fa" ? "پاک کردن پیشرفت یادگیری" : "Reset learning progress"}</h3>
-          <p>{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه به حالت اولیه برمی‌گردد." : "Reset all learning progress and review history on this device."}</p>
-        </div>
-
+      <section className="settings-danger-zone" aria-label={language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}>
         {resetArmed ? (
           <div className="settings-reset-confirmation" role="alert">
             <strong>{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
-            <p>{language === "fa" ? "این عمل قابل بازگشت نیست." : "This action cannot be undone."}</p>
+            <p>{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
             <div className="settings-danger-actions">
               <button className="button secondary" type="button" onClick={() => setResetArmed(false)} disabled={effectiveBusy}>{t("cancel", language)}</button>
               <button className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
@@ -280,8 +274,9 @@ export function SettingsDialog({
             </div>
           </div>
         ) : (
-          <button className="button danger settings-reset-button" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
-            {language === "fa" ? "پاک کردن پیشرفت" : "Reset progress"}
+          <button className="settings-reset-trigger" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
+            <span>{language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}</span>
+            <span aria-hidden="true">›</span>
           </button>
         )}
       </section>
