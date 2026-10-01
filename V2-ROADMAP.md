@@ -36,6 +36,39 @@ The v2 presentation layer consumes only the stable v1.9 view-model boundary. It 
 - Establish the final v2 visual hierarchy, typography, spacing, component system, and interaction polish.
 - Keep visual decisions independent from learning-engine contracts.
 
+### P6 — Reading Lab Maturity (Planned)
+The Reading Lab remains a focused contextual-reading workbench rather than a general-purpose language-learning suite.
+
+#### P0 — Next-focus navigation
+- Add **Focus Next / Next Unknown** to jump directly to the next non-familiar or attention-state kanji in the current sentence/text.
+- Keep the action aligned with the authoritative mastery state; do not create a second mastery model.
+
+#### P1 — Sentence playback & synchronization
+- Add **sentence autoplay** with smooth advance and **Repeat sentence**.
+- Keep manual previous/next sentence navigation.
+- Extend the existing SRT/VTT cue model into a polished synchronized listening mode with clear active-cue state.
+
+#### P1 — Reading Coverage refinement
+- Keep the current unique-kanji coverage metric, but label it explicitly as unique coverage.
+- Add an **occurrence-weighted coverage** metric so repeated exposure in the text is represented.
+- Surface the hardest / most attention-demanding sentence as a quick focus target without changing learning state.
+
+#### P2 — Contextual reading support
+- Add **sentence translation / annotation** as a lightweight support layer, not an AI chat or generic translator.
+- Add **voice selection** for browser TTS where supported.
+- Replace heavy persistent mastery decoration with a compact **mastery micro-popover** on interaction when useful.
+
+#### P3 — Reading library & vocabulary learning
+- Add **saved readings** with source/title metadata and resume state.
+- Add **sentence mining** and vocabulary-SRS only after the vocabulary layer is mature enough to provide stable word identity, readings, meanings, and learning state.
+- Export/import or cross-device persistence must preserve the distinction between reading-workbench data and authoritative learning progress.
+
+#### Product boundary
+- Reading Lab should follow the product chain:
+  **Text → Sentence → Word → Kanji → Mastery → Audio → Next focus**
+- Avoid turning the Lab into an all-in-one grammar tutor, AI chat, or generic content platform.
+- Any future reading-session persistence must remain clearly scoped to the Reading Lab context and must not become a competing source of truth for SRS/FSRS state.
+
 ### P5 — v2 Release Readiness ✅
 - Remove the v1 presentation path from the default user-facing runtime; retain only an explicit `?legacy=1` compatibility path for regression/migration verification.
 - Run complete regression, offline, accessibility, and browser gates.
