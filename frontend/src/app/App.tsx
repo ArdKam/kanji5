@@ -908,7 +908,8 @@ function App(){
           setSnapshotHydrated(true);
         }).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});
       };
-      if("requestIdleCallback" in window)window.requestIdleCallback(schedule,{timeout:1800});
+      const idleCallback=(window as Window & {requestIdleCallback?: (callback:()=>void,options?:{timeout?:number})=>number}).requestIdleCallback;
+      if(typeof idleCallback==="function")idleCallback(schedule,{timeout:1800});
       else window.setTimeout(schedule,120);
     }).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});
     return()=>{
