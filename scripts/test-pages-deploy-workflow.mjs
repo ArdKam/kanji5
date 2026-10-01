@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const source=fs.readFileSync(".github/workflows/pages-deploy.yml","utf8");
+const stagingSource=fs.readFileSync("scripts/stage-pages-site.mjs","utf8");
 
 assert.match(source, /Build shipped React artifact from source/);
 assert.match(source, /react-dist\/kanji5-react\.js/);
 assert.match(source, /react-dist\/kanji5-react\.css/);
+assert.match(stagingSource, /"sw\.js"/);
 
 assert.match(source, /fetch_with_retry "\$base\/" \/tmp\/kanji5-root\.html "react-entry\.js"/);
 assert.match(source, /fetch_with_retry "\$base\/react-entry\.js" \/tmp\/kanji5-entry\.js "react-dist\/kanji5-react\.js"/);
@@ -29,3 +31,5 @@ assert.match(source, /Stage production GitHub Pages site/);
 assert.match(source, /node scripts\/stage-pages-site\.mjs/);
 assert.match(source, /path: _site/);
 assert.doesNotMatch(source, /path: \.\s*$/m);
+
+console.log("Pages staging contract includes the service worker shell entry.");
