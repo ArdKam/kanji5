@@ -935,7 +935,7 @@ function App(){
           busy={busy}
           language={language}
           onClose={closeSecondaryPage}
-          onSave={async s=>{await action(async()=>{await updateSettings(s);closeSecondaryPage()})}}
+          onSave={s=>action(async()=>{await updateSettings(s);closeSecondaryPage();return true})}
           onReset={()=>void action(async()=>{resetProgress()})}
           mnemonicCatalog={mnemonicCatalog}
         /> : null}
