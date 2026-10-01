@@ -1,7 +1,9 @@
 (()=>{
 'use strict';
 if(window.__KANJI5_STATE__)return;
-const DEVICE_KEY='kanji5-device-id',STORAGE='kanji5-v1',CARDS_STORAGE='kanji5-v1-cards',REVIEWS_STORAGE='kanji5-v1-reviews',KNOWLEDGE_STORAGE='kanji5-v1.2-knowledge',COMPONENT_KEY='kanji5-v1.5-components',LAST_ATTEMPT_KEY='kanji5-v1.2-last-attempt',SESSION_HISTORY_KEY='kanji5-v1.6-session-history',DECK_KEY='kanji5-deck',SETTINGS_KEY='kanji5-v1.3-education-settings';
+const K=window.__KANJI5_STORAGE_KEYS__;
+if(!K)throw new Error('KANJI5_STORAGE_KEYS_NOT_LOADED');
+const DEVICE_KEY=K.deviceId,STORAGE=K.state,CARDS_STORAGE=K.cards,REVIEWS_STORAGE=K.reviews,KNOWLEDGE_STORAGE=K.knowledge,COMPONENT_KEY=K.components,LAST_ATTEMPT_KEY=K.lastAttempt,SESSION_HISTORY_KEY=K.sessionHistory,DECK_KEY=K.deck,SETTINGS_KEY=K.educationSettings;
 const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2,SESSION_HISTORY_LIMIT=30,MNEMONIC_SCHEMA_VERSION=1;
 const defaults={dailyNew:5,retention:.90,maxInterval:36500,dailyGoal:20,leechThreshold:8};
 const educationDefaults={production:true,vocabulary:true,context:true};
