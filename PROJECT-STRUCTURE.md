@@ -28,8 +28,8 @@ For the current product, read these in order:
 | Runtime data | `kanji-data.json`, `kanji-components.json`, `kanji-radicals.json`, `kanji-radical-map.json` | Runtime data; inspect build scripts before editing. |
 | Browser E2E | `e2e/` | Playwright browser/integration coverage. |
 | Contract/unit tests | `scripts/test-*.mjs` | Repository-level contracts and unit/regression checks. |
-| Generated React bundle | `react-dist/` | Built output. Do not edit these files manually; rebuild from `frontend/`. |
-| Compatibility presentation | `?legacy=1` path in `index.html` | The legacy loader is explicitly gated; inspect the `legacyScripts` list before changing compatibility behavior. |
+| Generated React bundle | `react-dist/` | Build-only output; ignored by Git and produced from `frontend/`. |
+| Legacy presentation | retired | The default browser path is React; the former `?legacy=1` compatibility loader is removed. |
 
 ## Current browser path
 
@@ -61,7 +61,7 @@ The learning engine stays outside the React tree.
 ├── e2e/                      # Playwright browser/integration tests
 ├── scripts/                  # contract/unit tests and maintenance/build helpers
 ├── docs/                     # focused documentation and setup guides
-├── react-dist/               # generated React build artifacts
+├── react-dist/               # generated React build output (not tracked)
 ├── vendor/                   # vendored runtime dependency used offline
 ├── supabase/                 # Supabase schema assets
 └── *.js                     # versioned learning/runtime modules and browser integration
@@ -97,25 +97,15 @@ Workflow filenames preserve their historical names, so the filename alone is not
 | `.github/workflows/build-v1.8.yml` | v1.8 compatibility plus current v1.9 learning-engine validation and aggregate engine gates. |
 | `.github/workflows/build-v1.7.yml` | Adaptive-recall contract/unit validation retained for that engine layer. |
 | `.github/workflows/build-v1.6.yml` | Broad historical contract/release validation that still checks shared runtime contracts used by current releases. |
-| `.github/workflows/pages-deploy.yml` | Builds the current frontend, syncs generated release artifacts, runs release checks, and deploys GitHub Pages. |
+| `.github/workflows/pages-deploy.yml` | Builds the current frontend from source, runs release checks, and deploys GitHub Pages. Generated artifacts are not committed back to `main`. |
 
 Do not rename or move workflow files merely to make the names prettier without checking path filters, workflow references, and release automation first.
 
 ## Generated and compatibility artifacts
 
-The primary generated React files are:
+The primary generated React files are produced under `react-dist/` during CI/deployment. They are ignored by Git and are never the source of truth for UI code.
 
-- `react-dist/kanji5-react.js`
-- `react-dist/kanji5-react.css`
-
-The repository also carries release-specific generated/compatibility artifacts such as:
-
-- `react-dist/kanji5-react-release18.js`
-- `react-dist/kanji5-react-release18.css`
-- `sw-release18.js`
-- `sw-release19.js`
-
-These files are part of the current repository/release wiring. Treat them as generated or compatibility outputs rather than source-of-truth UI code.
+The active runtime uses the canonical `app-bootstrap.js` and `sw.js`; release-specific bootstrap/service-worker duplicates are retired.
 
 The React build is produced with:
 
