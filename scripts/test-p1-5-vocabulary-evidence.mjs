@@ -41,6 +41,8 @@ const wrong=adapter.outcome(school,{
   attemptType:'cued_recognition'
 });
 assert.equal(wrong.state,'introduced');
+const selectedAfterWrong=adapter.select([student,school]);
+assert.equal(selectedAfterWrong.contentId,schoolItem.contentId,'recent vocabulary mistake should be selected before unseen content');
 assert.equal(wrong.practiceCount,1);
 assert.equal(wrong.correctCount,0);
 assert.equal(wrong.wrongCount,1);
@@ -80,14 +82,11 @@ assert.equal(secondIndependentCorrect.correctCount,2);
 assert.equal(vocabularyEvidenceAccuracy(secondIndependentCorrect),2/3);
 assert.equal(vocabularyRecentErrorRate(secondIndependentCorrect),0);
 
-const projected=adapter.projectVocabularyLearning(school);
+const projected=adapter.project(school);
 assert.equal(projected.state,'stable');
 assert.equal(projected.evidence.practiceCount,3);
 assert.equal(projected.evidence.recoveryCount,1);
 assert.equal(projected.accuracy,2/3);
-
-const selected=adapter.select([student,school]);
-assert.equal(selected.contentId,schoolItem.contentId,'recent vocabulary mistake should be selected before stable content');
 
 assert.throws(
   ()=>adapter.outcome(school,{}),
