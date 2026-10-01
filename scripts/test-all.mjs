@@ -31,6 +31,7 @@ const buildDependentTests=new Set([
   'test-v2-p3-accessibility.mjs',
   'test-v2-p4-visual.mjs',
   'test-v2-v18-parity.mjs',
+  'test-service-worker-shell.mjs',
 ]);
 
 const scripts=allScripts.filter(name=>!retiredTests.has(name)&&!buildDependentTests.has(name));
