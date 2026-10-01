@@ -935,7 +935,7 @@ function App(){
           busy={busy}
           language={language}
           onClose={closeSecondaryPage}
-          onSave={s=>action(async()=>{await updateSettings(s);closeSecondaryPage();return true})}
+          onSave={async s=>{const result=await action(async()=>{await updateSettings(s);return true});if(result)closeSecondaryPage();return result}}
           onReset={()=>void action(async()=>{resetProgress()})}
         /> : null}
         {secondaryPage==="mnemonics" ? <MnemonicsDialog
