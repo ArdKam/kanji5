@@ -1231,27 +1231,9 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 }
 
 
-/* Secondary menu sections are in-flow pages, not modal overlays. */
-.secondary-page-host{display:grid;gap:10px;min-width:0;}
-.secondary-page-back{justify-self:start;min-height:42px;padding-inline:14px;}
-.dialog.secondary-page-dialog{
-  position:static;
-  inset:auto;
-  transform:none;
-  display:block;
-  width:100%;
-  max-width:none;
-  max-height:none;
-  min-height:calc(100dvh - var(--nav-bar-height) - 104px);
-  margin:0;
-  overflow:auto;
-  border-radius:var(--radius-xl);
-  padding:20px;
-  padding-bottom:calc(30px + var(--nav-bar-height) + max(14px,env(safe-area-inset-bottom)));
-  box-shadow:0 14px 36px -28px rgba(28,26,23,.45);
-}
-.dialog.secondary-page-dialog::backdrop{display:none;}
-.dialog.secondary-page-dialog > .dialog-close{margin-inline-start:auto;}
+/* Secondary menu sections retain the centered modal presentation. */
+.secondary-page-host{display:contents;}
+.secondary-page-back{display:none!important;}
 .learning-back-identity-visual{min-height:104px;display:grid;place-items:center;min-width:0;}
 .learning-back-identity-placeholder{width:100%;min-height:104px;display:grid;place-items:center;}
 .learning-back-identity-placeholder span{display:block;width:clamp(58px,11vw,86px);height:clamp(58px,11vw,86px);border-radius:18px;background:linear-gradient(90deg,#eee7da 20%,#f8f3e9 40%,#eee7da 60%);background-size:220% 100%;animation:kanji5-loading-shimmer 1.1s linear infinite;}
