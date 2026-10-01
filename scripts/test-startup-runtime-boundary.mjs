@@ -12,16 +12,7 @@ const bootstrap = read('app-bootstrap.js');
 const entry = read('react-entry.js');
 const sw = read('sw.js');
 
-const legacyFiles = [
-  'v1.4-education-migration.js','v1.4-education-core.js','v1.5-p0.js',
-  'v1.2-enhancements.js','v1.2-runtime-fixes.js','v1.9-recovery.js','v1.5-education-ui.js'
-];
-
-for (const file of legacyFiles) {
-  assert.ok(index.includes(`"./${file}"`)||index.includes(`'./${file}'`), `legacy dependency lost ${file}`);
-  assert.doesNotMatch(index, new RegExp(`<script[^>]+src="./${file.replaceAll('.', '\\\.')}"[^>]*><\\/script>`),
-    `legacy file is directly wired into the default shell: ${file}`);
-}
+assert.doesNotMatch(index,/legacyScripts|legacy=1/, 'legacy presentation loader must be retired');
 assert.match(index, /<script src="\.\/v1\.5-state\.js"><\/script>/);
 assert.match(index, /<script src="\.\/v1\.3-p0\.js"><\/script>/);
 assert.doesNotMatch(index, /v1\.3-(?:perf|settings)\.js/);
@@ -46,8 +37,8 @@ for (const file of ['v1.4-education-migration.js','v1.4-education-core.js','v1.5
   assert.ok(sw.includes(`"./${file}"`), `lazy exercise dependency missing from precache: ${file}`);
 for (const file of ['./v1.8-learning-ux.js','./v1.9-recovery-ui.js'])
   assert.equal(sw.includes(`"${file}"`), false, `retired file remains in precache: ${file}`);
-for (const file of ['v1.5-p0.js','v1.5-recall-core.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
-  assert.ok(sw.includes(`"./${file}"`), `legacy compatibility dependency missing from offline cache: ${file}`);
+for (const file of ['v1.5-p0.js','v1.2-enhancements.js','v1.2-runtime-fixes.js'])
+  assert.equal(sw.includes(`"./${file}"`), false, `retired compatibility dependency remains in offline cache: ${file}`);
 
 assert.match(sw, /const CACHE='kanji5-shell-v[0-9A-Za-z._-]+'/);
 console.log('Kanji 5 startup runtime boundary contract passed.');
