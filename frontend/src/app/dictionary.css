@@ -2086,11 +2086,6 @@
   border-radius:0;
   background:transparent;
 }
-.dialog.secondary-page-dialog .reading-lab-canvas{
-  padding:5px;
-  border-radius:18px;
-  background:var(--washi);
-}
 .reading-lab-analysis{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
