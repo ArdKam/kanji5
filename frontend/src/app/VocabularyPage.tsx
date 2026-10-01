@@ -1,3 +1,4 @@
+import "./vocabulary-page.css";
 import { useMemo, useState } from "react";
 
 type VocabularyItem = {
