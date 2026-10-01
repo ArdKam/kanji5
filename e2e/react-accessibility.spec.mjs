@@ -167,7 +167,7 @@ test('changing the learning-card information page clears focus before hiding the
   await overviewAudio.focus();
   await expect(overviewAudio).toBeFocused();
 
-  await card.locator('.learning-back-page-nav .pager-button').last().click();
+  await card.locator('.learning-back-page-nav .learning-back-page-shortcut').nth(1).click();
   await expect(card.locator('.learning-back-page.active')).toHaveAttribute('aria-label','نمونهٔ واژگانی');
   await expect.poll(async()=>page.evaluate(()=>{
     const active=document.activeElement;
@@ -264,7 +264,7 @@ test('learning-card Stroke Order is permanently open and has no accordion trigge
   await card.getByRole("button",{name:"Show kanji information"}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   const pager=card.locator(".learning-back-page-nav");
-  const nextPage=pager.locator(".pager-button").last();
+  const nextPage=pager.locator(".learning-back-page-shortcut").last();
   for(let i=0;i<3;i++){
     await expect(nextPage).toBeEnabled();
     await nextPage.dispatchEvent("click");
