@@ -188,28 +188,6 @@ export type Boundary = {
   recordHandwritingGrade: (character:string,grade:HandwritingGradeLike) => Promise<boolean>;
 };
 
-type EducationStartResult = {
-  started?: boolean;
-  reason?: string;
-  character?: string;
-  mode?: string;
-};
-
-type EducationBridge = {
-  start?: () => Promise<EducationStartResult | unknown> | (EducationStartResult | unknown);
-  submitValue?: (value: string) => Promise<unknown> | unknown;
-  dontKnow?: () => Promise<unknown> | unknown;
-  selfReportProduction?: (knewIt: boolean) => Promise<unknown> | unknown;
-  retry?: () => Promise<unknown> | unknown;
-  next?: () => Promise<unknown> | unknown;
-};
-
-type SessionApi = {
-  getSession?: () => { started?: boolean; finished?: boolean; experience?: "review" | "practice" } | null;
-  startExperience?: (experience: "review" | "practice") => Promise<unknown> | unknown;
-  startReady?: () => Promise<unknown> | unknown;
-  start?: () => Promise<unknown> | unknown;
-};
 
 declare global {
   interface Window {
