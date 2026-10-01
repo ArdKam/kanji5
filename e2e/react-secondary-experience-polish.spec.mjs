@@ -50,11 +50,18 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   await clean(page, "en");
   const dialog = await openMenuItem(page, "Prepared mnemonics");
   const search = dialog.locator(".prepared-mnemonic-library-search");
-  await expect(search).toBeVisible({ timeout: 10000 });
+  await expect(search).toHaveAttribute("type", "search");
+  await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText(/2[,.]?136/);
+  await expect(dialog.locator(".prepared-mnemonic-filter-chip").filter({ hasText: "Curated" }).first()).toHaveAttribute("aria-pressed", "false");
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);
   const rows = dialog.locator(".prepared-mnemonic-library-row");
-  await expect(rows.first()).toContainText(/学|study/i);
+  const curatedRow = dialog.locator(".prepared-mnemonic-library-row.is-curated").first();
+  await expect(curatedRow).toContainText(/学|study/i);
+  await expect(curatedRow.locator(".prepared-mnemonic-source.curated")).toBeVisible();
+  await expect(curatedRow.locator(".prepared-mnemonic-library-meaning")).toBeVisible();
+  await expect(curatedRow.locator(".prepared-mnemonic-library-use")).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-results-header")).toContainText(/result/);
 });
 
 test("Secondary desktop surfaces preserve centered modal geometry after the polish pass", async ({ page }) => {
