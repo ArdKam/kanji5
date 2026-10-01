@@ -27,7 +27,8 @@ assert.doesNotMatch(styles, /\.learning-card\[data-card-density="dense"\] \.lear
 
 const e2e = await readFile(new URL("../e2e/react-learning-card-flip.spec.mjs", import.meta.url), "utf8");
 assert.match(e2e, /learning card keeps the Stroke Order page directly open/);
-assert.match(e2e, /learning card exposes compact Mnemonic and Stroke Order shortcuts/);
+assert.match(e2e, /learning card exposes five full-content back pages in Persian and English/);
+assert.match(e2e, /learning card keeps the Stroke Order page directly open/);
 assert.doesNotMatch(e2e, /stroke-order replay auto-scrolls the expanded viewer fully into view/);
 assert.match(e2e, /personal mnemonic editor auto-scrolls fully into view when opened/);
 
