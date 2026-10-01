@@ -7,7 +7,7 @@ import { StrokeOrderViewer } from "./StrokeOrderViewer";
 const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({default: module.DictionaryPage})));
 const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({default: module.StatsDialog})));
 const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({default: module.SettingsDialog})));
-const PracticeHome = lazy(() => import("./PracticeHome").then(module => ({default: module.PracticeHome})));
+import { PracticeHome } from "./PracticeHome";
 const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({default: module.GrammarDialog})));
 const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({default: module.ReadingLabDialog})));
 const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({default: module.MnemonicsDialog})));
@@ -1017,7 +1017,6 @@ function App(){
       {snapshot?.exercise?.character?<Suspense fallback={null}><PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/></Suspense>:null}
     </>
   ) : (
-    <Suspense fallback={<LoadingLearning />}>
     <PracticeHome
       language={language}
       busy={busy}
@@ -1036,7 +1035,6 @@ function App(){
         return Boolean(result?.started);
       }}
     />
-    </Suspense>
   )
 ) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshotHydrated&&snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
