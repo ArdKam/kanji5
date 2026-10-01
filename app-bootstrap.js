@@ -13,7 +13,9 @@ try{
 }catch(_){}
 const registerServiceWorker=()=>{
   if(!('serviceWorker' in navigator))return;
-  navigator.serviceWorker.register('./sw.js?v=134').catch(()=>{});
+  const buildHash=String(document.querySelector('meta[name="kanji5-build-hash"]')?.getAttribute('content')||'').trim();
+  const swVersion=/^[0-9a-f]{7,40}$/i.test(buildHash)?`?v=${buildHash}`:'';
+  navigator.serviceWorker.register(`./sw.js${swVersion}`).catch(()=>{});
 };
 if('requestIdleCallback' in window){
   requestIdleCallback(registerServiceWorker,{timeout:2000});
