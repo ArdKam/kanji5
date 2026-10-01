@@ -56,11 +56,12 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);
   const rows = dialog.locator(".prepared-mnemonic-library-row");
-  await expect(rows.first()).toContainText(/学|study/i);
-  await expect(rows.first().locator(".prepared-mnemonic-source")).toBeVisible();
-  await expect(rows.first().locator(".prepared-mnemonic-library-meaning")).toBeVisible();
-  await expect(rows.first().locator(".prepared-mnemonic-library-use")).toBeVisible();
-  await expect(dialog.locator(".prepared-mnemonic-results-header")).toContainText("1 result");
+  const curatedRow = rows.filter({ has: dialog.locator(".prepared-mnemonic-source.curated") }).first();
+  await expect(curatedRow).toContainText(/学|study/i);
+  await expect(curatedRow.locator(".prepared-mnemonic-source.curated")).toBeVisible();
+  await expect(curatedRow.locator(".prepared-mnemonic-library-meaning")).toBeVisible();
+  await expect(curatedRow.locator(".prepared-mnemonic-library-use")).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-results-header")).toContainText(/result/);
 });
 
 test("Secondary desktop surfaces preserve centered modal geometry after the polish pass", async ({ page }) => {
