@@ -7,12 +7,6 @@ export const VOCABULARY_EVIDENCE_STATES=Object.freeze(['unseen','introduced','re
 const safeObject=value=>value&&typeof value==='object'&&!Array.isArray(value)?value:{};
 const text=(value,limit=240)=>String(value??'').normalize('NFKC').trim().slice(0,limit);
 
-function firstLinkedKanji(item){
-  const linked=Array.isArray(item?.linkedKanji)?item.linkedKanji:[];
-  const first=linked[0];
-  return typeof first==='string'&&first.startsWith('kanji:')?first.slice('kanji:'.length):'';
-}
-
 function provenanceOf(item){
   const provenance=safeObject(item?.provenance);
   const source=text(provenance.source||item?.source,64);
@@ -32,7 +26,7 @@ export function normalizeVocabularyEvidenceInput(item,input={}){
     contentKind:'vocabulary',
     provenance:provenanceOf(normalized),
   };
-  const character=text(input?.character,16)||firstLinkedKanji(normalized);
+  const character=text(input?.character,16);
   if(character)evidence.character=character;
   if(outcome!==undefined)evidence.outcome=outcome;
   if(input?.selectedAnswer!=null)evidence.selectedAnswer=text(input.selectedAnswer,80);
@@ -48,9 +42,9 @@ export function vocabularyEvidenceAccuracy(record){
   return practice?Math.max(0,Math.min(1,correct/practice)):null;
 }
 
-export function vocabularyRecentErrorRate(record){
+export function vocabularyErrorRate(record){
   const practice=Math.max(0,Number(record?.practiceCount)||0);
-  const wrong=Math.max(0,Number(record?.recentWrongCount)||0);
+  const wrong=Math.max(0,Number(record?.wrongCount)||0);
   return practice?Math.max(0,Math.min(1,wrong/practice)):0;
 }
 
@@ -81,7 +75,7 @@ export function projectVocabularyLearning(item,record=null){
       updatedAt:text(record?.updatedAt,80),
     },
     accuracy:vocabularyEvidenceAccuracy(record),
-    recentErrorRate:vocabularyRecentErrorRate(record),
+    errorRate:vocabularyErrorRate(record),
   };
 }
 
