@@ -71,7 +71,7 @@ test('React presentation can switch language from More Menu and keep Settings fo
   await expect(dialog).toContainText('Learning');
   await expect(dialog).toContainText('Review scheduling');
   await expect(dialog).toContainText('Data & backup');
-  await dialog.getByRole('button',{name:'Close',exact:true}).click();
+  await dialog.locator('.dialog-close').click();
 
   await page.getByRole('button',{name:'More',exact:true}).click();
   await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
