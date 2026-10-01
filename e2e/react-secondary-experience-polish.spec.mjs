@@ -39,7 +39,7 @@ test("Grammar behaves like a lesson: persistent progress, retry, and gated next 
   const stored = await page.evaluate(() => sessionStorage.getItem("kanji5-grammar-progress"));
   expect(stored).toContain("0");
 
-  await dialog.getByRole("button", { name: "Close", exact: true }).click();
+  await dialog.locator(".dialog-close").click();
   const reopened = await openMenuItem(page, "Grammar guide");
   await expect(reopened.locator(".grammar-progress")).toContainText("%");
   const progressText = await reopened.locator(".grammar-progress").innerText();
@@ -131,7 +131,7 @@ test("Data backup exports and restores the authoritative learning data", async (
   const downloadPromise = page.waitForEvent("download");
   await settings.getByRole("button", { name: "Export backup", exact: true }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^kanji5-backup-\\d{4}-\\d{2}-\\d{2}\\.json$/);
+  expect(download.suggestedFilename()).toMatch(/^kanji5-backup-\d{4}-\d{2}-\d{2}\.json$/);
   const backupPath = await download.path();
   expect(backupPath).toBeTruthy();
 
