@@ -22,7 +22,7 @@ assert(first);
 assert.equal(first.domain,'vocabulary');
 assert.equal(first.written,'学校');
 assert.equal(first.reading,'がっこう');
-assert.equal(first.contentId.startsWith('vocabulary:kanjiapi.dev:'),true);
+assert.match(first.contentId,/^vocabulary:kanjiapi\.dev:[0-9a-f]{8}$/);
 assert.deepEqual(first.linkedKanji,['kanji:学','kanji:校']);
 
 current=payloadChanged;
