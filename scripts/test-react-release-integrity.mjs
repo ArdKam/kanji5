@@ -12,11 +12,14 @@ assert.match(index, /href="\.\/react-dist\/kanji5-react\.css" data-kanji5-react-
 assert.match(index, /href="\.\/react-dist\/kanji5-react\.js">/);
 assert.doesNotMatch(index, /release18|release19/);
 
-assert.match(entry, /react-dist\/kanji5-react\.js\?v=/);
-assert.match(entry, /react-dist\/kanji5-react\.css\?v=/);
+assert.match(index, /<meta name="kanji5-build-id" content="[^"]+">/);
+assert.match(entry, /const buildId=\(document\.querySelector\('meta\[name="kanji5-build-id"\]'\).*\|\|'dev'\)/);
+assert.match(entry, /react-dist\/kanji5-react\.js'\+assetVersion/);
+assert.match(entry, /react-dist\/kanji5-react\.css'\+assetVersion/);
 assert.doesNotMatch(entry, /react-dist\/kanji5-react-release\d+/);
 
-assert.match(bootstrap, /serviceWorker\.register\('\.\/sw\.js\?v=/);
+assert.match(bootstrap, /const buildId=\(document\.querySelector\('meta\[name="kanji5-build-id"\]'\)/);
+assert.match(bootstrap, /serviceWorker\.register\('\.\/sw\.js\?v='\+encodeURIComponent\(buildId\)\)/);
 assert.doesNotMatch(bootstrap, /sw-release\d+/);
 
 assert.match(sw, /\.\/react-dist\/kanji5-react\.js/);
