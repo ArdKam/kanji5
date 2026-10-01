@@ -253,10 +253,11 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
   const page=await context.newPage();
   const cdp=await context.newCDPSession(page);
   await cdp.send("Network.setCacheDisabled",{cacheDisabled:true});
+  await cdp.send("Network.clearBrowserCache");
   let attempts=0;
   const vectorUrl='https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/05b66.svg';
   try{
-    await page.route("**/KanjiVG/kanjivg/**/kanji/05b66.svg",async route=>{
+    await page.route("**/05b66.svg",async route=>{
       attempts+=1;
       if(attempts===1){
         await route.fulfill({status:503,contentType:'text/plain',body:'simulated KanjiVG outage'});
