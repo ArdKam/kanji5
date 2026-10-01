@@ -3,6 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { getVocabulary, type KanjiCatalogItem, type VocabularyItem } from "./engine";
 import "./reading-lab-focus.css";
 import "./reading-lab-playback.css";
+import "./reading-lab-coverage.css";
 
 const isKanji = (value: string) => /\p{Script=Han}/u.test(value);
 const READING_LAB_STORAGE_KEY = "kanji5-reading-lab-session-v1";
@@ -187,13 +188,81 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   }, [extracted]);
 
   const coverage = extracted.length ? Math.round((counts.familiar / extracted.length) * 100) : 0;
+
+  const sentences = useMemo(
+    () => subtitleCues.length
+      ? subtitleCues.map(cue => ({ index: cue.index, text: cue.text }))
+      : splitReadingSentences(value),
+    [subtitleCues, value],
+  );
+
+  const occurrenceCoverage = useMemo(() => {
+    let recognized = 0;
+    let familiar = 0;
+    for (const character of Array.from(value)) {
+      if (!isKanji(character)) continue;
+      const item = catalogByCharacter.get(character);
+      if (!item) continue;
+      recognized++;
+      if (getMasteryBucket(item) === "familiar") familiar++;
+    }
+    return {
+      recognized,
+      familiar,
+      percentage: recognized ? Math.round((familiar / recognized) * 100) : 0,
+    };
+  }, [catalogByCharacter, value]);
+
+  const sentenceFocus = useMemo(() => {
+    return sentences.map((sentence, sentenceIndex) => {
+      let recognized = 0;
+      let newCount = 0;
+      let attentionCount = 0;
+      let learningCount = 0;
+      for (const character of Array.from(sentence.text)) {
+        if (!isKanji(character)) continue;
+        const item = catalogByCharacter.get(character);
+        if (!item) continue;
+        recognized++;
+        switch (getMasteryBucket(item)) {
+          case "new": newCount++; break;
+          case "attention": attentionCount++; break;
+          case "learning": learningCount++; break;
+        }
+      }
+      const weightedRisk = recognized
+        ? (newCount + (attentionCount * 0.75) + (learningCount * 0.35)) / recognized
+        : 0;
+      return { sentenceIndex, text: sentence.text, recognized, newCount, attentionCount, learningCount, weightedRisk };
+    });
+  }, [catalogByCharacter, sentences]);
+
+  const hardestSentence = useMemo(() => {
+    const candidates = sentenceFocus.filter(sentence => sentence.weightedRisk > 0);
+    if (!candidates.length) return null;
+    return [...candidates].sort((a, b) =>
+      b.weightedRisk - a.weightedRisk
+      || b.newCount - a.newCount
+      || b.attentionCount - a.attentionCount
+      || b.recognized - a.recognized
+      || a.sentenceIndex - b.sentenceIndex
+    )[0];
+  }, [sentenceFocus]);
+
+  const focusSentence = (nextIndex: number) => {
+    if (!sentences.length) return;
+    const clamped = Math.max(0, Math.min(sentences.length - 1, nextIndex));
+    setActiveSentenceIndex(clamped);
+    window.requestAnimationFrame(() => {
+      sentenceRefs.current[clamped]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  };
+
+  const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
   const attentionItems = useMemo(
     () => extracted.filter(item => getMasteryBucket(item) === "attention"),
     [extracted],
   );
-
-  const sentences = useMemo(() => subtitleCues.length ? subtitleCues.map(cue => ({ index: cue.index, text: cue.text })) : splitReadingSentences(value), [subtitleCues, value]);
-  const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
   const syncReady = Boolean(audioUrl && subtitleCues.length);
   const activeCue = syncReady ? subtitleCues[activeSentenceIndex] : undefined;
 
@@ -577,11 +646,18 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
           <section className="reading-lab-analysis" aria-live="polite" aria-labelledby="reading-lab-analysis-title">
             <div className="reading-lab-analysis-primary">
               <p className="eyebrow">{t("readingLabAnalysis", language)}</p>
-              <div className="reading-lab-coverage-row">
-                <strong id="reading-lab-analysis-title">{formatNumber(coverage, language)}%</strong>
-                <span>{t("readingLabCoverage", language)}</span>
+              <div className="reading-lab-coverage-metrics">
+                <div className="reading-lab-coverage-metric">
+                  <strong id="reading-lab-analysis-title">{formatNumber(coverage, language)}%</strong>
+                  <span>{t("readingLabUniqueCoverage", language)}</span>
+                  <small>{formatNumber(counts.familiar, language)} / {formatNumber(extracted.length, language)} {t("readingLabFamiliar", language)}</small>
+                </div>
+                <div className="reading-lab-coverage-metric">
+                  <strong>{formatNumber(occurrenceCoverage.percentage, language)}%</strong>
+                  <span>{t("readingLabOccurrenceCoverage", language)}</span>
+                  <small>{formatNumber(occurrenceCoverage.familiar, language)} / {formatNumber(occurrenceCoverage.recognized, language)} {t("readingLabFamiliar", language)}</small>
+                </div>
               </div>
-              <p>{formatNumber(counts.familiar, language)} / {formatNumber(extracted.length, language)} {t("readingLabFamiliar", language)}</p>
             </div>
             <div className="reading-lab-analysis-stats">
               <div><strong>{formatNumber(inputCharacters, language)}</strong><span>{t("readingLabCharacters", language)}</span></div>
@@ -591,6 +667,22 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               <div><strong>{formatNumber(counts.new, language)}</strong><span>{t("readingLabNew", language)}</span></div>
             </div>
           </section>
+
+          {hardestSentence ? (
+            <section className="reading-lab-hardest-sentence" aria-labelledby="reading-lab-focus-target-title">
+              <div className="reading-lab-hardest-copy">
+                <p className="eyebrow">{t("readingLabFocusTargetEyebrow", language)}</p>
+                <h3 id="reading-lab-focus-target-title">{t("readingLabFocusTarget", language)}</h3>
+                <p lang="ja">{hardestSentence.text}</p>
+                <small>
+                  {formatNumber(hardestSentence.newCount, language)} {t("readingLabNew", language)} · {formatNumber(hardestSentence.attentionCount, language)} {t("readingLabAttention", language)}
+                </small>
+              </div>
+              <button className="button secondary reading-lab-focus-target-button" type="button" onClick={() => focusSentence(hardestSentence.sentenceIndex)}>
+                {t("readingLabFocusSentence", language)}
+              </button>
+            </section>
+          ) : null}
 
           {attentionItems.length ? (
             <section className="reading-lab-attention" aria-labelledby="reading-lab-attention-title">
