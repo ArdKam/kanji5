@@ -3,10 +3,11 @@ import { test, expect } from "@playwright/test";
 async function clean(page, language = "en") {
   await page.addInitScript((value) => localStorage.setItem("kanji5-ui-language", value), language);
   await page.goto("/");
-  await page.evaluate(() => {
+  await page.evaluate((value) => {
     for (const key of Object.keys(localStorage)) if (key.startsWith("kanji5-")) localStorage.removeItem(key);
+    localStorage.setItem("kanji5-ui-language", value);
     sessionStorage.clear();
-  });
+  }, language);
   await page.reload();
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
 }
