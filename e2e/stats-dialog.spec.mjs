@@ -46,3 +46,23 @@ test('Statistics dashboard switches labels consistently to English',async({page}
   await expect(englishDialog.locator('.stats-activity')).toContainText('7-day review activity');
   await expect(englishDialog.locator('.stats-overview')).toContainText('Jōyō coverage');
 });
+
+test('Statistics mastery distribution respects seen kanji exposure',async({page})=>{
+  await clean(page);
+  const distribution=await page.evaluate(async()=>{
+    const state=window.__KANJI5_STATE__;
+    const now=new Date().toISOString();
+    state.writeKnowledge({
+      学:{exposedAt:now},
+      日:{exposedAt:now}
+    });
+    await window.__KANJI5_V19_LEARNER_MODEL__?.update?.();
+    const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.();
+    return snapshot?.stats?.masteryDistribution||null;
+  });
+  expect(distribution).not.toBeNull();
+  expect(distribution.total).toBe(2136);
+  expect(distribution.learning).toBeGreaterThanOrEqual(2);
+  expect(distribution.unseen).toBeLessThan(2136);
+  expect(distribution.unseen + distribution.learning + distribution.attention + distribution.stable + distribution.mastered).toBe(2136);
+});
