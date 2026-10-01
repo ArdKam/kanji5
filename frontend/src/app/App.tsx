@@ -1021,9 +1021,9 @@ function App(){
       language={language}
       busy={busy}
       onStartActiveRecall={async()=>{
+        setPracticeMode("exercise");
         await action(async()=>{
           await startExercise();
-          setPracticeMode("exercise");
         });
       }}
       onStartCustomStudy={async(filter: CustomStudyFilter)=>{
