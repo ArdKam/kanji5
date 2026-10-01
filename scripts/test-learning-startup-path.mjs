@@ -11,13 +11,13 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
-for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
+for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog']) {
   assert.match(app,new RegExp('const '+name+' = lazy\\('),`Non-learning surface ${name} must be deferred off the startup renderer bundle`);
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),`Non-learning surface ${name} must not be statically imported`);
 }
 
 
-assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);
+assert.match(app,/import \{ PracticeHome \} from "\.\/PracticeHome"/);\nassert.match(app,/import \{ HandwritingPractice \} from "\.\/HandwritingPractice"/);
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
 assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.js'\)/);
