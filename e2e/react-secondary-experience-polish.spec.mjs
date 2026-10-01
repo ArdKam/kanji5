@@ -138,6 +138,12 @@ test("Data backup exports and restores the authoritative learning data", async (
   await dailyNew.fill("9");
   await settings.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.locator("#settings-title")).toHaveCount(0);
+  await expect.poll(async () => page.evaluate(async () => {
+    const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
+    const snapshot = await boundary?.snapshot?.();
+    const appState = window.__KANJI5_STATE__?.readAppState?.();
+    return { snapshotDailyNew: snapshot?.settings?.dailyNew ?? null, persistedDailyNew: appState?.settings?.dailyNew ?? null };
+  }), { timeout: 10000 }).toEqual({ snapshotDailyNew: 9, persistedDailyNew: 9 });
 
   settings = await openMenuItem(page, "Settings");
   await expect(settings.getByLabel("New kanji per day", { exact: true })).toHaveValue("9");
