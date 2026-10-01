@@ -59,7 +59,7 @@ export function buildFeedbackViewModel(input={}){
 }
 
 export function buildLearnerSkillSummary(model){
-  const source=model&&typeof model==='object'?model:{};const attrs={};for(const mode of MODES){const a=source.attributes?.[mode]||{};attrs[mode]={state:text(a.state,40)||'unseen',accuracy:Math.max(0,Math.min(1,finite(a.accuracy,0))),recentAccuracy:Math.max(0,Math.min(1,finite(a.recentAccuracy,0))),confidence:Math.max(0,Math.min(1,finite(a.confidence,0))),momentum:Math.max(-1,Math.min(1,finite(a.momentum,0))),repeatedFailure:bool(a.repeatedFailure)}}
+  const source=model&&typeof model==='object'?model:{};const attrs={};for(const mode of MODES){const a=source.attributes?.[mode]||{};attrs[mode]={state:text(a.state,40)||'unseen',accuracy:Math.max(0,Math.min(1,finite(a.accuracy,0))),recentAccuracy:Math.max(0,Math.min(1,finite(a.recentAccuracy,0))),confidence:Math.max(0,Math.min(1,finite(a.confidence,0))),momentum:Math.max(-1,Math.min(1,finite(a.momentum,0))),attempts:Math.max(0,finite(a.attempts,0)),recentAttempts:Math.max(0,finite(a.recentAttempts,0)),repeatedFailure:bool(a.repeatedFailure)}}
   return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'learner-skill-summary',modelVersion:text(source.version,80)||text(source.modelVersion,80),attributes:attrs})
 }
 
