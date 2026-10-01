@@ -132,9 +132,8 @@ for (const profile of profiles) {
       `application transfer budget exceeded: ${metrics.appTransferKB}KB > ${startupBudgets.appTransferKB}KB`
     ).toBeLessThanOrEqual(startupBudgets.appTransferKB);
 
-    await page.getByRole("button", { name: "بیشتر", exact: true }).click();
     const interactionStart = await page.evaluate(() => performance.now());
-    await page.locator("#header-tools-menu").waitFor({ state: "visible" });
+    await page.getByRole("button", { name: "بیشتر", exact: true }).click();
     await expect(page.locator("#header-tools-menu")).toHaveClass(/open/);
     const interactionMs = await page.evaluate((start) => performance.now() - start, interactionStart);
     expect(
