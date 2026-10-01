@@ -203,7 +203,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
     const resize=()=>{
       const rect=wrap.getBoundingClientRect();
       const size=Math.max(1,Math.round(rect.width));
-      const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+      const dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
       dprRef.current=dpr;
       guide.width=Math.round(size*dpr);
       guide.height=Math.round(size*dpr);
@@ -385,6 +385,14 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                 })}
               </div>
               <p id={"handwriting-help-"+normalized} className="handwriting-help">{t("handwritingPracticeHelp",language)}</p>
+              <div className={"handwriting-live-feedback-slot"+(liveFeedback?" is-active":"")} aria-hidden={!liveFeedback}>
+                {liveFeedback?(
+                  <div className="handwriting-live-feedback" role="status" aria-live="polite" data-feedback-code={liveFeedback.grade.feedbackCode}>
+                    <span>{t("handwritingLiveStroke",language).replace("{n}",formatNumber(liveFeedback.strokeNumber,language))}</span>
+                    <strong>{(() => {switch(liveFeedback.grade.feedbackCode){case "endpoints":return t("handwritingFeedbackEndpoints",language);case "direction":return t("handwritingFeedbackDirection",language);case "length":return t("handwritingFeedbackLength",language);case "curvature":return t("handwritingFeedbackCurvature",language);case "shape":return t("handwritingFeedbackShape",language);default:return t("handwritingRetry",language);}})()}</strong>
+                  </div>
+                ):null}
+              </div>
               <div className="handwriting-canvas-wrap" ref={wrapRef}>
                 <canvas
                   ref={guideCanvasRef}
@@ -402,12 +410,6 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                   onPointerCancel={cancelStroke}
                 />
               </div>
-              {liveFeedback?(
-                <div className="handwriting-live-feedback" role="status" aria-live="polite" data-feedback-code={liveFeedback.grade.feedbackCode}>
-                  <span>{t("handwritingLiveStroke",language).replace("{n}",formatNumber(liveFeedback.strokeNumber,language))}</span>
-                  <strong>{(() => {switch(liveFeedback.grade.feedbackCode){case "endpoints":return t("handwritingFeedbackEndpoints",language);case "direction":return t("handwritingFeedbackDirection",language);case "length":return t("handwritingFeedbackLength",language);case "curvature":return t("handwritingFeedbackCurvature",language);case "shape":return t("handwritingFeedbackShape",language);default:return t("handwritingRetry",language);}})()}</strong>
-                </div>
-              ):null}
               <div className="handwriting-actions">
                 <button className="button secondary" type="button" onClick={undoLastStroke} disabled={!strokes.length||Boolean(activeStrokeRef.current.length)} aria-label={t("undoLastStroke",language)}>
                   {t("undoLastStroke",language)}
