@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
-const entry=read('react-entry.js'),css=read('react-dist/kanji5-react.css'),index=read('index.html'),contract=read('v1.9-v2-contract-core.js'),sw=read('sw.js');
+const entry=read('react-entry.js'),css=read('frontend/src/styles.css'),index=read('index.html'),contract=read('v1.9-v2-contract-core.js'),sw=read('sw.js');
 for(const token of ['react-dist/kanji5-react.js','react-dist/kanji5-react.css'])assert.ok(entry.includes(token),'React entry must load '+token);
 for(const token of ['--washi:','--paper:','--sumi:','--shu:','--ai:','--matcha:'])assert.ok(css.includes(token),'React design system must expose '+token);
 assert.ok(index.includes('./react-entry.js'));assert.ok(index.includes('./v1.9-v2-boundary.js'));assert.ok(index.includes('./review-runtime.js'));assert.doesNotMatch(index,/legacy\.css|v2-presentation/);
