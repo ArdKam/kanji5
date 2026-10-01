@@ -58,11 +58,7 @@ const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
 const pct=(v:number|undefined)=>Math.round(Math.max(0,Math.min(1,Number(v)||0))*100);
 const toHiragana=(value:string)=>Array.from(value).map(ch=>{const code=ch.charCodeAt(0);return code>=0x30a1&&code<=0x30f6?String.fromCharCode(code-0x60):ch}).join("");
 const skillLabel=(key:string)=>({meaning:t("meaning"),reading:t("reading"),production:t("production"),vocabulary:t("vocabulary"),context:t("context")} as Record<string,string>)[key]??text(key);
-const stateLabel=(key:string)=>localizeDynamic(key,getLanguage(),text(key));
-const actionLabel=(key:string)=>localizeDynamic(key,getLanguage(),text(key));
 const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==="context"?"برای این جمله گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن.":"برای این واژه گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن."):(mode==="context"?"Not enough safe choices are available for this sentence. Continue to the next exercise.":"Not enough safe choices are available for this word. Continue to the next exercise.");
-const skillKeys=["meaning","reading","production","vocabulary","context"] as const;
-const outcomeLabel=(key:string)=>({correct:t("correct"),wrong:t("wrong"),unknown:t("unknown"),near_miss:t("nearMiss"),empty:t("empty"),invalid:t("unavailable")} as Record<string,string>)[key]??text(key);
 
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
 function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
@@ -788,44 +784,16 @@ function PracticeHandwriting({character,language,exercise}:{character:string;lan
     />
   </div>;
 }
-function Panel({title,children}:{title:string;children:ReactNode}){return <section className="surface insight-panel"><h3>{title}</h3>{children}</section>}
-function MasteryOverview({snapshot}:{snapshot:Snapshot}){
-  return <Panel title={t("masteryOverview")}><div className="mastery-grid">{skillKeys.map(k=>{
-    const s=snapshot.learner?.attributes?.[k]??{};
-    const value=pct(s.confidence??s.accuracy);
-    const trend=Number(s.momentum??0);
-    const trendClass=trend>0.02?"trend-up":trend<-0.02?"trend-down":"trend-flat";
-    const trendIcon=trend>0.02?"↑":trend<-0.02?"↓":"→";
-    const trendValue=Math.round(Math.abs(trend)*100);
-    return <div className="mastery-row" key={k}>
-      <div className="mastery-label"><span>{skillLabel(k)}</span><strong>{fa(value)}%</strong></div>
-      <div className="mastery-track" role="progressbar" aria-label={skillLabel(k)+" — "+t("modelConfidence")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:value+"%"}} /></div>
-      <div className="mastery-state"><span>{stateLabel(s.state??"")}</span><span className={trendClass}>{trendIcon} {fa(trendValue)}%</span></div>
-    </div>;
-  })}</div><p className="mastery-footnote">{t("modelConfidence")}</p></Panel>;
-}
-function SevenDayActivity({snapshot}:{snapshot:Snapshot}){
-  const days=snapshot.stats?.last7??[];
-  const max=Math.max(1,...days.map(d=>Math.max(0,Number(d.count)||0)));
-  return <Panel title={t("sevenDayActivity")}><div className="activity-chart" aria-label={t("sevenDayActivity")}>{days.map((d,i)=>{
-    const count=Math.max(0,Number(d.count)||0);
-    const height=Math.max(6,Math.round(count/max*100));
-    return <div className="activity-bar-wrap" key={(d.label??"")+(i)}>
-      <div className="activity-count">{fa(count)}</div>
-      <div className="activity-bar-track" aria-hidden="true"><span style={{height:height+"%"}} /></div>
-      <div className="activity-label">{text(d.label,"—")}</div>
-    </div>;
-  })}</div></Panel>;
-}
-function Insights({snapshot}:{snapshot:Snapshot}){
-  return <details className="insights"><summary>{t("sessionDetails")}</summary><div className="insights-grid">
-    <MasteryOverview snapshot={snapshot}/>
-    <SevenDayActivity snapshot={snapshot}/>
-    <Panel title={t("learnerSkills")}>{skillKeys.map(k=>{const s=snapshot.learner?.attributes?.[k]??{};return <p className="row" key={k}><span>{skillLabel(k)}</span><strong>{stateLabel(s.state??"")} · {t("recent")} {fa(pct(s.recentAccuracy))}%</strong></p>})}</Panel>
-    <Panel title={t("adaptiveFocus")}><p className="row"><span>{t("skill")}</span><strong>{skillLabel(snapshot.adaptiveReason?.mode??"")}</strong></p><p className="row"><span>{t("action")}</span><strong>{actionLabel(snapshot.adaptiveReason?.action??"")}</strong></p>{(snapshot.adaptiveReason?.reasons??[]).filter(Boolean).map((r,i)=><p className="reason" key={r+"-"+i}>{r}</p>)}</Panel>
-    <Panel title={t("sessionSummary")}><p className="row"><span>{t("attempts")}</span><strong>{fa(snapshot.sessionSummary?.attempts??0)}</strong></p><p className="row"><span>{t("right")}</span><strong>{fa(snapshot.sessionSummary?.correct??0)}</strong></p><p className="row"><span>{t("accuracy")}</span><strong>{fa(pct(snapshot.sessionSummary?.accuracy))}{getLanguage()==="fa"?"٪":"%"}</strong></p></Panel>
-    <Panel title={t("recentResults")}>{(snapshot.recentOutcomes??[]).map((r,i)=><div className="outcome-row" key={(r.character??"")+"-"+i}><strong lang="ja">{text(r.character)}</strong><span>{skillLabel(r.mode??"")} · {outcomeLabel(r.quality??r.outcome??"")}</span><b>{r.correct?"✓":outcomeLabel(r.outcome??"")}</b></div>)}{!snapshot.recentOutcomes?.length?<p className="empty-text">{t("noResults")}</p>:null}</Panel>
-  </div></details>;
+function SessionFeedback({snapshot}:{snapshot:Snapshot}){
+  const summary=snapshot.sessionSummary??{};
+  const attempts=Math.max(0,Number(summary.attempts)||0);
+  if(attempts===0)return null;
+  const correct=Math.max(0,Number(summary.correct)||0);
+  const accuracy=pct(summary.accuracy);
+  return <section className="session-feedback" aria-label={t("sessionSummary",getLanguage())}>
+    <strong>{t("sessionSummary",getLanguage())}</strong>
+    <span>{fa(attempts)} {t("attempts",getLanguage())} · {fa(correct)} {t("right",getLanguage())} · {fa(accuracy)}{getLanguage()==="fa"?"٪":"%"} {t("accuracy",getLanguage())}</span>
+  </section>;
 }
 function getInitialSnapshot():Snapshot|null{
   if(typeof window==="undefined")return null;
@@ -854,10 +822,6 @@ function LoadingLearning(){
     </div>
   </section>;
 }
-function LoadingInsights(){
-  return <div className="insights loading-insights" aria-hidden="true"><div className="loading-insights-row"><span className="loading-block"/><span className="loading-block"/></div></div>;
-}
-
 function App(){
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   useEffect(()=>applyLanguage(language),[language]);
@@ -1038,7 +1002,7 @@ function App(){
     
   )
 ) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
-              {!showExercise?(snapshotHydrated&&snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
+              {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot}/>:null):null}
       </>}
     </main>
     <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
