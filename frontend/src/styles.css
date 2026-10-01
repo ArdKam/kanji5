@@ -2635,41 +2635,46 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 }
 .settings-save-actions .button{flex:1 1 0;}
 .settings-danger-zone{
-  margin-top:28px;
-  padding:20px;
-  border:1px solid color-mix(in srgb,var(--shu) 28%,var(--line));
-  border-radius:18px;
-  background:color-mix(in srgb,var(--shu) 5%,var(--paper));
+  margin-top:20px;
+  border-top:1px solid var(--line-soft);
+  padding-top:10px;
 }
-.settings-danger-heading{
-  display:grid;
-  gap:4px;
-}
-.settings-danger-heading .eyebrow{color:var(--shu);}
-.settings-danger-heading h3{
-  margin:0;
-  color:var(--ink);
-  font-size:var(--text-md);
-}
-.settings-danger-heading>p:last-child{
-  margin:0;
-  max-width:58ch;
+.settings-reset-trigger{
+  width:100%;
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 4px;
+  border:0;
+  border-radius:var(--radius-sm);
+  background:transparent;
   color:var(--mute);
   font-size:var(--text-xs);
-  line-height:1.65;
+  font-weight:750;
+  text-align:start;
+  transition:color .16s ease,background .16s ease;
 }
-.settings-reset-button{
-  margin-top:13px;
+.settings-reset-trigger:hover:not(:disabled),
+.settings-reset-trigger:focus-visible{
+  color:var(--shu);
+  background:color-mix(in srgb,var(--shu) 4%,transparent);
+}
+.settings-reset-trigger span:last-child{
+  font-size:18px;
+  line-height:1;
+  color:currentColor;
 }
 .settings-reset-confirmation{
   display:grid;
   gap:6px;
-  margin-top:13px;
   padding:13px;
   border:1px solid color-mix(in srgb,var(--shu) 32%,var(--line));
   border-radius:14px;
   background:color-mix(in srgb,var(--shu) 8%,var(--paper));
 }
+
 .settings-reset-confirmation>strong{font-size:var(--text-sm);}
 .settings-reset-confirmation>p{margin:0;color:var(--mute);font-size:var(--text-xs);}
 .settings-danger-actions{
