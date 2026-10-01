@@ -7,6 +7,7 @@ import { adaptHintLevel, hintLevelName, hintProfile, initialHintLevel, shouldPre
 import { feedbackFocusKind, feedbackMarkerPoints, feedbackStrokeIndex } from "./handwriting-feedback";
 import { deriveHandwritingPrompt, type HandwritingPromptKind } from "./handwriting-prompts";
 import "./handwriting-practice.css";
+import "./handwriting-layout.css";
 
 type Point = { x:number; y:number };
 
