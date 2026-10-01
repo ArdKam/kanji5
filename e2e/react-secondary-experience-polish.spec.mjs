@@ -82,7 +82,7 @@ test("Secondary desktop surfaces preserve centered modal geometry after the poli
     expect(metrics.top).toBeGreaterThanOrEqual(0);
     expect(metrics.left + metrics.width).toBeLessThanOrEqual(metrics.viewportWidth);
     expect(metrics.top + metrics.height).toBeLessThanOrEqual(metrics.viewportHeight);
-    await dialog.getByRole("button", { name: "Close", exact: true }).click();
+    await dialog.locator(".dialog-close").click();
   }
 });
 
