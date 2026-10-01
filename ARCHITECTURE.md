@@ -27,6 +27,8 @@ The active browser runtime is intentionally split into narrow responsibilities:
 
 The former v1/v2 DOM presentation files and compatibility stylesheet are no longer part of the production runtime.
 
+React build provenance: `frontend/` is the canonical UI source; `react-dist/` is generated only in the build/deploy working tree and is not source-controlled.
+
 ## Dependency direction
 
 The intended direction is:
