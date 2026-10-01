@@ -43,7 +43,7 @@ cover current presentation/runtime boundaries and release contracts.
 
 `test-v1.4-*.mjs` through `test-v1.9-*.mjs` are not automatically dead tests. They encode contracts for engine layers that evolved incrementally and are still used by the current release gates.
 
-Read the workflow files in `.github/workflows/` to see which versioned suites are authoritative for each CI gate.
+The consolidated `.github/workflows/build-v1.8.yml` is the authoritative engine gate; `handwriting.yml`, `react-frontend.yml`, and `pages-deploy.yml` own their specialized/browser/release checks.
 
 ### v2 tests
 
