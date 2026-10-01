@@ -1,10 +1,13 @@
 name: Deploy Kanji 5 to GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - "React presentation build"
+    types:
+      - completed
     branches:
       - main
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,14 +20,30 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout release tree
+      - name: Checkout exact verified React commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Verify verified React commit is still current main
+        shell: bash
+        env:
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          current="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          test -n "$current"
+          if [ "$current" != "$RELEASE_SHA" ]; then
+            echo "A newer main commit exists; refusing to deploy stale workflow_run $RELEASE_SHA."
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -33,7 +52,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Typecheck frontend
         working-directory: frontend
