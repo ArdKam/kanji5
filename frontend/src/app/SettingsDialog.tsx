@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
 import { DataBackup } from "./DataBackup";
@@ -148,6 +148,9 @@ export function SettingsDialog({
     if (dirty) setDiscardOpen(true);
     else onClose();
   };
+  const requestCloseRef = useRef(requestClose);
+  requestCloseRef.current = requestClose;
+  const stableClose = useCallback(() => requestCloseRef.current(), []);
 
   const handleSave = async () => {
     if (saving || !dirty) return;
@@ -160,7 +163,7 @@ export function SettingsDialog({
     }
   };
 
-  const dialogRef = usePageDialog(open, requestClose);
+  const dialogRef = usePageDialog(open, stableClose);
   const effectiveBusy = busy || saving;
 
   return open ? (
