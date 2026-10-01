@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 
 const css=fs.readFileSync("react-dist/kanji5-react.css","utf8");
 const entry=fs.readFileSync("react-entry.js","utf8");
@@ -22,9 +23,10 @@ if(!/react-dist\/kanji5-react\.js\?v=/.test(entry) || !/react-dist\/kanji5-react
   throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
 }
 console.log("React entry uses cache-busted shipped runtime assets.");
-const reactJs=fs.readFileSync("react-dist/kanji5-react.js","utf8");
+const reactJsPath="react-dist/kanji5-react.js";
+const reactJs=fs.readFileSync(reactJsPath,"utf8");
 try{
-  new Function(reactJs);
+  execFileSync(process.execPath,["--check",reactJsPath],{stdio:"pipe"});
 }catch(error){
   throw new Error("SHIPPED_REACT_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));
 }
