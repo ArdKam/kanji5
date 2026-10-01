@@ -27,7 +27,7 @@ assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.
 mustContain(session,'function start(){if(!IS_LEGACY)return;','Legacy dashboard startup must not run in modern mode');
 mustContain(session,'void loadPlanApi()','Session plan API remains available on explicit use');
 
-mustContain(review,"const prefetchFsrs=()=>{if(!window.__KANJI5_P0_FSRS_PROMISE)","Review runtime must retain the shared FSRS compatibility path");
+mustContain(p0,"const prefetchFsrs=()=>{if(!window.__KANJI5_P0_FSRS_PROMISE)","P0 must retain the shared FSRS compatibility path");
 mustContain(review,"window.__KANJI5_P0_FSRS_PROMISE?window.__KANJI5_P0_FSRS_PROMISE.then", "Review runtime must consume the shared FSRS promise when present");
 mustContain(review,"buildQueue();next();document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'))","Review runtime must signal readiness after queue initialization");
 mustContain(boundary,'async function startupSnapshot(){','Boundary must expose a Learning-first snapshot path');
