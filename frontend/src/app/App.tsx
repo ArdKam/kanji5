@@ -1,17 +1,17 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
-const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
-const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
-const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({ default: module.SettingsDialog })));
-const PracticeHome = lazy(() => import("./PracticeHome").then(module => ({ default: module.PracticeHome })));
-const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({ default: module.GrammarDialog })));
-const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({ default: module.ReadingLabDialog })));
-const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog })));
-const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(module => ({ default: module.HandwritingPractice })));
+import { DictionaryPage } from "./DictionaryPage";
+import { StatsDialog } from "./StatsDialog";
+import { SettingsDialog } from "./SettingsDialog";
+import { PracticeHome } from "./PracticeHome";
+import { GrammarDialog } from "./GrammarDialog";
+import { ReadingLabDialog } from "./ReadingLabDialog";
+import { MnemonicsDialog } from "./MnemonicsDialog";
+import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -976,8 +976,8 @@ function App(){
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
-        {secondaryPage==="stats" ? <Suspense fallback={null}><StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/></Suspense> : null}
-        {secondaryPage==="settings" ? <Suspense fallback={null}><SettingsDialog
+        {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
+        {secondaryPage==="settings" ? <SettingsDialog
           open={settingsOpen}
           snapshot={snapshot??{}}
           busy={busy}
@@ -985,8 +985,8 @@ function App(){
           onClose={closeSecondaryPage}
           onSave={async s=>{const result=await action(async()=>{await updateSettings(s);return true});if(result)closeSecondaryPage();return result}}
           onReset={()=>void action(async()=>{resetProgress()})}
-        /></Suspense> : null}
-        {secondaryPage==="mnemonics" ? <Suspense fallback={null}><MnemonicsDialog
+        /> : null}
+        {secondaryPage==="mnemonics" ? <MnemonicsDialog
           open={mnemonicsOpen}
           language={language}
           catalog={mnemonicCatalog}
@@ -996,15 +996,15 @@ function App(){
           onRetry={()=>setMnemonicCatalogRetry(value=>value+1)}
           onClose={closeSecondaryPage}
           onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
-        /></Suspense> : null}
-        {secondaryPage==="grammar" ? <Suspense fallback={null}><GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/></Suspense> : null}
-        {secondaryPage==="readingLab" ? <Suspense fallback={null}><ReadingLabDialog
+        /> : null}
+        {secondaryPage==="grammar" ? <GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/> : null}
+        {secondaryPage==="readingLab" ? <ReadingLabDialog
           open={readingLabOpen}
           language={language}
           onClose={closeSecondaryPage}
-        /></Suspense> : null}
+        /> : null}
         {secondaryPage==="account" ? <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/> : null}
-      </section> : showDictionary?<Suspense fallback={<LoadingLearning/>}><DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
+      </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
         {!showExercise?(snapshotHydrated&&snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
@@ -1012,10 +1012,9 @@ function App(){
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
       <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
-      {snapshot?.exercise?.character?<Suspense fallback={null}><PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/></Suspense>:null}
+      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
-    <Suspense fallback={<LoadingLearning/>}>
     <PracticeHome
       language={language}
       busy={busy}
@@ -1034,7 +1033,7 @@ function App(){
         return Boolean(result?.started);
       }}
     />
-    </Suspense>
+    
   )
 ) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{await rateLearning(r);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshotHydrated&&snapshot?<Insights snapshot={snapshot}/>:<LoadingInsights/>):null}
