@@ -64,6 +64,44 @@ function handwritingConsistency(rows){const values=rows.map(x=>Number(x.score)).
 function handwritingSkillState({attempts,averageScore,recentAverageScore,errorStreak,successStreak},cfg=HANDWRITING_DEFAULTS){if(!attempts)return'unseen';if(errorStreak>=2||recentAverageScore<cfg.weakScore)return'weak';if(attempts>=cfg.masteryMinAttempts&&averageScore>=cfg.masteryScore)return'mastered';if(attempts>=cfg.stableMinAttempts&&averageScore>=cfg.stableScore&&successStreak>=2)return'stable';return'learning'}
 export function projectHandwritingSkill(evidence,options={}){const cfg={...HANDWRITING_DEFAULTS,...options},source=normalizeHandwritingEvidence(evidence),recent=source.slice(-Math.max(1,cfg.recentWindow)),attempts=source.length,correct=source.filter(x=>x.outcome==='correct').length,accuracy=attempts?correct/attempts:0,sum=source.reduce((a,x)=>a+x.score,0),averageScore=attempts?sum/attempts:0,recentSum=recent.reduce((a,x)=>a+x.score,0),recentAverageScore=recent.length?recentSum/recent.length:0;let errorStreak=0,successStreak=0;for(let i=source.length-1;i>=0;i--){const o=source[i]?.outcome;if((o==='wrong'||o==='unknown'||o==='invalid'||o==='empty')&&successStreak===0){errorStreak++;continue}if(o==='correct'&&errorStreak===0){successStreak++;continue}break}const older=source.length>recent.length?source.slice(0,source.length-recent.length):[],olderAverageScore=older.length?older.reduce((a,x)=>a+x.score,0)/older.length:null,momentum=olderAverageScore===null?0:clamp(recentAverageScore-olderAverageScore,-1,1),confidence=clamp(attempts/Math.max(1,cfg.confidenceFullAttempts)),consistency=handwritingConsistency(recent),latest=source.length?source[source.length-1]:null,metrics={shape:handwritingMetricAverage(recent,'shape'),endpoints:handwritingMetricAverage(recent,'endpoints'),length:handwritingMetricAverage(recent,'length'),direction:handwritingMetricAverage(recent,'direction'),curvature:handwritingMetricAverage(recent,'curvature'),placement:handwritingMetricAverage(recent,'placement')},candidates=Object.entries(metrics).filter(([,v])=>typeof v==='number'),weakestMetric=candidates.length?candidates.slice().sort((a,b)=>a[1]-b[1])[0][0]:null;return Object.freeze({version:'1.0.0-handwriting-skill',attempts,correct,accuracy,score:averageScore,averageScore,recentAttempts:recent.length,recentAccuracy:recent.length?recent.filter(x=>x.outcome==='correct').length/recent.length:0,recentAverageScore,momentum,confidence,consistency,errorStreak,successStreak,state:handwritingSkillState({attempts,averageScore,recentAverageScore,errorStreak,successStreak},cfg),lastAt:latest?.at||'',lastOutcome:latest?.outcome||null,lastScore:latest?.score||0,feedbackCode:latest?.evidence?.feedbackCode||null,feedbackStroke:Number.isFinite(Number(latest?.evidence?.feedbackStroke))?Number(latest.evidence.feedbackStroke):null,weakestMetric,metrics})}
 export function buildLearnerModel(rows,options={}){const ordered=orderRows(rows),out={version:LEARNER_MODEL_VERSION,sessions:ordered.length,generatedAt:Date.now(),attributes:{}};for(const mode of ATTRIBUTES)out.attributes[mode]=modeSummary(ordered,mode,options.now??Date.now(),options);return out}
+
+export function buildLearnerModelFromKanji(kanjiByCharacter={},options={}){
+  const now=Number(options.now)||Date.now();
+  const source=kanjiByCharacter&&typeof kanjiByCharacter==='object'?kanjiByCharacter:{};
+  const out={version:LEARNER_MODEL_VERSION,sessions:0,generatedAt:now,attributes:{}};
+  for(const mode of ATTRIBUTES){
+    const rows=[];
+    for(const entry of Object.values(source)){
+      const skill=entry?.attributes?.[mode];
+      if(skill&&Number(skill.attempts)>0)rows.push(skill);
+    }
+    const attempts=rows.reduce((sum,row)=>sum+Math.max(0,num(row.attempts)),0);
+    const correct=rows.reduce((sum,row)=>sum+Math.min(Math.max(0,num(row.correct)),Math.max(0,num(row.attempts))),0);
+    const recentAttempts=rows.reduce((sum,row)=>sum+Math.max(0,num(row.recentAttempts)),0);
+    const recentCorrect=rows.reduce((sum,row)=>sum+Math.min(Math.max(0,num(row.recentCorrect)),Math.max(0,num(row.recentAttempts))),0);
+    const accuracy=attempts?correct/attempts:0;
+    const recentAccuracy=recentAttempts?recentCorrect/recentAttempts:0;
+    const confidence=clamp(attempts/Math.max(1,options.confidenceFullAttempts||DEFAULTS.confidenceFullAttempts));
+    const momentumWeighted=rows.reduce((sum,row)=>sum+(Number.isFinite(Number(row.momentum))?Number(row.momentum):0)*Math.max(1,num(row.recentAttempts)),0);
+    const momentumWeight=rows.reduce((sum,row)=>sum+Math.max(1,num(row.recentAttempts)),0);
+    const momentum=momentumWeight?clamp(momentumWeighted/momentumWeight,-1,1):0;
+    const latest=rows.slice().sort((a,b)=>String(a?.lastAt||'').localeCompare(String(b?.lastAt||'')) ).at(-1);
+    let successStreak=0,errorStreak=0;
+    for(const row of rows.slice().sort((a,b)=>String(a?.lastAt||'').localeCompare(String(b?.lastAt||''))).reverse()){
+      if(row?.lastCorrect===true&&errorStreak===0){successStreak++;continue}
+      if((row?.lastCorrect===false)&&successStreak===0){errorStreak++;continue}
+      break;
+    }
+    const state=deriveState({attempts,accuracy,confidence,errorStreak:0,successStreak,recentAccuracy,momentum},options);
+    const lastAt=typeof latest?.lastAt==='string'?latest.lastAt:'';
+    const lastMs=lastAt?Date.parse(lastAt):NaN;
+    const recencyDays=Number.isFinite(lastMs)?Math.max(0,(now-lastMs)/86400000):null;
+    const recoveryCount=rows.reduce((sum,row)=>sum+Math.max(0,num(row.recoveryCount)),0);
+    const base={attempts,correct,accuracy,recentAttempts,recentCorrect,recentAccuracy,errorStreak,successStreak,lastAt,recencyDays,momentum,recoveryCount,confidence,state,version:LEARNER_MODEL_VERSION};
+    out.attributes[mode]={...base,...semanticSkillState(base)};
+  }
+  return out;
+}
 export function projectKanjiAttributes(knowledge,character,options={}){const entry=knowledge?.[character]||{},out={character,version:LEARNER_MODEL_VERSION,attributes:{},skills:{handwriting:projectHandwritingSkill(options.evidenceByMode?.handwriting||[],options)}};for(const mode of ATTRIBUTES){const raw=entry?.[mode],legacy=normalizeAttempt(raw);const evidence=deriveEvidence(options.evidenceByMode?.[mode],options.now??Date.now(),options.recentWindow||DEFAULTS.recentWindow);const evidenceRows=normalizeEvidence(options.evidenceByMode?.[mode]);const knownNonIndependent=evidenceRows.filter(x=>x.independent===false).length;const knownNonIndependentCorrect=evidenceRows.filter(x=>x.independent===false&&x.outcome==='correct').length;const evidencePrimary=legacy.attempts===0&&evidenceRows.length>0;const attempts=evidencePrimary?evidence.independentAttempts:Math.max(0,legacy.attempts-knownNonIndependent);const correct=evidencePrimary?evidence.independentCorrect:Math.max(0,Math.min(attempts,legacy.correct-knownNonIndependentCorrect));const confidence=clamp(attempts/(options.confidenceFullAttempts||DEFAULTS.confidenceFullAttempts));const state=deriveState({attempts,accuracy:attempts?correct/attempts:0,confidence,errorStreak:evidence.errorStreak,recentAccuracy:evidence.recentAccuracy,momentum:evidence.momentum,exposed:Boolean(entry?.exposedAt)},DEFAULTS);const base={...legacy,attempts,correct,lastAt:evidence.lastAt||legacy.lastAt,...evidence,confidence,state,version:LEARNER_MODEL_VERSION};out.attributes[mode]={...base,...semanticSkillState(base)}}return out}
 export function attributeWeakness(model,mode){const s=model?.attributes?.[mode];if(!s)return 1;const stateMultiplier=STATE_PRIORITY[s.state]??1;return clamp((1-s.accuracy)*stateMultiplier*(1+Math.max(0,s.errorStreak-1)*0.25))}
 export function rankAttributes(model){return ATTRIBUTES.map(mode=>({mode,score:attributeWeakness(model,mode),state:model?.attributes?.[mode]?.state||'unseen',confidence:model?.attributes?.[mode]?.confidence||0})).sort((a,b)=>(STATE_ORDER[a.state]??99)-(STATE_ORDER[b.state]??99)||b.score-a.score||a.mode.localeCompare(b.mode))}
