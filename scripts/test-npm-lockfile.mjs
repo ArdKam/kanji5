@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const lock=JSON.parse(fs.readFileSync('package-lock.json','utf8'));
-const workflowFiles=['build-v1.8.yml'];
+const workflowFiles=['build-v1.8.yml','handwriting.yml','react-frontend.yml','pages-deploy.yml'];
 
 const frontendPkg=JSON.parse(fs.readFileSync('frontend/package.json','utf8'));
 const frontendLock=JSON.parse(fs.readFileSync('frontend/package-lock.json','utf8'));
