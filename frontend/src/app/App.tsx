@@ -11,7 +11,7 @@ import { PracticeHome } from "./PracticeHome";
 const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({default: module.GrammarDialog})));
 const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({default: module.ReadingLabDialog})));
 const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({default: module.MnemonicsDialog})));
-const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(module => ({default: module.HandwritingPractice})));
+import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -1014,7 +1014,7 @@ function App(){
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
       <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
-      {snapshot?.exercise?.character?<Suspense fallback={null}><PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/></Suspense>:null}
+      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
     <PracticeHome
