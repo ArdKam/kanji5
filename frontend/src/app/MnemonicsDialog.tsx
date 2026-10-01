@@ -7,6 +7,9 @@ import { usePageDialog } from "./usePageDialog";
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
+type LibraryMode = "curated" | "generated";
+type LevelFilter = "all" | "grade1" | "n5";
+
 function PreparedMnemonicLibrary({
   language,
   catalog,
@@ -18,8 +21,8 @@ function PreparedMnemonicLibrary({
 }) {
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"all" | "curated" | "generated">("all");
-  const [levelFilter, setLevelFilter] = useState<"all" | "grade1" | "n5">("all");
+  const [mode, setMode] = useState<LibraryMode>("curated");
+  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [visibleLimit, setVisibleLimit] = useState(60);
   const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
   const [busyKey, setBusyKey] = useState("");
@@ -55,34 +58,39 @@ function PreparedMnemonicLibrary({
     () => entries.reduce((count, entry) => count + Number(entry.suggestion.source === "curated"), 0),
     [entries]
   );
+  const generatedCount = Math.max(0, entries.length - curatedCount);
 
   const filteredEntries = useMemo(() => {
     const q = normalize(query);
     return entries.filter(entry => {
-      if (typeFilter === "curated" && entry.suggestion.source !== "curated") return false;
-      if (typeFilter === "generated" && entry.suggestion.source !== "generated") return false;
-      if (levelFilter === "grade1" && Number(catalogByCharacter.get(entry.character)?.grade) !== 1) return false;
-      if (levelFilter === "n5" && catalogByCharacter.get(entry.character)?.jlpt !== "N5") return false;
+      const isCurated = entry.suggestion.source === "curated";
+      if (mode === "curated" && !isCurated) return false;
+      if (mode === "generated" && isCurated) return false;
+
+      const item = catalogByCharacter.get(entry.character);
+      if (levelFilter === "grade1" && Number(item?.grade) !== 1) return false;
+      if (levelFilter === "n5" && item?.jlpt !== "N5") return false;
+
       if (!q) return true;
       const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
-      const item = catalogByCharacter.get(entry.character);
       const searchable = [
         entry.character,
         ...(item?.meanings ?? []),
         ...(item?.on ?? []),
         ...(item?.kun ?? []),
-        mnemonic
+        mnemonic,
+        ...(componentMap[entry.character] ?? [])
       ].join(" ");
       return normalize(searchable).includes(q);
     });
-  }, [entries, language, query, typeFilter, levelFilter, catalogByCharacter]);
+  }, [entries, language, query, mode, levelFilter, catalogByCharacter, componentMap]);
 
   useEffect(() => {
     setVisibleLimit(60);
     setAppliedKey("");
     setErrorKey("");
     setErrorMessage("");
-  }, [language, query, typeFilter, levelFilter]);
+  }, [language, query, mode, levelFilter]);
 
   const visible = filteredEntries.slice(0, visibleLimit);
 
@@ -93,63 +101,87 @@ function PreparedMnemonicLibrary({
   }, [appliedKey]);
 
   const copy = language === "fa" ? {
-    filters: "نوع یادسپار",
-    all: "همه",
-    curated: "دست‌چین‌شده",
-    generated: "راهنمای ساخت",
-    levels: "سطح",
+    modeLabel: "نوع کمک حافظه",
+    curatedMode: "یادسپارهای آماده",
+    generatedMode: "سرنخ‌های ساخت",
+    curatedCountLabel: "منتخب و آمادهٔ استفاده",
+    generatedCountLabel: "سرنخ برای ساختن یادسپار",
+    level: "سطح",
     allLevels: "همه",
     grade1: "پایه ۱",
     n5: "JLPT N5",
+    howItWorks: "چطور استفاده کنی",
+    stepOne: "یک قلاب کوتاه را پیدا کن.",
+    stepTwo: "اگر با ذهن تو جور بود، آن را ذخیره یا شخصی‌سازی کن.",
+    stepThree: "بعداً همان یادسپار روی کارت کانجی به کمک یادآوری برمی‌گردد.",
+    scopeNote: "این بخش خودش مرور نیست و امتیاز SRS نمی‌دهد؛ فقط ساختن یک مسیر حافظه برای کانجی را آسان‌تر می‌کند.",
     searchResults: "نتیجه",
     searchResultsPlural: "نتیجه",
-    allResults: "یادسپار",
-    allResultsPlural: "یادسپار",
-    coverage: "کانجی پوشش‌داده‌شده",
-    use: "استفاده به‌عنوان یادسپار شخصی",
+    readyResults: "یادسپار آماده",
+    readyResultsPlural: "یادسپار آماده",
+    scaffoldResults: "سرنخ ساخت",
+    scaffoldResultsPlural: "سرنخ ساخت",
+    save: "ذخیره در یادسپار شخصی",
     saving: "در حال ذخیره…",
-    saved: "✓ ذخیره شد",
-    scaffold: "راهنمای ساخت",
-    openKanji: "مشاهده در واژه‌نامه",
-    personalExists: "این کانجی یک یادسپار شخصی دارد. برای جایگزینی، از کارت کانجی آن را ویرایش کنید."
+    saved: "✓ در یادسپار شخصی ذخیره شد",
+    build: "ساخت یادسپار شخصی",
+    openKanji: "مشاهدهٔ کانجی",
+    scaffoldTitle: "این متن یادسپار نهایی نیست",
+    scaffoldHint: "از اجزای شکل و این سرنخ به‌عنوان نقطهٔ شروع استفاده کن؛ یادسپار را برای خودت قابل‌معنا کن.",
+    components: "اجزای شکل",
+    personalExists: "این کانجی از قبل یادسپار شخصی دارد؛ برای جایگزینی، آن را از کارت کانجی ویرایش کن.",
+    emptyTitle: "چیزی پیدا نشد",
+    emptyHint: "عبارت جست‌وجو یا سطح فعلی را تغییر بده."
   } : {
-    filters: "Mnemonic type",
-    all: "All",
-    curated: "Curated",
-    generated: "راهنمای ساخت",
-    levels: "Level",
+    modeLabel: "Memory aid type",
+    curatedMode: "Ready-made mnemonics",
+    generatedMode: "Build clues",
+    curatedCountLabel: "selected and ready to use",
+    generatedCountLabel: "clues for making a mnemonic",
+    level: "Level",
     allLevels: "All",
     grade1: "Grade 1",
     n5: "JLPT N5",
+    howItWorks: "How to use this",
+    stepOne: "Find a short memory hook.",
+    stepTwo: "Keep it only if it clicks; save it or make it your own.",
+    stepThree: "That personal mnemonic can then appear with the kanji card later.",
+    scopeNote: "This is not a review and does not give SRS credit; it simply makes a memory path easier to build.",
     searchResults: "result",
     searchResultsPlural: "results",
-    allResults: "memory cue",
-    allResultsPlural: "memory cues",
-    use: "Use as personal mnemonic",
+    readyResults: "ready-made mnemonic",
+    readyResultsPlural: "ready-made mnemonics",
+    scaffoldResults: "build clue",
+    scaffoldResultsPlural: "build clues",
+    save: "Save to personal mnemonics",
     saving: "Saving…",
-    saved: "✓ Saved",
-    scaffold: "Build your own",
-    openKanji: "Open in dictionary",
-    personalExists: "This kanji already has a personal mnemonic. Edit it from the kanji card before replacing it."
+    saved: "✓ Saved to personal mnemonics",
+    build: "Build personal mnemonic",
+    openKanji: "Open kanji",
+    scaffoldTitle: "This is not a finished mnemonic",
+    scaffoldHint: "Use the shape clues as a starting point, then make the connection meaningful to you.",
+    components: "Shape components",
+    personalExists: "This kanji already has a personal mnemonic. Edit it from the kanji card before replacing it.",
+    emptyTitle: "Nothing found",
+    emptyHint: "Try a different search term or level."
   };
 
   const resultLabel = query.trim()
     ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.searchResults : copy.searchResultsPlural}`
-    : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.allResults : copy.allResultsPlural}`;
-
-  const activeFilterLabel = [
-    typeFilter !== "all" ? (typeFilter === "curated" ? copy.curated : copy.generated) : "",
-    levelFilter !== "all" ? (levelFilter === "grade1" ? copy.grade1 : copy.n5) : ""
-  ].filter(Boolean).join(" · ");
-
-  const typeChips: Array<["all" | "curated" | "generated", string]> = [
-    ["all", copy.all],
-    ["curated", copy.curated],
-    ["generated", copy.generated]
-  ];
+    : mode === "curated"
+      ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.readyResults : copy.readyResultsPlural}`
+      : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.scaffoldResults : copy.scaffoldResultsPlural}`;
 
   return (
     <section className="prepared-mnemonic-library">
+      <div className="prepared-mnemonic-purpose">
+        <div className="prepared-mnemonic-purpose-icon" aria-hidden="true">🧠</div>
+        <div>
+          <strong>{copy.howItWorks}</strong>
+          <p>{copy.scopeNote}</p>
+        </div>
+      </div>
+
       <div className="prepared-mnemonic-toolbar" aria-label={language === "fa" ? "ابزارهای جست‌وجو و فیلتر" : "Search and filter tools"}>
         <label className="prepared-mnemonic-search-shell">
           <span aria-hidden="true">⌕</span>
@@ -163,55 +195,60 @@ function PreparedMnemonicLibrary({
           />
         </label>
 
-        <div className="prepared-mnemonic-filter-groups">
-          <div className="prepared-mnemonic-filter-group" role="group" aria-label={copy.filters}>
-            <span className="prepared-mnemonic-filter-label">{copy.filters}</span>
-            <div className="prepared-mnemonic-filter-chips">
-              {typeChips.map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={"prepared-mnemonic-filter-chip" + (typeFilter === key ? " active" : "")}
-                  aria-pressed={typeFilter === key}
-                  onClick={() => setTypeFilter(key)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="prepared-mnemonic-mode-row" role="tablist" aria-label={copy.modeLabel}>
+          <button
+            className={"prepared-mnemonic-mode-tab" + (mode === "curated" ? " active" : "")}
+            type="button"
+            role="tab"
+            aria-selected={mode === "curated"}
+            onClick={() => setMode("curated")}
+          >
+            <span>{copy.curatedMode}</span>
+            <strong>{formatNumber(curatedCount, language)}</strong>
+          </button>
+          <button
+            className={"prepared-mnemonic-mode-tab is-secondary" + (mode === "generated" ? " active" : "")}
+            type="button"
+            role="tab"
+            aria-selected={mode === "generated"}
+            onClick={() => setMode("generated")}
+          >
+            <span>{copy.generatedMode}</span>
+            <strong>{formatNumber(generatedCount, language)}</strong>
+          </button>
+        </div>
 
-          <div className="prepared-mnemonic-filter-group" role="group" aria-label={copy.levels}>
-            <span className="prepared-mnemonic-filter-label">{copy.levels}</span>
-            <div className="prepared-mnemonic-filter-chips">
-              {([
-                ["all", copy.allLevels],
-                ["grade1", copy.grade1],
-                ["n5", copy.n5]
-              ] as Array<["all" | "grade1" | "n5", string]>).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={"prepared-mnemonic-filter-chip" + (levelFilter === key ? " active" : "")}
-                  aria-pressed={levelFilter === key}
-                  onClick={() => setLevelFilter(key)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+        <div className="prepared-mnemonic-level-row">
+          <span className="prepared-mnemonic-filter-label">{copy.level}</span>
+          <div className="prepared-mnemonic-filter-chips">
+            {([
+              ["all", copy.allLevels],
+              ["grade1", copy.grade1],
+              ["n5", copy.n5]
+            ] as Array<[LevelFilter, string]>).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                className={"prepared-mnemonic-filter-chip" + (levelFilter === key ? " active" : "")}
+                aria-pressed={levelFilter === key}
+                onClick={() => setLevelFilter(key)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
+      <div className="prepared-mnemonic-howto" aria-label={copy.howItWorks}>
+        <span><b>1</b>{copy.stepOne}</span>
+        <span><b>2</b>{copy.stepTwo}</span>
+        <span><b>3</b>{copy.stepThree}</span>
+      </div>
+
       <div className="prepared-mnemonic-results-header">
-        <div>
-          <strong>{resultLabel}</strong>
-          {activeFilterLabel ? <span> · {activeFilterLabel}</span> : null}
-        </div>
-        {visible.length < filteredEntries.length ? (
-          <span>{formatNumber(visible.length, language)} / {formatNumber(filteredEntries.length, language)}</span>
-        ) : null}
+        <strong>{resultLabel}</strong>
+        <span>{formatNumber(visible.length, language)} / {formatNumber(filteredEntries.length, language)}</span>
       </div>
 
       <div className="prepared-mnemonic-library-list" role="list">
@@ -225,6 +262,7 @@ function PreparedMnemonicLibrary({
           const isBusy = busyKey === key;
           const isApplied = appliedKey === key;
           const hasError = errorKey === key;
+          const components = (componentMap[entry.character] ?? []).filter(value => value && value !== entry.character).slice(0, 4);
 
           return (
             <article
@@ -240,7 +278,7 @@ function PreparedMnemonicLibrary({
                 }}
                 lang="ja"
                 title={copy.openKanji}
-                aria-label={language === "fa" ? `مشاهده ${entry.character} در واژه‌نامه` : `Open ${entry.character} in dictionary`}
+                aria-label={language === "fa" ? `مشاهدهٔ ${entry.character} در فرهنگ کانجی` : `Open ${entry.character} in the kanji dictionary`}
               >
                 {entry.character}
               </button>
@@ -249,12 +287,28 @@ function PreparedMnemonicLibrary({
                 <div className="prepared-mnemonic-library-meta">
                   <span className={"prepared-mnemonic-source " + (isCurated ? "curated" : "generated")}>
                     <span aria-hidden="true">{isCurated ? "✦" : "◇"}</span>
-                    {isCurated ? copy.curated : copy.scaffold}
+                    {isCurated ? copy.curatedMode : copy.generatedMode}
                   </span>
                   {meaning ? <span className="prepared-mnemonic-library-meaning">{meaning}</span> : null}
                   {reading ? <span className="prepared-mnemonic-library-reading" lang="ja">{reading}</span> : null}
                 </div>
+
+                {!isCurated ? (
+                  <p className="prepared-mnemonic-library-scaffold-title">{copy.scaffoldTitle}</p>
+                ) : null}
+
                 <p className="prepared-mnemonic-library-mnemonic">{mnemonic}</p>
+
+                {!isCurated && components.length ? (
+                  <div className="prepared-mnemonic-components" aria-label={copy.components}>
+                    <span>{copy.components}</span>
+                    <div>
+                      {components.map(component => <bdi key={component} lang="ja">{component}</bdi>)}
+                    </div>
+                  </div>
+                ) : null}
+
+                {!isCurated ? <p className="prepared-mnemonic-library-scaffold-hint">{copy.scaffoldHint}</p> : null}
               </div>
 
               <div className="prepared-mnemonic-library-action">
@@ -266,12 +320,20 @@ function PreparedMnemonicLibrary({
                       disabled={busyKey !== "" || isApplied}
                       onClick={() => void apply(entry.character, entry.suggestion, key)}
                     >
-                      {isBusy ? copy.saving : isApplied ? copy.saved : copy.use}
+                      {isBusy ? copy.saving : isApplied ? copy.saved : copy.save}
                     </button>
                     {hasError ? <span className="prepared-mnemonic-row-error" role="status">{errorMessage}</span> : null}
                   </>
                 ) : (
-                  <span className="prepared-mnemonic-library-scaffold-label">{copy.scaffold}</span>
+                  <button
+                    className="button secondary prepared-mnemonic-library-build"
+                    type="button"
+                    onClick={() => {
+                      if (item) onSelectKanji(item);
+                    }}
+                  >
+                    {copy.build}
+                  </button>
                 )}
               </div>
             </article>
@@ -281,8 +343,8 @@ function PreparedMnemonicLibrary({
 
       {!filteredEntries.length ? (
         <div className="prepared-mnemonic-empty" role="status">
-          <strong>{language === "fa" ? "یادسپاری پیدا نشد" : "No memory cues found"}</strong>
-          <span>{language === "fa" ? "عبارت جست‌وجو یا فیلتر فعلی را تغییر دهید." : "Try a different search term or filter."}</span>
+          <strong>{copy.emptyTitle}</strong>
+          <span>{copy.emptyHint}</span>
         </div>
       ) : null}
 
@@ -292,7 +354,9 @@ function PreparedMnemonicLibrary({
           type="button"
           onClick={() => setVisibleLimit(value => Math.min(value + 60, filteredEntries.length))}
         >
-          {language === "fa" ? `نمایش ${formatNumber(Math.min(60, filteredEntries.length - visible.length), language)} مورد دیگر` : `Show ${Math.min(60, filteredEntries.length - visible.length)} more`}
+          {language === "fa"
+            ? `نمایش ${formatNumber(Math.min(60, filteredEntries.length - visible.length), language)} مورد دیگر`
+            : `Show ${Math.min(60, filteredEntries.length - visible.length)} more`}
         </button>
       ) : null}
     </section>
@@ -340,13 +404,12 @@ export function MnemonicsDialog({
   onSelectKanji: (item: KanjiCatalogItem) => void;
 }) {
   const dialogRef = usePageDialog(open, onClose);
-  const intro = language === "fa"
-    ? "یادسپار کوتاه و آماده را پیدا کن، مرورش کن و در صورت مناسب بودن به یادسپار شخصی خودت تبدیلش کن."
-    : "Find a short prepared cue, review it, and make it your own when it fits.";
 
   if (!open) return null;
 
   const curatedCount = Object.keys(CURATED_PREPARED_MNEMONICS).length;
+  const generatedCount = Math.max(0, catalog.length - curatedCount);
+
   return (
     <dialog
       ref={dialogRef}
@@ -356,15 +419,20 @@ export function MnemonicsDialog({
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <div className="prepared-mnemonics-dialog-heading">
         <div>
-          <p className="eyebrow red">{language === "fa" ? "کتابخانه حافظه" : "Memory library"}</p>
+          <p className="eyebrow red">{language === "fa" ? "کمک حافظه" : "MEMORY AIDS"}</p>
           <h2 id="mnemonics-dialog-title">{t("preparedMnemonicLibrary", language)}</h2>
-          <p className="secondary-surface-dialog-hint">{intro}</p>
+          <p className="secondary-surface-dialog-hint">
+            {language === "fa"
+              ? "اینجا برای یک کانجی، یک تصویر یا ارتباط به‌یادماندنی پیدا می‌کنی؛ سپس فقط چیزی را که برای ذهن خودت کار می‌کند نگه می‌داری."
+              : "Find a memorable image or connection for a kanji, then keep only what works for your own memory."}
+          </p>
         </div>
-        <div className="prepared-mnemonics-dialog-metrics">
-          <span><strong>{formatNumber(catalog.length, language)}</strong>{language === "fa" ? " کانجی پوشش‌داده‌شده" : " kanji covered"}</span>
-          <span><strong>{formatNumber(curatedCount, language)}</strong>{language === "fa" ? " دست‌چین‌شده" : " curated"}</span>
+        <div className="prepared-mnemonics-dialog-metrics" aria-label={language === "fa" ? "پوشش یادسپارها" : "Mnemonic coverage"}>
+          <span><strong>{formatNumber(curatedCount, language)}</strong>{language === "fa" ? " یادسپار آماده" : " ready-made"}</span>
+          <span><strong>{formatNumber(generatedCount, language)}</strong>{language === "fa" ? " سرنخ ساخت" : " build clues"}</span>
         </div>
       </div>
+
       <PreparedMnemonicLibrary
         language={language}
         catalog={catalog}
