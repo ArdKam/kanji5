@@ -4,8 +4,6 @@ import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMne
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { buildPreparedMnemonic } from "./prepared-mnemonic-core";
-import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
-import type { PreparedMnemonic } from "./mnemonic-library";
 const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module => ({ default: module.StrokeOrderViewer })));
 const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
 const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
@@ -988,7 +986,7 @@ function App(){
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
       <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
-      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
+      {snapshot?.exercise?.character?<Suspense fallback={null}><PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/></Suspense>:null}
     </>
   ) : (
     <Suspense fallback={<LoadingLearning/>}>
