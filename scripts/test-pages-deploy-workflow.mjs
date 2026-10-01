@@ -29,3 +29,6 @@ assert.match(source, /Stage production GitHub Pages site/);
 assert.match(source, /node scripts\/stage-pages-site\.mjs/);
 assert.match(source, /path: _site/);
 assert.doesNotMatch(source, /path: \.\s*$/m);
+
+assert.match(source, /node scripts\/verify-pages-site\.mjs/);
+assert.match(source, /node scripts\/stage-pages-site\.mjs/);
