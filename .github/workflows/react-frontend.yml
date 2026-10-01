@@ -90,6 +90,7 @@ on:
       - "e2e/react-pwa-release.spec.mjs"
       - "e2e/react-final-release-matrix.spec.mjs"
       - "e2e/react-experience-session-isolation.spec.mjs"
+      - "e2e/react-engine-boundary-gate.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
       - "index.html"
       - "app-bootstrap.js"
