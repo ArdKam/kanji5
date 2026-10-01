@@ -14,7 +14,7 @@
 - **Review/scheduling runtime:** `review-runtime.js`.
 - **Current service worker:** `sw.js`.
 - **Browser tests:** `e2e/`.
-- **Contract/unit tests:** `scripts/test-*.mjs`.
+- **Contract/unit tests:** `scripts/test-*.mjs`; build-dependent artifact contracts run in the React build workflow after `react-dist/` is generated.
 - **Generated React output:** `react-dist/` — فقط هنگام build/deploy ساخته می‌شود و در Git نگهداری نمی‌شود.
 
 نام `v1.*` به‌تنهایی به معنی legacy نیست؛ بخشی از learning engine فعلی هنوز همین runtimeهای versioned را مصرف می‌کند. برای presentation فعلی، از `frontend/` شروع کنید. مسیر compatibility قدیمی در `index.html` به‌صورت صریح پشت `?legacy=1` قرار دارد.
