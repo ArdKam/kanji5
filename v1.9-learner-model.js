@@ -18,7 +18,11 @@ async function rank(character){const core=await api();return core.rankAttributes
 const stableApi={update:updateCore,read:()=>state.readComponents?.()?.[KEY]||null,project,rank,recordOutcome:detail=>{const character=String(detail?.character||'');if(writeEvidence(character,detail)){return updateCore()}return Promise.resolve(false)}};
 window.__KANJI5_V19_LEARNER_MODEL__=Object.freeze(stableApi);
 void migratePersistedData();
-void updateCore();
+const scheduleLearnerHydration=()=>{
+  void updateCore();
+};
+if('requestIdleCallback' in window)window.requestIdleCallback(scheduleLearnerHydration,{timeout:2200});
+else window.setTimeout(scheduleLearnerHydration,1000);
 document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(()=>{void updateCore()},0));
 document.addEventListener('kanji5:v1.6-education-result',e=>{const d=e?.detail||{};writeEvidence(String(d.character||''),d);setTimeout(()=>{void updateCore()},0)});
 void import('./v1.9-adaptive-planner.js').catch(()=>{});
