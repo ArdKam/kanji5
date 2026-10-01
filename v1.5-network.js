@@ -9,7 +9,6 @@ function stableContentHash(value){
   for(let i=0;i<source.length;i++){h^=source.charCodeAt(i);h=Math.imul(h,16777619)}
   return (h>>>0).toString(16).padStart(8,'0');
 }
-function vocabularyContentId(word,reading,meaning){return 'vocabulary:'+stableContentHash(String(word??'')+'|'+String(reading??'')+'|'+String(meaning??''))}
 function sentenceContentId(id,text,english){const stableId=String(id??'').trim();return stableId?'sentence:'+stableId:'sentence:'+stableContentHash(String(text??'')+'|'+String(english??''))}
 
 
