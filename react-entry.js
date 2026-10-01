@@ -12,6 +12,8 @@ const startupObserver=startupRoot?new MutationObserver(()=>{
   }
 }):null;
 startupObserver?.observe(document.getElementById('root')||document.documentElement,{childList:true,subtree:true});
+const buildHash=String(document.querySelector('meta[name="kanji5-build-hash"]')?.getAttribute('content')||'').trim();
+const assetVersion=/^[0-9a-f]{7,40}$/i.test(buildHash)?`?v=${buildHash}`:'';
 const style=document.createElement('style');
 style.textContent='#root{display:block;min-height:100vh}';
 document.head.appendChild(style);
@@ -19,11 +21,11 @@ let reactStylesheet=document.querySelector('link[data-kanji5-react-styles]');
 if(!reactStylesheet){
   reactStylesheet=document.createElement('link');
   reactStylesheet.rel='stylesheet';
-  reactStylesheet.href='./react-dist/kanji5-react.css?v=20260928-release19';
+  reactStylesheet.href=`./react-dist/kanji5-react.css${assetVersion}`;
   reactStylesheet.dataset.kanji5React='true';
   document.head.appendChild(reactStylesheet);
 }
-import('./react-dist/kanji5-react.js?v=20260928-release19')
+import(`./react-dist/kanji5-react.js${assetVersion}`)
   .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
 
 function scheduleAccountSync(){
