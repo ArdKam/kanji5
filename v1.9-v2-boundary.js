@@ -86,9 +86,9 @@ function runtimePresentationData(now=Date.now()){
 }
 
 function startupPresentationData(){
-  const app=state.readAppState?.()||{},deck=state.readDeck?.()||[],cards=app.cards&&typeof app.cards==='object'?app.cards:{},reviews=state.readReviews?.()||[];
+  const app=state.readAppState?.()||{},deck=state.readDeck?.()||[],cards=app.cards&&typeof app.cards==='object'?app.cards:{};
   const settings={...(state.DEFAULTS||{}),...(app.settings||{}),...(state.readSettings?.()||{})};
-  const stats={totalReviews:reviews.length,nonAgainRate:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:0,last7:[],masteryDistribution:{unseen:deck.length,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length}};
+  const stats={totalReviews:0,nonAgainRate:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:0,last7:[],masteryDistribution:{unseen:deck.length,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length}};
   return {
     dailySummary:{dueCount:0,newCount:Math.min(Math.max(0,Number(app.todayNew)||0),Math.max(1,Number(settings.dailyNew)||5)),masteredCount:0,streak:Number(app.streak?.current)||0},
     dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},
@@ -267,7 +267,7 @@ async function startupSnapshot(){
     if(bridge?.snapshot)learning=core.buildLearningCardViewModel(await bridge.snapshot());
     const session=activeSession()||completedSession();
     const runtime=startupPresentationData();
-    return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime});
+    return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:[],adaptiveReason,...runtime});
   })();
   try{return await startupSnapshotInFlight}finally{startupSnapshotInFlight=null}
 }
