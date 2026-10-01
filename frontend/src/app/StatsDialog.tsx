@@ -58,47 +58,37 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
   );
 }
 
-function MasterySection({ catalog, loading, language }: { catalog: KanjiCatalogItem[]; loading: boolean; language: Language }) {
-  const mastery = useMemo(() => {
-    const groups = { unseen: 0, learning: 0, attention: 0, stable: 0, mastered: 0 };
-    const studied = catalog.filter(item => item.state !== "unseen");
-    for (const item of catalog) {
-      switch (item.state) {
-        case "mastered": groups.mastered++; break;
-        case "stable": groups.stable++; break;
-        case "weak":
-        case "recovering": groups.attention++; break;
-        case "introduced":
-        case "learning": groups.learning++; break;
-        default: groups.unseen++;
-      }
-    }
-    const average = studied.length
-      ? studied.reduce((sum, item) => sum + Math.max(0, Math.min(1, Number(item.mastery) || 0)), 0) / studied.length
-      : 0;
-    return { ...groups, average, total: catalog.length };
-  }, [catalog]);
+function MasterySection({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
+  const distribution = snapshot.stats?.masteryDistribution ?? {
+    unseen: 0,
+    learning: 0,
+    attention: 0,
+    stable: 0,
+    mastered: 0,
+    average: 0,
+    total: 0,
+  };
 
   const items = [
-    ["unseen", mastery.unseen, t("masteryUnseen", language)],
-    ["learning", mastery.learning, t("masteryLearning", language)],
-    ["attention", mastery.attention, t("masteryNeedsAttention", language)],
-    ["stable", mastery.stable, t("masteryStable", language)],
-    ["mastered", mastery.mastered, t("masteryMastered", language)],
+    ["unseen", Number(distribution.unseen) || 0, t("masteryUnseen", language)],
+    ["learning", Number(distribution.learning) || 0, t("masteryLearning", language)],
+    ["attention", Number(distribution.attention) || 0, t("masteryNeedsAttention", language)],
+    ["stable", Number(distribution.stable) || 0, t("masteryStable", language)],
+    ["mastered", Number(distribution.mastered) || 0, t("masteryMastered", language)],
   ] as const;
+  const total = Math.max(1, Number(distribution.total) || 0);
+  const hasData = Number(distribution.total) > 0;
 
   return (
     <section className="stats-section" aria-labelledby="stats-mastery-title">
       <div className="stats-section-heading">
         <div><p className="eyebrow">{language === "fa" ? "تسلط" : "Mastery"}</p><h3 id="stats-mastery-title">{language === "fa" ? "توزیع وضعیت کانجی‌ها" : "Kanji mastery"}</h3></div>
-        <div className="stats-section-summary"><strong>{formatNumber(Math.round(mastery.average * 100), language)}%</strong><span>{language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery"}</span></div>
+        <div className="stats-section-summary"><strong>{formatNumber(Math.round((Number(distribution.average) || 0) * 100), language)}%</strong><span>{language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery"}</span></div>
       </div>
-      {loading ? (
-        <div className="stats-mastery-skeleton" aria-hidden="true"><span /><span /><span /></div>
-      ) : catalog.length ? (
+      {hasData ? (
         <>
           <div className="stats-mastery-bar" role="img" aria-label={items.map(([, count, label]) => label + " " + formatNumber(count, language)).join(" · ")}>
-            {items.map(([key, count]) => <span key={key} className={"stats-mastery-segment " + key} style={{ width: (count / Math.max(1, mastery.total)) * 100 + "%" }} />)}
+            {items.map(([key, count]) => <span key={key} className={"stats-mastery-segment " + key} style={{ width: (count / total) * 100 + "%" }} />)}
           </div>
           <div className="stats-mastery-legend">
             {items.map(([key, count, label]) => <div key={key} className="stats-mastery-item"><i className={"stats-mastery-dot " + key} aria-hidden="true" /><span>{label}</span><strong>{formatNumber(count, language)}</strong></div>)}
@@ -209,7 +199,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
       </section>
 
       <ActivitySection snapshot={snapshot} language={language} />
-      <MasterySection catalog={catalog} loading={loading} language={language} />
+      <MasterySection snapshot={snapshot} language={language} />
       <SkillsSection snapshot={snapshot} language={language} />
       <AttentionSection catalog={catalog} language={language} onStudyWeak={onStudyWeak} />
     </dialog>
