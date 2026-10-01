@@ -162,6 +162,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const sentenceRefs = useRef<Array<HTMLDivElement | null>>([]);
   const vocabularyCacheRef = useRef(new Map<string, VocabularyItem[]>());
   const readerKanjiRefs = useRef(new Map<string, HTMLButtonElement>());
+  const focusCursorRef = useRef<{ sentenceIndex:number; characterIndex:number } | null>(null);
   const skipSentenceResetRef = useRef(Boolean(initialSession?.text));
 
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
@@ -410,15 +411,16 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     const activeButton = active?.matches?.(".reading-lab-reader-kanji") ? active : null;
     const currentSentenceIndex = activeButton?.dataset.readingLabSentenceIndex
       ? Number(activeButton.dataset.readingLabSentenceIndex)
-      : activeSentenceIndex;
+      : focusCursorRef.current?.sentenceIndex ?? activeSentenceIndex;
     const currentCharacterIndex = activeButton?.dataset.readingLabCharacterIndex
       ? Number(activeButton.dataset.readingLabCharacterIndex)
-      : -1;
+      : focusCursorRef.current?.characterIndex ?? -1;
     const next = candidates.find(target =>
       target.sentenceIndex > currentSentenceIndex
       || (target.sentenceIndex === currentSentenceIndex && target.characterIndex > currentCharacterIndex)
     ) ?? candidates[0];
     const key = next.sentenceIndex + ":" + next.characterIndex;
+    focusCursorRef.current = { sentenceIndex: next.sentenceIndex, characterIndex: next.characterIndex };
     selectSentence(next.sentenceIndex, false);
     window.requestAnimationFrame(() => {
       const button = readerKanjiRefs.current.get(key);
@@ -607,7 +609,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                     {Array.from(sentence.text).map((character, index) => {
                       const item = isKanji(character) ? catalogByCharacter.get(character) : undefined;
                       return item ? (
-                        <button key={character + "-" + index} ref={node => { const key = sentenceIndex + ":" + index; if (node) readerKanjiRefs.current.set(key, node); else readerKanjiRefs.current.delete(key); }} data-reading-lab-sentence-index={sentenceIndex} data-reading-lab-character-index={index} type="button" className={"reading-lab-reader-kanji " + getMasteryBucket(item)} onClick={() => void handleReaderKanjiClick(sentenceIndex, index, item)} title={t("readingLabWordLookupHint", language)} aria-label={character + " — " + t("readingLabWordLookupHint", language)} aria-busy={wordLookupKey === sentenceIndex + ":" + index}>
+                        <button key={character + "-" + index} ref={node => { const key = sentenceIndex + ":" + index; if (node) readerKanjiRefs.current.set(key, node); else readerKanjiRefs.current.delete(key); }} data-reading-lab-sentence-index={sentenceIndex} data-reading-lab-character-index={index} onFocus={() => { focusCursorRef.current = { sentenceIndex, characterIndex: index }; }} type="button" className={"reading-lab-reader-kanji " + getMasteryBucket(item)} onClick={() => void handleReaderKanjiClick(sentenceIndex, index, item)} title={t("readingLabWordLookupHint", language)} aria-label={character + " — " + t("readingLabWordLookupHint", language)} aria-busy={wordLookupKey === sentenceIndex + ":" + index}>
                           {character}
                         </button>
                       ) : <span key={character + "-" + index}>{character}</span>;
