@@ -11,6 +11,14 @@ try{
     localStorage.setItem(VERSION_KEY,DATA_VERSION);
   }
 }catch(_){}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=134').catch(()=>{});
+const registerServiceWorker=()=>{
+  if(!('serviceWorker' in navigator))return;
+  navigator.serviceWorker.register('./sw.js?v=134').catch(()=>{});
+};
+if('requestIdleCallback' in window){
+  requestIdleCallback(registerServiceWorker,{timeout:2000});
+}else{
+  window.setTimeout(registerServiceWorker,1500);
+}
 import('./v1.6-session.js').catch(()=>{});
 })();
