@@ -7,26 +7,33 @@ const review=await readFile(new URL('../review-runtime.js',import.meta.url),'utf
 const boundary=await readFile(new URL('../v1.9-v2-boundary.js',import.meta.url),'utf8');
 const engine=await readFile(new URL('../frontend/src/app/engine.ts',import.meta.url),'utf8');
 
+const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
+
 for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice','StrokeOrderViewer']) {
-  assert.match(app,new RegExp('const '+name+' = lazy\\('),`Learning startup must lazy-load ${name}`);
+  mustContain(app,`const ${name} = lazy(`,`Learning startup must lazy-load ${name}`);
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),`Eager import remains for ${name}`);
 }
 
-assert.match(app,/<Suspense fallback=\\{null\\}><section className="secondary-page-host"/);
-assert.match(app,/<Suspense fallback=\\{<LoadingLearning\\/>}><DictionaryPage/);
-assert.match(app,/<Suspense fallback=\\{null\\}><StrokeOrderViewer/);
-assert.match(app,/<h2>\\{t\("learningCard"\\)\\}<\\/h2>/,"Loading Learning surface should expose the same semantic heading early");
+mustContain(app,'<Suspense fallback={null}><section className="secondary-page-host">','Secondary pages must be suspense-wrapped');
+mustContain(app,'<Suspense fallback={<LoadingLearning/>}><DictionaryPage','Dictionary must not block the Learning bundle');
+mustContain(app,'<Suspense fallback={null}><StrokeOrderViewer','Stroke order must be demand-loaded');
+mustContain(app,'<h2>{t("learningCard")}</h2>','Loading Learning surface must expose the same semantic heading early');
+mustContain(app,'startupSnapshot as readStartupSnapshot','React must consume the Learning-first boundary');
 
-assert.match(session,/let planPromise=null;const loadPlanApi=/);
+mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
 assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.js'\)/);
-assert.match(session,/function start\(\)\{if\(!IS_LEGACY\)return;/);
-assert.match(session,/void loadPlanApi\(\)/);
+mustContain(session,'function start(){if(!IS_LEGACY)return;','Legacy dashboard startup must not run in modern mode');
+mustContain(session,'void loadPlanApi()','Session plan API remains available on explicit use');
 
-assert.match(review,/buildQueue\(\);next\(\);document\.dispatchEvent\(new CustomEvent\('kanji5:v1\.9-review-ready'\)\)/);
-assert.match(boundary,/if\(window\.__KANJI5_V19_REVIEW_BRIDGE__\)void refreshLearning\(\);else document\.addEventListener\('kanji5:v1\.9-review-ready'/);
+mustContain(review,"buildQueue();next();document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'))","Review runtime must signal readiness after queue initialization");
+mustContain(boundary,'async function startupSnapshot(){','Boundary must expose a Learning-first snapshot path');
+mustContain(boundary,'async function publishStartupSnapshot(){','Boundary must publish a startup snapshot');
+mustContain(boundary,"document.addEventListener('kanji5:v1.9-review-ready',()=>{void publishStartupSnapshot()},{once:true})","Startup snapshot waits for actual review readiness");
 assert.doesNotMatch(boundary,/setTimeout\(\(\)=>\{void refreshLearning\(\)\},100\)/);
 assert.doesNotMatch(boundary,/setTimeout\(\(\)=>\{void refreshLearning\(\)\},500\)/);
-assert.match(engine,/startupSnapshot: \(\) => Promise<Snapshot>/);
-assert.match(engine,/export async function startupSnapshot\(\): Promise<Snapshot>/);
+mustContain(boundary,'startupSnapshot,refreshLearning','Startup snapshot must cross the public boundary');
+
+mustContain(engine,'startupSnapshot: () => Promise<Snapshot>','Boundary type must declare startupSnapshot');
+mustContain(engine,'export async function startupSnapshot(): Promise<Snapshot>','Engine adapter must expose startupSnapshot');
 
 console.log('Learning startup path contract: PASS');
