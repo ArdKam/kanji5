@@ -11,6 +11,7 @@ try{
     localStorage.setItem(VERSION_KEY,DATA_VERSION);
   }
 }catch(_){}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=134').catch(()=>{});
+const buildId=(document.querySelector('meta[name="kanji5-build-id"]')?.getAttribute('content')||'dev').trim()||'dev';
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(buildId)).catch(()=>{});
 import('./v1.6-session.js').catch(()=>{});
 })();
