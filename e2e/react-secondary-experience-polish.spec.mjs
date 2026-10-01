@@ -51,7 +51,8 @@ test("Prepared Mnemonics search reaches dictionary meaning and reading fields", 
   const dialog = await openMenuItem(page, "Prepared mnemonics");
   const search = dialog.locator(".prepared-mnemonic-library-search");
   await expect(search).toHaveAttribute("type", "search");
-  await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText(/2[,.]?136/);
+  await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("259");
+  await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("1877");
   await expect(dialog.getByText("This is not a review and does not give SRS credit; it simply makes a memory path easier to build.", { exact: true })).toBeVisible();
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").first()).toHaveAttribute("aria-pressed", "true");
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "false");
