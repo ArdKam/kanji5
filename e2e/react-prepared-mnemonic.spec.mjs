@@ -1,9 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 async function goToBackPage(card, targetIndex) {
-  for (let index = 0; index < targetIndex; index += 1) {
-    await card.locator(".pager-button").nth(1).click();
-  }
+  await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(targetIndex).click();
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
   await card.locator(".learning-back-page.active .learning-back-scroll").evaluate(async (el) => {
     const animations = el.getAnimations({ subtree: true });
