@@ -18,9 +18,9 @@ assert.match(app, /useState<Snapshot\|null>\(\(\)=>getInitialSnapshot\(\)\)/, "A
 assert.match(app, /function LoadingSummary\(\)/, "Review loading state must reserve summary geometry");
 assert.match(app, /function LoadingGoal\(\)/, "Review loading state must reserve goal geometry");
 assert.match(app, /function LoadingLearning\(\)/, "Review loading state must reserve learning-card geometry");
-assert.match(app, /function LoadingInsights\(\)/, "Review loading state must reserve insights geometry");
+assert.doesNotMatch(app, /function LoadingInsights\(\)/, "Learning no longer reserves analytics geometry");
 assert.match(css, /\.kanji-display\{display:inline-block;width:1\.15em;height:1\.15em/, "Critical kanji box must have stable geometry");
 assert.match(css, /\.loading-learning/, "Loading learning card styles must exist");
-assert.match(css, /\.loading-insights/, "Loading insights styles must exist");
+assert.match(css, /\.session-feedback/, "Compact session feedback styles must exist");
 
 console.log("Kanji 5 LCP/CLS regression contract passed.");
