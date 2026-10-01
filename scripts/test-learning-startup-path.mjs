@@ -20,7 +20,8 @@ mustContain(app,'<Suspense fallback={null}><section className="secondary-page-ho
 mustContain(app,'<Suspense fallback={<LoadingLearning/>}><DictionaryPage','Dictionary must not block the Learning bundle');
 mustContain(app,'<Suspense fallback={null}><StrokeOrderViewer','Stroke order must be demand-loaded');
 mustContain(app,'<h2>{t("learningCard")}</h2>','Loading Learning surface must expose the same semantic heading early');
-mustContain(app,'startupSnapshot as readStartupSnapshot','React must consume the Learning-first boundary');\nmustContain(app,'startLearningSession','Initial mount must avoid filter-clearing refresh work');
+mustContain(app,'startupSnapshot as readStartupSnapshot','React must consume the Learning-first boundary');
+mustContain(app,'startLearningSession','Initial mount must avoid filter-clearing refresh work');
 assert.doesNotMatch(app,/import .*from "\.\/prepared-mnemonic-core"/,'Prepared mnemonic catalog must remain deferred');
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
