@@ -277,8 +277,17 @@ function clearCustomStudyFilter(){
   return Boolean(bridge.clearCustomStudyFilter());
 }
 
+async function waitForReviewSessionApi(timeoutMs=5000){
+  const started=Date.now();
+  while(Date.now()-started<timeoutMs){
+    const session=window.__KANJI5_V16_SESSION_API__;
+    if(session?.startExperience||session?.startReady||session?.start)return session;
+    await new Promise(resolve=>window.setTimeout(resolve,25));
+  }
+  return window.__KANJI5_V16_SESSION_API__;
+}
 async function startReviewSession(experience='review'){
-  const session=window.__KANJI5_V16_SESSION_API__;
+  const session=await waitForReviewSessionApi();
   if(session?.startExperience)await session.startExperience(experience);
   else if(session?.startReady)await session.startReady();
   else if(session?.start)await session.start();
