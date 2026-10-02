@@ -16,8 +16,22 @@ const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:
 assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
 const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,attempts:5,recentAttempts:3,repeatedFailure:true}}});
 assert.equal(learner.modelVersion,'1.9.0-learner-model');assert.equal(learner.attributes.reading.state,'weak');assert.equal(learner.attributes.reading.attempts,5);assert.equal(learner.attributes.reading.recentAttempts,3);
-const stats=buildStatsViewModel({masteryDistribution:{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21}});
-assert.deepEqual(stats.masteryDistribution,{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21});
+const stats=buildStatsViewModel({
+  masteryDistribution:{unseen:10,learning:5,attention:2,stable:3,mastered:1,average:.64,total:21},
+  evaluation:{
+    sessions:8,completedSessions:7,totalAttempts:40,accuracy:.8,unknownRate:.1,recoveryRate:.6,repeatedFailureRate:.05,
+    attributeCoverage:1,averageRecallsPerSession:5,sessionCompletionRate:.875,
+    modeDistribution:{meaning:10,reading:8,production:8,vocabulary:7,context:7},
+    attributes:{meaning:{attempts:10,accuracy:.8,recentAccuracy:.9,retentionRate:.75,recoveryRate:.5,repeatedFailureRate:.1}},
+    evidence:{sessions:8,attempts:40,sufficient:true,reason:'sufficient'}
+  }
+});
+assert.equal(stats.evaluation.recoveryRate,.6);
+assert.equal(stats.evaluation.attributeCoverage,1);
+assert.equal(stats.evaluation.sessionCompletionRate,.875);
+assert.equal(stats.evaluation.attributes.meaning.retentionRate,.75);
+assert.equal(stats.evaluation.evidence.sufficient,true);
+assert.equal(stats.evaluation.modeDistribution.context,7);
 const summary=buildSessionSummary({sessionId:'s1',status:'complete',modeResults:{meaning:{attempts:2,correct:1},reading:{attempts:1,correct:1}}});
 assert.equal(summary.attempts,3);assert.equal(summary.correct,2);assert.equal(summary.completionStatus,'complete');
 const reason=buildAdaptiveReasonViewModel({mode:'reading',action:'repair',reasons:['recent failure','weak recent accuracy'],score:3});
