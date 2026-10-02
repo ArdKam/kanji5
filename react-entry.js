@@ -25,7 +25,7 @@ if(!reactStylesheet){
   reactStylesheet.dataset.kanji5React='true';
   document.head.appendChild(reactStylesheet);
 }
-function showReactBootFailure(){
+function showReactBootFailure(error){
   if(!startupRoot)return;
   startupRoot.classList.remove('is-ready');
   startupRoot.classList.add('is-error');
@@ -51,10 +51,10 @@ function showReactBootFailure(){
   action.addEventListener('click',()=>window.location.reload());
   card.append(mark,title,copy,action);
   startupRoot.appendChild(card);
-  console.error('Kanji 5 React presentation failed to boot.');
+  console.error('Kanji 5 React presentation failed to boot.',{buildId,error});
 }
 import('./react-dist/kanji5-react.js'+assetVersion)
-  .catch(()=>showReactBootFailure());
+  .catch(error=>showReactBootFailure(error));
 
 function scheduleAccountFallback(){
   const load=()=>{
