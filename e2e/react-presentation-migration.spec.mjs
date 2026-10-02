@@ -251,6 +251,34 @@ test('Reading Lab focuses the next unfamiliar kanji without changing the reading
 
 });
 
+test('Reading Lab exposes occurrence-weighted coverage and bounded hardest-sentence focus',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('textarea').fill('今日は学生です。明日は先生です。');
+  const analysisStats=lab.locator('.reading-lab-analysis-stats > div');
+  await expect(analysisStats.nth(2)).toContainText('پوشش بر اساس تعداد تکرار');
+  const hardest=lab.locator('.reading-lab-focus-button').filter({hasText:'سخت‌ترین جمله'});
+  await expect(hardest).toBeEnabled();
+  const expectedIndex=await lab.locator('.reading-lab-reader-sentence').evaluateAll((sentences)=>{
+    const weights={attention:3,new:2,learning:1,familiar:0};
+    const scores=sentences.map(sentence=>[...sentence.querySelectorAll('.reading-lab-reader-kanji')].reduce((sum,node)=>{
+      for(const bucket of Object.keys(weights)){
+        if(node.classList.contains(bucket)) return sum+weights[bucket];
+      }
+      return sum;
+    },0));
+    const max=Math.max(...scores);
+    return scores.findIndex(score=>score===max&&score>0);
+  });
+  expect(expectedIndex).toBeGreaterThanOrEqual(0);
+  await hardest.click();
+  await expect(lab.locator('.reading-lab-reader-sentence.active')).toHaveAttribute('data-reading-lab-sentence-index',String(expectedIndex));
+  await expect(lab.locator('textarea')).toHaveValue('今日は学生です。明日は先生です。');
+});
+
 test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
   await clean(page);
   await page.route('https://kanjiapi.dev/v1/words/%E6%97%A5',async route=>{
