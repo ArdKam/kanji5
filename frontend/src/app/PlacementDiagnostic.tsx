@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import type { CustomStudyFilter, KanjiCatalogItem } from "./engine";
-import { buildPlacementQuestions, DIAGNOSTIC_LEVELS } from "./placement-logic";
+import { buildPlacementQuestions, DIAGNOSTIC_LEVELS, scorePlacementAnswers } from "./placement-logic";
 
 export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, autoOpen = false }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>; autoOpen?: boolean }) {
   const questions = useMemo(() => buildPlacementQuestions(catalog, t("diagnosticMeaningPrompt", language)), [catalog, language]);
@@ -10,7 +10,7 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState("");
   const [score, setScore] = useState(0);
-  const [levelScores, setLevelScores] = useState<Record<string, { correct: number; total: number }>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [finished, setFinished] = useState(false);
   const [starting, setStarting] = useState(false);
   const current = questions[index];
@@ -26,21 +26,17 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
     setIndex(0);
     setSelected("");
     setScore(0);
-    setLevelScores({});
+    setAnswers({});
     setFinished(false);
     setActive(true);
   };
 
   const choose = (option: string) => {
     if (!current || selected) return;
-    const correct = option === current.options.find(item => item.correct)?.label;
+    const optionRecord = current.options.find(item => item.label === option);
+    if (!optionRecord) return;
     setSelected(option);
-    setScore(value => value + (correct ? 1 : 0));
-    setLevelScores(previous => {
-      const level = current.level ?? "unknown";
-      const existing = previous[level] ?? { correct: 0, total: 0 };
-      return { ...previous, [level]: { correct: existing.correct + (correct ? 1 : 0), total: existing.total + 1 } };
-    });
+    setAnswers(previous => ({ ...previous, [current.id]: optionRecord.id }));
   };
 
   const next = () => {
@@ -53,14 +49,11 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
     setSelected("");
   };
 
-  const suggestedLevel = useMemo(() => {
-    const order = ["N2", "N3", "N4", "N5"];
-    for (const level of order) {
-      const result = levelScores[level];
-      if (result && result.total >= 2 && result.correct / result.total >= 0.67) return level;
-    }
-    return "N5";
-  }, [levelScores]);
+  const placementScore = useMemo(
+    () => scorePlacementAnswers(questions, answers),
+    [questions, answers],
+  );
+  const suggestedLevel = placementScore.suggestedLevel;
 
   if (!questions.length) return null;
 
@@ -76,11 +69,11 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
         <div className="placement-result" aria-live="polite">
           <div className="placement-result-score">
             <span>{t("diagnosticResult", language)}</span>
-            <strong>{formatNumber(score, language)} / {formatNumber(questions.length, language)}</strong>
+            <strong>{formatNumber(placementScore.score, language)} / {formatNumber(placementScore.total, language)}</strong>
           </div>
           <div className="placement-levels">
             {DIAGNOSTIC_LEVELS.map(level => {
-              const result = levelScores[level] ?? { correct: 0, total: 0 };
+              const result = placementScore.levelScores[level] ?? { correct: 0, total: 0 };
               return <div className="placement-level" key={level}><span>{level}</span><strong>{formatNumber(result.correct, language)} / {formatNumber(result.total, language)}</strong></div>;
             })}
           </div>
