@@ -28,6 +28,7 @@ try {
 
     if (await onboarding.isVisible().catch(() => false)) {
       await onboarding.getByRole('button', { name: 'Start learning today', exact: true }).click();
+      await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
       await onboarding.getByRole('button', { name: 'Start from the beginning', exact: true }).click();
       await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
       await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
