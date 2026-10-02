@@ -26,6 +26,45 @@ const entries = core.buildPreparedMnemonicEntries(catalog, () => []);
 assert.equal(entries.length, 2136, "Prepared mnemonic library must expose every catalog kanji");
 assert.equal(new Set(entries.map(entry => entry.character)).size, 2136, "Prepared mnemonic library contains duplicate characters");
 
+const curatedEntries = Object.fromEntries(Object.entries(core.CURATED_PREPARED_MNEMONICS).map(([character, values]) => [character, values?.[0]]));
+const faTexts = Object.values(curatedEntries).map(entry => String(entry?.fa ?? "").replace(/\s+/g, " ").trim());
+const enTexts = Object.values(curatedEntries).map(entry => String(entry?.en ?? "").replace(/\s+/g, " ").trim());
+assert.equal(new Set(faTexts).size, faTexts.length, "Curated Persian mnemonic corpus contains exact duplicates");
+assert.equal(new Set(enTexts).size, enTexts.length, "Curated English mnemonic corpus contains exact duplicates");
+
+// Human-reviewed semantic sentinel set (2026-10-02): representative shape, component,
+// directional, lexical, and high-confusion kanji. These anchors guard against regressions
+// in the reviewed corpus without pretending that a regex can judge mnemonic quality alone.
+const semanticReviewSentinels = [
+  ["日", /خورشید/, /sun/i],
+  ["月", /ماه/, /moon/i],
+  ["火", /آتش/, /flames?/i],
+  ["水", /آب/, /water/i],
+  ["木", /درخت/, /tree/i],
+  ["生", /جوانه/, /sprout/i],
+  ["行", /مسافر|قدم/, /traveler|moving/i],
+  ["左", /دست|چپ/, /hand|left/i],
+  ["右", /دست|راست/, /hand|right/i],
+  ["前", /جلو|جلوی/, /front/i],
+  ["後", /پشت|عقب/, /behind/i],
+  ["入", /داخل|وارد/, /inward|step in/i],
+  ["出", /بیرون|خارج/, /out|exit|emerge/i],
+  ["読", /خوان|کتاب/, /read|book/i],
+  ["語", /زبان|حرف/, /language|words?/i],
+  ["題", /سؤال|موضوع|برگه/, /question|topic|page/i],
+  ["勝", /رقیب|زور|پیروزی/, /rival|victory|beat/i],
+  ["機", /دستگاه|سازوکار|چوب/, /machine|mechanism|frame/i],
+  ["議", /حرف|بحث|میز/, /debating|table|debate/i],
+  ["難", /سخت|دشواری/, /difficult|hard/i],
+];
+for (const [character, faPattern, enPattern] of semanticReviewSentinels) {
+  const entry = curatedEntries[character];
+  assert.ok(entry, `Semantic-review sentinel missing for ${character}`);
+  assert.match(entry.fa, faPattern, `Persian semantic anchor missing for ${character}`);
+  assert.match(entry.en, enPattern, `English semantic anchor missing for ${character}`);
+}
+
+
 const coverage = core.preparedMnemonicCoverage(catalog);
 assert.deepEqual(coverage, { total: 2136, curated: 259, generated: 1877, coverage: 1 });
 
@@ -54,6 +93,7 @@ console.log("Curated enrichment contract: PASS (259 curated; 220 new high-freque
 console.log(`Mnemonic quality gate: PASS (${quality.concreteAnchorFa}/${quality.curated} fa concrete anchors; ${quality.concreteAnchorEn}/${quality.curated} en concrete anchors; ${quality.actionSceneFa}/${quality.curated} fa action scenes; ${quality.actionSceneEn}/${quality.curated} en action scenes)`);
 
 console.log("Prepared mnemonic coverage: PASS (2136/2136; 259 curated + 1877 generated fallbacks)");
+console.log(`Semantic sentinel review: PASS (${semanticReviewSentinels.length} representative curated kanji; exact-duplicate guard active)`);
 
 assert.equal(quality.generated, 1877, "Generated fallback count must remain explicit");
 assert.equal(quality.generatedSourceFailures, 0, "Generated fallback entries must retain generated provenance");
