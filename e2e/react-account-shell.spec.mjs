@@ -5,7 +5,7 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   await page.goto('/');
   await expect(page.locator('.account-button:visible')).toHaveCount(1, { timeout: 15000 });
   await page.locator('.account-button:visible').click();
-  await expect(page.locator('.account-dialog:visible')).toBeVisible();
+  await expect(page.locator('.account-dialog:visible')).toHaveCount(1);
   const accountDialog = page.locator('.account-dialog:visible');
   await expect(accountDialog).not.toHaveClass(/secondary-page-dialog/);
   expect(await accountDialog.evaluate((el) => getComputedStyle(el).position)).toBe('fixed');
