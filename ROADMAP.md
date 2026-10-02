@@ -133,6 +133,8 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 
 **DONE on current \`main\`:**
 - Release/bootstrap foundation and React artifact hygiene.
+- Pre-Vocabulary public-readiness implementation: learner-state preservation across dataset revisions, bounded local diagnostics, external-content escaping, release evidence/docs, and browser compatibility gates.
+- D4 domain-neutral scheduling boundary: shared card identity seam with FSRS remaining the sole scheduling authority.
 - D1 canonical cross-domain content identities.
 - D2 shared evidence envelope.
 - D3 deterministic cross-domain relationships.
@@ -150,11 +152,15 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 - Reading Lab: only the later Reading Library remains; sentence translation/annotation and optional Japanese voice selection are implemented and E2E-covered.
 - Mnemonics: current 259-entry curated corpus passed structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Future content refresh is routine QA, not a release blocker.
 - Responsive/accessibility/performance: final representative-device evidence outside the CI matrix remains; CI covers 360/375/390, tablet, desktop, keyboard, focus, touch targets, and accessibility contracts.
-- Phase B/C closeout: documentation/status reconciliation is the remaining administrative slice.
 
-**PENDING next strategic stages:**
-- Phase R — Public Product Readiness.
-- D4 — domain-neutral scheduling boundary.
+**IN PROGRESS / remaining before Vocabulary MVP:**
+- Phase 0/A1 external evidence: representative-device performance and final current-release production smoke.
+- Phase R public-readiness completion and sign-off.
+
+**DONE before Vocabulary architecture:**
+- D4 — domain-neutral scheduling boundary implemented and contract-tested.
+
+**PENDING next strategic stage:**
 - E — Vocabulary MVP.
 - F — Context/Reading integration.
 - G — Grammar foundation.
@@ -1828,10 +1834,10 @@ The roadmap has two levels: **remaining Kanji hardening** and **domain expansion
 **0. Release Integrity final verification — CURRENT**
 → capture representative-device performance evidence and complete the broader live production smoke matrix; cache/stale-client/offline verification is already evidenced on current `main`
 
-**1. Phase R — Public Product Readiness**
-→ positioning, onboarding, guest-first accounts, data safety, backup/restore hardening, PWA, offline, browser compatibility, i18n, observability, security, privacy/legal, help, feedback, beta/release gate
+**1. Phase R — Public Product Readiness (IN PROGRESS)**
+→ finish external validation/sign-off: target devices/browsers, full sync/conflict/migration acceptance, production security/RLS/CSP, privacy/legal finalization, and real-user beta.
 
-**2. D4 — Scheduling Boundary**
+**2. D4 — Scheduling Boundary — DONE**
 → one domain-neutral scheduling seam; no second scheduler and no FSRS rewrite
 
 **3. E — Vocabulary MVP**
