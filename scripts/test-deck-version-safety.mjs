@@ -6,6 +6,6 @@ assert.match(bootstrap,/DATA_VERSION='v1\.2-dataset-2136'/);
 assert.doesNotMatch(bootstrap,/localStorage\.removeItem\(DECK_KEY\)/,'bootstrap must never delete the learner deck on dataset-version change');
 assert.match(bootstrap,/__KANJI5_DECK_REFRESH_NEEDED__/);
 assert.match(runtime,/localStorage\.getItem\(["']kanji5-deck-version["']\)/);
-assert.match(runtime,/cachedVersion===DATA_VERSION/);
+assert.match(runtime,/cachedVersion!==DATA_VERSION/);
 assert.match(runtime,/localStorage\.setItem\(["']kanji5-deck-version["']\s*,\s*DATA_VERSION\)/);
 console.log('Kanji 5 deck-version preservation contract passed.');
