@@ -1,7 +1,7 @@
 {
-  "name": "کانجی‌یار",
-  "short_name": "کانجی‌یار",
-  "description": "یادگیری روزانهٔ ۵ کانجی با مرور فاصله‌دار تطبیقی FSRS",
+  "name": "RINEMI — Japanese Learning",
+  "short_name": "RINEMI",
+  "description": "یادگیری ژاپنی با مرور فاصله‌دار تطبیقی FSRS",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4efe3",
