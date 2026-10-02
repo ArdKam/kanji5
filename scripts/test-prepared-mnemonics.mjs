@@ -49,13 +49,13 @@ const semanticReviewSentinels = [
   ["後", /پشت|عقب/, /behind/i],
   ["入", /داخل|وارد/, /inward|step in/i],
   ["出", /بیرون|خارج/, /out|exit|emerge/i],
-  ["読", /خوان|کتاب/, /read|book/i],
-  ["語", /زبان|حرف/, /language|words?/i],
+  ["言", /حرف|دهان|واژه/, /spoken words?|strokes/i],
+  ["家", /خانه|سقف|خوک/, /household|roof/i],
   ["題", /سؤال|موضوع|برگه/, /question|topic|page/i],
   ["勝", /رقیب|زور|پیروزی/, /rival|victory|beat/i],
   ["機", /دستگاه|سازوکار|چوب/, /machine|mechanism|frame/i],
   ["議", /حرف|بحث|میز/, /debating|table|debate/i],
-  ["難", /سخت|دشواری/, /difficult|hard/i],
+  ["共", /دست|هم/, /hands?|together/i],
 ];
 for (const [character, faPattern, enPattern] of semanticReviewSentinels) {
   const entry = curatedEntries[character];
