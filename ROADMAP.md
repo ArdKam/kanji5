@@ -1225,18 +1225,18 @@ not:
 
 ---
 
-## D5. Persistence/offline seam — PENDING
+## D5. Persistence/offline seam — DONE
 
-Minimum first step:
+The initial D5 migration/offline seam is implemented on current \`main\` via the context identity migration and cross-domain dependency precaching.
 
-- domain-neutral storage abstraction
-- explicit persistence ownership
-- migration seams
-- vocabulary/grammar records independent of Kanji-only assumptions
-- offline-compatible content and learner state
+Completed minimum foundation:
+
+- cross-domain identity migration for persisted Context data
+- offline precaching of cross-domain identity dependencies
+- migration and dependency contract coverage
 - compatibility with existing Kanji state
 
-Do not perform a large storage backend rewrite unless measured needs require it.
+Remaining persistence scalability work belongs to Phase R (public data safety/review-history scalability) and the later scale gate. Do not restart D5 as a full storage-backend rewrite without measured need.
 
 ---
 
