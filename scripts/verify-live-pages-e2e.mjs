@@ -23,7 +23,7 @@ try {
 
     const onboarding = page.locator('.public-onboarding');
     if (await onboarding.isVisible().catch(() => false)) {
-      await onboarding.getByRole('button', { name: "Start today's learning", exact: true }).click();
+      await onboarding.getByTestId('public-onboarding-start').click();
     }
     await page.locator('#root .learning-card').waitFor({ state: 'visible', timeout: 15000 });
 
