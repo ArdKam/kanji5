@@ -45,7 +45,7 @@ function showReactBootFailure(error){
   action.className='kanji5-startup-error-action';
   action.type='button';
   const isFa=document.documentElement.lang==='fa';
-  title.textContent=isFa?'کانجی‌یار باز نشد':'Kanji5 could not start';
+  title.textContent=isFa?'RINEMI باز نشد':'RINEMI could not start';
   copy.textContent=isFa?'یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد. صفحه را دوباره بارگذاری کنید.':'A required application file could not be loaded for this release. Reload the page and try again.';
   action.textContent=isFa?'بارگذاری دوباره':'Reload';
   action.addEventListener('click',()=>window.location.reload());
