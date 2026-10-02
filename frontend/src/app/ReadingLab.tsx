@@ -32,6 +32,9 @@ type SavedReadingSession = {
   speechRate: number;
   subtitleCues: SubtitleCue[];
   audioName: string;
+  speechVoiceName?: string;
+  sentenceAnnotations?: Record<string, string>;
+  sentenceTranslations?: Record<string, string>;
   updatedAt: number;
 };
 
@@ -117,6 +120,48 @@ function readSavedReadingSession(): SavedReadingSession | null {
   }
 }
 
+function readingSentenceKey(sentence: ReadingSentence) {
+  let hash = 2166136261;
+  for (const character of Array.from(sentence.text)) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return sentence.index + ":" + (hash >>> 0).toString(16);
+}
+
+function normalizeSentenceForMatch(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+async function fetchSentenceTranslation(sentence: ReadingSentence): Promise<string | null> {
+  const text = sentence.text.trim();
+  if (!text) return null;
+  const url = new URL("https://api.tatoeba.org/v1/sentences");
+  url.searchParams.set("lang", "jpn");
+  url.searchParams.set("q", text);
+  url.searchParams.set("trans:lang", "eng");
+  url.searchParams.set("trans:is_direct", "yes");
+  url.searchParams.set("is_orphan", "no");
+  url.searchParams.set("is_unapproved", "no");
+  url.searchParams.set("sort", "relevance");
+  url.searchParams.set("limit", "12");
+  try {
+    const response = await fetch(url.toString(), { cache: "force-cache" });
+    if (!response.ok) return null;
+    const payload = await response.json() as { data?: Array<{ text?: string; translations?: Array<Array<{ text?: string }> | { text?: string }> }> };
+    const expected = normalizeSentenceForMatch(text);
+    for (const row of Array.isArray(payload?.data) ? payload.data : []) {
+      if (normalizeSentenceForMatch(String(row?.text ?? "")) !== expected) continue;
+      const translations = Array.isArray(row?.translations) ? row.translations : [];
+      const english = translations.flatMap(group => Array.isArray(group) ? group : [group]).map(item => String(item?.text ?? "").trim()).find(Boolean);
+      if (english) return english.slice(0, 1200);
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 function findLongestVocabularyMatch(text: string, characterIndex: number, items: VocabularyItem[]) {
   const chars = Array.from(text);
   const clickedCharacter = chars[characterIndex] ?? "";
@@ -151,6 +196,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const [audioUrl, setAudioUrl] = useState("");
   const [audioName, setAudioName] = useState(initialSession?.audioName ?? "");
   const [speechRate, setSpeechRate] = useState(initialSession?.speechRate ?? 0.85);
+  const [speechVoiceName, setSpeechVoiceName] = useState(initialSession?.speechVoiceName ?? "");
+  const [speechVoices, setSpeechVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeSentenceIndex, setActiveSentenceIndex] = useState(initialSession?.activeSentenceIndex ?? 0);
   const [subtitleCues, setSubtitleCues] = useState<SubtitleCue[]>(initialSession?.subtitleCues ?? []);
@@ -158,6 +205,12 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const [showRestoreNotice, setShowRestoreNotice] = useState(Boolean(initialSession?.text));
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [sentenceAutoplay, setSentenceAutoplay] = useState(false);
+  const [sentenceAnnotations, setSentenceAnnotations] = useState<Record<string, string>>(initialSession?.sentenceAnnotations ?? {});
+  const [sentenceTranslations, setSentenceTranslations] = useState<Record<string, string>>(initialSession?.sentenceTranslations ?? {});
+  const [translationBusyKey, setTranslationBusyKey] = useState<string | null>(null);
+  const [translationUnavailableKey, setTranslationUnavailableKey] = useState<string | null>(null);
+  const [annotationEditingKey, setAnnotationEditingKey] = useState<string | null>(null);
+  const [annotationDraft, setAnnotationDraft] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const audioInputRef = useRef<HTMLInputElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -224,6 +277,11 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     return bestIndex;
   }, [catalogByCharacter, sentences]);
   const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
+  const selectedSpeechVoice = speechVoices.find(voice => voice.name === speechVoiceName);
+  const japaneseSpeechVoices = useMemo(
+    () => speechVoices.filter(voice => /^ja(?:-|$)/i.test(String(voice.lang ?? ""))).sort((a, b) => `${a.name} ${a.lang}`.localeCompare(`${b.name} ${b.lang}`)),
+    [speechVoices],
+  );
   const syncReady = Boolean(audioUrl && subtitleCues.length);
   const activeCue = syncReady ? subtitleCues[activeSentenceIndex] : undefined;
 
@@ -296,12 +354,15 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
         speechRate,
         subtitleCues: subtitleCues.slice(0, 500),
         audioName: audioName.slice(0, 180),
+        speechVoiceName: speechVoiceName.slice(0, 180),
+        sentenceAnnotations: Object.fromEntries(Object.entries(sentenceAnnotations).slice(-200).map(([key, note]) => [key, String(note).slice(0, 600)])),
+        sentenceTranslations: Object.fromEntries(Object.entries(sentenceTranslations).slice(-200).map(([key, translation]) => [key, String(translation).slice(0, 1200)])),
         updatedAt: Date.now(),
       } satisfies SavedReadingSession));
     } catch {
       // Reading Lab remains usable when storage is unavailable or full.
     }
-  }, [activeSentenceIndex, audioName, speechRate, subtitleCues, value]);
+  }, [activeSentenceIndex, audioName, sentenceAnnotations, sentenceTranslations, speechRate, speechVoiceName, subtitleCues, value]);
 
   useEffect(() => {
     sentenceAutoplayRef.current = sentenceAutoplay;
@@ -317,11 +378,25 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     && typeof window.speechSynthesis?.speak === "function"
     && typeof window.SpeechSynthesisUtterance === "function";
 
+  useEffect(() => {
+    if (!speechSupported) return;
+    const loadVoices = () => setSpeechVoices(window.speechSynthesis.getVoices());
+    loadVoices();
+    window.speechSynthesis.addEventListener?.("voiceschanged", loadVoices);
+    return () => window.speechSynthesis.removeEventListener?.("voiceschanged", loadVoices);
+  }, [speechSupported]);
+
+  useEffect(() => {
+    if (!speechVoiceName || !speechVoices.length) return;
+    if (!speechVoices.some(voice => voice.name === speechVoiceName)) setSpeechVoiceName("");
+  }, [speechVoiceName, speechVoices]);
+
   const speakUtterance = (text: string) => {
     if (!speechSupported || !text.trim()) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text.trim());
     utterance.lang = "ja-JP";
+    if (selectedSpeechVoice) utterance.voice = selectedSpeechVoice;
     utterance.rate = speechRate;
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -455,6 +530,41 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     onSelectKanji(item);
   };
 
+  const toggleSentenceAnnotation = (sentence: ReadingSentence) => {
+    const key = readingSentenceKey(sentence);
+    if (annotationEditingKey === key) {
+      setAnnotationEditingKey(null);
+      return;
+    }
+    setAnnotationEditingKey(key);
+    setAnnotationDraft(sentenceAnnotations[key] ?? "");
+    setTranslationUnavailableKey(null);
+  };
+
+  const saveSentenceAnnotation = (sentence: ReadingSentence) => {
+    const key = readingSentenceKey(sentence);
+    const next = annotationDraft.trim().slice(0, 600);
+    setSentenceAnnotations(current => {
+      const copy = { ...current };
+      if (next) copy[key] = next;
+      else delete copy[key];
+      return copy;
+    });
+    setAnnotationEditingKey(null);
+    setAnnotationDraft("");
+  };
+
+  const translateSentence = async (sentence: ReadingSentence) => {
+    const key = readingSentenceKey(sentence);
+    if (sentenceTranslations[key] || translationBusyKey === key) return;
+    setTranslationUnavailableKey(null);
+    setTranslationBusyKey(key);
+    const translation = await fetchSentenceTranslation(sentence);
+    if (translation) setSentenceTranslations(current => ({ ...current, [key]: translation }));
+    else setTranslationUnavailableKey(key);
+    setTranslationBusyKey(null);
+  };
+
   const clearText = () => {
     setSentenceAutoplay(false);
     sentenceAutoplayRef.current = false;
@@ -462,6 +572,11 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     setSubtitleCues([]);
     setAudioName("");
     setIsAudioPlaying(false);
+    setSentenceAnnotations({});
+    setSentenceTranslations({});
+    setAnnotationEditingKey(null);
+    setAnnotationDraft("");
+    setTranslationUnavailableKey(null);
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl("");
@@ -577,6 +692,13 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               {t("readingStopSpeech", language)}
             </button>
           </div>
+          <label className="reading-lab-speech-voice">
+            <span>{t("readingSpeechVoice", language)}</span>
+            <select value={speechVoiceName} onChange={event => setSpeechVoiceName(event.target.value)}>
+              <option value="">{t("readingSpeechVoiceDefault", language)}</option>
+              {japaneseSpeechVoices.map(voice => <option key={voice.name + voice.lang} value={voice.name}>{voice.name} · {voice.lang}</option>)}
+            </select>
+          </label>
           <label className="reading-lab-speech-rate">
             <span>{t("readingSpeechRate", language)}</span>
             <select value={speechRate} onChange={event => setSpeechRate(Number(event.target.value))}>
@@ -727,6 +849,28 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                         </button>
                       ) : <span key={character + "-" + index}>{character}</span>;
                     })}
+                  </div>
+                  <div className="reading-lab-sentence-support">
+                    <div className="reading-lab-sentence-support-actions">
+                      <button className="button secondary reading-lab-support-action" type="button" disabled={translationBusyKey === readingSentenceKey(sentence)} onClick={() => void translateSentence(sentence)}>
+                        {translationBusyKey === readingSentenceKey(sentence) ? t("readingLabTranslationLoading", language) : t("readingLabTranslateSentence", language)}
+                      </button>
+                      <button className={"button secondary reading-lab-support-action" + (annotationEditingKey === readingSentenceKey(sentence) ? " is-active" : "")} type="button" onClick={() => toggleSentenceAnnotation(sentence)}>
+                        {sentenceAnnotations[readingSentenceKey(sentence)] ? t("readingLabEditAnnotation", language) : t("readingLabAddAnnotation", language)}
+                      </button>
+                    </div>
+                    {sentenceTranslations[readingSentenceKey(sentence)] ? <p className="reading-lab-sentence-translation"><strong>{t("readingLabTranslation", language)}</strong>{sentenceTranslations[readingSentenceKey(sentence)]}</p> : null}
+                    {translationUnavailableKey === readingSentenceKey(sentence) ? <p className="reading-lab-sentence-support-status" role="status">{t("readingLabTranslationUnavailable", language)}</p> : null}
+                    {sentenceAnnotations[readingSentenceKey(sentence)] && annotationEditingKey !== readingSentenceKey(sentence) ? <p className="reading-lab-sentence-annotation"><strong>{t("readingLabAnnotation", language)}</strong>{sentenceAnnotations[readingSentenceKey(sentence)]}</p> : null}
+                    {annotationEditingKey === readingSentenceKey(sentence) ? (
+                      <div className="reading-lab-annotation-editor">
+                        <textarea value={annotationDraft} maxLength={600} onChange={event => setAnnotationDraft(event.target.value)} rows={3} aria-label={t("readingLabAnnotation", language)} placeholder={t("readingLabAnnotationPlaceholder", language)} />
+                        <div className="reading-lab-annotation-actions">
+                          <button className="button primary" type="button" onClick={() => saveSentenceAnnotation(sentence)}>{t("readingLabSaveAnnotation", language)}</button>
+                          <button className="button secondary" type="button" onClick={() => { setAnnotationEditingKey(null); setAnnotationDraft(""); }}>{t("cancel", language)}</button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               ))}
