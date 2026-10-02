@@ -107,8 +107,8 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
             {current.options.map(option => {
               const isCorrect = option.correct;
               const isSelected = option.label === selected;
-              return <button key={option} className={"placement-option " + (selected ? (isCorrect ? "correct" : isSelected ? "wrong" : "") : "")} type="button" disabled={Boolean(selected)} onClick={() => choose(option)}>
-                <span>{option}</span>{selected && isCorrect ? <b aria-label={t("correct", language)}>✓</b> : null}
+              return <button key={option.id} className={"placement-option " + (selected ? (isCorrect ? "correct" : isSelected ? "wrong" : "") : "")} type="button" disabled={Boolean(selected)} onClick={() => choose(option.label)}>
+                <span>{option.label}</span>{selected && isCorrect ? <b aria-label={t("correct", language)}>✓</b> : null}
               </button>;
             })}
           </div>
