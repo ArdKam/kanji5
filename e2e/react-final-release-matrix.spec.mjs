@@ -55,6 +55,9 @@ for(const viewport of viewports){
 
 
 for(const viewport of [
+  {name:'mobile-360',width:360,height:800},
+  {name:'mobile-375',width:375,height:812},
+  {name:'mobile-390',width:390,height:844},
   {name:'tablet',width:768,height:1024},
   {name:'mobile-landscape',width:844,height:390},
 ]){
@@ -68,6 +71,10 @@ for(const viewport of [
       navHeight:document.querySelector('.experience-nav')?.getBoundingClientRect().height||0,
       bottomSafePadding:getComputedStyle(document.querySelector('.mobile-study-flow')||document.body).paddingBottom
     }));
+    expect(metrics.overflow, `horizontal overflow at ${viewport.width}px`).toBe(false);
     expect(metrics.navHeight).toBeGreaterThanOrEqual(44);
+    if(viewport.width<=390){
+      expect(metrics.bottomSafePadding).toMatch(/px$/);
+    }
   });
 }
