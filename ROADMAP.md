@@ -2,9 +2,9 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`6a21c08ca54bd29ac20612a2160b773a7f711960\` (2026-10-02). The roadmap itself is now tracked on current \`main\`; documentation-only commits follow that implementation snapshot.
+> **Implementation baseline reviewed:** \`main\` at commit \`5806602712ed1f8edb7420487d08e1e7f2c5f213\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, and the completed Kanji UX foundation slices described below.
 >
-> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are tracked as pending/in-review work and must be rebased or rebuilt against the current \`main\` before being considered complete.
+> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
 ---
 
@@ -127,15 +127,58 @@ Especially avoid:
 - **LATER** — intentionally deferred until evidence or scale justifies it.
 - **DO NOT REOPEN** — completed foundational behavior that should not be rewritten without a verified defect.
 
+### 2.1 Verified current status ledger — 2026-10-02
+
+This ledger is the anti-regression checkpoint for future reviews. Reviewers must start here and only inspect the remaining gaps.
+
+**DONE on current \`main\`:**
+- Release/bootstrap foundation and React artifact hygiene.
+- D1 canonical cross-domain content identities.
+- D2 shared evidence envelope.
+- D3 deterministic cross-domain relationships.
+- D5 context migration/offline cross-domain seam.
+- Stats exposure/hydration/mastery corrections.
+- Advanced Stats and deterministic learning-efficacy evidence surface.
+- Learning vs Active Recall separation, compact session feedback, four-page Learning Card pager, keyboard-accessible shortcuts, swipe navigation, mobile feedback/card bounds.
+- Reading Lab core state preservation, local session restoration, in-place word/Kanji lookup, unique + occurrence-weighted coverage, hardest-sentence focus, sentence navigation, speech/autoplay, and SRT/VTT synchronization.
+- Dictionary narrow-mobile tabs and personal-mnemonic draft preservation across dictionary remount/async loading.
+- Settings exercise toggles, Placement/Test ownership correction, Data Backup/Restore foundation, and separated destructive reset UI.
+- Mnemonics information architecture distinguishing prepared/curated material, generated scaffolds, and personal mnemonics; prepared coverage is complete.
+
+**PARTIAL / remaining before Public Product Readiness:**
+- Release verification: live artifact/cache/stale-client/offline verification and representative-device performance measurement.
+- Reading Lab: lightweight translation/annotation, optional voice selection, and later Reading Library are still roadmap items.
+- Mnemonics: semantic/content-quality QA remains; coverage is not the remaining problem.
+- Responsive/accessibility/performance: final cross-device WCAG/CWV verification remains.
+- Phase B/C closeout: ensure metrics/content QA policy and documentation match the implementation.
+
+**PENDING next strategic stages:**
+- Phase R — Public Product Readiness.
+- D4 — domain-neutral scheduling boundary.
+- E — Vocabulary MVP.
+- F — Context/Reading integration.
+- G — Grammar foundation.
+
+**Intentionally not active backlog:** A2, A3, A5, A6, and the completed D1/D2/D3/D5 foundations above. Do not recreate these from scratch because an old PR with a matching title is still open.
+
 ---
 
 # 3. Current baseline and already-completed foundations
 
-The current \`main\` baseline is commit \`6a21c08ca54bd29ac20612a2160b773a7f711960\`, whose recent history includes:
+The current \`main\` baseline is commit \`5806602712ed1f8edb7420487d08e1e7f2c5f213\`. Its implementation history immediately before the roadmap documentation includes:
 
-- D1 — canonical cross-domain content identities
-- D2 — shared evidence envelope
-- D3 — deterministic cross-domain relationships
+- \`0a0df45\` — D5 context migration and offline cross-domain dependency precaching.
+- \`75b9cb4\` — Stats learning-efficacy evidence surface.
+- \`6a21c08\` — D3 deterministic cross-domain relationships.
+- Earlier D1/D2 foundations remain on the same ancestry.
+
+For Kanji UX status, the current \`main\` also contains the equivalent of older open work represented by recent commits such as:
+
+- \`a2862e5\` — exposure-based Stats correction/hydration refresh.
+- \`75073f9\` — compact Learning session feedback.
+- \`be9a5d4\` — Reading Lab occurrence coverage/hardest-sentence focus.
+- \`547e4ad\` — narrow-mobile Dictionary section tabs.
+- \`5fe001bd\` — mnemonic generated-quality scaffolding/coverage work.
 
 These are not hypothetical contracts anymore; concrete source modules and behavioral tests exist on \`main\`.
 
@@ -246,7 +289,7 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ## A1. Release/runtime integrity
 
-### DONE / PARTIAL
+### PARTIAL — final release verification remains
 
 - \`app-bootstrap.js\` loading restored.
 - \`react-dist/\` removed from git.
@@ -269,7 +312,11 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ## A2. Learning / Active Recall
 
-### Requirements
+### DONE on current \`main\`; DO NOT REOPEN without a verified regression
+
+The current implementation and browser contracts cover the defined Learning/Active Recall separation, Learning Card hierarchy, pager/swipe/rating flow, compact session feedback, keyboard behavior, and exercise-toggle boundary.
+
+### Remaining verification only
 
 - Keep Learning and Active Recall conceptually separate.
 - Learning Card must remain focused on:
@@ -306,6 +353,10 @@ Detailed analytics belong in Stats / Advanced Stats.
 ---
 
 ## A3. Stats correctness and information architecture
+
+### DONE on current \`main\`; DO NOT REOPEN without a verified regression
+
+Exposure-based studied/unseen/mastery corrections, first-read hydration, Advanced Stats, and deterministic learning-efficacy evidence are implemented on current \`main\`.
 
 ### Source-of-truth rules
 
@@ -414,6 +465,10 @@ Later:
 
 ## A5. Dictionary
 
+### DONE on current \`main\`; remaining work is release verification only
+
+Narrow-mobile tabs and dictionary personal-mnemonic draft preservation are implemented.
+
 ### Requirements
 
 - Kanji tabs fit at 360/375/390px without overflow.
@@ -428,6 +483,10 @@ Later:
 ---
 
 ## A6. Settings
+
+### DONE on current \`main\`; remaining work is release verification only
+
+Exercise toggles, Placement/Test ownership, Data Backup/Restore, and reset separation are implemented and contract-tested.
 
 ### Requirements
 
@@ -1710,7 +1769,7 @@ Examples include:
 
 ### Rule
 
-An open PR is **not complete**.
+An open PR is **not complete**, and an open PR matching a roadmap bullet is **not evidence that the work is still pending on \`main\`**.
 
 Before integration:
 
@@ -1726,45 +1785,45 @@ Do not merge merely because a PR title matches a roadmap bullet.
 
 # 18. Detailed execution order
 
-The roadmap has two levels: **product hardening** and **domain expansion**.
+The roadmap has two levels: **remaining Kanji hardening** and **domain expansion**. Completed foundation phases are not placed back into the execution queue.
 
-The current preferred order is:
+### Current execution order — 2026-10-02
 
-**0. Release Integrity**
-↓
-**A1 Runtime integrity**
-↓
-**A3 Stats correctness**
-↓
-**A2 Learning / Active Recall**
-↓
-**A4 Reading Lab**
-↓
-**A5 Dictionary**
-↓
-**A6 Settings**
-↓
-**A7 Mnemonics**
-↓
-**A8 Responsive / Accessibility / Performance**
-↓
-**B Measurement / Advanced Stats**
-↓
-**C Content Quality**
-↓
-**R Public Product Readiness**
-↓
-**D4 Scheduling Boundary**
-↓
-**D5 Persistence / Offline Seam**
-↓
-**E Vocabulary MVP**
-↓
-**F Context + Reading Integration**
-↓
-**G Grammar Foundation**
-↓
-**H Public Product Maturity / scale-driven expansion**
+**0. Release Integrity final verification**
+→ live artifact graph, cache invalidation, stale-client recovery, offline cold/repeat, production smoke, release sequencing
+
+**1. A8 final Responsive / Accessibility / Performance gate**
+→ 360/375/390, tablet/desktop, keyboard/focus/IME, WCAG checks, LCP/INP/CLS, long tasks, repeat startup, offline startup
+
+**2. A4 remaining Reading Lab polish**
+→ lightweight translation/annotation and carefully scoped optional voice support; Reading Library remains later
+
+**3. A7 Mnemonic content-quality QA**
+→ semantic usefulness, reading relevance, ambiguity, memorability, malformed/missing entries; do not confuse coverage with quality
+
+**4. Phase B/C closeout**
+→ reconcile measurement/evidence and content-QA policy with current implementation; update documentation/statuses as needed
+
+**5. Phase R — Public Product Readiness**
+→ positioning, onboarding, guest-first accounts, data safety, backup/restore hardening, PWA, offline, browser compatibility, i18n, observability, security, privacy/legal, help, feedback, beta/release gate
+
+**6. D4 — Scheduling Boundary**
+→ one domain-neutral scheduling seam; no second scheduler and no FSRS rewrite
+
+**7. E — Vocabulary MVP**
+→ local versioned dataset, deterministic learning modes, evidence/recovery, scheduling integration, persistence/offline, UX, QA
+
+**8. F — Context + Reading Integration**
+
+**9. G — Grammar Foundation**
+
+**10. H — Public Product Maturity / scale-driven expansion**
+
+### Explicitly complete and removed from the active queue
+
+Do **not** restart A2, A3, A5, A6, D1, D2, D3, or D5 unless a new current-main regression is demonstrated.
+
+An old/open PR that implements one of those areas should first be diffed against current \`main\`; often the correct action is to supersede or close it rather than merge it.
 
 ### Parallelism rule
 
