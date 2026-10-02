@@ -11,8 +11,17 @@ export default defineConfig({
     outDir: "../react-dist",
     emptyOutDir: true,
     cssCodeSplit: false,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "react-vendor",
+              test: /node_modules[\\/](?:react|react-dom)[\\/]/,
+              priority: 100,
+            },
+          ],
+        },
         entryFileNames: "kanji5-react.js",
         assetFileNames: (assetInfo) =>
           assetInfo.name?.endsWith(".css")
