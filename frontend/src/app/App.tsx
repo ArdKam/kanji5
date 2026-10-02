@@ -1052,7 +1052,6 @@ function App(){
               {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}
       </>}
     </main>
-    <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
 <footer className="footer">{t("footerTagline",language)}</footer>
   </div>
 }
