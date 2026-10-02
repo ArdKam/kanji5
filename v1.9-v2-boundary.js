@@ -41,7 +41,12 @@ function runtimePresentationData(now=Date.now(),includeStats=true){
     if(card&&card.state===2&&(Number(card.scheduled_days)||0)>=21)masteredCount++;
   }
   upcoming.sort((a,b)=>Date.parse(a.dueAt)-Date.parse(b.dueAt));
-  const baseStats={totalReviews:0,nonAgainRate:0,studiedCount:Object.keys(cards).length,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:0,last7:[],masteryDistribution:{unseen:deck.length,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length}};
+  const knowledge=state.readKnowledge?.()||{};
+  const studiedCount=deck.reduce((count,item)=>{
+    const character=String(item?.character||item?.id||'').trim();
+    return count+(character&&knowledge?.[character]?.exposedAt?1:0);
+  },0);
+  const baseStats={totalReviews:0,nonAgainRate:0,studiedCount,deckSize:deck.length,longestStreak:Number(app.streak?.longest)||0,currentStreak:Number(app.streak?.current)||0,leechCount:0,last7:[],masteryDistribution:{unseen:Math.max(0,deck.length-studiedCount),learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length}};
   let stats=baseStats;
   if(includeStats){
     const reviews=state.readReviews?.()||[];
@@ -51,14 +56,16 @@ function runtimePresentationData(now=Date.now(),includeStats=true){
     for(const item of reviews){if(String(item.rating||'')!=='Again')nonAgainReviews++;const dayIndex=dayBuckets.get(String(item.at||'').slice(0,10));if(dayIndex!==undefined)days[dayIndex].count++;}
     const trimmedDays=days.map(({label,count})=>({label,count}));
     let leechCount=0;for(const item of Object.values(cards))if(item?.leech)leechCount++;
-    const masteryDistribution={unseen:0,learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length};
+    const masteryDistribution={unseen:Math.max(0,deck.length-studiedCount),learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length};
     let studiedMasteryTotal=0,studiedMasteryCount=0;
-    const model=learner()||{},knowledge=state.readKnowledge?.()||{};
+    const model=learner()||{};
     for(const item of deck){
-      const character=String(item?.character||item?.id||'').trim(),attrs=model?.kanji?.[character]?.attributes||{},states=Object.values(attrs).map(v=>String(v?.state||'')).filter(Boolean);
-      const stateName=states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'attention':states.includes('weak')?'attention':states.includes('learning')?'learning':states.includes('introduced')?'learning':'unseen';
+      const character=String(item?.character||item?.id||'').trim();
+      if(!character||!knowledge?.[character]?.exposedAt)continue;
+      const attrs=model?.kanji?.[character]?.attributes||{},states=Object.values(attrs).map(v=>String(v?.state||'')).filter(Boolean);
+      const stateName=states.includes('mastered')?'mastered':states.includes('stable')?'stable':states.includes('recovering')?'attention':states.includes('weak')?'attention':states.includes('learning')?'learning':states.includes('introduced')?'learning':'learning';
       masteryDistribution[stateName]++;
-      if(stateName!=='unseen'){studiedMasteryTotal+=kanjiMastery(character,knowledge,model);studiedMasteryCount++;}
+      studiedMasteryTotal+=kanjiMastery(character,knowledge,model);studiedMasteryCount++;
     }
     masteryDistribution.average=studiedMasteryCount?studiedMasteryTotal/studiedMasteryCount:0;
     stats={...baseStats,totalReviews:reviews.length,nonAgainRate:reviews.length?nonAgainReviews/reviews.length:0,leechCount,last7:trimmedDays,masteryDistribution};
