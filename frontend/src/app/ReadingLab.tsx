@@ -284,7 +284,11 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     return bestIndex;
   }, [catalogByCharacter, sentences]);
   const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
-  const selectedSpeechVoice = speechVoices.find(voice => voice.name === speechVoiceName);
+  const resolveSpeechVoice = () => {
+    if (!speechVoiceName || typeof window === "undefined" || !speechSupported) return undefined;
+    const voices = window.speechSynthesis.getVoices?.() ?? speechVoices;
+    return voices.find(voice => voice.name === speechVoiceName);
+  };
   const japaneseSpeechVoices = useMemo(
     () => speechVoices.filter(voice => /^ja(?:-|$)/i.test(String(voice.lang ?? ""))).sort((a, b) => `${a.name} ${a.lang}`.localeCompare(`${b.name} ${b.lang}`)),
     [speechVoices],
@@ -403,7 +407,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text.trim());
     utterance.lang = "ja-JP";
-    if (selectedSpeechVoice) utterance.voice = selectedSpeechVoice;
+    const selectedVoice = resolveSpeechVoice();
+    if (selectedVoice) utterance.voice = selectedVoice;
     utterance.rate = speechRate;
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
