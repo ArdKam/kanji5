@@ -259,7 +259,7 @@ test('Reading Lab distinguishes unique and occurrence-weighted coverage and focu
   const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible({timeout:10000});
 
-  await lab.locator('textarea').fill('学学学生。日本語を読む。');
+  await lab.locator('textarea').fill('学学。日本語を読む。');
   await expect(lab.locator('#reading-lab-analysis-title')).toHaveText('۰%');
   await expect(lab.locator('.reading-lab-coverage-secondary')).toContainText('۰%');
   await expect(lab.locator('.reading-lab-focus-button')).toHaveCount(3);
