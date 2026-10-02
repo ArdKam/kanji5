@@ -875,7 +875,7 @@ function App(){
     )
   );
   const handleOnboardingDailyGoal = useCallback(async (value:number)=>{
-    const current = snapshot?.settings ?? {};
+    const current = (snapshot?.settings ?? {}) as Partial<Settings>;
     await action(async()=>updateSettings({
       dailyNew: Number(current.dailyNew) || 5,
       retention: Number(current.retention) || .9,
