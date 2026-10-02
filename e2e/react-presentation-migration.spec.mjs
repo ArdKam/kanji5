@@ -443,6 +443,18 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
 test('Reading Lab persists sentence notes, reuses exact translation matches, and supports Japanese voice selection',async({page})=>{
   await clean(page);
   const sentence='今日は学生です。';
+  await page.evaluate(()=>{
+    Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+      cancel:()=>{},
+      speak:(utterance)=>{window.__KANJI5_LAST_UTTERANCE__=utterance;utterance.onstart?.();},
+      getVoices:()=>[{name:'Test Japanese',lang:'ja-JP'}],
+      addEventListener:()=>{},
+      removeEventListener:()=>{},
+    }});
+    Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
+      constructor(text){this.text=text;this.lang='';this.rate=1;this.voice=null;this.onstart=null;this.onend=null;this.onerror=null;}
+    }});
+  });
   await page.route(/https:\/\/api\.tatoeba\.org\/v1\/sentences\?.*/,async route=>{
     const url=new URL(route.request().url());
     if(url.searchParams.get('q')!==sentence){ await route.continue(); return; }
@@ -460,18 +472,6 @@ test('Reading Lab persists sentence notes, reuses exact translation matches, and
   await sentenceRow.locator('.reading-lab-annotation-editor textarea').fill('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
   await sentenceRow.getByRole('button',{name:'ذخیرهٔ یادداشت',exact:true}).click();
   await expect(sentenceRow.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
-  await page.evaluate(()=>{
-    Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
-      cancel:()=>{},
-      speak:(utterance)=>{window.__KANJI5_LAST_UTTERANCE__=utterance;utterance.onstart?.();},
-      getVoices:()=>[{name:'Test Japanese',lang:'ja-JP'}],
-      addEventListener:()=>{},
-      removeEventListener:()=>{},
-    }});
-    Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
-      constructor(text){this.text=text;this.lang='';this.rate=1;this.voice=null;this.onstart=null;this.onend=null;this.onerror=null;}
-    }});
-  });
   await lab.locator('.reading-lab-speech-voice select').selectOption({label:'Test Japanese · ja-JP'});
   await lab.getByRole('button',{name:'خواندن جمله',exact:true}).click();
   const voice=await page.evaluate(()=>({name:window.__KANJI5_LAST_UTTERANCE__?.voice?.name||'',lang:window.__KANJI5_LAST_UTTERANCE__?.voice?.lang||''}));
