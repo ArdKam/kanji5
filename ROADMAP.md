@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`efbfaf1912f99e3ae6afc607e675efcd9cb2ff62\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, the verified public-readiness account/boot safeguards, and the completed Kanji UX foundation slices described below.
+> **Implementation baseline reviewed:** \`main\` at commit \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\` (2026-10-02). PR #396 is merged; post-merge React verification is still in progress. This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, the verified public-readiness account/boot safeguards, and the completed Kanji UX foundation slices described below.
 >
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -178,7 +178,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 
 # 3. Current baseline and already-completed foundations
 
-The current \`main\` baseline is commit \`efbfaf1912f99e3ae6afc607e675efcd9cb2ff62\`. Its implementation history immediately before the roadmap documentation includes:
+The current \`main\` baseline is commit \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\`. Its implementation history immediately before the roadmap documentation includes:
 
 - \`0a0df45\` — D5 context migration and offline cross-domain dependency precaching.
 - \`75b9cb4\` — Stats learning-efficacy evidence surface.
@@ -243,7 +243,7 @@ Establish a trustworthy production baseline before product expansion.
 - Build from source during CI/deploy.
 - Verify the exact artifact that is shipped.
 
-### 0.3 Deployment gates — VERIFIED ON CURRENT MAIN (2026-10-02)
+### 0.3 Deployment gates — CONFIGURED / PR-VERIFIED; POST-MERGE VERIFYING (2026-10-02)
 
 Current deployment workflow contains gates for:
 
@@ -258,7 +258,7 @@ Current deployment workflow contains gates for:
 - staged site verification
 - live GitHub Pages artifact verification
 
-Current-main evidence: React release run **2436** and Pages deployment run **1539** completed successfully for \`efbfaf1912f99e3ae6afc607e675efcd9cb2ff62\`.
+PR #396 evidence: the complete React release matrix and engine build passed on head \`2bb01e010f791320eed0d80852b79234789a3330\`. After merge to \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\`, React push run **2488** is still in progress; engine push run **2324** has passed.
 
 A workflow definition is not evidence that a particular commit succeeded. Release records must distinguish:
 - workflow configured
@@ -266,7 +266,7 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - workflow passed
 - live production verified
 
-### 0.4 Cache and stale-client handling — DONE ON CURRENT MAIN (2026-10-02)
+### 0.4 Cache and stale-client handling — PR-VERIFIED; POST-MERGE LIVE EVIDENCE PENDING (2026-10-02)
 
 - Verify cache invalidation across HTML, JS, CSS, service worker, and dynamically imported assets.
 - Verify stale-client recovery.
@@ -274,7 +274,7 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - Treat dynamic-import failures as release blockers.
 - Keep service-worker shell and runtime asset lists synchronized.
 
-Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. Current-main post-merge deployment/live evidence is still pending.
+Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. The merged-release live Pages artifact/cache/offline evidence is still pending.
 
 ### 0.5 Production smoke test
 
@@ -1276,7 +1276,7 @@ not:
 
 ## D5. Persistence/offline seam — DONE
 
-The initial D5 migration/offline seam is implemented on current \`main\` via the context identity migration and cross-domain dependency precaching.
+The initial D5 migration/offline seam is implemented on current \`main\` via the context identity migration and cross-domain dependency precaching. This is distinct from the still-pending Phase R storage abstraction.
 
 Completed minimum foundation:
 
