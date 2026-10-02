@@ -250,6 +250,18 @@ export function SettingsDialog({
         </section>
 
 
+        <section className="settings-section settings-support-section" aria-labelledby="settings-support-title">
+          <div className="settings-section-heading">
+            <p className="eyebrow">{language === "fa" ? "راهنما و پشتیبانی" : "Help & support"}</p>
+            <p id="settings-support-title">{language === "fa" ? "راهنمای استفاده، حریم خصوصی و مسیر گزارش مشکل را از اینجا پیدا کن." : "Find the product guide, privacy information, and the public feedback path here."}</p>
+          </div>
+          <div className="settings-support-links">
+            <a className="button secondary" href="./docs/PUBLIC-PRODUCT.md" target="_blank" rel="noreferrer">{language === "fa" ? "راهنمای Kanji5" : "How Kanji5 works"}</a>
+            <a className="button secondary" href="./docs/BROWSER-SUPPORT.md" target="_blank" rel="noreferrer">{language === "fa" ? "پشتیبانی مرورگرها" : "Browser support"}</a>
+            <a className="button secondary" href="./docs/PRIVACY-AND-DATA.md" target="_blank" rel="noreferrer">{language === "fa" ? "حریم خصوصی و داده" : "Privacy & data"}</a>
+            <a className="button secondary" href="https://github.com/ArdKam/kanji5/issues/new/choose" target="_blank" rel="noreferrer">{language === "fa" ? "گزارش مشکل / بازخورد" : "Report a problem / feedback"}</a>
+          </div>
+        </section>
         <section className="settings-danger-zone" aria-label={language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}>
           {resetArmed ? (
             <div className="settings-reset-confirmation" role="alert">
