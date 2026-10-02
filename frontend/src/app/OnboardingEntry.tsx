@@ -21,8 +21,6 @@ import {
   type Settings,
   type Snapshot,
 } from "./engine";
-void import("./onboarding/onboarding.css");
-
 import type {
   OnboardingCompletion,
   OnboardingDraft,
@@ -47,12 +45,22 @@ function toPlacementQuestions(records: PlacementQuestionRecord[]): PlacementQues
   }));
 }
 
+function ensureOnboardingStylesheet() {
+  if (typeof document === "undefined" || document.querySelector('link[data-kanji5-onboarding-style]')) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./kanji5-onboarding.css";
+  link.dataset.kanji5OnboardingStyle = "true";
+  document.head.appendChild(link);
+}
+
 export function OnboardingEntry({
   language,
   snapshot,
   busy: parentBusy = false,
   onFinished,
 }: OnboardingEntryProps) {
+  ensureOnboardingStylesheet();
   const [initialProgress] = useState<OnboardingProgress | null>(() => readOnboardingProgress());
   const [progress, setProgress] = useState<OnboardingProgress | null>(initialProgress);
   const [placementRecords, setPlacementRecords] = useState<PlacementQuestionRecord[]>([]);
