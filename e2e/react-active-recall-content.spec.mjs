@@ -33,6 +33,15 @@ async function clean(page){
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
+    localStorage.setItem("kanji5-onboarding-complete", "complete");
+    localStorage.removeItem("kanji5-onboarding-progress-v2");
+  });
+});
+
 async function seedSeenCard(page){
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.locator('#root .learning-card .button.wide').click();
