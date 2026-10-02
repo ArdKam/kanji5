@@ -15,16 +15,26 @@ try {
       sessionStorage.clear();
     });
     await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
+    const onboarding = page.locator('[data-testid="onboarding-flow"]');
+    const appShell = page.locator('#root .app-shell');
+    await Promise.race([
+      onboarding.waitFor({ state: 'visible', timeout: 30000 }),
+      appShell.waitFor({ state: 'visible', timeout: 30000 }),
+    ]);
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
     if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) {
       throw new Error('LIVE_OFFLINE_GATE_NO_SERVICE_WORKER_CONTROLLER');
     }
 
-    const onboarding = page.locator('.public-onboarding');
     if (await onboarding.isVisible().catch(() => false)) {
-      await onboarding.getByTestId('public-onboarding-start').click();
+      await onboarding.getByRole('button', { name: 'Start learning today', exact: true }).click();
+      await onboarding.getByRole('button', { name: 'Start from the beginning', exact: true }).click();
+      await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
+      await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
+      await onboarding.getByRole('button', { name: 'Continue as a guest', exact: true }).click();
+      await onboarding.waitFor({ state: 'hidden', timeout: 15000 });
     }
+    await appShell.waitFor({ state: 'visible', timeout: 30000 });
     await page.locator('#root .learning-card').waitFor({ state: 'visible', timeout: 15000 });
 
     const reveal = page.locator('#root .learning-card-front .button.primary.wide');
