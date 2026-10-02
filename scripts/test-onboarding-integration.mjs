@@ -7,6 +7,7 @@ const model = read("frontend/src/app/onboarding/onboarding-model.ts");
 const persistence = read("frontend/src/app/onboarding/onboarding-persistence.ts");
 const host = read("frontend/src/app/OnboardingEntry.tsx");
 const placement = read("frontend/src/app/placement-logic.ts");
+const diagnostic = read("frontend/src/app/PlacementDiagnostic.tsx");
 const app = read("frontend/src/app/App.tsx");
 const account = read("frontend/src/app/AccountDialog.tsx");
 
@@ -27,7 +28,8 @@ assert.ok(host.includes("scorePlacementAnswers"));
 assert.ok(host.includes("updateSettings"));
 assert.ok(host.includes("startCustomStudy"));
 assert.ok(host.includes("completeOnboarding"));
-assert.ok(placement.includes("scorePlacementAnswers") === false);
+assert.ok(placement.includes("scorePlacementAnswers"));
+assert.ok(diagnostic.includes("buildPlacementQuestions"));
 assert.ok(app.includes("OnboardingEntry"));
 assert.ok(!app.includes("PublicOnboarding"));
 assert.ok(account.includes("onAuthenticated"));
