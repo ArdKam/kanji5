@@ -113,6 +113,13 @@ function readSavedReadingSession(): SavedReadingSession | null {
       speechRate: clampSpeechRate(parsed.speechRate),
       subtitleCues,
       audioName: typeof parsed.audioName === "string" ? parsed.audioName.slice(0, 180) : "",
+      speechVoiceName: typeof parsed.speechVoiceName === "string" ? parsed.speechVoiceName.slice(0, 180) : "",
+      sentenceAnnotations: parsed.sentenceAnnotations && typeof parsed.sentenceAnnotations === "object"
+        ? Object.fromEntries(Object.entries(parsed.sentenceAnnotations as Record<string, unknown>).slice(-200).map(([key, note]) => [key, String(note).trim().slice(0, 600)]).filter(([, note]) => Boolean(note)))
+        : {},
+      sentenceTranslations: parsed.sentenceTranslations && typeof parsed.sentenceTranslations === "object"
+        ? Object.fromEntries(Object.entries(parsed.sentenceTranslations as Record<string, unknown>).slice(-200).map(([key, translation]) => [key, String(translation).trim().slice(0, 1200)]).filter(([, translation]) => Boolean(translation)))
+        : {},
       updatedAt: Number(parsed.updatedAt) || Date.now(),
     };
   } catch {
