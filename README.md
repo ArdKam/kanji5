@@ -2,6 +2,13 @@
 
 یک PWA شخصی برای یادگیری ۲۱۳۶ کانجی Jōyō ژاپنی، روزانه ۵ کانجی جدید، با مرور فاصله‌دار تطبیقی بر پایهٔ FSRS.
 
+## برای کاربر نهایی
+
+- **راهنمای محصول:** [PUBLIC-PRODUCT.md](docs/PUBLIC-PRODUCT.md)
+- **حریم خصوصی و داده:** [PRIVACY-AND-DATA.md](docs/PRIVACY-AND-DATA.md)
+- **پشتیبانی و بازخورد:** [FEEDBACK.md](docs/FEEDBACK.md)
+- **پشتیبانی مرورگرها:** [BROWSER-SUPPORT.md](docs/BROWSER-SUPPORT.md)
+
 ## برای توسعه‌دهنده‌ای که تازه وارد پروژه شده
 
 برای فهم نسخهٔ فعلی لازم نیست history نسخه‌های قدیمی را دنبال کنید. از این مسیر شروع کنید:
