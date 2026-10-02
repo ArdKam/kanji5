@@ -18,6 +18,7 @@ const K=Object.freeze({
   syncMeta:'kanji5-v1.2-sync-meta'
 });
 window.__KANJI5_STORAGE_KEYS__=K;
+const storage=window.__KANJI5_STORAGE__||localStorage;
 const DEVICE_KEY=K.deviceId,STORAGE=K.state,CARDS_STORAGE=K.cards,REVIEWS_STORAGE=K.reviews,KNOWLEDGE_STORAGE=K.knowledge,COMPONENT_KEY=K.components,LAST_ATTEMPT_KEY=K.lastAttempt,SESSION_HISTORY_KEY=K.sessionHistory,DECK_KEY=K.deck,SETTINGS_KEY=K.educationSettings;
 const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2,SESSION_HISTORY_LIMIT=30,MNEMONIC_SCHEMA_VERSION=1;
 const DOMAIN_IDENTITY_SCHEMA_VERSION=1;
