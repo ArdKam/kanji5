@@ -77,6 +77,7 @@ export function PublicOnboarding({
         <h2 id="public-onboarding-title">{t("onboardingTitle", language)}</h2>
         <p>{t("onboardingIntro", language)}</p>
         <div className="public-onboarding-loop" aria-label={t("learningLoop", language)}>
+          <strong>{t("learningLoop", language)}</strong>
           <span>{t("learning", language)}</span><i aria-hidden="true">→</i>
           <span>{t("activeRecall", language)}</span><i aria-hidden="true">→</i>
           <span>{t("learningReviewLabel", language)}</span>
