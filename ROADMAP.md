@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`98253356fa531ff977e08c05b76846c1f9e4d7b7\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, and the completed Kanji UX foundation slices described below.
+> **Implementation baseline reviewed:** \`main\` at commit \`efbfaf1912f99e3ae6afc607e675efcd9cb2ff62\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, the verified public-readiness account/boot safeguards, and the completed Kanji UX foundation slices described below.
 >
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -146,7 +146,7 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 - Mnemonics information architecture plus curated/generated/personal provenance; 2,136/2,136 prepared coverage and current curated-content QA.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- Release verification: live artifact/cache/stale-client/offline verification and representative-device performance measurement.
+- Release verification: live artifact, cache, stale-client, and offline verification are now evidenced on current \`main\`; representative-device performance measurement and broader live smoke coverage remain.
 - Reading Lab: only the later Reading Library remains; sentence translation/annotation and optional Japanese voice selection are implemented and E2E-covered.
 - Mnemonics: current 259-entry curated corpus passed structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Future content refresh is routine QA, not a release blocker.
 - Responsive/accessibility/performance: final representative-device evidence outside the CI matrix remains; CI covers 360/375/390, tablet, desktop, keyboard, focus, touch targets, and accessibility contracts.
@@ -165,7 +165,7 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 
 # 3. Current baseline and already-completed foundations
 
-The current \`main\` baseline is commit \`98253356fa531ff977e08c05b76846c1f9e4d7b7\`. Its implementation history immediately before the roadmap documentation includes:
+The current \`main\` baseline is commit \`efbfaf1912f99e3ae6afc607e675efcd9cb2ff62\`. Its implementation history immediately before the roadmap documentation includes:
 
 - \`0a0df45\` — D5 context migration and offline cross-domain dependency precaching.
 - \`75b9cb4\` — Stats learning-efficacy evidence surface.
@@ -230,7 +230,7 @@ Establish a trustworthy production baseline before product expansion.
 - Build from source during CI/deploy.
 - Verify the exact artifact that is shipped.
 
-### 0.3 Deployment gates — IMPLEMENTED, MUST REMAIN VERIFIED
+### 0.3 Deployment gates — VERIFIED ON CURRENT MAIN (2026-10-02)
 
 Current deployment workflow contains gates for:
 
@@ -245,19 +245,23 @@ Current deployment workflow contains gates for:
 - staged site verification
 - live GitHub Pages artifact verification
 
+Current-main evidence: React release run **2436** and Pages deployment run **1539** completed successfully for \`efbfaf1912f99e3ae6afc607e675efcd9cb2ff62\`.
+
 A workflow definition is not evidence that a particular commit succeeded. Release records must distinguish:
 - workflow configured
 - workflow executed
 - workflow passed
 - live production verified
 
-### 0.4 Cache and stale-client handling — BLOCKER BEFORE PUBLIC RELEASE
+### 0.4 Cache and stale-client handling — DONE ON CURRENT MAIN (2026-10-02)
 
 - Verify cache invalidation across HTML, JS, CSS, service worker, and dynamically imported assets.
 - Verify stale-client recovery.
 - Verify no previous release can trap a user in a broken asset graph.
 - Treat dynamic-import failures as release blockers.
 - Keep service-worker shell and runtime asset lists synchronized.
+
+Evidence: the merged Stage 0 gate verified stale-release cache eviction and offline shell recovery; the live Pages release then verified the deployed artifact hashes and live offline reload.
 
 ### 0.5 Production smoke test
 
