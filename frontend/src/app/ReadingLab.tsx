@@ -187,12 +187,38 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   }, [extracted]);
 
   const coverage = extracted.length ? Math.round((counts.familiar / extracted.length) * 100) : 0;
+  const occurrenceCoverage = useMemo(() => {
+    let knownOccurrences = 0;
+    let familiarOccurrences = 0;
+    for (const character of Array.from(value)) {
+      if (!isKanji(character)) continue;
+      const item = catalogByCharacter.get(character);
+      if (!item) continue;
+      knownOccurrences++;
+      if (getMasteryBucket(item) === "familiar") familiarOccurrences++;
+    }
+    return knownOccurrences ? Math.round((familiarOccurrences / knownOccurrences) * 100) : 0;
+  }, [catalogByCharacter, value]);
   const attentionItems = useMemo(
     () => extracted.filter(item => getMasteryBucket(item) === "attention"),
     [extracted],
   );
 
   const sentences = useMemo(() => subtitleCues.length ? subtitleCues.map(cue => ({ index: cue.index, text: cue.text })) : splitReadingSentences(value), [subtitleCues, value]);
+  const hardestSentence = useMemo(() => {
+    let best: { index: number; score: number } | null = null;
+    sentences.forEach((sentence, index) => {
+      let score = 0;
+      for (const character of Array.from(sentence.text)) {
+        const item = catalogByCharacter.get(character);
+        if (!item) continue;
+        const bucket = getMasteryBucket(item);
+        score += bucket === "attention" ? 3 : bucket === "new" ? 2 : bucket === "learning" ? 1 : 0;
+      }
+      if (score > 0 && (!best || score > best.score)) best = { index, score };
+    });
+    return best;
+  }, [catalogByCharacter, sentences]);
   const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
   const syncReady = Boolean(audioUrl && subtitleCues.length);
   const activeCue = syncReady ? subtitleCues[activeSentenceIndex] : undefined;
@@ -442,6 +468,14 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
 
   const inputCharacters = Array.from(value).length;
 
+  const focusHardestSentence = () => {
+    if (!hardestSentence) return;
+    selectSentence(hardestSentence.index, false);
+    window.requestAnimationFrame(() => {
+      sentenceRefs.current[hardestSentence.index]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
+
   const focusableTargets = useMemo(() => {
     const targets: Array<{ sentenceIndex: number; characterIndex: number; item: KanjiCatalogItem }> = [];
     sentences.forEach((sentence, sentenceIndex) => {
@@ -586,6 +620,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
             <div className="reading-lab-analysis-stats">
               <div><strong>{formatNumber(inputCharacters, language)}</strong><span>{t("readingLabCharacters", language)}</span></div>
               <div><strong>{formatNumber(extracted.length, language)}</strong><span>{t("readingLabKanji", language)}</span></div>
+              <div><strong>{formatNumber(occurrenceCoverage, language)}%</strong><span>{t("readingLabOccurrenceCoverage", language)}</span></div>
               <div><strong>{formatNumber(counts.learning, language)}</strong><span>{t("readingLabLearning", language)}</span></div>
               <div><strong>{formatNumber(counts.attention, language)}</strong><span>{t("readingLabAttention", language)}</span></div>
               <div><strong>{formatNumber(counts.new, language)}</strong><span>{t("readingLabNew", language)}</span></div>
@@ -631,6 +666,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               <div className="reading-lab-focus-controls" aria-label={t("readingLabFocusControls", language)}>
                 <button className="button secondary reading-lab-focus-button" type="button" disabled={!focusableTargets.length} onClick={() => focusNextTarget(false)}>{t("readingLabFocusNext", language)}</button>
                 <button className="button secondary reading-lab-focus-button" type="button" disabled={!unknownTargets.length} onClick={() => focusNextTarget(true)}>{t("readingLabNextUnknown", language)}</button>
+                <button className="button secondary reading-lab-focus-button" type="button" disabled={!hardestSentence} onClick={focusHardestSentence}>{t("readingLabHardestSentence", language)}</button>
               </div>
               <div className="reading-lab-sentence-position">
                 <span>{t("readingLabSentence", language)}</span>
