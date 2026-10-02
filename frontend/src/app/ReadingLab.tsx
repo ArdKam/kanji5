@@ -204,6 +204,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const [audioName, setAudioName] = useState(initialSession?.audioName ?? "");
   const [speechRate, setSpeechRate] = useState(initialSession?.speechRate ?? 0.85);
   const [speechVoiceName, setSpeechVoiceName] = useState(initialSession?.speechVoiceName ?? "");
+  const speechVoiceNameRef = useRef(initialSession?.speechVoiceName ?? "");
   const [speechVoices, setSpeechVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [activeSentenceIndex, setActiveSentenceIndex] = useState(initialSession?.activeSentenceIndex ?? 0);
@@ -285,9 +286,10 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   }, [catalogByCharacter, sentences]);
   const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
   const resolveSpeechVoice = () => {
-    if (!speechVoiceName || typeof window === "undefined" || !speechSupported) return undefined;
+    const selectedName = speechVoiceNameRef.current;
+    if (!selectedName || typeof window === "undefined" || !speechSupported) return undefined;
     const voices = window.speechSynthesis.getVoices?.() ?? speechVoices;
-    return voices.find(voice => voice.name === speechVoiceName);
+    return voices.find(voice => voice.name === selectedName);
   };
   const japaneseSpeechVoices = useMemo(
     () => speechVoices.filter(voice => /^ja(?:-|$)/i.test(String(voice.lang ?? ""))).sort((a, b) => `${a.name} ${a.lang}`.localeCompare(`${b.name} ${b.lang}`)),
@@ -701,7 +703,11 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
           </div>
           <label className="reading-lab-speech-voice">
             <span>{t("readingSpeechVoice", language)}</span>
-            <select value={speechVoiceName} onChange={event => setSpeechVoiceName(event.target.value)}>
+            <select value={speechVoiceName} onChange={event => {
+              const next = event.target.value;
+              speechVoiceNameRef.current = next;
+              setSpeechVoiceName(next);
+            }}>
               <option value="">{t("readingSpeechVoiceDefault", language)}</option>
               {japaneseSpeechVoices.map(voice => <option key={voice.name + voice.lang} value={voice.name}>{voice.name} · {voice.lang}</option>)}
             </select>
