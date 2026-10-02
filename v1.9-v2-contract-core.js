@@ -37,7 +37,53 @@ export function buildStatsViewModel(input={}){
     average:Math.max(0,Math.min(1,finite(masterySource.average,0))),
     total:Math.max(0,finite(masterySource.total,0))
   });
-  const domainSource=source.domains&&typeof source.domains==='object'?source.domains:{};const domains={};for(const [domain,row] of Object.entries(domainSource))domains[domain]=Object.freeze({domain,domainSchemaVersion:DOMAIN_SCHEMA_VERSION,...aggregateForDomain,...(row&&typeof row==='object'?row:{})});if(!domains.kanji)domains.kanji=Object.freeze({domain:'kanji',domainSchemaVersion:DOMAIN_SCHEMA_VERSION,...aggregateForDomain});return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',domainSchemaVersion:DOMAIN_SCHEMA_VERSION,domains:Object.freeze(domains),totalReviews:Math.max(0,finite(source.totalReviews,0)),nonAgainRate:Math.max(0,Math.min(1,finite(source.nonAgainRate,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[]),masteryDistribution});
+  const evaluationSource=source.evaluation&&typeof source.evaluation==='object'?source.evaluation:{};
+  const evaluationAttributes={};
+  for(const mode of MODES){
+    const row=evaluationSource.attributes?.[mode]&&typeof evaluationSource.attributes[mode]==='object'?evaluationSource.attributes[mode]:{};
+    evaluationAttributes[mode]=Object.freeze({
+      attempts:Math.max(0,finite(row.attempts,0)),
+      accuracy:Math.max(0,Math.min(1,finite(row.accuracy,0))),
+      recentAccuracy:Math.max(0,Math.min(1,finite(row.recentAccuracy,0))),
+      retentionRate:row.retentionRate==null?null:Math.max(0,Math.min(1,finite(row.retentionRate,0))),
+      recoveryRate:Math.max(0,Math.min(1,finite(row.recoveryRate,0))),
+      repeatedFailureRate:Math.max(0,Math.min(1,finite(row.repeatedFailureRate,0)))
+    });
+  }
+  const modeDistribution={};
+  for(const mode of MODES)modeDistribution[mode]=Math.max(0,finite(evaluationSource.modeDistribution?.[mode],0));
+  const comparisonSource=evaluationSource.comparison&&typeof evaluationSource.comparison==='object'?evaluationSource.comparison:{};
+  const comparison=Object.freeze({
+    available:Boolean(comparisonSource.available),
+    sufficient:Boolean(comparisonSource.sufficient),
+    accuracyDelta:comparisonSource.accuracyDelta==null?null:finite(comparisonSource.accuracyDelta,null),
+    recoveryDelta:comparisonSource.recoveryDelta==null?null:finite(comparisonSource.recoveryDelta,null),
+    coverageDelta:comparisonSource.coverageDelta==null?null:finite(comparisonSource.coverageDelta,null),
+    evidenceReason:text(comparisonSource.evidenceReason,80)||'insufficient-evidence'
+  });
+  const evaluation=Object.freeze({
+    version:text(evaluationSource.version,80),
+    sessions:Math.max(0,finite(evaluationSource.sessions,0)),
+    completedSessions:Math.max(0,finite(evaluationSource.completedSessions,0)),
+    sessionCompletionRate:evaluationSource.sessionCompletionRate==null?null:Math.max(0,Math.min(1,finite(evaluationSource.sessionCompletionRate,0))),
+    totalAttempts:Math.max(0,finite(evaluationSource.totalAttempts,0)),
+    accuracy:Math.max(0,Math.min(1,finite(evaluationSource.accuracy,0))),
+    unknownRate:Math.max(0,Math.min(1,finite(evaluationSource.unknownRate,0))),
+    recoveryRate:Math.max(0,Math.min(1,finite(evaluationSource.recoveryRate,0))),
+    repeatedFailureRate:Math.max(0,Math.min(1,finite(evaluationSource.repeatedFailureRate,0))),
+    attributeCoverage:Math.max(0,Math.min(1,finite(evaluationSource.attributeCoverage,0))),
+    averageRecallsPerSession:Math.max(0,finite(evaluationSource.averageRecallsPerSession,0)),
+    modeDistribution:Object.freeze(modeDistribution),
+    attributes:Object.freeze(evaluationAttributes),
+    comparison,
+    evidence:Object.freeze({
+      sessions:Math.max(0,finite(evaluationSource.evidence?.sessions,0)),
+      attempts:Math.max(0,finite(evaluationSource.evidence?.attempts,0)),
+      sufficient:Boolean(evaluationSource.evidence?.sufficient),
+      reason:text(evaluationSource.evidence?.reason,80)||'insufficient-evidence'
+    })
+  });
+  const domainSource=source.domains&&typeof source.domains==='object'?source.domains:{};const domains={};for(const [domain,row] of Object.entries(domainSource))domains[domain]=Object.freeze({domain,domainSchemaVersion:DOMAIN_SCHEMA_VERSION,...aggregateForDomain,...(row&&typeof row==='object'?row:{})});if(!domains.kanji)domains.kanji=Object.freeze({domain:'kanji',domainSchemaVersion:DOMAIN_SCHEMA_VERSION,...aggregateForDomain});return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'stats',domainSchemaVersion:DOMAIN_SCHEMA_VERSION,domains:Object.freeze(domains),totalReviews:Math.max(0,finite(source.totalReviews,0)),nonAgainRate:Math.max(0,Math.min(1,finite(source.nonAgainRate,0))),studiedCount:Math.max(0,finite(source.studiedCount,0)),deckSize:Math.max(0,finite(source.deckSize,0)),longestStreak:Math.max(0,finite(source.longestStreak,0)),currentStreak:Math.max(0,finite(source.currentStreak,0)),leechCount:Math.max(0,finite(source.leechCount,0)),last7:Object.freeze(Array.isArray(source.last7)?source.last7.slice(0,7).map(item=>Object.freeze({label:text(item?.label,30),count:Math.max(0,finite(item?.count,0))})):[]),masteryDistribution,evaluation});
 }
 
 export function buildSessionViewModel(session){

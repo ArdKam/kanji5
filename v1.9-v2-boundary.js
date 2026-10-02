@@ -261,7 +261,74 @@ async function startupSnapshot(){
 }
 let snapshotInFlight=null;async function snapshot(){if(snapshotInFlight)return snapshotInFlight;snapshotInFlight=(async()=>{const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData(Date.now(),false);return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime})})();try{return await snapshotInFlight}finally{snapshotInFlight=null}}
 let statsInFlight=null;
-async function getStats(){if(statsInFlight)return statsInFlight;statsInFlight=(async()=>{const learnerApi=window.__KANJI5_V19_LEARNER_MODEL__;if(learnerApi?.read?.()==null&&learnerApi?.update)await learnerApi.update();return runtimePresentationData(Date.now(),true).stats})();try{return await statsInFlight}finally{statsInFlight=null}}
+async function getStats(){
+  if(statsInFlight)return statsInFlight;
+  statsInFlight=(async()=>{
+    const learnerApi=window.__KANJI5_V19_LEARNER_MODEL__;
+    if(learnerApi?.read?.()==null&&learnerApi?.update)await learnerApi.update();
+    const stats=runtimePresentationData(Date.now(),true).stats;
+    try{
+      await import('./v1.9-learning-evaluation.js');
+      const evaluationApi=window.__KANJI5_V19_EVALUATION__;
+      const report=await evaluationApi?.evaluate?.();
+      if(report){
+        const evaluationCore=await import('./v1.9-learning-evaluation-core.js');
+        const evidence=evaluationCore.evidenceSufficiency(report);
+        const learnerModel=learner()||{};
+        const attributes={};
+        for(const mode of ['meaning','reading','production','vocabulary','context']){
+          const row=report.attributes?.[mode]||{};
+          const modelRow=learnerModel?.attributes?.[mode]||{};
+          attributes[mode]={
+            attempts:Number(row.attempts)||0,
+            accuracy:Number(row.accuracy)||0,
+            recentAccuracy:Number(modelRow.recentAccuracy),
+            retentionRate:report.modeResults?.[mode]?.retentionRate==null?null:Number(report.modeResults[mode].retentionRate)||0,
+            recoveryRate:Number(row.recoveryRate)||0,
+            repeatedFailureRate:Number(row.repeatedFailureRate)||0
+          };
+        }
+        let comparison={available:false,sufficient:false,accuracyDelta:null,recoveryDelta:null,coverageDelta:null,evidenceReason:'no-comparison-data'};
+        const history=state.readSessionHistory?.()||[];
+        const policyRows=history.filter(row=>row&&['adaptive','baseline'].includes(String(row.policy||'')));
+        if(policyRows.length){
+          const compared=evaluationCore.comparePolicies(policyRows);
+          comparison={
+            available:Boolean(compared.available),
+            sufficient:Boolean(compared.sufficient),
+            accuracyDelta:compared.deltas?.accuracy??null,
+            recoveryDelta:compared.deltas?.recoveryRate??null,
+            coverageDelta:compared.sufficient
+              ? Number(compared.groups?.adaptive?.attributeCoverage||0)-Number(compared.groups?.baseline?.attributeCoverage||0)
+              : null,
+            evidenceReason:compared.sufficient?'sufficient':(compared.evidence?.adaptive?.reason||compared.evidence?.baseline?.reason||'insufficient-evidence')
+          };
+        }
+        return {...stats,evaluation:{
+          version:report.version,
+          sessions:Number(report.sessions)||0,
+          completedSessions:Number(report.completedSessions)||0,
+          sessionCompletionRate:Number(report.sessions)?Number(report.completedSessions)/Number(report.sessions):null,
+          totalAttempts:Number(report.totalAttempts)||0,
+          accuracy:Number(report.accuracy)||0,
+          unknownRate:Number(report.unknownRate)||0,
+          recoveryRate:Number(report.recoveryRate)||0,
+          repeatedFailureRate:Number(report.repeatedFailureRate)||0,
+          attributeCoverage:Number(report.attributeCoverage)||0,
+          averageRecallsPerSession:Number(report.averageRecallsPerSession)||0,
+          modeDistribution:report.modeDistribution||{},
+          attributes,
+          comparison,
+          evidence:{sessions:evidence.sessions,attempts:evidence.attempts,sufficient:evidence.sufficient,reason:evidence.reason}
+        }};
+      }
+    }catch(error){
+      window.__KANJI5_EVALUATION_LOAD_DEGRADED__=String(error?.message||error||'unknown');
+    }
+    return stats;
+  })();
+  try{return await statsInFlight}finally{statsInFlight=null}
+}
 async function publishStartupSnapshot(){const viewModel=await startupSnapshot();document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-startup-view-model',{detail:viewModel}));return viewModel}
 async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
 async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}

@@ -202,8 +202,22 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
       <div className="stats-overview stats-advanced-metrics">
         <Metric label={language === "fa" ? "روزهای فعال" : "Active days"} value={formatNumber(activeDays, language)} hint={language === "fa" ? "از ۷ روز" : "of 7 days"} />
         <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={formatNumber(Number(activityAverage.toFixed(1)), language)} hint={language === "fa" ? "در روز" : "per day"} />
-        <Metric label={language === "fa" ? "سررسید فعلی" : "Due now"} value={formatNumber(Number(snapshot.dailySummary?.dueCount) || 0, language)} />
-        <Metric label={language === "fa" ? "مسلط" : "Mastered"} value={formatNumber(Number(mastery.mastered) || 0, language)} />
+        <Metric label={language === "fa" ? "نرخ بازیابی" : "Recovery"} value={formatRate(snapshot.stats?.evaluation?.recoveryRate, language)} />
+        <Metric label={language === "fa" ? "پوشش مهارت‌ها" : "Attribute coverage"} value={formatRate(snapshot.stats?.evaluation?.attributeCoverage, language)} />
+        <Metric label={language === "fa" ? "تکمیل جلسه" : "Session completion"} value={formatRate(snapshot.stats?.evaluation?.sessionCompletionRate, language)} />
+        <Metric label={language === "fa" ? "میانگین فراخوانی" : "Recalls / session"} value={formatNumber(Number((snapshot.stats?.evaluation?.averageRecallsPerSession ?? 0).toFixed(1)), language)} />
+      </div>
+
+      <div className="stats-section-summary" aria-live="polite">
+        <span>
+          {snapshot.stats?.evaluation?.evidence?.sufficient
+            ? (language === "fa"
+              ? `شواهد کافی: ${formatNumber(snapshot.stats?.evaluation?.evidence?.sessions ?? 0, language)} جلسه · ${formatNumber(snapshot.stats?.evaluation?.evidence?.attempts ?? 0, language)} تلاش`
+              : `Sufficient evidence: ${formatNumber(snapshot.stats?.evaluation?.evidence?.sessions ?? 0, language)} sessions · ${formatNumber(snapshot.stats?.evaluation?.evidence?.attempts ?? 0, language)} attempts`)
+            : (language === "fa"
+              ? `شواهد محدود است؛ نرخ‌ها برای قضاوت طولی کافی نیستند.`
+              : `Evidence is limited; longitudinal rates are not yet strong enough to interpret.`)}
+        </span>
       </div>
 
       <div className="stats-skills-list stats-advanced-skill-list">
@@ -217,14 +231,44 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
               <div className="stats-skill-track" aria-hidden="true"><span style={{ width: (Number.isFinite(rate) ? Math.max(0, Math.min(1, rate)) : 0) * 100 + "%" }} /></div>
               <span className="stats-skill-state">
                 {Number.isFinite(attempts) && attempts > 0
-                  ? (language === "fa" ? "اخیر " : "Recent ") + formatRate(skill.recentAccuracy, language) + " · " + formatNumber(attempts, language) + " " + (language === "fa" ? "تلاش" : "attempts") + " · " + stateLabel(skill.state)
+                  ? <>
+                      {(language === "fa" ? "اخیر " : "Recent ") + formatRate(skill.recentAccuracy, language)}
+                      {" · "}
+                      {(language === "fa" ? "بازیابی " : "Recovery ") + formatRate(snapshot.stats?.evaluation?.attributes?.[key]?.recoveryRate, language)}
+                      {" · "}
+                      {(language === "fa" ? "تکرار خطا " : "Repeated failure ") + formatRate(snapshot.stats?.evaluation?.attributes?.[key]?.repeatedFailureRate, language)}
+                      {" · "}
+                      {(language === "fa" ? "تلاش " : "Attempts ") + formatNumber(attempts, language)}
+                      {" · "}
+                      {snapshot.stats?.evaluation?.attributes?.[key]?.retentionRate == null
+                        ? (language === "fa" ? "حفظ: —" : "Retention: —")
+                        : (language === "fa" ? "حفظ " : "Retention ") + formatRate(snapshot.stats?.evaluation?.attributes?.[key]?.retentionRate, language)}
+                      {" · "}
+                      {stateLabel(skill.state)}
+                    </>
                   : language === "fa" ? "داده کافی نیست" : "Not enough data"}
               </span>
             </div>
           );
         })}
       </div>
-      <p className="stats-footnote">{language === "fa" ? "دقت، عملکرد مشاهده‌شده است؛ اطمینان مدل فقط قدرت شواهد را نشان می‌دهد." : "Accuracy is observed performance; model confidence reflects the strength of the evidence."}</p>
+      <div className="stats-section-summary" style={{ marginTop: "0.75rem" }}>
+        <span>{language === "fa" ? "نرخ ناشناخته" : "Unknown"} · {formatRate(snapshot.stats?.evaluation?.unknownRate, language)}</span>
+        <span>{language === "fa" ? "تکرار خطای کل" : "Repeated failure"} · {formatRate(snapshot.stats?.evaluation?.repeatedFailureRate, language)}</span>
+        <span>{language === "fa" ? "جلسه تکمیل‌شده" : "Completed sessions"} · {formatNumber(snapshot.stats?.evaluation?.completedSessions ?? 0, language)}</span>
+      </div>
+
+      {snapshot.stats?.evaluation?.comparison?.available ? (
+        <div className="stats-section-summary" style={{ marginTop: "0.5rem" }}>
+          <span>
+            {snapshot.stats?.evaluation?.comparison?.sufficient
+              ? (language === "fa" ? "مقایسه adaptive با baseline با شواهد کافی در دسترس است." : "Adaptive vs baseline comparison has sufficient evidence.")
+              : (language === "fa" ? "مقایسهٔ adaptive/baseline هنوز شواهد کافی ندارد." : "Adaptive/baseline comparison does not yet have sufficient evidence.")}
+          </span>
+        </div>
+      ) : null}
+
+      <p className="stats-footnote">{language === "fa" ? "دقت، عملکرد مشاهده‌شده است؛ اطمینان مدل فقط قدرت شواهد را نشان می‌دهد. مقایسهٔ adaptive و baseline فقط پس از رسیدن به آستانهٔ شواهد نمایش داده می‌شود." : "Accuracy is observed performance; model confidence reflects evidence strength. Adaptive vs baseline comparisons are interpreted only after the evidence threshold is met."}</p>
     </section>
   );
 }
