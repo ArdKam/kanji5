@@ -3,15 +3,6 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
-const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module => ({ default: module.StrokeOrderViewer })));
-const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
-const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
-const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({ default: module.SettingsDialog })));
-const PracticeHome = lazy(() => import("./PracticeHome").then(module => ({ default: module.PracticeHome })));
-const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({ default: module.GrammarDialog })));
-const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({ default: module.ReadingLabDialog })));
-const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog })));
-const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(module => ({ default: module.HandwritingPractice })));
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -52,6 +43,16 @@ import {
   listKanji,
   listPersonalMnemonics,
 } from "./engine";
+
+const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module => ({ default: module.StrokeOrderViewer })));
+const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
+const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
+const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({ default: module.SettingsDialog })));
+const PracticeHome = lazy(() => import("./PracticeHome").then(module => ({ default: module.PracticeHome })));
+const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({ default: module.GrammarDialog })));
+const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({ default: module.ReadingLabDialog })));
+const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog })));
+const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(module => ({ default: module.HandwritingPractice })));
 
 const fa=(v:number)=>formatNumber(v,getLanguage());
 const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
