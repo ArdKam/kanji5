@@ -24,7 +24,7 @@ async function reachStartingPoint(page) {
 
 test("first-run onboarding is a dedicated full-page guest-first journey", async ({ page }) => {
   const onboarding = await reachStartingPoint(page);
-  await onboarding.getByRole("button", { name: "Start from the beginning", exact: true }).click();
+  await onboarding.getByRole("button", { name: /Start from the beginning/ }).click();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
   await expect(onboarding.getByRole("button", { name: /5 new kanji/, exact: true })).toHaveAttribute("aria-pressed", "true");
@@ -39,7 +39,7 @@ test("first-run onboarding is a dedicated full-page guest-first journey", async 
 
 test("placement path shares the existing kanji diagnostic contract", async ({ page }) => {
   const onboarding = await reachStartingPoint(page);
-  await onboarding.getByRole("button", { name: "Check my kanji level", exact: true }).click();
+  await onboarding.getByRole("button", { name: /Check my kanji level/ }).click();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.locator(".kanji5-onboarding-stimulus")).toBeVisible({ timeout: 20000 });
 
@@ -52,7 +52,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
 
   await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText("N2");
-  await onboarding.getByRole("button", { name: "Use this starting point", exact: true }).click();
+  await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
 });
 
