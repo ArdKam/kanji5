@@ -304,11 +304,13 @@ async function syncNow() {
       } catch (error) {
         console.warn('Kanji 5 sync attempt failed', error);
         if (attempt === MAX_SYNC_ATTEMPTS) {
+          window.__KANJI5_OBSERVABILITY__?.capture?.('sync-failure',error,{attempts:MAX_SYNC_ATTEMPTS,code:String(error?.code||'')});
           setSyncStatus('error', 'SYNC_FAILED');
           return;
         }
       }
     }
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-conflict',{message:'SYNC_CONFLICT'},{attempts:MAX_SYNC_ATTEMPTS});
     setSyncStatus('error', 'SYNC_CONFLICT');
   });
 }
