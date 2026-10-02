@@ -92,6 +92,35 @@ test('Advanced statistics stay collapsed until explicitly opened',async({page})=
 });
 
 
+test('Advanced statistics expose deterministic efficacy evidence without inventing a comparison',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at='2026-09-15T00:00:00.000Z';
+    localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify([
+      {sessionId:'eff-1',endedAt:at,modeResults:{meaning:{attempts:3,correct:2,lastCorrect:true},reading:{attempts:2,correct:1,lastCorrect:false},production:{attempts:1,correct:1}}},
+      {sessionId:'eff-2',endedAt:at,modeResults:{meaning:{attempts:2,correct:2,lastCorrect:true},reading:{attempts:2,correct:2,lastCorrect:true},production:{attempts:1,correct:1,lastCorrect:true}}}
+    ]));
+    localStorage.setItem('kanji5-v1.5-components',JSON.stringify({v19LearnerEvidence:{
+      学:[
+        {at:'2026-09-14T00:00:00.000Z',mode:'reading',outcome:'wrong',taskId:'read-1'},
+        {at:'2026-09-15T00:00:00.000Z',mode:'reading',outcome:'correct',taskId:'read-1',retryOf:'read-1',recovery:true,recoveryAttempt:1}
+      ]
+    }}));
+  });
+  await page.reload();
+  const dialog=await openStats(page);
+  const trigger=dialog.locator('.stats-advanced-trigger');
+  await trigger.click();
+  const advanced=dialog.locator('.stats-advanced');
+  await expect(advanced).toBeVisible();
+  await expect(advanced).toContainText('Recovery');
+  await expect(advanced).toContainText('Attribute coverage');
+  await expect(advanced).toContainText('Session completion');
+  await expect(advanced).toContainText('Unknown');
+  await expect(advanced).toContainText('Repeated failure');
+  await expect(advanced).toContainText('Not enough data').or.toContainText('Sufficient evidence');
+});
+
 test('Statistics uses persisted kanji exposure for studied coverage',async({page})=>{
   await clean(page);
   await page.evaluate(()=>{
