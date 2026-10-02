@@ -4,6 +4,7 @@ import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMne
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { PracticeHome } from "./PracticeHome";
+import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -52,7 +53,6 @@ const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({ d
 const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({ default: module.GrammarDialog })));
 const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({ default: module.ReadingLabDialog })));
 const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog })));
-const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(module => ({ default: module.HandwritingPractice })));
 
 const fa=(v:number)=>formatNumber(v,getLanguage());
 const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
@@ -994,11 +994,7 @@ function App(){
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
       <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
-      {snapshot?.exercise?.character?
-        <Suspense fallback={<div className="loading" role="status">{t("handwritingPractice",language)}</div>}>
-          <PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>
-        </Suspense>
-        :null}
+      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
     <PracticeHome
