@@ -20,6 +20,9 @@ for(const name of deferredSurfaces){
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),'Learning startup must not eagerly import '+name);
   mustContain(app,'const '+name+' = lazy(() => import("./'+name+'")','Learning startup must lazy-load '+name);
 }
+mustContain(app,'changeExperience("practice");setPracticeMode("home");void action(async()=>{await startPracticeExperience()})','Active Recall tab transition must set its presentation mode before async startup to avoid stale reset races');
+assert.doesNotMatch(app,/startPracticeExperience();setPracticeMode("home")/,'Active Recall startup must not reset presentation mode after async startup');
+
 mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("dictionaryLoading",language)}</div>}>','Secondary surfaces must have a bounded loading fallback');
 mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("strokeOrderLoading",getLanguage())}</div>}>','Stroke Order must load only when its page is selected');
 
