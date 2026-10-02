@@ -15,7 +15,6 @@ import {
   type PlacementQuestion,
   type StartingPointChoice,
 } from "./onboarding-model";
-import "./onboarding.css";
 
 export type OnboardingFlowProps = {
   language: Language;
