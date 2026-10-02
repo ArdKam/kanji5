@@ -533,7 +533,7 @@ test('React surfaces an actionable state when the shipped presentation chunk fai
   await page.goto('/');
   await expect(page.locator('#kanji5-startup-shell')).toHaveClass(/is-error/,{timeout:10000});
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
-  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('کانجی‌یار باز نشد');
+  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('RINEMI باز نشد');
   await expect(page.locator('.kanji5-startup-error-copy')).toContainText('یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد.');
   await expect(page.locator('.kanji5-startup-error-action')).toHaveText('بارگذاری دوباره');
 });
