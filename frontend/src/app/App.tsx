@@ -1,8 +1,9 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
+import { StrokeOrderViewer } from "./StrokeOrderViewer";
 import { DictionaryPage } from "./DictionaryPage";
 import { StatsDialog } from "./StatsDialog";
 import { SettingsDialog } from "./SettingsDialog";
@@ -10,8 +11,7 @@ import { PracticeHome } from "./PracticeHome";
 import { GrammarDialog } from "./GrammarDialog";
 import { ReadingLabDialog } from "./ReadingLabDialog";
 import { MnemonicsDialog } from "./MnemonicsDialog";
-const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module => ({ default: module.StrokeOrderViewer })));
-const HandwritingPractice = lazy(() => import("./HandwritingPractice").then(module => ({ default: module.HandwritingPractice })));
+import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -483,11 +483,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             </div>
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
-                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?
-  <Suspense fallback={<div className="loading" role="status">{t("strokeOrderLoading",getLanguage())}</div>}>
-    <StrokeOrderViewer character={card.character} language={getLanguage()}/>
-  </Suspense>
-  :null}</div>
+                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
               </div>
             </div>
           </div>
@@ -987,11 +983,7 @@ function App(){
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
       <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
-      {snapshot?.exercise?.character?
-  <Suspense fallback={<div className="loading" role="status">{t("handwritingPractice",language)}</div>}>
-    <PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>
-  </Suspense>
-  :null}
+      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
     <PracticeHome
