@@ -13,6 +13,7 @@ export default defineConfig({
     cssCodeSplit: false,
     rolldownOptions: {
       output: {
+        chunkFileNames: "assets/[name].js",
         codeSplitting: {
           groups: [
             {
