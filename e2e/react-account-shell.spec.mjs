@@ -285,3 +285,78 @@ test('persisted learner state survives a fresh browser context', async ({ page }
     await freshContext.close();
   }
 });
+
+
+test('guest state survives a later account sign-in', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-v1', JSON.stringify({
+      settings: { dailyGoal: 29 },
+      today: '2026-10-02',
+      todayNew: 1,
+      todayReviewCount: 2,
+      goalCelebrated: false,
+      streak: { current: 1, longest: 2, lastActiveDate: '2026-10-02' }
+    }));
+  });
+  await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
+  await page.route('**/supabase-sync.js', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      (() => {
+        let snapshot = {
+          status: 'signed-out',
+          user: null,
+          syncStatus: 'idle',
+          error: null,
+          recoveryPending: false,
+          syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null }
+        };
+        const listeners = new Set();
+        const notify = () => listeners.forEach(listener => listener({ ...snapshot, user: snapshot.user && { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }));
+        window.__KANJI5_ACCOUNT__ = {
+          getState: () => ({ ...snapshot, user: snapshot.user && { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }),
+          subscribe: listener => { listeners.add(listener); listener(window.__KANJI5_ACCOUNT__.getState()); return () => listeners.delete(listener); },
+          signInWithGoogle: async () => {},
+          signInWithPassword: async () => {
+            snapshot = {
+              ...snapshot,
+              status: 'signed-in',
+              user: { id: 'later-user', email: 'later@example.com', name: 'Later User', avatarUrl: null },
+              syncStatus: 'synced',
+              syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: new Date().toISOString() }
+            };
+            notify();
+          },
+          signUpWithPassword: async () => ({ needsEmailConfirmation: false }),
+          updateProfile: async () => {},
+          updatePassword: async () => {},
+          sendMagicLink: async () => {},
+          sendPasswordReset: async () => {},
+          setPassword: async () => {},
+          signOut: async () => {
+            snapshot = { ...snapshot, status: 'signed-out', user: null, syncStatus: 'idle' };
+            notify();
+          },
+          syncNow: async () => {},
+          getSyncSummary: () => ({ ...snapshot.syncSummary })
+        };
+      })();
+    `
+  }));
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  const dialog = page.locator('.account-dialog:visible');
+  await expect(dialog).toBeVisible();
+  await dialog.locator('input[name="email"]').fill('later@example.com');
+  await dialog.locator('input[name="password"]').fill('StrongTestPassword123!');
+  await dialog.getByRole('button', { name: /Sign in with email|ورود با ایمیل/ }).click();
+  await expect(page.locator('.account-dialog:visible')).toHaveCount(0);
+  const accountButton = page.locator('.account-button:visible');
+  await expect(accountButton).toContainText('Later User');
+  await accountButton.click();
+  await expect(page.locator('.account-dialog:visible .account-identity-card')).toContainText('later@example.com');
+  const main = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1') || '{}'));
+  expect(main.settings.dailyGoal).toBe(29);
+});
