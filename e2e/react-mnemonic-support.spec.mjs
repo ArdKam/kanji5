@@ -2,6 +2,15 @@ test.use({ serviceWorkers: "allow" });
 
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
+    localStorage.setItem("kanji5-onboarding-complete", "complete");
+    localStorage.removeItem("kanji5-onboarding-progress-v2");
+  });
+});
+
 async function goToMnemonicSupportPage(card) {
   const pages = card.locator(".learning-back-page");
   const count = await pages.count();
