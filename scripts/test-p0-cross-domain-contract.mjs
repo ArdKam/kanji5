@@ -27,7 +27,7 @@ assert.equal(session.modeResults.vocabulary.skill,'word-completion');
 const exercise=buildExerciseViewModel({mode:'vocabulary',contentId:'vocabulary:abc'});
 assert.equal(exercise.domain,'kanji');
 assert.equal(exercise.skill,'word-completion');
-const feedback=buildFeedbackViewModel({mode:'context',contentId:'sentence:10',outcome:'correct'});
+const feedback=buildFeedbackViewModel({mode:'context',contentId:'context:tatoeba:10',outcome:'correct'});
 assert.equal(feedback.domain,'kanji');
 assert.equal(feedback.skill,'context');
 
@@ -46,7 +46,7 @@ try{
   const words=await network.fetchWords('学');
   assert.match(words[0].contentId,/^vocabulary:kanjiapi\.dev:[0-9a-f]{8}$/);
   const sentences=await network.fetchContextSentences('学');
-  assert.equal(sentences[0].contentId,'sentence:123');
+  assert.equal(sentences[0].contentId,'context:tatoeba:123');
   assert.equal(sentences[0].id,123);
 }finally{globalThis.fetch=originalFetch}
 
