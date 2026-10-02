@@ -3,6 +3,7 @@ import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
+import { PracticeHome } from "./PracticeHome";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -48,7 +49,6 @@ const StrokeOrderViewer = lazy(() => import("./StrokeOrderViewer").then(module =
 const DictionaryPage = lazy(() => import("./DictionaryPage").then(module => ({ default: module.DictionaryPage })));
 const StatsDialog = lazy(() => import("./StatsDialog").then(module => ({ default: module.StatsDialog })));
 const SettingsDialog = lazy(() => import("./SettingsDialog").then(module => ({ default: module.SettingsDialog })));
-const PracticeHome = lazy(() => import("./PracticeHome").then(module => ({ default: module.PracticeHome })));
 const GrammarDialog = lazy(() => import("./GrammarDialog").then(module => ({ default: module.GrammarDialog })));
 const ReadingLabDialog = lazy(() => import("./ReadingLabDialog").then(module => ({ default: module.ReadingLabDialog })));
 const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog })));
@@ -1001,26 +1001,24 @@ function App(){
         :null}
     </>
   ) : (
-    <Suspense fallback={<div className="loading" role="status">{t("activeRecall",language)}</div>}>
-      <PracticeHome
-        language={language}
-        busy={busy}
-        onStartActiveRecall={async()=>{
-          await action(async()=>{
-            await startExercise();
-            setPracticeMode("exercise");
-          });
-        }}
-        onStartCustomStudy={async(filter: CustomStudyFilter)=>{
-          const result=await action(async()=>{
-            await clearTransient();
-            return await startCustomStudy(filter);
-          });
-          if(result?.started)setExperience("review");
-          return Boolean(result?.started);
-        }}
-      />
-    </Suspense>
+    <PracticeHome
+      language={language}
+      busy={busy}
+      onStartActiveRecall={async()=>{
+        await action(async()=>{
+          await startExercise();
+          setPracticeMode("exercise");
+        });
+      }}
+      onStartCustomStudy={async(filter: CustomStudyFilter)=>{
+        const result=await action(async()=>{
+          await clearTransient();
+          return await startCustomStudy(filter);
+        });
+        if(result?.started)setExperience("review");
+        return Boolean(result?.started);
+      }}
+    />
   )
 ) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}
