@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const source=fs.readFileSync('v2-observability.js','utf8');
+assert.match(source,/kanji5-diagnostics-v1/);
+assert.match(source,/uncaught-error/);
+assert.match(source,/unhandled-rejection/);
+assert.match(source,/release:buildId\(\)/);
+assert.match(source,/userAgent/);
+assert.match(source,/slice\(-LIMIT\)/);
+assert.doesNotMatch(source,/console\.log|console\.debug/);
+console.log('Kanji 5 observability contract passed.');
