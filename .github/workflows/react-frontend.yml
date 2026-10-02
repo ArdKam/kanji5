@@ -1,4 +1,5 @@
 name: React presentation build
+# R4 storage seam release coverage
 # Release gate includes traditional radical data and contract coverage.
 
 on:
@@ -21,6 +22,15 @@ on:
       - "scripts/test-floating-experience-nav.mjs"
       - "kanji-radicals.json"
       - "kanji-radical-map.json"
+      - "v1.5-state.js"
+      - "review-runtime.js"
+      - "v2-*.js"
+      - "sw.js"
+      - "app-bootstrap.js"
+      - "index.html"
+      - "manifest.webmanifest"
+      - "icon*.svg"
+      - "docs/**"
       - "frontend/src/app/mnemonic-support.ts"
       - "frontend/src/app/MnemonicSupport.tsx"
       - "frontend/src/app/mnemonic-support.css"
@@ -44,9 +54,7 @@ on:
       - "e2e/react-account-shell.spec.mjs"
       - "e2e/stats-dialog.spec.mjs"
       - "index.html"
-      - "app-bootstrap.js"
       - "react-entry.js"
-      - "sw.js"
       - "account-fallback.js"
       - "v1.3-*.js"
       - "v1.4-*.js"
@@ -55,7 +63,6 @@ on:
       - "v1.7-*.js"
       - "v1.8-*.js"
       - "v1.9-*.js"
-      - "review-runtime.js"
       - "v2-observability.js"
       - "v2-scheduling-core.js"
       - "e2e/react-browser-compat.spec.mjs"
