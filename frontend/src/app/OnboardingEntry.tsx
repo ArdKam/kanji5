@@ -21,6 +21,8 @@ import {
   type Settings,
   type Snapshot,
 } from "./engine";
+void import("./onboarding/onboarding.css");
+
 import type {
   OnboardingCompletion,
   OnboardingDraft,
