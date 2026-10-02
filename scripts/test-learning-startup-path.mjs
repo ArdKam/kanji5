@@ -14,8 +14,9 @@ const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
 mustContain(app,'import { lazy, Suspense,','React startup path may defer secondary surfaces without changing the Learning-first renderer');
 assert.match(app,/import \{ PracticeHome \} from/, 'Active Recall launcher remains eager for the first interaction path');
+assert.match(app,/import \{ HandwritingPractice \} from/, 'Handwriting practice remains eager because it participates in the Active Recall render path');
 
-const deferredSurfaces=['StrokeOrderViewer','DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice'];
+const deferredSurfaces=['StrokeOrderViewer','DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog'];
 for(const name of deferredSurfaces){
   assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),'Learning startup must not eagerly import '+name);
   mustContain(app,'const '+name+' = lazy(() => import("./'+name+'")','Learning startup must lazy-load '+name);
