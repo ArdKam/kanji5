@@ -5,7 +5,7 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   await page.goto('/');
   await expect(page.locator('.account-button:visible')).toHaveCount(1, { timeout: 15000 });
   await page.locator('.account-button:visible').click();
-  await expect(page.locator('.account-dialog:visible')).toBeVisible();
+  await expect(page.locator('.account-dialog:visible')).toHaveCount(1);
   const accountDialog = page.locator('.account-dialog:visible');
   await expect(accountDialog).not.toHaveClass(/secondary-page-dialog/);
   expect(await accountDialog.evaluate((el) => getComputedStyle(el).position)).toBe('fixed');
@@ -161,4 +161,202 @@ test('signed-in account hub renders one identity surface, sync metrics, and sepa
   await expect(page.locator('input[name="currentPassword"]')).toBeVisible();
   await expect(page.locator('input[name="newPassword"]')).toBeVisible();
   await expect(page.locator('input[name="confirmPassword"]')).toBeVisible();
+});
+
+test('guest-first onboarding keeps account optional and leads directly into learning', async ({ page }) => {
+  await page.addInitScript(() => {
+    for (const key of Object.keys(localStorage)) if (key.startsWith('kanji5-')) localStorage.removeItem(key);
+    sessionStorage.clear();
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  const onboarding = page.locator('.public-onboarding');
+  await expect(onboarding).toBeVisible();
+  await expect(onboarding).toContainText(/Sign-in is optional|ورود اختیاری است|حساب اختیاری/);
+  await expect(onboarding).toContainText(/learning|یادگیری/);
+  await expect(onboarding.getByRole('button', { name: /Start learning today|شروع یادگیری امروز/ })).toBeVisible();
+  await onboarding.getByRole('button', { name: /Start learning today|شروع یادگیری امروز/ }).click();
+  await expect(onboarding).toHaveCount(0);
+  await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 10000 });
+});
+
+test('logout leaves local learner state untouched', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-v1', JSON.stringify({
+      settings: { dailyGoal: 37 },
+      today: '2026-10-02',
+      todayNew: 2,
+      todayReviewCount: 3,
+      goalCelebrated: false,
+      streak: { current: 2, longest: 4, lastActiveDate: '2026-10-02' }
+    }));
+    localStorage.setItem('kanji5-v1-cards', JSON.stringify({ 'kanji:test': { card: { due: '2026-10-02T00:00:00.000Z' } } }));
+  });
+  await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
+  await page.route('**/supabase-sync.js', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      (() => {
+        let snapshot = {
+          status: 'signed-in',
+          user: { id: 'user-logout-test', email: 'logout@example.com', name: 'Logout Test', avatarUrl: null },
+          syncStatus: 'synced',
+          error: null,
+          recoveryPending: false,
+          syncSummary: { activeCards: 1, reviews: 3, personalMnemonics: 0, lastSyncedAt: new Date().toISOString() }
+        };
+        window.__KANJI5_ACCOUNT__ = {
+          getState: () => ({ ...snapshot, user: { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }),
+          subscribe: listener => { listener(window.__KANJI5_ACCOUNT__.getState()); return () => {}; },
+          signInWithGoogle: async () => {},
+          signInWithPassword: async () => {},
+          signUpWithPassword: async () => ({ needsEmailConfirmation: false }),
+          updateProfile: async () => {},
+          updatePassword: async () => {},
+          sendMagicLink: async () => {},
+          sendPasswordReset: async () => {},
+          setPassword: async () => {},
+          signOut: async () => { snapshot = { ...snapshot, status: 'signed-out', user: null, syncStatus: 'idle' }; },
+          syncNow: async () => {},
+          getSyncSummary: () => ({ ...snapshot.syncSummary })
+        };
+      })();
+    `
+  }));
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  await expect(page.locator('.account-dialog:visible')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await page.waitForTimeout(50);
+  const state = await page.evaluate(() => ({
+    main: localStorage.getItem('kanji5-v1'),
+    cards: localStorage.getItem('kanji5-v1-cards')
+  }));
+  expect(JSON.parse(state.main || '{}').settings.dailyGoal).toBe(37);
+  expect(Object.keys(JSON.parse(state.cards || '{}'))).toContain('kanji:test');
+});
+
+
+test('account copy makes sync benefit and guest path explicit', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'en'));
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  const auth = page.locator('.account-auth-surface');
+  await expect(auth).toBeVisible();
+  await expect(auth).toContainText('sync your progress across devices');
+  await expect(auth).toContainText('keep learning without an account on this device');
+});
+
+test('persisted learner state survives a fresh browser context', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-v1', JSON.stringify({
+      settings: { dailyGoal: 41 },
+      today: '2026-10-02',
+      todayNew: 4,
+      todayReviewCount: 5,
+      goalCelebrated: false,
+      streak: { current: 3, longest: 6, lastActiveDate: '2026-10-02' }
+    }));
+    localStorage.setItem('kanji5-v1-cards', JSON.stringify({
+      'kanji:restart-test': { card: { due: '2026-10-02T00:00:00.000Z' } }
+    }));
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  const browser = page.context().browser();
+  if (!browser) throw new Error('Browser instance unavailable for restart simulation');
+  const storageState = await page.context().storageState();
+  const freshContext = await browser.newContext({ storageState });
+  try {
+    const freshPage = await freshContext.newPage();
+    await freshPage.goto('/');
+    await expect(freshPage.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+    const state = await freshPage.evaluate(() => ({
+      main: localStorage.getItem('kanji5-v1'),
+      cards: localStorage.getItem('kanji5-v1-cards')
+    }));
+    expect(JSON.parse(state.main || '{}').settings.dailyGoal).toBe(41);
+    expect(Object.keys(JSON.parse(state.cards || '{}'))).toContain('kanji:restart-test');
+  } finally {
+    await freshContext.close();
+  }
+});
+
+
+test('guest state survives a later account sign-in', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-v1', JSON.stringify({
+      settings: { dailyGoal: 29 },
+      today: '2026-10-02',
+      todayNew: 1,
+      todayReviewCount: 2,
+      goalCelebrated: false,
+      streak: { current: 1, longest: 2, lastActiveDate: '2026-10-02' }
+    }));
+  });
+  await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
+  await page.route('**/supabase-sync.js', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      (() => {
+        let snapshot = {
+          status: 'signed-out',
+          user: null,
+          syncStatus: 'idle',
+          error: null,
+          recoveryPending: false,
+          syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null }
+        };
+        const listeners = new Set();
+        const notify = () => listeners.forEach(listener => listener({ ...snapshot, user: snapshot.user && { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }));
+        window.__KANJI5_ACCOUNT__ = {
+          getState: () => ({ ...snapshot, user: snapshot.user && { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }),
+          subscribe: listener => { listeners.add(listener); listener(window.__KANJI5_ACCOUNT__.getState()); return () => listeners.delete(listener); },
+          signInWithGoogle: async () => {},
+          signInWithPassword: async () => {
+            snapshot = {
+              ...snapshot,
+              status: 'signed-in',
+              user: { id: 'later-user', email: 'later@example.com', name: 'Later User', avatarUrl: null },
+              syncStatus: 'synced',
+              syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: new Date().toISOString() }
+            };
+            notify();
+          },
+          signUpWithPassword: async () => ({ needsEmailConfirmation: false }),
+          updateProfile: async () => {},
+          updatePassword: async () => {},
+          sendMagicLink: async () => {},
+          sendPasswordReset: async () => {},
+          setPassword: async () => {},
+          signOut: async () => {
+            snapshot = { ...snapshot, status: 'signed-out', user: null, syncStatus: 'idle' };
+            notify();
+          },
+          syncNow: async () => {},
+          getSyncSummary: () => ({ ...snapshot.syncSummary })
+        };
+      })();
+    `
+  }));
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  const dialog = page.locator('.account-dialog:visible');
+  await expect(dialog).toBeVisible();
+  await dialog.locator('input[name="email"]').fill('later@example.com');
+  await dialog.locator('input[name="password"]').fill('StrongTestPassword123!');
+  await dialog.getByRole('button', { name: /Sign in with email|ورود با ایمیل/ }).click();
+  await expect(page.locator('.account-dialog:visible')).toHaveCount(0);
+  const accountButton = page.locator('.account-button:visible');
+  await expect(accountButton).toContainText('Later User');
+  await accountButton.click();
+  await expect(page.locator('.account-dialog:visible .account-identity-card')).toContainText('later@example.com');
+  const main = await page.evaluate(() => JSON.parse(localStorage.getItem('kanji5-v1') || '{}'));
+  expect(main.settings.dailyGoal).toBe(29);
 });

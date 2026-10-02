@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`a8cc3f340d8005fbcca03b52831ea91e0f64e53d\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, and the completed Kanji UX foundation slices described below.
+> **Implementation baseline reviewed:** \`main\` at commit \`98253356fa531ff977e08c05b76846c1f9e4d7b7\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, and the completed Kanji UX foundation slices described below.
 >
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -165,7 +165,7 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 
 # 3. Current baseline and already-completed foundations
 
-The current \`main\` baseline is commit \`a8cc3f340d8005fbcca03b52831ea91e0f64e53d\`. Its implementation history immediately before the roadmap documentation includes:
+The current \`main\` baseline is commit \`98253356fa531ff977e08c05b76846c1f9e4d7b7\`. Its implementation history immediately before the roadmap documentation includes:
 
 - \`0a0df45\` — D5 context migration and offline cross-domain dependency precaching.
 - \`75b9cb4\` — Stats learning-efficacy evidence surface.
