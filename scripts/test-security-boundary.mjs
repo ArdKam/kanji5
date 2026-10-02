@@ -23,5 +23,7 @@ assert.match(runtime,/escapeHtml\(x\.reading\)/);
 
 const config=fs.readFileSync('supabase-config.js','utf8');
 assert.match(config,/anonKey/);
-const anonKeyMatch=config.match(/anonKey:\s*['\"]([^'\"]+)['\"]/);\nassert.ok(anonKeyMatch,'Supabase publishable anonKey is missing');\nassert.doesNotMatch(anonKeyMatch[1],/service_role|service-role|SUPABASE_SERVICE_ROLE/i);
+const anonKeyMatch=config.match(/anonKey:\s*["']([^"']+)["']/);
+assert.ok(anonKeyMatch,'Supabase publishable anonKey is missing');
+assert.doesNotMatch(anonKeyMatch[1],/service_role|service-role|SUPABASE_SERVICE_ROLE/i);
 console.log('Kanji 5 public security boundary passed.');
