@@ -1825,8 +1825,8 @@ The roadmap has two levels: **remaining Kanji hardening** and **domain expansion
 
 ### Current execution order — 2026-10-02
 
-**0. Release Integrity final verification**
-→ deploy the latest `main` release, verify live artifact/cache/offline behavior, and capture representative-device performance evidence
+**0. Release Integrity final verification — CURRENT**
+→ capture representative-device performance evidence and complete the broader live production smoke matrix; cache/stale-client/offline verification is already evidenced on current `main`
 
 **1. Phase R — Public Product Readiness**
 → positioning, onboarding, guest-first accounts, data safety, backup/restore hardening, PWA, offline, browser compatibility, i18n, observability, security, privacy/legal, help, feedback, beta/release gate
