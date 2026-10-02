@@ -70,6 +70,11 @@ export function OnboardingEntry({
 
   useEffect(() => {
     let active = true;
+    if (progress?.draft.startingPoint !== "assess") {
+      setPlacementLoading(false);
+      setPlacementError("");
+      return () => { active = false; };
+    }
     setPlacementLoading(true);
     setPlacementError("");
     void listKanji()
@@ -96,7 +101,7 @@ export function OnboardingEntry({
     return () => {
       active = false;
     };
-  }, [language, placementRetry]);
+  }, [language, placementRetry, progress?.draft.startingPoint]);
 
   const handleProgressChange = useCallback((next: OnboardingProgress) => {
     setProgress(next);
