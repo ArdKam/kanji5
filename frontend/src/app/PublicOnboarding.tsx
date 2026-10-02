@@ -72,28 +72,28 @@ export function PublicOnboarding({
 
   return (
     <section className="surface card public-onboarding" aria-labelledby="public-onboarding-title">
-      <div className="public-onboarding-copy">
+      <div>
         <p className="eyebrow red">{t("onboardingEyebrow", language)}</p>
         <h2 id="public-onboarding-title">{t("onboardingTitle", language)}</h2>
-        <p>{t("onboardingIntro", language)}</p>
-        <div className="public-onboarding-loop" aria-label={t("learningLoop", language)}>
-          <strong>{t("learningLoop", language)}</strong>
-          <span>{t("learning", language)}</span><i aria-hidden="true">→</i>
-          <span>{t("activeRecall", language)}</span><i aria-hidden="true">→</i>
-          <span>{t("learningReviewLabel", language)}</span>
+        <p className="subtitle">{t("onboardingIntro", language)}</p>
+        <p className="eyebrow">{t("learningLoop", language)}</p>
+        <div className="actions" aria-label={t("learningLoop", language)}>
+          <span className="badge">{t("learning", language)}</span><span aria-hidden="true">→</span>
+          <span className="badge">{t("activeRecall", language)}</span><span aria-hidden="true">→</span>
+          <span className="badge">{t("learningReviewLabel", language)}</span>
         </div>
       </div>
 
-      <div className="public-onboarding-goal">
-        <div>
-          <strong>{t("onboardingGoalTitle", language)}</strong>
-          <span>{t("onboardingGoalHint", language)}</span>
-        </div>
-        <div className="public-onboarding-goal-options" role="group" aria-label={t("dailyGoal", language)}>
+      <div className="setting-control-row">
+        <span className="setting-copy">
+          <span className="setting-label">{t("onboardingGoalTitle", language)}</span>
+          <span className="setting-description">{t("onboardingGoalHint", language)}</span>
+        </span>
+        <div className="actions" role="group" aria-label={t("dailyGoal", language)}>
           {[10, 20, 30].map(value => (
             <button
               key={value}
-              className={"button secondary" + (dailyGoal === value ? " is-selected" : "")}
+              className={"button secondary" + (dailyGoal === value ? " active" : "")}
               type="button"
               disabled={busy || savingGoal}
               aria-pressed={dailyGoal === value}
@@ -105,7 +105,7 @@ export function PublicOnboarding({
         </div>
       </div>
 
-      <div className="public-onboarding-actions">
+      <div className="actions">
         <button className="button primary" type="button" disabled={busy} onClick={() => void start()}>
           {t("onboardingStart", language)}
         </button>
@@ -117,7 +117,7 @@ export function PublicOnboarding({
         </button>
       </div>
 
-      <p className="public-onboarding-footnote">{t("guestModeHint", language)}</p>
+      <p className="subtitle">{t("guestModeHint", language)}</p>
     </section>
   );
 }
