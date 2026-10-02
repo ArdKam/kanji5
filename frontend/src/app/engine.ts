@@ -106,6 +106,42 @@ export type Snapshot = {
       average?: number;
       total?: number;
     };
+    evaluation?: {
+      version?: string;
+      sessions?: number;
+      completedSessions?: number;
+      sessionCompletionRate?: number | null;
+      totalAttempts?: number;
+      accuracy?: number;
+      unknownRate?: number;
+      recoveryRate?: number;
+      repeatedFailureRate?: number;
+      attributeCoverage?: number;
+      averageRecallsPerSession?: number;
+      modeDistribution?: Record<string, number>;
+      attributes?: Record<string, {
+        attempts?: number;
+        accuracy?: number;
+        recentAccuracy?: number;
+        retentionRate?: number | null;
+        recoveryRate?: number;
+        repeatedFailureRate?: number;
+      }>;
+      comparison?: {
+        available?: boolean;
+        sufficient?: boolean;
+        accuracyDelta?: number | null;
+        recoveryDelta?: number | null;
+        coverageDelta?: number | null;
+        evidenceReason?: string;
+      };
+      evidence?: {
+        sessions?: number;
+        attempts?: number;
+        sufficient?: boolean;
+        reason?: string;
+      };
+    };
   };
   settings?: Settings;
 };
