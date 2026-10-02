@@ -162,3 +162,79 @@ test('signed-in account hub renders one identity surface, sync metrics, and sepa
   await expect(page.locator('input[name="newPassword"]')).toBeVisible();
   await expect(page.locator('input[name="confirmPassword"]')).toBeVisible();
 });
+
+test('guest-first onboarding keeps account optional and leads directly into learning', async ({ page }) => {
+  await page.addInitScript(() => {
+    for (const key of Object.keys(localStorage)) if (key.startsWith('kanji5-')) localStorage.removeItem(key);
+    sessionStorage.clear();
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  const onboarding = page.locator('.public-onboarding');
+  await expect(onboarding).toBeVisible();
+  await expect(onboarding).toContainText(/Sign-in is optional|ورود اختیاری است|حساب اختیاری/);
+  await expect(onboarding).toContainText(/learning|یادگیری/);
+  await expect(onboarding.getByRole('button', { name: /Start learning today|شروع یادگیری امروز/ })).toBeVisible();
+  await onboarding.getByRole('button', { name: /Start learning today|شروع یادگیری امروز/ }).click();
+  await expect(onboarding).toHaveCount(0);
+  await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 10000 });
+});
+
+test('logout leaves local learner state untouched', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-v1', JSON.stringify({
+      settings: { dailyGoal: 37 },
+      today: '2026-10-02',
+      todayNew: 2,
+      todayReviewCount: 3,
+      goalCelebrated: false,
+      streak: { current: 2, longest: 4, lastActiveDate: '2026-10-02' }
+    }));
+    localStorage.setItem('kanji5-v1-cards', JSON.stringify({ 'kanji:test': { card: { due: '2026-10-02T00:00:00.000Z' } } }));
+  });
+  await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
+  await page.route('**/supabase-sync.js', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      (() => {
+        let snapshot = {
+          status: 'signed-in',
+          user: { id: 'user-logout-test', email: 'logout@example.com', name: 'Logout Test', avatarUrl: null },
+          syncStatus: 'synced',
+          error: null,
+          recoveryPending: false,
+          syncSummary: { activeCards: 1, reviews: 3, personalMnemonics: 0, lastSyncedAt: new Date().toISOString() }
+        };
+        window.__KANJI5_ACCOUNT__ = {
+          getState: () => ({ ...snapshot, user: { ...snapshot.user }, syncSummary: { ...snapshot.syncSummary } }),
+          subscribe: listener => { listener(window.__KANJI5_ACCOUNT__.getState()); return () => {}; },
+          signInWithGoogle: async () => {},
+          signInWithPassword: async () => {},
+          signUpWithPassword: async () => ({ needsEmailConfirmation: false }),
+          updateProfile: async () => {},
+          updatePassword: async () => {},
+          sendMagicLink: async () => {},
+          sendPasswordReset: async () => {},
+          setPassword: async () => {},
+          signOut: async () => { snapshot = { ...snapshot, status: 'signed-out', user: null, syncStatus: 'idle' }; },
+          syncNow: async () => {},
+          getSyncSummary: () => ({ ...snapshot.syncSummary })
+        };
+      })();
+    `
+  }));
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  await expect(page.locator('.account-dialog:visible')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await page.waitForTimeout(50);
+  const state = await page.evaluate(() => ({
+    main: localStorage.getItem('kanji5-v1'),
+    cards: localStorage.getItem('kanji5-v1-cards')
+  }));
+  expect(JSON.parse(state.main || '{}').settings.dailyGoal).toBe(37);
+  expect(Object.keys(JSON.parse(state.cards || '{}'))).toContain('kanji:test');
+});
