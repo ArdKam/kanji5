@@ -102,5 +102,5 @@ test('Statistics uses persisted kanji exposure for studied coverage',async({page
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   const dialog=await openStats(page);
   await expect(dialog.locator('.stats-overview-primary')).toContainText('۱ / ۲۱۳۶');
-  await expect(dialog.locator('.stats-overview')).toContainText('0%');
+  await expect(dialog.locator('.stats-overview')).toContainText('۰%');
 });
