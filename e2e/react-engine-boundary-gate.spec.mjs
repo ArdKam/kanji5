@@ -17,8 +17,6 @@ test("engine snapshot reaches the React learning surface through the v2 boundary
 });
 
 test("engine exercise state reaches React and remains isolated from the Learning surface", async ({ page }) => {
-  page.on("console", message => console.log("[browser-console]", message.type(), message.text()));
-  page.on("pageerror", error => console.log("[browser-pageerror]", error.message, error.stack || ""));
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20_000 });
   await waitForBoundary(page);
@@ -36,21 +34,7 @@ test("engine exercise state reaches React and remains isolated from the Learning
   await page.getByRole("button", { name: /Active Recall|یادآوری فعال/i }).click();
   await expect(page.locator(".practice-start-button")).toBeVisible({ timeout: 5_000 });
   await page.locator(".practice-start-button").click();
-  try {
-    await expect(page.locator("#exercise")).toBeVisible({ timeout: 15_000 });
-  } catch (error) {
-    const debug = await page.evaluate(async () => ({
-      body: document.body.innerText.slice(0, 5000),
-      errorBanner: document.querySelector(".app-error-banner")?.textContent || "",
-      practiceTab: document.querySelector(".experience-tab.active")?.textContent || "",
-      exerciseCount: document.querySelectorAll("#exercise").length,
-      boundary: Boolean(window.__KANJI5_V19_V2_BOUNDARY__),
-      educationBridge: Boolean(window.__KANJI5_EDU_BRIDGE__?.start),
-      snapshot: await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.(),
-    }));
-    console.log("[boundary-debug]", JSON.stringify(debug));
-    throw error;
-  }
+  await expect(page.locator("#exercise")).toBeVisible({ timeout: 15_000 });
 
   const snapshot = await page.evaluate(async () => {
     const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
