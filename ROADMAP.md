@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Baseline:** \`main\` at commit \`6a21c08ca54bd29ac20612a2160b773a7f711960\` (2026-10-02).
+> **Implementation baseline reviewed:** \`main\` at commit \`6a21c08ca54bd29ac20612a2160b773a7f711960\` (2026-10-02). The roadmap itself is now tracked on current \`main\`; documentation-only commits follow that implementation snapshot.
 >
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are tracked as pending/in-review work and must be rebased or rebuilt against the current \`main\` before being considered complete.
 
