@@ -3,26 +3,14 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    dedupe: ["react", "react-dom"],
-  },
   base: "./",
   build: {
     outDir: "../react-dist",
     emptyOutDir: true,
     cssCodeSplit: false,
+    manifest: true,
     rolldownOptions: {
       output: {
-        chunkFileNames: "assets/[name].js",
-        codeSplitting: {
-          groups: [
-            {
-              name: "react-vendor",
-              test: /node_modules[\\/](?:react|react-dom)[\\/]/,
-              priority: 100,
-            },
-          ],
-        },
         entryFileNames: "kanji5-react.js",
         assetFileNames: (assetInfo) =>
           assetInfo.name?.endsWith(".css")
