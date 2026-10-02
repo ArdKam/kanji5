@@ -250,7 +250,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
       if (active) setStatsLoading(false);
     });
     return () => { active = false; };
-  }, [open]);
+  }, [open, snapshot]);
 
   useEffect(() => {
     if (!open || !showAdvanced) return;
