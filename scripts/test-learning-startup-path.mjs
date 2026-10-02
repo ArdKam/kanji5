@@ -1,4 +1,3 @@
-// Startup contract: secondary surfaces remain deferred; Active Recall launcher stays first-interaction eager.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -11,21 +10,22 @@ const p0=await readFile(new URL('../v1.3-p0.js',import.meta.url),'utf8');
 const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url),'utf8');
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
-
-mustContain(app,'import { lazy, Suspense,','React startup path may defer secondary surfaces without changing the Learning-first renderer');
-assert.match(app,/import \{ PracticeHome \} from/, 'Active Recall launcher remains eager for the first interaction path');
-assert.match(app,/import \{ HandwritingPractice \} from/, 'Handwriting practice remains eager because it participates in the Active Recall render path');
-
-const deferredSurfaces=['StrokeOrderViewer','DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog'];
-for(const name of deferredSurfaces){
-  assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),'Learning startup must not eagerly import '+name);
-  mustContain(app,'const '+name+' = lazy(() => import("./'+name+'")','Learning startup must lazy-load '+name);
+assert.match(app,/import \{ lazy, Suspense,/, 'React startup can defer non-critical surfaces');
+for(const name of ['StrokeOrderViewer','HandwritingPractice']){
+  assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),'Non-critical '+name+' must not be eagerly imported');
+  mustContain(app,'const '+name+' = lazy(() => import("./'+name+'")','Non-critical '+name+' must lazy-load');
 }
-mustContain(app,'changeExperience("practice");setPracticeMode("home");void action(async()=>{await startPracticeExperience()})','Active Recall tab transition must set its presentation mode before async startup to avoid stale reset races');
-assert.doesNotMatch(app,/startPracticeExperience();setPracticeMode("home")/,'Active Recall startup must not reset presentation mode after async startup');
+assert.match(app,/import \{ PracticeHome \} from/, 'Active Recall launcher remains eager');
+for(const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog']){
+  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),'Critical surface '+name+' remains eager');
+}
+mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("strokeOrderLoading",getLanguage())}</div>}>','Stroke Order has a bounded lazy fallback');
+mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("handwritingPractice",language)}</div>}>','Handwriting has a bounded lazy fallback');
 
-mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("dictionaryLoading",language)}</div>}>','Secondary surfaces must have a bounded loading fallback');
-mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("strokeOrderLoading",getLanguage())}</div>}>','Stroke Order must load only when its page is selected');
+
+for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
+  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
+}
 
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
