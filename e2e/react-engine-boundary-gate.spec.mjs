@@ -18,7 +18,7 @@ test("engine snapshot reaches the React learning surface through the v2 boundary
 
 test("engine exercise state reaches React and remains isolated from the Learning surface", async ({ page }) => {
   page.on("console", message => console.log("[browser-console]", message.type(), message.text()));
-  page.on("pageerror", error => console.log("[browser-pageerror]", error.message));
+  page.on("pageerror", error => console.log("[browser-pageerror]", error.message, error.stack || ""));
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20_000 });
   await waitForBoundary(page);
