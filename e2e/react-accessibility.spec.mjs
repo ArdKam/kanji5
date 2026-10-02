@@ -10,6 +10,26 @@ async function clean(page){
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
 
+for(const viewport of [
+  {name:'mobile-360',width:360,height:800},
+  {name:'mobile-375',width:375,height:812},
+  {name:'mobile-390',width:390,height:844},
+]){
+  test(`visible controls preserve touch-target bounds at ${viewport.name}`,async({page})=>{
+    await clean(page);
+    await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.reload();
+    await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+    const undersized=await page.locator('button:visible').evaluateAll(nodes=>nodes.map(node=>({
+      text:(node.textContent||'').trim(),
+      aria:node.getAttribute('aria-label')||'',
+      minHeight:parseFloat(getComputedStyle(node).minHeight),
+      rectHeight:node.getBoundingClientRect().height,
+    })).filter(button=>button.minHeight<44 || button.rectHeight<44));
+    expect(undersized,JSON.stringify(undersized)).toEqual([]);
+  });
+}
+
 test('React presentation meets core keyboard, focus, motion and touch-target accessibility checks with current rendered controls', async ({page})=>{
   await clean(page);
 
