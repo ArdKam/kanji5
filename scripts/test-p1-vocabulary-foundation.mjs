@@ -34,6 +34,19 @@ assert.equal(invalid.valid,false);
 assert(invalid.reasons.includes('missing_reading'));
 assert(invalid.reasons.includes('missing_glosses'));
 
+const malformedReading=core.validateVocabularyItem({
+  schemaVersion:1,domain:'vocabulary',contentId:'vocabulary:x',written:'学校',reading:'gakkou',glosses:['school']
+});
+assert(malformedReading.reasons.includes('malformed_reading'));
+const malformedWritten=core.validateVocabularyItem({
+  schemaVersion:1,domain:'vocabulary',contentId:'vocabulary:x',written:'school',reading:'がっこう',glosses:['school']
+});
+assert(malformedWritten.reasons.includes('malformed_written'));
+const emptyGloss=core.validateVocabularyItem({
+  schemaVersion:1,domain:'vocabulary',contentId:'vocabulary:x',written:'学校',reading:'がっこう',glosses:['']
+});
+assert(emptyGloss.reasons.includes('empty_gloss'));
+
 const hashA=core.stableVocabularyHash('学校|がっこう');
 const hashB=core.stableVocabularyHash('学校|がっこう|school');
 assert.notEqual(hashA,hashB);
