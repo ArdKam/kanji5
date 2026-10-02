@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const sw=fs.readFileSync('sw.js','utf8');
+assert.match(sw,/react-dist\/\.vite\/manifest\.json/,'Service worker must know the Vite React manifest');
+assert.match(sw,/dynamicImports/,'Service worker must traverse dynamically imported React chunks');
+assert.match(sw,/async function precacheReactManifest/,'Service worker must precache the React asset graph from the manifest');
+
 const match=sw.match(/const SHELL=(\[[\s\S]*?\]);/);
 assert.ok(match,'Service worker SHELL manifest not found.');
 const shell=JSON.parse(match[1]);
