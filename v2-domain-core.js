@@ -1,5 +1,5 @@
 export const DOMAIN_SCHEMA_VERSION=1;
-export const DOMAINS=Object.freeze(['kanji','vocabulary','grammar']);
+export const DOMAINS=Object.freeze(['kanji','vocabulary','context','grammar']);
 
 const MODE_DEFINITIONS=Object.freeze({
   meaning:Object.freeze({domain:'kanji',skill:'meaning',exercise:'free-recall'}),
