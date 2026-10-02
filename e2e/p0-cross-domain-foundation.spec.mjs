@@ -36,6 +36,33 @@ test('P0 migrates legacy Kanji cards to typed identities without changing storag
   expect(keys).toContain(seeded.id);
 });
 
+test('P0 migrates context card metadata without changing the legacy storage key',async({page})=>{
+  await cleanStart(page);
+  const seeded=await page.evaluate(()=>{
+    const deck=JSON.parse(localStorage.getItem('kanji5-deck')||'[]');
+    const item=deck.find(x=>x?.character);
+    if(!item)throw new Error('Kanji deck unavailable');
+    const key='legacy-context-card';
+    const cards={};
+    cards[key]={domain:'context',sourceId:'tatoeba:123',card:{due:new Date(Date.now()+86400000).toISOString()}};
+    localStorage.setItem('kanji5-v1-cards',JSON.stringify(cards));
+    return {key};
+  });
+  await page.reload();
+  await expect(page.locator('#app')).toBeVisible({timeout:20000});
+  const migrated=await page.evaluate(key=>JSON.parse(localStorage.getItem('kanji5-v1-cards')||'{}')[key]||null,seeded.key);
+  expect(migrated).toMatchObject({
+    identitySchemaVersion:1,
+    domain:'context',
+    contentId:'context:tatoeba:123',
+    skill:'integrated',
+    exercise:'scheduled-review'
+  });
+  expect(migrated.cardId).toBe('card:context:tatoeba:123:integrated:scheduled-review');
+  const keys=await page.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem('kanji5-v1-cards')||'{}')));
+  expect(keys).toContain(seeded.key);
+});
+
 test('P0 persists domain metadata on active sessions',async({page})=>{
   await cleanStart(page);
   await expect(page.locator('#v16Start')).toBeVisible({timeout:20000});
