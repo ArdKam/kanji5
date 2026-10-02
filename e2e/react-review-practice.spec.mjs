@@ -28,7 +28,7 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await expect(review).toHaveAttribute('aria-current','page');
   await expect(practice).not.toHaveAttribute('aria-current','page');
   await expect(page.locator('#root #exercise')).toHaveCount(0);
-  await expect(page.locator('#root .card')).toBeVisible();
+  await expect(page.locator('#root .learning-card')).toBeVisible();
   // Establish the documented education precondition before asserting the active exercise path.
   await seedSeenCard(page);
   await practice.click();
@@ -45,7 +45,7 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await expect(review).toHaveAttribute('aria-current','page');
   await expect(practice).not.toHaveAttribute('aria-current','page');
   await expect(page.locator('#root #exercise')).toHaveCount(0);
-  await expect(page.locator('#root .card')).toBeVisible();
+  await expect(page.locator('#root .learning-card')).toBeVisible();
 });
  
 async function startForcedExercise(page,mode){
