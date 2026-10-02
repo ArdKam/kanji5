@@ -524,3 +524,15 @@ test('analytics remain in Stats and Learning keeps only compact session feedback
   await expect(stats.locator('.stats-skills-list').first()).toBeVisible({timeout:10000});
 });
 
+
+
+test('React surfaces an actionable state when the shipped presentation chunk fails',async({page})=>{
+  await page.route('**/react-dist/kanji5-react.js*',async route=>{
+    await route.fulfill({status:503,contentType:'text/plain',body:'simulated missing release asset'});
+  });
+  await page.goto('/');
+  await expect(page.locator('#kanji5-startup-shell')).toHaveClass(/is-error/,{timeout:10000});
+  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('Kanji5 could not start');
+  await expect(page.locator('.kanji5-startup-error-copy')).toContainText('required application file could not be loaded');
+  await expect(page.locator('.kanji5-startup-error-action')).toHaveText('Reload');
+});
