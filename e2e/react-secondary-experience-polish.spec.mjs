@@ -6,7 +6,7 @@ async function clean(page, language = "en") {
   await page.evaluate((value) => {
     for (const key of Object.keys(localStorage)) if (key.startsWith("kanji5-")) localStorage.removeItem(key);
     localStorage.setItem("kanji5-ui-language", value);
-    sessionStorage.clear();
+    sessionStorage.clear();localStorage.setItem('kanji5-onboarding-v2','complete');
   }, language);
   await page.reload();
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
