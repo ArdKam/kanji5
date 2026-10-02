@@ -21,7 +21,7 @@ export function buildPreparedMnemonicEntries(
   componentResolver?: ((character: string) => string[]) | null
 ): Array<{ character: string; suggestion: PreparedMnemonic }>;
 
-export function scorePreparedMnemonic(entry: PreparedMnemonic, character?: string, components?: string[]): {
+export function scorePreparedMnemonic(entry: PreparedMnemonic, character?: string, components?: string[], meaning?: string): {
   source: "curated" | "generated" | "invalid";
   valid: boolean;
   minLength: boolean;
@@ -47,6 +47,11 @@ export function preparedMnemonicQualityReport(
   concreteAnchorEnRate: number;
   characterConnectedRate: number;
   componentConnectedRate: number;
+  generatedSourceFailures: number;
+  generatedMeaningFailures: number;
+  generatedMeaningRate: number;
+  generatedMeaningConnectedRate: number;
+  generatedComponentConnectedRate: number;
   passes: boolean;
 };
 

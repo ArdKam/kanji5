@@ -55,4 +55,11 @@ console.log(`Mnemonic quality gate: PASS (${quality.concreteAnchorFa}/${quality.
 
 console.log("Prepared mnemonic coverage: PASS (2136/2136; 259 curated + 1877 generated fallbacks)");
 
+assert.equal(quality.generated, 1877, "Generated fallback count must remain explicit");
+assert.equal(quality.generatedSourceFailures, 0, "Generated fallback entries must retain generated provenance");
+assert.equal(quality.generatedMeaningFailures, 0, "Generated fallback entries must contain substantive bilingual scaffolds");
+assert.ok(quality.generatedMeaningRate >= 1, `Every generated fallback should meet minimum scaffold length; got ${quality.generatedMeaningRate}`);
+assert.ok(quality.generatedMeaningConnectedRate >= 0.99, `Generated fallbacks should explicitly connect to their catalog meaning; got ${quality.generatedMeaningConnectedRate}`);
+assert.equal(quality.generatedComponentConnectedRate, 1, "Generated fallbacks without components should remain valid scaffold coverage");
+
 assert.equal(quality.curated, 259, "Semantic pass must preserve the curated corpus size");

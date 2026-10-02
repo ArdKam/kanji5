@@ -1241,7 +1241,7 @@ const GENERATED_TEMPLATE_PATTERNS = [
   /Turn the shape of/i
 ];
 
-export function scorePreparedMnemonic(entry, character = "", components = []) {
+export function scorePreparedMnemonic(entry, character = "", components = [], meaning = "") {
   const fa = cleanText(entry?.fa, 600);
   const en = cleanText(entry?.en, 600);
   const source = entry?.source === "curated" || entry?.source === "generated" ? entry.source : "invalid";
@@ -1258,6 +1258,7 @@ export function scorePreparedMnemonic(entry, character = "", components = []) {
     actionSceneEn: EN_SCENE_CUES.test(en) && EN_ACTION_CUES.test(en),
     characterConnected: Boolean(character) && (fa.includes(character) || en.includes(character)),
     componentConnected,
+    meaningConnected: Boolean(meaning) && (fa.includes(meaning) || en.includes(meaning)),
     genericTemplate
   };
 }
@@ -1265,23 +1266,33 @@ export function scorePreparedMnemonic(entry, character = "", components = []) {
 export function preparedMnemonicQualityReport(catalog = [], componentResolver = null) {
   const items = Array.isArray(catalog) ? catalog.filter(item => String(item?.character ?? "").trim()) : [];
   const curated = items.filter(item => CURATED_PREPARED_MNEMONICS[String(item.character)]?.[0]);
-  const scores = curated.map(item => {
+  const curatedScores = curated.map(item => {
     const character = String(item.character);
     const components = componentResolver?.(character) ?? [];
     return scorePreparedMnemonic(CURATED_PREPARED_MNEMONICS[character]?.[0], character, components);
   });
-  const count = scores.length;
-  const rate = (key) => count ? scores.filter(score => Boolean(score[key])).length / count : 0;
-  const criticalFailures = scores.filter(score => !score.valid || !score.minLength || score.source !== "curated").length;
-  const genericTemplateLeaks = scores.filter(score => score.genericTemplate).length;
-  const concreteAnchorFa = scores.filter(score => score.concreteAnchorFa).length;
-  const concreteAnchorEn = scores.filter(score => score.concreteAnchorEn).length;
-  const actionSceneFa = scores.filter(score => score.actionSceneFa).length;
-  const actionSceneEn = scores.filter(score => score.actionSceneEn).length;
+  const generated = items.filter(item => !CURATED_PREPARED_MNEMONICS[String(item.character)]);
+  const generatedScores = generated.map(item => {
+    const character = String(item.character);
+    const components = componentResolver?.(character) ?? [];
+    return scorePreparedMnemonic(buildPreparedMnemonic(item, components), character, components, firstMeaning(item));
+  });
+  const count = curatedScores.length;
+  const generatedCount = generatedScores.length;
+  const rate = (key) => count ? curatedScores.filter(score => Boolean(score[key])).length / count : 0;
+  const generatedRate = (key) => generatedCount ? generatedScores.filter(score => Boolean(score[key])).length / generatedCount : 0;
+  const criticalFailures = curatedScores.filter(score => !score.valid || !score.minLength || score.source !== "curated").length;
+  const genericTemplateLeaks = curatedScores.filter(score => score.genericTemplate).length;
+  const generatedSourceFailures = generatedScores.filter(score => score.source !== "generated").length;
+  const generatedMeaningFailures = generatedScores.filter(score => !score.minLength).length;
+  const concreteAnchorFa = curatedScores.filter(score => score.concreteAnchorFa).length;
+  const concreteAnchorEn = curatedScores.filter(score => score.concreteAnchorEn).length;
+  const actionSceneFa = curatedScores.filter(score => score.actionSceneFa).length;
+  const actionSceneEn = curatedScores.filter(score => score.actionSceneEn).length;
   return {
     total: items.length,
     curated: count,
-    generated: Math.max(0, items.length - count),
+    generated: generatedCount,
     criticalFailures,
     genericTemplateLeaks,
     concreteAnchorFa,
@@ -1294,12 +1305,20 @@ export function preparedMnemonicQualityReport(catalog = [], componentResolver = 
     actionSceneEnRate: rate("actionSceneEn"),
     characterConnectedRate: rate("characterConnected"),
     componentConnectedRate: rate("componentConnected"),
+    generatedSourceFailures,
+    generatedMeaningFailures,
+    generatedMeaningRate: generatedRate("minLength"),
+    generatedMeaningConnectedRate: generatedRate("meaningConnected"),
+    generatedComponentConnectedRate: generatedRate("componentConnected"),
     passes: criticalFailures === 0 &&
       genericTemplateLeaks === 0 &&
+      generatedSourceFailures === 0 &&
+      generatedMeaningFailures === 0 &&
       rate("concreteAnchorFa") >= 0.8 &&
       rate("concreteAnchorEn") >= 0.9
   };
 };
+
 
 const cleanText = (value, max = 120) =>
   String(value ?? "").replace(/\s+/g, " ").trim().slice(0, max);
