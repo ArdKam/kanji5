@@ -472,7 +472,9 @@ test('Reading Lab persists sentence notes, reuses exact translation matches, and
   await sentenceRow.locator('.reading-lab-annotation-editor textarea').fill('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
   await sentenceRow.getByRole('button',{name:'ذخیرهٔ یادداشت',exact:true}).click();
   await expect(sentenceRow.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
-  await lab.locator('.reading-lab-speech-voice select').selectOption({label:'Test Japanese · ja-JP'});
+  const voiceSelect=lab.locator('.reading-lab-speech-voice select');
+  await voiceSelect.selectOption('Test Japanese');
+  await expect(voiceSelect).toHaveValue('Test Japanese');
   await lab.getByRole('button',{name:'خواندن جمله',exact:true}).click();
   const voice=await page.evaluate(()=>({name:window.__KANJI5_LAST_UTTERANCE__?.voice?.name||'',lang:window.__KANJI5_LAST_UTTERANCE__?.voice?.lang||''}));
   expect(voice).toEqual({name:'Test Japanese',lang:'ja-JP'});
