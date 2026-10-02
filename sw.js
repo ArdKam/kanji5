@@ -2,7 +2,7 @@ const BUILD_ID='__KANJI5_BUILD_ID__';
 const CACHE='kanji5-shell-v'+BUILD_ID;
 const DATA_CACHE='kanji5-data-v25';
 const API_CACHE='kanji5-api-v15';
-const SHELL=["./","./index.html","./startup-shell.css","./app-bootstrap.js","./react-entry.js","./manifest.webmanifest","./icon.svg","./v1.3-p0.js","./v1.4-education-migration.js","./v1.4-education-core.js","./v1.5-state.js","./v1.5-recall-core.js","./v1.5-p0.js","./v1.5-network.js","./v1.5-education-ui.js","./v1.5-education-sync-core.js","./v1.5-fsrs-sync-core.js","./v1.5-sync-core.js","./v1.6-session.js","./v1.6-session-core.js","./v1.6-session-feedback.js","./v1.6-session-analytics.js","./v1.6-skill-profile.js","./v1.6-sync-core.js","./v1.6-session-ui.js","./v1.8-production-core.js","./v1.8-vocabulary-core.js","./v1.8-context-core.js","./v2-domain-core.js","./v2-vocabulary-core.js","./v1.9-outcome-core.js","./v1.9-curriculum-policy.js","./v1.9-learner-model-core.js","./v1.9-learner-model.js","./v1.9-adaptive-planner-core.js","./v1.9-adaptive-planner.js","./v1.9-recovery-core.js","./v1.9-recovery.js","./v1.9-learning-evaluation-core.js","./v1.9-learning-evaluation.js","./v1.9-data-quality-core.js","./v1.9-data-integrity-core.js","./v1.9-content-evidence.js","./v1.9-v2-contract-core.js","./v1.9-v2-boundary.js","./v2-custom-study-core.js","./review-runtime.js","./react-dist/kanji5-react.js","./react-dist/kanji5-react.css","./react-dist/assets/react-vendor.js","./react-dist/assets/prepared-mnemonic-core.js","./react-dist/assets/rolldown-runtime.js","./vendor/ts-fsrs-5.4.1.mjs","./v1.2-enhancements.js","./v1.2-runtime-fixes.js","./supabase-config.js","./supabase-sync.js","./account-fallback.js","./kanji-radicals.json","./kanji-radical-map.json"];
+const SHELL=["./","./index.html","./startup-shell.css","./app-bootstrap.js","./react-entry.js","./manifest.webmanifest","./icon.svg","./v1.3-p0.js","./v1.4-education-migration.js","./v1.4-education-core.js","./v1.5-state.js","./v1.5-recall-core.js","./v1.5-p0.js","./v1.5-network.js","./v1.5-education-ui.js","./v1.5-education-sync-core.js","./v1.5-fsrs-sync-core.js","./v1.5-sync-core.js","./v1.6-session.js","./v1.6-session-core.js","./v1.6-session-feedback.js","./v1.6-session-analytics.js","./v1.6-skill-profile.js","./v1.6-sync-core.js","./v1.6-session-ui.js","./v1.8-production-core.js","./v1.8-vocabulary-core.js","./v1.8-context-core.js","./v2-domain-core.js","./v2-vocabulary-core.js","./v1.9-outcome-core.js","./v1.9-curriculum-policy.js","./v1.9-learner-model-core.js","./v1.9-learner-model.js","./v1.9-adaptive-planner-core.js","./v1.9-adaptive-planner.js","./v1.9-recovery-core.js","./v1.9-recovery.js","./v1.9-learning-evaluation-core.js","./v1.9-learning-evaluation.js","./v1.9-data-quality-core.js","./v1.9-data-integrity-core.js","./v1.9-content-evidence.js","./v1.9-v2-contract-core.js","./v1.9-v2-boundary.js","./v2-custom-study-core.js","./review-runtime.js","./react-dist/kanji5-react.js","./react-dist/kanji5-react.css","./vendor/ts-fsrs-5.4.1.mjs","./v1.2-enhancements.js","./v1.2-runtime-fixes.js","./supabase-config.js","./supabase-sync.js","./account-fallback.js","./kanji-radicals.json","./kanji-radical-map.json"];
 const DATA_URL=new URL('./kanji-data.json',self.location.href).href;
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
@@ -11,7 +11,30 @@ const KANJIVG_PATH='/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/ka
 const API_TTL_MS=7*24*60*60*1000;
 const API_MAX_ENTRIES=250;
 const API_INFLIGHT=new Map();
-self.addEventListener('install',e=>e.waitUntil(Promise.all([caches.open(CACHE).then(c=>c.addAll(SHELL)),caches.open(DATA_CACHE).then(c=>c.addAll(['./kanji-data.json','./kanji-components.json'])),caches.open(API_CACHE)]).then(()=>self.skipWaiting())));
+async function precacheReactManifest(cache){
+  try{
+    const response=await fetch('./react-dist/.vite/manifest.json',{cache:'no-store'});
+    if(!response.ok)return;
+    const manifest=await response.json();
+    const urls=new Set(['./react-dist/.vite/manifest.json']);
+    const visited=new Set();
+    const visit=key=>{
+      if(visited.has(key))return;
+      visited.add(key);
+      const entry=manifest?.[key];
+      if(!entry)return;
+      for(const value of [entry.file,...(entry.css||[]),...(entry.assets||[])])if(typeof value==='string'&&value)urls.add('./react-dist/'+value.replace(/^\.\//,''));
+      for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visit(dependency);
+    };
+    for(const key of Object.keys(manifest||{}))visit(key);
+    await cache.addAll([...urls]);
+  }catch(_){}
+}
+self.addEventListener('install',e=>e.waitUntil(Promise.all([
+  caches.open(CACHE).then(async c=>{await c.addAll(SHELL);await precacheReactManifest(c)}),
+  caches.open(DATA_CACHE).then(c=>c.addAll(['./kanji-data.json','./kanji-components.json'])),
+  caches.open(API_CACHE)
+]).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('kanji5-')&&!([CACHE,DATA_CACHE,API_CACHE].includes(k))).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback,{ignoreSearch:true});if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback,{ignoreSearch:false}))||Response.error()}}
 async function staleWhileRevalidate(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback||req);const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone()).catch(()=>{});return r}).catch(()=>null);if(hit){void update;return hit}const fresh=await update;return fresh||Response.error()}
