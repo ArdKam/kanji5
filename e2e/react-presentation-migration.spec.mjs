@@ -527,6 +527,7 @@ test('analytics remain in Stats and Learning keeps only compact session feedback
 
 
 test('React surfaces an actionable state when the shipped presentation chunk fails',async({page})=>{
+  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
   await page.route('**/react-dist/kanji5-react.js*',async route=>{
     await route.fulfill({status:503,contentType:'text/plain',body:'simulated missing release asset'});
   });
