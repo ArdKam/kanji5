@@ -8,7 +8,8 @@ const viewports=[
 for(const viewport of viewports){
   test('final React release matrix — '+viewport.name,async({page})=>{
     await page.setViewportSize({width:viewport.width,height:viewport.height});
-    await page.goto('/');
+    await page.addInitScript(() => localStorage.setItem('kanji5-onboarding-v2','complete'));
+  await page.goto('/');
     await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 
     const learning=page.getByRole('button',{name:'یادگیری',exact:true});
