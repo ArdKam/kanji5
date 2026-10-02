@@ -421,6 +421,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(sentence.text.trim());
     utterance.lang = "ja-JP";
+    const selectedVoice = resolveSpeechVoice();
+    if (selectedVoice) utterance.voice = selectedVoice;
     utterance.rate = speechRate;
     utterance.onstart = () => {
       setActiveSentenceIndex(index);
