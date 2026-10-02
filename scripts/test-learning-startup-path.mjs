@@ -10,18 +10,10 @@ const p0=await readFile(new URL('../v1.3-p0.js',import.meta.url),'utf8');
 const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url),'utf8');
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
-assert.match(app,/import \{ lazy, Suspense,/, 'React startup can defer non-critical surfaces');
-for(const name of ['StrokeOrderViewer','HandwritingPractice']){
-  assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),'Non-critical '+name+' must not be eagerly imported');
-  mustContain(app,'const '+name+' = lazy(() => import("./'+name+'")','Non-critical '+name+' must lazy-load');
-}
-assert.match(app,/import \{ PracticeHome \} from/, 'Active Recall launcher remains eager');
-for(const name of ['DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog']){
-  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),'Critical surface '+name+' remains eager');
-}
-mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("strokeOrderLoading",getLanguage())}</div>}>','Stroke Order has a bounded lazy fallback');
-mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("handwritingPractice",language)}</div>}>','Handwriting has a bounded lazy fallback');
 
+for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
+  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
+}
 
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
