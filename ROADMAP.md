@@ -295,6 +295,8 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ### PARTIAL — final release verification remains
 
+The current `main` contains the release-integrity implementation and the CI-tested stale-client/offline gates. Do not mark A1 complete until post-merge production verification and representative-device performance evidence are recorded.
+
 - \`app-bootstrap.js\` loading restored.
 - \`react-dist/\` removed from git.
 - CI builds React from source.
@@ -1825,8 +1827,8 @@ The roadmap has two levels: **remaining Kanji hardening** and **domain expansion
 
 ### Current execution order — 2026-10-02
 
-**0. Release Integrity final verification**
-→ deploy the latest `main` release, verify live artifact/cache/offline behavior, and capture representative-device performance evidence
+**0. Release Integrity final verification — CURRENT**
+→ verify the post-merge GitHub Pages artifact/cache/offline run from `efbfaf1912f99e3ae6afc607e675efcd9cb2ff62`, then capture representative-device performance evidence; only then close Phase 0/A1
 
 **1. Phase R — Public Product Readiness**
 → positioning, onboarding, guest-first accounts, data safety, backup/restore hardening, PWA, offline, browser compatibility, i18n, observability, security, privacy/legal, help, feedback, beta/release gate
