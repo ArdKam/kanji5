@@ -1859,6 +1859,8 @@
   .dictionary-section-tab{
     flex:1 1 calc(20% - 4px);
     min-width:44px;
+    min-height:44px;
+    height:44px;
     padding-inline:5px;
   }
   .dictionary-section-tab-label{
