@@ -17,6 +17,30 @@ async function seedSeenCard(page){
 }
 
 
+test('first-open onboarding explains the learning loop, saves a daily goal, and disappears after starting',async({page})=>{
+  await clean(page);
+  const onboarding=page.locator('.public-onboarding');
+  await expect(onboarding).toBeVisible({timeout:15000});
+  await expect(onboarding).toContainText('چرخهٔ یادگیری');
+  await expect(onboarding).toContainText('حساب اختیاری');
+  await expect(onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true})).toBeVisible();
+
+  await onboarding.getByRole('button',{name:'30',exact:true}).click();
+  await expect.poll(async()=>page.evaluate(async()=>{
+    const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.();
+    return Number(snapshot?.settings?.dailyGoal||0);
+  })).toBe(30);
+
+  await onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true}).click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:15000});
+  await expect(page.locator('.public-onboarding')).toHaveCount(0);
+  await expect.poll(async()=>page.evaluate(()=>localStorage.getItem('kanji5-public-onboarding-v1'))).toBe('seen');
+
+  await page.reload();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:15000});
+  await expect(page.locator('.public-onboarding')).toHaveCount(0);
+});
+
 test('React is the sole default presentation renderer',async({page})=>{
   await clean(page);
   await expect(page.locator('#root .daily-summary')).toBeVisible({timeout:10000});
