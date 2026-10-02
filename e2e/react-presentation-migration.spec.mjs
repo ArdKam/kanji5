@@ -440,6 +440,54 @@ test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
 });
 
+test('Reading Lab persists sentence notes, reuses exact translation matches, and supports Japanese voice selection',async({page})=>{
+  await clean(page);
+  const sentence='今日は学生です。';
+  await page.evaluate(()=>{
+    Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+      cancel:()=>{},
+      speak:(utterance)=>{window.__KANJI5_LAST_UTTERANCE__=utterance;utterance.onstart?.();},
+      getVoices:()=>[{name:'Test Japanese',lang:'ja-JP'}],
+      addEventListener:()=>{},
+      removeEventListener:()=>{},
+    }});
+    Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
+      constructor(text){this.text=text;this.lang='';this.rate=1;this.voice=null;this.onstart=null;this.onend=null;this.onerror=null;}
+    }});
+  });
+  await page.route(/https:\/\/api\.tatoeba\.org\/v1\/sentences\?.*/,async route=>{
+    const url=new URL(route.request().url());
+    if(url.searchParams.get('q')!==sentence){ await route.continue(); return; }
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:[{text:sentence,translations:[[{text:'Today I am a student.'}]]}]})});
+  });
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('textarea').fill(sentence);
+  const sentenceRow=lab.locator('.reading-lab-reader-sentence').first();
+  await sentenceRow.getByRole('button',{name:'ترجمهٔ جمله',exact:true}).click();
+  await expect(sentenceRow.locator('.reading-lab-sentence-translation')).toContainText('Today I am a student.');
+  await sentenceRow.getByRole('button',{name:'یادداشت',exact:true}).click();
+  await sentenceRow.locator('.reading-lab-annotation-editor textarea').fill('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
+  await sentenceRow.getByRole('button',{name:'ذخیرهٔ یادداشت',exact:true}).click();
+  await expect(sentenceRow.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
+  const voiceSelect=lab.locator('.reading-lab-speech-voice select');
+  await voiceSelect.selectOption('Test Japanese');
+  await expect(voiceSelect).toHaveValue('Test Japanese');
+  await lab.getByRole('button',{name:'خواندن جمله',exact:true}).click();
+  const voice=await page.evaluate(()=>({name:window.__KANJI5_LAST_UTTERANCE__?.voice?.name||'',lang:window.__KANJI5_LAST_UTTERANCE__?.voice?.lang||''}));
+  expect(voice).toEqual({name:'Test Japanese',lang:'ja-JP'});
+
+  await dialog.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const reopened=page.getByRole('dialog',{name:'آزمایشگاه خواندن'}).locator('.reading-lab').locator('.reading-lab-reader-sentence').first();
+  await expect(reopened.locator('.reading-lab-sentence-translation')).toContainText('Today I am a student.');
+  await expect(reopened.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
+});
+
 test('analytics remain in Stats and Learning keeps only compact session feedback',async({page})=>{
   await clean(page);
   await expect(page.locator('.insights')).toHaveCount(0);

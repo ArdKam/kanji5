@@ -2235,6 +2235,21 @@
   scroll-margin-block:12px;
   transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;
 }
+.reading-lab-sentence-support{grid-column:2;display:grid;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);}
+.reading-lab-sentence-support-actions{display:flex;flex-wrap:wrap;gap:6px;}
+.reading-lab-support-action{min-height:36px;padding:5px 9px;font-size:var(--text-xs);}
+.reading-lab-support-action.is-active{border-color:color-mix(in srgb,var(--shu) 35%,var(--line));background:color-mix(in srgb,var(--shu) 6%,var(--paper));}
+.reading-lab-sentence-translation,.reading-lab-sentence-annotation{margin:0;padding:8px 9px;border-radius:10px;background:color-mix(in srgb,var(--washi) 78%,var(--paper));font-size:var(--text-sm);line-height:1.55;}
+.reading-lab-sentence-translation{direction:ltr;text-align:start;}
+.reading-lab-sentence-translation strong,.reading-lab-sentence-annotation strong{display:block;color:var(--mute);font-size:10px;font-weight:850;margin-bottom:2px;}
+.reading-lab-sentence-support-status{margin:0;color:var(--mute);font-size:10px;line-height:1.5;}
+.reading-lab-annotation-editor{display:grid;gap:6px;}
+.reading-lab-annotation-editor textarea{width:100%;box-sizing:border-box;min-height:72px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);padding:9px 10px;font:inherit;font-size:var(--text-sm);line-height:1.55;}
+.reading-lab-annotation-editor textarea:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 22%,transparent);outline-offset:1px;}
+.reading-lab-annotation-actions{display:flex;flex-wrap:wrap;gap:6px;}
+.reading-lab-speech-voice{display:grid;gap:4px;min-width:min(220px,100%);}
+.reading-lab-speech-voice select{min-height:40px;min-width:0;}
+@media(max-width:640px){.reading-lab-sentence-support{grid-column:2;}.reading-lab-speech-voice{min-width:0;}}
 .reading-lab-reader-sentence.active{
   border-color:color-mix(in srgb,var(--shu) 30%,var(--line));
   background:color-mix(in srgb,var(--washi) 76%,var(--paper));
