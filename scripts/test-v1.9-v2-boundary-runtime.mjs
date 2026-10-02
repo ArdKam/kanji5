@@ -5,6 +5,8 @@ assert.match(s,/window\.__KANJI5_V19_V2_BOUNDARY__/);
 assert.match(s,/learnerApi\?\.read\?\.\(\)==null&&learnerApi\?\.update/,'stats must hydrate the learner model before first computation');
 assert.match(s,/const knowledge=state\.readKnowledge\?\.\(\)\|\|\{\}/,'stats must use persisted knowledge exposure');
 assert.match(s,/const studiedCount=deck\.reduce/,'studied count must be derived from the deck and persisted exposure');
+const statsRuntime=s.slice(s.indexOf('function runtimePresentationData'),s.indexOf('function startupPresentationData'));
+assert.doesNotMatch(statsRuntime,/studiedCount:Object\.keys\(cards\)\.length/,'stats runtime must not equate studied count with card-object count');
 assert.match(s,/async function snapshot/);assert.match(s,/let snapshotInFlight=null/);assert.match(s,/async function setExercise/);assert.match(s,/async function setFeedback/);assert.match(s,/async function setAdaptiveReason/);assert.match(s,/async function getStats/);assert.match(s,/__KANJI5_V19_V2_LAST_SNAPSHOT__/);assert.match(s,/kanji5:v1\.9-v2-view-models/);assert.match(s,/kanji5:v1\.6-education-result/);assert.match(s,/kanji5:v1\.9-feedback/);assert.doesNotMatch(s,/getElementById|querySelector|innerHTML|style\.|classList/);
 const sw=fs.readFileSync('sw.js','utf8');assert.match(sw,/v1\.9-v2-contract-core\.js/);assert.match(sw,/v1\.9-v2-boundary\.js/);assert.match(sw,/const BUILD_ID='__KANJI5_BUILD_ID__';/);assert.match(sw,/const CACHE='kanji5-shell-v'\+BUILD_ID/);
 console.log('Kanji 5 v1.9 v2 boundary runtime wiring passed.');
