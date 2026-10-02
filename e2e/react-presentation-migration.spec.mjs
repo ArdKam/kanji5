@@ -22,9 +22,10 @@ test('first-open onboarding runs as a dedicated resumable entry flow',async({pag
   const onboarding=page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({timeout:15000});
   await expect(page.locator('#root .app-shell')).toHaveCount(0);
-  await expect(onboarding).toContainText('روش کار');
+  await expect(onboarding).toContainText('به Kanji5 خوش آمدی');
   await expect(onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true})).toBeVisible();
   await onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true}).click();
+  await expect(onboarding).toContainText('روش کار');
   await expect(onboarding.getByRole('heading',{name:'از کجا شروع کنیم؟'})).toBeVisible();
   await onboarding.getByRole('button',{name:'از ابتدا',exact:true}).click();
   await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
@@ -107,7 +108,7 @@ test('React presentation can switch language from More Menu and keep Settings fo
 });
 
 test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
-  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');localStorage.setItem('kanji5-onboarding-v2','complete')});
   await page.goto('/');
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Show kanji information',exact:true}).click();
