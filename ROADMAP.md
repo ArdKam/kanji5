@@ -129,44 +129,51 @@ Especially avoid:
 
 ### 2.1 Verified current status ledger — 2026-10-02
 
-This ledger is the anti-regression checkpoint for future reviews. Reviewers must start here and only inspect the remaining gaps.
+Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
 
-**DONE on current \`main\`:**
-- Release/bootstrap foundation and React artifact hygiene.
-- Pre-Vocabulary public-readiness implementation: learner-state preservation across dataset revisions, bounded local diagnostics, external-content escaping, release evidence/docs, and browser compatibility gates.
-- D4 domain-neutral scheduling boundary: shared card identity seam with FSRS remaining the sole scheduling authority.
-- D1 canonical cross-domain content identities.
-- D2 shared evidence envelope.
-- D3 deterministic cross-domain relationships.
-- D5 context migration/offline cross-domain seam.
-- Stats exposure/hydration/mastery corrections.
-- Advanced Stats and deterministic learning-efficacy evidence surface.
-- Learning vs Active Recall separation, compact session feedback, four-page Learning Card pager, keyboard-accessible shortcuts, swipe navigation, mobile feedback/card bounds.
-- Reading Lab session preservation/restoration, in-place word/Kanji lookup, unique + occurrence-weighted coverage, hardest-sentence focus, sentence navigation, speech/autoplay, SRT/VTT synchronization, lightweight sentence translation/annotation, and optional Japanese voice selection.
-- Dictionary narrow-mobile tabs and personal-mnemonic draft preservation across dictionary remount/async loading.
-- Settings exercise toggles, Placement/Test ownership correction, Data Backup/Restore foundation, and separated destructive reset UI.
-- Mnemonics information architecture plus curated/generated/personal provenance; 2,136/2,136 prepared coverage and current curated-content QA.
+**DONE on current `main`:**
+- Bootstrap/runtime and React artifact hygiene.
+- Guest-first account safeguards and learner-state preservation/boot recovery.
+- Product positioning foundation, public Help/Browser/Privacy/Feedback surface.
+- D1/D2/D3/D4/D5 cross-domain foundations.
+- Stats/Advanced Stats/learning-efficacy foundations.
+- Learning vs Active Recall, Learning Card pager/swipe/rating, keyboard/mobile contracts.
+- Reading Lab session/lookup/navigation/audio/speech/translation/annotation foundation.
+- Dictionary mobile/personal-mnemonic behavior.
+- Settings exercise toggles, Placement ownership, Data Backup/Restore foundation, reset separation.
+- Mnemonic information architecture, provenance, prepared coverage and current QA.
+- PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- Release verification: live artifact, cache, stale-client, and offline verification are now evidenced on current \`main\`; representative-device performance measurement and broader live smoke coverage remain.
-- Reading Lab: only the later Reading Library remains; sentence translation/annotation and optional Japanese voice selection are implemented and E2E-covered.
-- Mnemonics: current 259-entry curated corpus passed structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Future content refresh is routine QA, not a release blocker.
-- Responsive/accessibility/performance: final representative-device evidence outside the CI matrix remains; CI covers 360/375/390, tablet, desktop, keyboard, focus, touch targets, and accessibility contracts.
+- A1 release integrity: current-main push verification is still running; live Pages smoke and representative-device evidence remain.
+- R2 onboarding redesign is not complete; current onboarding works but the dedicated first-open value/setup/placement/account flow is still pending.
+- R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
+- R5/R6 review-history and backup/restore public-release evidence remain incomplete.
+- R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
+- R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
+- R10 full i18n audit remains.
+- R11 broader controlled-failure observability remains in open PR #392.
+- R12 production security review remains.
+- R13 Terms, exact production-service disclosure, deletion semantics, and target-market legal review remain.
+- R14 docs are now staged in the release path; production smoke verification remains.
+- R16 public Vocabulary/Context provenance rules remain to be finalized.
+- R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments.
 
-**IN PROGRESS / remaining before Vocabulary MVP:**
-- Phase 0/A1 external evidence: representative-device performance and final current-release production smoke.
-- Phase R public-readiness completion and sign-off.
+**PENDING:**
+- R18 Public Beta.
+- R19 Public Release Gate.
+- E Vocabulary MVP.
+- F Context/Reading integration.
+- G Grammar foundation.
 
-**DONE before Vocabulary architecture:**
-- D4 — domain-neutral scheduling boundary implemented and contract-tested.
+**DO NOT REOPEN without a verified regression:**
+- A2, A3, A5, A6, A7.
+- D1, D2, D3, D4, D5.
 
-**PENDING next strategic stage:**
-- E — Vocabulary MVP.
-- F — Context/Reading integration.
-- G — Grammar foundation.
-
-**Intentionally not active backlog:** A2, A3, A5, A6, and the completed D1/D2/D3/D5 foundations above. Do not recreate these from scratch because an old PR with a matching title is still open.
-
+**Open PRs not counted as completion:**
+- #389: persistence adapter.
+- #392: controlled runtime-failure observability.
+- #398: superseded by this current-main roadmap sync.
 ---
 
 # 3. Current baseline and already-completed foundations
@@ -267,7 +274,7 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - Treat dynamic-import failures as release blockers.
 - Keep service-worker shell and runtime asset lists synchronized.
 
-Evidence: the merged Stage 0 gate verified stale-release cache eviction and offline shell recovery; the live Pages release then verified the deployed artifact hashes and live offline reload.
+Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. Current-main post-merge deployment/live evidence is still pending.
 
 ### 0.5 Production smoke test
 
@@ -310,10 +317,10 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ### PENDING
 
-- verify live asset graph after every release
+- finish current-main React/engine release verification
+- verify the live Pages asset graph for the merged release
 - verify cold/repeat offline behavior
-- verify cache invalidation
-- verify stale-client recovery
+- verify cache invalidation and stale-client recovery
 - measure startup on representative mobile devices
 - track LCP/INP/CLS and long-task causes
 - treat missing assets/font failures/dynamic imports/offline regressions as blockers
@@ -734,7 +741,7 @@ It sits **before broad Vocabulary/Grammar expansion**.
 
 ---
 
-## R1. Product positioning
+## R1. Product positioning — DONE ON CURRENT MAIN
 
 Define and expose:
 
@@ -751,7 +758,7 @@ The first-open experience must not assume personal knowledge of the project.
 
 ---
 
-## R2. Onboarding
+## R2. Onboarding — PARTIAL
 
 ### New user
 
@@ -769,7 +776,7 @@ Onboarding must not repeatedly interrupt returning users.
 
 ---
 
-## R3. Guest-first account model
+## R3. Guest-first account model — DONE ON CURRENT MAIN
 
 Prefer:
 
@@ -812,7 +819,7 @@ Verify:
 
 Do **not** start with a full IndexedDB rewrite just because public users are coming.
 
-First establish a domain-neutral storage abstraction.
+First establish a domain-neutral storage abstraction. This remains pending on current `main`; PR #389 is the candidate seam and is not counted until merged and re-verified.
 
 Conceptually:
 
@@ -899,7 +906,7 @@ Verify:
 - update behavior
 - reinstall behavior
 
-The current manifest should be rechecked for production install requirements, including appropriate icon sizing/assets.
+Explicit install metadata/assets are now present on current `main`; remaining work is cross-platform install/update/reinstall evidence.
 
 ---
 
@@ -983,7 +990,7 @@ Keep engine behavior independent from presentation language.
 
 ---
 
-## R11. Error handling and observability
+## R11. Error handling and observability — PARTIAL
 
 Public users need actionable failure states.
 
@@ -1060,7 +1067,7 @@ Legal requirements must be reviewed against actual target markets and business m
 
 ---
 
-## R14. User help/documentation
+## R14. User help/documentation — IMPLEMENTED; PRODUCTION VERIFICATION REMAINS
 
 Provide user-facing documentation for:
 
@@ -1079,7 +1086,7 @@ Documentation should be separate from developer architecture documents.
 
 ---
 
-## R15. Feedback and support
+## R15. Feedback and support — DONE ON CURRENT MAIN
 
 Provide simple paths for:
 
@@ -1238,7 +1245,7 @@ Relationships must remain deterministic and versionable.
 
 ---
 
-## D4. Scheduling boundary — PENDING / BLOCKER FOR FULL VOCABULARY LEARNING
+## D4. Scheduling boundary — DONE / BLOCKER FOR FULL VOCABULARY LEARNING
 
 This is the correct interpretation of the earlier SRS concern.
 
