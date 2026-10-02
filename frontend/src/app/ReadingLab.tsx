@@ -474,7 +474,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     [focusableTargets],
   );
 
-  const hardestSentence: { index: number; score: number; targetCount: number } | null = useMemo(() => {
+  const hardestSentence = useMemo<{ index: number; score: number; targetCount: number } | null>(() => {
     let best: { index: number; score: number; targetCount: number } | null = null;
     sentences.forEach((sentence, sentenceIndex) => {
       let score = 0;
