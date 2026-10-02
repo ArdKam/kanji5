@@ -1,3 +1,11 @@
+# Canonical roadmap notice
+
+The complete forward-looking roadmap is now maintained in [ROADMAP.md](./ROADMAP.md). It combines the existing Kanji foundation roadmap, the cross-domain/Vocabulary/Grammar plan, and the new Public Product Readiness phase for broader distribution.
+
+This document is retained in full as historical/phase-specific planning context; do not treat it as a competing roadmap. When the two documents differ, ROADMAP.md is the canonical execution order and status source.
+
+---
+
 # Kanji5 Product & Engineering Roadmap
 
 > This roadmap is the active planning source for work after the v1.9 learning-engine closeout. It complements `V1.9-ROADMAP.md`: v1.9 P0–P7 are complete; this document defines the remaining product hardening and the staged path from a polished Kanji foundation to Vocabulary and Grammar.
