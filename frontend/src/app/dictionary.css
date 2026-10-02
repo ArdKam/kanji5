@@ -1851,6 +1851,21 @@
   overflow:hidden;
   text-overflow:ellipsis;
 }
+@media(max-width:390px){
+  .dictionary-section-nav{
+    overflow-x:visible;
+    flex-wrap:wrap;
+  }
+  .dictionary-section-tab{
+    flex:1 1 calc(20% - 4px);
+    min-width:44px;
+    padding-inline:5px;
+  }
+  .dictionary-section-tab-label{
+    overflow:visible;
+    text-overflow:clip;
+  }
+}
 .dictionary-tabpanel{
   min-width:0;
   outline:none;
