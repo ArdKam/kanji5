@@ -26,6 +26,7 @@ test('first-open onboarding runs as a dedicated resumable entry flow',async({pag
   await expect(onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true})).toBeVisible();
   await onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true}).click();
   await expect(onboarding).toContainText('روش کار');
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
   await expect(onboarding.getByRole('heading',{name:'از کجا شروع کنیم؟'})).toBeVisible();
   await onboarding.getByRole('button',{name:'از ابتدا',exact:true}).click();
   await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
