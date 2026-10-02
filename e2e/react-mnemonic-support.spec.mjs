@@ -21,6 +21,9 @@ async function goToMnemonicSupportPage(card) {
 test("learning card exposes reading and vocabulary memory bridges without altering grading", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
+    localStorage.setItem("kanji5-onboarding-complete", "complete");
     localStorage.setItem("kanji5-ui-language", "en");
   });
   await page.goto("/");
