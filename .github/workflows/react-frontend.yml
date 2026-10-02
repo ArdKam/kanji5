@@ -13,6 +13,8 @@ on:
       - "scripts/test-service-worker-shell.mjs"
       - "scripts/test-react-release-integrity.mjs"
       - "scripts/verify-live-pages-e2e.mjs"
+      - "scripts/stage-pages-site.mjs"
+      - "scripts/test-public-doc-staging.mjs"
       - "scripts/test-architecture-build-cleanup.mjs"
       - "scripts/test-prepared-mnemonics.mjs"
       - "scripts/test-mnemonic-support.mjs"
@@ -59,6 +61,7 @@ on:
       - "v2-observability.js"
       - "v2-scheduling-core.js"
       - "e2e/react-browser-compat.spec.mjs"
+      - "playwright.compat.config.mjs"
       - "supabase-sync.js"
       - "vendor/**"
       - "kanji-data.json"
@@ -119,7 +122,7 @@ jobs:
         run: npm test
       - name: Install Chromium, Firefox, and WebKit
         working-directory: .
-        run: npx playwright install chromium firefox webkit
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Run engine-to-React boundary gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
