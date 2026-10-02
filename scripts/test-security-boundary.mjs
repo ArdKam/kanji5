@@ -16,6 +16,11 @@ const unsafe=stack.filter(file=>{
   return /dangerouslySetInnerHTML|\.innerHTML\s*=/.test(source);
 });
 assert.deepEqual(unsafe,[],'React presentation must not inject HTML directly; render external/provider text as data.');
+const runtime=fs.readFileSync('review-runtime.js','utf8');
+assert.match(runtime,/function escapeHtml\(value\)/);
+assert.match(runtime,/escapeHtml\(x\.word\)/);
+assert.match(runtime,/escapeHtml\(x\.reading\)/);
+
 const config=fs.readFileSync('supabase-config.js','utf8');
 assert.match(config,/anonKey/);
 assert.doesNotMatch(config,/service_role|service-role|SUPABASE_SERVICE_ROLE/i);
