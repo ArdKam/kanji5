@@ -194,6 +194,33 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card).toBeHidden();
 });
 
+test('Dictionary card tabs fit narrow mobile widths without horizontal overflow',async({page})=>{
+  await clean(page);
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible();
+  const tile=pageRoot.locator('.kanji-catalog-tile').first();
+  await expect(tile).toBeVisible();
+  for(const width of [360,375,390]){
+    await page.setViewportSize({width,height:844});
+    await tile.click();
+    const card=page.getByRole('dialog');
+    await expect(card).toBeVisible();
+    const nav=card.locator('.dictionary-section-nav');
+    const tabs=nav.locator('.dictionary-section-tab');
+    await expect(tabs).toHaveCount(5);
+    const metrics=await nav.evaluate(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth}));
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth+1);
+    for(const tab of await tabs.all()){
+      const box=await tab.boundingBox();
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+    await card.locator('.dialog-close').click();
+    await expect(card).toBeHidden();
+  }
+});
+
 test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
