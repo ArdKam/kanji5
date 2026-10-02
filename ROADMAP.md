@@ -129,44 +129,56 @@ Especially avoid:
 
 ### 2.1 Verified current status ledger — 2026-10-02
 
-This ledger is the anti-regression checkpoint for future reviews. Reviewers must start here and only inspect the remaining gaps.
+This ledger is the anti-regression checkpoint for future reviews. Only work present on current `main` counts as complete.
 
-**DONE on current \`main\`:**
+**DONE on current `main`:**
 - Release/bootstrap foundation and React artifact hygiene.
-- Pre-Vocabulary public-readiness implementation: learner-state preservation across dataset revisions, bounded local diagnostics, external-content escaping, release evidence/docs, and browser compatibility gates.
-- D4 domain-neutral scheduling boundary: shared card identity seam with FSRS remaining the sole scheduling authority.
+- Guest-first account safeguards, local-state preservation, boot-failure recovery, and the current public Help/Browser/Privacy/Feedback surface.
 - D1 canonical cross-domain content identities.
 - D2 shared evidence envelope.
 - D3 deterministic cross-domain relationships.
+- D4 domain-neutral scheduling boundary: distinct card identity seam with FSRS remaining the sole scheduling authority.
 - D5 context migration/offline cross-domain seam.
-- Stats exposure/hydration/mastery corrections.
-- Advanced Stats and deterministic learning-efficacy evidence surface.
-- Learning vs Active Recall separation, compact session feedback, four-page Learning Card pager, keyboard-accessible shortcuts, swipe navigation, mobile feedback/card bounds.
-- Reading Lab session preservation/restoration, in-place word/Kanji lookup, unique + occurrence-weighted coverage, hardest-sentence focus, sentence navigation, speech/autoplay, SRT/VTT synchronization, lightweight sentence translation/annotation, and optional Japanese voice selection.
-- Dictionary narrow-mobile tabs and personal-mnemonic draft preservation across dictionary remount/async loading.
+- Stats exposure/hydration/mastery corrections, Advanced Stats, and deterministic learning-efficacy evidence.
+- Learning vs Active Recall separation, Learning Card pager/swipe/rating flow, keyboard behavior, mobile bounds, and exercise-toggle boundaries.
+- Reading Lab session preservation/lookup/navigation/audio/speech/translation/annotation work covered by the current E2E suite.
+- Dictionary narrow-mobile behavior and personal-mnemonic draft preservation.
 - Settings exercise toggles, Placement/Test ownership correction, Data Backup/Restore foundation, and separated destructive reset UI.
-- Mnemonics information architecture plus curated/generated/personal provenance; 2,136/2,136 prepared coverage and current curated-content QA.
+- Mnemonic information architecture, provenance labels, prepared coverage, and current curated-content QA.
 
-**PARTIAL / remaining before Public Product Readiness:**
-- Release verification: live artifact, cache, stale-client, and offline verification are now evidenced on current \`main\`; representative-device performance measurement and broader live smoke coverage remain.
-- Reading Lab: only the later Reading Library remains; sentence translation/annotation and optional Japanese voice selection are implemented and E2E-covered.
-- Mnemonics: current 259-entry curated corpus passed structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Future content refresh is routine QA, not a release blocker.
-- Responsive/accessibility/performance: final representative-device evidence outside the CI matrix remains; CI covers 360/375/390, tablet, desktop, keyboard, focus, touch targets, and accessibility contracts.
+**PARTIAL — current-main gaps before Public Product Readiness:**
+- Release integrity: the latest current-main React push run `2461` failed the artifact CSS budget (built CSS 226.53 kB vs a 221 kB contract limit); the corresponding Pages deployment run `1550` was skipped. Representative-device performance and post-merge live smoke evidence are still outstanding.
+- R4 Data safety/persistence: learner state is already local-first and backup exists, but the domain-neutral persistence adapter is not yet merged to current `main`, and the full reload/restart/login/logout/sync/conflict/restore matrix is not yet evidenced on the current baseline.
+- R6 Backup/Restore: foundation exists and is exercised, but production-quality migration/conflict/restore evidence is not complete.
+- R7 PWA installability: current `main` still uses the older `icon.svg`/manifest shape; explicit 192/512 install assets are prepared in unmerged PR #396. Production install/reinstall evidence remains missing.
+- R8 Offline reliability: core offline/stale-client paths are contract-tested, but current-main live post-deploy evidence and target-device coverage are incomplete.
+- R9 Browser compatibility: policy and automated Firefox/WebKit smoke infrastructure exist, but the latest current-main WebKit run failed because the CI runner lacked required WebKit system libraries; this is an environment/pipeline gap, not evidence of a product failure.
+- R10 Internationalization: bilingual UI language separation is implemented, but comprehensive review of every error/empty/accessibility/date/number surface is not yet a release sign-off.
+- R11 Error handling/observability: bounded diagnostics and startup recovery exist; broader capture of controlled runtime failures remains in unmerged PR #392.
+- R12 Security: source/contract checks exist, but the dedicated production review of CSP/headers, Supabase RLS/auth/session configuration, backup tampering, dependency exposure, and third-party services is still required.
+- R13 Privacy/legal: the user-facing privacy/data notice exists, but Terms, exact production-service disclosures, deletion semantics, and target-market legal review remain.
+- R14 User documentation: user-facing product, browser-support, privacy/data, and feedback documents exist in the repository, but current Pages staging does not yet include all linked docs.
+- R16 Provenance: current Kanji/mnemonic provenance is strong and Vocabulary foundation metadata exists, but public-facing provenance requirements must be finalized as Vocabulary becomes first-class.
+- R17 Public product quality bar: meaningful implementation exists, but the complete new-user-to-recovery journey is not yet demonstrated end-to-end on real target environments.
 
-**IN PROGRESS / remaining before Vocabulary MVP:**
-- Phase 0/A1 external evidence: representative-device performance and final current-release production smoke.
-- Phase R public-readiness completion and sign-off.
-
-**DONE before Vocabulary architecture:**
-- D4 — domain-neutral scheduling boundary implemented and contract-tested.
-
-**PENDING next strategic stage:**
+**PENDING:**
+- R18 Public Beta — requires a real-user cohort and structured observations.
+- R19 Public Release Gate — depends on the remaining R1–R17 evidence and sign-offs.
 - E — Vocabulary MVP.
 - F — Context/Reading integration.
 - G — Grammar foundation.
 
-**Intentionally not active backlog:** A2, A3, A5, A6, and the completed D1/D2/D3/D5 foundations above. Do not recreate these from scratch because an old PR with a matching title is still open.
+**DO NOT REOPEN without a verified regression:**
+- A2 Learning / Active Recall.
+- A3 Stats.
+- A5 Dictionary.
+- A6 Settings.
+- A7 current mnemonic foundation.
+- D1/D2/D3/D5 cross-domain foundations.
 
+**Important open-PR rule:**
+- PR #389 (persistence adapter), #392 (controlled-failure observability), and #396 (release-path/PWA hardening) are not current-main completion evidence until merged and verified on the resulting main commit.
+- PR #390, #393, #394, and #395 were closed/superseded because their work was consolidated into the current release-path effort; do not treat them as merged product state.
 ---
 
 # 3. Current baseline and already-completed foundations
@@ -299,7 +311,7 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ## A1. Release/runtime integrity
 
-### PARTIAL — final release verification remains
+### PARTIAL — current-main release verification is still open
 
 - \`app-bootstrap.js\` loading restored.
 - \`react-dist/\` removed from git.
@@ -310,13 +322,14 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ### PENDING
 
-- verify live asset graph after every release
+- re-run the current-main React release matrix after the CSS budget fix
+- verify live asset graph after the resulting release
 - verify cold/repeat offline behavior
-- verify cache invalidation
-- verify stale-client recovery
+- verify cache invalidation and stale-client recovery
 - measure startup on representative mobile devices
 - track LCP/INP/CLS and long-task causes
 - treat missing assets/font failures/dynamic imports/offline regressions as blockers
+- do not mark Phase 0 complete while the current-main React release gate is failing or Pages deployment is skipped
 
 ---
 
@@ -812,7 +825,7 @@ Verify:
 
 Do **not** start with a full IndexedDB rewrite just because public users are coming.
 
-First establish a domain-neutral storage abstraction.
+First establish a domain-neutral storage abstraction. This remains pending on current `main` until the adapter PR is merged and fully verified.
 
 Conceptually:
 
@@ -899,7 +912,7 @@ Verify:
 - update behavior
 - reinstall behavior
 
-The current manifest should be rechecked for production install requirements, including appropriate icon sizing/assets.
+The current manifest is not yet the final install baseline. Explicit 192/512 install assets and metadata remain pending merge and production verification.
 
 ---
 
@@ -1005,7 +1018,7 @@ At minimum retain enough diagnostics to answer:
 - browser/platform
 - whether user data was affected
 
-Do not introduce invasive analytics merely for observability.
+Do not introduce invasive analytics merely for observability. Prefer the existing bounded local diagnostics surface and expand it only where a concrete failure mode is currently unobservable.
 
 ---
 
@@ -1238,7 +1251,7 @@ Relationships must remain deterministic and versionable.
 
 ---
 
-## D4. Scheduling boundary — PENDING / BLOCKER FOR FULL VOCABULARY LEARNING
+## D4. Scheduling boundary — DONE / BLOCKER FOR FULL VOCABULARY LEARNING
 
 This is the correct interpretation of the earlier SRS concern.
 
