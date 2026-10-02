@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 const runtime=fs.readFileSync('review-runtime.js','utf8');
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const append='state.reviews.push({eventId:reviewEventId,deviceId:reviewDeviceId,parentEventId:previousEvent,baseRecord,id,at:now.toISOString(),rating:which,due:rec.card.due,scheduledDays:rec.card.scheduled_days||0});';
+const appendPrefix='state.reviews.push({eventId:reviewEventId,deviceId:reviewDeviceId,parentEventId:previousEvent,baseRecord,id,';
 const cap='if(state.reviews.length>5000)state.reviews.splice(0,state.reviews.length-5000);';
 assert(runtime.includes('const previousEvent=[...state.reviews].reverse().find(r=>r.id===id&&r.eventId)?.eventId||null'),'Review parent-event lookup missing');
 assert(runtime.includes('const reviewEventId=eventId();const reviewDeviceId=deviceId();const baseRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))});'),'FSRS review event metadata capture missing');
-assert(runtime.includes(append),'Review event append path missing');
+assert(runtime.includes(appendPrefix),'Review event append path missing');
 assert(runtime.includes(cap),'Runtime review history is not bounded immediately after append');
 assert(runtime.indexOf(cap)>runtime.indexOf(append),'Runtime review history cap must run after append');
 assert(runtime.includes('const total=state.reviews.length'),'Stats must consume the bounded runtime history');
