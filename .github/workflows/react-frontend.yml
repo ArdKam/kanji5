@@ -59,6 +59,7 @@ on:
       - "v2-observability.js"
       - "v2-scheduling-core.js"
       - "e2e/react-browser-compat.spec.mjs"
+      - "playwright.compat.config.mjs"
       - "supabase-sync.js"
       - "vendor/**"
       - "kanji-data.json"
