@@ -16,6 +16,8 @@ async function reachStartingPoint(page) {
   await expect(onboarding).toBeVisible({ timeout: 20000 });
   await expect(page.locator("#root .app-shell")).toHaveCount(0);
   await onboarding.getByRole("button", { name: /Start learning today/ }).click();
+  await expect(onboarding.getByRole("heading", { name: "Learn, recall, review" })).toBeVisible();
+  await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
   return onboarding;
 }
