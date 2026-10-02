@@ -122,7 +122,7 @@ jobs:
         run: npm test
       - name: Install Chromium, Firefox, and WebKit
         working-directory: .
-        run: npx playwright install chromium firefox webkit
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Run engine-to-React boundary gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
