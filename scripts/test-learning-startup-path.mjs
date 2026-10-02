@@ -1,3 +1,4 @@
+// Startup contract: secondary surfaces remain deferred; Active Recall launcher stays first-interaction eager.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
