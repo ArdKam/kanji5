@@ -9,6 +9,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: process.env.CI ? 'line' : 'html',
+  use: { baseURL: 'http://127.0.0.1:4173' },
   outputDir: 'test-results/compat',
   projects: [
     { name: 'firefox', use: { browserName: 'firefox', serviceWorkers: 'allow' } },
