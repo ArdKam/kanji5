@@ -311,7 +311,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 
 @media(min-width:761px){.app-shell{padding-bottom:118px;}}
 
-.readings-header{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--mute);font-size:var(--text-xs);font-weight:800}.reading-toggle{min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--sumi);font:inherit;font-weight:800}.reading-toggle:hover{background:var(--washi)}
+.readings-header{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--mute);font-size:var(--text-xs);font-weight:800}.reading-toggle{min-height:45px;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--sumi);font:inherit;font-weight:800}.reading-toggle:hover{background:var(--washi)}.learning-back-readings .audio-button{width:45px;height:45px;min-height:45px}
 
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .dictionary-dialog{width:min(720px,calc(100vw - 24px));}
