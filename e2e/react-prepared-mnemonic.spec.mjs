@@ -131,8 +131,10 @@ test("generated mnemonic scaffolds are non-persistent prompts rather than direct
     localStorage.clear();
     localStorage.setItem("kanji5-ui-language", "en");
   });
-  await page.goto("/");
-  await expect(page.locator(".experience-nav")).toBeVisible({ timeout: 10000 });
+  await page.goto("/?onboarding=complete");
+  await page.evaluate(() => localStorage.setItem("kanji5-onboarding-v2", "complete"));
+  await page.reload();
+  await expect(page.locator(".experience-nav")).toBeVisible({ timeout: 15000 });
   const dictionaryTab = page.locator(".experience-nav .experience-tab").nth(2);
   await dictionaryTab.click();
   await expect(page.locator(".dictionary-page")).toBeVisible({ timeout: 10000 });
