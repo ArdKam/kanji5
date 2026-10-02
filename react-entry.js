@@ -25,8 +25,36 @@ if(!reactStylesheet){
   reactStylesheet.dataset.kanji5React='true';
   document.head.appendChild(reactStylesheet);
 }
+function showReactBootFailure(){
+  if(!startupRoot)return;
+  startupRoot.classList.remove('is-ready');
+  startupRoot.classList.add('is-error');
+  startupRoot.removeAttribute('aria-hidden');
+  startupRoot.replaceChildren();
+  const card=document.createElement('div');
+  card.className='kanji5-startup-card';
+  const mark=document.createElement('span');
+  mark.className='kanji5-startup-mark';
+  mark.lang='ja';
+  mark.textContent='迷';
+  const title=document.createElement('h1');
+  title.className='kanji5-startup-error-title';
+  const copy=document.createElement('p');
+  copy.className='kanji5-startup-error-copy';
+  const action=document.createElement('button');
+  action.className='kanji5-startup-error-action';
+  action.type='button';
+  const isFa=document.documentElement.lang==='fa';
+  title.textContent=isFa?'کانجی‌یار باز نشد':'Kanji5 could not start';
+  copy.textContent=isFa?'یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد. صفحه را دوباره بارگذاری کنید.':'A required application file could not be loaded for this release. Reload the page and try again.';
+  action.textContent=isFa?'بارگذاری دوباره':'Reload';
+  action.addEventListener('click',()=>window.location.reload());
+  card.append(mark,title,copy,action);
+  startupRoot.appendChild(card);
+  console.error('Kanji 5 React presentation failed to boot.');
+}
 import('./react-dist/kanji5-react.js'+assetVersion)
-  .catch(error=>console.error('Kanji 5 React presentation failed to boot.',error));
+  .catch(()=>showReactBootFailure());
 
 function scheduleAccountFallback(){
   const load=()=>{
