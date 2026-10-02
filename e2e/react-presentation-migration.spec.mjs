@@ -262,8 +262,20 @@ test('Reading Lab exposes occurrence-weighted coverage and bounded hardest-sente
   await expect(analysisStats.nth(2)).toContainText('پوشش بر اساس تعداد تکرار');
   const hardest=lab.locator('.reading-lab-focus-button').filter({hasText:'سخت‌ترین جمله'});
   await expect(hardest).toBeEnabled();
+  const expectedIndex=await lab.locator('.reading-lab-reader-sentence').evaluateAll((sentences)=>{
+    const weights={attention:3,new:2,learning:1,familiar:0};
+    const scores=sentences.map(sentence=>[...sentence.querySelectorAll('.reading-lab-reader-kanji')].reduce((sum,node)=>{
+      for(const bucket of Object.keys(weights)){
+        if(node.classList.contains(bucket)) return sum+weights[bucket];
+      }
+      return sum;
+    },0));
+    const max=Math.max(...scores);
+    return scores.findIndex(score=>score===max&&score>0);
+  });
+  expect(expectedIndex).toBeGreaterThanOrEqual(0);
   await hardest.click();
-  await expect(lab.locator('.reading-lab-reader-sentence.active')).toContainText('明日は先生です。');
+  await expect(lab.locator('.reading-lab-reader-sentence.active')).toHaveAttribute('data-reading-lab-sentence-index',String(expectedIndex));
   await expect(lab.locator('textarea')).toHaveValue('今日は学生です。明日は先生です。');
 });
 
