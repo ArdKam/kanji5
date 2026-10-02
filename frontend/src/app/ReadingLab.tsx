@@ -397,11 +397,6 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     return () => window.speechSynthesis.removeEventListener?.("voiceschanged", loadVoices);
   }, [speechSupported]);
 
-  useEffect(() => {
-    if (!speechVoiceName || !speechVoices.length) return;
-    if (!speechVoices.some(voice => voice.name === speechVoiceName)) setSpeechVoiceName("");
-  }, [speechVoiceName, speechVoices]);
-
   const speakUtterance = (text: string) => {
     if (!speechSupported || !text.trim()) return;
     window.speechSynthesis.cancel();
