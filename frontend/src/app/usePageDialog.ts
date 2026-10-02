@@ -8,48 +8,31 @@ export function usePageDialog(open: boolean, onClose: () => void): RefObject<HTM
     const dialog = ref.current;
     if (!dialog) return;
 
-    let frame = 0;
-
     if (open) {
       openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      frame = window.requestAnimationFrame(() => {
-        if (!dialog.isConnected) return;
-        if (!dialog.open) {
-          try {
-            dialog.showModal();
-          } catch {
-            if (dialog.isConnected) dialog.setAttribute("open", "");
-          }
-        }
+      if (!dialog.open) dialog.showModal();
 
-        const focusTarget = dialog.querySelector<HTMLElement>(
-          "[autofocus], .dialog-close, button, input, textarea, select, [tabindex]:not([tabindex='-1'])",
-        );
-        focusTarget?.focus();
-      });
+      const focusTarget = dialog.querySelector<HTMLElement>(
+        "[autofocus], .dialog-close, button, input, textarea, select, [tabindex]:not([tabindex='-1'])",
+      );
+      requestAnimationFrame(() => focusTarget?.focus());
 
       const onCancel = (event: Event) => {
         event.preventDefault();
         onClose();
       };
       dialog.addEventListener("cancel", onCancel);
-
       return () => {
-        window.cancelAnimationFrame(frame);
         dialog.removeEventListener("cancel", onCancel);
       };
     }
 
-    if (dialog.open && dialog.isConnected) dialog.close();
+    if (dialog.open) dialog.close();
     const opener = openerRef.current;
     openerRef.current = null;
     if (opener && document.contains(opener)) {
-      frame = window.requestAnimationFrame(() => {
-        if (document.contains(opener)) opener.focus({ preventScroll: true });
-      });
+      requestAnimationFrame(() => opener.focus({ preventScroll: true }));
     }
-
-    return () => window.cancelAnimationFrame(frame);
   }, [open, onClose]);
 
   return ref;
