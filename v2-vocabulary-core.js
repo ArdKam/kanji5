@@ -6,6 +6,8 @@ const MAX_TEXT=240;
 const MAX_GLOSS=160;
 const MAX_GLOSSES=8;
 const JAPANESE_KANJI_RE=/[\u3400-\u9fff]/;
+const JAPANESE_TEXT_RE=/[\u3040-\u30ff\u3400-\u9fff]/;
+const KANA_ONLY_RE=/^[\u3040-\u30ffー・]+$/;
 
 function text(value,max=MAX_TEXT){
   return String(value??'').normalize('NFKC').replace(/[ \t\r\n]+/g,' ').trim().slice(0,max);
@@ -96,13 +98,18 @@ export function normalizeVocabularyItem(entry,options={}){
 
 export function validateVocabularyItem(item){
   const value=item&&typeof item==='object'?item:{};
+  const written=text(value.written);
+  const reading=text(value.reading);
   const reasons=[];
   if(value.schemaVersion!==VOCABULARY_SCHEMA_VERSION)reasons.push('schema_version');
   if(value.domain!==VOCABULARY_DOMAIN)reasons.push('domain');
   if(!text(value.contentId))reasons.push('missing_content_id');
-  if(!text(value.written))reasons.push('missing_written');
-  if(!text(value.reading))reasons.push('missing_reading');
+  if(!written)reasons.push('missing_written');
+  else if(!JAPANESE_TEXT_RE.test(written))reasons.push('malformed_written');
+  if(!reading)reasons.push('missing_reading');
+  else if(!KANA_ONLY_RE.test(reading))reasons.push('malformed_reading');
   if(!Array.isArray(value.glosses)||!value.glosses.length)reasons.push('missing_glosses');
+  if(Array.isArray(value.glosses)&&value.glosses.some(gloss=>!text(gloss)))reasons.push('empty_gloss');
   if(value.provenance?.source&&!text(value.provenance.source))reasons.push('invalid_source');
   return {valid:reasons.length===0,reasons};
 }
