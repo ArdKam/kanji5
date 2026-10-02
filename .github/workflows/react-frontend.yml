@@ -56,6 +56,9 @@ on:
       - "v1.8-*.js"
       - "v1.9-*.js"
       - "review-runtime.js"
+      - "v2-observability.js"
+      - "v2-scheduling-core.js"
+      - "e2e/react-browser-compat.spec.mjs"
       - "supabase-sync.js"
       - "vendor/**"
       - "kanji-data.json"
@@ -114,9 +117,9 @@ jobs:
       - name: Run root contract/unit suite
         working-directory: .
         run: npm test
-      - name: Install Chromium
+      - name: Install Chromium, Firefox, and WebKit
         working-directory: .
-        run: npx playwright install chromium
+        run: npx playwright install chromium firefox webkit
       - name: Run engine-to-React boundary gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
@@ -156,6 +159,12 @@ jobs:
       - name: Run React accessibility gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-accessibility.spec.mjs
+      - name: Run Firefox compatibility smoke
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 --browser=firefox e2e/react-browser-compat.spec.mjs
+      - name: Run WebKit compatibility smoke
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 --browser=webkit e2e/react-browser-compat.spec.mjs
       - name: Run React PWA release gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs

@@ -106,7 +106,7 @@ export function PublicOnboarding({
       </div>
 
       <div className="actions">
-        <button className="button primary" type="button" disabled={busy} onClick={() => void start()}>
+        <button data-testid="public-onboarding-start" className="button primary" type="button" disabled={busy} onClick={() => void start()}>
           {t("onboardingStart", language)}
         </button>
         <button className="button secondary" type="button" disabled={busy} onClick={() => { dismiss(); onOpenAccount(); }}>
