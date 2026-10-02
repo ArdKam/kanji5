@@ -113,12 +113,12 @@ test('Advanced statistics expose deterministic efficacy evidence without inventi
   await trigger.click();
   const advanced=dialog.locator('.stats-advanced');
   await expect(advanced).toBeVisible();
-  await expect(advanced).toContainText('Recovery');
-  await expect(advanced).toContainText('Attribute coverage');
-  await expect(advanced).toContainText('Session completion');
-  await expect(advanced).toContainText('Unknown');
-  await expect(advanced).toContainText('Repeated failure');
-  await expect(advanced).toContainText('Not enough data').or.toContainText('Sufficient evidence');
+  await expect(advanced).toContainText('نرخ بازیابی');
+  await expect(advanced).toContainText('پوشش مهارت‌ها');
+  await expect(advanced).toContainText('تکمیل جلسه');
+  await expect(advanced).toContainText('نرخ ناشناخته');
+  await expect(advanced).toContainText('تکرار خطای کل');
+  await expect(advanced).toContainText('شواهد محدود است');
 });
 
 test('Statistics uses persisted kanji exposure for studied coverage',async({page})=>{
