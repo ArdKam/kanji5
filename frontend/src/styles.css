@@ -2570,10 +2570,6 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   gap:9px;
 }
 .settings-save-actions .button{flex:1 1 0;}
-.settings-support-links{display:flex;flex-wrap:wrap;gap:8px;}
-.settings-support-links .button{min-height:40px;text-decoration:none;white-space:normal;text-align:center;}
-@media(max-width:520px){.settings-support-links{display:grid;}.settings-support-links .button{width:100%;}}
-
 .settings-danger-zone{
   margin-top:20px;
   border-top:1px solid var(--line-soft);
