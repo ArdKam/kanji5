@@ -1,3 +1,4 @@
+.kanji5-onboarding-entry{position:fixed;inset:0;z-index:2100;isolation:isolate;pointer-events:auto}
 .kanji5-onboarding-root{--onboarding-paper:#f7f2e8;--onboarding-ink:#252525;--onboarding-muted:#6e6a61;--onboarding-line:rgba(37,37,37,.12);--onboarding-accent:#304f74;--onboarding-accent-soft:rgba(48,79,116,.10);--onboarding-warm:#bb6b70;min-height:100svh;width:100%;background:radial-gradient(circle at 50% -5%,rgba(48,79,116,.07),transparent 38%),var(--onboarding-paper);color:var(--onboarding-ink);display:flex;flex-direction:column;overflow:hidden}
 .kanji5-onboarding-root *,.kanji5-onboarding-root *::before,.kanji5-onboarding-root *::after{box-sizing:border-box}
 .kanji5-onboarding-header{width:min(1120px,100%);margin:0 auto;padding:18px 24px 8px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
