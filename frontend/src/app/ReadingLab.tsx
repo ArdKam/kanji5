@@ -205,8 +205,9 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   );
 
   const sentences = useMemo(() => subtitleCues.length ? subtitleCues.map(cue => ({ index: cue.index, text: cue.text })) : splitReadingSentences(value), [subtitleCues, value]);
-  const hardestSentence = useMemo(() => {
-    let best: { index: number; score: number } | null = null;
+  const hardestSentenceIndex = useMemo(() => {
+    let bestIndex = -1;
+    let bestScore = 0;
     sentences.forEach((sentence, index) => {
       let score = 0;
       for (const character of Array.from(sentence.text)) {
@@ -215,9 +216,12 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
         const bucket = getMasteryBucket(item);
         score += bucket === "attention" ? 3 : bucket === "new" ? 2 : bucket === "learning" ? 1 : 0;
       }
-      if (score > 0 && (!best || score > best.score)) best = { index, score };
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
     });
-    return best;
+    return bestIndex;
   }, [catalogByCharacter, sentences]);
   const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
   const syncReady = Boolean(audioUrl && subtitleCues.length);
@@ -469,10 +473,10 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
   const inputCharacters = Array.from(value).length;
 
   const focusHardestSentence = () => {
-    if (!hardestSentence) return;
-    selectSentence(hardestSentence.index, false);
+    if (hardestSentenceIndex < 0) return;
+    selectSentence(hardestSentenceIndex, false);
     window.requestAnimationFrame(() => {
-      sentenceRefs.current[hardestSentence.index]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      sentenceRefs.current[hardestSentenceIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   };
 
@@ -666,7 +670,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               <div className="reading-lab-focus-controls" aria-label={t("readingLabFocusControls", language)}>
                 <button className="button secondary reading-lab-focus-button" type="button" disabled={!focusableTargets.length} onClick={() => focusNextTarget(false)}>{t("readingLabFocusNext", language)}</button>
                 <button className="button secondary reading-lab-focus-button" type="button" disabled={!unknownTargets.length} onClick={() => focusNextTarget(true)}>{t("readingLabNextUnknown", language)}</button>
-                <button className="button secondary reading-lab-focus-button" type="button" disabled={!hardestSentence} onClick={focusHardestSentence}>{t("readingLabHardestSentence", language)}</button>
+                <button className="button secondary reading-lab-focus-button" type="button" disabled={hardestSentenceIndex < 0} onClick={focusHardestSentence}>{t("readingLabHardestSentence", language)}</button>
               </div>
               <div className="reading-lab-sentence-position">
                 <span>{t("readingLabSentence", language)}</span>
