@@ -4,7 +4,7 @@ async function cleanStart(page){
   await page.goto('/?legacy=1');
   await page.evaluate(()=>{
     for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);
-    sessionStorage.clear();
+    sessionStorage.clear();localStorage.setItem('kanji5-onboarding-v2','complete');
   });
   await page.reload();
   await expect(page.locator('#app')).toBeVisible({timeout:20000});
