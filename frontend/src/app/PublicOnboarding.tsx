@@ -71,7 +71,7 @@ export function PublicOnboarding({
   };
 
   return (
-    <section className="surface public-onboarding" aria-labelledby="public-onboarding-title">
+    <section className="surface card public-onboarding" aria-labelledby="public-onboarding-title">
       <div className="public-onboarding-copy">
         <p className="eyebrow red">{t("onboardingEyebrow", language)}</p>
         <h2 id="public-onboarding-title">{t("onboardingTitle", language)}</h2>
