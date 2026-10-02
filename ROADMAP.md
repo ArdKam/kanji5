@@ -147,8 +147,8 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 
 **PARTIAL / remaining before Public Product Readiness:**
 - Release verification: live artifact/cache/stale-client/offline verification and representative-device performance measurement.
-- Reading Lab: lightweight translation/annotation, optional voice selection, and later Reading Library are still roadmap items.
-- Mnemonics: semantic/content-quality QA remains; coverage is not the remaining problem.
+- Reading Lab: lightweight sentence translation/annotation and optional Japanese voice selection are implemented; only the later Reading Library remains.
+- Mnemonics: current 259-entry curated corpus passed corpus-wide structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Ongoing content maintenance remains future QA, not a release blocker.
 - Responsive/accessibility/performance: final cross-device WCAG/CWV verification remains.
 - Phase B/C closeout: ensure metrics/content QA policy and documentation match the implementation.
 
@@ -406,6 +406,10 @@ Show insufficient evidence instead of misleading percentages.
 
 ## A4. Reading Lab
 
+### Status — 2026-10-02
+
+**DONE for current public-readiness scope.** Core session/navigation/audio work plus lightweight translation/annotation and optional Japanese voice selection are implemented and covered by E2E. Reading Library remains a later post-foundation feature.
+
 ### Core bug/UX requirements
 
 - Preserve entered text when scrolling.
@@ -504,6 +508,10 @@ Exercise toggles, Placement/Test ownership, Data Backup/Restore, and reset separ
 ---
 
 ## A7. Mnemonics / memory aids
+
+### Status — 2026-10-02
+
+**DONE for current public-readiness scope.** Prepared coverage remains 2,136/2,136 with 259 curated + 1,877 generated scaffolds. The current curated corpus passed structural/quality checks, exact-duplicate guards, and a 20-item representative semantic sentinel review. Future content refreshes remain routine QA and do not reopen this roadmap item without a regression or a new acceptance criterion.
 
 ### Information architecture
 
