@@ -65,7 +65,6 @@ on:
       - "v1.7-*.js"
       - "v1.8-*.js"
       - "v1.9-*.js"
-      - "review-runtime.js"
       - "v2-observability.js"
       - "v2-scheduling-core.js"
       - "e2e/react-browser-compat.spec.mjs"
