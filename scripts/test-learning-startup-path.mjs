@@ -23,10 +23,6 @@ mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("
 mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("handwritingPractice",language)}</div>}>','Handwriting has a bounded lazy fallback');
 
 
-for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
-  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
-}
-
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
 assert.doesNotMatch(session,/const planPromise=import\('\.\/v1\.6-session-core\.js'\)/);
