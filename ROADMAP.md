@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\` (2026-10-02). PR #396 is merged; post-merge React verification is still in progress. This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, the verified public-readiness account/boot safeguards, and the completed Kanji UX foundation slices described below.
+> **Implementation baseline reviewed:** \`main\` at commit \`fab8f4ec0fdb77cc5a122f8ec2c5ec74d38d6dcc\` (2026-10-02). PR #396 is merged; the resulting current-main React verification is still in progress. This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, the verified public-readiness account/boot safeguards, and the completed Kanji UX foundation slices described below.
 >
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
