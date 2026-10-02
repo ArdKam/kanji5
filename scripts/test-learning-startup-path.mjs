@@ -11,9 +11,15 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
-for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
-  assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
+mustContain(app,'import { lazy, Suspense,','React startup path may defer secondary surfaces without changing the Learning-first renderer');
+
+const deferredSurfaces=['StrokeOrderViewer','DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice'];
+for(const name of deferredSurfaces){
+  assert.doesNotMatch(app,new RegExp('import \\{ '+name+' \\} from'),'Learning startup must not eagerly import '+name);
+  mustContain(app,'const '+name+' = lazy(() => import("./'+name+'")','Learning startup must lazy-load '+name);
 }
+mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("dictionaryLoading",language)}</div>}>','Secondary surfaces must have a bounded loading fallback');
+mustContain(app,'<Suspense fallback={<div className="loading" role="status">{t("strokeOrderLoading",getLanguage())}</div>}>','Stroke Order must load only when its page is selected');
 
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');
