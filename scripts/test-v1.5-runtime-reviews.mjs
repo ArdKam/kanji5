@@ -7,6 +7,6 @@ assert(runtime.includes('const previousEvent=[...state.reviews].reverse().find(r
 assert(runtime.includes('const reviewEventId=eventId();const reviewDeviceId=deviceId();const baseRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))});'),'FSRS review event metadata capture missing');
 assert(runtime.includes(appendPrefix),'Review event append path missing');
 assert(runtime.includes(cap),'Runtime review history is not bounded immediately after append');
-assert(runtime.indexOf(cap)>runtime.indexOf(append),'Runtime review history cap must run after append');
+assert(runtime.indexOf(cap)>runtime.indexOf(appendPrefix),'Runtime review history cap must run after append');
 assert(runtime.includes('const total=state.reviews.length'),'Stats must consume the bounded runtime history');
 console.log('Kanji 5 v1.5 runtime review history and FSRS event test passed.');
