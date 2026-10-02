@@ -33,29 +33,84 @@ Avoid introducing alternate spellings, transliterations, or competing product na
 
 This is a preliminary product/market screen, not legal trademark clearance.
 
-### Web / market screen
+### 1. Japanese linguistic screen — PRELIMINARY PASS
 
-Searches on 2026-10-02 found existing unrelated uses of the string “RINEMI”, including:
+The exact Japanese rendering リネミ is phonotactically straightforward as ri-ne-mi and does not surface as an obvious standard Japanese dictionary word in the web-indexed Japanese-language searches performed on 2026-10-02.
 
-- a product/design name for engineered-marble 3D wall/floor tiles. citeturn704006search1
-- an OOO “RINEMI” company registered in Moscow in August 2026, with wholesale/retail as its primary activity. citeturn704006search0
-- a historical “RINEMI TRADING CO. LIMITED” in Cyprus, currently dissolved. citeturn704006search4
+Searches did, however, surface existing Japanese-market use of the exact string リネミ / Linemi, including a Mercari Shops seller using “Linemi リネミ” for handmade ceramic plant pots. This is a different product category, but it means the Japanese string is not globally unused. citeturn835034search0turn835034search1
 
-The searches did not surface an obvious Japanese-learning product using RINEMI. Search results are not a substitute for a formal trademark search.
+Conclusion: no obvious linguistic red flag was found in the preliminary screen, but this is not equivalent to native-speaker or professional localization sign-off.
 
-### App-store screen
+### 2. Trademark screen — PRELIMINARY ONLY
 
-Searches for exact-match RINEMI listings on Apple App Store and Google Play did not surface an obvious Japanese-learning app. This is an initial screen only; store search coverage can be incomplete.
+USPTO guidance states that clearance requires searching confusingly similar marks, related goods/services, federal records, state records, and internet/common-law use; it also notes that marks can conflict based on appearance, sound, meaning, or commercial impression. citeturn354760search3turn354760search4
 
-### Domain screen
+The Japanese J-PlatPat trademark search supports exact, phonetic, and similarity-oriented searches and allows filtering by goods/services similarity groups. citeturn907897search0
 
-Direct automated opening of rinemi.com, rinemi.app, and rinemi.io was not available through the browsing environment, so domain availability is unverified and must not be treated as available.
+Web-indexed searches performed on 2026-10-02 did not surface an obvious exact-match RINEMI Japanese-learning trademark record, but the searchable government databases themselves are the authoritative place for a full clearance search.
 
-### Legal gate
+Known unrelated uses surfaced:
+- “Rinemi” is the name of an engineered-marble 3D wall/floor tile product. citeturn169069search0
+- OOO “RINEMI” was registered in Moscow on 7 August 2026 for wholesale/retail and related activities. citeturn169069search3
 
-Before public commercial use, perform professional trademark clearance for the intended territories/classes, at minimum the software/education classes relevant to a Japanese-learning application.
+Conclusion: **not legally cleared**. A professional trademark search remains required before filing or commercial launch.
 
-Do not file or publish based on this preliminary screen alone.
+### 3. App Store / Google Play — PRELIMINARY ONLY
+
+Searches for exact-match RINEMI listings and combinations with Japanese-learning terms did not surface an obvious competing Japanese-learning app in the indexed results available to this environment.
+
+This does not establish name availability in either store. Store-side exact-name availability and account-level reservation remain unverified.
+
+### 4. Domains — UNVERIFIED
+
+The following were checked for indexed/public presence but could not be authoritatively verified for current registration/availability from this environment:
+
+- rinemi.com
+- rinemi.app
+- rinemi.jp
+- getrinemi.com
+- userinemi.com
+
+No indexed WHOIS result was returned for these exact queries, and direct domain/RDAP access was unavailable in the browsing environment. Therefore none should be treated as available.
+
+Priority:
+1. rinemi.com
+2. rinemi.app
+3. rinemi.jp
+4. getrinemi.com
+5. userinemi.com
+
+### 5. Social handles — UNVERIFIED
+
+Exact-handle availability could not be authoritatively verified through the available web access.
+
+Indexed use of “rinemi” exists on unrelated accounts/services, including a Japanese social user named rinemi and other unrelated user identities. citeturn800584search0turn800584search1
+
+Before reservation, check:
+- X
+- Instagram
+- YouTube
+- TikTok
+- GitHub
+- Discord
+
+Conclusion: handle clearance remains open.
+
+### Stage 1 decision gate
+
+**Current status: CONDITIONAL / NOT CLEARED.**
+
+What is established:
+- no obvious Japanese-learning product collision found in indexed web/store searches
+- no obvious linguistic red flag found
+- unrelated commercial uses exist in Japan and internationally
+
+What remains mandatory before “cleared”:
+- official trademark database review in target jurisdictions
+- similarity/phonetic trademark review, not only exact-match search
+- actual domain registration checks
+- actual platform-side handle checks
+- professional legal opinion before filing/launch
 
 ## Stage 2 — Brand system foundation
 
@@ -91,6 +146,10 @@ Japanese Learning
 
 The English name is the primary global brand. The Japanese lockup is a supporting identity element. The descriptor clarifies category and should not be mistaken for the product name.
 
+### Tagline
+
+No separate marketing tagline is approved yet. “Japanese Learning” remains a descriptor, not a tagline.
+
 ### Mascot rule
 
 Cat = primary character.
@@ -98,12 +157,24 @@ Shiba = secondary companion.
 
 Characters should appear in product illustrations/onboarding/empty states where useful, but should not be fused into the core wordmark.
 
-### Existing exploration
+### Asset status
 
-The RINEMI visual-identity exploration has already been produced as a separate Canva deck for review:
+The existing RINEMI visual-identity exploration remains an exploratory reference:
 https://canva.link/h3y2tct89e692jm
 
-It is exploratory brand work, not legal approval.
+Final production assets are deliberately **not yet committed** because Stage 1 clearance is still conditional.
+
+### Stage 2 asset plan
+
+After the clearance gate:
+1. final wordmark
+2. compact/horizontal lockup
+3. monochrome variants
+4. light/dark variants
+5. app icon
+6. favicon
+7. small-size usage tests
+8. mini brand usage guide
 
 ## Stage 3 boundary — DO NOT START
 
