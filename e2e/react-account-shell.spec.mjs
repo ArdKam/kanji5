@@ -238,3 +238,50 @@ test('logout leaves local learner state untouched', async ({ page }) => {
   expect(JSON.parse(state.main || '{}').settings.dailyGoal).toBe(37);
   expect(Object.keys(JSON.parse(state.cards || '{}'))).toContain('kanji:test');
 });
+
+
+test('account copy makes sync benefit and guest path explicit', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'en'));
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  const auth = page.locator('.account-auth-surface');
+  await expect(auth).toBeVisible();
+  await expect(auth).toContainText('sync your progress across devices');
+  await expect(auth).toContainText('keep learning without an account on this device');
+});
+
+test('persisted learner state survives a fresh browser context', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-v1', JSON.stringify({
+      settings: { dailyGoal: 41 },
+      today: '2026-10-02',
+      todayNew: 4,
+      todayReviewCount: 5,
+      goalCelebrated: false,
+      streak: { current: 3, longest: 6, lastActiveDate: '2026-10-02' }
+    }));
+    localStorage.setItem('kanji5-v1-cards', JSON.stringify({
+      'kanji:restart-test': { card: { due: '2026-10-02T00:00:00.000Z' } }
+    }));
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  const browser = page.context().browser();
+  if (!browser) throw new Error('Browser instance unavailable for restart simulation');
+  const storageState = await page.context().storageState();
+  const freshContext = await browser.newContext({ storageState });
+  try {
+    const freshPage = await freshContext.newPage();
+    await freshPage.goto('/');
+    await expect(freshPage.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+    const state = await freshPage.evaluate(() => ({
+      main: localStorage.getItem('kanji5-v1'),
+      cards: localStorage.getItem('kanji5-v1-cards')
+    }));
+    expect(JSON.parse(state.main || '{}').settings.dailyGoal).toBe(41);
+    expect(Object.keys(JSON.parse(state.cards || '{}'))).toContain('kanji:restart-test');
+  } finally {
+    await freshContext.close();
+  }
+});
