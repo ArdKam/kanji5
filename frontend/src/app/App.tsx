@@ -13,6 +13,7 @@ import { ReadingLabDialog } from "./ReadingLabDialog";
 import { MnemonicsDialog } from "./MnemonicsDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
+import { PublicOnboarding } from "./PublicOnboarding";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
 import { getThemePreference, setThemePreference as persistThemePreference, type ThemePreference } from "./ui-preferences";
@@ -829,6 +830,7 @@ function LoadingLearning(){
 function App(){
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
+  const [onboardingRefresh,setOnboardingRefresh]=useState(0);
   useEffect(()=>{
     if(!sessionFeedbackVisible)return;
     const timeout=window.setTimeout(()=>setSessionFeedbackVisible(false),4000);
@@ -865,6 +867,26 @@ function App(){
     setStatsOpen(false);setSettingsOpen(false);setGrammarOpen(false);setReadingLabOpen(false);setMnemonicsOpen(false);setAccountOpen(false);
   },[]);
   const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
+  const onboardingReturningUser = Boolean(
+    snapshotHydrated &&
+    (
+      Number(snapshot?.stats?.studiedCount ?? 0) > 0 ||
+      Number(snapshot?.dailySummary?.streak ?? 0) > 0 ||
+      Boolean(snapshot?.upcomingReviews?.length)
+    )
+  );
+  const handleOnboardingDailyGoal = useCallback(async (value:number)=>{
+    const current = snapshot?.settings ?? {};
+    await action(async()=>updateSettings({
+      dailyNew: Number(current.dailyNew) || 5,
+      retention: Number(current.retention) || .9,
+      dailyGoal: value,
+      leechThreshold: Number(current.leechThreshold) || 8,
+      production: current.production !== false,
+      vocabulary: current.vocabulary !== false,
+      context: current.context !== false,
+    }));
+  },[snapshot,action]);
   const experienceRef=useRef<"review"|"practice"|"dictionary">("review");
   const changeExperience=useCallback((next:"review"|"practice"|"dictionary")=>{experienceRef.current=next;setExperience(next)},[]);
   useEffect(()=>{
@@ -951,6 +973,23 @@ function App(){
 </aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
     </header>
     <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
+      {!showExercise && !showDictionary && snapshotHydrated && snapshot ? (
+        <PublicOnboarding
+          key={onboardingRefresh}
+          language={language}
+          dailyGoal={Math.max(1, Number(snapshot.settings?.dailyGoal ?? snapshot.dailyGoal?.target ?? 20))}
+          returningUser={onboardingReturningUser}
+          busy={busy}
+          onStartLearning={async()=>{
+            await action(async()=>{
+              await clearTransient();
+              await startLearningExperience();
+            });
+          }}
+          onOpenAccount={()=>{setAccountOpen(true);setSecondaryPage("account");}}
+          onSetDailyGoal={handleOnboardingDailyGoal}
+        />
+      ) : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
         {secondaryPage==="settings" ? <SettingsDialog
