@@ -1,10 +1,6 @@
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("kanji5-onboarding-v2", "complete"));
-});
-
-test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("kanji5-onboarding-v2", "complete");
   });
@@ -39,6 +35,7 @@ async function goToMnemonicPage(card) {
 test("prepared mnemonic is available on every learning card and can be saved as personal", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
     localStorage.setItem("kanji5-ui-language", "en");
   });
   await page.goto("/");
