@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('account hub exposes a compact auth flow and RTL-safe fields', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'fa'));
+  await page.addInitScript(() => { localStorage.setItem('kanji5-ui-language', 'fa'); localStorage.setItem('kanji5-onboarding-v2', 'complete'); });
   await page.goto('/');
   await expect(page.locator('.account-button:visible')).toHaveCount(1, { timeout: 15000 });
   await page.locator('.account-button:visible').click();
@@ -71,7 +71,7 @@ test('account signup preserves entered credentials after switching auth intent',
     });
   });
 
-  await page.addInitScript(() => localStorage.setItem('kanji5-ui-language', 'en'));
+  await page.addInitScript(() => { localStorage.setItem('kanji5-ui-language', 'en'); localStorage.setItem('kanji5-onboarding-v2', 'complete'); });
   await page.goto('/');
   await page.locator('.account-button:visible').click();
   await expect(page.locator('.account-dialog:visible')).toBeVisible();
@@ -169,17 +169,15 @@ test('guest-first onboarding keeps account optional and leads directly into lear
     sessionStorage.clear();
   });
   await page.goto('/');
-  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
-  const onboarding = page.locator('.public-onboarding');
-  await expect(onboarding).toBeVisible();
-  await expect(onboarding).toContainText(/Sign-in is optional|ورود اختیاری است|حساب اختیاری/);
-  await expect(onboarding).toContainText(/learning|یادگیری/);
-  await expect(onboarding.getByRole('button', { name: /Start learning today|شروع یادگیری امروز/ })).toBeVisible();
-  await onboarding.getByRole('button', { name: /Start learning today|شروع یادگیری امروز/ }).click();
+  const onboarding = page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('#root .app-shell')).toHaveCount(0);
+  await expect(onboarding).toContainText(/An account is optional|حساب اختیاری است/);
+  await expect(onboarding.getByRole('button', { name: /Continue as a guest|ادامه به‌عنوان مهمان/ })).toBeVisible();
+  await onboarding.getByRole('button', { name: /Continue as a guest|ادامه به‌عنوان مهمان/ }).click();
   await expect(onboarding).toHaveCount(0);
-  await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 15000 });
 });
-
 test('logout leaves local learner state untouched', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('kanji5-ui-language', 'en');
