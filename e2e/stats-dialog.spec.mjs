@@ -90,3 +90,17 @@ test('Advanced statistics stay collapsed until explicitly opened',async({page})=
   await expect(advanced).toContainText('داده کافی نیست');
   await expect(advanced.locator('.stats-advanced-skill-list .stats-skill-row').first()).toContainText('۶۷%');
 });
+
+
+test('Statistics uses persisted kanji exposure for studied coverage',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({学:{exposedAt:at}}));
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  const dialog=await openStats(page);
+  await expect(dialog.locator('.stats-overview-primary')).toContainText('۱ / ۲۱۳۶');
+  await expect(dialog.locator('.stats-overview')).toContainText('۰%');
+});
