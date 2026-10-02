@@ -71,6 +71,10 @@ Persian UI: use the existing Persian type system for now; brand migration is out
 
 ## 6. Wordmark specification
 
+**Selected Stage 2 direction: Humanist wordmark concept.**
+
+The existing RINEMI exploration contains three wordmark directions. The humanist direction is carried forward as the design handoff because it best matches the intended warm/editorial tone while retaining product-scale legibility. This is a concept selection, not a final trademark/logo approval.
+
 Conceptual direction: typographic wordmark first; no mandatory pictorial symbol.
 
 Construction rules:
@@ -111,6 +115,10 @@ Do not use mascots as the only brand identifier.
 
 ## 9. Icon direction
 
+**Selected Stage 2 direction: Abstract Ink Mark concept.**
+
+Of the three exploratory icon directions, the abstract ink-mark concept is carried forward as the design handoff. It keeps the icon independent from the mascot system and avoids small-text dependence. This is a concept selection, not a final production asset.
+
 App icon should remain recognizable without the full wordmark.
 
 Preferred concept direction:
@@ -137,9 +145,11 @@ Final icon artwork remains intentionally uncommitted until the Stage 1 clearance
 
 ## 11. Tagline decision
 
-No separate marketing tagline is approved at Stage 2.
+**Decision: no standalone tagline for the initial brand system.**
 
-The product should first establish the name + descriptor system. A tagline can be introduced later without forcing a semantic meaning onto the coined name.
+`Japanese Learning` remains the descriptor. The exploratory line “Japanese that stays with you.” is retained only as a future copy candidate and is not part of the canonical brand lockup.
+
+This keeps the coined name semantically open while the descriptor handles immediate category clarity.
 
 ## 12. Stage 3 boundary
 
