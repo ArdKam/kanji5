@@ -8,6 +8,7 @@ export default defineConfig({
     outDir: "../react-dist",
     emptyOutDir: true,
     cssCodeSplit: false,
+    manifest: true,
     rollupOptions: {
       output: {
         entryFileNames: "kanji5-react.js",
