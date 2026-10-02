@@ -251,6 +251,27 @@ test('Reading Lab focuses the next unfamiliar kanji without changing the reading
 
 });
 
+test('Reading Lab distinguishes unique and occurrence-weighted coverage and focuses the hardest sentence',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible({timeout:10000});
+
+  await lab.locator('textarea').fill('学学学生。日本語を読む。');
+  await expect(lab.locator('#reading-lab-analysis-title')).toHaveText('۰%');
+  await expect(lab.locator('.reading-lab-coverage-secondary')).toContainText('۰%');
+  await expect(lab.locator('.reading-lab-focus-button')).toHaveCount(3);
+  const focusHardest=lab.locator('.reading-lab-focus-button').nth(2);
+  await expect(focusHardest).toBeEnabled();
+
+  await focusHardest.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji') ? document.activeElement.getAttribute('data-reading-lab-sentence-index') : null)).toBe('1');
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(lab.locator('textarea')).toHaveValue('学学学生。日本語を読む。');
+});
+
 test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
   await clean(page);
   await page.route('https://kanjiapi.dev/v1/words/%E6%97%A5',async route=>{
