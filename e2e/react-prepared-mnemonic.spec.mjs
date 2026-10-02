@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+});
+
 async function goToMnemonicPage(card) {
   const pages = card.locator(".learning-back-page");
   const count = await pages.count();
