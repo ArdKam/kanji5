@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`5806602712ed1f8edb7420487d08e1e7f2c5f213\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, and the completed Kanji UX foundation slices described below.
+> **Implementation baseline reviewed:** \`main\` at commit \`18e1495b27b2cec030eafe6df1fd9258fe34cbc5\` (2026-10-02). This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, and the completed Kanji UX foundation slices described below.
 >
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -140,17 +140,17 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 - Stats exposure/hydration/mastery corrections.
 - Advanced Stats and deterministic learning-efficacy evidence surface.
 - Learning vs Active Recall separation, compact session feedback, four-page Learning Card pager, keyboard-accessible shortcuts, swipe navigation, mobile feedback/card bounds.
-- Reading Lab core state preservation, local session restoration, in-place word/Kanji lookup, unique + occurrence-weighted coverage, hardest-sentence focus, sentence navigation, speech/autoplay, and SRT/VTT synchronization.
+- Reading Lab session preservation/restoration, in-place word/Kanji lookup, unique + occurrence-weighted coverage, hardest-sentence focus, sentence navigation, speech/autoplay, SRT/VTT synchronization, lightweight sentence translation/annotation, and optional Japanese voice selection.
 - Dictionary narrow-mobile tabs and personal-mnemonic draft preservation across dictionary remount/async loading.
 - Settings exercise toggles, Placement/Test ownership correction, Data Backup/Restore foundation, and separated destructive reset UI.
-- Mnemonics information architecture distinguishing prepared/curated material, generated scaffolds, and personal mnemonics; prepared coverage is complete.
+- Mnemonics information architecture plus curated/generated/personal provenance; 2,136/2,136 prepared coverage and current curated-content QA.
 
 **PARTIAL / remaining before Public Product Readiness:**
 - Release verification: live artifact/cache/stale-client/offline verification and representative-device performance measurement.
-- Reading Lab: lightweight sentence translation/annotation and optional Japanese voice selection are implemented; only the later Reading Library remains.
-- Mnemonics: current 259-entry curated corpus passed corpus-wide structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Ongoing content maintenance remains future QA, not a release blocker.
-- Responsive/accessibility/performance: final cross-device WCAG/CWV verification remains.
-- Phase B/C closeout: ensure metrics/content QA policy and documentation match the implementation.
+- Reading Lab: only the later Reading Library remains; sentence translation/annotation and optional Japanese voice selection are implemented and E2E-covered.
+- Mnemonics: current 259-entry curated corpus passed structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Future content refresh is routine QA, not a release blocker.
+- Responsive/accessibility/performance: final representative-device evidence outside the CI matrix remains; CI covers 360/375/390, tablet, desktop, keyboard, focus, touch targets, and accessibility contracts.
+- Phase B/C closeout: documentation/status reconciliation is the remaining administrative slice.
 
 **PENDING next strategic stages:**
 - Phase R — Public Product Readiness.
@@ -165,7 +165,7 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 
 # 3. Current baseline and already-completed foundations
 
-The current \`main\` baseline is commit \`5806602712ed1f8edb7420487d08e1e7f2c5f213\`. Its implementation history immediately before the roadmap documentation includes:
+The current \`main\` baseline is commit \`18e1495b27b2cec030eafe6df1fd9258fe34cbc5\`. Its implementation history immediately before the roadmap documentation includes:
 
 - \`0a0df45\` — D5 context migration and offline cross-domain dependency precaching.
 - \`75b9cb4\` — Stats learning-efficacy evidence surface.
@@ -603,6 +603,10 @@ Existing/open performance work must be rebased against current \`main\` before i
 
 ## B1. Core metrics
 
+### Status — 2026-10-02
+
+**DONE on current `main`.** Stats distinguish exposure, attempts, cards, mastery, and completion and reconcile with authoritative learner data.
+
 Every metric must clearly distinguish:
 
 - exposure
@@ -614,6 +618,10 @@ Every metric must clearly distinguish:
 Metrics must reconcile with authoritative data.
 
 ## B2. Advanced Stats
+
+### Status — 2026-10-02
+
+**DONE on current `main`.** Advanced Stats is optional, evidence-aware, read-only, and separate from the primary Stats surface.
 
 Secondary and explicitly optional.
 
@@ -637,6 +645,10 @@ Stats remain read-only.
 
 ## B3. Learning efficacy
 
+### Status — 2026-10-02
+
+**DONE on current `main`.** Deterministic learning-efficacy evidence is implemented without automatically tuning the planner from observational metrics.
+
 Use deterministic evaluation to distinguish:
 
 - product/runtime failures
@@ -651,6 +663,10 @@ Do not automatically tune the planner from observational metrics.
 
 ## C1. Kanji and mnemonic QA
 
+### Status — 2026-10-02
+
+**DONE for the current Kanji corpus.** Coverage, provenance, structural quality, duplicate guards, and representative semantic review are contract-tested.
+
 Audit:
 
 - missing content
@@ -662,6 +678,10 @@ Audit:
 - prepared-vs-generated provenance
 
 ## C2. Vocabulary QA policy
+
+### Status — 2026-10-02
+
+**DONE as a foundation policy.** Current Vocabulary contracts define deterministic normalization/validation and provenance expectations; full dataset acceptance remains part of E2.
 
 Before public Vocabulary release, define deterministic validation for:
 
@@ -680,6 +700,10 @@ Before public Vocabulary release, define deterministic validation for:
 - fallback selection
 
 ## C3. Context QA policy
+
+### Status — 2026-10-02
+
+**DONE as a foundation policy.** Current context ingestion validates sentence/translation presence, target containment, provenance, and network fallback behavior; full content-source acceptance remains part of F.
 
 Validate:
 
@@ -1798,34 +1822,22 @@ The roadmap has two levels: **remaining Kanji hardening** and **domain expansion
 ### Current execution order — 2026-10-02
 
 **0. Release Integrity final verification**
-→ live artifact graph, cache invalidation, stale-client recovery, offline cold/repeat, production smoke, release sequencing
+→ deploy the latest `main` release, verify live artifact/cache/offline behavior, and capture representative-device performance evidence
 
-**1. A8 final Responsive / Accessibility / Performance gate**
-→ 360/375/390, tablet/desktop, keyboard/focus/IME, WCAG checks, LCP/INP/CLS, long tasks, repeat startup, offline startup
-
-**2. A4 remaining Reading Lab polish**
-→ lightweight translation/annotation and carefully scoped optional voice support; Reading Library remains later
-
-**3. A7 Mnemonic content-quality QA**
-→ semantic usefulness, reading relevance, ambiguity, memorability, malformed/missing entries; do not confuse coverage with quality
-
-**4. Phase B/C closeout**
-→ reconcile measurement/evidence and content-QA policy with current implementation; update documentation/statuses as needed
-
-**5. Phase R — Public Product Readiness**
+**1. Phase R — Public Product Readiness**
 → positioning, onboarding, guest-first accounts, data safety, backup/restore hardening, PWA, offline, browser compatibility, i18n, observability, security, privacy/legal, help, feedback, beta/release gate
 
-**6. D4 — Scheduling Boundary**
+**2. D4 — Scheduling Boundary**
 → one domain-neutral scheduling seam; no second scheduler and no FSRS rewrite
 
-**7. E — Vocabulary MVP**
+**3. E — Vocabulary MVP**
 → local versioned dataset, deterministic learning modes, evidence/recovery, scheduling integration, persistence/offline, UX, QA
 
-**8. F — Context + Reading Integration**
+**4. F — Context + Reading Integration**
 
-**9. G — Grammar Foundation**
+**5. G — Grammar Foundation**
 
-**10. H — Public Product Maturity / scale-driven expansion**
+**6. H — Public Product Maturity / scale-driven expansion**
 
 ### Explicitly complete and removed from the active queue
 
