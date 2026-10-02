@@ -6,25 +6,40 @@ export function usePageDialog(open: boolean, onClose: () => void): RefObject<HTM
 
   useEffect(() => {
     const dialog = ref.current;
-    if (!dialog || !document.contains(dialog)) return;
+    if (!dialog) return;
 
-    if (open) {
-      openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    let cancelled = false;
+    let frame = 0;
 
-      if (!dialog.open) {
-        try {
-          dialog.showModal();
-        } catch {
-          if (document.contains(dialog)) dialog.setAttribute("open", "");
-        }
-      }
-
+    const focusDialog = () => {
+      if (cancelled || !document.contains(dialog)) return;
       const focusTarget = dialog.querySelector<HTMLElement>(
         "[autofocus], .dialog-close, button, input, textarea, select, [tabindex]:not([tabindex='-1'])",
       );
-      requestAnimationFrame(() => {
-        if (document.contains(dialog)) focusTarget?.focus();
+      focusTarget?.focus();
+    };
+
+    const openWhenAttached = () => {
+      if (cancelled) return;
+      if (!document.contains(dialog)) {
+        frame = requestAnimationFrame(openWhenAttached);
+        return;
+      }
+
+      try {
+        if (!dialog.open) dialog.showModal();
+      } catch {
+        if (document.contains(dialog)) dialog.setAttribute("open", "");
+      }
+
+      frame = requestAnimationFrame(() => {
+        if (!cancelled) focusDialog();
       });
+    };
+
+    if (open) {
+      openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      openWhenAttached();
 
       const onCancel = (event: Event) => {
         event.preventDefault();
@@ -33,6 +48,8 @@ export function usePageDialog(open: boolean, onClose: () => void): RefObject<HTM
       dialog.addEventListener("cancel", onCancel);
 
       return () => {
+        cancelled = true;
+        cancelAnimationFrame(frame);
         dialog.removeEventListener("cancel", onCancel);
         if (dialog.open) {
           try {
@@ -40,6 +57,8 @@ export function usePageDialog(open: boolean, onClose: () => void): RefObject<HTM
           } catch {
             dialog.removeAttribute("open");
           }
+        } else {
+          dialog.removeAttribute("open");
         }
       };
     }
@@ -51,6 +70,8 @@ export function usePageDialog(open: boolean, onClose: () => void): RefObject<HTM
         dialog.removeAttribute("open");
       }
     }
+    dialog.removeAttribute("open");
+
     const opener = openerRef.current;
     openerRef.current = null;
     if (opener && document.contains(opener)) {
