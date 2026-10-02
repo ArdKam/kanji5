@@ -160,5 +160,5 @@ jobs:
           verify_live_matches_staged "$base/react-dist/kanji5-react.css" _site/react-dist/kanji5-react.css /tmp/kanji5-live-react.css
           echo "LIVE_PAGES_ARTIFACT_VERIFIED"
 
-      - name: Run live GitHub Pages offline E2E
+      - name: Run live GitHub Pages offline and core-product E2E
         run: node scripts/verify-live-pages-e2e.mjs

@@ -12,6 +12,7 @@ on:
       - "scripts/test-performance-font-loading.mjs"
       - "scripts/test-service-worker-shell.mjs"
       - "scripts/test-react-release-integrity.mjs"
+      - "scripts/verify-live-pages-e2e.mjs"
       - "scripts/test-architecture-build-cleanup.mjs"
       - "scripts/test-prepared-mnemonics.mjs"
       - "scripts/test-mnemonic-support.mjs"
@@ -92,6 +93,9 @@ jobs:
           node scripts/test-performance-font-loading.mjs
           node scripts/test-service-worker-shell.mjs
           node scripts/test-react-release-integrity.mjs
+      - name: Validate live Pages smoke script
+        working-directory: .
+        run: node --check scripts/verify-live-pages-e2e.mjs
       - name: Run generated-artifact presentation contracts
         working-directory: .
         run: |
