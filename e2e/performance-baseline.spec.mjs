@@ -46,6 +46,7 @@ for (const profile of profiles) {
         cls: 0,
         fcp: 0,
         longTasks: [],
+        layoutShiftSources: [],
       };
       window.__KANJI5_PERF_BASELINE__ = metrics;
 
@@ -60,7 +61,18 @@ for (const profile of profiles) {
       try {
         new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            if (!entry.hadRecentInput) metrics.cls += entry.value;
+            if (!entry.hadRecentInput) {
+              metrics.cls += entry.value;
+              for (const source of entry.sources || []) {
+                const node = source.node;
+                metrics.layoutShiftSources.push({
+                  value: entry.value,
+                  node: node?.tagName ? `${node.tagName.toLowerCase()}#${node.id || ""}.${String(node.className || "").trim().replace(/\\s+/g, ".")}` : "unknown",
+                  previous: source.previousRect ? { x: Math.round(source.previousRect.x), y: Math.round(source.previousRect.y), width: Math.round(source.previousRect.width), height: Math.round(source.previousRect.height) } : null,
+                  current: source.currentRect ? { x: Math.round(source.currentRect.x), y: Math.round(source.currentRect.y), width: Math.round(source.currentRect.width), height: Math.round(source.currentRect.height) } : null,
+                });
+              }
+            }
           }
         }).observe({ type: "layout-shift", buffered: true });
       } catch (_) {}
@@ -83,7 +95,7 @@ for (const profile of profiles) {
       const resources = performance.getEntriesByType("resource");
 
       const fcp = paints.find((entry) => entry.name === "first-contentful-paint")?.startTime ?? 0;
-      const perf = window.__KANJI5_PERF_BASELINE__ ?? { lcp: 0, cls: 0, longTasks: [] };
+      const perf = window.__KANJI5_PERF_BASELINE__ ?? { lcp: 0, cls: 0, longTasks: [], layoutShiftSources: [] };
       const appResources = resources
         .filter((entry) => /react-dist|react-entry|app-bootstrap|v1\.|vendor\//.test(entry.name))
         .reduce((sum, entry) => sum + Number(entry.transferSize || 0), 0);
@@ -100,6 +112,7 @@ for (const profile of profiles) {
         longTaskMaxMs: perf.longTasks.reduce((max, duration) => Math.max(max, duration), 0),
         resourceCount: resources.length,
         appTransferKB: Math.round(appResources / 1024),
+        layoutShiftSources: Array.isArray(perf.layoutShiftSources) ? perf.layoutShiftSources.slice(-20) : [],
       };
     });
 
@@ -110,6 +123,7 @@ for (const profile of profiles) {
 
     expect(metrics.fcpMs, `FCP budget exceeded: ${metrics.fcpMs.toFixed(0)}ms > ${startupBudgets.fcpMs}ms`).toBeLessThanOrEqual(startupBudgets.fcpMs);
     expect(metrics.lcpMs, `LCP budget exceeded: ${metrics.lcpMs.toFixed(0)}ms > ${startupBudgets.lcpMs}ms`).toBeLessThanOrEqual(startupBudgets.lcpMs);
+    if (metrics.cls > startupBudgets.cls) console.log("CLS_SOURCES", JSON.stringify(metrics.layoutShiftSources));
     expect(metrics.cls, `CLS budget exceeded: ${metrics.cls.toFixed(3)} > ${startupBudgets.cls}`).toBeLessThanOrEqual(startupBudgets.cls);
     expect(metrics.longTaskTotalMs, `long-task budget exceeded: ${metrics.longTaskTotalMs.toFixed(0)}ms > ${startupBudgets.longTaskTotalMs}ms`).toBeLessThanOrEqual(startupBudgets.longTaskTotalMs);
     expect(metrics.longTaskMaxMs, `max long-task budget exceeded: ${metrics.longTaskMaxMs.toFixed(0)}ms > ${startupBudgets.longTaskMaxMs}ms`).toBeLessThanOrEqual(startupBudgets.longTaskMaxMs);

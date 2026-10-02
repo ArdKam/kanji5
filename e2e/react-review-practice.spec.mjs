@@ -23,12 +23,12 @@ async function forcedTargetCharacter(page){
 
 test('Learning and Active Recall are explicit independent presentation experiences',async({page})=>{
   await clean(page);
-  const review=page.getByRole('button',{name:'یادگیری'});
+  const review=page.getByRole('button',{name:'یادگیری',exact:true});
   const practice=page.getByRole('button',{name:'یادآوری فعال'});
   await expect(review).toHaveAttribute('aria-current','page');
   await expect(practice).not.toHaveAttribute('aria-current','page');
   await expect(page.locator('#root #exercise')).toHaveCount(0);
-  await expect(page.locator('#root .card')).toBeVisible();
+  await expect(page.locator('#root .learning-card')).toBeVisible();
   // Establish the documented education precondition before asserting the active exercise path.
   await seedSeenCard(page);
   await practice.click();
@@ -45,7 +45,7 @@ test('Learning and Active Recall are explicit independent presentation experienc
   await expect(review).toHaveAttribute('aria-current','page');
   await expect(practice).not.toHaveAttribute('aria-current','page');
   await expect(page.locator('#root #exercise')).toHaveCount(0);
-  await expect(page.locator('#root .card')).toBeVisible();
+  await expect(page.locator('#root .learning-card')).toBeVisible();
 });
  
 async function startForcedExercise(page,mode){
@@ -79,7 +79,7 @@ test('Learning rating is idempotent when submitted concurrently',async({page})=>
 
 test('experience navigation remains clickable while an engine transition is busy',async({page})=>{
   await clean(page);
-  const learning=page.getByRole('button',{name:'یادگیری'});
+  const learning=page.getByRole('button',{name:'یادگیری',exact:true});
   const practice=page.getByRole('button',{name:'یادآوری فعال'});
   const dictionary=page.getByRole('button',{name:'فرهنگ کانجی'});
   await practice.click();
@@ -94,7 +94,7 @@ test('experience navigation remains clickable while an engine transition is busy
 
 test('empty Active Recall state stays responsive before any card is learned',async({page})=>{
   await clean(page);
-  const learning=page.getByRole('button',{name:'یادگیری'});
+  const learning=page.getByRole('button',{name:'یادگیری',exact:true});
   const practice=page.getByRole('button',{name:'یادآوری فعال'});
   await practice.click();
   await expect(practice).toHaveAttribute('aria-current','page');
