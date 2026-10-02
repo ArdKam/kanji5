@@ -9,7 +9,7 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: false,
     manifest: true,
-    rolldownOptions: {
+    rollupOptions: {
       output: {
         entryFileNames: "kanji5-react.js",
         assetFileNames: (assetInfo) =>
