@@ -251,6 +251,35 @@ test('Reading Lab focuses the next unfamiliar kanji without changing the reading
 
 });
 
+test('Reading Lab reports unique and occurrence-weighted coverage and focuses the hardest sentence',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible({timeout:10000});
+  await lab.locator('textarea').fill('今日は学生です。明日は先生です。');
+
+  const coverageMetrics=lab.locator('.reading-lab-coverage-metric');
+  await expect(coverageMetrics).toHaveCount(2);
+  await expect(coverageMetrics.nth(0)).toContainText('پوشش یکتا');
+  await expect(coverageMetrics.nth(1)).toContainText('پوشش وزنیِ وقوع');
+  await expect(coverageMetrics.nth(0).locator('strong')).toHaveText(/٪|%/);
+  await expect(coverageMetrics.nth(1).locator('strong')).toHaveText(/٪|%/);
+
+  const hardest=lab.locator('.reading-lab-hardest-sentence');
+  await expect(hardest).toBeVisible();
+  const hardestText=(await hardest.locator('p[lang="ja"]').textContent()||'').trim();
+  expect(hardestText.length).toBeGreaterThan(0);
+  const activeBefore=(await lab.locator('.reading-lab-reader-sentence.active').textContent()||'').trim();
+  const focusButton=hardest.getByRole('button',{name:'تمرکز روی جمله',exact:true});
+  await expect(focusButton).toBeEnabled();
+  await focusButton.click();
+  await expect(lab.locator('.reading-lab-reader-sentence.active')).toContainText(hardestText);
+  const activeAfter=(await lab.locator('.reading-lab-reader-sentence.active').textContent()||'').trim();
+  expect(activeAfter).toContain(hardestText);
+  expect(typeof activeBefore).toBe('string');
+});
 test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
   await clean(page);
   await page.route('https://kanjiapi.dev/v1/words/%E6%97%A5',async route=>{
