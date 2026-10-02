@@ -4,7 +4,7 @@ async function clean(page){
   page.on('pageerror',error=>console.error(`[E2E_PAGEERROR] ${error?.stack||error}`));
   page.on('console',message=>{if(message.type()==='error')console.error(`[E2E_CONSOLE_ERROR] ${message.text()}`)});
   await page.goto('/');
-  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear()});
+  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear();localStorage.setItem('kanji5-onboarding-v2','complete')});
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
