@@ -1001,25 +1001,26 @@ function App(){
         :null}
     </>
   ) : (
-    <PracticeHome
-      language={language}
-      busy={busy}
-      onStartActiveRecall={async()=>{
-        await action(async()=>{
-          await startExercise();
-          setPracticeMode("exercise");
-        });
-      }}
-      onStartCustomStudy={async(filter: CustomStudyFilter)=>{
-        const result=await action(async()=>{
-          await clearTransient();
-          return await startCustomStudy(filter);
-        });
-        if(result?.started)setExperience("review");
-        return Boolean(result?.started);
-      }}
-    />
-    
+    <Suspense fallback={<div className="loading" role="status">{t("activeRecall",language)}</div>}>
+      <PracticeHome
+        language={language}
+        busy={busy}
+        onStartActiveRecall={async()=>{
+          await action(async()=>{
+            await startExercise();
+            setPracticeMode("exercise");
+          });
+        }}
+        onStartCustomStudy={async(filter: CustomStudyFilter)=>{
+          const result=await action(async()=>{
+            await clearTransient();
+            return await startCustomStudy(filter);
+          });
+          if(result?.started)setExperience("review");
+          return Boolean(result?.started);
+        }}
+      />
+    </Suspense>
   )
 ) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}
