@@ -364,6 +364,18 @@ test("short learning cards stay single-page and keep examples with core informat
 });
 
 
+test("learning session feedback stays compact and auto-dismisses", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const card = await revealLearningCard(page, "en");
+  await card.locator(".rating-grid button").nth(2).click();
+  const feedback = page.locator(".session-feedback");
+  await expect(feedback).toBeVisible({ timeout: 10000 });
+  await expect(feedback.locator("strong")).toHaveCount(1);
+  await expect(feedback.locator("span")).toHaveCount(1);
+  await expect(feedback.locator("button,details,.insights")).toHaveCount(0);
+  await expect(feedback).toBeHidden({ timeout: 6000 });
+});
+
 test("learning rating feedback controls stay fully inside the card on mobile",async({page})=>{
   await page.setViewportSize({width:390,height:844});
   const card=await revealLearningCard(page,"en");
