@@ -1,5 +1,6 @@
 import { validateVocabularyList, validateContextList, selectDeterministic, selectAdaptiveContent } from './v1.9-data-quality-core.js';
 import { normalizeVocabularyItem } from './v2-vocabulary-core.js';
+import { canonicalContentId } from './v2-domain-core.js';
 
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
@@ -9,7 +10,11 @@ function stableContentHash(value){
   for(let i=0;i<source.length;i++){h^=source.charCodeAt(i);h=Math.imul(h,16777619)}
   return (h>>>0).toString(16).padStart(8,'0');
 }
-function sentenceContentId(id,text,english){const stableId=String(id??'').trim();return stableId?'sentence:'+stableId:'sentence:'+stableContentHash(String(text??'')+'|'+String(english??''))}
+function sentenceContentId(id,text,english){
+  const stableId=String(id??'').trim();
+  if(stableId)return canonicalContentId('context','tatoeba:'+stableId);
+  return canonicalContentId('context','tatoeba:'+stableContentHash(String(text??'')+'|'+String(english??'')));
+}
 
 
 async function requestJSON(url){

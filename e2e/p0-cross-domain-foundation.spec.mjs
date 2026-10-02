@@ -99,7 +99,7 @@ test('P0 network content adapters expose stable content identities',async({page}
     };
   });
   expect(result.words[0].contentId).toMatch(/^vocabulary:[0-9a-f]{8}$/);
-  expect(result.sentences[0].contentId).toBe('sentence:123');
+  expect(result.sentences[0].contentId).toBe('context:tatoeba:123');
 });
 
 test('P0 React shell has no horizontal overflow at mobile baselines',async({page})=>{
