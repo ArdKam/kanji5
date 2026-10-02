@@ -109,7 +109,7 @@ test('React presentation can switch language from More Menu and keep Settings fo
 });
 
 test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
-  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');document.documentElement.lang='en';document.documentElement.dir='ltr';});
   await page.goto('/');
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Show kanji information',exact:true}).click();
