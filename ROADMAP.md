@@ -133,6 +133,8 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 
 **DONE on current \`main\`:**
 - Release/bootstrap foundation and React artifact hygiene.
+- Pre-Vocabulary public-readiness hardening: learner-deck preservation across dataset revisions, bounded local diagnostics, external-content HTML escaping, browser compatibility smoke coverage, and public product/support documentation.
+- D4 domain-neutral scheduling boundary implemented; FSRS remains the sole scheduling authority and scheduled Kanji reviews route through the boundary.
 - D1 canonical cross-domain content identities.
 - D2 shared evidence envelope.
 - D3 deterministic cross-domain relationships.
@@ -150,11 +152,24 @@ This ledger is the anti-regression checkpoint for future reviews. Reviewers must
 - Reading Lab: only the later Reading Library remains; sentence translation/annotation and optional Japanese voice selection are implemented and E2E-covered.
 - Mnemonics: current 259-entry curated corpus passed structural/quality checks, exact-duplicate guards, and a representative semantic sentinel review. Future content refresh is routine QA, not a release blocker.
 - Responsive/accessibility/performance: final representative-device evidence outside the CI matrix remains; CI covers 360/375/390, tablet, desktop, keyboard, focus, touch targets, and accessibility contracts.
-- Phase B/C closeout: documentation/status reconciliation is the remaining administrative slice.
+
+**PARTIAL / external release evidence still required:**
+- Representative-device performance and target-browser/device validation.
+- Final production Supabase/RLS, dependency, CSP/header security sign-off.
+- Final privacy/terms/legal review against actual production services and target markets.
+- Small real-user beta and observed public-usage evidence.
+
+**IN PROGRESS / remaining product-readiness work:**
+- R1/R2/R3: positioning/onboarding/guest-first account foundations exist; final public UX validation remains.
+- R4/R5/R6: persistence, bounded review history, backup/restore foundations exist; full sync/conflict/migration acceptance remains.
+- R7/R8/R9: PWA/offline foundations exist; target-platform install/update/reconnect validation remains.
+- R10: bilingual UI infrastructure exists; full public-facing i18n/accessibility validation remains.
+- R11/R12: diagnostics and security boundary hardening exist; production observability/security review remains.
+- R13/R14/R15/R16: privacy/legal drafts, user documentation, feedback path, and provenance foundations exist; production-finalization remains.
+- R18/R19: beta and public-release gates remain pending real-user and release evidence.
 
 **PENDING next strategic stages:**
-- Phase R — Public Product Readiness.
-- D4 — domain-neutral scheduling boundary.
+- E — Vocabulary MVP.
 - E — Vocabulary MVP.
 - F — Context/Reading integration.
 - G — Grammar foundation.
@@ -1255,6 +1270,8 @@ Target architecture:
 
 **Domain content → skill/evidence → planner/session selection → Card identity → FSRS**
 
+The current Kanji review runtime now crosses this boundary without introducing a second scheduler; Vocabulary can use the same seam.
+
 not:
 
 **Kanji Scheduler + Vocabulary Scheduler + Grammar Scheduler**
@@ -1826,13 +1843,13 @@ The roadmap has two levels: **remaining Kanji hardening** and **domain expansion
 ### Current execution order — 2026-10-02
 
 **0. Release Integrity final verification — CURRENT**
-→ capture representative-device performance evidence and complete the broader live production smoke matrix; cache/stale-client/offline verification is already evidenced on current `main`
+→ rerun the corrected post-merge Pages smoke and capture representative-device performance evidence
 
-**1. Phase R — Public Product Readiness**
+**1. Phase R — Public Product Readiness (IN PROGRESS; external release evidence remains)**
 → positioning, onboarding, guest-first accounts, data safety, backup/restore hardening, PWA, offline, browser compatibility, i18n, observability, security, privacy/legal, help, feedback, beta/release gate
 
-**2. D4 — Scheduling Boundary**
-→ one domain-neutral scheduling seam; no second scheduler and no FSRS rewrite
+**2. D4 — Scheduling Boundary — DONE**
+→ domain-neutral scheduling seam implemented; no second scheduler and no FSRS rewrite
 
 **3. E — Vocabulary MVP**
 → local versioned dataset, deterministic learning modes, evidence/recovery, scheduling integration, persistence/offline, UX, QA
