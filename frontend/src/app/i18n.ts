@@ -44,6 +44,16 @@ type TranslationKey =
   | "pageOf"
   | "actionFailed"
   | "footerTagline"
+  | "onboardingEyebrow"
+  | "onboardingTitle"
+  | "onboardingIntro"
+  | "learningLoop"
+  | "learningReviewLabel"
+  | "onboardingGoalTitle"
+  | "onboardingGoalHint"
+  | "onboardingStart"
+  | "onboardingAccount"
+  | "onboardingLater"
   | "showKanjiInfo"
   | "again"
   | "hard"
@@ -505,7 +515,18 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"یادآوری فعال", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
-    cardBack:"پشت کارت", meaningAndStructure:"معنی و ساختار", readings:"خوانش‌ها", showHiragana:"نمایش هیراگانا", showKatakana:"نمایش کاتاکانا", pageOf:"صفحه {page} از {total}", actionFailed:"خطا در عملیات", footerTagline:"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.", showKanjiInfo:"نمایش اطلاعات کانجی",
+    cardBack:"پشت کارت", meaningAndStructure:"معنی و ساختار", readings:"خوانش‌ها", showHiragana:"نمایش هیراگانا", showKatakana:"نمایش کاتاکانا", pageOf:"صفحه {page} از {total}", actionFailed:"خطا در عملیات", footerTagline:"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.",
+    onboardingEyebrow:"شروع ساده",
+    onboardingTitle:"کانجی ۵ را برای اولین بار می‌بینی؟",
+    onboardingIntro:"هر روز چند دقیقه روی کانجی‌های کاربردی کار کن؛ درس را ببین، آن را به یاد بیاور و بعد با مرور فاصله‌دار برگرد.",
+    learningLoop:"چرخهٔ یادگیری",
+    learningReviewLabel:"مرور",
+    onboardingGoalTitle:"هدف روزانه",
+    onboardingGoalHint:"یک ریتم کوچک و پایدار انتخاب کن. بعداً از تنظیمات می‌توانی آن را تغییر بدهی.",
+    onboardingStart:"شروع یادگیری امروز",
+    onboardingAccount:"حساب اختیاری",
+    onboardingLater:"فعلاً بعداً",
+ showKanjiInfo:"نمایش اطلاعات کانجی",
     again:"دوباره", hard:"سخت", good:"خوب", easy:"آسان",
     meaning:"معنی", reading:"خوانش", production:"تولید", componentLearningPath:"مسیر یادگیری اجزای کانجی", componentLearningPathHint:"اجزای سازنده را از پایه تا کانجی ببین و برای هر جزء تسلط فعلی را بررسی کن.", componentLearningPathLeaf:"جزء پایه", masteryShort:"تسلط", notInCatalog:"در فهرست نیست", vocabulary:"واژگان", vocabularyLearningGraph:"شبکهٔ واژگانی", vocabularyLearningGraphHint:"واژه‌های نمونه نشان می‌دهند این کانجی با چه کانجی‌های جویو در کنار هم دیده می‌شود.", context:"بافت",
     unknown:"نمی‌دانم", correct:"درست", wrong:"نادرست", nearMiss:"نزدیک بود", empty:"خالی", unavailable:"در دسترس نیست",
