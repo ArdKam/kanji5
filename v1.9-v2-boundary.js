@@ -322,9 +322,7 @@ async function getStats(){
           evidence:{sessions:evidence.sessions,attempts:evidence.attempts,sufficient:evidence.sufficient,reason:evidence.reason}
         }};
       }
-    }catch(error){
-      if(import.meta.env?.DEV)console.debug('Kanji 5 evaluation metrics unavailable.',error);
-    }
+    }catch(_error){}
     return stats;
   })();
   try{return await statsInFlight}finally{statsInFlight=null}
