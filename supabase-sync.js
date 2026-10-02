@@ -1,6 +1,7 @@
 import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
 
+const storage=window.__KANJI5_STORAGE__||localStorage;
 const K=window.__KANJI5_STORAGE_KEYS__;
 if(!K)throw new Error("KANJI5_STORAGE_KEYS_NOT_LOADED");
 const STORAGE_KEY=K.state;
@@ -63,15 +64,15 @@ function mapUser(value) {
 }
 
 function localPayload() {
-  const persisted = safeJSON(localStorage.getItem(STORAGE_KEY), null);
-  const cards = safeJSON(localStorage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});
-  const reviews = safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);
-  const components = safeJSON(localStorage.getItem(COMPONENT_KEY), {});
-  const history = safeJSON(localStorage.getItem(SESSION_HISTORY_KEY), []);
+  const persisted = safeJSON(storage.getItem(STORAGE_KEY), null);
+  const cards = safeJSON(storage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});
+  const reviews = safeJSON(storage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);
+  const components = safeJSON(storage.getItem(COMPONENT_KEY), {});
+  const history = safeJSON(storage.getItem(SESSION_HISTORY_KEY), []);
   return {
     state: persisted ? { ...persisted, cards, reviews, queue: [], current: null, revealed: false, examples: {} } : null,
-    knowledge: safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {}),
-    deckVersion: localStorage.getItem('kanji5-deck-version') || null,
+    knowledge: safeJSON(storage.getItem(KNOWLEDGE_KEY), {}),
+    deckVersion: storage.getItem('kanji5-deck-version') || null,
     educationSchemaVersion: 2,
     syncSchemaVersion: 1,
     v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
@@ -86,10 +87,10 @@ function safeJSON(raw, fallback) {
 }
 
 function readSyncSummary() {
-  const cards = safeJSON(localStorage.getItem(CARDS_STORAGE_KEY), {});
-  const reviews = safeJSON(localStorage.getItem(REVIEWS_STORAGE_KEY), []);
-  const knowledge = safeJSON(localStorage.getItem(KNOWLEDGE_KEY), {});
-  const meta = safeJSON(localStorage.getItem(SYNC_META_KEY), {});
+  const cards = safeJSON(storage.getItem(CARDS_STORAGE_KEY), {});
+  const reviews = safeJSON(storage.getItem(REVIEWS_STORAGE_KEY), []);
+  const knowledge = safeJSON(storage.getItem(KNOWLEDGE_KEY), {});
+  const meta = safeJSON(storage.getItem(SYNC_META_KEY), {});
   const activeCards = cards && typeof cards === 'object' ? Object.values(cards).filter(entry => entry?.card).length : 0;
   const personalMnemonics = knowledge && typeof knowledge === 'object' && knowledge.v2Mnemonics && typeof knowledge.v2Mnemonics === 'object'
     ? Object.values(knowledge.v2Mnemonics).filter(value => typeof value === 'string' && value.trim()).length
@@ -105,7 +106,7 @@ function readSyncSummary() {
 function writeLocal(payload, remoteUpdatedAt = null) {
   if (payload?.state) {
     const s = payload.state;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    storage.setItem(STORAGE_KEY, JSON.stringify({
       settings: s.settings,
       today: s.today,
       todayNew: s.todayNew,
@@ -113,20 +114,20 @@ function writeLocal(payload, remoteUpdatedAt = null) {
       goalCelebrated: s.goalCelebrated,
       streak: s.streak
     }));
-    localStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(s.cards || {}));
-    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(s.reviews || []));
+    storage.setItem(CARDS_STORAGE_KEY, JSON.stringify(s.cards || {}));
+    storage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(s.reviews || []));
   }
-  localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(payload?.knowledge || {}));
-  if (payload?.deckVersion) localStorage.setItem('kanji5-deck-version', payload.deckVersion);
+  storage.setItem(KNOWLEDGE_KEY, JSON.stringify(payload?.knowledge || {}));
+  if (payload?.deckVersion) storage.setItem('kanji5-deck-version', payload.deckVersion);
   const v16 = mergeV16SyncData(payload, payload);
-  const currentComponents = safeJSON(localStorage.getItem(COMPONENT_KEY), {}) || {};
-  localStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(v16.sessionHistory || payload?.sessionHistory || []));
-  localStorage.setItem(COMPONENT_KEY, JSON.stringify({
+  const currentComponents = safeJSON(storage.getItem(COMPONENT_KEY), {}) || {};
+  storage.setItem(SESSION_HISTORY_KEY, JSON.stringify(v16.sessionHistory || payload?.sessionHistory || []));
+  storage.setItem(COMPONENT_KEY, JSON.stringify({
     ...currentComponents,
     ...(v16.components || payload?.components || {}),
     ...(v16.skillProfile || payload?.skillProfile ? { v16SkillProfile: v16.skillProfile || payload.skillProfile } : {})
   }));
-  localStorage.setItem(SYNC_META_KEY, JSON.stringify({
+  storage.setItem(SYNC_META_KEY, JSON.stringify({
     educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
     syncSchemaVersion: Number(payload?.syncSchemaVersion) || 1,
     v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || V16_SYNC_SCHEMA_VERSION,
@@ -266,7 +267,7 @@ async function syncOnce() {
   const remoteHash = hashPayload(remoteRow.payload);
 
   if (mergedHash === localHash && mergedHash === remoteHash) {
-    localStorage.setItem(SYNC_META_KEY, JSON.stringify({
+    storage.setItem(SYNC_META_KEY, JSON.stringify({
       educationSchemaVersion: 2,
       syncSchemaVersion: 1,
       v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
