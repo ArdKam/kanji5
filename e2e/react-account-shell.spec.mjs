@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }, testInfo) => {
+  if (testInfo.title === 'guest-first onboarding keeps account optional and leads directly into learning') return;
+  await page.addInitScript(() => localStorage.setItem('kanji5-onboarding-v2', 'complete'));
+});
+
 test('account hub exposes a compact auth flow and RTL-safe fields', async ({ page }) => {
   await page.addInitScript(() => { localStorage.setItem('kanji5-ui-language', 'fa'); localStorage.setItem('kanji5-onboarding-v2', 'complete'); });
   await page.goto('/');
