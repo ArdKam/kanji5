@@ -109,7 +109,6 @@ test('React presentation can switch language from More Menu and keep Settings fo
 });
 
 test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
-  await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');document.documentElement.lang='en';document.documentElement.dir='ltr';});
   await page.goto('/');
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Show kanji information',exact:true}).click();
@@ -533,7 +532,11 @@ test('React surfaces an actionable state when the shipped presentation chunk fai
   });
   await page.goto('/');
   await expect(page.locator('#kanji5-startup-shell')).toHaveClass(/is-error/,{timeout:10000});
-  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('Kanji5 could not start');
-  await expect(page.locator('.kanji5-startup-error-copy')).toContainText('required application file could not be loaded');
-  await expect(page.locator('.kanji5-startup-error-action')).toHaveText('Reload');
+  const language=await page.locator('html').getAttribute('lang');
+  const expectedTitle=language==='fa'?'کانجی‌یار باز نشد':'Kanji5 could not start';
+  const expectedCopy=language==='fa'?'یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد.':'A required application file could not be loaded for this release.';
+  const expectedAction=language==='fa'?'بارگذاری دوباره':'Reload';
+  await expect(page.locator('.kanji5-startup-error-title')).toHaveText(expectedTitle);
+  await expect(page.locator('.kanji5-startup-error-copy')).toContainText(expectedCopy);
+  await expect(page.locator('.kanji5-startup-error-action')).toHaveText(expectedAction);
 });
