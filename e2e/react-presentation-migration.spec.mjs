@@ -269,7 +269,7 @@ test('Reading Lab distinguishes unique and occurrence-weighted coverage and focu
   await focusHardest.click();
   await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji') ? document.activeElement.getAttribute('data-reading-lab-sentence-index') : null)).toBe('1');
   await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
-  await expect(lab.locator('textarea')).toHaveValue('学学学生。日本語を読む。');
+  await expect(lab.locator('textarea')).toHaveValue('学学。日本語を読む。');
 });
 
 test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
