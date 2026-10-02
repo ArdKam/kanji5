@@ -4,6 +4,7 @@ import { sanitizeOnboardingProgress } from "./onboarding-model";
 const COMPLETE_KEY = "kanji5-onboarding-v2";
 const PROGRESS_KEY = "kanji5-onboarding-progress-v2";
 const LEGACY_COMPLETE_KEY = "kanji5-public-onboarding-v1";
+const ALT_COMPLETE_KEYS = ["kanji5-onboarding-complete", "kanji5-onboarding-seen"];
 
 function read(key: string): string | null {
   if (typeof window === "undefined") return null;
@@ -21,7 +22,7 @@ function remove(key: string): void {
 }
 
 export function isOnboardingComplete(): boolean {
-  return read(COMPLETE_KEY) === "complete" || read(LEGACY_COMPLETE_KEY) === "seen";
+  return read(COMPLETE_KEY) === "complete" || read(LEGACY_COMPLETE_KEY) === "seen" || ALT_COMPLETE_KEYS.some(key => read(key) === "complete" || read(key) === "seen" || read(key) === "true");
 }
 
 export function readOnboardingProgress(): OnboardingProgress | null {
