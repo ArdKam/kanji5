@@ -21,7 +21,7 @@ window.__KANJI5_STORAGE_KEYS__=K;
 const DEVICE_KEY=K.deviceId,STORAGE=K.state,CARDS_STORAGE=K.cards,REVIEWS_STORAGE=K.reviews,KNOWLEDGE_STORAGE=K.knowledge,COMPONENT_KEY=K.components,LAST_ATTEMPT_KEY=K.lastAttempt,SESSION_HISTORY_KEY=K.sessionHistory,DECK_KEY=K.deck,SETTINGS_KEY=K.educationSettings;
 const SNAPSHOT_STORAGE='kanji5-v1-snapshot',SNAPSHOT_COMMIT='kanji5-v1-snapshot-commit',PERSISTENCE_SCHEMA_VERSION=1,REVIEW_EVENT_SCHEMA_VERSION=2,SESSION_HISTORY_LIMIT=30,MNEMONIC_SCHEMA_VERSION=1;
 const DOMAIN_IDENTITY_SCHEMA_VERSION=1;
-const VALID_DOMAINS=Object.freeze(['kanji','vocabulary','grammar']);
+const VALID_DOMAINS=Object.freeze(['kanji','vocabulary','context','grammar']);
 function identityText(value,max=240){return String(value??'').trim().slice(0,max)}
 function canonicalIdentityId(domain,sourceId){
   const d=identityText(domain,40).toLowerCase(),source=identityText(sourceId,200);
