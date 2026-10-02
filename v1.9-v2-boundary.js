@@ -322,7 +322,9 @@ async function getStats(){
           evidence:{sessions:evidence.sessions,attempts:evidence.attempts,sufficient:evidence.sufficient,reason:evidence.reason}
         }};
       }
-    }catch(_error){}
+    }catch(error){
+      window.__KANJI5_EVALUATION_LOAD_DEGRADED__=String(error?.message||error||'unknown');
+    }
     return stats;
   })();
   try{return await statsInFlight}finally{statsInFlight=null}
