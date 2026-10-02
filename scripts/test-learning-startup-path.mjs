@@ -13,7 +13,7 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
 mustContain(app,'import { lazy, Suspense,','React startup path may defer secondary surfaces without changing the Learning-first renderer');
-assert.match(app,/import \\{ PracticeHome \\} from/, 'Active Recall launcher remains eager for the first interaction path');
+assert.match(app,/import \{ PracticeHome \} from/, 'Active Recall launcher remains eager for the first interaction path');
 
 const deferredSurfaces=['StrokeOrderViewer','DictionaryPage','StatsDialog','SettingsDialog','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice'];
 for(const name of deferredSurfaces){
