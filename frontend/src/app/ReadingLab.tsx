@@ -186,6 +186,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     return result;
   }, [extracted]);
 
+  const sentences = useMemo(() => subtitleCues.length ? subtitleCues.map(cue => ({ index: cue.index, text: cue.text })) : splitReadingSentences(value), [subtitleCues, value]);
+
   const coverage = extracted.length ? Math.round((counts.familiar / extracted.length) * 100) : 0;
   const occurrenceCoverage = useMemo(() => {
     let total = 0;
@@ -207,7 +209,6 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     [extracted],
   );
 
-  const sentences = useMemo(() => subtitleCues.length ? subtitleCues.map(cue => ({ index: cue.index, text: cue.text })) : splitReadingSentences(value), [subtitleCues, value]);
   const activeSentence = sentences[activeSentenceIndex] ?? sentences[0];
   const syncReady = Boolean(audioUrl && subtitleCues.length);
   const activeCue = syncReady ? subtitleCues[activeSentenceIndex] : undefined;
@@ -473,7 +474,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
     [focusableTargets],
   );
 
-  const hardestSentence = useMemo(() => {
+  const hardestSentence: { index: number; score: number; targetCount: number } | null = useMemo(() => {
     let best: { index: number; score: number; targetCount: number } | null = null;
     sentences.forEach((sentence, sentenceIndex) => {
       let score = 0;
