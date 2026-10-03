@@ -127,15 +127,16 @@ test("prepared mnemonic is available on every learning card and can be saved as 
 
 
 test("generated mnemonic scaffolds are non-persistent prompts rather than direct personal-mnemonic values", async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.clear();
+  await page.goto("/");
+  await page.evaluate(() => {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("kanji5-")) localStorage.removeItem(key);
+    }
+    sessionStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
     localStorage.setItem("kanji5-ui-language", "en");
   });
-  await page.addInitScript(() => {
-    localStorage.setItem("kanji5-onboarding-v2", "complete");
-    localStorage.removeItem("kanji5-onboarding-progress-v2");
-  });
-  await page.goto("/");
+  await page.reload();
   await expect(page.locator(".experience-nav")).toBeVisible({ timeout: 15000 });
   const dictionaryTab = page.locator(".experience-nav .experience-tab").nth(2);
   await dictionaryTab.click();
