@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kanji5-onboarding-v2", "complete"));
+});
+
 async function routeExamples(page, count) {
   await page.route("https://kanjiapi.dev/v1/words/**", async (route) => {
     const url = new URL(route.request().url());
