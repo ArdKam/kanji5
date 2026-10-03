@@ -121,6 +121,7 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
   const [confirmPassword, setConfirmPassword] = useState("");
   const [setPasswordOnly, setSetPasswordOnly] = useState(false);
   const [securityEditing, setSecurityEditing] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -146,6 +147,7 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
     setConfirmPassword("");
     setSetPasswordOnly(false);
     setSecurityEditing(false);
+    setDeleteConfirm(false);
     if (state.user) {
       setDisplayName(state.user.name && state.user.name !== state.user.email ? state.user.name : "");
     } else {
@@ -182,6 +184,7 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
         : code === "AUTH_RESET_EMAIL_REQUIRED" ? t("emailRequired", language)
         : code === "AUTH_RESET_FAILED" ? t("passwordResetError", language)
         : code === "AUTH_SET_PASSWORD_FAILED" ? t("passwordChangeError", language)
+        : code === "AUTH_ACCOUNT_DELETE_FAILED" ? t("accountDeleteError", language)
         : code === "Password should be at least 6 characters." ? t("passwordTooShort", language)
         : t("authError", language);
       setAuthMessage(message);
@@ -420,7 +423,21 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
         </section>
 
         <section className="account-section account-section-actions">
-          <div><h3>{t("accountActions", language)}</h3></div>
+          <div>
+            <h3>{t("accountActions", language)}</h3>
+            <p>{t("deleteAccountHint", language)}</p>
+          </div>
+          {deleteConfirm ? <div className="account-inline-actions">
+            <p className="account-message" role="alert">{t("deleteAccountConfirm", language)}</p>
+            <button className="account-signout-button" type="button" disabled={busy} onClick={() => void run(async () => {
+              const api = await getAccountApi();
+              await api.deleteAccount();
+              setDeleteConfirm(false);
+              setAuthMessage(t("accountDeleted", language));
+              onClose();
+            })}>{t("deleteAccountProceed", language)}</button>
+            <button className="account-link-button" type="button" disabled={busy} onClick={() => setDeleteConfirm(false)}>{t("cancel", language)}</button>
+          </div> : <button className="account-link-button" type="button" disabled={busy} onClick={() => setDeleteConfirm(true)}>{t("deleteAccount", language)}</button>}
           <button className="account-signout-button" type="button" disabled={busy} onClick={() => void run(async () => { const api = await getAccountApi(); await api.signOut(); onClose(); })}>{t("signOut", language)}</button>
         </section>
 

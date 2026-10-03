@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const read = path => fs.readFileSync(path, 'utf8');
+const legacyLoader = read('legacy-loader.js');
 const index = read('index.html');
 const boundary = read('v1.9-v2-boundary.js');
 const engine = read('frontend/src/app/engine.ts');
@@ -18,7 +19,7 @@ const legacyFiles = [
 ];
 
 for (const file of legacyFiles) {
-  assert.ok(index.includes(`"./${file}"`)||index.includes(`'./${file}'`), `legacy dependency lost ${file}`);
+  assert.ok(legacyLoader.includes(`"./${file}"`)||legacyLoader.includes(`'./${file}'`)||index.includes(`"./${file}"`)||index.includes(`'./${file}'`), `legacy dependency lost ${file}`);
   assert.doesNotMatch(index, new RegExp(`<script[^>]+src="./${file.replaceAll('.', '\\\.')}"[^>]*><\\/script>`),
     `legacy file is directly wired into the default shell: ${file}`);
 }
