@@ -60,7 +60,9 @@ export function OnboardingEntry({
   busy: parentBusy = false,
   onFinished,
 }: OnboardingEntryProps) {
-  ensureOnboardingStylesheet();
+  useEffect(() => {
+    ensureOnboardingStylesheet();
+  }, []);
   const [initialProgress] = useState<OnboardingProgress | null>(() => readOnboardingProgress());
   const [progress, setProgress] = useState<OnboardingProgress | null>(initialProgress);
   const [placementRecords, setPlacementRecords] = useState<PlacementQuestionRecord[]>([]);
