@@ -293,7 +293,6 @@ export function OnboardingFlow({
     if (busy || completing || (event.pointerType === "mouse" && event.button !== 0)) return;
     swipeRef.current = { x: event.clientX, y: event.clientY, active: true, pointerId: event.pointerId };
     suppressClickRef.current = false;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
@@ -312,7 +311,6 @@ export function OnboardingFlow({
     const start = swipeRef.current;
     const wasActive = start.active;
     swipeRef.current.active = false;
-    if (start.pointerId === event.pointerId) event.currentTarget.releasePointerCapture?.(event.pointerId);
     if (!wasActive || busy || completing) {
       setDragX(0);
       return;
