@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
 import "vazirmatn/Vazirmatn-Variable-font-face.css";
-import "@fontsource-variable/plus-jakarta-sans/wght.css";
+import "./plus-jakarta.css";
 import "./styles.css";
 import "./experience-nav.css";
 import "./app/dictionary.css";
