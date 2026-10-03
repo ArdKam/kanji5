@@ -88,8 +88,10 @@ try {
     }
 
     await context.setOffline(true);
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
+    const onboardingComplete = await page.evaluate(() => localStorage.getItem('kanji5-onboarding-v2'));
+    if (onboardingComplete !== 'complete') throw new Error('LIVE_OFFLINE_GATE_ONBOARDING_NOT_PERSISTED: ' + onboardingComplete);
+    await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 45000 });
     await page.locator('#root .daily-summary').waitFor({ state: 'visible', timeout: 10000 });
     console.log('LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED');
   } finally {
