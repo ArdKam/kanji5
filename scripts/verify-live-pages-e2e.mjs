@@ -67,7 +67,7 @@ try {
       throw new Error('LIVE_SMOKE_UNEXPECTED_BACKUP_FILENAME: ' + download.suggestedFilename());
     }
     await expect(settings.getByRole('status')).toContainText('Backup exported successfully.');
-    await settings.getByRole('button', { name: 'Close', exact: true }).click();
+    await settings.locator('button.button.secondary').getByText('Close', { exact: true }).click();
 
     await page.locator('.account-button:visible').click();
     const accountDialog = page.locator('.account-dialog:visible');
