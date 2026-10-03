@@ -60,6 +60,7 @@ export function OnboardingEntry({
   const [placementLoading, setPlacementLoading] = useState(false);
   const [placementError, setPlacementError] = useState("");
   const [placementRetry, setPlacementRetry] = useState(0);
+  const [placementSeed, setPlacementSeed] = useState(() => Date.now() >>> 0);
   // The first-run shell must stay interactive while the authoritative engine warms in the background.
   const [busy, setBusy] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -87,6 +88,7 @@ export function OnboardingEntry({
         const records = buildPlacementQuestions(
           result.results,
           t("diagnosticMeaningPrompt", language),
+          placementSeed,
         );
         setPlacementRecords(records);
         if (!records.length) {
@@ -105,7 +107,7 @@ export function OnboardingEntry({
     return () => {
       active = false;
     };
-  }, [language, placementRetry, progress?.draft.startingPoint]);
+  }, [language, placementRetry, placementSeed, progress?.draft.startingPoint]);
 
   const handleProgressChange = useCallback((next: OnboardingProgress) => {
     setProgress(next);
@@ -226,6 +228,7 @@ export function OnboardingEntry({
           placementError={placementError}
           onRetryPlacement={() => setPlacementRetry(value => value + 1)}
           onPlacementComplete={resolvePlacement}
+          onPlacementRestart={() => setPlacementSeed(seed => ((seed + 0x9e3779b9) ^ (Date.now() >>> 0)) >>> 0)}
           initialProgress={initialProgress}
           busy={busy}
           onSkip={() => void handleSkip()}
