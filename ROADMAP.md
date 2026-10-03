@@ -165,7 +165,7 @@ A feature may remain technically implemented while its educational validity rema
 ### 2.1.1 Changes implemented during the current pre-beta pass
 
 - Production Supabase review was performed; RLS ownership was confirmed for `public.user_learning_state`.
-- A user-owned DELETE policy/grant was applied in production and recorded in the repository migration path.
+- A user-owned DELETE policy/grant was applied in production and recorded in the open security candidate PR #440; it is not counted as current-main implementation until that PR is merged and re-verified.
 - An authenticated Supabase `delete-account` Edge Function was deployed with JWT verification; browser-side deletion semantics were kept separate from local-first device data.
 - Security hardening was implemented in current-main candidate PR #440: explicit CSP, externalized bootstrap scripts, removal of two shipped runtime HTML sinks, security/unsafe-DOM contract tests, and dependency-audit workflow.
 - Global React failure containment was implemented in current-main candidate PR #441: ErrorBoundary, observable render-failure capture, reload, backup export, and diagnostic report actions.
