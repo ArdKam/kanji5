@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `098fab1f4d37d8e2538813e7dc039c13bc2079ec` (2026-10-03). The matching GitHub Pages deployment for this SHA has completed successfully. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
+> **Implementation baseline reviewed:** `main` at commit `940224fad0fe50c82bb03e7064dd1909ad9d6e4c` (2026-10-03). The matching GitHub Pages deployment for this SHA has completed successfully. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
 
 > **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -115,6 +115,50 @@ Especially avoid:
 - replacing the planner because of presentation needs
 - large persistence migrations without measured need
 - broad file restructuring during active feature work
+
+### 1.6 Learning-engine audit — 2026-10-03
+
+A current-main review of the learning engine identified substantive educational/algorithmic gaps. These do **not** justify an engine rewrite; the existing boundaries, FSRS authority, learner-model authority, deterministic grading, evidence contracts, recovery layer, and offline-first design should be preserved while the model is strengthened.
+
+Detailed findings are recorded in `docs/ENGINE-AUDIT.md`.
+
+#### P0 — resolve before claiming an adaptive/research-grade engine
+
+1. **Unify card memory and attribute memory semantics.** FSRS is authoritative for scheduled card memory, while the Learner Model currently behaves primarily as an accuracy/performance model. Define an explicit bridge between card retrievability and Meaning/Reading/Production/Vocabulary/Context skill state without creating a second scheduler.
+2. **Fix global streak derivation.** Global success/error streaks must come from chronologically ordered learning events, not the latest state of multiple Kanji aggregated by timestamp; the latter can manufacture a false streak.
+3. **Make Production Recall genuinely productive.** A mode presented as Production must include a true free-production path (type/draw), not only recognition via distractor selection. Revealed self-report may remain a separate evidence type.
+4. **Define a single decision objective for adaptive selection.** The engine currently separates “which skill?” and “which Kanji/content?”. Specify a deterministic `content × skill × modality × spacing × learner-state` objective so planner and item selection do not optimize independently.
+
+#### P1 — strengthen the educational model
+
+5. **Move mastery beyond raw accuracy.** Incorporate time since review/retrievability and delayed outcomes into long-term skill confidence. Accuracy remains evidence, not the whole memory model.
+6. **Use captured evidence in planning.** Response time, modality, independence/recovery, repeated confusion, and delayed performance should materially affect learner-model/planner decisions where evidence is sufficient.
+7. **Improve Vocabulary/Context grading tolerance.** Keep deterministic grading, but support explicit accepted-answer sets and documented normalization/orthographic alternatives to reduce educational false negatives.
+8. **Replace coarse content-difficulty heuristics with learner-calibrated difficulty.** Length and Kanji-count heuristics may remain as fallback priors, but observed learner performance should progressively calibrate Vocabulary/Context difficulty.
+9. **Strengthen evaluation.** The existing adaptive-vs-baseline evaluation framework must eventually measure delayed retention, time-to-stability, review cost, transfer across modalities, and recovery—not only session accuracy.
+
+#### P2 — competitive/long-term engine improvements
+
+10. **Add stronger curriculum dependencies.** Radical/component → Kanji → Vocabulary relationships should become explicit learning dependencies where pedagogically justified, while keeping scheduling authoritative in FSRS.
+11. **Improve cross-vector scheduling behavior.** Use the useful concept of separate question/skill vectors seen in mature tools such as Renshuu, while retaining Kanji5's five-skill evidence model and deterministic planner.
+12. **Add scheduler calibration tooling.** Long-term, use replay/simulation/optimizer-style analysis to calibrate retention targets and workload rather than relying only on static thresholds.
+
+#### Engine acceptance criteria
+
+An engine improvement is not complete merely because code exists. Relevant work must have:
+
+- deterministic unit/contract coverage;
+- browser coverage for cross-layer behavior;
+- migration compatibility for persisted learner evidence;
+- proof that FSRS remains the scheduling authority;
+- no second competing scheduler;
+- explicit delayed-retention/retrievability evidence where the change claims memory improvement;
+- no regression in offline behavior;
+- updated `docs/ENGINE-AUDIT.md` and this roadmap when the algorithmic contract changes.
+
+#### Scope protection
+
+Do **not** reopen or rewrite the engine solely for presentation cleanup, React migration, or feature-count parity. Preserve the current architecture and make targeted changes only when they address a verified educational, scheduling, persistence, reliability, or correctness defect.
 
 ---
 
