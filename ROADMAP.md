@@ -180,7 +180,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 
 **PARTIAL / remaining before Public Product Readiness:**
 - A1 release integrity: current `main` Pages deployment is green, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
-- R2 onboarding redesign is not complete; current onboarding works but the dedicated first-open value/setup/placement/account flow is still pending.
+- R2 onboarding redesign is **DONE on current `main`**: dedicated first-open value/setup/placement/account flow is implemented, guest-first, and covered by desktop/mobile E2E. Remaining work is release evidence on representative target environments, not the core onboarding implementation.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
 - R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
@@ -805,13 +805,22 @@ See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
 ### C4.1 Placement validity
 
-- Randomize answer position; never encode the correct choice at a fixed index.
-- Replace the current 3-items-per-level heuristic with a documented level blueprint.
-- Do not make a strong placement decision from a tiny sample such as 2/3 correct.
-- Add boundary-case and uncertainty handling.
-- Define how N1 is handled.
-- Call the result a **Kanji starting-point diagnostic**, not overall Japanese proficiency.
-- Add regression tests for position bias, synonym ambiguity, boundary placement, and insufficient evidence.
+**PARTIAL — core implementation complete; broader validity evidence remains.**
+
+Implemented on current `main`:
+- randomized answer order with stable option IDs;
+- documented 4-item-per-level blueprint across N5–N2, sampling the beginning/middle/end of each level;
+- 16-question onboarding diagnostic contract;
+- stronger 3/4 per-level threshold instead of tiny-sample level decisions;
+- retake reshuffling;
+- explicit **Kanji starting-point diagnostic** wording rather than overall Japanese proficiency;
+- regression coverage for answer-position assumptions and the 16-question contract.
+
+Remaining before Public Beta:
+- explicit boundary-case/uncertainty presentation and empirical validation of placement stability;
+- broader synonym/ambiguous-meaning fixtures;
+- explicit policy/evidence for how N1 should be treated for users above N2.
+
 
 ### C4.2 Exercise-modality fidelity
 
@@ -2073,7 +2082,7 @@ The roadmap has one active pre-Vocabulary release sequence. Historical A/B/C/R/D
 → account lifecycle and production OAuth verification → persistence seam → Supabase migration/RLS consolidation → backup/restore → deletion/export semantics → privacy/terms/legal
 
 **3. Public UX**
-→ onboarding R2 → final Learning/Active Recall/Stats/Settings/Dictionary/Reading Lab/Mnemonic/Handwriting polish → RTL/i18n → loading/error/empty states → small reliability UX
+→ onboarding R2 release evidence → final Learning/Active Recall/Stats/Settings/Dictionary/Reading Lab/Mnemonic/Handwriting polish → RTL/i18n → loading/error/empty states → small reliability UX
 
 **4. Real Device / Accessibility / Performance**
 → Tier-1/Tier-2 device matrix → PWA install/update/reinstall → offline/reconnect → manual accessibility → representative performance evidence
