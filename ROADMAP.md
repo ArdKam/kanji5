@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be` (2026-10-03). The matching GitHub Pages deployment is not yet recorded as completed in the release ledger; same-SHA deployment/hash/live/device evidence remains pending.
+> **Implementation baseline reviewed:** `main` at commit `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be` (2026-10-03). GitHub Pages deployment run `37142310325` completed successfully with exact same-SHA verification and live offline/core-product smoke. The release ledger records the verified hashes; representative-device evidence and a frozen/tagged candidate are still pending.
 
 > **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -223,7 +223,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- A1 release integrity: current `main` Pages deployment is green, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
+- A1 release integrity: current `main` has green same-SHA Pages deployment, exact live artifact/hash equality for the core shipped files, and live offline/core smoke. A frozen/tagged release candidate plus cache/stale-client and representative-device evidence is still required.
 - R2 onboarding implementation is present on current `main` after PR #417; representative mobile/desktop and full first-open live evidence remain pending.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
