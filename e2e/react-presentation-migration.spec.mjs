@@ -25,7 +25,8 @@ test('first-open onboarding runs as a dedicated resumable entry flow',async({pag
   await expect(onboarding).toContainText('به Kanji5 خوش آمدی');
   await expect(onboarding.getByRole('button',{name:'شروع کنیم',exact:true})).toBeVisible();
   await onboarding.getByRole('button',{name:'شروع کنیم',exact:true}).click();
-  await expect(onboarding).toContainText('روش کار');
+  await expect(onboarding).toContainText('هر کانجی را چطور یاد می‌گیری؟');
+  await expect(onboarding).toContainText('معنی و خوانش را یک‌جا می‌بینی.');
   await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
   await expect(onboarding.getByRole('heading',{name:'از کجا شروع کنیم؟'})).toBeVisible();
   await onboarding.getByRole('button',{name:/از ابتدا/}).click();
