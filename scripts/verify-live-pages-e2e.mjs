@@ -63,7 +63,7 @@ try {
     const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
     await settings.getByRole('button', { name: 'Export backup', exact: true }).click();
     const download = await downloadPromise;
-    if (!/^kanji5-backup-\\d{4}-\\d{2}-\\d{2}\\.json$/.test(download.suggestedFilename())) {
+    if (!/^kanji5-backup-\d{4}-\d{2}-\d{2}\.json$/.test(download.suggestedFilename())) {
       throw new Error('LIVE_SMOKE_UNEXPECTED_BACKUP_FILENAME: ' + download.suggestedFilename());
     }
     await expect(settings.getByRole('status')).toContainText('Backup exported successfully.');
