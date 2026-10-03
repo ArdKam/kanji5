@@ -35,7 +35,7 @@ test("first-run onboarding is a dedicated full-page guest-first journey", async 
   await onboarding.getByRole("button", { name: /Start from the beginning/ }).click();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
-  await expect(onboarding.getByRole("button", { name: /5 new kanji/, exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(onboarding.getByRole("button", { name: /^5 new kanji$/ })).toHaveAttribute("aria-pressed", "true");
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "An account is optional" })).toBeVisible();
   await expect(onboarding.getByRole("button", { name: "Continue as a guest", exact: true })).toBeVisible();
@@ -58,6 +58,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
       await onboarding.getByRole("button", { name: "Next question", exact: true }).click();
     }
   }
+  await onboarding.getByRole("button", { name: "Finish placement", exact: true }).click();
 
   await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText("N2");
@@ -70,6 +71,11 @@ test("onboarding resumes its transient setup after reload", async ({ page }) => 
   const onboarding = await reachStartingPoint(page);
   await onboarding.getByRole("button", { name: "I know some kanji", exact: true }).click();
   await expect(onboarding.getByRole("button", { name: "I know some kanji", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem("kanji5-onboarding-progress-v2");
+    if (!raw) return null;
+    try { return JSON.parse(raw)?.draft?.startingPoint ?? null; } catch { return null; }
+  })).toBe("some-knowledge");
   await page.reload();
   const resumed = page.locator('[data-testid="onboarding-flow"]');
   await expect(resumed).toBeVisible({ timeout: 20000 });
