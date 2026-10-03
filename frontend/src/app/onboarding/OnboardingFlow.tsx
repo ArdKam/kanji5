@@ -47,12 +47,7 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-hero-mark,.kanji5-onboarding-stimulus{display:grid;place-items:center;border:1px solid var(--line);background:var(--washi);box-shadow:0 18px 44px rgba(38,37,35,.08)}
 .kanji5-onboarding-hero-mark{width:104px;height:104px;margin:28px 0;border-radius:28px;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:62px}
 .kanji5-onboarding-stimulus{width:142px;height:142px;margin:7px 0 20px;border-radius:30px;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:74px}
-.kanji5-onboarding-loop{display:grid;grid-template-columns:repeat(3,1fr);margin:24px 0;padding:16px 0;border-block:1px solid var(--line)}
-.kanji5-onboarding-loop-step{display:grid;grid-template-columns:22px 1fr;gap:8px}
-.kanji5-onboarding-loop-step+.kanji5-onboarding-loop-step{border-inline-start:1px solid var(--line);padding-inline-start:16px}
-.kanji5-onboarding-loop-step>span:first-child{color:var(--indigo);font-weight:850}
-.kanji5-onboarding-loop-copy{display:grid;gap:3px}.kanji5-onboarding-loop-copy small{color:var(--mute);font-size:11px;line-height:1.5}
-@media(max-width:860px){.kanji5-onboarding-loop{grid-template-columns:1fr}.kanji5-onboarding-loop-step+.kanji5-onboarding-loop-step{border-inline-start:0;border-top:1px solid var(--line);padding:12px 0 0;margin-top:12px}}.kanji5-onboarding-choices{display:grid;gap:10px;margin:27px 0}.kanji5-onboarding-choice{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:13px;width:100%;padding:17px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,252,246,.58);color:inherit;text-align:start;cursor:pointer;box-shadow:0 10px 26px rgba(38,37,35,.035);transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}.kanji5-onboarding-choice:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(38,37,35,.08)}.kanji5-onboarding-choice.is-selected{border-color:rgba(48,79,116,.42);background:linear-gradient(120deg,rgba(48,79,116,.1),rgba(255,252,246,.6));box-shadow:0 15px 34px rgba(48,79,116,.09)}
+.kanji5-onboarding-choices{display:grid;gap:10px;margin:27px 0}.kanji5-onboarding-choice{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:13px;width:100%;padding:17px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,252,246,.58);color:inherit;text-align:start;cursor:pointer;box-shadow:0 10px 26px rgba(38,37,35,.035);transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}.kanji5-onboarding-choice:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(38,37,35,.08)}.kanji5-onboarding-choice.is-selected{border-color:rgba(48,79,116,.42);background:linear-gradient(120deg,rgba(48,79,116,.1),rgba(255,252,246,.6));box-shadow:0 15px 34px rgba(48,79,116,.09)}
 .kanji5-onboarding-choice-check{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line-strong);border-radius:50%;color:var(--indigo);background:rgba(255,252,246,.72)}.kanji5-onboarding-choice.is-selected .kanji5-onboarding-choice-check{border-color:var(--indigo);background:var(--indigo);color:#fff}.kanji5-onboarding-choice-copy{display:grid;gap:5px;min-width:0}.kanji5-onboarding-choice-copy strong{font-size:15px}.kanji5-onboarding-choice-copy small,.kanji5-onboarding-footnote,.kanji5-onboarding-question-meta{color:var(--mute)}.kanji5-onboarding-choice-copy small{font-size:12px;line-height:1.55}.kanji5-onboarding-choice-arrow{display:grid;place-items:center;width:34px;height:34px;color:var(--mute);font-size:18px;transition:transform .18s ease}.kanji5-onboarding-root[dir=rtl] .kanji5-onboarding-choice-arrow{transform:scaleX(-1)}.kanji5-onboarding-choice:hover .kanji5-onboarding-choice-arrow{transform:translateX(3px)}.kanji5-onboarding-root[dir=rtl] .kanji5-onboarding-choice:hover .kanji5-onboarding-choice-arrow{transform:scaleX(-1) translateX(3px)}
 .kanji5-onboarding-question-meta{display:flex;align-items:center;gap:9px;margin:10px 0 18px;font-size:12px;font-weight:800}.kanji5-onboarding-question-meta:after{content:"";flex:1;height:4px;border-radius:99px;background:linear-gradient(90deg,var(--indigo) 0 24%,rgba(38,37,35,.08) 24%);opacity:.75}
 .kanji5-onboarding-question{margin:0 0 18px;font-size:17px;line-height:1.6}.kanji5-onboarding-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.kanji5-onboarding-option{min-height:66px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,252,246,.62);color:inherit;font-size:15px;text-align:start;cursor:pointer;box-shadow:0 8px 22px rgba(38,37,35,.03);transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}.kanji5-onboarding-option:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(38,37,35,.07)}.kanji5-onboarding-option.is-selected{border-color:rgba(48,79,116,.42);background:rgba(48,79,116,.09);box-shadow:0 11px 24px rgba(48,79,116,.08)}
@@ -363,29 +358,11 @@ export function OnboardingFlow({
             <p className="kanji5-onboarding-eyebrow">{t("onboardingLoopEyebrow", language)}</p>
             <h1>{t("onboardingLoopTitle", language)}</h1>
             <p className="kanji5-onboarding-body">{t("onboardingLoopBody", language)}</p>
-            <div className="kanji5-onboarding-loop" aria-label={t("learningLoop", language)}>
-              <div className="kanji5-onboarding-loop-step">
-                <span className="kanji5-onboarding-loop-number" aria-hidden="true">1</span>
-                <span className="kanji5-onboarding-loop-copy">
-                  <strong>{t("onboardingLearn", language)}</strong>
-                  <small>{t("onboardingLearnHint", language)}</small>
-                </span>
-              </div>
-              <div className="kanji5-onboarding-loop-step">
-                <span className="kanji5-onboarding-loop-number" aria-hidden="true">2</span>
-                <span className="kanji5-onboarding-loop-copy">
-                  <strong>{t("onboardingRecall", language)}</strong>
-                  <small>{t("onboardingRecallHint", language)}</small>
-                </span>
-              </div>
-              <div className="kanji5-onboarding-loop-step">
-                <span className="kanji5-onboarding-loop-number" aria-hidden="true">3</span>
-                <span className="kanji5-onboarding-loop-copy">
-                  <strong>{t("onboardingReview", language)}</strong>
-                  <small>{t("onboardingReviewHint", language)}</small>
-                </span>
-              </div>
-            </div>
+            <ol className="kanji5-onboarding-body" aria-label={t("learningLoop", language)}>
+              <li><strong>{t("onboardingLearn", language)}:</strong> {t("onboardingLearnHint", language)}</li>
+              <li><strong>{t("onboardingRecall", language)}:</strong> {t("onboardingRecallHint", language)}</li>
+              <li><strong>{t("onboardingReview", language)}:</strong> {t("onboardingReviewHint", language)}</li>
+            </ol>
             <button className="kanji5-onboarding-primary" type="button" onClick={advance} disabled={busy || completing}>{t("onboardingNext", language)}</button>
           </section>
         );
