@@ -499,7 +499,7 @@ const api = {
     const c = await getClient();
     const { error } = await c.functions.invoke('delete-account', { body: {} });
     if (error) throw new Error('AUTH_ACCOUNT_DELETE_FAILED');
-    try { await c.auth.signOut(); } catch (_) {}
+    try { await c.auth.signOut(); } catch (error) { console.debug('Kanji 5 account cleanup sign-out failed after deletion', error); }
     localStorage.removeItem(SYNC_META_KEY);
     user = null;
     stopSyncLifecycle();
