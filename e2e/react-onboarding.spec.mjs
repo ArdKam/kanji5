@@ -8,14 +8,15 @@ test.beforeEach(async ({ page }) => {
 
 
 async function fresh(page) {
-  await page.addInitScript(() => {
+  await page.goto("/");
+  await page.evaluate(() => {
     for (const key of Object.keys(localStorage)) {
       if (key.startsWith("kanji5-")) localStorage.removeItem(key);
     }
     sessionStorage.clear();
     localStorage.setItem("kanji5-ui-language", "en");
   });
-  await page.goto("/");
+  await page.reload();
 }
 
 async function reachStartingPoint(page) {
