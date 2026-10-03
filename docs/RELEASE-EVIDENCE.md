@@ -6,7 +6,7 @@ This file is an operational ledger, not a user-facing promise.
 
 - **Current main:** `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be`.
 - **Latest main change:** educational/content audit and assessment-validity gates are now on main; see `docs/EDUCATIONAL-CONTENT-AUDIT.md` and `docs/ENGINE-AUDIT.md`.
-- **Pages deployment:** the exact-SHA deployment/live artifact/hash evidence for `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be` is not yet recorded here.
+- **Pages deployment:** run `37142310325` deployed `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be` and completed the exact same-SHA live verification. Core live file hashes matched staged files: `index.html` 2b9dba3725f97f74239a73c78937bf975a8570de598c290d5de1884b662a38b4; `react-entry.js` 829ecaa116e123deef09bcf8f2bbfe99bef26518928cdf2199a1580f1a316760; `sw.js` 55c1f842dce18036288f00c79d4030a7307b772dca52a0de9c75fb0cb237fa0c; `react-dist/kanji5-react.js` b5f3e20630f6502704ee8aab6e3619a53e5eea351dcb1f0efe7611fcf14e372e; `react-dist/kanji5-react.css` 694721f7939ee89f5e070461e733a486093aec469b87aa94d4c9c86521d8e040. Uploaded Pages artifact SHA-256: `3eebfce254111b62394e23c0e41d494a4ec740f4c9691ea076ec1a9eecc6f7cf`; artifact ID `11280413877`. Live offline/core smoke reported `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
 - **PR #420:** current-main security/CSP/Supabase hardening remains open; implementation is not counted until CI and production verification pass.
 - **PR #421:** current-main global React error-boundary/recovery remains open; implementation is not counted until CI/build/live checks pass.
 - **PR #422:** merged as `7bd26bf8713b03898fd00dcdd8e4a39402d659ac`, bringing the Privacy/Data and Release Governance docs onto main.
