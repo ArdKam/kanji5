@@ -3,7 +3,7 @@ import { createBackup } from "./engine";
 import { getLanguage, t, type Language } from "./i18n";
 
 type Observability = {
-  capture: (type: string, error: unknown, extra?: Record<string, unknown>) => unknown;
+  capture: (type: string, error: unknown, extra?: Record<string, unknown>) => { release?: string } | undefined;
   list?: () => unknown[];
 };
 type State = { failed: boolean; backupBusy: boolean; copied: boolean };
