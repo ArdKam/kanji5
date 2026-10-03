@@ -6,7 +6,7 @@ import path from 'node:path';
 const root = path.resolve('.');
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
-const cspMatch = index.match(/<meta\\s+http-equiv=["']Content-Security-Policy["']\\s+content="([^"]+)"\\s*\\/?>/i);
+const cspMatch = index.match(/<meta\s+http-equiv=["']Content-Security-Policy["']\s+content="([^"]+)"\s*\/?\s*>/i);
 assert.ok(cspMatch, 'index.html must declare an explicit Content-Security-Policy');
 const csp = cspMatch[1];
 const scriptSource = csp.match(/(?:^|;)\s*script-src\s+([^;]+)/i)?.[1] || '';
