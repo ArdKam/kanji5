@@ -2,10 +2,15 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { createBackup } from "./engine";
 import { getLanguage, t, type Language } from "./i18n";
 
+type Observability = {
+  capture: (type: string, error: unknown, extra?: Record<string, unknown>) => unknown;
+  list?: () => unknown[];
+};
 type State = { failed: boolean; backupBusy: boolean; copied: boolean };
+const getObservability = () => (window as Window & { __KANJI5_OBSERVABILITY__?: Observability }).__KANJI5_OBSERVABILITY__;
 
 function diagnosticsFor(error: Error, info: ErrorInfo) {
-  const observability = window.__KANJI5_OBSERVABILITY__;
+  const observability = getObservability();
   const captured = observability?.capture("react-render-error", error, {
     componentStack: info.componentStack ?? "",
   });
