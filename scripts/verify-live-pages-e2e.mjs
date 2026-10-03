@@ -90,12 +90,18 @@ try {
       throw new Error('LIVE_OFFLINE_GATE_MISSING_CACHE_ENTRY: ' + JSON.stringify(cached));
     }
 
-    await context.setOffline(true);
-    const onboardingComplete = await page.evaluate(() => localStorage.getItem('kanji5-onboarding-v2'));
+    const offlinePage = await context.newPage();
+    await offlinePage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await offlinePage.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
+    await offlinePage.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await expect.poll(async () => offlinePage.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+    const onboardingComplete = await offlinePage.evaluate(() => localStorage.getItem('kanji5-onboarding-v2'));
     if (onboardingComplete !== 'complete') throw new Error('LIVE_OFFLINE_GATE_ONBOARDING_NOT_PERSISTED: ' + onboardingComplete);
-    await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 45000 });
-    await page.locator('#root .daily-summary').waitFor({ state: 'visible', timeout: 10000 });
+
+    await context.setOffline(true);
+    await offlinePage.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+    await offlinePage.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
+    await offlinePage.locator('#root .daily-summary').waitFor({ state: 'visible', timeout: 10000 });
     console.log('LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED');
   } finally {
     await context.close();
