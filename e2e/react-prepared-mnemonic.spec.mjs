@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
     localStorage.setItem("kanji5-onboarding-v2", "complete");
   });
 });
