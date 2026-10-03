@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+});
+
 const waitForBoundary = async (page) => {
   await expect.poll(async () => page.evaluate(() => Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
 };

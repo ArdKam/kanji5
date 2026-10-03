@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.use({ serviceWorkers: 'allow' });
 
 test('current service worker evicts stale release caches and remains usable offline', async ({ page, context }) => {
+  await page.addInitScript(() => localStorage.setItem('kanji5-onboarding-v2','complete'));
   await page.goto('/');
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });

@@ -39,6 +39,7 @@ test("performance artifact budgets", () => {
 for (const profile of profiles) {
   test(`performance budget — ${profile.name}`, async ({ page }) => {
     await page.setViewportSize({ width: profile.width, height: profile.height });
+    await page.addInitScript(() => localStorage.setItem("kanji5-onboarding-v2", "complete"));
 
     await page.addInitScript(() => {
       const metrics = {

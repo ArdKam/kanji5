@@ -106,7 +106,7 @@ export function AccountButton({ language, onClick }: { language: Language; onCli
   </button>;
 }
 
-export function AccountDialog({ open, language, onClose }: { open: boolean; language: Language; onClose: () => void }) {
+export function AccountDialog({ open, language, onClose, onAuthenticated, initialEmailIntent = "sign-in" }: { open: boolean; language: Language; onClose: () => void; onAuthenticated?: () => void; initialEmailIntent?: "sign-in" | "sign-up" }) {
   const initialSummary = { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null };
   const [state, setState] = useState<AccountState>({ status: "loading", user: null, syncStatus: "idle", error: null, recoveryPending: false, syncSummary: initialSummary });
   const [busy, setBusy] = useState(false);
@@ -151,9 +151,9 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
     } else {
       setDisplayName("");
       setAuthMode(state.recoveryPending ? "reset" : "email");
-      setEmailIntent("sign-in");
+      setEmailIntent(initialEmailIntent);
     }
-  }, [open, state.user?.id]);
+  }, [open, state.user?.id, initialEmailIntent]);
 
   useEffect(() => {
     if (!open || !state.recoveryPending) return;
@@ -189,6 +189,11 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
       setBusy(false);
     }
   };
+
+  useEffect(() => {
+    if (!open || !onAuthenticated || state.status !== "signed-in") return;
+    onAuthenticated();
+  }, [open, onAuthenticated, state.status]);
 
   const dialogRef = useModalDialog(open, onClose);
 
@@ -231,12 +236,13 @@ export function AccountDialog({ open, language, onClose }: { open: boolean; lang
       await api.signInWithPassword(email, password);
       setPassword("");
       onClose();
+      onAuthenticated?.();
       return;
     }
     const result = await api.signUpWithPassword(email, password);
     setPassword("");
     setAuthMessage(result.needsEmailConfirmation ? t("accountCheckEmail", language) : t("signedIn", language));
-    if (!result.needsEmailConfirmation) onClose();
+    if (!result.needsEmailConfirmation) { onClose(); onAuthenticated?.(); }
   });
 
   const submitPassword = () => void run(async () => {

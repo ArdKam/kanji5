@@ -4,7 +4,7 @@ async function clean(page){
   page.on('pageerror',error=>console.error(`[E2E_PAGEERROR] ${error?.stack||error}`));
   page.on('console',message=>{if(message.type()==='error')console.error(`[E2E_CONSOLE_ERROR] ${message.text()}`)});
   await page.goto('/');
-  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear()});
+  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear();localStorage.setItem('kanji5-onboarding-v2','complete')});
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
@@ -17,30 +17,30 @@ async function seedSeenCard(page){
 }
 
 
-test('first-open onboarding explains the learning loop, saves a daily goal, and disappears after starting',async({page})=>{
-  await clean(page);
-  const onboarding=page.locator('.public-onboarding');
+test('first-open onboarding runs as a dedicated resumable entry flow',async({page})=>{
+  await page.goto('/');
+  const onboarding=page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({timeout:15000});
-  await expect(onboarding).toContainText('چرخهٔ یادگیری');
-  await expect(onboarding).toContainText('حساب اختیاری');
+  await expect(page.locator('#root .app-shell')).toHaveCount(0);
+  await expect(onboarding).toContainText('به Kanji5 خوش آمدی');
   await expect(onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true})).toBeVisible();
-
-  await onboarding.getByRole('button',{name:'30',exact:true}).click();
-  await expect.poll(async()=>page.evaluate(async()=>{
-    const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.();
-    return Number(snapshot?.settings?.dailyGoal||0);
-  })).toBe(30);
-
   await onboarding.getByRole('button',{name:'شروع یادگیری امروز',exact:true}).click();
+  await expect(onboarding).toContainText('روش کار');
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
+  await expect(onboarding.getByRole('heading',{name:'از کجا شروع کنیم؟'})).toBeVisible();
+  await onboarding.getByRole('button',{name:/از ابتدا/}).click();
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
+  await expect(onboarding.getByRole('heading',{name:'روزانه چند کانجی جدید؟'})).toBeVisible();
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
+  await expect(onboarding.getByRole('heading',{name:'حساب اختیاری است'})).toBeVisible();
+  await onboarding.getByRole('button',{name:'ادامه به‌عنوان مهمان',exact:true}).click();
+  await expect(onboarding).toHaveCount(0);
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:15000});
-  await expect(page.locator('.public-onboarding')).toHaveCount(0);
-  await expect.poll(async()=>page.evaluate(()=>localStorage.getItem('kanji5-public-onboarding-v1'))).toBe('seen');
-
+  await expect.poll(async()=>page.evaluate(()=>localStorage.getItem('kanji5-onboarding-v2'))).toBe('complete');
   await page.reload();
-  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:15000});
-  await expect(page.locator('.public-onboarding')).toHaveCount(0);
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:15000});
+  await expect(page.locator('[data-testid="onboarding-flow"]')).toHaveCount(0);
 });
-
 test('React is the sole default presentation renderer',async({page})=>{
   await clean(page);
   await expect(page.locator('#root .daily-summary')).toBeVisible({timeout:10000});
@@ -109,7 +109,7 @@ test('React presentation can switch language from More Menu and keep Settings fo
 });
 
 test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
-  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');localStorage.setItem('kanji5-onboarding-v2','complete')});
   await page.goto('/');
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Show kanji information',exact:true}).click();

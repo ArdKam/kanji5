@@ -6,13 +6,10 @@ test('browser-compat startup and core learning smoke', async ({ page }) => {
   await page.addInitScript(() => {
     for (const key of Object.keys(localStorage)) if (key.startsWith('kanji5-')) localStorage.removeItem(key);
     sessionStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2","complete");
   });
   await page.goto('/');
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
-  const onboarding = page.locator('.public-onboarding');
-  if (await onboarding.isVisible().catch(() => false)) {
-    await onboarding.getByRole('button', { name: /شروع یادگیری امروز|Start learning today/ }).click();
-  }
   await expect(page.locator('#root .learning-card-front .button.wide')).toBeVisible({ timeout: 15000 });
   await page.locator('#root .learning-card-front .button.wide').click();
   await expect(page.locator('#root .rating-grid')).toBeVisible({ timeout: 10000 });

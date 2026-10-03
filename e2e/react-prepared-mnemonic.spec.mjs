@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+});
+
 async function goToMnemonicPage(card) {
   const pages = card.locator(".learning-back-page");
   const count = await pages.count();
@@ -29,6 +36,7 @@ async function goToMnemonicPage(card) {
 test("prepared mnemonic is available on every learning card and can be saved as personal", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
     localStorage.setItem("kanji5-ui-language", "en");
   });
   await page.goto("/");
@@ -120,11 +128,17 @@ test("prepared mnemonic is available on every learning card and can be saved as 
 
 
 test("generated mnemonic scaffolds are non-persistent prompts rather than direct personal-mnemonic values", async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.clear();
+  await page.goto("/");
+  await page.evaluate(() => {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("kanji5-")) localStorage.removeItem(key);
+    }
+    sessionStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
     localStorage.setItem("kanji5-ui-language", "en");
   });
-  await page.goto("/");
+  await page.reload();
+  await expect(page.locator(".experience-nav")).toBeVisible({ timeout: 15000 });
   const dictionaryTab = page.locator(".experience-nav .experience-tab").nth(2);
   await dictionaryTab.click();
   await expect(page.locator(".dictionary-page")).toBeVisible({ timeout: 10000 });
