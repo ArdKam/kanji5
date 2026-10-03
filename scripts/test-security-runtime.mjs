@@ -60,7 +60,7 @@ const legacyOnlySinkFiles = new Set([
   'v1.6-skill-profile.js',
 ]);
 const legacyGatedSinkFiles = new Set(['review-runtime.js']);
-const excludedSinkFiles = new Set([...auditedSanitizedSinkFiles, ...legacyOnlySinkFiles, ...legacyGatedSinkFiles]);
+const excludedSinkFiles = new Set([...auditedSanitizedSinkFiles, ...legacyLoaderSinkFiles, ...legacyDynamicSinkFiles, ...legacyGatedSinkFiles]);
 const runtimeFiles = fs.readdirSync(root, { withFileTypes: true })
   .filter(entry => entry.isFile() && /\.js$/.test(entry.name) && !excludedSinkFiles.has(entry.name))
   .map(entry => path.join(root, entry.name));
@@ -70,11 +70,18 @@ assert.deepEqual(
   [],
   'Default-path shipped root runtime JS must not use direct HTML sinks',
 );
-for (const file of legacyOnlySinkFiles) {
+for (const file of legacyLoaderSinkFiles) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
   assert.match(source, /innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/);
   assert.doesNotMatch(index, new RegExp(`<script[^>]+src=["']\\./${file.replace('.', '\\.') }["']`));
   assert.match(legacyLoader, new RegExp(`["']\\./${file.replace('.', '\\.') }["']`));
+}
+for (const file of legacyDynamicSinkFiles) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  assert.match(source, /innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/);
+  assert.match(source, /IS_LEGACY/);
+  assert.doesNotMatch(index, new RegExp(`<script[^>]+src=["']\\./${file.replace('.', '\\.') }["']`));
+  assert.doesNotMatch(legacyLoader, new RegExp(`["']\\./${file.replace('.', '\\.') }["']`));
 }
 for (const file of legacyGatedSinkFiles) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
