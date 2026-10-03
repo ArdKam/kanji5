@@ -64,6 +64,7 @@ for(const viewport of [
 ]){
   test('final React responsive shell — '+viewport.name,async({page})=>{
     await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.addInitScript(() => localStorage.setItem('kanji5-onboarding-v2','complete'));
     await page.goto('/');
     await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 
