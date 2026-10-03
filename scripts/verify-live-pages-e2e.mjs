@@ -12,6 +12,9 @@ try {
       for (const key of Object.keys(localStorage)) {
         if (key.startsWith('kanji5-') && key !== 'kanji5-ui-language') localStorage.removeItem(key);
       }
+      // Core-product live smoke is intentionally independent from first-run onboarding;
+      // onboarding has its own dedicated release gate.
+      localStorage.setItem('kanji5-onboarding-v2', 'complete');
       sessionStorage.clear();
     });
     await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
