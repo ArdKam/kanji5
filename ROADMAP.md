@@ -186,6 +186,23 @@ The following are release blockers, not merely roadmap work items. Public beta i
 
 Configured workflows, open PRs, and prior-release evidence do not satisfy this gate by themselves.
 
+### 2.0.1 Educational Content & Assessment Hard Gate
+
+The 2026-10-03 educational/content audit is recorded in docs/EDUCATIONAL-CONTENT-AUDIT.md. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
+
+Before Public Beta, the following educational gates are release blockers:
+
+- **Placement validity:** randomize answer position; use a documented item blueprint; remove level decisions based on tiny samples; define boundary/uncertainty handling; keep the diagnostic explicitly limited to Kanji starting-point knowledge rather than overall Japanese proficiency.
+- **Production fidelity:** make independent Kanji production the primary path; keep reveal/self-report and multiple choice as lower-evidence hint/recovery paths; preserve independent/assisted/revealed evidence semantics.
+- **Vocabulary/Context fidelity:** distinguish recognition/cued recall from independent production; provide an explicit progression toward typed/free recall where the feature name claims production or retrieval.
+- **Learner-content layer:** separate learner-priority meanings/readings/examples from raw dictionary/reference glosses without deleting source data; tier readings into core vs secondary/reference targets.
+- **Example/context quality:** validate not only structure and provenance but learner level, usefulness, naturalness, translation quality, and pedagogical value for sampled content.
+- **Mnemonic quality:** retain the curated/generated/personal distinction; treat 100% coverage as insufficient evidence of 100% quality; expand human-reviewed curated coverage over time.
+- **Learning-evidence validity:** do not present coverage, self-report, recognition, or geometric handwriting similarity as stronger evidence than the underlying modality supports.
+- **Educational efficacy:** distinguish implementation/test success from demonstrated learning benefit; use delayed/independent evidence before claiming adaptive superiority or tuning the planner from observational data.
+
+A feature may remain technically implemented while its educational validity remains PARTIAL. Such a feature is not considered fully public-beta-ready until the applicable educational acceptance criteria are met.
+
 ---
 
 ### 2.1 Verified current status ledger — 2026-10-03
@@ -202,7 +219,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - Reading Lab session/lookup/navigation/audio/speech/translation/annotation foundation.
 - Dictionary mobile/personal-mnemonic behavior.
 - Settings exercise toggles, Placement ownership, Data Backup/Restore foundation, reset separation.
-- Mnemonic information architecture, provenance, prepared coverage and current QA.
+- Mnemonic information architecture, provenance, prepared coverage and current structural QA; educational-quality gaps remain tracked under C4.
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
@@ -219,6 +236,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
+- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md; C4 is required before Public Beta.
 
 **PENDING:**
 - R18 Public Beta.
@@ -228,7 +246,10 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - G Grammar foundation.
 
 **DO NOT REOPEN without a verified regression:**
-- A2, A3, A5, A6, A7.
+- A2, A3, A5, A6.
+
+**Implementation complete, educational-quality follow-up remains active:**
+- A7 mnemonic infrastructure/provenance/coverage.
 - D1, D2, D3, D4, D5.
 
 **Open PRs not counted as completion:**
@@ -650,9 +671,9 @@ Exercise toggles, Placement/Test ownership, Data Backup/Restore, and reset separ
 
 ## A7. Mnemonics / memory aids
 
-### Status — 2026-10-02
+### Status — 2026-10-03
 
-**DONE for current public-readiness scope.** Prepared coverage remains 2,136/2,136 with 259 curated + 1,877 generated scaffolds. The current curated corpus passed structural/quality checks, exact-duplicate guards, and a 20-item representative semantic sentinel review. Future content refreshes remain routine QA and do not reopen this roadmap item without a regression or a new acceptance criterion.
+**PARTIAL for educational quality; infrastructure is implemented.** Prepared coverage remains 2,136/2,136 with 259 curated + 1,877 generated scaffolds. Provenance, persistence, structural checks, duplicate guards, and representative semantic sentinels are implemented. The audit now explicitly treats the large generated/scaffolded majority as a quality workstream rather than equating coverage with learner-tested quality.
 
 ### Information architecture
 
@@ -804,9 +825,9 @@ Do not automatically tune the planner from observational metrics.
 
 ## C1. Kanji and mnemonic QA
 
-### Status — 2026-10-02
+### Status — 2026-10-03
 
-**DONE for the current Kanji corpus.** Coverage, provenance, structural quality, duplicate guards, and representative semantic review are contract-tested.
+**PARTIAL for learner-facing quality.** Coverage/provenance/structural QA are implemented, but learner-priority meanings/readings, example usefulness, ambiguous answer handling, and mnemonic quality still require the acceptance work documented in C4.
 
 Audit:
 
@@ -817,6 +838,102 @@ Audit:
 - ambiguity
 - generated mnemonic quality
 - prepared-vs-generated provenance
+
+## C4. Educational content & assessment validity — BLOCKER for Public Beta
+
+### Status — 2026-10-03
+
+**BLOCKER.** The educational/content audit found that several features are technically implemented but not yet strong enough to support their strongest learner-facing claims.
+
+See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
+
+### C4.1 Placement validity
+
+- Randomize answer position; never encode the correct choice at a fixed index.
+- Replace the current 3-items-per-level heuristic with a documented level blueprint.
+- Do not make a strong placement decision from a tiny sample such as 2/3 correct.
+- Add boundary-case and uncertainty handling.
+- Define how N1 is handled.
+- Call the result a **Kanji starting-point diagnostic**, not overall Japanese proficiency.
+- Add regression tests for position bias, synonym ambiguity, boundary placement, and insufficient evidence.
+
+### C4.2 Exercise-modality fidelity
+
+- Production: independent Kanji production is the default; reveal/self-report is lower-evidence fallback.
+- Vocabulary: distinguish word recognition, missing-Kanji completion, and independent word production.
+- Context: distinguish guided recognition, sentence completion, and free contextual retrieval.
+- Preserve modality, independence, recovery, and reveal metadata in evidence and Stats.
+- Ensure UI copy describes the modality actually being tested.
+
+### C4.3 Learner-facing Kanji content model
+
+Add a learner-oriented content layer over dictionary/source data:
+
+- primary meanings
+- secondary/common meanings
+- reference/dictionary meanings
+- core readings
+- vocabulary-supported readings
+- reference readings
+- learner-priority example words
+- provenance/source version
+
+Do not delete source meanings; reclassify their learner priority.
+
+### C4.4 Vocabulary and Context content QA
+
+For sampled and high-priority content, review:
+
+- learner level
+- frequency/usefulness
+- naturalness
+- translation quality
+- target usage
+- grammar burden
+- unknown-vocabulary burden
+- duplicate/near-duplicate examples
+- rare/obsolete/unsuitable entries
+
+Structural validation alone is not sufficient for public-beta content acceptance.
+
+### C4.5 Mnemonic quality
+
+- Keep curated, generated/scaffolded, and personal mnemonics explicitly distinct.
+- Grow curated coverage for high-frequency, high-confusion, irregular-reading, and visually deceptive Kanji.
+- Add human review alongside structural/regex checks.
+- Track usefulness/memorability samples rather than only coverage.
+
+### C4.6 Learning-efficacy interpretation
+
+- Do not equate exposure with mastery.
+- Do not equate recognition with production.
+- Do not equate self-report after reveal with independent retrieval.
+- Do not equate Kanji coverage with reading comprehension.
+- Do not equate handwriting geometric similarity with overall handwriting proficiency.
+- Do not claim adaptive superiority until a baseline/delayed-evidence comparison exists.
+
+### C4.7 Acceptance evidence
+
+C4 is complete only when applicable:
+
+- the Educational Content Audit has no unresolved P0 issue;
+- placement bias/validity tests pass;
+- modality labels match actual interaction;
+- learner-facing meanings/readings have a documented prioritization model;
+- sampled examples/context pass human/content QA;
+- mnemonic provenance and quality reporting are current;
+- evidence semantics remain conservative and interpretable;
+- the release candidate records the educational QA result against the exact frozen SHA.
+
+### C4.8 Non-goals
+
+C4 does not authorize:
+
+- rewriting FSRS;
+- creating a second scheduler;
+- duplicating learner state in React;
+- turning Reading Lab into a grammar/AI tutor;
+- broad Vocabulary runtime integration before the Public Kanji Release gate.
 
 ## C2. Vocabulary QA policy
 
