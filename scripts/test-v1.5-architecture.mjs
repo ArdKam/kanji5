@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const index = read('index.html');
+const legacyLoader = read('legacy-loader.js');
 const state = read('v1.5-state.js');
 const recallCore = read('v1.5-recall-core.js');
 const p0 = read('v1.5-p0.js');
@@ -73,7 +74,7 @@ assert.match(sw, /\.clone\(\)/, 'service worker must return independent response
 assert.doesNotMatch(index, /window\.fetch\s*=|globalThis\.fetch\s*=/, 'application shell must not monkey-patch fetch');
 
 assert.match(index, /<script src="\.\/v1\.5-state\.js"><\/script>/, 'state boundary must be loaded before the application runtime');
-assert.match(index, /legacyScripts\s*=\s*\[/, 'legacy compatibility loader must remain explicit');
+assert.match(legacyLoader, /legacyScripts\s*=\s*\[/, 'legacy compatibility loader must remain explicit');
 assert.match(index, /"\.\/v1\.5-p0\.js"/, 'P0 must remain available to compatibility route');
 assert.equal((index.match(/<script src="\.\/v1\.5-p0\.js"><\/script>/g) || []).length, 0, 'P0 must not be directly wired');
 
