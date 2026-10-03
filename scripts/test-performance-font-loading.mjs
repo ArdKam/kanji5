@@ -12,7 +12,7 @@ await access("frontend/src/assets/NotoSerifJP-Regular.subset.woff2");
 assert.doesNotMatch(index,/rel="preload" href="\.\/react-dist\/assets\/NotoSerifJP-Regular\.subset\.woff2"/,"Noto Serif JP must not use an unconditional preload; it is loaded on demand by the application stylesheet");
 assert.equal(packageJson.dependencies["@fontsource-variable/plus-jakarta-sans"],"5.3.0","Plus Jakarta Sans package must remain pinned to 5.3.0");
 assert.match(frontendEntry,/import "\.\/plus-jakarta\.css";/,"Plus Jakarta Sans stylesheet must be imported from the frontend bundle");
-assert.match(css,/font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif/,"Primary UI font must use the local Plus Jakarta Sans variable family");
+assert.match(css,/--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif/,"Primary UI font token must use the local Plus Jakarta Sans variable family");
 assert.match(frontendEntry,/import "\.\/plus-jakarta\.css";/,"Plus Jakarta Sans stylesheet import must remain explicit");
 assert.doesNotMatch(css,/font-family:[^;]*\bInter\b/,"Inter must not remain an explicit UI font family");
 assert.ok(jpCss.includes('font-family:"Noto Serif JP";'),"Local Noto Serif JP @font-face is missing");
@@ -26,6 +26,7 @@ assert.match(bundledFontPath,/^react-dist\/assets\/Vazirmatn_[^/]+\.woff2$/,"Bun
 await access(bundledFontPath);
 
 const interUrl="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap";
+void interUrl;
 assert.doesNotMatch(index,/fonts\.googleapis\.com\/css2\?family=Inter/,"Inter must not block startup through an external stylesheet request");
 assert.doesNotMatch(index,/fonts\.gstatic\.com/,"Google Fonts static origin must not be required by the startup shell");
 assert.doesNotMatch(css,/^\s*@import\s+url\(["']https:\/\/fonts\.googleapis\.com\//m);
