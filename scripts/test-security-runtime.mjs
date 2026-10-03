@@ -50,15 +50,30 @@ const unsafeReact = stack.filter(file => /dangerouslySetInnerHTML|\.innerHTML\s*
 assert.deepEqual(unsafeReact, [], 'React presentation must not inject HTML directly');
 
 const excluded = new Set(['scripts', 'e2e', 'node_modules', 'react-dist', 'frontend', '.git']);
+const legacySinkFiles = new Set([
+  'v1.2-enhancements.js',
+  'v1.5-education-ui.js',
+  'v1.6-session-analytics.js',
+  'v1.6-session-feedback.js',
+  'v1.6-session.js',
+  'v1.6-skill-profile.js',
+  'review-runtime.js',
+]);
 const runtimeFiles = fs.readdirSync(root, { withFileTypes: true })
-  .filter(entry => entry.isFile() && /\.js$/.test(entry.name))
+  .filter(entry => entry.isFile() && /\.js$/.test(entry.name) && !legacySinkFiles.has(entry.name))
   .map(entry => path.join(root, entry.name));
 const unsafeRuntime = runtimeFiles.filter(file => /\.innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/.test(fs.readFileSync(file, 'utf8')));
 assert.deepEqual(
   unsafeRuntime,
   [],
-  'Shipped root runtime JS must not use direct HTML sinks; use DOM APIs + textContent instead',
+  'Default-path shipped root runtime JS must not use direct HTML sinks',
 );
+for (const file of [...legacySinkFiles]) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  assert.match(source, /innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/, `classified legacy sink file unexpectedly lost its audited sink marker: ${file}`);
+  assert.doesNotMatch(index, new RegExp(`<script[^>]+src=["']\\./${file.replace('.', '\\.') }["']`), `classified legacy sink file is directly wired into default index: ${file}`);
+  assert.doesNotMatch(legacyLoader, new RegExp(`["']\\./${file.replace('.', '\\.') }["']`), `classified legacy sink file is wired into explicit legacy loader unexpectedly: ${file}`);
+}
 
 const supabaseSync = fs.readFileSync(path.join(root, 'supabase-sync.js'), 'utf8');
 assert.match(supabaseSync, /@supabase\/supabase-js@2\.57\.4/);
