@@ -76,9 +76,13 @@ for (const file of legacyLoaderSinkFiles) {
 for (const file of legacyDynamicSinkFiles) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
   assert.match(source, /innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/);
-  assert.match(source, /IS_LEGACY/);
   assert.doesNotMatch(index, new RegExp(`<script[^>]+src=["']\\./${file.replace('.', '\\.') }["']`));
   assert.doesNotMatch(legacyLoader, new RegExp(`["']\\./${file.replace('.', '\\.') }["']`));
+}
+const sessionRuntime = fs.readFileSync(path.join(root, 'v1.6-session.js'), 'utf8');
+assert.match(sessionRuntime, /const IS_LEGACY = .*legacy.*1/);
+for (const file of ['v1.6-session-analytics.js','v1.6-session-feedback.js','v1.6-skill-profile.js']) {
+  assert.match(sessionRuntime, new RegExp(`import\\(.*${file.replace('.', '\\.')}`));
 }
 for (const file of legacyGatedSinkFiles) {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
