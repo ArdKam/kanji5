@@ -23,7 +23,7 @@ async function reachStartingPoint(page) {
   const onboarding = page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({ timeout: 20000 });
   await expect(page.locator("#root .app-shell")).toHaveCount(0);
-  await onboarding.getByRole("button", { name: /Start today's learning/ }).click();
+  await onboarding.getByRole("button", { name: /Let's begin/ }).click();
   await expect(onboarding.getByRole("heading", { name: "Learn, recall, review" })).toBeVisible();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
