@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.removeItem("kanji5-public-onboarding-v1");
+    localStorage.removeItem("kanji5-onboarding-v2");
+  });
+});
+
+
 async function fresh(page) {
   await page.addInitScript(() => {
     for (const key of Object.keys(localStorage)) {
