@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `098fab1f4d37d8e2538813e7dc039c13bc2079ec` (2026-10-03). The matching GitHub Pages deployment for this SHA has completed successfully. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
+> **Implementation baseline reviewed:** `main` at commit `7bd26bf8713b03898fd00dcdd8e4a39402d659ac` (2026-10-03). A GitHub Pages deployment for this SHA is currently in progress; it is not yet counted as same-SHA release evidence. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
 
 > **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -163,16 +163,16 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 
 **PARTIAL / remaining before Public Product Readiness:**
 - A1 release integrity: current `main` Pages deployment is green, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
-- R2 onboarding redesign is not complete; current onboarding works but the dedicated first-open value/setup/placement/account flow is still pending.
+- R2 onboarding implementation is now present on current `main` after PR #417; representative mobile/desktop and full first-open live evidence remain pending.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
 - R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
 - R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
 - R10 full i18n audit remains.
-- R11 broader controlled-failure observability remains in open PR #392; global React render-failure containment/error-boundary recovery is also not yet on current `main`.
+- R11 broader controlled-failure observability remains in stale open PR #392; the new global React render-failure containment/error-boundary recovery is in open PR #421 and is not yet on current `main`.
 - R12 production security review remains: production RLS verification, CSP, unsafe-DOM/`innerHTML` audit, CDN supply-chain hardening, and dependency-security evidence are still required.
-- R13 Terms, exact production-service disclosure, account/local deletion semantics, retention/export behavior, and target-market legal review remain.
-- R14 docs are now staged in the release path; production smoke verification remains.
+- R13 Privacy/Terms and deletion/export semantics are now documented on current `main` via PR #422; exact production-service disclosure, retention policy, project-license decision, and target-market legal review remain.
+- R14 public release docs are now staged on current `main`; same-SHA production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
 
@@ -188,9 +188,11 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - D1, D2, D3, D4, D5.
 
 **Open PRs not counted as completion:**
-- #389: persistence adapter.
-- #392: controlled runtime-failure observability.
-- #398: superseded by this current-main roadmap sync.
+- #389: persistence adapter; still based on an older baseline.
+- #392: controlled runtime-failure observability; still based on an older baseline.
+- #420: current-main security/CSP/Supabase hardening PR; not complete until CI is green and production verification is evidenced.
+- #421: current-main global React error-boundary/recovery PR; not complete until CI/build/live checks are green.
+- #398: superseded by the current-main roadmap sync.
 ---
 
 
