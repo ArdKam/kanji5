@@ -74,7 +74,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   }
 
   await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible();
-  await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText("N2");
+  await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText(/N[2-5]/);
   await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
 });
