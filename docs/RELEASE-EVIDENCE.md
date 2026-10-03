@@ -2,6 +2,18 @@
 
 This file is an operational ledger, not a user-facing promise.
 
+## Current release-candidate ledger — 2026-10-03
+
+- **Current main:** `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be`.
+- **Latest main change:** educational/content audit and assessment-validity gates are now on main; see `docs/EDUCATIONAL-CONTENT-AUDIT.md` and `docs/ENGINE-AUDIT.md`.
+- **Pages deployment:** the exact-SHA deployment/live artifact/hash evidence for `1dad70cb6af1c4d7f2accc9ca21940cf2d3b98be` is not yet recorded here.
+- **PR #420:** current-main security/CSP/Supabase hardening remains open; implementation is not counted until CI and production verification pass.
+- **PR #421:** current-main global React error-boundary/recovery remains open; implementation is not counted until CI/build/live checks pass.
+- **PR #422:** merged as `7bd26bf8713b03898fd00dcdd8e4a39402d659ac`, bringing the Privacy/Data and Release Governance docs onto main.
+- **Production Supabase:** `public.user_learning_state` has RLS enabled with auth.uid()-scoped ownership; the authenticated delete policy was applied in production on 2026-10-03; the `delete-account` Edge Function is deployed with JWT verification. Credentialed end-to-end account deletion is not yet evidenced.
+- **Security Advisor:** one warning remains for leaked password protection being disabled.
+- **Project license:** no project-level `LICENSE` file is present; owner/legal license selection remains a release blocker.
+
 ## Verified baseline
 
 - efbfaf1912f99e3ae6afc607e675efcd9cb2ff62: release artifact/cache/stale-client/offline production verification recorded in roadmap PR #377.
