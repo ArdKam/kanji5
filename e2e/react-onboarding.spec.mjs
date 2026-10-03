@@ -88,3 +88,48 @@ test("onboarding resumes its transient setup after reload", async ({ page }) => 
   await expect(resumed.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
   await expect(resumed.locator(".kanji5-onboarding-choice").filter({ hasText: "I know some kanji" })).toHaveAttribute("aria-pressed", "true");
 });
+test("first-run language selector changes the document direction before setup starts", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.clear();
+    localStorage.setItem("kanji5-ui-language", "en");
+  });
+  await page.goto("/");
+  const onboarding = page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({ timeout: 20000 });
+  await expect(onboarding.getByRole("button", { name: "فارسی", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "fa");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(onboarding).toContainText("به Kanji5 خوش آمدی");
+  await onboarding.getByRole("button", { name: "EN", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+});
+
+test("first-run horizontal swipe advances, including when the gesture starts on a choice card", async ({ page }) => {
+  await fresh(page);
+  const onboarding = page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({ timeout: 20000 });
+  const surface = onboarding.locator(".kanji5-onboarding-main");
+  const box = await surface.boundingBox();
+  if (!box) throw new Error("Onboarding surface is not measurable");
+  await page.mouse.move(box.x + box.width * 0.72, box.y + box.height * 0.52);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.28, box.y + box.height * 0.52, { steps: 8 });
+  await page.mouse.up();
+  await expect(onboarding.getByRole("heading", { name: "Learn, recall, review" })).toBeVisible();
+
+  await onboarding.locator(".kanji5-onboarding-main").locator("button").filter({ hasText: "Continue" }).click();
+  await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
+  const choice = onboarding.locator(".kanji5-onboarding-choice").filter({ hasText: "I know some kanji" });
+  await choice.click();
+  const choiceBox = await choice.boundingBox();
+  if (!choiceBox) throw new Error("Starting point choice is not measurable");
+  await page.mouse.move(choiceBox.x + choiceBox.width * 0.75, choiceBox.y + choiceBox.height * 0.5);
+  await page.mouse.down();
+  await page.mouse.move(choiceBox.x + choiceBox.width * 0.2, choiceBox.y + choiceBox.height * 0.5, { steps: 8 });
+  await page.mouse.up();
+  await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
+});

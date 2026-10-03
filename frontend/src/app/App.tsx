@@ -932,7 +932,7 @@ function App(){
       requestAnimationFrame(()=>opener?.focus());
     };
   },[headerMenuOpen]);
-  if(showOnboarding)return <OnboardingEntry language={language} snapshot={snapshot} busy={busy} onFinished={()=>setOnboardingComplete(true)}/>;
+  if(showOnboarding)return <OnboardingEntry language={language} snapshot={snapshot} busy={busy} onFinished={()=>setOnboardingComplete(true)} onLanguageChange={changeLanguage}/>;
   if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>{t("learningCoreError")}</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>{t("tryAgain")}</button></section></div>;
   return <div className="app-shell">
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>

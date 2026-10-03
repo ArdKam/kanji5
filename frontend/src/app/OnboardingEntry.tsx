@@ -33,6 +33,7 @@ type OnboardingEntryProps = {
   snapshot: Snapshot | null;
   busy?: boolean;
   onFinished: () => void;
+  onLanguageChange: (language: Language) => void;
 };
 
 function toPlacementQuestions(records: PlacementQuestionRecord[]): PlacementQuestion[] {
@@ -45,24 +46,14 @@ function toPlacementQuestions(records: PlacementQuestionRecord[]): PlacementQues
   }));
 }
 
-function ensureOnboardingStylesheet() {
-  if (typeof document === "undefined" || document.querySelector('link[data-kanji5-onboarding-style]')) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "./kanji5-onboarding.css";
-  link.dataset.kanji5OnboardingStyle = "true";
-  document.head.appendChild(link);
-}
 
 export function OnboardingEntry({
   language,
   snapshot,
   busy: parentBusy = false,
   onFinished,
+  onLanguageChange,
 }: OnboardingEntryProps) {
-  useEffect(() => {
-    ensureOnboardingStylesheet();
-  }, []);
   const [initialProgress] = useState<OnboardingProgress | null>(() => readOnboardingProgress());
   const [progress, setProgress] = useState<OnboardingProgress | null>(initialProgress);
   const [placementRecords, setPlacementRecords] = useState<PlacementQuestionRecord[]>([]);
@@ -242,6 +233,7 @@ export function OnboardingEntry({
           onComplete={finish}
           onCreateAccount={handleCreateAccount}
           onSignIn={handleSignIn}
+          onLanguageChange={onLanguageChange}
         />
         {error ? (
           <div className="kanji5-onboarding-host-error" role="alert">
