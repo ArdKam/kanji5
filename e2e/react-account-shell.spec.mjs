@@ -27,7 +27,7 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   expect(accountCloseBounds.y + accountCloseBounds.height).toBeLessThanOrEqual(accountDialogBounds.y + accountDialogBounds.height);
   await expect(page.locator('.account-auth-surface')).toBeVisible();
   await expect(page.locator('.account-auth-tabs')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /Google sign-in will be enabled soon|ورود با Google/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Continue with Google|ادامه با Google/ })).toBeVisible();
 
   const tabs = page.locator('.account-auth-intent [role="tab"]');
   await expect(tabs).toHaveCount(2);
@@ -55,6 +55,43 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   await page.getByRole('button', { name: /ورود با لینک جادویی|Use a magic link/ }).click();
   await expect(page.locator('input[name="magic-email"]')).toHaveAttribute('dir', 'ltr');
   await expect(page.getByRole('button', { name: /بازگشت به ورود|Back to sign in/ })).toBeVisible();
+});
+
+test('Google sign-in delegates to the account auth API', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+  });
+  await page.route('**/account-fallback.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript', body: '(()=>{})();' }));
+  await page.route('**/supabase-sync.js', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: `
+      (() => {
+        const snapshot = {
+          status: 'signed-out',
+          user: null,
+          syncStatus: 'idle',
+          error: null,
+          recoveryPending: false,
+          syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null }
+        };
+        window.__KANJI5_ACCOUNT__ = {
+          getState: () => ({ ...snapshot, syncSummary: { ...snapshot.syncSummary } }),
+          subscribe: listener => { listener(window.__KANJI5_ACCOUNT__.getState()); return () => {}; },
+          signInWithGoogle: async () => { window.__KANJI5_GOOGLE_SIGNIN_CALLED__ = true; }
+        };
+      })();
+    `
+  }));
+
+  await page.goto('/');
+  await page.locator('.account-button:visible').click();
+  await expect(page.locator('.account-dialog:visible')).toBeVisible();
+  const google = page.getByRole('button', { name: /Continue with Google|ادامه با Google/ });
+  await expect(google).toBeVisible();
+  await google.click();
+  await expect.poll(() => page.evaluate(() => window.__KANJI5_GOOGLE_SIGNIN_CALLED__ === true)).toBe(true);
 });
 
 test('account signup preserves entered credentials after switching auth intent', async ({ page }) => {

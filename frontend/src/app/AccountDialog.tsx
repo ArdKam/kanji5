@@ -339,6 +339,13 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
         </form>
 
         <div className="account-divider"><span>{t("or", language)}</span></div>
+        <button className="button account-google-button" type="button" disabled={busy} onClick={() => void run(async () => {
+          const api = await getAccountApi();
+          await api.signInWithGoogle();
+        })}>
+          <span className="google-glyph" aria-hidden="true">G</span>
+          <span>{busy ? t("signingIn", language) : t("continueWithGoogle", language)}</span>
+        </button>
         <button className="account-link-button account-magic-link" type="button" disabled={busy} onClick={() => { setAuthMode("magic"); setAuthMessage(null); }}>{t("useMagicLink", language)}</button>
       </>}
       {authMessage ? <p className="account-message" role="status">{authMessage}</p> : null}
