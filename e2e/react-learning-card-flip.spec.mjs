@@ -86,7 +86,7 @@ async function goToBackPage(page, card, targetIndex) {
 }
 
 async function revealLearningCard(page, language = "fa") {
-  await page.addInitScript((value) => localStorage.setItem("kanji5-ui-language", value), language);
+  await page.addInitScript((value) => { localStorage.setItem("kanji5-ui-language", value); localStorage.setItem("kanji5-onboarding-v2", "complete"); }, language);
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
