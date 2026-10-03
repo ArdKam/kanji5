@@ -54,10 +54,6 @@ const auditedSanitizedSinkFiles = new Set(['account-fallback.js']);
 const legacyLoaderSinkFiles = new Set([
   'v1.2-enhancements.js',
   'v1.5-education-ui.js',
-  'v1.6-session-analytics.js',
-  'v1.6-session-feedback.js',
-  'v1.6-session.js',
-  'v1.6-skill-profile.js',
 ]);
 const legacyDynamicSinkFiles = new Set(['v1.6-session.js','v1.6-session-analytics.js','v1.6-session-feedback.js','v1.6-skill-profile.js']);
 const legacyGatedSinkFiles = new Set(['review-runtime.js']);
