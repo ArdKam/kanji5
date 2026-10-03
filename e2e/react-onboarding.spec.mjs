@@ -30,6 +30,7 @@ async function reachStartingPoint(page) {
 }
 
 test("first-run onboarding is a dedicated full-page guest-first journey", async ({ page }) => {
+  await fresh(page);
   const onboarding = await reachStartingPoint(page);
   await onboarding.getByRole("button", { name: /Start from the beginning/ }).click();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
@@ -45,6 +46,7 @@ test("first-run onboarding is a dedicated full-page guest-first journey", async 
 });
 
 test("placement path shares the existing kanji diagnostic contract", async ({ page }) => {
+  await fresh(page);
   const onboarding = await reachStartingPoint(page);
   await onboarding.getByRole("button", { name: /Check my kanji level/ }).click();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
@@ -64,6 +66,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
 });
 
 test("onboarding resumes its transient setup after reload", async ({ page }) => {
+  await fresh(page);
   const onboarding = await reachStartingPoint(page);
   await onboarding.getByRole("button", { name: "I know some kanji", exact: true }).click();
   await expect(onboarding.getByRole("button", { name: "I know some kanji", exact: true })).toHaveAttribute("aria-pressed", "true");
