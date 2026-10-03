@@ -416,8 +416,9 @@ test('English dictionary presentation localizes card controls and uses the share
 
 
 test('English shell does not retain Persian presentation labels',async({page})=>{
+  await clean(page);
   await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
-  await page.goto('/');
+  await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   await expect(page.locator('.header .eyebrow')).toHaveText('Smart learning');
   await expect(page.locator('.header h1')).toHaveText('Kanji-yar');
