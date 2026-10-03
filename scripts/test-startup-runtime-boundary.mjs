@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-const legacyLoader = read('legacy-loader.js');
 import fs from 'node:fs';
 
 const read = path => fs.readFileSync(path, 'utf8');
