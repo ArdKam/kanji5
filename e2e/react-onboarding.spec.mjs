@@ -85,8 +85,6 @@ test("onboarding resumes its transient setup after reload", async ({ page }) => 
   })).toBe("some-knowledge");
   const resumed = page.locator('[data-testid="onboarding-flow"]');
   await expect(resumed).toBeVisible({ timeout: 20000 });
-  await resumed.getByRole("button", { name: /Start today's learning/ }).click();
-  await resumed.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(resumed.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
   await expect(resumed.locator(".kanji5-onboarding-choice").filter({ hasText: "I know some kanji" })).toHaveAttribute("aria-pressed", "true");
 });
