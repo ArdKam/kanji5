@@ -2,9 +2,9 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** \`main\` at commit \`fab8f4ec0fdb77cc5a122f8ec2c5ec74d38d6dcc\` (2026-10-02). PR #396 is merged; the resulting current-main React verification is still in progress. This baseline includes the completed D1–D5 cross-domain foundation, current Stats/evidence work, the verified public-readiness account/boot safeguards, and the completed Kanji UX foundation slices described below.
->
-> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
+> **Implementation baseline reviewed:** `main` at commit `d6882d56cd395210711bb52cad15f8b967184447` (2026-10-03). React presentation CI run **2582** for this exact commit is in progress at the time of this update, so this commit is the current baseline but not yet a fully verified release candidate. The immediately preceding Pages deployment for `e3dbc58ceeede7bff32c7596b40b76af708531aa` succeeded. The roadmap never treats that older deployment as evidence for the current `main` commit.
+
+> **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
 ---
 
@@ -127,7 +127,7 @@ Especially avoid:
 - **LATER** — intentionally deferred until evidence or scale justifies it.
 - **DO NOT REOPEN** — completed foundational behavior that should not be rewritten without a verified defect.
 
-### 2.1 Verified current status ledger — 2026-10-02
+### 2.1 Verified current status ledger — 2026-10-03
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
 
@@ -176,6 +176,60 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - #398: superseded by this current-main roadmap sync.
 ---
 
+
+### 2.2 Canonical pre-Vocabulary execution sequence — 2026-10-03
+
+All work before Vocabulary must follow this order. Work may overlap only when it does not compete for the same authoritative boundary or shared files.
+
+**Stage 1 — Release Lock**
+- Establish one current-main release candidate.
+- Finish CI for that SHA.
+- Verify GitHub Pages deployment, live artifact equality, live core smoke, cache invalidation, stale-client recovery, and offline smoke.
+- No unrelated feature work should enter the release-critical path until the candidate is trustworthy.
+
+**Stage 2 — Trust Layer**
+- Complete account lifecycle: guest → account → sync → logout → return.
+- Verify Google, Email, Magic Link, and reset flows in production configuration.
+- Complete Supabase/RLS review and consolidate duplicate schemas into one migration path.
+- Make backup/restore versioned, integrity-checked, migration-aware, and safe.
+- Define and implement account deletion, local-data deletion, export, retention, and third-party data semantics.
+- Complete Privacy/Terms/legal review against actual production services.
+
+**Stage 3 — Public UX**
+- Finish onboarding redesign without making account creation mandatory.
+- Complete final UX passes for Learning, Active Recall, Stats, Settings, Dictionary, Reading Lab, Mnemonics, and Handwriting.
+- Close responsive, RTL/LTR, typography, loading/error/empty-state, keyboard, focus, touch-target, modal, safe-area, and mobile-keyboard defects.
+- Keep Learning and Stats information architecture separate.
+- Add only small high-value reliability UX that reduces user failure or confusion.
+
+**Stage 4 — Real Device / Accessibility / Performance**
+- Validate the Tier-1 and Tier-2 browser/device matrix.
+- Test installation, update, reinstall, offline/reconnect, persistence, sync, backup/restore, and accessibility on representative hardware.
+- Run manual VoiceOver, TalkBack, keyboard-only, focus, zoom, and mixed RTL/LTR checks.
+- Record LCP, INP, CLS, startup, long tasks, bundle/font cost, and slow-device behavior.
+- Optimize only where evidence identifies a meaningful product bottleneck.
+
+**Stage 5 — Content Quality**
+- Establish recurring QA for all 2,136 Kanji.
+- Audit readings, meanings, examples, stroke data, radicals/components, pronunciation fallback, and mnemonic quality.
+- Treat coverage as necessary but not sufficient.
+- Add provenance labels and clear distinction between curated, generated/guided, and personal memory aids.
+- Establish content-report and correction workflow.
+
+**Stage 6 — Reliability / Security / Governance**
+- Add production-grade error recovery and global failure containment.
+- Finish observability for runtime, asset, sync, migration, and service-worker failures.
+- Complete dependency/security/supply-chain review, CSP/header policy, secret/source-map checks, and third-party runtime review.
+- Add/complete public repository governance: LICENSE, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT where appropriate, issue/PR templates, stale-branch/PR cleanup, and release procedure.
+- Reconcile README, CHANGELOG, ROADMAP, product naming, manifest, title/metadata, and user documentation with actual behavior.
+
+**Stage 7 — Public Beta → Public Kanji Release**
+- Run a small real-user cohort across target devices.
+- Observe onboarding, first-session completion, return behavior, offline use, sync, backup/restore, content reports, and accessibility.
+- Fix high-frequency/high-severity issues and add regression tests for accepted defects.
+- Pass the final Public Release Gate before beginning Vocabulary implementation.
+
+**Only after Stage 7 is complete:** start the real Vocabulary runtime/content integration. Existing cross-domain foundations may be prepared in parallel when they do not change the public Kanji release surface.
 # 3. Current baseline and already-completed foundations
 
 The current \`main\` baseline is commit \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\`. Its implementation history immediately before the roadmap documentation includes:
@@ -243,7 +297,7 @@ Establish a trustworthy production baseline before product expansion.
 - Build from source during CI/deploy.
 - Verify the exact artifact that is shipped.
 
-### 0.3 Deployment gates — CONFIGURED / PR-VERIFIED; POST-MERGE VERIFYING (2026-10-02)
+### 0.3 Deployment gates — CONFIGURED; CURRENT-MAIN VERIFICATION PENDING (2026-10-03)
 
 Current deployment workflow contains gates for:
 
@@ -266,7 +320,7 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - workflow passed
 - live production verified
 
-### 0.4 Cache and stale-client handling — PR-VERIFIED; POST-MERGE LIVE EVIDENCE PENDING (2026-10-02)
+### 0.4 Cache and stale-client handling — PR-VERIFIED; CURRENT-MAIN LIVE EVIDENCE PENDING (2026-10-03)
 
 - Verify cache invalidation across HTML, JS, CSS, service worker, and dynamically imported assets.
 - Verify stale-client recovery.
@@ -1834,68 +1888,85 @@ Do not merge merely because a PR title matches a roadmap bullet.
 
 # 18. Detailed execution order
 
-The roadmap has two levels: **remaining Kanji hardening** and **domain expansion**. Completed foundation phases are not placed back into the execution queue.
+The roadmap has one active pre-Vocabulary release sequence. Historical A/B/C/R/D sections remain as reference and acceptance criteria; they do not override this execution order.
 
-### Current execution order — 2026-10-02
+### Current execution order — 2026-10-03
 
-**0. Release Integrity final verification — CURRENT**
-→ capture representative-device performance evidence and complete the broader live production smoke matrix; cache/stale-client/offline verification is already evidenced on current `main`
+**1. Release Lock**
+→ current-main green CI → same-SHA Pages deploy → live artifact equality → live core smoke → cache/stale-client/offline verification
 
-**1. Phase R — Public Product Readiness (IN PROGRESS)**
-→ finish external validation/sign-off: target devices/browsers, full sync/conflict/migration acceptance, production security/RLS/CSP, privacy/legal finalization, and real-user beta.
+**2. Trust Layer**
+→ account lifecycle and production OAuth verification → persistence seam → Supabase migration/RLS consolidation → backup/restore → deletion/export semantics → privacy/terms/legal
 
-**2. D4 — Scheduling Boundary — DONE**
-→ one domain-neutral scheduling seam; no second scheduler and no FSRS rewrite
+**3. Public UX**
+→ onboarding R2 → final Learning/Active Recall/Stats/Settings/Dictionary/Reading Lab/Mnemonic/Handwriting polish → RTL/i18n → loading/error/empty states → small reliability UX
 
-**3. E — Vocabulary MVP**
-→ local versioned dataset, deterministic learning modes, evidence/recovery, scheduling integration, persistence/offline, UX, QA
+**4. Real Device / Accessibility / Performance**
+→ Tier-1/Tier-2 device matrix → PWA install/update/reinstall → offline/reconnect → manual accessibility → representative performance evidence
 
-**4. F — Context + Reading Integration**
+**5. Content Quality**
+→ Kanji/readings/examples/stroke/radical-component/mnemonic QA → provenance → content reporting/correction workflow
 
-**5. G — Grammar Foundation**
+**6. Reliability / Security / Governance**
+→ error containment → observability → security/CSP/dependency/third-party review → repository governance → documentation/branding/release-process reconciliation
 
-**6. H — Public Product Maturity / scale-driven expansion**
+**7. Public Beta**
+→ real-user cohort → structured evidence → severity-based fixes → regression coverage
 
-### Explicitly complete and removed from the active queue
+**8. Public Kanji Release**
+→ final release gate passes
 
-Do **not** restart A2, A3, A5, A6, D1, D2, D3, or D5 unless a new current-main regression is demonstrated.
+**9. Vocabulary**
+→ only after the Public Kanji Release gate passes; then connect the existing domain foundations to local versioned content, learning state, scheduler, offline runtime, UX, and QA
 
-An old/open PR that implements one of those areas should first be diffed against current \`main\`; often the correct action is to supersede or close it rather than merge it.
+**10. Context/Reading expansion**
+
+**11. Grammar foundation**
+
+**12. Post-domain product maturity**
 
 ### Parallelism rule
 
-Where safe, work may proceed in parallel, but no implementation may bypass an authoritative seam.
+Parallel work is allowed only inside the current stage when it does not bypass an authoritative seam or create conflicting edits.
 
-Examples:
+Safe examples:
+- content QA while accessibility work is underway
+- security review while onboarding polish is underway
+- device testing while documentation is being reconciled
+- Vocabulary content-policy preparation while public Kanji release work is underway
 
-- content QA can run while UI polish occurs
-- accessibility can run while Stats work occurs
-- Vocabulary content pipeline can begin after dataset policy is defined
-- public documentation can begin before the final public beta
-- performance investigation can proceed while non-conflicting UI work continues
+Unsafe examples:
+- two branches changing the same engine boundary
+- feature work that changes production behavior while the release candidate is being verified
+- Vocabulary runtime integration before the public Kanji release gate is green
 
-However, do not parallelize two changes that both alter the same engine boundary without coordination.
+### Explicitly complete and removed from the active queue
 
----
+Do not restart A2, A3, A5, A6, D1, D2, D3, or D5 unless a new current-main regression is demonstrated.
+
+An old/open PR that implements one of those areas should first be diffed against current `main`; the correct action may be to supersede or close it rather than merge it.
 
 # 19. What is explicitly NOT required before public release
 
-Do not block public readiness on:
+Do not block the public Kanji release on:
 
-- complete engine rewrite
-- complete ESM migration
+- complete learning-engine rewrite
 - replacing FSRS
-- building a second scheduler
+- creating a second scheduler
+- full IndexedDB migration without measured need
+- complete ESM/runtime-file renaming project
 - full event-sourcing architecture
-- social/gamification
+- social/community/gamification systems
 - huge analytics dashboard
 - AI grading authority
-- all future Vocabulary features
+- Vocabulary runtime integration
 - complete Grammar learning system
-- complete repository renaming
+- Reading Library at full scale
+- broad repository renaming
 
----
+These are deliberately deferred because they add complexity without being required to make the current Kanji product trustworthy.
 
+Small improvements that directly reduce user failure remain in scope before release, including stronger error recovery, clearer offline/sync states, safer backup/restore, accessibility fixes, and targeted UI/UX corrections.
 # 20. Definition of Done
 
 A roadmap phase is complete only when applicable:
@@ -1918,34 +1989,37 @@ For public-release blockers, “implemented in code” is insufficient; the beha
 # 21. Final release milestones
 
 ## Milestone M0 — Engineering baseline
+**Result:** one current-main release candidate with green automated gates and a reproducible build/deploy chain.
 
-**Result:** stable release pipeline, no critical runtime/deploy failures.
+## Milestone M1 — Trust Layer
+**Result:** account, persistence, sync, backup/restore, deletion/export semantics, privacy/legal, and Supabase/RLS behavior are production-defined and verified.
 
-## Milestone M1 — Trustworthy Kanji product
+## Milestone M2 — Public Kanji UX
+**Result:** onboarding and the existing Kanji learning surfaces are coherent, accessible, responsive, recoverable, and understandable without developer knowledge.
 
-**Result:** learning, Active Recall, Stats, Reading Lab, Dictionary, Settings, Mnemonics, mobile/accessibility, and performance meet the defined quality bar.
+## Milestone M3 — Real Environment Validation
+**Result:** target devices/browsers, PWA install/update/reinstall, offline/reconnect, accessibility, and representative performance have real-environment evidence.
 
-## Milestone M2 — Public Beta
+## Milestone M4 — Content Quality
+**Result:** Kanji learning content has a repeatable QA/provenance/correction process and critical content defects are addressed.
 
-**Result:** a new user can onboard, learn, return, work offline, recover data, and provide feedback.
+## Milestone M5 — Reliability & Governance
+**Result:** production error containment, observability, security/supply-chain controls, repository governance, branding, documentation, and release procedure are aligned.
 
-## Milestone M3 — Public Kanji Release
+## Milestone M6 — Public Beta
+**Result:** a real-user cohort completes onboarding and learning, returns later, uses offline mode, can recover data, and can report problems; high-severity issues are fixed and regression-tested.
 
-**Result:** privacy/security/documentation/PWA/browser/support/recovery/release gates pass.
+## Milestone M7 — Public Kanji Release
+**Result:** the Public Release Gate in R19 passes and Kanji5 can be promoted as a public Kanji-learning product.
 
-## Milestone M4 — Vocabulary MVP
+## Milestone M8 — Vocabulary MVP
+**Result:** Vocabulary becomes a real learning domain using the existing cross-domain identity/evidence/scheduling architecture, with local content, deterministic learning behavior, persistence, offline support, UX, and QA.
 
-**Result:** Vocabulary becomes a real learning domain using the existing cross-domain foundation and the same authoritative FSRS architecture.
+## Milestone M9 — Context/Reading Integration
+**Result:** Reading Lab connects context, words, Kanji, evidence, and audio without creating a competing scheduler.
 
-## Milestone M5 — Context/Reading Integration
-
-**Result:** Reading Lab can connect sentences, words, Kanji, mastery and audio without becoming a competing scheduler.
-
-## Milestone M6 — Grammar Foundation
-
-**Result:** Grammar becomes a structured, versioned reference-first domain with evidence-backed learning introduced incrementally.
-
----
+## Milestone M10 — Grammar Foundation
+**Result:** Grammar becomes a structured, versioned, reference-first domain with incremental evidence-backed learning.
 
 # 22. Decision record from the pre-Vocabulary architecture review
 
@@ -1983,30 +2057,36 @@ Grammar reference can remain interim, but its authoritative learning model shoul
 
 # 23. Current strategic conclusion
 
-Kanji5 should **not** jump directly from the personal-project state into “add Vocabulary and Grammar”.
+Kanji5 must reach a trustworthy public Kanji release before major domain expansion.
 
-The correct transition is:
+The canonical transition is:
 
-**Personal Kanji PWA**
+**Current Kanji main**
 →
-**Trustworthy Kanji product**
+**Release Lock**
 →
-**Public Product Readiness**
+**Trust Layer**
+→
+**Public UX**
+→
+**Real Device / Accessibility / Performance**
+→
+**Content Quality**
+→
+**Reliability / Security / Governance**
 →
 **Public Beta**
 →
-**Public Kanji release**
+**Public Kanji Release**
 →
-**Cross-domain runtime seams**
+**Vocabulary**
 →
-**Vocabulary MVP**
+**Context/Reading**
 →
-**Context/Reading integration**
-→
-**Grammar foundation**
+**Grammar**
 
-The key architectural rule is:
+The architectural rule remains:
 
-**Make the current Kanji product trustworthy first, make the cross-domain seams real second, then add new learning domains without creating competing engines.**
+**Do not rewrite the learning engine merely to enable presentation or new-domain work. Strengthen the current Kanji product first, prove the public operating model second, then expand through the existing cross-domain seams.**
 
-This roadmap deliberately prefers measured migrations over speculative rewrites, preserves historical work for auditability, and treats real public-user reliability as a first-class product requirement.
+This ordering is the canonical pre-Vocabulary execution sequence.
