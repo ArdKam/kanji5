@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -16,11 +15,7 @@ assert.ok(!scriptSource.includes("'unsafe-inline'"), 'CSP script-src must not al
 const inlineScripts = [...index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map(match => match[1])
   .filter(source => source.trim());
-assert.ok(inlineScripts.length >= 1, 'Expected inline bootstrap script(s) to be detected');
-for (const source of inlineScripts) {
-  const digest = crypto.createHash('sha256').update(source, 'utf8').digest('base64');
-  assert.ok(csp.includes("'sha256-" + digest + "'"), 'Every inline script must be authorized by an exact CSP SHA-256 hash');
-}
+assert.deepEqual(inlineScripts, [], 'Entry HTML must not contain executable inline scripts under the strict CSP');
 
 for (const required of [
   'connect-src',
@@ -36,8 +31,10 @@ for (const required of [
   assert.ok(csp.includes(required), `CSP is missing required directive/value: ${required}`);
 }
 
-assert.equal((index.match(/document\.write\(/g) || []).length, 1, 'The compatibility loader document.write sink must remain singular and auditable');
-assert.match(index, /const legacyScripts = \[/, 'Compatibility loader allowlist is missing');
+assert.equal((index.match(/document\.write\(/g) || []).length, 0, 'Entry HTML must not contain document.write');
+const legacyLoader = fs.readFileSync(path.join(root, 'legacy-loader.js'), 'utf8');
+assert.equal((legacyLoader.match(/document\.write\(/g) || []).length, 1, 'Legacy compatibility loader must retain exactly one audited document.write sink');
+assert.match(legacyLoader, /const legacyScripts = \[/, 'Compatibility loader allowlist is missing');
 
 const reactRoot = path.join(root, 'frontend', 'src', 'app');
 const stack = [];
