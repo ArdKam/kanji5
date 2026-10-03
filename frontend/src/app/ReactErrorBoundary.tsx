@@ -56,6 +56,8 @@ export class ReactErrorBoundary extends Component<{ children: ReactNode }, State
     try {
       const backup = await createBackup();
       downloadBackup(backup, getLanguage());
+    } catch (error) {
+      getObservability()?.capture("react-error-backup-failed", error);
     } finally {
       this.setState({ backupBusy: false });
     }
