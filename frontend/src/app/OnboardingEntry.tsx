@@ -69,7 +69,7 @@ export function OnboardingEntry({
   const [placementLoading, setPlacementLoading] = useState(false);
   const [placementError, setPlacementError] = useState("");
   const [placementRetry, setPlacementRetry] = useState(0);
-  const [busy, setBusy] = useState(parentBusy);
+  // The first-run shell must stay interactive while the authoritative engine warms in the background.\n  const [busy, setBusy] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountIntent, setAccountIntent] = useState<"sign-in" | "sign-up">("sign-in");
   const [accountDraft, setAccountDraft] = useState<OnboardingDraft | null>(null);
@@ -129,7 +129,7 @@ export function OnboardingEntry({
   );
 
   const run = useCallback(async (task: () => Promise<void>) => {
-    if (busy || parentBusy) return false;
+    if (busy) return false;
     setBusy(true);
     setError("");
     try {
@@ -148,7 +148,7 @@ export function OnboardingEntry({
     } finally {
       setBusy(false);
     }
-  }, [busy, language, parentBusy]);
+  }, [busy, language]);
 
   const finish = useCallback(async (completion: OnboardingCompletion) => {
     const ok = await run(async () => {
@@ -235,7 +235,7 @@ export function OnboardingEntry({
           onRetryPlacement={() => setPlacementRetry(value => value + 1)}
           onPlacementComplete={resolvePlacement}
           initialProgress={initialProgress}
-          busy={busy || parentBusy}
+          busy={busy}
           onSkip={() => void handleSkip()}
           onProgressChange={handleProgressChange}
           onComplete={finish}
