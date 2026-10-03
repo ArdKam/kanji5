@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `098fab1f4d37d8e2538813e7dc039c13bc2079ec` (2026-10-03). The matching GitHub Pages deployment for this SHA has completed successfully. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
+> **Implementation baseline reviewed:** `main` at commit `5569d1fbc879937558cfdc9f15f5bc53d0b2439b` (2026-10-03). Recent current-main work includes onboarding/educational audits and mnemonic-scroll E2E coverage; the exact same-SHA release ledger still needs to be refreshed before a release candidate can be frozen.
 
 > **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -162,6 +162,16 @@ A feature may remain technically implemented while its educational validity rema
 ---
 
 ### 2.1 Verified current status ledger — 2026-10-03
+### 2.1.1 Changes implemented during the current pre-beta pass
+
+- Production Supabase review was performed; RLS ownership was confirmed for `public.user_learning_state`.
+- A user-owned DELETE policy/grant was applied in production and recorded in the open security candidate PR #440; it is not counted as current-main implementation until that PR is merged and re-verified.
+- An authenticated Supabase `delete-account` Edge Function was deployed with JWT verification; browser-side deletion semantics were kept separate from local-first device data.
+- Security hardening was implemented in current-main candidate PR #440: explicit CSP, externalized bootstrap scripts, removal of two shipped runtime HTML sinks, security/unsafe-DOM contract tests, and dependency-audit workflow.
+- Global React failure containment was implemented in current-main candidate PR #441: ErrorBoundary, observable render-failure capture, reload, backup export, and diagnostic report actions.
+- Release/legal documentation was added on current `main` through merged PR #422: Privacy/Data alignment, Terms draft, and Release Governance.
+- These implementation changes remain distinct from release evidence; open PRs are not counted as DONE until merged and re-verified on `main`.
+
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
 
@@ -179,17 +189,17 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- A1 release integrity: current `main` Pages deployment is green, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
-- R2 onboarding redesign is not complete; current onboarding works but the dedicated first-open value/setup/placement/account flow is still pending.
+- A1 release integrity: current `main` CI/deploy work continues, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
+- R2 onboarding implementation is present in current-main work, with PR #417 merged and PR #442 refining the welcome CTA; full first-open value/setup/placement/account live evidence is still pending.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
 - R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
 - R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
 - R10 full i18n audit remains.
-- R11 broader controlled-failure observability remains in open PR #392; global React render-failure containment/error-boundary recovery is also not yet on current `main`.
-- R12 production security review remains: production RLS verification, CSP, unsafe-DOM/`innerHTML` audit, CDN supply-chain hardening, and dependency-security evidence are still required.
-- R13 Terms, exact production-service disclosure, account/local deletion semantics, retention/export behavior, and target-market legal review remain.
-- R14 docs are now staged in the release path; production smoke verification remains.
+- R11 broader controlled-failure observability remains incomplete on current `main`; current-main candidate PR #441 adds controlled runtime-boundary capture, while the clean ErrorBoundary/recovery work is represented in the current-main recovery branch. Neither is completion evidence until merged and re-verified.
+- R12 production security review is now partially evidenced: production RLS was verified, a user-owned delete policy was applied, account deletion was deployed as an authenticated Edge Function, and current-main security candidate PR #440 carries CSP/unsafe-DOM/dependency hardening. Remaining blockers are same-SHA live verification, final supply-chain/vendor decision, secret/source-map review, and resolution/documentation of the current Supabase Security Advisor warning.
+- R13 Privacy/Data + Terms draft + Release Governance are on current `main` via merged PR #422; production account deletion semantics are documented, while final legal review, retention policy, project LICENSE decision, and credentialed end-to-end deletion evidence remain.
+- R14 public release/user-help documentation and governance docs are staged on current `main`; production smoke and exact-SHA release evidence remain.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
 - **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md; C4 is required before Public Beta.
@@ -209,9 +219,15 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - D1, D2, D3, D4, D5.
 
 **Open PRs not counted as completion:**
-- #389: persistence adapter.
-- #392: controlled runtime-failure observability.
-- #398: superseded by this current-main roadmap sync.
+- #389: persistence adapter; stale baseline, not completion evidence.
+- #392: controlled runtime-failure observability; stale baseline, superseded by current-main PR #441.
+- #420/#429: superseded security branches; do not count.
+- #431: superseded current-main security branch; replaced by PR #440.
+- #421/#430: superseded ErrorBoundary branches; replaced by current-main recovery work.
+- #440: current-main security/CSP/account-deletion/dependency hardening; open, not completion evidence.
+- #441: current-main controlled runtime-boundary observability; open, not completion evidence.
+- #442: current-main onboarding CTA refinement; open, not completion evidence.
+- #398: superseded by newer current-main roadmap/evidence updates.
 ---
 
 
