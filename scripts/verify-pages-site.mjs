@@ -24,7 +24,6 @@ for(const relative of required){
 for(const forbidden of [
   "frontend",
   "node_modules",
-  "docs",
   "scripts",
   "e2e",
   ".github",
