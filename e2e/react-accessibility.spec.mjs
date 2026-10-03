@@ -277,8 +277,9 @@ test('learning-card Stroke Order is permanently open and has no accordion trigge
   await page.route("https://raw.githubusercontent.com/KanjiVG/kanjivg/422b5538595676da918c288a4230cb5e22a1ee7e/kanji/**.svg", async route => {
     await route.fulfill({status:200,contentType:"image/svg+xml",body:svg});
   });
+  await clean(page);
   await page.addInitScript(()=>localStorage.setItem("kanji5-ui-language","en"));
-  await page.goto("/");
+  await page.reload();
   const card=page.locator("#root .learning-card");
   await expect(card).toBeVisible({timeout:20000});
   await card.getByRole("button",{name:"Show kanji information"}).click();
@@ -390,8 +391,9 @@ test('dictionary search clear, detailed bounds, and persistent dismiss affordanc
 });
 
 test('English dictionary presentation localizes card controls and uses the shared audio icon',async({page})=>{
+  await clean(page);
   await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
-  await page.goto('/');
+  await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   await page.getByRole('button',{name:'Kanji dictionary'}).click();
   await expect(page.locator('.dictionary-page')).toBeVisible({timeout:10000});
