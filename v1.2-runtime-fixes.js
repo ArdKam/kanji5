@@ -19,7 +19,27 @@
     loading.hidden = false;
     loading.removeAttribute("aria-hidden");
     loading.style.display = "flex";
-    loading.innerHTML = '<div style="text-align:center"><div style="font-size:24px">⚠️</div><div style="font-weight:800;margin:6px 0">اجرای برنامه با مشکل مواجه شد.</div><div style="color:#6b7280;font-size:12px;margin:0 0 8px">لطفاً صفحه را دوباره بارگذاری کنید.</div><button class="primary" id="v12RuntimeRetry">تلاش دوباره</button></div>';
+    const card = document.createElement("div");
+    card.style.textAlign = "center";
+    const icon = document.createElement("div");
+    icon.style.fontSize = "24px";
+    icon.textContent = "⚠️";
+    const title = document.createElement("div");
+    title.style.fontWeight = "800";
+    title.style.margin = "6px 0";
+    title.textContent = "اجرای برنامه با مشکل مواجه شد.";
+    const hint = document.createElement("div");
+    hint.style.color = "#6b7280";
+    hint.style.fontSize = "12px";
+    hint.style.margin = "0 0 8px";
+    hint.textContent = "لطفاً صفحه را دوباره بارگذاری کنید.";
+    const retry = document.createElement("button");
+    retry.className = "primary";
+    retry.id = "v12RuntimeRetry";
+    retry.type = "button";
+    retry.textContent = "تلاش دوباره";
+    card.append(icon, title, hint, retry);
+    loading.replaceChildren(card);
     document.getElementById("v12RuntimeRetry")?.addEventListener("click", () => location.reload());
     console.error("Kanji 5 startup failed:", reason);
   }
