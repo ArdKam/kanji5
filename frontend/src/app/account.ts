@@ -36,6 +36,7 @@ export type AccountApi = {
   sendMagicLink: (email: string) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   setPassword: (newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
   syncNow: () => Promise<void>;
 };
