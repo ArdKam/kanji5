@@ -4,7 +4,11 @@ import type { CustomStudyFilter, KanjiCatalogItem } from "./engine";
 import { buildPlacementQuestions, DIAGNOSTIC_LEVELS, scorePlacementAnswers } from "./placement-logic";
 
 export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, autoOpen = false }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>; autoOpen?: boolean }) {
-  const questions = useMemo(() => buildPlacementQuestions(catalog, t("diagnosticMeaningPrompt", language)), [catalog, language]);
+  const [diagnosticSeed, setDiagnosticSeed] = useState(0);
+  const questions = useMemo(
+    () => buildPlacementQuestions(catalog, t("diagnosticMeaningPrompt", language), diagnosticSeed),
+    [catalog, language, diagnosticSeed],
+  );
 
   const [active, setActive] = useState(false);
   const [index, setIndex] = useState(0);
@@ -23,6 +27,11 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
   }, [questions.length]);
 
   const start = () => {
+    const bytes = new Uint32Array(1);
+    const nextSeed = typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function"
+      ? (crypto.getRandomValues(bytes), bytes[0])
+      : Date.now();
+    setDiagnosticSeed(nextSeed);
     setIndex(0);
     setSelected("");
     setScore(0);
