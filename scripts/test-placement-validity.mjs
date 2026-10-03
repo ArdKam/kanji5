@@ -17,7 +17,7 @@ assert.doesNotMatch(logic, /const labels = \[correct, \.\.\.distractors\]/);
 assert.match(diagnostic, /diagnosticSeed/);
 assert.match(diagnostic, /setDiagnosticSeed/);
 assert.match(entry, /placementSeed/);
-assert.match(entry, /buildPlacementQuestions\([\\s\\S]*placementSeed/);
+assert.match(entry, /buildPlacementQuestions\([\s\S]*placementSeed/);
 assert.match(entry, /onPlacementRestart/);
 assert.match(flow, /onPlacementRestart\?\./);
 assert.ok(integration.includes("buildPlacementQuestions"));
