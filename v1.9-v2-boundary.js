@@ -8,7 +8,7 @@ let learning=null,exercise=null,feedback=null,adaptiveReason=null;
 let educationRuntimePromise=null;
 let networkPromise=null;
 function loadNetwork(){
-  return networkPromise||(networkPromise=import('./v1.5-network.js')).catch(error=>{networkPromise=null;throw error});
+  return networkPromise||(networkPromise=import('./v1.5-network.js')).catch(error=>{networkPromise=null;window.__KANJI5_OBSERVABILITY__?.capture?.('network-runtime-load-failure',error);throw error});
 }
 let componentDataPromise=null;let radicalDataPromise=null;
 async function ensureEducationRuntime(){
@@ -22,7 +22,7 @@ async function ensureEducationRuntime(){
     return Boolean(window.__KANJI5_EDU_BRIDGE__?.start);
   })().catch(error=>{
     educationRuntimePromise=null;
-    console.error('Kanji 5 education runtime failed to load.',error);
+    window.__KANJI5_OBSERVABILITY__?.capture?.('education-runtime-load-failure',error);console.error('Kanji 5 education runtime failed to load.',error);
     return false;
   });
   return educationRuntimePromise;
@@ -93,10 +93,10 @@ function loadComponentData(){
   componentDataPromise=fetch('./kanji-components.json',{cache:'no-store'}).then(response=>{
     if(!response.ok)throw new Error('KANJI5_COMPONENT_DATA_UNAVAILABLE');
     return response.json();
-  }).catch(()=>null);
+  }).catch(error=>{window.__KANJI5_OBSERVABILITY__?.capture?.('component-data-load-failure',error);return null});
   return componentDataPromise;
 }
-function loadRadicalData(){if(radicalDataPromise)return radicalDataPromise;radicalDataPromise=Promise.all([fetch('./kanji-radicals.json',{cache:'no-store'}),fetch('./kanji-radical-map.json',{cache:'no-store'})]).then(async([catalogResponse,mapResponse])=>{if(!catalogResponse.ok||!mapResponse.ok)throw new Error('KANJI5_RADICAL_DATA_UNAVAILABLE');return {catalog:await catalogResponse.json(),map:await mapResponse.json()}}).catch(()=>null);return radicalDataPromise;}
+function loadRadicalData(){if(radicalDataPromise)return radicalDataPromise;radicalDataPromise=Promise.all([fetch('./kanji-radicals.json',{cache:'no-store'}),fetch('./kanji-radical-map.json',{cache:'no-store'})]).then(async([catalogResponse,mapResponse])=>{if(!catalogResponse.ok||!mapResponse.ok)throw new Error('KANJI5_RADICAL_DATA_UNAVAILABLE');return {catalog:await catalogResponse.json(),map:await mapResponse.json()}}).catch(error=>{window.__KANJI5_OBSERVABILITY__?.capture?.('radical-data-load-failure',error);return null});return radicalDataPromise;}
 async function getRadicalInfo(character){const normalized=Array.from(String(character||'').trim()).slice(0,1).join('');const data=await loadRadicalData();if(!data||!normalized)return {character:normalized,available:false,radicalId:null,radical:null,coverage:data?.map?.coverage||null,source:data?.catalog?.source||null};const id=Number(data.map?.kanji?.[normalized]);const radical=Number.isInteger(id)?data.catalog?.radicals?.find(item=>Number(item.id)===id)||null:null;return {character:normalized,available:Boolean(radical&&Number.isInteger(id)),radicalId:Number.isInteger(id)?id:null,radical,coverage:data.map?.coverage||null,source:data.catalog?.source||null};}
 function normalizeDictionaryQuery(value){
   return String(value||'').trim().replace(/[ァ-ヺ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).toLowerCase();
