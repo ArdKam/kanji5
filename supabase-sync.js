@@ -494,6 +494,17 @@ const api = {
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), recoveryPending: false, error: null });
   },
+  async deleteAccount() {
+    if (!user?.id) throw new Error('AUTH_USER_REQUIRED');
+    const c = await getClient();
+    const { error } = await c.functions.invoke('delete-account', { body: {} });
+    if (error) throw new Error('AUTH_ACCOUNT_DELETE_FAILED');
+    try { await c.auth.signOut(); } catch (error) { console.debug('Kanji 5 account cleanup sign-out failed after deletion', error); }
+    localStorage.removeItem(SYNC_META_KEY);
+    user = null;
+    stopSyncLifecycle();
+    setState({ status: 'signed-out', user: null, syncStatus: 'idle', recoveryPending: false, error: null });
+  },
   async signOut() {
     const c = await getClient();
     const { error } = await c.auth.signOut();

@@ -4,7 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#c0392b" />
-<script>(()=>{const v=localStorage.getItem("kanji5-theme");document.documentElement.dataset.theme=v==="light"||v==="dark"?v:"system";document.documentElement.style.colorScheme=v==="dark"?"dark":v==="light"?"light":"light dark";})();</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://esm.sh; connect-src 'self' https://vbrtzkejodkddfdbolbo.supabase.co https://kanjiapi.dev https://api.tatoeba.org https://raw.githubusercontent.com; img-src 'self' data: blob: https://raw.githubusercontent.com; font-src 'self' data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; form-action 'self'; upgrade-insecure-requests" />
+<script src="./theme-bootstrap.js"></script>
 <meta name="description" content="یادگیری روزانهٔ ۵ کانجی با مرور فاصله‌دار تطبیقی FSRS" />
 <meta name="kanji5-build-id" content="dev">
 <link rel="manifest" href="manifest.webmanifest">
@@ -34,21 +35,7 @@
 <script src="./v1.3-p0.js"></script>
 <script src="./v1.9-learner-model.js"></script>
 <script type="module" src="./review-runtime.js"></script>
-<script>
-(() => {
-  if (new URLSearchParams(location.search).get("legacy") !== "1") return;
-  const legacyScripts = [
-    "./v1.4-education-migration.js",
-    "./v1.4-education-core.js",
-    "./v1.5-p0.js",
-    "./v1.2-enhancements.js",
-    "./v1.2-runtime-fixes.js",
-    "./v1.9-recovery.js",
-    "./v1.5-education-ui.js"
-  ];
-  document.write(legacyScripts.map(src => `<script src="${src}"><\/script>`).join(""));
-})();
-</script>
+<script src="./legacy-loader.js"></script>
 <script src="./v1.9-v2-boundary.js"></script>
 <script src="./app-bootstrap.js"></script>
 <script src="./supabase-config.js"></script>
