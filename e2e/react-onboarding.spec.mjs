@@ -24,7 +24,9 @@ async function reachStartingPoint(page) {
   await expect(onboarding).toBeVisible({ timeout: 20000 });
   await expect(page.locator("#root .app-shell")).toHaveCount(0);
   await onboarding.getByRole("button", { name: /Let's begin/ }).click();
-  await expect(onboarding.getByRole("heading", { name: "Learn, recall, review" })).toBeVisible();
+  await expect(onboarding.getByRole("heading", { name: "How you learn each kanji" })).toBeVisible();
+  await expect(onboarding).toContainText("See the key meaning and reading.");
+  await expect(onboarding).toContainText("Try to answer before seeing the answer.");
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
   return onboarding;
@@ -52,14 +54,24 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await onboarding.getByRole("button", { name: /Check my kanji level/ }).click();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.locator(".kanji5-onboarding-stimulus")).toBeVisible({ timeout: 20000 });
+  await expect(onboarding.getByRole("button", { name: "Next question", exact: true })).toHaveCount(0);
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 12");
+
+  const surface = onboarding.locator(".kanji5-onboarding-main");
+  const box = await surface.boundingBox();
+  if (!box) throw new Error("Placement surface is not measurable");
+  await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5, { steps: 5 });
+  await page.mouse.up();
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 12");
 
   for (let index = 0; index < 12; index += 1) {
     await onboarding.locator(".kanji5-onboarding-option").first().click();
     if (index < 11) {
-      await onboarding.getByRole("button", { name: "Next question", exact: true }).click();
+      await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText(`Question ${index + 2} / 12`);
     }
   }
-  await onboarding.locator(".kanji5-onboarding-primary").click();
 
   await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText("N2");

@@ -47,8 +47,13 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-hero-mark,.kanji5-onboarding-stimulus{display:grid;place-items:center;border:1px solid var(--line);background:var(--washi);box-shadow:0 18px 44px rgba(38,37,35,.08)}
 .kanji5-onboarding-hero-mark{width:104px;height:104px;margin:28px 0;border-radius:28px;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:62px}
 .kanji5-onboarding-stimulus{width:142px;height:142px;margin:7px 0 20px;border-radius:30px;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:74px}
-.kanji5-onboarding-loop{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:11px;margin:30px 0}.kanji5-onboarding-loop>div{min-height:108px;padding:18px;border:1px solid var(--line);border-radius:22px;background:var(--washi);box-shadow:0 14px 34px rgba(38,37,35,.05)}.kanji5-onboarding-loop span{display:block;margin-bottom:14px;color:var(--shu);font-size:10px;font-weight:850;letter-spacing:.12em}.kanji5-onboarding-loop b{color:var(--mute);font-size:18px;font-weight:500}
-.kanji5-onboarding-choices{display:grid;gap:10px;margin:27px 0}.kanji5-onboarding-choice{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:13px;width:100%;padding:17px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,252,246,.58);color:inherit;text-align:start;cursor:pointer;box-shadow:0 10px 26px rgba(38,37,35,.035);transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}.kanji5-onboarding-choice:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(38,37,35,.08)}.kanji5-onboarding-choice.is-selected{border-color:rgba(48,79,116,.42);background:linear-gradient(120deg,rgba(48,79,116,.1),rgba(255,252,246,.6));box-shadow:0 15px 34px rgba(48,79,116,.09)}
+.kanji5-onboarding-loop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:30px 0;border-block:1px solid var(--line)}
+.kanji5-onboarding-loop-step{display:grid;grid-template-columns:auto 1fr;gap:12px;align-content:start;padding:20px 18px}
+.kanji5-onboarding-loop-step+.kanji5-onboarding-loop-step{border-inline-start:1px solid var(--line)}
+.kanji5-onboarding-loop-number{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--line-strong);border-radius:50%;color:var(--indigo);background:rgba(255,252,246,.62);font-size:11px;font-weight:850}
+.kanji5-onboarding-loop-copy{display:grid;gap:5px;min-width:0}
+.kanji5-onboarding-loop-copy strong{font-size:14px}
+.kanji5-onboarding-loop-copy small{color:var(--mute);font-size:12px;line-height:1.6}.kanji5-onboarding-choices{display:grid;gap:10px;margin:27px 0}.kanji5-onboarding-choice{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:13px;width:100%;padding:17px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,252,246,.58);color:inherit;text-align:start;cursor:pointer;box-shadow:0 10px 26px rgba(38,37,35,.035);transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}.kanji5-onboarding-choice:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(38,37,35,.08)}.kanji5-onboarding-choice.is-selected{border-color:rgba(48,79,116,.42);background:linear-gradient(120deg,rgba(48,79,116,.1),rgba(255,252,246,.6));box-shadow:0 15px 34px rgba(48,79,116,.09)}
 .kanji5-onboarding-choice-check{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line-strong);border-radius:50%;color:var(--indigo);background:rgba(255,252,246,.72)}.kanji5-onboarding-choice.is-selected .kanji5-onboarding-choice-check{border-color:var(--indigo);background:var(--indigo);color:#fff}.kanji5-onboarding-choice-copy{display:grid;gap:5px;min-width:0}.kanji5-onboarding-choice-copy strong{font-size:15px}.kanji5-onboarding-choice-copy small,.kanji5-onboarding-footnote,.kanji5-onboarding-question-meta{color:var(--mute)}.kanji5-onboarding-choice-copy small{font-size:12px;line-height:1.55}.kanji5-onboarding-choice-arrow{display:grid;place-items:center;width:34px;height:34px;color:var(--mute);font-size:18px;transition:transform .18s ease}.kanji5-onboarding-root[dir=rtl] .kanji5-onboarding-choice-arrow{transform:scaleX(-1)}.kanji5-onboarding-choice:hover .kanji5-onboarding-choice-arrow{transform:translateX(3px)}.kanji5-onboarding-root[dir=rtl] .kanji5-onboarding-choice:hover .kanji5-onboarding-choice-arrow{transform:scaleX(-1) translateX(3px)}
 .kanji5-onboarding-question-meta{display:flex;align-items:center;gap:9px;margin:10px 0 18px;font-size:12px;font-weight:800}.kanji5-onboarding-question-meta:after{content:"";flex:1;height:4px;border-radius:99px;background:linear-gradient(90deg,var(--indigo) 0 24%,rgba(38,37,35,.08) 24%);opacity:.75}
 .kanji5-onboarding-question{margin:0 0 18px;font-size:17px;line-height:1.6}.kanji5-onboarding-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.kanji5-onboarding-option{min-height:66px;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,252,246,.62);color:inherit;font-size:15px;text-align:start;cursor:pointer;box-shadow:0 8px 22px rgba(38,37,35,.03);transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease}.kanji5-onboarding-option:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(38,37,35,.07)}.kanji5-onboarding-option.is-selected{border-color:rgba(48,79,116,.42);background:rgba(48,79,116,.09);box-shadow:0 11px 24px rgba(48,79,116,.08)}
@@ -57,7 +62,7 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-account-actions{display:grid;gap:9px;width:min(430px,100%);margin:30px 0 0}.kanji5-onboarding-primary,.kanji5-onboarding-secondary{min-height:52px;padding:13px 19px;border-radius:15px;font:inherit;font-weight:800;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.kanji5-onboarding-primary{border:1px solid var(--indigo);background:var(--indigo);color:#fff;box-shadow:0 15px 28px rgba(48,79,116,.2)}.kanji5-onboarding-primary:hover{transform:translateY(-1px);box-shadow:0 19px 34px rgba(48,79,116,.25)}.kanji5-onboarding-secondary{border:1px solid var(--line);background:rgba(255,252,246,.58);color:inherit}.kanji5-onboarding-secondary:hover{transform:translateY(-1px);background:rgba(255,252,246,.84)}
 .kanji5-onboarding-ghost,.kanji5-onboarding-footer-action{border:0;background:transparent;color:var(--mute);font:inherit;cursor:pointer}.kanji5-onboarding-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:24px}.kanji5-onboarding-footnote{margin:11px 0 0;font-size:12px;line-height:1.65}.kanji5-onboarding-swipe-hint{display:flex;align-items:center;gap:8px;margin:15px 0 0;color:var(--mute);font-size:11px}.kanji5-onboarding-swipe-hint:before{content:"↔";display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--line);border-radius:50%;background:rgba(255,252,246,.55)}
 .kanji5-onboarding-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:7px 28px 20px;min-height:54px}.kanji5-onboarding-footer-action{padding:10px 0;font-size:12px}.kanji5-onboarding-primary:focus-visible,.kanji5-onboarding-secondary:focus-visible,.kanji5-onboarding-ghost:focus-visible,.kanji5-onboarding-footer-action:focus-visible,.kanji5-onboarding-language button:focus-visible,.kanji5-onboarding-choice:focus-visible,.kanji5-onboarding-option:focus-visible,.kanji5-onboarding-range-option:focus-visible{outline:3px solid rgba(48,79,116,.26);outline-offset:3px}.kanji5-onboarding-host-error{position:fixed;left:50%;bottom:20px;z-index:3;transform:translateX(-50%);max-width:min(640px,calc(100% - 32px));padding:12px 15px;border:1px solid rgba(181,109,114,.28);border-radius:16px;background:rgba(255,252,246,.95);color:var(--mute);font-size:12px;line-height:1.5;box-shadow:0 12px 30px rgba(38,37,35,.14);text-align:center}
-@media(max-width:860px){.kanji5-onboarding-header{padding:13px 16px 8px}.kanji5-onboarding-main{padding:12px 16px 10px}.kanji5-onboarding-stage{display:block;min-height:0;width:min(680px,100%)}.kanji5-onboarding-visual{min-height:210px;height:30svh;max-height:260px;margin-bottom:18px;padding:16px;border-radius:28px}.kanji5-onboarding-visual-art{width:min(74vw,290px)}.kanji5-onboarding-visual-kanji{font-size:90px}.kanji5-onboarding-panel-shell{display:block}.kanji5-onboarding-panel{width:100%}.kanji5-onboarding-panel h1{max-width:none;font-size:clamp(31px,8vw,44px)}.kanji5-onboarding-body{margin-top:14px;font-size:15px}.kanji5-onboarding-loop{grid-template-columns:1fr;gap:7px}.kanji5-onboarding-loop>div{min-height:68px;padding:14px 15px}.kanji5-onboarding-loop b{display:none}.kanji5-onboarding-option-grid,.kanji5-onboarding-range{grid-template-columns:1fr}.kanji5-onboarding-range-option{min-height:82px;grid-template-columns:auto minmax(0,1fr);align-items:center}.kanji5-onboarding-account-actions{width:100%}.kanji5-onboarding-footer{padding:6px 16px 14px}.kanji5-onboarding-progress{min-width:122px}.kanji5-onboarding-progress-track{width:78px}.kanji5-onboarding-brand strong{display:none}}
+@media(max-width:860px){.kanji5-onboarding-header{padding:13px 16px 8px}.kanji5-onboarding-main{padding:12px 16px 10px}.kanji5-onboarding-stage{display:block;min-height:0;width:min(680px,100%)}.kanji5-onboarding-visual{min-height:210px;height:30svh;max-height:260px;margin-bottom:18px;padding:16px;border-radius:28px}.kanji5-onboarding-visual-art{width:min(74vw,290px)}.kanji5-onboarding-visual-kanji{font-size:90px}.kanji5-onboarding-panel-shell{display:block}.kanji5-onboarding-panel{width:100%}.kanji5-onboarding-panel h1{max-width:none;font-size:clamp(31px,8vw,44px)}.kanji5-onboarding-body{margin-top:14px;font-size:15px}.kanji5-onboarding-loop{grid-template-columns:1fr}.kanji5-onboarding-loop-step+.kanji5-onboarding-loop-step{border-inline-start:0;border-top:1px solid var(--line)}.kanji5-onboarding-loop-step{padding:15px 0}.kanji5-onboarding-option-grid,.kanji5-onboarding-range{grid-template-columns:1fr}.kanji5-onboarding-range-option{min-height:82px;grid-template-columns:auto minmax(0,1fr);align-items:center}.kanji5-onboarding-account-actions{width:100%}.kanji5-onboarding-footer{padding:6px 16px 14px}.kanji5-onboarding-progress{min-width:122px}.kanji5-onboarding-progress-track{width:78px}.kanji5-onboarding-brand strong{display:none}}
 @media(max-width:500px){.kanji5-onboarding-header{grid-template-columns:1fr auto}.kanji5-onboarding-progress{grid-column:1/-1;grid-row:2;justify-self:center;order:3;margin-top:4px}.kanji5-onboarding-language{grid-column:2}.kanji5-onboarding-main{padding-top:9px}.kanji5-onboarding-visual{height:24svh;min-height:166px;max-height:205px;margin-bottom:15px}.kanji5-onboarding-visual:before{top:26px;left:28px}.kanji5-onboarding-visual:after{right:26px;bottom:28px}.kanji5-onboarding-visual-kanji{font-size:78px}.kanji5-onboarding-stimulus{width:118px;height:118px;font-size:62px}.kanji5-onboarding-choice{grid-template-columns:30px minmax(0,1fr) auto;padding:15px}.kanji5-onboarding-choice-arrow{width:27px}.kanji5-onboarding-actions{margin-top:19px}.kanji5-onboarding-actions .kanji5-onboarding-primary{flex:1}.kanji5-onboarding-actions .kanji5-onboarding-ghost{flex:0 0 auto}.kanji5-onboarding-swipe-hint{margin-top:11px}}
 @media(prefers-reduced-motion:reduce){.kanji5-onboarding-panel,.kanji5-onboarding-visual-art,.kanji5-onboarding-primary,.kanji5-onboarding-secondary,.kanji5-onboarding-choice,.kanji5-onboarding-option,.kanji5-onboarding-range-option,.kanji5-onboarding-language button,.kanji5-onboarding-progress-track span{animation:none!important;transition:none!important}}`;
 
@@ -210,9 +215,9 @@ export function OnboardingFlow({
     setCompletedPlacement(false);
   };
 
-  const answerPlacement = () => {
-    if (!currentQuestion || !canProceedFromPlacement(currentQuestion, placementAnswer)) return;
-    const nextAnswer: PlacementAnswer = { questionId: currentQuestion.id, optionId: placementAnswer };
+  const answerPlacement = (selectedOptionId: string) => {
+    if (!currentQuestion || !canProceedFromPlacement(currentQuestion, selectedOptionId)) return;
+    const nextAnswer: PlacementAnswer = { questionId: currentQuestion.id, optionId: selectedOptionId };
     const answers = [
       ...draft.placementAnswers.filter(answer => answer.questionId !== currentQuestion.id),
       nextAnswer,
@@ -283,7 +288,7 @@ export function OnboardingFlow({
     (step === "daily-rhythm" && Boolean(draft.dailyNew));
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
-    if (busy || completing || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (step === "placement" || busy || completing || (event.pointerType === "mouse" && event.button !== 0)) return;
     swipeRef.current = { x: event.clientX, y: event.clientY, active: true, pointerId: event.pointerId };
     suppressClickRef.current = false;
   };
@@ -318,8 +323,7 @@ export function OnboardingFlow({
       if (!canAdvanceBySwipe()) return;
       suppressClickRef.current = true;
       window.setTimeout(() => { suppressClickRef.current = false; }, 0);
-      if (step === "placement") answerPlacement();
-      else advance();
+      advance();
       return;
     }
     if (steps.indexOf(step) > 0) {
@@ -361,11 +365,27 @@ export function OnboardingFlow({
             <h1>{t("onboardingLoopTitle", language)}</h1>
             <p className="kanji5-onboarding-body">{t("onboardingLoopBody", language)}</p>
             <div className="kanji5-onboarding-loop" aria-label={t("learningLoop", language)}>
-              <div><span>1</span><strong>{t("onboardingLearn", language)}</strong></div>
-              <b aria-hidden="true">→</b>
-              <div><span>2</span><strong>{t("onboardingRecall", language)}</strong></div>
-              <b aria-hidden="true">→</b>
-              <div><span>3</span><strong>{t("onboardingReview", language)}</strong></div>
+              <div className="kanji5-onboarding-loop-step">
+                <span className="kanji5-onboarding-loop-number" aria-hidden="true">1</span>
+                <span className="kanji5-onboarding-loop-copy">
+                  <strong>{t("onboardingLearn", language)}</strong>
+                  <small>{t("onboardingLearnHint", language)}</small>
+                </span>
+              </div>
+              <div className="kanji5-onboarding-loop-step">
+                <span className="kanji5-onboarding-loop-number" aria-hidden="true">2</span>
+                <span className="kanji5-onboarding-loop-copy">
+                  <strong>{t("onboardingRecall", language)}</strong>
+                  <small>{t("onboardingRecallHint", language)}</small>
+                </span>
+              </div>
+              <div className="kanji5-onboarding-loop-step">
+                <span className="kanji5-onboarding-loop-number" aria-hidden="true">3</span>
+                <span className="kanji5-onboarding-loop-copy">
+                  <strong>{t("onboardingReview", language)}</strong>
+                  <small>{t("onboardingReviewHint", language)}</small>
+                </span>
+              </div>
             </div>
             <button className="kanji5-onboarding-primary" type="button" onClick={advance} disabled={busy || completing}>{t("onboardingNext", language)}</button>
           </section>
@@ -414,14 +434,13 @@ export function OnboardingFlow({
             <p className="kanji5-onboarding-question">{currentQuestion.prompt}</p>
             <div className="kanji5-onboarding-option-grid">
               {currentQuestion.options.map(option => (
-                <button key={option.id} className={"kanji5-onboarding-option" + (placementAnswer === option.id ? " is-selected" : "")} type="button" aria-pressed={placementAnswer === option.id} disabled={busy || completing} onClick={() => setPlacementAnswer(option.id)}>
+                <button key={option.id} className={"kanji5-onboarding-option" + (placementAnswer === option.id ? " is-selected" : "")} type="button" aria-pressed={placementAnswer === option.id} disabled={busy || completing} onClick={() => answerPlacement(option.id)}>
                   <span>{option.label}</span>
                 </button>
               ))}
             </div>
             <div className="kanji5-onboarding-actions">
               <button className="kanji5-onboarding-ghost" type="button" onClick={goBack} disabled={busy || completing}>{t("onboardingBack", language)}</button>
-              <button className="kanji5-onboarding-primary" type="button" onClick={answerPlacement} disabled={busy || completing || !placementAnswer}>{placementIndex + 1 >= placementQuestions.length ? t("onboardingPlacementFinish", language) : t("onboardingPlacementNext", language)}</button>
             </div>
           </section>
         );
