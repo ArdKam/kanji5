@@ -876,7 +876,7 @@ function App(){
       Boolean(snapshot?.upcomingReviews?.length)
     )
   );
-  const showOnboarding = !onboardingComplete && !onboardingReturningUser;
+  const showOnboarding = !onboardingComplete;
   const experienceRef=useRef<"review"|"practice"|"dictionary">("review");
   const changeExperience=useCallback((next:"review"|"practice"|"dictionary")=>{experienceRef.current=next;setExperience(next)},[]);
   useEffect(()=>{
