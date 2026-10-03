@@ -51,7 +51,7 @@ assert.deepEqual(unsafeReact, [], 'React presentation must not inject HTML direc
 
 const excluded = new Set(['scripts', 'e2e', 'node_modules', 'react-dist', 'frontend', '.git']);
 const auditedSanitizedSinkFiles = new Set(['account-fallback.js']);
-const legacyOnlySinkFiles = new Set([
+const legacyLoaderSinkFiles = new Set([
   'v1.2-enhancements.js',
   'v1.5-education-ui.js',
   'v1.6-session-analytics.js',
@@ -59,6 +59,7 @@ const legacyOnlySinkFiles = new Set([
   'v1.6-session.js',
   'v1.6-skill-profile.js',
 ]);
+const legacyDynamicSinkFiles = new Set(['v1.6-session.js','v1.6-session-analytics.js','v1.6-session-feedback.js','v1.6-skill-profile.js']);
 const legacyGatedSinkFiles = new Set(['review-runtime.js']);
 const excludedSinkFiles = new Set([...auditedSanitizedSinkFiles, ...legacyLoaderSinkFiles, ...legacyDynamicSinkFiles, ...legacyGatedSinkFiles]);
 const runtimeFiles = fs.readdirSync(root, { withFileTypes: true })
