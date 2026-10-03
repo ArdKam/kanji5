@@ -69,7 +69,8 @@ export function OnboardingEntry({
   const [placementLoading, setPlacementLoading] = useState(false);
   const [placementError, setPlacementError] = useState("");
   const [placementRetry, setPlacementRetry] = useState(0);
-  // The first-run shell must stay interactive while the authoritative engine warms in the background.\n  const [busy, setBusy] = useState(false);
+  // The first-run shell must stay interactive while the authoritative engine warms in the background.
+  const [busy, setBusy] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountIntent, setAccountIntent] = useState<"sign-in" | "sign-up">("sign-in");
   const [accountDraft, setAccountDraft] = useState<OnboardingDraft | null>(null);
