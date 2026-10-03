@@ -98,7 +98,7 @@ for (const file of auditedSanitizedSinkFiles) {
 
 const supabaseSync = fs.readFileSync(path.join(root, 'supabase-sync.js'), 'utf8');
 assert.match(supabaseSync, /@supabase\/supabase-js@2\.57\.4/);
-assert.doesNotMatch(supabaseSync, /@supabase\/supabase-js@(?:latest|\d+\.\d+|\d+)/);
+assert.doesNotMatch(supabaseSync, /@supabase\/supabase-js@(?:latest|\d+)(?:\.\d+)?(?:[\/'"]|$)/);
 assert.doesNotMatch(supabaseSync, /service[_-]?role/i);
 
 console.log('Kanji 5 CSP + unsafe-DOM security boundary passed.');
