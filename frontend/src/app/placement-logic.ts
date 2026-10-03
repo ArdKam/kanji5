@@ -1,6 +1,8 @@
 import type { KanjiCatalogItem } from "./engine";
 
 export const DIAGNOSTIC_LEVELS = ["N5", "N4", "N3", "N2"] as const;
+export const PLACEMENT_ITEMS_PER_LEVEL = 4;
+const BLUEPRINT_QUANTILES = [0.05, 0.35, 0.65, 0.95] as const;
 
 export type PlacementQuestionRecord = {
   id: string;
@@ -18,7 +20,62 @@ export type PlacementScore = {
   suggestedLevel: string;
 };
 
-export function buildPlacementQuestions(catalog: KanjiCatalogItem[], prompt: string): PlacementQuestionRecord[] {
+function stableHash(value: string): number {
+  let hash = 2166136261;
+  for (const char of value) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function seededUnit(seed: number, salt: string): number {
+  let x = (seed ^ stableHash(salt)) >>> 0;
+  x ^= x << 13;
+  x ^= x >>> 17;
+  x ^= x << 5;
+  return (x >>> 0) / 4294967296;
+}
+
+function shuffleWithSeed<T>(values: T[], seed: number, salt: string): T[] {
+  const result = values.slice();
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const unit = seededUnit(seed, salt + ":" + i);
+    const j = Math.floor(unit * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function pickBlueprintItems(pool: KanjiCatalogItem[]): KanjiCatalogItem[] {
+  if (!pool.length) return [];
+  const selected: KanjiCatalogItem[] = [];
+  const used = new Set<KanjiCatalogItem>();
+  for (const quantile of BLUEPRINT_QUANTILES) {
+    const index = Math.min(pool.length - 1, Math.max(0, Math.round(quantile * (pool.length - 1))));
+    const item = pool[index];
+    if (item && !used.has(item)) {
+      used.add(item);
+      selected.push(item);
+    }
+  }
+  for (const item of pool) {
+    if (selected.length >= PLACEMENT_ITEMS_PER_LEVEL || used.has(item)) continue;
+    used.add(item);
+    selected.push(item);
+  }
+  return selected.slice(0, PLACEMENT_ITEMS_PER_LEVEL);
+}
+
+function optionId(questionIndex: number, label: string): string {
+  return "option-" + questionIndex + "-" + stableHash(label).toString(16);
+}
+
+export function buildPlacementQuestions(
+  catalog: KanjiCatalogItem[],
+  prompt: string,
+  seed = 0,
+): PlacementQuestionRecord[] {
   const byLevel = new Map<string, KanjiCatalogItem[]>();
   catalog
     .filter(item => item.meanings.length && DIAGNOSTIC_LEVELS.includes(item.jlpt as typeof DIAGNOSTIC_LEVELS[number]))
@@ -30,20 +87,25 @@ export function buildPlacementQuestions(catalog: KanjiCatalogItem[], prompt: str
 
   const selected: KanjiCatalogItem[] = [];
   for (const level of DIAGNOSTIC_LEVELS) {
-    const pool = (byLevel.get(level) ?? []).slice().sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity));
-    selected.push(...pool.slice(0, 3));
+    const pool = (byLevel.get(level) ?? [])
+      .slice()
+      .sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity));
+    selected.push(...pickBlueprintItems(pool));
   }
 
-  if (selected.length < 8) {
-    const fallback = catalog.filter(item => item.meanings.length).slice().sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity));
+  if (selected.length < DIAGNOSTIC_LEVELS.length * PLACEMENT_ITEMS_PER_LEVEL) {
+    const fallback = catalog
+      .filter(item => item.meanings.length)
+      .slice()
+      .sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity));
     for (const item of fallback) {
       if (selected.includes(item)) continue;
       selected.push(item);
-      if (selected.length >= 12) break;
+      if (selected.length >= DIAGNOSTIC_LEVELS.length * PLACEMENT_ITEMS_PER_LEVEL) break;
     }
   }
 
-  return selected.slice(0, 12).map((item, questionIndex) => {
+  return selected.slice(0, DIAGNOSTIC_LEVELS.length * PLACEMENT_ITEMS_PER_LEVEL).map((item, questionIndex) => {
     const correct = item.meanings[0];
     const distractors = catalog
       .filter(candidate => candidate.character !== item.character && candidate.meanings[0] && candidate.meanings[0] !== correct)
@@ -51,15 +113,25 @@ export function buildPlacementQuestions(catalog: KanjiCatalogItem[], prompt: str
       .sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity))
       .map(candidate => candidate.meanings[0])
       .filter((value, index, values) => values.indexOf(value) === index)
-      .slice(questionIndex % 5, questionIndex % 5 + 3);
-    const labels = [correct, ...distractors].slice(0, 4);
+      .slice(questionIndex % 7, questionIndex % 7 + 6);
+
+    const optionLabels = shuffleWithSeed(
+      [correct, ...distractors].slice(0, 4),
+      seed,
+      "placement-options:" + item.character + ":" + questionIndex,
+    );
+
     return {
       id: "placement-" + item.character + "-" + questionIndex,
       item,
       level: item.jlpt ?? null,
       stimulus: item.character,
       prompt,
-      options: labels.map((label, index) => ({ id: "option-" + index, label, correct: index === 0 })),
+      options: optionLabels.map(label => ({
+        id: optionId(questionIndex, label),
+        label,
+        correct: label === correct,
+      })),
     };
   }).filter(question => question.options.length >= 2);
 }
@@ -67,6 +139,7 @@ export function buildPlacementQuestions(catalog: KanjiCatalogItem[], prompt: str
 export function scorePlacementAnswers(questions: PlacementQuestionRecord[], answers: Record<string, string>): PlacementScore {
   const levelScores: Record<string, { correct: number; total: number }> = {};
   let score = 0;
+
   for (const question of questions) {
     const level = question.level ?? "unknown";
     const chosen = answers[question.id] ?? "";
@@ -78,13 +151,15 @@ export function scorePlacementAnswers(questions: PlacementQuestionRecord[], answ
     };
     score += isCorrect ? 1 : 0;
   }
+
   let suggestedLevel = "N5";
   for (const level of ["N2", "N3", "N4", "N5"]) {
     const result = levelScores[level];
-    if (result && result.total >= 2 && result.correct / result.total >= 0.67) {
+    if (result && result.total >= 3 && result.correct / result.total >= 0.75) {
       suggestedLevel = level;
       break;
     }
   }
+
   return { score, total: questions.length, levelScores, suggestedLevel };
 }
