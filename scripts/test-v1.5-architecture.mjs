@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 const index = read('index.html');
+const legacyLoader = read('legacy-loader.js');
 const state = read('v1.5-state.js');
 const recallCore = read('v1.5-recall-core.js');
 const p0 = read('v1.5-p0.js');
