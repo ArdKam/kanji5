@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("kanji5-onboarding-v2", "complete"));
+  await page.addInitScript(() => { localStorage.setItem("kanji5-onboarding-v2", "complete"); sessionStorage.clear(); });
 });
 
 async function goToMnemonicPage(card) {
