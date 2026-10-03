@@ -58,7 +58,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
       await onboarding.getByRole("button", { name: "Next question", exact: true }).click();
     }
   }
-  await onboarding.getByRole("button", { name: "Finish placement", exact: true }).click();
+  await onboarding.locator(".kanji5-onboarding-primary").click();
 
   await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText("N2");
@@ -69,8 +69,8 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
 test("onboarding resumes its transient setup after reload", async ({ page }) => {
   await fresh(page);
   const onboarding = await reachStartingPoint(page);
-  await onboarding.getByRole("button", { name: "I know some kanji", exact: true }).click();
-  await expect(onboarding.getByRole("button", { name: "I know some kanji", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await onboarding.locator(".kanji5-onboarding-choice").filter({ hasText: "I know some kanji" }).click();
+  await expect(onboarding.locator(".kanji5-onboarding-choice").filter({ hasText: "I know some kanji" })).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => page.evaluate(() => {
     const raw = localStorage.getItem("kanji5-onboarding-progress-v2");
     if (!raw) return null;
@@ -80,5 +80,5 @@ test("onboarding resumes its transient setup after reload", async ({ page }) => 
   const resumed = page.locator('[data-testid="onboarding-flow"]');
   await expect(resumed).toBeVisible({ timeout: 20000 });
   await expect(resumed.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
-  await expect(resumed.getByRole("button", { name: "I know some kanji", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(resumed.locator(".kanji5-onboarding-choice").filter({ hasText: "I know some kanji" })).toHaveAttribute("aria-pressed", "true");
 });
