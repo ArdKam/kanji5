@@ -315,15 +315,20 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
 
   await page.evaluate(() => {
     const calls = [];
-    const original = Element.prototype.scrollTo;
+    const scrollProto =
+      typeof HTMLElement.prototype.scrollTo === "function"
+        ? HTMLElement.prototype
+        : Element.prototype;
+    const original = scrollProto.scrollTo;
     window.__kanji5MnemonicScrollToCalls = calls;
-    window.__kanji5MnemonicOriginalScrollTo = original;
-    Element.prototype.scrollTo = function (options) {
+    window.__kanji5MnemonicScrollToProto = scrollProto === HTMLElement.prototype ? "HTMLElement" : "Element";
+    scrollProto.scrollTo = function (options) {
       if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
         calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
       }
       return original.apply(this, arguments);
     };
+    window.__kanji5MnemonicOriginalScrollTo = original;
   });
 
   await trigger.click();
@@ -349,7 +354,10 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
 
     await page.evaluate(() => {
       if (window.__kanji5MnemonicOriginalScrollTo) {
-        Element.prototype.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
+        const proto = window.__kanji5MnemonicScrollToProto === "HTMLElement"
+          ? HTMLElement.prototype
+          : Element.prototype;
+        proto.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
       }
     });
   }
