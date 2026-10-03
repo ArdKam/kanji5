@@ -131,7 +131,7 @@ test("first-run horizontal swipe advances, including when the gesture starts on 
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.28, box.y + box.height * 0.52, { steps: 8 });
   await page.mouse.up();
-  await expect(onboarding.getByRole("heading", { name: "Learn, recall, review" })).toBeVisible();
+  await expect(onboarding.getByRole("heading", { name: "How you learn each kanji" })).toBeVisible();
 
   await onboarding.locator(".kanji5-onboarding-main").locator("button").filter({ hasText: "Continue" }).click();
   await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
