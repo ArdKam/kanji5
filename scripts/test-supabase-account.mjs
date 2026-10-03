@@ -42,7 +42,9 @@ assert.match(sync, /PASSWORD_RECOVERY/);
 assert.match(sync, /setPassword/);
 assert.match(sync, /personalMnemonics/);
 assert.match(schema, /enable row level security/);
-assert.match(schema, /auth\.uid\(\).*user_id/);
+assert.match(schema, /auth\\.uid\\(\\).*user_id/);
+assert.match(schema, /Users can delete their own learning state/);
+assert.match(schema, /grant select, insert, update, delete/);
 
 console.log("Kanji 5 Supabase account integration contract passed.");
 
