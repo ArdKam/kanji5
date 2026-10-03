@@ -1,0 +1,1 @@
+(()=>{const v=localStorage.getItem("kanji5-theme");document.documentElement.dataset.theme=v==="light"||v==="dark"?v:"system";document.documentElement.style.colorScheme=v==="dark"?"dark":v==="light"?"light":"light dark";})();

@@ -9,6 +9,8 @@ const core = read("v1.5-sync-core.js");
 const account = read("frontend/src/app/account.ts");
 const dialog = read("frontend/src/app/AccountDialog.tsx");
 const schema = read("supabase/schema.sql");
+const deleteAccountFn = read("supabase/functions/delete-account/index.ts");
+const supabaseConfig = read("supabase/config.toml");
 
 assert.match(index, /supabase-config\.js/);
 assert.doesNotMatch(index, /<script[^>]+src=["\']\.\/supabase-sync\.js["\']/);
@@ -37,12 +39,23 @@ assert.match(dialog, /PasswordField/);
 assert.match(dialog, /dir="ltr"/);
 assert.doesNotMatch(dialog, /account-section-tabs/);
 assert.match(dialog, /account-signout-button/);
+assert.match(dialog, /deleteAccountProceed/);
+assert.match(sync, /functions\.invoke\(['"]delete-account['"]/);
+assert.match(account, /deleteAccount/);
+assert.match(deleteAccountFn, /withSupabase\(\{ auth: ["']user["'] \}/);
+assert.match(deleteAccountFn, /auth\.admin\.deleteUser/);
+assert.match(deleteAccountFn, /ctx\.userClaims\?\.id/);
+assert.doesNotMatch(deleteAccountFn, /SUPABASE_SERVICE_ROLE_KEY|service_role/);
+assert.match(supabaseConfig, /\[functions\.delete-account\]/);
+assert.match(supabaseConfig, /verify_jwt\s*=\s*true/);
 assert.match(sync, /resetPasswordForEmail/);
 assert.match(sync, /PASSWORD_RECOVERY/);
 assert.match(sync, /setPassword/);
 assert.match(sync, /personalMnemonics/);
 assert.match(schema, /enable row level security/);
 assert.match(schema, /auth\.uid\(\).*user_id/);
+assert.match(schema, /Users can delete their own learning state/);
+assert.match(schema, /grant select, insert, update, delete/);
 
 console.log("Kanji 5 Supabase account integration contract passed.");
 
