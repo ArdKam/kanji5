@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `d6882d56cd395210711bb52cad15f8b967184447` (2026-10-03). React presentation CI run **2582** for this exact commit is in progress at the time of this update, so this commit is the current baseline but not yet a fully verified release candidate. The immediately preceding Pages deployment for `e3dbc58ceeede7bff32c7596b40b76af708531aa` succeeded. The roadmap never treats that older deployment as evidence for the current `main` commit.
+> **Implementation baseline reviewed:** `main` at commit `098fab1f4d37d8e2538813e7dc039c13bc2079ec` (2026-10-03). The matching GitHub Pages deployment for this SHA has completed successfully. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
 
 > **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -127,6 +127,23 @@ Especially avoid:
 - **LATER** — intentionally deferred until evidence or scale justifies it.
 - **DO NOT REOPEN** — completed foundational behavior that should not be rewritten without a verified defect.
 
+## 2.0 Pre-Beta Hard Gate
+
+The following are release blockers, not merely roadmap work items. Public beta invitation requires evidence on one frozen/tagged candidate SHA for each applicable item:
+
+- **Release integrity:** green CI, successful Pages deployment, exact live artifact/hash equality, production smoke, cache/stale-client recovery, and offline smoke.
+- **Trust/data safety:** production auth lifecycle, RLS verification, canonical Supabase schema path, account/local deletion, export, and backup/restore including rollback/version-mismatch evidence.
+- **Security:** CSP, classified unsafe `innerHTML` sinks, reviewed/vendored security-sensitive runtime dependencies, dependency audit, secret/source-map review, and third-party runtime inventory.
+- **Failure containment:** global render/runtime recovery with actionable reload/backup/report behavior plus controlled diagnostics.
+- **Public UX:** onboarding/placement completion on representative mobile and desktop environments, with no blocking navigation/data-loss defects.
+- **Accessibility/device:** Tier 1/Tier 2 matrix evidence, manual VoiceOver/TalkBack/keyboard/zoom checks, and representative performance measurements.
+- **Content trust:** documented Kanji QA sampling, provenance labels, correction/reporting flow, and placement/content-match edge-case review.
+- **Governance/docs:** final Privacy/Terms, deletion/export semantics, third-party disclosure, LICENSE, release procedure, and reconciled product metadata.
+
+Configured workflows, open PRs, and prior-release evidence do not satisfy this gate by themselves.
+
+---
+
 ### 2.1 Verified current status ledger — 2026-10-03
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
@@ -145,19 +162,19 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- A1 release integrity: current-main push verification is still running; live Pages smoke and representative-device evidence remain.
+- A1 release integrity: current `main` Pages deployment is green, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
 - R2 onboarding redesign is not complete; current onboarding works but the dedicated first-open value/setup/placement/account flow is still pending.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
 - R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
 - R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
 - R10 full i18n audit remains.
-- R11 broader controlled-failure observability remains in open PR #392.
-- R12 production security review remains.
-- R13 Terms, exact production-service disclosure, deletion semantics, and target-market legal review remain.
+- R11 broader controlled-failure observability remains in open PR #392; global React render-failure containment/error-boundary recovery is also not yet on current `main`.
+- R12 production security review remains: production RLS verification, CSP, unsafe-DOM/`innerHTML` audit, CDN supply-chain hardening, and dependency-security evidence are still required.
+- R13 Terms, exact production-service disclosure, account/local deletion semantics, retention/export behavior, and target-market legal review remain.
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
-- R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments.
+- R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
 
 **PENDING:**
 - R18 Public Beta.
@@ -184,16 +201,21 @@ All work before Vocabulary must follow this order. Work may overlap only when it
 **Stage 1 — Release Lock**
 - Establish one current-main release candidate.
 - Finish CI for that SHA.
-- Verify GitHub Pages deployment, live artifact equality, live core smoke, cache invalidation, stale-client recovery, and offline smoke.
+- Freeze one release-candidate SHA/tag.
+- Record green CI for that exact SHA.
+- Verify GitHub Pages deployment, exact live artifact/hash equality, live core smoke, cache invalidation, stale-client recovery, and offline smoke.
+- Record all release evidence against that exact SHA in `docs/RELEASE-EVIDENCE.md`.
 - No unrelated feature work should enter the release-critical path until the candidate is trustworthy.
 
 **Stage 2 — Trust Layer**
 - Complete account lifecycle: guest → account → sync → logout → return.
 - Verify Google, Email, Magic Link, and reset flows in production configuration.
-- Complete Supabase/RLS review and consolidate duplicate schemas into one migration path.
-- Make backup/restore versioned, integrity-checked, migration-aware, and safe.
-- Define and implement account deletion, local-data deletion, export, retention, and third-party data semantics.
-- Complete Privacy/Terms/legal review against actual production services.
+- Complete Supabase/RLS review against the production project and consolidate duplicate schemas into one canonical migration path.
+- Verify production auth flows (Google, email, magic link, reset) end-to-end.
+- Make backup/restore versioned, integrity-checked, migration-aware, corruption-resistant, and safe; prove real-device restore, version mismatch, rollback, and non-destructive/atomic behavior.
+- Define and implement account deletion, local-data deletion, export, retention, and third-party data semantics, then verify the deletion path in production.
+- Harden the security supply chain: CSP, `innerHTML`/unsafe-DOM audit, vendor/pin the Supabase client, and add dependency audit/maintenance controls.
+- Complete Privacy/Terms/legal review against actual production services and target markets.
 
 **Stage 3 — Public UX**
 - Finish onboarding redesign without making account creation mandatory.
@@ -210,22 +232,24 @@ All work before Vocabulary must follow this order. Work may overlap only when it
 - Optimize only where evidence identifies a meaningful product bottleneck.
 
 **Stage 5 — Content Quality**
-- Establish recurring QA for all 2,136 Kanji.
-- Audit readings, meanings, examples, stroke data, radicals/components, pronunciation fallback, and mnemonic quality.
+- Establish recurring QA for all 2,136 Kanji with a documented sampling protocol and recorded results.
+- Audit readings, meanings, examples, stroke data, radicals/components, pronunciation fallback, and mnemonic quality; explicitly recheck known grading/meaning-match edge cases.
 - Treat coverage as necessary but not sufficient.
 - Add provenance labels and clear distinction between curated, generated/guided, and personal memory aids.
-- Establish content-report and correction workflow.
+- Establish context-aware content-report and correction workflow for readings, meanings, examples, strokes, radicals/components, and mnemonics.
+- Validate placement-test ambiguity/synonym handling before public beta.
 
 **Stage 6 — Reliability / Security / Governance**
 - Add production-grade error recovery and global failure containment.
-- Finish observability for runtime, asset, sync, migration, and service-worker failures.
-- Complete dependency/security/supply-chain review, CSP/header policy, secret/source-map checks, and third-party runtime review.
+- Add global failure containment and actionable recovery for React/render failures, including reload, backup export, and reporting.
+- Finish observability for runtime, asset, sync, migration, service-worker, and dynamic-import failures.
+- Complete dependency/security/supply-chain review, CSP policy, secret/source-map checks, third-party runtime review, and dependency automation/audit.
 - Add/complete public repository governance: LICENSE, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT where appropriate, issue/PR templates, stale-branch/PR cleanup, and release procedure.
 - Reconcile README, CHANGELOG, ROADMAP, product naming, manifest, title/metadata, and user documentation with actual behavior.
 
 **Stage 7 — Public Beta → Public Kanji Release**
 - Run a small real-user cohort across target devices.
-- Observe onboarding, first-session completion, return behavior, offline use, sync, backup/restore, content reports, and accessibility.
+- Observe onboarding, first-session completion, placement quality, return behavior, offline use, sync, backup/restore, error recovery/reporting, content reports, and accessibility.
 - Fix high-frequency/high-severity issues and add regression tests for accepted defects.
 - Pass the final Public Release Gate before beginning Vocabulary implementation.
 
@@ -297,7 +321,7 @@ Establish a trustworthy production baseline before product expansion.
 - Build from source during CI/deploy.
 - Verify the exact artifact that is shipped.
 
-### 0.3 Deployment gates — CONFIGURED; CURRENT-MAIN VERIFICATION PENDING (2026-10-03)
+### 0.3 Deployment gates — CONFIGURED; same-SHA release evidence still required
 
 Current deployment workflow contains gates for:
 
@@ -319,8 +343,10 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - workflow executed
 - workflow passed
 - live production verified
+- release candidate frozen/tagged
+- live artifact/hash equality recorded
 
-### 0.4 Cache and stale-client handling — PR-VERIFIED; CURRENT-MAIN LIVE EVIDENCE PENDING (2026-10-03)
+### 0.4 Cache and stale-client handling — current deployment green; candidate evidence must still be frozen and recorded
 
 - Verify cache invalidation across HTML, JS, CSS, service worker, and dynamically imported assets.
 - Verify stale-client recovery.
@@ -328,7 +354,7 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - Treat dynamic-import failures as release blockers.
 - Keep service-worker shell and runtime asset lists synchronized.
 
-Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. The merged-release live Pages artifact/cache/offline evidence is still pending.
+Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. The current `main` Pages deployment is green, but the release ledger must still tie live artifact/hash, cache, offline, and smoke evidence to the frozen candidate SHA.
 
 ### 0.5 Production smoke test
 
@@ -828,6 +854,11 @@ Target flow:
 
 Onboarding must not repeatedly interrupt returning users.
 
+Placement-test acceptance:
+- validate ambiguous meanings and synonym-equivalent answers
+- document scoring/threshold behavior
+- verify that answer-key wording does not create obvious false confidence or obvious misplacement
+
 ---
 
 ## R3. Guest-first account model — DONE ON CURRENT MAIN
@@ -932,6 +963,10 @@ Restore must:
 - explain what will be changed
 - avoid silent destructive replacement
 - preserve compatibility with existing learner state
+- snapshot or otherwise protect the prior state before applying
+- behave atomically on failure and support rollback/version-mismatch handling
+
+Release evidence must include at least one representative real-device restore and failure/rollback case.
 
 ---
 
@@ -1066,7 +1101,12 @@ At minimum retain enough diagnostics to answer:
 - browser/platform
 - whether user data was affected
 
-Do not introduce invasive analytics merely for observability.
+Add a global React/render-failure containment boundary with an actionable recovery screen. Recovery should provide, as applicable:
+- reload/retry
+- export backup
+- report the problem
+
+Controlled-failure diagnostics may remain local/opt-in; do not introduce invasive analytics merely for observability.
 
 ---
 
@@ -1090,6 +1130,15 @@ Audit:
 - accidental secret exposure
 - production source-map/data exposure
 - third-party CDN dependencies
+- runtime loading of security-sensitive libraries
+- dependency audit/maintenance policy
+
+For security-sensitive browser dependencies such as the Supabase client:
+- pin a reviewed version
+- prefer a vendored/local build over runtime CDN loading
+- precache the shipped dependency for offline/auth resilience
+
+CSP must be an explicit release control, not merely a documentation item. Every legacy `innerHTML` sink must be classified, and provider/user-controlled content must not reach unsafe HTML sinks without an explicit trusted transformation.
 
 Any externally supplied text must be treated as untrusted content.
 
@@ -1116,6 +1165,8 @@ Document what is:
 - optional
 - deleted on account deletion
 - retained by third parties
+
+Before beta/release, verify the implemented account-deletion path against the production backend and document the resulting local/cloud deletion semantics. Reconcile the privacy notice with the actual runtime third parties, including authentication/sync, content APIs, CDN dependencies, hosted assets, and any analytics if introduced.
 
 Legal requirements must be reviewed against actual target markets and business model.
 
@@ -1156,6 +1207,8 @@ Use feedback to identify:
 - device/browser-specific issues
 - content problems
 - learning-flow problems
+
+General feedback is not sufficient for content QA. Provide a context-aware content correction/report path so a user can identify a wrong reading, meaning, example, stroke/radical/component entry, or mnemonic.
 
 ---
 
@@ -1199,8 +1252,9 @@ without developer intervention.
 Before broad release:
 
 - recruit a small real-user cohort
-- collect structured feedback
+- collect structured feedback with severity/category fields
 - test different device/browser combinations
+- use the beta to validate real-user onboarding and placement behavior, not merely automated flow completion
 - observe onboarding
 - observe first session completion
 - inspect sync/offline failures
@@ -1222,14 +1276,17 @@ Do not publicly promote Kanji5 beyond beta until:
 - offline core learning works
 - account/sync behavior is explainable
 - backup/restore is reliable
-- security pass is complete
-- privacy/legal surface exists
-- accessibility baseline is met
-- major target browsers are validated
+- security pass is complete, including production RLS, CSP, unsafe-DOM, and dependency/supply-chain checks
+- privacy/legal surface exists and matches implemented deletion/export/third-party behavior
+- accessibility baseline is met through both automated checks and manual representative assistive-technology testing
+- major target browsers/devices are validated
+- the candidate is frozen/tagged and release evidence is recorded against the exact promoted SHA
 - onboarding is understandable
 - public error reporting exists
 - user documentation exists
 - production smoke test passes
+- public failure recovery is available for render/runtime failures
+- content correction/reporting is available
 
 ---
 
