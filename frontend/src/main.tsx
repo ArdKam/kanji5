@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
+import { ReactErrorBoundary } from "./app/ReactErrorBoundary";
 import "vazirmatn/Vazirmatn-Variable-font-face.css";
 import "./styles.css";
 import "./experience-nav.css";
@@ -12,6 +13,8 @@ if (!root) throw new Error("KANJI5_REACT_ROOT_REQUIRED");
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <ReactErrorBoundary>
+      <App />
+    </ReactErrorBoundary>
   </StrictMode>,
 );
