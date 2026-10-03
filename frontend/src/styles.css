@@ -1,5 +1,5 @@
 @import "./noto-serif-jp.css";
-:root{font-family:Inter,system-ui,sans-serif;--fa-font:"Vazirmatn",Inter,system-ui,sans-serif;color:#1c1a17;background:#f4efe3;--washi:#f4efe3;--paper:#fbf8f0;--sumi:#1c1a17;--ink:#4a463f;--mute:#746d61;--shu:#c0392b;--ai:#26406b;--matcha:#7e8c5a;--line:#918777;--line-soft:#d1c7b7;--line-interactive:#786d5e;
+:root{font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;--fa-font:"Vazirmatn","Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;color:#1c1a17;background:#f4efe3;--washi:#f4efe3;--paper:#fbf8f0;--sumi:#1c1a17;--ink:#4a463f;--mute:#746d61;--shu:#c0392b;--ai:#26406b;--matcha:#7e8c5a;--line:#918777;--line-soft:#d1c7b7;--line-interactive:#786d5e;
   --text-xs:11px;
   --text-sm:13px;
   --text-base:15px;
@@ -101,7 +101,7 @@
 .learning-card-back .example-row{padding:7px 0;}
 .example-content{display:grid;gap:2px;min-width:0;flex:1 1 auto;}
 .example-main{font-family:"Noto Serif JP",serif;overflow-wrap:anywhere;}
-.example-meaning{color:var(--mute);font-family:Inter,system-ui,sans-serif;font-size:var(--text-xs);line-height:1.4;direction:ltr;overflow-wrap:anywhere;}
+.example-meaning{color:var(--mute);font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;font-size:var(--text-xs);line-height:1.4;direction:ltr;overflow-wrap:anywhere;}
 .compact-examples{display:block;min-width:0;}
 .compact-examples h3{margin:0 0 4px;}
 .learning-back-footer{flex:0 0 auto;min-width:0;padding:10px 0 calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper);box-shadow:0 -10px 22px -24px rgba(28,26,23,.45);}
@@ -676,7 +676,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   color:var(--shu);
   font-weight:800;
 }
-.account-avatar-fallback{font-family:Inter,system-ui,sans-serif}
+.account-avatar-fallback{font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif}
 .account-avatar-guest{font-size:var(--text-md)}
 .account-dialog{width:min(640px,calc(100vw - 28px));padding:28px}
 .account-dialog-heading{display:flex;align-items:center;gap:14px;padding-inline-end:28px;margin-bottom:18px}
@@ -957,7 +957,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 @media(max-width:760px){.production-recall-revealed{padding:16px 12px}.production-recall-actions{grid-template-columns:1fr;}}
 
 html[lang="fa"] body,html[lang="fa"] button,html[lang="fa"] input,html[lang="fa"] textarea,html[lang="fa"] select{font-family:var(--fa-font);}
-html[lang="fa"] .example-meaning{font-family:Inter,system-ui,sans-serif;}
+html[lang="fa"] .example-meaning{font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;}
 html[lang="fa"] .kanji-stimulus,html[lang="fa"] .first-readings,html[lang="fa"] .reading>strong,html[lang="fa"] .example-main,html[lang="fa"] .kanji-display,html[lang="fa"] .learning-back-kanji{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;}
 .audio-button{border-color:var(--line-interactive);transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease;}
 .audio-button:hover:not(:disabled){background:var(--washi);border-color:var(--ai);transform:scale(1.06);box-shadow:0 5px 14px -10px rgba(38,64,107,.65);}
