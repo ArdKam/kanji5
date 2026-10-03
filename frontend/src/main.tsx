@@ -6,6 +6,7 @@ import "vazirmatn/Vazirmatn-Variable-font-face.css";
 import "./plus-jakarta.css";
 import "./styles.css";
 import "./experience-nav.css";
+import "./visual-polish.css";
 import "./app/dictionary.css";
 import "./app/exercise-layout.css";
 
