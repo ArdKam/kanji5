@@ -26,7 +26,15 @@ function setup(){
   let bar=document.querySelector('#v16DashboardToolbar');
   if(!bar){
     bar=document.createElement('div');bar.id='v16DashboardToolbar';
-    bar.innerHTML='<button id="v16Start" type="button">شروع جلسه</button><button id="v16FinishExternal" type="button" hidden>پایان جلسه</button><button id="v16DashboardToggle" type="button" aria-expanded="false" aria-controls="v16Session" hidden>بستن داشبورد</button><span class="v16-dashboard-mini" id="v16DashboardMini" aria-live="polite" hidden></span>';
+    const startButton=document.createElement('button');
+    startButton.id='v16Start';startButton.type='button';startButton.textContent='شروع جلسه';
+    const finishButton=document.createElement('button');
+    finishButton.id='v16FinishExternal';finishButton.type='button';finishButton.hidden=true;finishButton.textContent='پایان جلسه';
+    const dashboardToggle=document.createElement('button');
+    dashboardToggle.id='v16DashboardToggle';dashboardToggle.type='button';dashboardToggle.setAttribute('aria-expanded','false');dashboardToggle.setAttribute('aria-controls','v16Session');dashboardToggle.hidden=true;dashboardToggle.textContent='بستن داشبورد';
+    const miniStatus=document.createElement('span');
+    miniStatus.className='v16-dashboard-mini';miniStatus.id='v16DashboardMini';miniStatus.setAttribute('aria-live','polite');miniStatus.hidden=true;
+    bar.append(startButton,finishButton,dashboardToggle,miniStatus);
     panel.parentNode.insertBefore(bar,panel);
   }
   const start=document.querySelector('#v16Start'),finish=document.querySelector('#v16FinishExternal'),toggle=document.querySelector('#v16DashboardToggle'),mini=document.querySelector('#v16DashboardMini');
