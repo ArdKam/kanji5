@@ -177,7 +177,12 @@ test('guest-first onboarding keeps account optional and leads directly into lear
   const onboarding = page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({ timeout: 20000 });
   await expect(page.locator('#root .app-shell')).toHaveCount(0);
-  await expect(onboarding).toContainText(/An account is optional|حساب اختیاری است/);
+  await onboarding.getByRole('button', { name: /شروع یادگیری امروز|Start learning today/ }).click();
+  await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
+  await onboarding.getByRole('button', { name: /از ابتدا|Beginner|از ابتدا شروع/ }).click();
+  await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
+  await onboarding.getByRole('button', { name: /^5$/ }).click();
+  await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
   await expect(onboarding.getByRole('button', { name: /Continue as a guest|ادامه به‌عنوان مهمان/ })).toBeVisible();
   await onboarding.getByRole('button', { name: /Continue as a guest|ادامه به‌عنوان مهمان/ }).click();
   await expect(onboarding).toHaveCount(0);
