@@ -17,6 +17,7 @@ This audit records the direct runtime/build dependencies pinned by the repositor
 | `react` | 19.2.0 | MIT | Runtime |
 | `react-dom` | 19.2.0 | MIT | Runtime |
 | `vazirmatn` | 33.0.3 | OFL-1.1 | Font |
+| `@fontsource-variable/plus-jakarta-sans` | 5.3.0 | OFL-1.1 | Font |
 | `@types/react` | 19.2.0 | MIT | Development/type definitions |
 | `@types/react-dom` | 19.2.0 | MIT | Development/type definitions |
 | `@vitejs/plugin-react` | 5.2.0 | MIT | Build tooling |

@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
 import { ReactErrorBoundary } from "./app/ReactErrorBoundary";
 import "vazirmatn/Vazirmatn-Variable-font-face.css";
+import "./plus-jakarta.css";
 import "./styles.css";
 import "./experience-nav.css";
 import "./app/dictionary.css";
