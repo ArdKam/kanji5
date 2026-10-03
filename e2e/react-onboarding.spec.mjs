@@ -2,8 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.removeItem("kanji5-public-onboarding-v1");
-    localStorage.removeItem("kanji5-onboarding-v2");
+    for (const key of ["kanji5-public-onboarding-v1", "kanji5-onboarding-v2", "kanji5-onboarding-complete", "kanji5-onboarding-seen", "kanji5-onboarding-progress-v2"]) localStorage.removeItem(key);
   });
 });
 
