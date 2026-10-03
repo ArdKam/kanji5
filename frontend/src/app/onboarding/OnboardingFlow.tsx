@@ -68,6 +68,7 @@ export type OnboardingFlowProps = {
   placementError?: string;
   onRetryPlacement?: () => void;
   onPlacementComplete?: (answers: PlacementAnswer[]) => string | null;
+  onPlacementRestart?: () => void;
   initialProgress?: OnboardingProgress | null;
   busy?: boolean;
   onClose?: () => void;
@@ -130,6 +131,7 @@ export function OnboardingFlow({
   placementError = "",
   onRetryPlacement,
   onPlacementComplete,
+  onPlacementRestart,
   initialProgress,
   busy = false,
   onClose,
@@ -265,6 +267,7 @@ export function OnboardingFlow({
 
   const startOverPlacement = () => {
     if (!placementQuestions.length) return;
+    onPlacementRestart?.();
     setPlacementIndex(0);
     setPlacementAnswer("");
     setCompletedPlacement(false);
