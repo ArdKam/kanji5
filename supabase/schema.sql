@@ -32,9 +32,16 @@ create policy "Users can update their own learning state"
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
+drop policy if exists "Users can delete their own learning state" on public.user_learning_state;
+create policy "Users can delete their own learning state"
+  on public.user_learning_state
+  for delete
+  to authenticated
+  using ((select auth.uid()) = user_id);
+
 create index if not exists user_learning_state_updated_at_idx
   on public.user_learning_state (updated_at);
 
 -- Explicit API privileges: RLS then controls row ownership.
-grant select, insert, update on public.user_learning_state to authenticated;
+grant select, insert, update, delete on public.user_learning_state to authenticated;
 revoke all on public.user_learning_state from anon;
