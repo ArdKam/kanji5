@@ -8,6 +8,9 @@ test('React presentation is available offline from the real service-worker shell
     return Boolean(await caches.match(target));
   }, path);
 
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+  });
   await page.goto('/?react=1');
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
