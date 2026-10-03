@@ -37,16 +37,9 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-language button:hover{transform:translateY(-1px)}
 .kanji5-onboarding-language button.is-active{background:var(--ink);color:#fff}
 .kanji5-onboarding-main{flex:1;min-height:0;width:100%;padding:22px 28px 10px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
-.kanji5-onboarding-stage{width:min(1040px,100%);min-height:min(650px,calc(100svh - 150px));margin:auto;display:grid;grid-template-columns:minmax(340px,.78fr) minmax(0,1.22fr);align-items:stretch;gap:clamp(28px,5vw,76px)}
-.kanji5-onboarding-visual{position:relative;display:grid;place-items:center;min-height:460px;padding:34px;border-radius:34px;background:linear-gradient(145deg,rgba(255,252,246,.75),rgba(255,252,246,.26));border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden}
-.kanji5-onboarding-visual:before,.kanji5-onboarding-visual:after{content:"";position:absolute;width:9px;height:24px;border-radius:999px;background:rgba(181,109,114,.25);transform:rotate(34deg)}
-.kanji5-onboarding-visual:before{top:46px;left:54px}.kanji5-onboarding-visual:after{right:48px;bottom:54px;transform:rotate(-24deg)}
-.kanji5-onboarding-visual-art{width:min(100%,390px);color:var(--ink);filter:drop-shadow(0 24px 26px rgba(38,37,35,.12))}
-.kanji5-onboarding-visual-art .line{fill:none;stroke:currentColor;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
-.kanji5-onboarding-visual-art .soft{fill:rgba(48,79,116,.08);stroke:rgba(48,79,116,.28);stroke-width:2}.kanji5-onboarding-visual-art .shu{fill:rgba(181,109,114,.14);stroke:rgba(181,109,114,.42);stroke-width:2}.kanji5-onboarding-visual-art .paper{fill:rgba(255,252,246,.9);stroke:rgba(38,37,35,.1);stroke-width:2}
-.kanji5-onboarding-visual-kanji{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-58%);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:124px;line-height:1;color:var(--ink);opacity:.08}
+.kanji5-onboarding-stage{width:min(760px,100%);min-height:min(650px,calc(100svh - 150px));margin:auto;display:flex;align-items:center;justify-content:center}
 .kanji5-onboarding-panel-shell{display:flex;align-items:center;min-width:0}.kanji5-onboarding-step-wrap{min-width:0;transition:transform .22s cubic-bezier(.22,.75,.2,1)}
-.kanji5-onboarding-panel{width:min(620px,100%);text-align:start;animation:onbEnterForward .38s cubic-bezier(.22,.75,.2,1) both}.kanji5-onboarding-stage.is-back .kanji5-onboarding-panel{animation-name:onbEnterBack}
+.kanji5-onboarding-panel{width:min(680px,100%);text-align:start;animation:onbEnterForward .38s cubic-bezier(.22,.75,.2,1) both}.kanji5-onboarding-stage.is-back .kanji5-onboarding-panel{animation-name:onbEnterBack}
 @keyframes onbEnterForward{from{opacity:0;transform:translate3d(-22px,8px,0)}to{opacity:1;transform:none}}@keyframes onbEnterBack{from{opacity:0;transform:translate3d(22px,8px,0)}to{opacity:1;transform:none}}
 .kanji5-onboarding-eyebrow{margin:0 0 13px;color:var(--shu);font-size:11px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
 .kanji5-onboarding-panel h1{margin:0;max-width:17ch;font-size:clamp(34px,4.4vw,58px);line-height:1.05;letter-spacing:-.025em}
@@ -489,36 +482,6 @@ export function OnboardingFlow({
     }
   };
 
-  const visualKanji = step === "placement" ? "漢" : step === "placement-result" ? (draft.suggestedLevel ?? "N5") : step === "daily-rhythm" ? "五" : step === "account" ? "守" : "学";
-
-  const renderVisual = () => (
-    <div className="kanji5-onboarding-visual" aria-hidden="true">
-      <span className="kanji5-onboarding-visual-kanji" lang="ja">{visualKanji}</span>
-      <svg className="kanji5-onboarding-visual-art" viewBox="0 0 420 330" role="presentation">
-        <ellipse className="soft" cx="210" cy="270" rx="150" ry="28" />
-        <g transform="translate(58 66)">
-          <path className="paper" d="M94 55 78 26 58 56c-5 15-1 33 10 44 9 9 25 12 35 1 10-11 12-30 6-46Z"/>
-          <path className="line" d="M84 49 78 26 58 56M72 70q18 14 38 0"/>
-          <circle cx="70" cy="62" r="3" fill="currentColor"/><circle cx="101" cy="62" r="3" fill="currentColor"/>
-          <path className="line" d="M83 77q4 6 9 0"/>
-          <path className="shu" d="M48 115q34-25 76 0v76H48Z"/>
-          <path className="line" d="M66 135v54M105 135v54M49 147 25 171M123 147l22 24"/>
-        </g>
-        <g transform="translate(240 94)">
-          <path className="paper" d="M56 62q-8-26 13-48l18 15 25-16q22 20 11 49-10 29-39 32-28-3-28-32Z"/>
-          <path className="line" d="M69 33 87 15l22 14M62 52 47 70M120 52l16 18"/>
-          <circle cx="77" cy="52" r="3" fill="currentColor"/><circle cx="105" cy="52" r="3" fill="currentColor"/>
-          <path className="line" d="M88 67q6 7 12 0"/>
-          <path className="soft" d="M62 104q37-25 73 0v63H62Z"/>
-          <path className="line" d="M73 126v38M111 126v38M63 130 39 151M134 130l22 21"/>
-        </g>
-        <path className="line" d="M184 228c18-16 35-16 52 0" opacity=".45"/>
-        <circle className="shu" cx="184" cy="236" r="10"/><circle className="soft" cx="236" cy="236" r="10"/>
-        <circle className="paper" cx="210" cy="214" r="16"/><path className="line" d="M203 214h14M210 207v14"/>
-      </svg>
-    </div>
-  );
-
   return (
     <>
       <style>{ONBOARDING_STYLES}</style>
@@ -536,7 +499,6 @@ export function OnboardingFlow({
         </header>
         <main className="kanji5-onboarding-main" aria-live="polite" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel} onClickCapture={handleClickCapture}>
           <div className={"kanji5-onboarding-stage " + (transitionDirection === "back" ? "is-back" : "is-forward")}>
-            {renderVisual()}
             <div className="kanji5-onboarding-panel-shell">
               <div key={step + ":" + placementIndex} className="kanji5-onboarding-step-wrap" style={dragX ? { transform: "translate3d(" + dragX + "px,0,0)" } : undefined}>
                 {renderStep()}
