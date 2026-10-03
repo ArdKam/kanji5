@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { withSupabase } from "npm:@supabase/server@1";
+import { withSupabase } from "npm:@supabase/server";
 
 export default {
   fetch: withSupabase({ auth: "user" }, async (_req, ctx) => {
