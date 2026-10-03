@@ -214,7 +214,7 @@ test('guest-first onboarding keeps account optional and leads directly into lear
   const onboarding = page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({ timeout: 20000 });
   await expect(page.locator('#root .app-shell')).toHaveCount(0);
-  await onboarding.getByRole('button', { name: /شروع یادگیری امروز|Start learning today/ }).click();
+  await onboarding.getByRole('button', { name: /شروع کنیم|Let's begin/ }).click();
   await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
   await onboarding.getByRole('button', { name: /از ابتدا|Beginner|از ابتدا شروع/ }).click();
   await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
