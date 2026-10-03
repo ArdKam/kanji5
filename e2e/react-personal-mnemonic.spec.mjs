@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("kanji5-onboarding-v2", "complete"));
+});
+
 async function goToMnemonicPage(card) {
   const mnemonicShortcut = card.locator('.learning-back-page-shortcut[aria-label="Personal mnemonic"]');
   await expect(mnemonicShortcut).toBeVisible({ timeout: 10000 });
