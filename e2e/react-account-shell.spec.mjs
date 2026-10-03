@@ -181,7 +181,7 @@ test('guest-first onboarding keeps account optional and leads directly into lear
   await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
   await onboarding.getByRole('button', { name: /از ابتدا|Beginner|از ابتدا شروع/ }).click();
   await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
-  await onboarding.getByRole('button', { name: /^5$/ }).click();
+  await onboarding.locator('.kanji5-onboarding-range-option').first().click();
   await onboarding.getByRole('button', { name: /ادامه|Continue/ }).click();
   await expect(onboarding.getByRole('button', { name: /Continue as a guest|ادامه به‌عنوان مهمان/ })).toBeVisible();
   await onboarding.getByRole('button', { name: /Continue as a guest|ادامه به‌عنوان مهمان/ }).click();
