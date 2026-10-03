@@ -64,7 +64,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5, { steps: 5 });
   await page.mouse.up();
-  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 12");
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 16");
 
   for (let index = 0; index < 16; index += 1) {
     await onboarding.locator(".kanji5-onboarding-option").first().click();
