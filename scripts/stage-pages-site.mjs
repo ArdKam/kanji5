@@ -18,7 +18,6 @@ const required=new Set([
   ...shell.filter(item=>item!=="./").map(item=>String(item).replace(/^\.\//,""))
 ]);
 required.add("react-dist");
-for (const doc of ["docs/PUBLIC-PRODUCT.md","docs/BROWSER-SUPPORT.md","docs/PRIVACY-AND-DATA.md","docs/FEEDBACK.md"]) required.add(doc);
 
 function copy(relative){
   const source=path.join(root,relative);
