@@ -238,7 +238,8 @@ function renderCard(){
     ratings.append(rate);
   }
 
-  study.append(row,exposure,audioWrap,hint,reveal,answer,ratings);
+  answer.append(ratings);
+  study.append(row,exposure,audioWrap,hint,reveal,answer);
 
   reveal.addEventListener("click",()=>{
     if(!window.__KANJI5_CANONICAL_REVEAL__&&rec){window.__KANJI5_V12_OPEN_RECALL__?.();return}
