@@ -60,7 +60,7 @@ const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
 const pct=(v:number|undefined)=>Math.round(Math.max(0,Math.min(1,Number(v)||0))*100);
 const toHiragana=(value:string)=>Array.from(value).map(ch=>{const code=ch.charCodeAt(0);return code>=0x30a1&&code<=0x30f6?String.fromCharCode(code-0x60):ch}).join("");
 const skillLabel=(key:string)=>({meaning:t("meaning"),reading:t("reading"),production:t("production"),vocabulary:t("vocabulary"),context:t("context")} as Record<string,string>)[key]??text(key);
-const modalityLabel=(mode:string,modality:string,stage:string)=>{
+const modalityLabel=(modality:string,stage:string)=>{
   if(stage==="introduction")return t("contentExposureModality");
   if(modality==="revealed_self_report")return t("revealedSelfReportModality");
   if(modality==="cued-kanji-choice")return t("productionCuedModality");
@@ -400,6 +400,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
 
                     {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                     {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    {referenceMeanings.length?<details className="learning-back-reference-meanings"><summary>{t("additionalInformation")}</summary><div className="learning-back-secondary-meaning">{referenceMeanings.join(" · ")}</div></details>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
@@ -677,7 +678,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
   const disabled=busy||lockedRef.current||Boolean(result);
   const taskLabel=skillLabel(ex.mode??"");
   const effectiveModality=production?(productionRevealed?"revealed_self_report":showProductionOptions?"cued-kanji-choice":(ex.modality??"independent-typed-production")):(ex.modality??"");
-  const taskModalityLabel=modalityLabel(ex.mode??"",effectiveModality,ex.contentStage??"retrieval");
+  const taskModalityLabel=modalityLabel(effectiveModality,ex.contentStage??"retrieval");
   const introduction=ex.contentStage==="introduction"&&(ex.mode==="vocabulary"||ex.mode==="context");
   const taskDescription=introduction?t("contentIntroductionPrompt"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
   const correctAnswerDisplay=ex.mode==="vocabulary"||ex.mode==="context"?text(ex.character):text(ex.answerHint||ex.character);
