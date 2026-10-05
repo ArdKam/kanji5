@@ -430,13 +430,23 @@ test('English shell does not retain Persian presentation labels',async({page})=>
 });
 
 test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
+  await page.addInitScript(()=>{
+    const realFreeze=Object.freeze;
+    (window).__kanji5RealFreeze=realFreeze;
+    Object.freeze=value=>{
+      if(value&&typeof value==="object"&&typeof value.listKanji==="function"&&typeof value.snapshot==="function")return value;
+      return realFreeze(value);
+    };
+  });
   await clean(page);
   await page.evaluate(()=>{
-    const state=window.__KANJI5_STATE__;
-    if(!state||typeof state.readDeck!=="function")throw new Error("Kanji state unavailable");
-    const original=state.readDeck;
-    state.readDeck=()=>[];
-    (window).__restoreKanjiDeckRead=()=>{ state.readDeck=original; };
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    if(!boundary||typeof boundary.listKanji!=="function")throw new Error("V2 boundary unavailable");
+    const original=boundary.listKanji;
+    boundary.listKanji=async()=>{throw new Error("intentional catalog failure");};
+    (window).__restoreReadingLabCatalog=()=>{ boundary.listKanji=original; };
+    const realFreeze=(window).__kanji5RealFreeze;
+    if(typeof realFreeze==="function")Object.freeze=realFreeze;
   });
 
   await page.getByRole("button",{name:"بیشتر"}).click();
@@ -447,7 +457,11 @@ test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({p
   const retry=labDialog.getByRole("button",{name:"تلاش دوباره",exact:true});
   await expect(retry).toBeVisible();
 
-  await page.evaluate(()=>{ const restore=(window).__restoreKanjiDeckRead; if(typeof restore!=="function")throw new Error("Kanji deck read restore unavailable"); restore(); });
+  await page.evaluate(()=>{
+    const restore=(window).__restoreReadingLabCatalog;
+    if(typeof restore!=="function")throw new Error("Reading Lab catalog restore unavailable");
+    restore();
+  });
   await retry.click();
   await expect(labDialog.locator(".reading-lab")).toBeVisible({timeout:10000});
 });
