@@ -369,8 +369,7 @@ async function start(){
   try{
     if(!cached)await loadDeck();
     if(IS_LEGACY){if(fsrs)initScheduler();$("loading").hidden=true;$("app").hidden=false;}
-    buildQueue();next();modernStartupReady=true;
-    document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'));
+    buildQueue();next();modernStartupReady=true;document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'))
     if(!IS_LEGACY){
       const warm=()=>{void ensureFsrs().catch(error=>console.warn("Kanji 5 FSRS idle warmup failed.",error))};
       if("requestIdleCallback" in window)window.requestIdleCallback(warm,{timeout:2500});else window.setTimeout(warm,100);
