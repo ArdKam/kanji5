@@ -1,7 +1,8 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
-**Audit date:** 2026-10-03  
-**Audited baseline:** `main` @ `940224fad0fe50c82bb03e7064dd1909ad9d6e4c`  
+**Audit date:** 2026-10-05
+**Audited implementation baseline:** `c4-educational-validity` @ `40f1a93d9dfc6d2cf35c7098e87482c80963a868`
+**Release-candidate note:** this SHA is the pre-documentation verification baseline; C4 is not marked DONE until the remaining empirical/content-review gates are independently satisfied.  
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
 This document records the findings of the 2026-10-03 educational/content audit. It supplements `ROADMAP.md`; it does not replace the roadmap's implementation/status rules.
@@ -25,26 +26,14 @@ The product currently has several places where implementation is more conservati
 
 ### P0 — public-beta blockers
 
-1. **Placement validity**
-   - The correct answer is always the first option in the generated choice list.
-   - The current diagnostic uses only 3 questions per N5–N2 level, maximum 12 questions.
-   - A level can be selected after only 2 answered questions at >=67% accuracy.
-   - N1 is not directly sampled.
-   - The selected items are primarily the earliest entries by frequency order, not a psychometrically designed level blueprint.
-   - Result: the current diagnostic is a useful lightweight kanji check, but it is not yet reliable enough to make a strong proficiency claim.
+1. **Placement empirical validity / stability**
+   - The implementation now randomizes answer order, uses the 16-question N5–N2 blueprint, and applies the documented 3/4 threshold.
+   - Boundary and upper-range conditions are surfaced explicitly, with N1 treated conservatively as outside the directly tested range.
+   - The remaining blocker is empirical validation of placement stability/bias on representative answer patterns; the current regression suite is deterministic/contract-focused rather than a psychometric validation study.
 
-2. **Production Recall fidelity**
-   - The production mode offers a reveal-first self-report path.
-   - The user can reveal the answer and then select "I knew it / I didn't know it".
-   - The engine correctly marks revealed self-report as `independent=false`, so evidence semantics are not being falsely promoted.
-   - However, the learner-facing label "Production Recall" implies independent production more strongly than the current default interaction provides.
-   - True production should be the primary path; reveal/self-report should remain a hint/recovery path.
-
-3. **Vocabulary/Context modality mismatch**
-   - The underlying graders support typed answers.
-   - The current v2 presentation generally presents a choice grid for Vocabulary and Context retrieval.
-   - This makes the default activity recognition/cued retrieval rather than full word production or free contextual retrieval.
-   - Feature naming and educational claims should match the actual modality, or the product should promote typed/free recall into the main path.
+2. **Representative human/content QA**
+   - Learner-priority meanings/readings and deterministic example/context quality gates are now implemented.
+   - The remaining Public Beta blocker is independent human/content review of sampled high-risk meanings, readings, examples, context sentences, and curated mnemonics, with the result recorded against the frozen release SHA.
 
 ### P1 — important content quality work
 
@@ -113,16 +102,19 @@ The card exposes the right conceptual areas:
 
 The information architecture also separates factual reference data from personal mnemonic editing.
 
-### Problems
+### Current state
 
-The card is closer to a compact dictionary reference than a carefully staged teaching card.
+The learner-facing contract now separates source meanings/readings from a learner-priority layer:
 
-Current risks:
+- 1–2 primary meanings are emphasized, with curated ambiguity overrides for selected high-frequency cases;
+- secondary/common meanings remain visible but lower priority;
+- reference-style meanings remain available without being treated as primary learning targets;
+- core On/Kun readings are shown first, while remaining readings are reference-tiered;
+- example candidates are deterministically filtered for target containment, valid reading/meaning fields, duplicate removal, and lower-burden ordering.
 
-- multiple readings receive similar visual weight;
-- all dictionary meanings can appear similarly important;
-- vocabulary example selection is availability/heuristic-driven rather than fully curated;
-- six examples can be more information than a learner needs at first exposure.
+### Remaining content-quality risk
+
+The deterministic layer does not replace human pedagogical review. The release gate still requires sampled human review of meaning priority, reading usefulness, example naturalness, and context burden.
 
 ### Acceptance target
 
@@ -181,29 +173,25 @@ Use the core target first in direct recall, then teach other readings through vo
 
 ## 7. Production Recall audit
 
-### Current behavior
+### Current behavior after C4 patch
 
-The UI supports:
+The primary v2 path is now:
 
-- reveal answer;
-- self-report after reveal;
-- optional choice hint path.
+**meaning → typed Kanji production → submit/grade → feedback**
 
-The engine explicitly records revealed self-report separately from independent evidence. This is correct.
+The lower-evidence paths are:
 
-### Educational requirement
+- reveal → self-report;
+- optional multiple-choice hint.
 
-The primary path should become:
+The evidence path explicitly distinguishes:
 
-**meaning → independent Kanji production → submit/grade → feedback**
+- `independent_production` / `independent-typed-production`;
+- `cued_production` / `cued-kanji-choice`;
+- `revealed_self_report`;
+- `guided_recovery`.
 
-with:
-
-**reveal → self-report**
-
-as a lower-evidence fallback.
-
-Multiple choice should be a hint/recovery mechanism, not the normal definition of production.
+Retries remain recovery evidence and do not increment independent-attempt counts.
 
 ### Regression requirement
 
@@ -275,17 +263,18 @@ and annotate content difficulty separately from simple sentence length.
 Current contract:
 
 - N5–N2
-- 3 selected Kanji per level where available
-- maximum 12 questions
-- first meaning is used as the correct answer
+- 4 sampled Kanji per level where available
+- 16-question target
+- answer order shuffled from stable option IDs
+- first source meaning remains the answer key for the diagnostic item
 - suggested level checks N2→N5
-- >=2 answered questions and >=67% accuracy can trigger a level suggestion
+- a level must reach 3/4 (75%) to qualify
+- results expose boundary/limited-confidence conditions
+- 4/4 at N2 exposes an explicit upper-range/N1 limitation
 
-### Confirmed validity defects
+### Current validity status
 
-The generated option list places the correct answer at index 0. Because options are rendered in their generated order, this creates an avoidable position-bias/guessing vulnerability.
-
-The item blueprint is also too small and not sufficiently representative for strong level placement.
+The prior answer-position defect and tiny-sample threshold are no longer present in the current implementation. The remaining validity gap is empirical: there is no representative user/response dataset demonstrating placement stability across repeated retakes or difficult boundary populations.
 
 ### Required redesign
 
@@ -338,7 +327,7 @@ The project must preserve the principle:
 
 ### Required next step
 
-Grow curated coverage, prioritizing:
+The provenance distinction remains explicit and regression-covered. Grow curated coverage, prioritizing:
 
 - high-frequency Kanji;
 - high-confusion pairs;
@@ -477,16 +466,17 @@ Before Public Beta, educational quality must satisfy all applicable gates:
 - Placement blueprint documented.
 - Placement uncertainty documented.
 - Production modality semantics accurate.
-- Vocabulary/Context modality labels accurate.
-- No known answer-position bias.
+- Vocabulary/Context modality labels accurate to the actual cued-completion UI.
+- No known implementation-level answer-position bias.
+- Empirical placement-stability validation remains required.
 
 ### Content validity
 
-- Learner-facing meaning layer separated from raw dictionary glosses.
-- Reading priority classification documented.
-- Representative Kanji content sampled for meaning/readings/examples/strokes.
-- Context sentences sampled for naturalness/translation quality.
+- Learner-facing meaning layer is separated from raw dictionary glosses.
+- Reading priority classification is documented in code.
+- Representative example/context fixtures are regression-checked for target containment, translation presence, reading validity, duplication, and burden.
 - High-risk ambiguous/synonym cases have regression fixtures.
+- Independent human/content review of sampled material remains required before Public Beta.
 - Content provenance is visible where learner interpretation could otherwise be misleading.
 
 ### Mnemonic validity
