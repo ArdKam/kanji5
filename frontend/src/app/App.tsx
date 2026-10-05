@@ -541,7 +541,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
-function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string,meta?:{hintUsed?:boolean})=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
   const ex=snapshot.exercise??{},
     [answer,setAnswer]=useState(""),
     [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
@@ -601,7 +601,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
     if(!value.trim()||busy||lockedRef.current)return;
     lockedRef.current=true;
     try{
-      const raw=await onSubmit(value);
+      const raw=await onSubmit(value,production&&showProductionOptions?{hintUsed:true}:undefined);
       const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
       if(feedback&&typeof feedback.correct==="boolean"){
         const nextResult={correct:Boolean(feedback.correct),outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint,submittedAnswer:value};
@@ -1027,7 +1027,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={(v,meta)=>action(()=>submitExercise(v,meta),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
