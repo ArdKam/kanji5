@@ -20,6 +20,16 @@ const MEANING_PRIORITY_OVERRIDES=Object.freeze({
   '勝':Object.freeze({primary:['win','victory'],secondary:['prevail']}),
   '機':Object.freeze({primary:['machine'],secondary:['mechanism','loom']}),
   '議':Object.freeze({primary:['debate','consultation'],secondary:['deliberation']}),
+  '中':Object.freeze({primary:['middle','inside'],secondary:['in']}),
+  '本':Object.freeze({primary:['book','main'],secondary:['present']}),
+  '舞':Object.freeze({primary:['dance'],secondary:['flit','circle']}),
+  '優':Object.freeze({primary:['tenderness','excel'],secondary:['surpass']}),
+  '減':Object.freeze({primary:['decrease','reduce'],secondary:['dwindle']}),
+  '陸':Object.freeze({primary:['land'],reference:['six']}),
+  '塔':Object.freeze({primary:['pagoda','tower'],secondary:['steeple']}),
+  '張':Object.freeze({primary:['stretch','spread'],reference:['counter for bows & stringed instruments']}),
+  '杯':Object.freeze({primary:['glass','wine glass'],reference:['counter for cupfuls']}),
+  '箇':Object.freeze({reference:['counter for articles']}),
 });
 
 const REFERENCE_MEANING_PATTERNS=Object.freeze([
