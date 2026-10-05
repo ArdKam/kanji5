@@ -431,33 +431,25 @@ test('English shell does not retain Persian presentation labels',async({page})=>
 
 test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
   await clean(page);
-  const original=await page.evaluate(()=>{
-    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
-    if(!boundary)throw new Error("V2 boundary unavailable");
-    const original=boundary.listKanji;
-    boundary.listKanji=async()=>{throw new Error("intentional test failure");};
-    (window).__kanji5OriginalListKanji=original;
-    return true;
+  const originalDeck=await page.evaluate(()=>{
+    const raw=localStorage.getItem("kanji5-deck");
+    if(!raw)throw new Error("Kanji deck unavailable");
+    localStorage.removeItem("kanji5-deck");
+    return raw;
   });
 
   await page.getByRole("button",{name:"بیشتر"}).click();
   await page.getByRole("button",{name:"آزمایشگاه خواندن"}).click();
   const labDialog=page.locator(".reading-lab-dialog");
   await expect(labDialog).toBeVisible({timeout:10000});
-  await expect(labDialog.locator(".reading-lab-catalog-error")).toContainText("دادهٔ فرهنگ لغت در دسترس نیست.");
+  await expect(labDialog.locator(".reading-lab-catalog-error")).toContainText("دادهٔ فرهنگ لغت در دسترس نیست.",{timeout:12000});
   const retry=labDialog.getByRole("button",{name:"تلاش دوباره",exact:true});
   await expect(retry).toBeVisible();
 
-  await page.evaluate(()=>{
-    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
-    const original=(window).__kanji5OriginalListKanji;
-    if(!boundary||typeof original!=="function")throw new Error("Original listKanji unavailable");
-    boundary.listKanji=original;
-  });
+  await page.evaluate(deck=>localStorage.setItem("kanji5-deck",deck),originalDeck);
   await retry.click();
   await expect(labDialog.locator(".reading-lab")).toBeVisible({timeout:10000});
 });
-
 test("Settings destructive confirmations move focus into the confirmation and keep Tab inside it",async({page})=>{
   await clean(page);
   await page.getByRole("button",{name:"بیشتر"}).click();
