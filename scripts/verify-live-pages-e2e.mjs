@@ -11,13 +11,17 @@ try {
     page.on('pageerror', error => pageErrors.push(error?.stack || String(error)));
     await page.addInitScript(() => {
       localStorage.setItem('kanji5-ui-language', 'en');
-      for (const key of Object.keys(localStorage)) {
-        if (key.startsWith('kanji5-') && key !== 'kanji5-ui-language') localStorage.removeItem(key);
+      const initialized = sessionStorage.getItem('kanji5-live-smoke-initialized') === '1';
+      if (!initialized) {
+        for (const key of Object.keys(localStorage)) {
+          if (key.startsWith('kanji5-') && key !== 'kanji5-ui-language') localStorage.removeItem(key);
+        }
+        sessionStorage.setItem('kanji5-live-smoke-initialized', '1');
       }
       // Core-product live smoke is intentionally independent from first-run onboarding;
-      // onboarding has its own dedicated release gate.
+      // onboarding has its own dedicated release gate. Keep the marker across reloads
+      // so the persistence assertion can exercise the actual saved learner state.
       localStorage.setItem('kanji5-onboarding-v2', 'complete');
-      sessionStorage.clear();
     });
     await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
     const onboarding = page.locator('[data-testid="onboarding-flow"]');
