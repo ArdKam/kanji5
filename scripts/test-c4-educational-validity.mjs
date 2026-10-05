@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 import { buildLearnerContent, selectLearnerExamples, learnerContentPolicy } from "../v1.9-learner-content-core.js";
 import { createContentEvidenceStore } from "../v1.9-content-evidence.js";
+import { validateContextSentence, contentDifficulty } from "../v1.9-data-quality-core.js";
 import { legacyEducationDefinition } from "../v2-domain-core.js";
 
 const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
@@ -54,6 +55,19 @@ assert.equal(examples.length,4);
 assert.deepEqual(examples.map(x=>x.word),["学ぶ","学校","学年","学生"]);
 assert.ok(!examples.some(x=>x.word==="English"));
 
+const contextFixtures=[
+  {text:"私は学生です。",english:"I am a student."},
+  {text:"学校へ行きます。",english:"I go to school."},
+  {text:"新しい学びがあります。",english:"There is new learning."},
+  {text:"学ぶことは大切です。",english:"Learning is important."},
+];
+for(const fixture of contextFixtures){
+  const checked=validateContextSentence(fixture,"学");
+  assert.equal(checked.valid,true);
+  assert.ok(contentDifficulty(fixture,"学","context")>=0);
+}
+assert.equal(validateContextSentence({text:"学",english:""},"学").valid,false);
+
 const components={};
 const store=createContentEvidenceStore({
   readComponents:()=>components,
@@ -84,5 +98,9 @@ assert.match(diagnostic,/diagnosticPlacementBoundary/);
 assert.match(diagnostic,/diagnosticPlacementUpperBound/);
 assert.match(audit,/Placement uncertainty documented\./);
 assert.match(audit,/Independent retrieval separated from reveal\/self-report/);
+const mnemonics=fs.readFileSync("frontend/src/app/prepared-mnemonic-core.js","utf8");
+assert.match(mnemonics,/source:\s*"curated"/);
+assert.match(mnemonics,/source:\s*"generated"/);
+assert.match(app,/data-mnemonic-source=\{preparedMnemonic.source\}/);
 
 console.log("C4 educational validity regression contracts passed.");
