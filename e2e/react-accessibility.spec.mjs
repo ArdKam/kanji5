@@ -431,11 +431,13 @@ test('English shell does not retain Persian presentation labels',async({page})=>
 
 test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
   await clean(page);
-  const originalDeck=await page.evaluate(()=>{
-    const raw=localStorage.getItem("kanji5-deck");
-    if(!raw)throw new Error("Kanji deck unavailable");
-    localStorage.removeItem("kanji5-deck");
-    return raw;
+  await page.evaluate(()=>{
+    const originalGetItem=Storage.prototype.getItem;
+    Storage.prototype.getItem=function(key){
+      if(key==="kanji5-deck")throw new Error("intentional catalog failure");
+      return originalGetItem.call(this,key);
+    };
+    (window).__restoreKanjiDeckRead=()=>{ Storage.prototype.getItem=originalGetItem; };
   });
 
   await page.getByRole("button",{name:"بیشتر"}).click();
@@ -446,7 +448,7 @@ test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({p
   const retry=labDialog.getByRole("button",{name:"تلاش دوباره",exact:true});
   await expect(retry).toBeVisible();
 
-  await page.evaluate(deck=>localStorage.setItem("kanji5-deck",deck),originalDeck);
+  await page.evaluate(()=>{ const restore=(window).__restoreKanjiDeckRead; if(typeof restore!=="function")throw new Error("Kanji deck read restore unavailable"); restore(); });
   await retry.click();
   await expect(labDialog.locator(".reading-lab")).toBeVisible({timeout:10000});
 });
