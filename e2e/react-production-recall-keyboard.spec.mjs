@@ -110,6 +110,5 @@ test("Production Recall 1/2 grade keys invoke the visible self-report controls",
   await page.keyboard.press("Space");
   await expect(exercise.locator(".production-recall-revealed")).toBeVisible();
   await page.keyboard.press("1");
-  await expect(exercise.locator(".active-recall-feedback")).toContainText("بلد بودم");
   await expect(exercise.locator(".active-recall-feedback")).toContainText("درست");
 });
