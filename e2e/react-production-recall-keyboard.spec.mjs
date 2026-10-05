@@ -92,3 +92,24 @@ test("Production Recall Space is ignored from focused text fields",async({page})
     await field.evaluate(el=>el.remove());
   }
 });
+
+test("Production Recall 1/2 grade keys invoke the visible self-report controls",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await clean(page);
+  await seedSeenCard(page);
+  await startProductionExercise(page);
+
+  const exercise=page.locator("#root #exercise");
+  await page.evaluate(()=>{
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    if(!boundary)throw new Error("V2 boundary unavailable");
+    boundary.selfReportProduction=async knewIt=>({correct:knewIt,outcome:knewIt?"correct":"unknown"});
+    boundary.nextExercise=async()=>{};
+  });
+
+  await page.keyboard.press("Space");
+  await expect(exercise.locator(".production-recall-revealed")).toBeVisible();
+  await page.keyboard.press("1");
+  await expect(exercise.locator(".active-recall-feedback")).toContainText("بلد بودم");
+  await expect(exercise.locator(".active-recall-feedback")).toContainText("درست");
+});
