@@ -282,6 +282,7 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
 });
 
 test("handwriting hint radios support roving-focus keyboard navigation",async({page})=>{
+  await page.addInitScript(()=>localStorage.setItem("kanji5-ui-language","en"));
   await page.route("**/kanji/05b66.svg",route=>route.fulfill({
     status:200,
     contentType:"image/svg+xml",
