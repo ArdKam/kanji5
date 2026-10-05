@@ -137,13 +137,16 @@ export function SettingsDialog({
   const discardConfirmRef = useRef<HTMLButtonElement | null>(null);
   const resetCancelRef = useRef<HTMLButtonElement | null>(null);
   const resetConfirmRef = useRef<HTMLButtonElement | null>(null);
+  const resetTriggerRef = useRef<HTMLButtonElement | null>(null);
   const confirmationReturnFocusRef = useRef<HTMLElement | null>(null);
 
-  const restoreConfirmationFocus = () => {
+  const restoreConfirmationFocus = (fallbackSelector?: string) => {
     const opener = confirmationReturnFocusRef.current;
     confirmationReturnFocusRef.current = null;
     window.requestAnimationFrame(() => {
-      if (opener?.isConnected && !opener.hasAttribute("disabled") && opener.getAttribute("aria-hidden") !== "true") opener.focus({ preventScroll: true });
+      const fallback = fallbackSelector ? document.querySelector<HTMLElement>(fallbackSelector) : null;
+      const target = opener?.isConnected ? opener : fallback;
+      if (target?.isConnected && !target.hasAttribute("disabled") && target.getAttribute("aria-hidden") !== "true") target.focus({ preventScroll: true });
     });
   };
 
@@ -164,7 +167,7 @@ export function SettingsDialog({
 
   const dismissResetConfirmation = () => {
     setResetArmed(false);
-    restoreConfirmationFocus();
+    restoreConfirmationFocus(".settings-reset-trigger");
   };
 
   const handleConfirmationKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>, onEscape: () => void) => {
@@ -336,7 +339,7 @@ export function SettingsDialog({
               </div>
             </div>
           ) : (
-            <button className="settings-reset-trigger" type="button" onClick={openResetConfirmation} disabled={effectiveBusy}>
+            <button ref={resetTriggerRef} className="settings-reset-trigger" type="button" onClick={openResetConfirmation} disabled={effectiveBusy}>
               <span>{language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}</span>
               <span aria-hidden="true">›</span>
             </button>
