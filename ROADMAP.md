@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `2618d779222c00b906466a122762a19eb44a4f6c` (2026-10-05). This baseline includes the merged R11 observability hardening (#463) and final Kanji public UX/accessibility pass (#464). It is **not yet release-locked** because the exact-main React presentation workflow for this SHA failed at the account shell gate, so Pages was skipped for this SHA.
+> **Implementation baseline reviewed:** `main` at commit `81957a6065c7b271a3a697e0f41fd25f8bb048d8` (2026-10-05). This baseline includes merged C4 educational-validity work (#469), in addition to the previously merged R11 observability hardening (#463) and final Kanji public UX/accessibility pass (#464). It is **not yet release-locked** because post-merge workflow status is not yet recorded for this exact SHA.
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -144,7 +144,7 @@ Configured workflows, open PRs, and prior-release evidence do not satisfy this g
 
 ### 2.0.1 Educational Content & Assessment Hard Gate
 
-The 2026-10-06 educational/content audit is recorded in `docs/EDUCATIONAL-CONTENT-AUDIT.md`. C4 PR #469 is the current implementation candidate; it is not counted as DONE until merged into current `main` and the remaining educational acceptance gates are independently satisfied. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
+The 2026-10-06 educational/content audit is recorded in `docs/EDUCATIONAL-CONTENT-AUDIT.md`. C4 PR #469 is merged into current `main` at `81957a6065c7b271a3a697e0f41fd25f8bb048d8`. It is counted as implemented on `main`, but remains **PARTIAL for educational acceptance** until the remaining educational acceptance gates are independently satisfied. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
 
 Before Public Beta, the following educational gates are release blockers:
 
@@ -161,7 +161,7 @@ A feature may remain technically implemented while its educational validity rema
 
 ---
 
-### 2.1 Verified current status ledger — 2026-10-05
+### 2.1 Verified current status ledger — 2026-10-06
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
 
@@ -182,7 +182,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- A1 release integrity: the previously verified candidate `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d` passed its exact-SHA React + Pages gate, but current `main` has since advanced through #463 and #464. The current head `2618d779222c00b906466a122762a19eb44a4f6c` is **not release-locked** because its React workflow failed at the account shell gate and Pages was skipped. A new exact-SHA candidate, green CI, same-SHA deployment/live artifact equality, smoke, cache/stale-client/offline, and representative-device evidence are required.
+- A1 release integrity: the previously verified candidate `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d` passed its exact-SHA React + Pages gate, but current `main` has since advanced through #463 and #464. The current head `81957a6065c7b271a3a697e0f41fd25f8bb048d8` is **not release-locked** because post-merge CI/deployment evidence has not yet been recorded for this exact SHA. A new exact-SHA candidate, green CI, same-SHA deployment/live artifact equality, smoke, cache/stale-client/offline, and representative-device evidence are required.
 - R2 onboarding redesign is **DONE on current `main`**: dedicated first-open value/setup/placement/account flow is implemented, guest-first, and covered by desktop/mobile E2E. Remaining work is release/real-device evidence plus the C4 educational validity gate for placement.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
@@ -195,7 +195,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
-- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 implements and verifies the C4 runtime/assessment changes, with the final React presentation verification green (40/40 gates). C4 remains PARTIAL until representative psychometric/placement validation and independent human/content QA are recorded against the final release candidate and the change is present on current `main`.
+- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 is merged into current `main` at `81957a6065c7b271a3a697e0f41fd25f8bb048d8`. Its final pre-merge React presentation verification was green (40/40 gates). C4 remains PARTIAL only for the remaining educational acceptance gates: representative psychometric/placement validation and independent human/content QA against the final release candidate.
 
 **PENDING:**
 - R18 Public Beta.
@@ -211,12 +211,13 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - A7 mnemonic infrastructure/provenance/coverage.
 - D1, D2, D3, D4, D5.
 
-**Open PRs not counted as completion:**
 **Current release-critical PRs not yet counted as complete:**
 - #467: R4–R6 persistence/history/backup safety.
 - #468: R12 security hardening.
-- #469: C4 educational content and assessment validity.
 - #465: R13 privacy/legal reconciliation.
+
+**Merged and now present on current `main`:**
+- #469: C4 educational content and assessment validity, merged as `81957a6065c7b271a3a697e0f41fd25f8bb048d8`.
 
 **Superseded/stale PRs that must not be treated as pending implementation:**
 - #392: superseded by merged R11 work in #463.
