@@ -402,10 +402,10 @@ async function awaitExerciseOutcome(result){
   }
   return result;
 }
-async function submitExercise(value){
+async function submitExercise(value,meta={}){
   const fn=window.__KANJI5_EDU_BRIDGE__?.submitValue;
   if(!fn)throw new Error('KANJI5_EDU_SUBMIT_UNAVAILABLE');
-  return awaitExerciseOutcome(await fn(String(value??'')));
+  return awaitExerciseOutcome(await fn(String(value??''),meta&&typeof meta==='object'?meta:{}));
 }
 async function dontKnowExercise(){
   const fn=window.__KANJI5_EDU_BRIDGE__?.dontKnow;
