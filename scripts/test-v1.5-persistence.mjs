@@ -5,9 +5,9 @@ import vm from 'node:vm';
 const source = fs.readFileSync(new URL('../v1.5-state.js', import.meta.url), 'utf8');
 
 class MemoryStorage {
-  constructor(seed = {}) { this.map = new Map(Object.entries(seed)); this.fail = false; this.failKeys = new Set(); }
+  constructor(seed = {}) { this.map = new Map(Object.entries(seed)); this.fail = false; this.failKeys = new Set(); this.failOnceKeys = new Set(); }
   getItem(key) { return this.map.has(key) ? this.map.get(key) : null; }
-  setItem(key, value) { if (this.fail || this.failKeys.has(key)) throw new Error(`write failed: ${key}`); this.map.set(key, String(value)); }
+  setItem(key, value) { if (this.fail || this.failKeys.has(key)) throw new Error(`write failed: ${key}`); if (this.failOnceKeys.has(key)) { this.failOnceKeys.delete(key); throw new Error(`write failed once: ${key}`); } this.map.set(key, String(value)); }
   removeItem(key) { this.map.delete(key); }
 }
 
@@ -187,12 +187,14 @@ backupApi.writeSessionHistory([{ status: 'done', sessionId: 'session-1', endedAt
 backupApi.writeComponents({ a: { meaning: { school: { attempts: 2 } } } });
 const portable = backupApi.portableBackup();
 assert.equal(portable.format, 'kanji5-backup');
-assert.equal(portable.version, 1);
+assert.equal(portable.version, 2);
+assert.equal(portable.data.core.reviewSummary.totalReviews, 1);
 assert.equal(portable.summary.cards, 1);
 assert.equal(portable.summary.reviews, 1);
 assert.equal(portable.summary.personalMnemonics, 1);
 assert.equal(portable.summary.completedSessions, 1);
 assert.ok(typeof portable.checksum === 'string' && portable.checksum.length > 0);
+assert.equal(backupApi.readReviewSummary().totalReviews, 1);
 
 const changed = backupApi.loadState();
 changed.settings.dailyNew = 14;
@@ -212,6 +214,54 @@ assert.equal(boot(backupStorage).readSettings().production, false);
 assert.equal(boot(backupStorage).readSettings().context, false);
 assert.equal(boot(backupStorage).readSessionHistory().length, 1);
 assert.equal(boot(backupStorage).readComponents().a.meaning.school.attempts, 2);
+assert.equal(boot(backupStorage).readReviewSummary().totalReviews, 1);
+
+const legacyBackup = structuredClone(portable);
+legacyBackup.version = 1;
+delete legacyBackup.data.core.reviewSummary;
+legacyBackup.metadata = {...legacyBackup.metadata, backupSchemaVersion: 1};
+legacyBackup.checksum = (()=>{const input=JSON.stringify({data:legacyBackup.data,metadata:legacyBackup.metadata});let hash=2166136261;for(let i=0;i<input.length;i++){hash^=input.charCodeAt(i);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16)})();
+backupApi.restorePortableBackup(legacyBackup);
+assert.equal(boot(backupStorage).readReviewSummary().totalReviews, 1);
+
+const mismatch = structuredClone(portable);
+mismatch.version = 99;
+mismatch.checksum = (()=>{const input=JSON.stringify({data:mismatch.data,metadata:mismatch.metadata});let hash=2166136261;for(let i=0;i<input.length;i++){hash^=input.charCodeAt(i);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16)})();
+const protectedKeys = [backupApi.STORAGE, backupApi.CARDS_STORAGE, backupApi.REVIEWS_STORAGE, backupApi.KNOWLEDGE_STORAGE, backupApi.REVIEW_SUMMARY_STORAGE, backupApi.SETTINGS_KEY];
+const beforeMismatch = protectedKeys.map(key=>[key,backupStorage.getItem(key)]);
+assert.throws(() => boot(backupStorage).restorePortableBackup(mismatch), /KANJI5_BACKUP_VERSION_UNSUPPORTED/);
+assert.deepEqual(protectedKeys.map(key=>[key,backupStorage.getItem(key)]), beforeMismatch);
+
+const failedRestoreStorage = new MemoryStorage();
+const failedRestoreApi = boot(failedRestoreStorage);
+const protectedState = failedRestoreApi.createInitial({today:failedRestoreApi.todayKey(),settings:{dailyNew:11},cards:{safe:{card:{}}},reviews:[{id:'safe',eventId:'safe-1',at:'2026-09-04T00:00:00.000Z',rating:'Good'}]});
+failedRestoreApi.saveState(protectedState);
+failedRestoreApi.writeSettings({production:false,vocabulary:false,context:true});
+const rollbackKeys = [failedRestoreApi.STORAGE, failedRestoreApi.CARDS_STORAGE, failedRestoreApi.REVIEWS_STORAGE, failedRestoreApi.KNOWLEDGE_STORAGE, failedRestoreApi.REVIEW_SUMMARY_STORAGE, failedRestoreApi.SETTINGS_KEY, failedRestoreApi.SNAPSHOT_STORAGE, failedRestoreApi.SNAPSHOT_COMMIT];
+const beforeRollback = rollbackKeys.map(key=>[key,failedRestoreStorage.getItem(key)]);
+failedRestoreStorage.failOnceKeys.add(failedRestoreApi.CARDS_STORAGE);
+assert.throws(() => failedRestoreApi.restorePortableBackup(portable), /write failed once/);
+assert.deepEqual(rollbackKeys.map(key=>[key,failedRestoreStorage.getItem(key)]), beforeRollback);
+
+const bulkStorage = new MemoryStorage();
+const bulkApi = boot(bulkStorage);
+const firstReviews = Array.from({length: 1990},(_,i)=>({id:'bulk-'+i,eventId:'bulk-'+i,at:new Date(Date.UTC(2026,8,1)+i*60000).toISOString(),rating:i%2?'Good':'Again'}));
+const bulkState = bulkApi.createInitial({today:bulkApi.todayKey(),reviews:firstReviews});
+bulkApi.saveState(bulkState);
+const moreReviews = Array.from({length: 115},(_,i)=>({id:'bulk-'+(1990+i),eventId:'bulk-'+(1990+i),at:new Date(Date.UTC(2026,8,1)+(1990+i)*60000).toISOString(),rating:i%2?'Good':'Again'}));
+const continued = bulkApi.loadState();
+continued.reviews.push(...moreReviews);
+continued.reviewSummary = bulkApi.updateReviewSummary(moreReviews, continued.reviewSummary);
+bulkApi.saveState(continued);
+assert.equal(continued.reviews.length, 2000);
+assert.equal(bulkApi.readReviewSummary().totalReviews, 2105);
+assert.equal(bulkApi.readReviewSummary().knownEventIds.length, 2000);
+
+const reintroduced = bulkApi.loadState();
+reintroduced.reviews.push(firstReviews[0]);
+bulkApi.saveState(reintroduced);
+assert.equal(bulkApi.readReviewSummary().totalReviews, 2105);
+assert.equal(bulkApi.loadState().reviewSummary.totalReviews, 2105);
 
 const tampered = structuredClone(portable);
 tampered.data.core.settings.dailyNew = 99;

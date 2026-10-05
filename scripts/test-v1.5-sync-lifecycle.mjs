@@ -11,6 +11,8 @@ assert.match(sync, /window\.removeEventListener\('storage', onStorage\)/, 'Stora
 assert.match(sync, /window\.addEventListener\('storage', onStorage\)/, 'Storage listener is not centralized');
 assert.match(sync, /document\.removeEventListener\('visibilitychange', onVisibilityChange\)/, 'Visibility listener must be removable');
 assert.match(sync, /document\.addEventListener\('visibilitychange', onVisibilityChange\)/, 'Visibility listener is not centralized');
+assert.match(sync, /REVIEW_SUMMARY_KEY/, 'Review aggregate storage key must participate in sync lifecycle');
+assert.match(sync, /REVIEW_SUMMARY_KEY[^\n]*KNOWLEDGE_KEY/, 'Review aggregate storage changes must schedule sync');
 
 const bootBody = sync.slice(sync.indexOf('async function boot()'), sync.indexOf('\n  if (document.readyState'));
 assert.doesNotMatch(bootBody, /addEventListener\("online"/, 'Boot must not install repeated online listeners');
