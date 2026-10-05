@@ -39,7 +39,9 @@ function semanticMeaningOverlap(left: string, right: string): number {
   const shared = a.filter(token => bSet.has(token)).length;
   return shared / Math.max(1, Math.min(a.length, b.length));
 }
-function meaningSetsAmbiguous(targetMeanings: string[], candidateMeanings: string[]): boolean {
+function meaningSetsAmbiguous(character: string, targetMeanings: string[], candidateMeanings: string[]): boolean {
+  const fixture = PLACEMENT_SEMANTIC_FIXTURES.find(item => item.character === character);
+  if (fixture && fixture.equivalent.some(target => candidateMeanings.some(candidate => semanticMeaningOverlap(target, candidate) >= 0.8))) return true;
   return targetMeanings.some(target => candidateMeanings.some(candidate => semanticMeaningOverlap(target, candidate) >= 0.8));
 }
 
@@ -131,7 +133,7 @@ export function buildPlacementQuestions(
   return selected.slice(0, DIAGNOSTIC_LEVELS.length * PLACEMENT_ITEMS_PER_LEVEL).map((item, questionIndex) => {
     const correct = item.meanings[0];
     const distractors = catalog
-      .filter(candidate => candidate.character !== item.character && candidate.meanings[0] && candidate.meanings[0] !== correct && !meaningSetsAmbiguous(item.meanings, candidate.meanings))
+      .filter(candidate => candidate.character !== item.character && candidate.meanings[0] && candidate.meanings[0] !== correct && !meaningSetsAmbiguous(item.character, item.meanings, candidate.meanings))
       .slice()
       .sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity))
       .map(candidate => candidate.meanings[0])
