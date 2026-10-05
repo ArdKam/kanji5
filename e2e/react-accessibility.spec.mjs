@@ -445,7 +445,7 @@ test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({p
   const labDialog=page.locator(".reading-lab-dialog");
   await expect(labDialog).toBeVisible({timeout:10000});
   await expect(labDialog.locator(".reading-lab-catalog-error")).toContainText("دادهٔ فرهنگ لغت در دسترس نیست.");
-  const retry=labDialog.getByRole("button",{name:"دوباره تلاش کن",exact:true});
+  const retry=labDialog.getByRole("button",{name:"تلاش دوباره",exact:true});
   await expect(retry).toBeVisible();
 
   await page.evaluate(()=>{
