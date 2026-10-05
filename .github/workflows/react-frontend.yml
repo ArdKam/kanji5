@@ -107,6 +107,14 @@ jobs:
       - name: Run R12 public-release security checks
         working-directory: .
         run: node scripts/test-r12-security.mjs
+      - name: Stage release artifact for R12 security verification
+        working-directory: .
+        run: node scripts/stage-pages-site.mjs
+      - name: Verify staged production artifact
+        working-directory: .
+        run: |
+          node scripts/test-r12-security.mjs _site
+          node scripts/verify-pages-site.mjs
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
