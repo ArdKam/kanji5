@@ -23,15 +23,15 @@ const MEANING_PRIORITY_OVERRIDES=Object.freeze({
 });
 
 const REFERENCE_MEANING_PATTERNS=Object.freeze([
-  /\\bradical\\b/i,
-  /\\bno\\.?\\s*\\d+/i,
-  /\\bcounter\\b/i,
-  /\\bclassifier\\b/i,
-  /\\bsuffix\\b/i,
-  /\\bprefix\\b/i,
-  /\\bvariant\\b/i,
-  /\\barchaic\\b/i,
-  /\\bobsolete\\b/i,
+  /\bradical\b/i,
+  /\bno\\.?\s*\\d+/i,
+  /\bcounter\b/i,
+  /\bclassifier\b/i,
+  /\bsuffix\b/i,
+  /\bprefix\b/i,
+  /\bvariant\b/i,
+  /\barchaic\b/i,
+  /\bobsolete\b/i,
 ]);
 
 function referenceLike(value){return REFERENCE_MEANING_PATTERNS.some(pattern=>pattern.test(value));}
