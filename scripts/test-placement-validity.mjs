@@ -13,6 +13,10 @@ assert.match(logic, /shuffleWithSeed/);
 assert.match(logic, /correct: label === correct/);
 assert.match(logic, /total >= 3/);
 assert.match(logic, />= 0\.75/);
+assert.match(logic, /confidence: "high" \\| "boundary" \\| "limited"/);
+assert.match(logic, /upperBoundReached/);
+assert.match(logic, /PLACEMENT_SEMANTIC_FIXTURES/);
+assert.match(logic, /meaningSetsAmbiguous/);
 assert.doesNotMatch(logic, /const labels = \[correct, \.\.\.distractors\]/);
 assert.match(diagnostic, /diagnosticSeed/);
 assert.match(diagnostic, /setDiagnosticSeed/);
@@ -21,5 +25,7 @@ assert.match(entry, /buildPlacementQuestions\([\s\S]*placementSeed/);
 assert.match(entry, /onPlacementRestart/);
 assert.match(flow, /onPlacementRestart\?\./);
 assert.ok(integration.includes("buildPlacementQuestions"));
+assert.match(diagnostic, /diagnosticPlacementBoundary/);
+assert.match(diagnostic, /diagnosticPlacementUpperBound/);
 
 console.log("Kanji 5 placement-validity contract passed.");

@@ -144,7 +144,7 @@ Configured workflows, open PRs, and prior-release evidence do not satisfy this g
 
 ### 2.0.1 Educational Content & Assessment Hard Gate
 
-The 2026-10-03 educational/content audit is recorded in docs/EDUCATIONAL-CONTENT-AUDIT.md. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
+The 2026-10-06 educational/content audit is recorded in `docs/EDUCATIONAL-CONTENT-AUDIT.md`. C4 PR #469 is the current implementation candidate; it is not counted as DONE until merged into current `main` and the remaining educational acceptance gates are independently satisfied. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
 
 Before Public Beta, the following educational gates are release blockers:
 
@@ -195,7 +195,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
-- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md; C4 is required before Public Beta.
+- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 implements and verifies the C4 runtime/assessment changes, with the final React presentation verification green (40/40 gates). C4 remains PARTIAL until representative psychometric/placement validation and independent human/content QA are recorded against the final release candidate and the change is present on current `main`.
 
 **PENDING:**
 - R18 Public Beta.
@@ -800,9 +800,9 @@ Audit:
 
 ## C4. Educational content & assessment validity — BLOCKER for Public Beta
 
-### Status — 2026-10-03
+### Status — 2026-10-05
 
-**BLOCKER.** The educational/content audit found that several features are technically implemented but not yet strong enough to support their strongest learner-facing claims.
+**PARTIAL — implementation gates materially advanced; Public Beta acceptance still blocked.** The C4 implementation now corrects the Production default, exposes conservative Vocabulary/Context modality labels, adds learner-priority meaning/reading projection, and surfaces placement uncertainty. The implementation-level placement position-bias screen now passes on the actual 2,136-item dataset; remaining Public Beta blockers are psychometric/representative response validation and independent human/content QA.
 
 See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
@@ -810,7 +810,7 @@ See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
 **PARTIAL — core implementation complete; broader validity evidence remains.**
 
-Implemented on current `main`:
+Implemented in the C4 release candidate:
 - randomized answer order with stable option IDs;
 - documented 4-item-per-level blueprint across N5–N2, sampling the beginning/middle/end of each level;
 - 16-question onboarding diagnostic contract;
@@ -820,22 +820,27 @@ Implemented on current `main`:
 - regression coverage for answer-position assumptions and the 16-question contract.
 
 Remaining before Public Beta:
-- explicit boundary-case/uncertainty presentation and empirical validation of placement stability;
-- broader synonym/ambiguous-meaning fixtures;
-- explicit policy/evidence for how N1 should be treated for users above N2.
+- representative-response validation of placement stability/bias beyond the implementation-level shuffle screen;
+- broader high-risk synonym/ambiguous-meaning fixture coverage;
+- independent human/content QA recorded against the frozen release SHA;
 
 
 ### C4.2 Exercise-modality fidelity
 
-- Production: independent Kanji production is the default; reveal/self-report is lower-evidence fallback.
-- Vocabulary: distinguish word recognition, missing-Kanji completion, and independent word production.
-- Context: distinguish guided recognition, sentence completion, and free contextual retrieval.
+**Updated on 2026-10-05.**
+
+- Production: typed independent Kanji production is now the default; reveal/self-report and choice-hint paths are lower-evidence alternatives.
+- Vocabulary: current UI is explicitly labeled cued Kanji completion.
+- Context: current UI is explicitly labeled cued sentence completion.
+- Evidence preserves modality, independence, recovery, and reveal metadata; hint-assisted production is recorded as `cued_production` rather than independent production.
 - Preserve modality, independence, recovery, and reveal metadata in evidence and Stats.
 - Ensure UI copy describes the modality actually being tested.
 
 ### C4.3 Learner-facing Kanji content model
 
-Add a learner-oriented content layer over dictionary/source data:
+**Implementation added on 2026-10-05; human QA still pending.**
+
+The learner-facing projection now defines:
 
 - primary meanings
 - secondary/common meanings
@@ -849,6 +854,8 @@ Add a learner-oriented content layer over dictionary/source data:
 Do not delete source meanings; reclassify their learner priority.
 
 ### C4.4 Vocabulary and Context content QA
+
+**Implementation/fixture layer added on 2026-10-05; independent human QA remains required.**
 
 For sampled and high-priority content, review:
 
@@ -866,6 +873,8 @@ Structural validation alone is not sufficient for public-beta content acceptance
 
 ### C4.5 Mnemonic quality
 
+**Provenance checks retained and regression-covered on 2026-10-05; human review remains pending.**
+
 - Keep curated, generated/scaffolded, and personal mnemonics explicitly distinct.
 - Grow curated coverage for high-frequency, high-confusion, irregular-reading, and visually deceptive Kanji.
 - Add human review alongside structural/regex checks.
@@ -882,7 +891,7 @@ Structural validation alone is not sufficient for public-beta content acceptance
 
 ### C4.7 Acceptance evidence
 
-C4 is complete only when applicable:
+**Current status: PARTIAL.** C4 is not marked DONE. It is complete only when applicable:
 
 - the Educational Content Audit has no unresolved P0 issue;
 - placement bias/validity tests pass;

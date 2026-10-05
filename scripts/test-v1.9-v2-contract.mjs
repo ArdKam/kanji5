@@ -9,9 +9,9 @@ assert.deepEqual(session.remainingModes,{meaning:1,reading:2,production:0,vocabu
 assert.equal(session.modeResults.meaning.lastOutcome,'wrong');
 assert.equal(session.resumed,true);
 const exercise=buildExerciseViewModel({mode:'production',prompt:'Select the Kanji',character:'学',choices:['学','字','校','字'],contentId:42,provenance:'local'});
-assert.equal(exercise.mode,'production');assert.equal(exercise.character,'学');assert.equal(exercise.contentId,'42');assert.deepEqual(exercise.choices,['学','字','校','字']);
+assert.equal(exercise.mode,'production');assert.equal(exercise.character,'学');assert.equal(exercise.contentId,'42');assert.equal(exercise.exercise,'typed-kanji-production');assert.equal(exercise.modality,'independent-typed-production');assert.deepEqual(exercise.choices,['学','字','校','字']);
 const learning=buildLearningCardViewModel({active:true,character:'学',isNew:true,revealed:false,meanings:['study','learning'],on:['ガク'],kun:['まなぶ'],hint:'Learn this kanji'});
-assert.equal(learning.kind,'learning-card');assert.equal(learning.character,'学');assert.equal(learning.isNew,true);assert.equal(learning.revealed,false);assert.deepEqual(learning.meanings,['study','learning']);
+assert.equal(learning.kind,'learning-card');assert.equal(learning.character,'学');assert.equal(learning.isNew,true);assert.equal(learning.revealed,false);assert.deepEqual(learning.meanings,['study','learning']);assert.deepEqual(learning.learnerMeanings.primary,['study','learning']);assert.deepEqual(learning.learnerReadings.coreOn,['ガク']);assert.deepEqual(learning.learnerReadings.coreKun,['まなぶ']);
 const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:0.7,retryCount:1,recovered:true});
 assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
 const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,attempts:5,recentAttempts:3,repeatedFailure:true}}});

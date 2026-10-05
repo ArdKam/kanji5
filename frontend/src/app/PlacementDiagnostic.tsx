@@ -67,7 +67,7 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
   if (!questions.length) return null;
 
   return (
-    <details className="placement-panel" open={autoOpen || active || finished}>
+    <details className="placement-panel" open={autoOpen || active || finished} data-placement-confidence={placementScore.confidence} data-placement-upper-bound={placementScore.upperBoundReached ? "true" : "false"}>
       <summary>{t("placementDiagnostic", language)}</summary>
       {!active ? (
         <div className="placement-intro">
@@ -87,6 +87,9 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
             })}
           </div>
           <p className="placement-suggestion">{t("diagnosticSuggestedLevel", language)} <strong>{suggestedLevel}</strong></p>
+          {placementScore.confidence === "boundary" ? <p className="placement-uncertainty placement-boundary" role="note">{t("diagnosticPlacementBoundary", language)}</p> : null}
+          {placementScore.confidence === "limited" ? <p className="placement-uncertainty placement-limited" role="note">{t("diagnosticPlacementLimited", language)}</p> : null}
+          {placementScore.upperBoundReached ? <p className="placement-uncertainty placement-upper-bound" role="note">{t("diagnosticPlacementUpperBound", language)}</p> : null}
           <div className="placement-actions">
             <button className="button secondary" type="button" onClick={start}>{t("retakeDiagnostic", language)}</button>
             <button className="button primary" type="button" disabled={starting} onClick={async () => {

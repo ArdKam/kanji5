@@ -19,7 +19,7 @@ assert(runtime.includes('setInterval(updateUpcomingReviews,15000)'), 'Upcoming r
 assert(p0.includes('function getFocusComponent(character,mode)'), 'Component focus missing');
 assert(p0.includes('function recordFocusedRecall(character,mode,focus,outcome)'), 'Component recording missing');
 assert(p0.includes('componentSignal(entry)'), 'Component aggregate signal missing');
-assert(ui.includes("function record(correct,wrong='')"), 'Active education result must have a dedicated recording path');
+assert(/function record\(correct,wrong='',meta=\{\}\)/.test(ui) || /function record\(correct,wrong=''\)/.test(ui), 'Active education result must have a dedicated recording path');
 assert(ui.includes('state.writeKnowledge(next)'), 'Education recording must persist through the state boundary');
 assert(items.length===2136, 'Runtime dataset size changed unexpectedly');
 const rank={N5:0,N4:1,N3:2,N2:3,N1:4};

@@ -107,24 +107,47 @@ test('empty Active Recall state stays responsive before any card is learned',asy
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:5000});
 });
 
-test('Production Recall requires explicit reveal and does not require keyboard input',async({page})=>{
+test('Production Recall uses independent typed production as the primary path',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
   await startForcedExercise(page,'production');
   await expect(page.locator('#root #exercise .production-recall')).toBeVisible({timeout:10000});
   await expect(page.locator('#root #exercise .meaning-stimulus')).toBeVisible();
   await expect(page.locator('#root #exercise .meaning-stimulus strong')).toHaveText(/\S/);
-  await expect(page.locator('#root #exercise .production-recall-reveal')).toBeVisible();
-  await expect(page.locator('#root #exercise .production-choice')).toHaveCount(0);
-  await expect(page.locator('#root #exercise input')).toHaveCount(0);
+  await expect(page.locator('#root #exercise input')).toHaveCount(1);
+  await expect(page.locator('#root #exercise input')).toBeVisible();
+  await expect(page.locator('#root #exercise .active-recall-task-modality')).toHaveText('تولید مستقل کانجی');
+  await expect(page.getByRole('button',{name:'بررسی پاسخ'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'نمایش پاسخ'})).toBeVisible();
   await expect(page.getByRole('button',{name:'بلد بودم'})).toHaveCount(0);
-  await page.getByRole('button',{name:'نمایش پاسخ'}).click();
-  await expect(page.locator('#root #exercise .production-recall-revealed')).toBeVisible();
-  await expect.poll(async()=>page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""))).not.toBe('');
+  await expect(page.getByRole('button',{name:'نمی‌دانستم'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'کمک: نمایش گزینه‌ها'})).toBeVisible();
+  await expect(page.locator('#root #exercise .production-grid')).toHaveCount(0);
+});
+
+test('Production Recall typed answer records independent production evidence',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
   const character=await page.evaluate(async()=>String((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).exercise?.character||""));
-  await expect(page.locator('#root #exercise .production-recall-revealed strong')).toHaveText(character);
-  await expect(page.getByRole('button',{name:'بلد بودم'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'نمی‌دانستم'})).toBeVisible();
+  const input=page.locator('#root #exercise input').first();
+  await input.fill(character);
+  await page.getByRole('button',{name:'بررسی پاسخ'}).click();
+  await expect.poll(async()=>page.evaluate(character=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const production=knowledge?.[character]?.production||{};
+    return {attempts:Number(production.attempts||0),correct:Number(production.correct||0)};
+  },character)).toMatchObject({attempts:expect.any(Number),correct:expect.any(Number)});
+  await expect.poll(async()=>page.evaluate(character=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const production=knowledge?.[character]?.production||{};
+    return Number(production.attempts||0);
+  },character)).toBeGreaterThan(0);
+  await expect.poll(async()=>page.evaluate(character=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const production=knowledge?.[character]?.production||{};
+    return Number(production.correct||0);
+  },character)).toBeGreaterThan(0);
 });
 
 test('Production Recall known self-grade submits the revealed Kanji and advances',async({page})=>{

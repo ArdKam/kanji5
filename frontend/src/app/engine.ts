@@ -40,6 +40,9 @@ export type Snapshot = {
     meanings?: string[];
     on?: string[];
     kun?: string[];
+    sourceMeanings?: string[];
+    learnerMeanings?: { primary?: string[]; secondary?: string[]; reference?: string[] };
+    learnerReadings?: { coreOn?: string[]; coreKun?: string[]; vocabularySupported?: string[]; referenceOn?: string[]; referenceKun?: string[] };
     examples?: { word?: string; reading?: string; meaning?: string }[];
     hint?: string;
     revealLabel?: string;
@@ -60,6 +63,7 @@ export type Snapshot = {
     contentId?: string;
      contentStage?: "introduction" | "guided" | "retrieval";
      contentState?: string;
+    modality?: string;
   };
   feedback?: {
     outcome?: string;
@@ -216,7 +220,7 @@ export type Boundary = {
   startLearningExperience: () => Promise<void>;
   startPracticeExperience: () => Promise<void>;
   startExercise: () => Promise<void>;
-  submitExercise: (value:string) => Promise<ExerciseOutcome | unknown>;
+  submitExercise: (value:string, meta?: { hintUsed?: boolean }) => Promise<ExerciseOutcome | unknown>;
   dontKnowExercise: () => Promise<ExerciseOutcome | unknown>;
   selfReportProduction: (knewIt:boolean) => Promise<ExerciseOutcome | unknown>;
   retryExercise: () => Promise<unknown>;
@@ -291,8 +295,8 @@ export async function startExercise(): Promise<void> {
 
 type ExerciseOutcome = { correct?: boolean; outcome?: string; quality?: string; score?: number };
 
-export async function submitExercise(value: string): Promise<ExerciseOutcome | unknown> {
-  return (await waitForEngine()).submitExercise(value);
+export async function submitExercise(value: string, meta?: { hintUsed?: boolean }): Promise<ExerciseOutcome | unknown> {
+  return (await waitForEngine()).submitExercise(value, meta);
 }
 export async function dontKnow(): Promise<ExerciseOutcome | unknown> {
   return (await waitForEngine()).dontKnowExercise();

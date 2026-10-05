@@ -111,6 +111,8 @@ test('unseen vocabulary is introduced before recall and wrong answers support re
   await expect(page.locator('#root .active-recall-choice-grid')).toBeVisible();
   const guided=await page.evaluate(async()=>await window.__KANJI5_V19_V2_BOUNDARY__.snapshot());
   expect(guided.exercise.contentStage).toBe('guided');
+  expect(guided.exercise.modality).toBe('cued-kanji-completion');
+  await expect(page.locator('#root .active-recall-task-modality')).toHaveText('کامل‌کردن واژه با سرنخ');
   expect(guided.exercise.contentId).toBe(introContentId);
   const choiceData=await page.evaluate(async()=>{
     const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();
@@ -136,6 +138,8 @@ test('unseen context is introduced as content exposure, not a recall failure',as
   const snapshot=await page.evaluate(async()=>await window.__KANJI5_V19_V2_BOUNDARY__.snapshot());
   expect(snapshot.exercise.mode).toBe('context');
   expect(snapshot.exercise.contentStage).toBe('introduction');
+  expect(snapshot.exercise.modality).toBe('content-exposure');
+  await expect(page.locator('#root .active-recall-task-modality')).toHaveText('مرور محتوای جدید');
   expect(snapshot.exercise.stimulus.kind).toBe('context-intro');
   await expect(page.locator('#root .content-intro-stimulus')).toBeVisible();
   await expect(page.locator('#root .active-recall-feedback')).toHaveCount(0);

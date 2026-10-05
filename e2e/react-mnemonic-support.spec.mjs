@@ -43,7 +43,7 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
   await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-meaning")).toBeVisible();
-  await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings")).toBeVisible();
+  await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings").first()).toBeVisible();
   const supportPage = await goToMnemonicSupportPage(card);
   const support = supportPage.locator(".mnemonic-support");
   await expect(support).toBeVisible();

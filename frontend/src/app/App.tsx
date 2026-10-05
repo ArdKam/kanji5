@@ -60,6 +60,15 @@ const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
 const pct=(v:number|undefined)=>Math.round(Math.max(0,Math.min(1,Number(v)||0))*100);
 const toHiragana=(value:string)=>Array.from(value).map(ch=>{const code=ch.charCodeAt(0);return code>=0x30a1&&code<=0x30f6?String.fromCharCode(code-0x60):ch}).join("");
 const skillLabel=(key:string)=>({meaning:t("meaning"),reading:t("reading"),production:t("production"),vocabulary:t("vocabulary"),context:t("context")} as Record<string,string>)[key]??text(key);
+const modalityLabel=(modality:string,stage:string)=>{
+  if(stage==="introduction")return t("contentExposureModality");
+  if(modality==="revealed_self_report")return t("revealedSelfReportModality");
+  if(modality==="cued-kanji-choice")return t("productionCuedModality");
+  if(modality==="independent-typed-production")return t("productionModality");
+  if(modality==="cued-kanji-completion")return t("vocabularyModality");
+  if(modality==="cued-sentence-completion")return t("contextModality");
+  return t("freeRecallModality");
+};
 const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==="context"?"برای این جمله گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن.":"برای این واژه گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن."):(mode==="context"?"Not enough safe choices are available for this sentence. Continue to the next exercise.":"Not enough safe choices are available for this word. Continue to the next exercise.");
 
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
@@ -71,7 +80,12 @@ const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["
 
 function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
-  const preparedMeaningKey=(card.meanings??[]).join("\u0001");
+  const learnerMeaningModel=card.learnerMeanings??{};
+  const learnerReadingModel=card.learnerReadings??{};
+  const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
+  const secondaryMeanings=learnerMeaningModel.secondary??[];
+  const referenceMeanings=learnerMeaningModel.reference??[];
+  const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
   const [componentInfoReady,setComponentInfoReady]=useState(false);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
@@ -110,7 +124,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     setComponentInfo(null);
     setComponentInfoReady(false);
     const character = card.character;
-    const meanings = card.meanings ?? [];
+    const meanings = [...primaryMeanings,...secondaryMeanings];
     const mnemonicModule = import("./prepared-mnemonic-core");
     void mnemonicModule.then(({buildPreparedMnemonic})=>{
       if(!active)return;
@@ -212,8 +226,10 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
       setMnemonicBusy(false);
     }
   },[card.character,mnemonicBusy,personalMnemonic,preparedMnemonic]);
-  const displayedOn=(card.on??[]).map(v=>hiraganaReadings?toHiragana(v):v);
-  const displayedKun=(card.kun??[]).map(v=>hiraganaReadings?toHiragana(v):v);
+  const displayedOn=(learnerReadingModel.coreOn?.length?learnerReadingModel.coreOn:(card.on??[])).map(v=>hiraganaReadings?toHiragana(v):v);
+  const displayedKun=(learnerReadingModel.coreKun?.length?learnerReadingModel.coreKun:(card.kun??[])).map(v=>hiraganaReadings?toHiragana(v):v);
+  const referenceOn=learnerReadingModel.referenceOn??[];
+  const referenceKun=learnerReadingModel.referenceKun??[];
   const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
   const [examplesResolved,setExamplesResolved]=useState(false);
   const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
@@ -362,7 +378,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
         <div className="card-topline"><span className="badge badge-red">{t("learningBadge")}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2>{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <div className="first-readings" lang="ja">{[...(card.on??[]),...(card.kun??[])].slice(0,3).join(" · ")}</div>
+        <div className="first-readings" lang="ja">{[...(learnerReadingModel.coreOn??card.on??[]),...(learnerReadingModel.coreKun??card.kun??[])].slice(0,3).join(" · ")}</div>
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
@@ -382,10 +398,13 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
                         : <div className="learning-back-identity-placeholder" aria-hidden="true"><span /></div>}
                     </div>
 
-                    {card.meanings?.length?<div className="meanings learning-back-meaning">{card.meanings.join(" · ")}</div>:null}
+                    {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
+                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    {referenceMeanings.length?<details className="learning-back-reference-meanings"><summary>{t("additionalInformation")}</summary><div className="learning-back-secondary-meaning">{referenceMeanings.join(" · ")}</div></details>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                      {(referenceOn.length||referenceKun.length)?<details className="learning-back-reference-readings"><summary>{t("additionalInformation")}</summary><div className="readings learning-back-readings"><Reading title="On’yomi · reference" values={referenceOn}/><Reading title="Kun’yomi · reference" values={referenceKun}/></div></details>:null}
                     </div>
                   </div>
                 </div>
@@ -523,7 +542,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
-function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string)=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string,meta?:{hintUsed?:boolean})=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
   const ex=snapshot.exercise??{},
     [answer,setAnswer]=useState(""),
     [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
@@ -583,7 +602,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
     if(!value.trim()||busy||lockedRef.current)return;
     lockedRef.current=true;
     try{
-      const raw=await onSubmit(value);
+      const raw=await onSubmit(value,production&&showProductionOptions?{hintUsed:true}:undefined);
       const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
       if(feedback&&typeof feedback.correct==="boolean"){
         const nextResult={correct:Boolean(feedback.correct),outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint,submittedAnswer:value};
@@ -671,6 +690,8 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   const disabled=busy||lockedRef.current||Boolean(result);
   const taskLabel=skillLabel(ex.mode??"");
+  const effectiveModality=production?(productionRevealed?"revealed_self_report":showProductionOptions?"cued-kanji-choice":(ex.modality??"independent-typed-production")):(ex.modality??"");
+  const taskModalityLabel=modalityLabel(effectiveModality,ex.contentStage??"retrieval");
   const introduction=ex.contentStage==="introduction"&&(ex.mode==="vocabulary"||ex.mode==="context");
   const taskDescription=introduction?t("contentIntroductionPrompt"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
   const correctAnswerDisplay=ex.mode==="vocabulary"||ex.mode==="context"?text(ex.character):text(ex.answerHint||ex.character);
@@ -683,6 +704,8 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
         <span className="active-recall-kicker">{t("activeRecallLabel")}</span>
         <span className="active-recall-divider" aria-hidden="true">·</span>
         <span className="active-recall-task">{taskLabel}</span>
+        <span className="active-recall-divider" aria-hidden="true">·</span>
+        <span className="active-recall-task-modality">{taskModalityLabel}</span>
       </div>
       <span className="active-recall-session-dot" aria-hidden="true"/>
     </div>
@@ -726,12 +749,18 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
             {keyboardHint?<kbd>{keyboardHint}</kbd>:null}
           </div>
           {!productionRevealed?
-            <div className="active-recall-actions">
-              <button className="active-recall-primary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>
-                <span>{t("revealAnswer")}</span><UiIcon name="next" size={17}/>
-              </button>
-              {choices.length>=4?<button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>setShowProductionOptions(true)}>{t("useOptionsHint")}</button>:null}
-            </div>
+            <>
+              <label className="active-recall-input-wrap">
+                <span>{t("answerYourself")}</span>
+                <input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))} lang="ja" inputMode="text" autoComplete="off" spellCheck={false}/>
+              </label>
+              <div className="active-recall-actions">
+                <button className="active-recall-primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>
+                <button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button>
+                <button className="active-recall-secondary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>
+                {choices.length>=4?<button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>setShowProductionOptions(true)}>{t("useOptionsHint")}</button>:null}
+              </div>
+            </>
           :
             <div className="active-recall-reveal production-recall-revealed" aria-live="polite">
               <span className="active-recall-reveal-label">{t("revealedAnswer")}</span>
@@ -1012,7 +1041,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={v=>action(()=>submitExercise(v),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={(v,meta)=>action(()=>submitExercise(v,meta),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
