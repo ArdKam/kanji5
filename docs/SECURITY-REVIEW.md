@@ -4,10 +4,21 @@ Audit date: 2026-10-05
 Audit baseline: `main` at `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d`  
 Security work branch: `r12-public-release-security`  
 Status: **NOT COMPLETE**
+Reconciled base: current `main` at `708244a5ae096fba4c926ca6bb25c33978341d83` (R11, 2026-10-05).
+
+R12 was originally branched from the preceding `main` tip; the PR base has now been refreshed to current `main`, and the overlapping R11 observability changes in `index.html` / `supabase-sync.js` were preserved explicitly.
+
 
 R12 is intentionally not signed off from source inspection alone. The branch contains code and schema hardening plus focused checks, but production/live release evidence remains incomplete and the Supabase Security Advisor still reports one verified production blocker.
 
 ## Verified findings and fixes
+
+## Latest CI evidence
+
+At the pre-reconciliation R12 head `d6b8ab78d7b0c834ab63fb716f98f3badbc1c550`, all R12-specific security/staged-artifact/dependency/typecheck/build/unit-contract gates passed. The overall React workflow later failed only at the WebKit browser-compatibility smoke because `#root .app-shell` did not appear within 20 seconds; Firefox passed. This is outside the R12 security scope and is not used as evidence that R12 is complete.
+
+The current R12 security test additionally parses every root browser-runtime JavaScript file before running sink/secret checks, preventing syntax-level runtime defects from being missed by string scanning alone.
+
 
 ### 1. Unsafe DOM / XSS sinks — VERIFIED and fixed in branch
 
