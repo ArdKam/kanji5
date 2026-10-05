@@ -11,5 +11,5 @@ const legacyScripts=[
   "./v1.5-education-ui.js"
 ];
 // Compatibility-only path. All script URLs are compile-time constants; no user or provider data reaches this sink.
-document.write(legacyScripts.map(src=>`<script src="${src}"><\\/script>`).join(""));
+document.write(legacyScripts.map(src=>'<script src="'+src+'"></script>').join(""));
 })();
