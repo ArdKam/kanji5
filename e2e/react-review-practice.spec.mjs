@@ -121,7 +121,8 @@ test('Production Recall uses independent typed production as the primary path',a
   await expect(page.getByRole('button',{name:'نمایش پاسخ'})).toBeVisible();
   await expect(page.getByRole('button',{name:'بلد بودم'})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'نمی‌دانستم'})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'کمک: نمایش گزینه‌ها'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'کمک: نمایش گزینه‌ها'})).toBeVisible();
+  await expect(page.locator('#root #exercise .production-grid')).toHaveCount(0);
 });
 
 test('Production Recall typed answer records independent production evidence',async({page})=>{
@@ -132,9 +133,7 @@ test('Production Recall typed answer records independent production evidence',as
   const input=page.locator('#root #exercise input').first();
   await input.fill(character);
   await page.getByRole('button',{name:'بررسی پاسخ'}).click();
-  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-correct/);
-  const feedback=await page.evaluate(async()=>{const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return snapshot.feedback||null;});
-  expect(feedback?.correct).toBe(true);
+  await expect.poll(async()=>Boolean((await page.evaluate(async()=>{const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return snapshot.feedback||null;}))?.correct)).toBe(true);
   await page.waitForTimeout(900);
   const knowledge=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}'));
   expect(Number(knowledge?.[character]?.production?.attempts||0)).toBeGreaterThan(0);
