@@ -12,6 +12,7 @@ const education=fs.readFileSync("v1.5-education-ui.js","utf8");
 const boundary=fs.readFileSync("v1.9-v2-boundary.js","utf8");
 const placement=fs.readFileSync("frontend/src/app/placement-logic.ts","utf8");
 const diagnostic=fs.readFileSync("frontend/src/app/PlacementDiagnostic.tsx","utf8");
+const serviceWorker=fs.readFileSync("sw.js","utf8");
 const audit=fs.readFileSync("docs/EDUCATIONAL-CONTENT-AUDIT.md","utf8");
 
 assert.equal(legacyEducationDefinition("production").exercise,"typed-kanji-production");
