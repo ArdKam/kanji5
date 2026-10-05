@@ -1,6 +1,6 @@
 export const LEARNER_CONTENT_VERSION='1.0.0';
 
-const text=(value,max=240)=>String(value??'').normalize('NFKC').replace(/[\\t\\r\\n]+/g,' ').trim().slice(0,max);
+const text=(value,max=240)=>String(value??'').normalize('NFKC').replace(/[\t\r\n]+/g,' ').trim().slice(0,max);
 const uniq=values=>[...new Set((Array.isArray(values)?values:[]).map(value=>text(value)).filter(Boolean))];
 
 // Source glosses are preserved verbatim outside this projection. These overrides only
