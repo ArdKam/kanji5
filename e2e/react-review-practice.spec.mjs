@@ -121,7 +121,7 @@ test('Production Recall uses independent typed production as the primary path',a
   await expect(page.getByRole('button',{name:'نمایش پاسخ'})).toBeVisible();
   await expect(page.getByRole('button',{name:'بلد بودم'})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'نمی‌دانستم'})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'استفاده از گزینه‌ها'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'کمک: نمایش گزینه‌ها'})).toHaveCount(0);
 });
 
 test('Production Recall typed answer records independent production evidence',async({page})=>{
