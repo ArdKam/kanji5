@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { usePageDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
 import { DataBackup } from "./DataBackup";
@@ -133,6 +133,70 @@ export function SettingsDialog({
   const [discardOpen, setDiscardOpen] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [saving, setSaving] = useState(false);
+  const discardKeepEditingRef = useRef<HTMLButtonElement | null>(null);
+  const discardConfirmRef = useRef<HTMLButtonElement | null>(null);
+  const resetCancelRef = useRef<HTMLButtonElement | null>(null);
+  const resetConfirmRef = useRef<HTMLButtonElement | null>(null);
+  const resetTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const confirmationReturnFocusRef = useRef<HTMLElement | null>(null);
+
+  const restoreConfirmationFocus = (fallbackSelector?: string) => {
+    const opener = confirmationReturnFocusRef.current;
+    confirmationReturnFocusRef.current = null;
+    window.requestAnimationFrame(() => {
+      const fallback = fallbackSelector ? document.querySelector<HTMLElement>(fallbackSelector) : null;
+      const target = opener?.isConnected ? opener : fallback;
+      if (target?.isConnected && !target.hasAttribute("disabled") && target.getAttribute("aria-hidden") !== "true") target.focus({ preventScroll: true });
+    });
+  };
+
+  const openDiscardConfirmation = () => {
+    confirmationReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setDiscardOpen(true);
+  };
+
+  const dismissDiscardConfirmation = () => {
+    setDiscardOpen(false);
+    restoreConfirmationFocus();
+  };
+
+  const openResetConfirmation = () => {
+    confirmationReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setResetArmed(true);
+  };
+
+  const dismissResetConfirmation = () => {
+    setResetArmed(false);
+    restoreConfirmationFocus(".settings-reset-trigger");
+  };
+
+  const handleConfirmationKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>, onEscape: () => void) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      onEscape();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+    if (!buttons.length) return;
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  useEffect(() => {
+    if (!discardOpen && !resetArmed) return;
+    const target = discardOpen ? discardKeepEditingRef.current : resetCancelRef.current;
+    if (!target) return;
+    const frame = window.requestAnimationFrame(() => target.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [discardOpen, resetArmed]);
 
   useEffect(() => {
     if (!open) return;
@@ -145,7 +209,7 @@ export function SettingsDialog({
 
   const dirty = settingsKey(draft) !== savedKey;
   const requestClose = () => {
-    if (dirty) setDiscardOpen(true);
+    if (dirty) openDiscardConfirmation();
     else onClose();
   };
   const requestCloseRef = useRef(requestClose);
@@ -264,18 +328,18 @@ export function SettingsDialog({
         </section>
         <section className="settings-danger-zone" aria-label={language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}>
           {resetArmed ? (
-            <div className="settings-reset-confirmation" role="alert">
-              <strong>{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
-              <p>{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
+            <div className="settings-reset-confirmation" role="alertdialog" aria-modal="true" aria-labelledby="settings-reset-title" aria-describedby="settings-reset-hint" onKeyDown={event => handleConfirmationKeyDown(event, dismissResetConfirmation)}>
+              <strong id="settings-reset-title">{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
+              <p id="settings-reset-hint">{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
               <div className="settings-danger-actions">
-                <button className="button secondary" type="button" onClick={() => setResetArmed(false)} disabled={effectiveBusy}>{t("cancel", language)}</button>
-                <button className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
+                <button ref={resetCancelRef} className="button secondary" type="button" onClick={dismissResetConfirmation} disabled={effectiveBusy}>{t("cancel", language)}</button>
+                <button ref={resetConfirmRef} className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
                   {effectiveBusy ? "…" : (language === "fa" ? "بله، پیشرفت را پاک کن" : "Yes, reset progress")}
                 </button>
               </div>
             </div>
           ) : (
-            <button className="settings-reset-trigger" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
+            <button ref={resetTriggerRef} className="settings-reset-trigger" type="button" onClick={openResetConfirmation} disabled={effectiveBusy}>
               <span>{language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}</span>
               <span aria-hidden="true">›</span>
             </button>
@@ -295,14 +359,14 @@ export function SettingsDialog({
           </div>
         </div>
       </form>      {discardOpen ? (
-        <div className="settings-discard-dialog" role="alertdialog" aria-labelledby="settings-discard-title" aria-describedby="settings-discard-hint">
+        <div className="settings-discard-dialog" role="alertdialog" aria-modal="true" aria-labelledby="settings-discard-title" aria-describedby="settings-discard-hint" onKeyDown={event => handleConfirmationKeyDown(event, dismissDiscardConfirmation)}>
           <div className="settings-discard-dialog-card">
             <p className="eyebrow red">{language === "fa" ? "تغییر ذخیره‌نشده" : "Unsaved changes"}</p>
             <h3 id="settings-discard-title">{t("settingsDiscardTitle", language)}</h3>
             <p id="settings-discard-hint">{t("settingsDiscardHint", language)}</p>
             <div className="settings-discard-actions">
-              <button className="button secondary" type="button" onClick={() => setDiscardOpen(false)}>{t("settingsKeepEditing", language)}</button>
-              <button className="button danger" type="button" onClick={() => { setDiscardOpen(false); onClose(); }}>{t("settingsDiscardChanges", language)}</button>
+              <button ref={discardKeepEditingRef} className="button secondary" type="button" onClick={dismissDiscardConfirmation}>{t("settingsKeepEditing", language)}</button>
+              <button ref={discardConfirmRef} className="button danger" type="button" onClick={() => { setDiscardOpen(false); onClose(); }}>{t("settingsDiscardChanges", language)}</button>
             </div>
           </div>
         </div>

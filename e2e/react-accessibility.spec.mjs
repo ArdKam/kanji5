@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import fs from 'node:fs/promises';
 
 async function clean(page){
   await page.goto('/');
@@ -427,4 +428,48 @@ test('English shell does not retain Persian presentation labels',async({page})=>
   await page.locator('.header-menu-trigger').click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('button',{name:'Close menu'})).toBeVisible();
+});
+
+test("Reading Lab keeps a deterministic catalog failure state and retry affordance",async()=>{
+  const source=await fs.readFile("frontend/src/app/ReadingLabDialog.tsx","utf8");
+  expect(source).toContain('const [catalogError, setCatalogError] = useState(false);');
+  expect(source).toContain('setCatalogError(true);');
+  expect(source).toContain('className="empty-state reading-lab-catalog-error"');
+  expect(source).toContain('role={catalogError ? "alert" : "status"}');
+  expect(source).toContain('onClick={() => { setAttempted(false); setCatalogError(false); }}');
+});
+test("Settings destructive confirmations move focus into the confirmation and keep Tab inside it",async({page})=>{
+  await clean(page);
+  await page.getByRole("button",{name:"بیشتر"}).click();
+  await page.getByRole("button",{name:"تنظیمات"}).click();
+  const settings=page.locator(".settings-dialog");
+  await expect(settings).toBeVisible({timeout:10000});
+
+  const numberInput=settings.locator('input[type="number"]').first();
+  await numberInput.fill("6");
+  const closeButton=settings.locator(".settings-save-actions .button.secondary");
+  await closeButton.click();
+
+  const discard=settings.locator(".settings-discard-dialog");
+  await expect(discard).toBeVisible();
+  const buttons=discard.getByRole("button");
+  await expect(buttons).toHaveCount(2);
+  await expect(buttons.first()).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(buttons.last()).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(buttons.first()).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(discard).toBeHidden();
+  await expect(closeButton).toBeFocused();
+
+  const reset=settings.locator(".settings-reset-trigger");
+  await reset.click();
+  const resetDialog=settings.locator(".settings-reset-confirmation");
+  await expect(resetDialog).toBeVisible();
+  const resetButtons=resetDialog.getByRole("button");
+  await expect(resetButtons.first()).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(resetDialog).toBeHidden();
+  await expect(reset).toBeFocused();
 });

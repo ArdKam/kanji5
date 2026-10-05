@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
@@ -373,13 +373,30 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                   ["ghost", 1],
                   ["guide", 2],
                   ["free", 4],
-                ] as const).map(([modeName, modeLevel]) => {
+                ] as const).map(([modeName, modeLevel], index, options) => {
                   const isActive = modeName === "ghost" ? hintLevel <= 1 : modeName === "guide" ? hintLevel === 2 || hintLevel === 3 : hintLevel === 4;
                   const label = language === "fa"
                     ? (modeName === "ghost" ? "سایه" : modeName === "guide" ? "راهنما" : "آزاد")
                     : (modeName === "ghost" ? "Ghost" : modeName === "guide" ? "Guide" : "Free");
+                  const moveHintFocus = (direction:number) => {
+                    const nextIndex = (index + direction + options.length) % options.length;
+                    setHintLevel(options[nextIndex][1]);
+                    window.requestAnimationFrame(() => {
+                      document.querySelector<HTMLButtonElement>(
+                        ".handwriting-hint-control .handwriting-hint-segment:nth-child(" + (nextIndex + 1) + ")"
+                      )?.focus();
+                    });
+                  };
+                  const handleHintKeyDown = (event:ReactKeyboardEvent<HTMLButtonElement>) => {
+                    const forward = language === "fa" ? event.key === "ArrowLeft" : event.key === "ArrowRight";
+                    const backward = language === "fa" ? event.key === "ArrowRight" : event.key === "ArrowLeft";
+                    if(forward){ event.preventDefault(); moveHintFocus(1); }
+                    else if(backward){ event.preventDefault(); moveHintFocus(-1); }
+                    else if(event.key === "Home"){ event.preventDefault(); setHintLevel(options[0][1]); window.requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>(".handwriting-hint-control .handwriting-hint-segment")?.focus()); }
+                    else if(event.key === "End"){ event.preventDefault(); setHintLevel(options[options.length-1][1]); window.requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>(".handwriting-hint-control .handwriting-hint-segment:nth-child(" + options.length + ")")?.focus()); }
+                  };
                   return (
-                    <button key={modeName} className={"handwriting-hint-segment" + (isActive ? " is-active" : "")} type="button" role="radio" aria-checked={isActive} onClick={() => setHintLevel(modeLevel)}>
+                    <button key={modeName} className={"handwriting-hint-segment" + (isActive ? " is-active" : "")} type="button" role="radio" aria-checked={isActive} tabIndex={isActive ? 0 : -1} onClick={() => setHintLevel(modeLevel)} onKeyDown={handleHintKeyDown}>
                       {label}
                     </button>
                   );
