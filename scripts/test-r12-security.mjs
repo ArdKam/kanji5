@@ -52,10 +52,14 @@ const supabaseSync = read(path.join(root, "supabase-sync.js"));
 assert.match(supabaseSync, /SUPABASE_BROWSER_RUNTIME\s*=\s*'\.\/vendor\/supabase-js-2\.117\.2\.js'/);
 assert.doesNotMatch(supabaseSync, /cdn\.jsdelivr\.net|esm\.sh|unpkg\.com/);
 assert.doesNotMatch(supabaseSync, /import\(\s*['"]https?:/);
+assert.doesNotMatch(supabaseSync, /(?:https?:)?\/\/[^"'\s]+\.js(?:[?#]|$)/i);
 assert.match(supabaseSync, /window\.location\.origin\s*\+\s*window\.location\.pathname/);
 assert.match(supabaseSync, /persistSession\s*:\s*true/);
 assert.match(supabaseSync, /autoRefreshToken\s*:\s*true/);
 assert.match(supabaseSync, /detectSessionInUrl\s*:\s*true/);
+assert.match(supabaseSync, /MAX_SYNC_PAYLOAD_BYTES\s*=\s*5\s*\*\s*1024\s*\*\s*1024/);
+assert.match(supabaseSync, /SYNC_PAYLOAD_TOO_LARGE/);
+assert.match(supabaseSync, /assertSyncPayloadWithinLimit/);
 
 const config = read(path.join(root, "supabase-config.js"));
 const anon = config.match(/anonKey:\s*["']([^"']+)["']/)?.[1] || "";
