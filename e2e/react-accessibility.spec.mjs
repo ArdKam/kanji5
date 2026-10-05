@@ -467,7 +467,8 @@ test("Settings destructive confirmations move focus into the confirmation and ke
 
   const numberInput=settings.locator('input[type="number"]').first();
   await numberInput.fill("6");
-  await settings.locator(".settings-save-actions .button.secondary").click();
+  const closeButton=settings.locator(".settings-save-actions .button.secondary");
+  await closeButton.click();
 
   const discard=settings.locator(".settings-discard-dialog");
   await expect(discard).toBeVisible();
@@ -480,6 +481,7 @@ test("Settings destructive confirmations move focus into the confirmation and ke
   await expect(buttons.first()).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(discard).toBeHidden();
+  await expect(closeButton).toBeFocused();
 
   const reset=settings.locator(".settings-reset-trigger");
   await reset.click();
@@ -489,4 +491,5 @@ test("Settings destructive confirmations move focus into the confirmation and ke
   await expect(resetButtons.first()).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(resetDialog).toBeHidden();
+  await expect(reset).toBeFocused();
 });
