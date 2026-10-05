@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { webcrypto } from 'node:crypto';
 
 const source = fs.readFileSync(new URL('../v1.5-state.js', import.meta.url), 'utf8');
 
@@ -16,7 +15,7 @@ function boot(storage) {
   const context = vm.createContext({
     window: {},
     localStorage: storage,
-    crypto: webcrypto,
+    crypto: { randomUUID: () => 'device-test' },
     structuredClone,
     Intl,
     Date,
@@ -186,7 +185,7 @@ const backupState = backupApi.createInitial({
 backupApi.saveState(backupState);
 backupApi.writeSessionHistory([{ status: 'done', sessionId: 'session-1', endedAt: '2026-09-04T00:00:00.000Z', reviews: 1 }]);
 backupApi.writeComponents({ a: { meaning: { school: { attempts: 2 } } } });
-const portable = await backupApi.portableBackup();
+const portable = backupApi.portableBackup();
 assert.equal(portable.format, 'kanji5-backup');
 assert.equal(portable.version, 2);
 assert.equal(portable.summary.cards, 1);
@@ -201,7 +200,7 @@ backupApi.saveState(changed);
 backupApi.writeSettings({ production: true, vocabulary: false, context: true });
 backupApi.writeSessionHistory([]);
 backupApi.writeComponents({});
-const restoredSummary = await backupApi.restorePortableBackup(portable);
+const restoredSummary = backupApi.restorePortableBackup(portable);
 assert.deepEqual(restoredSummary, portable.summary);
 const restored = boot(backupStorage).loadState();
 assert.equal(restored.settings.dailyNew, 7);
@@ -216,7 +215,7 @@ assert.equal(boot(backupStorage).readComponents().a.meaning.school.attempts, 2);
 
 const tampered = structuredClone(portable);
 tampered.data.core.settings.dailyNew = 99;
-await assert.rejects(() => boot(backupStorage).restorePortableBackup(tampered), /KANJI5_INVALID_BACKUP/);
+assert.throws(() => boot(backupStorage).restorePortableBackup(tampered), /KANJI5_INVALID_BACKUP/);
 assert.equal(boot(backupStorage).loadState().settings.dailyNew, 7);
 
 console.log('Kanji 5 v1.5 local persistence hardening tests passed.');
