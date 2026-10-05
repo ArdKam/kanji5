@@ -200,8 +200,8 @@ export type Boundary = {
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   listPersonalMnemonics?: () => Promise<{ mnemonics: Record<string, string> }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
-  createBackup?: () => Promise<PortableBackup>;
-  restoreBackup?: (backup: PortableBackup) => Promise<BackupSummary>;
+  createBackup?: () => PortableBackup | null;
+  restoreBackup?: (backup: PortableBackup) => BackupSummary;
   listKanji: () => Promise<{ results: KanjiCatalogItem[] }>;
   startCustomStudy: (filter: CustomStudyFilter) => Promise<{ started: boolean; available: number }>;
   clearCustomStudyFilter: () => Promise<boolean>;
@@ -337,13 +337,13 @@ export async function saveMnemonic(character: string, value: string): Promise<{ 
   return (await waitForEngine()).saveMnemonic(character, value);
 }
 export async function createBackup(): Promise<PortableBackup> {
-  const backup = await (await waitForEngine()).createBackup?.();
+  const backup = (await waitForEngine()).createBackup?.();
   if (!backup) throw new Error("KANJI5_BACKUP_UNAVAILABLE");
   return backup;
 }
 
 export async function restoreBackup(backup: PortableBackup): Promise<BackupSummary> {
-  const summary = await (await waitForEngine()).restoreBackup?.(backup);
+  const summary = (await waitForEngine()).restoreBackup?.(backup);
   if (!summary) throw new Error("KANJI5_BACKUP_RESTORE_UNAVAILABLE");
   return summary;
 }
