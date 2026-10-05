@@ -80,21 +80,21 @@ const store=createContentEvidenceStore({
   readComponents:()=>components,
   writeComponents:value=>{Object.assign(components,value);return true;}
 },{now:()=> "2026-10-05T00:00:00.000Z",limit:64});
-store.recordExposure({mode:"production",contentId:"kanji:一",character:"一",contentKind:"kanji-production",provenance:"local"});
-store.recordOutcome({mode:"production",contentId:"kanji:一",character:"一",outcome:"correct",independent:true,recovery:false,attemptType:"independent_production"});
-let row=store.get("production","kanji:一");
+store.recordExposure({mode:"vocabulary",contentId:"vocabulary:test",character:"学",contentKind:"vocabulary",provenance:"fixture"});
+store.recordOutcome({mode:"vocabulary",contentId:"vocabulary:test",character:"学",outcome:"correct",independent:true,recovery:false,attemptType:"cued-kanji-completion"});
+let row=store.get("vocabulary","vocabulary:test");
 assert.equal(row.independentPracticeCount,1);
 assert.equal(row.correctCount,1);
-store.recordOutcome({mode:"production",contentId:"kanji:一",character:"一",outcome:"correct",independent:false,recovery:false,attemptType:"revealed_self_report"});
-row=store.get("production","kanji:一");
+store.recordOutcome({mode:"vocabulary",contentId:"vocabulary:test",character:"学",outcome:"correct",independent:false,recovery:false,attemptType:"revealed_self_report"});
+row=store.get("vocabulary","vocabulary:test");
 assert.equal(row.independentPracticeCount,1);
 assert.equal(row.correctCount,1);
-store.recordOutcome({mode:"production",contentId:"kanji:一",character:"一",outcome:"correct",independent:false,recovery:false,attemptType:"cued_production"});
-row=store.get("production","kanji:一");
-assert.equal(row.independentPracticeCount,1);
-store.recordOutcome({mode:"production",contentId:"kanji:一",character:"一",outcome:"correct",independent:false,recovery:true,attemptType:"guided_recovery"});
-row=store.get("production","kanji:一");
+store.recordOutcome({mode:"vocabulary",contentId:"vocabulary:test",character:"学",outcome:"wrong",independent:false,recovery:true,attemptType:"guided_recovery"});
+row=store.get("vocabulary","vocabulary:test");
 assert.equal(row.recoveryCount,1);
+
+assert.match(education,/const independent=!isRecoveryAttempt&&!productionSelfReport&&!productionHintAssisted/);
+assert.match(education,/attemptType=isRecoveryAttempt\?'guided_recovery':productionSelfReport\?'revealed_self_report':productionHintAssisted\?'cued_production':edu\.mode==='production'\?'independent_production'/);
 
 assert.match(placement,/confidence: "high" \| "boundary" \| "limited"/);
 assert.match(placement,/upperBoundReached/);
