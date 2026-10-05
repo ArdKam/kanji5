@@ -432,12 +432,11 @@ test('English shell does not retain Persian presentation labels',async({page})=>
 test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
   await clean(page);
   await page.evaluate(()=>{
-    const originalGetItem=Storage.prototype.getItem;
-    Storage.prototype.getItem=function(key){
-      if(key==="kanji5-deck")throw new Error("intentional catalog failure");
-      return originalGetItem.call(this,key);
-    };
-    (window).__restoreKanjiDeckRead=()=>{ Storage.prototype.getItem=originalGetItem; };
+    const state=window.__KANJI5_STATE__;
+    if(!state||typeof state.readDeck!=="function")throw new Error("Kanji state unavailable");
+    const original=state.readDeck;
+    state.readDeck=()=>[];
+    (window).__restoreKanjiDeckRead=()=>{ state.readDeck=original; };
   });
 
   await page.getByRole("button",{name:"بیشتر"}).click();
