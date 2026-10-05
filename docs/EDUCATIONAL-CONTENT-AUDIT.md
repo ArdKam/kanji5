@@ -59,6 +59,12 @@ Focused runtime spot checks executed in the isolated verification environment:
 
 The full repository `npm test` / TypeScript build was not executed in this environment because there is no local repository checkout and GitHub Actions exposed no workflow runs/statuses for the C4 branch at verification time. This is an execution limitation, not a pass claim.
 
+### Empirical placement screen
+
+Using the actual 2,136-item `kanji-data.json` and the production placement shuffle design, 10,000 deterministic retake seeds × 16 questions produced correct-answer positions of 24.84%, 25.01%, 24.95%, and 25.20%. The chi-square statistic was 4.37 (df=3), maximum relative deviation was 0.80%, and all 10,000 retakes produced a distinct full questionnaire layout. This passes the implementation-level answer-position-bias screen.
+
+This does **not** establish psychometric validity or real-user placement stability. Representative response-pattern data and independent human/content review are still required before Public Beta.
+
 ## 3. Dataset audit
 
 Current `kanji-data.json` contains:
@@ -517,6 +523,8 @@ After a baseline comparison exists, evaluate:
 Do not automatically change FSRS/planner parameters from observational metrics without an explicit evaluated decision record.
 
 ## 18. Recommended remaining educational work
+
+See `docs/C4-SAMPLE-CONTENT-QA.md` for the current sampled content-review record.
 
 1. Empirical placement stability/bias validation.
 2. Independent human/content QA for sampled high-risk meanings/readings/examples/context.
