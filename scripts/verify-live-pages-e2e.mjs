@@ -70,6 +70,7 @@ try {
     await page.getByRole('button', { name: 'Learning', exact: true }).click();
     await page.locator('#root .learning-card').waitFor({ state: 'visible', timeout: 15000 });
 
+    // Live release evidence must exercise the shipped Dictionary surface, not only local browser E2E.
     await page.locator('.experience-nav .experience-tab').nth(2).click();
     const dictionaryPage = page.locator('.dictionary-page');
     await dictionaryPage.waitFor({ state: 'visible', timeout: 10000 });
