@@ -4,6 +4,13 @@ export const DIAGNOSTIC_LEVELS = ["N5", "N4", "N3", "N2"] as const;
 export const PLACEMENT_ITEMS_PER_LEVEL = 4;
 const BLUEPRINT_QUANTILES = [0.05, 0.35, 0.65, 0.95] as const;
 
+export const PLACEMENT_SEMANTIC_FIXTURES = Object.freeze([
+  Object.freeze({ character: "会", equivalent: ["meet", "meeting"] }),
+  Object.freeze({ character: "学", equivalent: ["study", "learning"] }),
+  Object.freeze({ character: "生", equivalent: ["life", "birth"] }),
+  Object.freeze({ character: "行", equivalent: ["go"] }),
+]);
+
 export type PlacementQuestionRecord = {
   id: string;
   item: KanjiCatalogItem;
@@ -18,7 +25,23 @@ export type PlacementScore = {
   total: number;
   levelScores: Record<string, { correct: number; total: number }>;
   suggestedLevel: string;
+  confidence: "high" | "boundary" | "limited";
+  boundaryLevels: string[];
+  upperBoundReached: boolean;
 };
+
+const stemMeaningToken = (token: string): string => token.toLowerCase().replace(/(?:ing|ed|es|s)$/i, "");
+const meaningTokens = (value: string): string[] => String(value ?? "").normalize("NFKC").toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9\s]/g, " ").split(/\s+/).map(stemMeaningToken).filter(token => token.length > 1);
+function semanticMeaningOverlap(left: string, right: string): number {
+  const a = meaningTokens(left); const b = meaningTokens(right);
+  if (!a.length || !b.length) return 0;
+  const bSet = new Set(b);
+  const shared = a.filter(token => bSet.has(token)).length;
+  return shared / Math.max(1, Math.min(a.length, b.length));
+}
+function meaningSetsAmbiguous(targetMeanings: string[], candidateMeanings: string[]): boolean {
+  return targetMeanings.some(target => candidateMeanings.some(candidate => semanticMeaningOverlap(target, candidate) >= 0.8));
+}
 
 function stableHash(value: string): number {
   let hash = 2166136261;
@@ -108,7 +131,7 @@ export function buildPlacementQuestions(
   return selected.slice(0, DIAGNOSTIC_LEVELS.length * PLACEMENT_ITEMS_PER_LEVEL).map((item, questionIndex) => {
     const correct = item.meanings[0];
     const distractors = catalog
-      .filter(candidate => candidate.character !== item.character && candidate.meanings[0] && candidate.meanings[0] !== correct)
+      .filter(candidate => candidate.character !== item.character && candidate.meanings[0] && candidate.meanings[0] !== correct && !meaningSetsAmbiguous(item.meanings, candidate.meanings))
       .slice()
       .sort((a, b) => Number(a.order ?? Infinity) - Number(b.order ?? Infinity))
       .map(candidate => candidate.meanings[0])
@@ -161,5 +184,12 @@ export function scorePlacementAnswers(questions: PlacementQuestionRecord[], answ
     }
   }
 
-  return { score, total: questions.length, levelScores, suggestedLevel };
+  const boundaryLevels = DIAGNOSTIC_LEVELS.filter(level => {
+    const result = levelScores[level];
+    return Boolean(result && result.total === PLACEMENT_ITEMS_PER_LEVEL && (result.correct === 2 || result.correct === 3));
+  });
+  const complete = questions.length === DIAGNOSTIC_LEVELS.length * PLACEMENT_ITEMS_PER_LEVEL && DIAGNOSTIC_LEVELS.every(level => (levelScores[level]?.total ?? 0) === PLACEMENT_ITEMS_PER_LEVEL);
+  const upperBoundReached = (levelScores.N2?.total ?? 0) === PLACEMENT_ITEMS_PER_LEVEL && (levelScores.N2?.correct ?? 0) === PLACEMENT_ITEMS_PER_LEVEL;
+  const confidence = !complete ? "limited" : boundaryLevels.length ? "boundary" : "high";
+  return { score, total: questions.length, levelScores, suggestedLevel, confidence, boundaryLevels, upperBoundReached };
 }
