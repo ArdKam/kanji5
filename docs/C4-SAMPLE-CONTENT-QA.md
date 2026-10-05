@@ -1,8 +1,8 @@
 # C4 — Sampled Content QA Record
 
 **Review date:** 2026-10-05  
-**Implementation baseline reviewed:** `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83` plus the C4 candidate branch  
-**Review type:** implementer/content review; this is evidence, not independent sign-off.
+**Implementation baseline reviewed:** `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83` plus frozen C4 candidate @ `688c7ef384a748145adfd8ef72f9bb4e01ca3ce8`  
+**Review type:** implementer/content review; this is evidence, not independent sign-off. Final E2E verification passed on React workflow run `37360811744`.
 
 ## Scope
 
