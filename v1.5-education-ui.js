@@ -25,9 +25,90 @@ function stageLabel(stage){return({new:'جدید',exposed:'آشنا شده',lear
 function chooseChoices(target){const history=knowledge()[target.character]?.distractors||{};return[target,...CORE.chooseDistractors(target,deck(),history,3)].sort((a,b)=>String(a?.character||'').localeCompare(String(b?.character||'')))}
 function answerText(){if(edu.mode==='meaning')return safe((edu.item.meaning||[]).join(' · ')||'—');if(edu.mode==='reading')return safe([...(edu.item.on||[]),...(edu.item.kun||[])].join(' · ')||'—');if(edu.mode==='production')return safe(edu.item.character);if(edu.mode==='vocabulary'&&edu.word)return`${safe(edu.word.word)} · ${safe(edu.word.reading)}`;if(edu.mode==='context'&&edu.sentence)return safe(edu.item.character);return safe(edu.item.character)}
 function exercisePrompt(){return ({meaning:'معنی این کانجی را به انگلیسی بنویس.',reading:'یک خوانش رایج این کانجی را بنویس؛ Hiragana یا Romaji.',production:'با دیدن این معنی، کانجی را خودت تولید کن.',vocabulary:'واژهٔ کامل را به ژاپنی بنویس.',context:'کانجیِ حذف‌شده را در جمله وارد کن.'})[edu.mode]||'تمرین آموزشی'}
-async function publishV2Exercise(){if(!isV2()||!edu.item||!edu.mode)return;const boundary=window.__KANJI5_V19_V2_BOUNDARY__;if(!boundary)return;let contentId=edu.item.id||edu.item.character,provenance='local',stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'Type your answer'},answerHint=answerText(),choices=[],prompt=exercisePrompt();if(edu.mode==='meaning'){stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'e.g. school'}}else if(edu.mode==='reading'){stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'e.g. gaku or がく'}}else if(edu.mode==='production'){stimulus={kind:'meaning',primary:(edu.item.meaning||[]).join(' · ')||'—',inputPlaceholder:'Select the matching Kanji'};choices=chooseChoices(edu.item).map(item=>item.character)}else if(edu.mode==='vocabulary'&&edu.word){contentId=edu.contentId||edu.word.contentId||`${edu.item.character}:${edu.word.word}`;provenance='kanjiapi';if(edu.contentStage==='introduction'){stimulus={kind:'vocabulary-intro',primary:edu.word.word,secondary:edu.word.reading||'',translation:edu.word.meaning||''};prompt='review-new-content'}else{stimulus={kind:'masked-vocabulary',primary:edu.word.word.replaceAll(edu.item.character,'＿'),secondary:edu.word.reading||'',translation:edu.word.meaning||'',inputPlaceholder:'Select the missing Kanji'};choices=chooseChoices(edu.item).map(item=>item.character);prompt='کدام کانجی جای خالی را کامل می‌کند؟'}answerHint=`${edu.word.word} · ${edu.word.reading||''}`}else if(edu.mode==='context'&&edu.sentence){contentId=edu.contentId||edu.sentence.contentId||`${edu.item.character}:${edu.sentence.text}`;provenance='tatoeba';if(edu.contentStage==='introduction'){stimulus={kind:'context-intro',primary:edu.sentence.text,translation:edu.sentence.english||''};prompt='review-new-content'}else{stimulus={kind:'masked-context',primary:edu.sentence.text.replaceAll(edu.item.character,'＿'),translation:edu.sentence.english||'',inputPlaceholder:'Select the missing Kanji'};choices=chooseChoices(edu.item).map(item=>item.character);prompt='کدام کانجی جمله را کامل می‌کند؟'}answerHint=edu.item.character}edu.contentId=contentId;edu.taskId=`${edu.item.character}:${edu.mode}:${contentId}`;await boundary.setExercise({mode:edu.mode,prompt,character:edu.item.character,stimulus,choices,answerHint,contentId,contentVersion:'1',provenance,contentStage:edu.contentStage||'retrieval',contentState:edu.contentState||''})}function renderResult(result){if(isV2())return;const p=pane();if(!p)return;const q=result.outcome==='unknown'?'نمی‌دانستم':result.quality==='partial'?'نسبی':result.quality==='exact'?'دقیق':result.outcome==='invalid'?'نامعتبر':'نادرست';p.innerHTML=`<div class="v14-edu-wrap"><div class="v14-edu-title">${result.outcome==='unknown'?'🟡 پاسخ را نمی‌دانستم':result.correct?'✅ پاسخ درست بود':'❌ پاسخ نادرست بود'}</div><div class="v14-edu-meta">${safe(q)} · ${stageLabel(result.stage||CORE.getStage(knowledge()[edu.item.character]))}</div><div class="v14-edu-answer">پاسخ صحیح: <strong>${answerText()}</strong></div><div class="v14-edu-actions"><button type="button" class="primary" id="v14EduNext">تمرین بعدی</button><button type="button" class="secondary" id="v14EduReview">بازگشت به مرور</button></div></div>`}
-function renderChoices(items){return`<div class="v14-edu-grid">${items.map(c=>`<button type="button" class="secondary v14-edu-choice" data-choice="${safe(c.character)}">${safe(c.character)}</button>`).join('')}</div>`}
-function render(){if(isV2())return;const p=pane(),item=edu.item;if(!p||!item)return;let prompt='',body='';if(edu.mode==='meaning'){prompt='معنی این کانجی را به انگلیسی بنویس.';body=`<div class="v14-edu-kanji">${safe(item.character)}</div><input id="v14EduInput" class="v14-edu-input" autocomplete="off" spellcheck="false" placeholder="مثلاً: school">`}else if(edu.mode==='reading'){prompt='یک خوانش رایج این کانجی را بنویس؛ Hiragana یا Romaji.';body=`<div class="v14-edu-kanji">${safe(item.character)}</div><input id="v14EduInput" class="v14-edu-input" autocomplete="off" spellcheck="false" placeholder="مثلاً: gaku یا がく">`}else if(edu.mode==='production'){prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';body=`<div style="text-align:center;font-size:26px;font-weight:800;line-height:1.6">${safe((item.meaning||[]).join(' · ')||'—')}</div>${renderChoices(chooseChoices(item))}`}else if(edu.mode==='vocabulary'&&edu.word){prompt='واژهٔ کامل را به ژاپنی بنویس.';body=`<div class="v14-edu-word" style="font-size:30px;letter-spacing:0">${safe(edu.word.word.replaceAll(item.character,'＿'))}</div><div class="v14-edu-reading">${safe(edu.word.reading)}</div><div class="v14-edu-meaning">${safe(edu.word.meaning||'—')}</div><input id="v14EduVocabularyInput" class="v14-edu-input" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="واژه را وارد کن">`}else if(edu.mode==='context'&&edu.sentence){prompt='کانجیِ حذف‌شده را در جمله وارد کن.';body=`<div class="v14-edu-word" style="font-size:24px;line-height:1.8;letter-spacing:0">${safe(edu.sentence.text.replaceAll(item.character,'＿'))}</div><div class="v14-edu-meaning">${safe(edu.sentence.english||'—')}</div><input id="v14EduContextInput" class="v14-edu-input" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="کانجی را وارد کن">`}else{renderResult({correct:false,outcome:'invalid',quality:'unavailable',stage:CORE.getStage(knowledge()[item.character])});return}const check=(edu.mode==='meaning'||edu.mode==='reading')?'<button type="button" class="primary" id="v14EduSubmit">بررسی پاسخ</button>':'';p.innerHTML=`<div class="v14-edu-wrap"><div class="v14-edu-title">🧠 تمرین آموزشی</div><div class="v14-edu-meta">${stageLabel(CORE.getStage(knowledge()[item.character]))} · ${safe(edu.mode)}</div><div class="v14-edu-prompt">${safe(prompt)}</div>${body}<div class="v14-edu-actions">${check}<button type="button" class="secondary" id="v14EduDontKnow">نمی‌دانم</button></div></div>`;if(check)setTimeout(()=>{const input=edu.mode==='production'?$('#v14EduProductionInput'):edu.mode==='vocabulary'?$('#v14EduVocabularyInput'):edu.mode==='context'?$('#v14EduContextInput'):$('#v14EduInput');input?.focus()},0)}
+async function publishV2Exercise(){if(!isV2()||!edu.item||!edu.mode)return;const boundary=window.__KANJI5_V19_V2_BOUNDARY__;if(!boundary)return;let contentId=edu.item.id||edu.item.character,provenance='local',stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'Type your answer'},answerHint=answerText(),choices=[],prompt=exercisePrompt();if(edu.mode==='meaning'){stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'e.g. school'}}else if(edu.mode==='reading'){stimulus={kind:'kanji',primary:edu.item.character,inputPlaceholder:'e.g. gaku or がく'}}else if(edu.mode==='production'){stimulus={kind:'meaning',primary:(edu.item.meaning||[]).join(' · ')||'—',inputPlaceholder:'Select the matching Kanji'};choices=chooseChoices(edu.item).map(item=>item.character)}else if(edu.mode==='vocabulary'&&edu.word){contentId=edu.contentId||edu.word.contentId||`${edu.item.character}:${edu.word.word}`;provenance='kanjiapi';if(edu.contentStage==='introduction'){stimulus={kind:'vocabulary-intro',primary:edu.word.word,secondary:edu.word.reading||'',translation:edu.word.meaning||''};prompt='review-new-content'}else{stimulus={kind:'masked-vocabulary',primary:edu.word.word.replaceAll(edu.item.character,'＿'),secondary:edu.word.reading||'',translation:edu.word.meaning||'',inputPlaceholder:'Select the missing Kanji'};choices=chooseChoices(edu.item).map(item=>item.character);prompt='کدام کانجی جای خالی را کامل می‌کند؟'}answerHint=`${edu.word.word} · ${edu.word.reading||''}`}else if(edu.mode==='context'&&edu.sentence){contentId=edu.contentId||edu.sentence.contentId||`${edu.item.character}:${edu.sentence.text}`;provenance='tatoeba';if(edu.contentStage==='introduction'){stimulus={kind:'context-intro',primary:edu.sentence.text,translation:edu.sentence.english||''};prompt='review-new-content'}else{stimulus={kind:'masked-context',primary:edu.sentence.text.replaceAll(edu.item.character,'＿'),translation:edu.sentence.english||'',inputPlaceholder:'Select the missing Kanji'};choices=chooseChoices(edu.item).map(item=>item.character);prompt='کدام کانجی جمله را کامل می‌کند؟'}answerHint=edu.item.character}edu.contentId=contentId;edu.taskId=`${edu.item.character}:${edu.mode}:${contentId}`;await boundary.setExercise({mode:edu.mode,prompt,character:edu.item.character,stimulus,choices,answerHint,contentId,contentVersion:'1',provenance,contentStage:edu.contentStage||'retrieval',contentState:edu.contentState||''})}function uiNode(tag,className='',textValue=null){
+  const el=document.createElement(tag);
+  if(className)el.className=className;
+  if(textValue!==null)el.textContent=String(textValue);
+  return el
+}
+function uiButton(className,textValue,type='button'){
+  const el=uiNode('button',className,textValue);el.type=type;return el
+}
+function appendChoices(parent,items){
+  const grid=uiNode('div','v14-edu-grid');
+  items.forEach(item=>{
+    const b=uiButton('secondary v14-edu-choice',item.character);
+    b.dataset.choice=String(item.character??'');
+    grid.append(b)
+  });
+  parent.append(grid)
+}
+function renderResult(result){
+  if(isV2())return;
+  const p=pane();if(!p)return;
+  const q=result.outcome==='unknown'?'نمی‌دانستم':result.quality==='partial'?'نسبی':result.quality==='exact'?'دقیق':result.outcome==='invalid'?'نامعتبر':'نادرست';
+  p.replaceChildren();
+  const wrap=uiNode('div','v14-edu-wrap');
+  wrap.append(uiNode('div','v14-edu-title',result.outcome==='unknown'?'🟡 پاسخ را نمی‌دانستم':result.correct?'✅ پاسخ درست بود':'❌ پاسخ نادرست بود'));
+  wrap.append(uiNode('div','v14-edu-meta',q+' · '+stageLabel(result.stage||CORE.getStage(knowledge()[edu.item.character]))));
+  const answer=uiNode('div','v14-edu-answer','پاسخ صحیح: ');
+  answer.append(uiNode('strong','',answerText()));
+  const actions=uiNode('div','v14-edu-actions');
+  actions.append(uiButton('primary','تمرین بعدی'),uiButton('secondary','بازگشت به مرور'));
+  actions.children[0].id='v14EduNext';
+  actions.children[1].id='v14EduReview';
+  wrap.append(answer,actions);
+  p.append(wrap)
+}
+function render(){
+  if(isV2())return;
+  const p=pane(),item=edu.item;if(!p||!item)return;
+  let prompt='',body=null;
+  if(edu.mode==='meaning'||edu.mode==='reading'){
+    prompt=edu.mode==='meaning'?'معنی این کانجی را به انگلیسی بنویس.':'یک خوانش رایج این کانجی را بنویس؛ Hiragana یا Romaji.';
+    body=uiNode('div');
+    body.append(uiNode('div','v14-edu-kanji',item.character));
+    const input=document.createElement('input');input.id='v14EduInput';input.className='v14-edu-input';input.autocomplete='off';input.spellcheck=false;input.placeholder=edu.mode==='meaning'?'مثلاً: school':'مثلاً: gaku یا がく';
+    body.append(input)
+  }else if(edu.mode==='production'){
+    prompt='برای معنی زیر، کانجی مناسب را انتخاب کن.';
+    body=uiNode('div');
+    const meaning=uiNode('div','',((item.meaning||[]).join(' · ')||'—'));meaning.style.cssText='text-align:center;font-size:26px;font-weight:800;line-height:1.6';
+    body.append(meaning);appendChoices(body,chooseChoices(item))
+  }else if(edu.mode==='vocabulary'&&edu.word){
+    prompt='واژهٔ کامل را به ژاپنی بنویس.';
+    body=uiNode('div');
+    const word=uiNode('div','v14-edu-word',edu.word.word.replaceAll(item.character,'＿'));word.style.cssText='font-size:30px;letter-spacing:0';
+    const reading=uiNode('div','v14-edu-reading',edu.word.reading);
+    const meaning=uiNode('div','v14-edu-meaning',edu.word.meaning||'—');
+    const input=document.createElement('input');input.id='v14EduVocabularyInput';input.className='v14-edu-input';input.autocomplete='off';input.autocapitalize='none';input.spellcheck=false;input.placeholder='واژه را وارد کن';
+    body.append(word,reading,meaning,input)
+  }else if(edu.mode==='context'&&edu.sentence){
+    prompt='کانجیِ حذف‌شده را در جمله وارد کن.';
+    body=uiNode('div');
+    const sentence=uiNode('div','v14-edu-word',edu.sentence.text.replaceAll(item.character,'＿'));sentence.style.cssText='font-size:24px;line-height:1.8;letter-spacing:0';
+    const meaning=uiNode('div','v14-edu-meaning',edu.sentence.english||'—');
+    const input=document.createElement('input');input.id='v14EduContextInput';input.className='v14-edu-input';input.autocomplete='off';input.autocapitalize='none';input.spellcheck=false;input.placeholder='کانجی را وارد کن';
+    body.append(sentence,meaning,input)
+  }else{
+    renderResult({correct:false,outcome:'invalid',quality:'unavailable',stage:CORE.getStage(knowledge()[item.character])});return
+  }
+  p.replaceChildren();
+  const wrap=uiNode('div','v14-edu-wrap');
+  wrap.append(uiNode('div','v14-edu-title','🧠 تمرین آموزشی'));
+  wrap.append(uiNode('div','v14-edu-meta',stageLabel(CORE.getStage(knowledge()[item.character]))+' · '+edu.mode));
+  wrap.append(uiNode('div','v14-edu-prompt',prompt));
+  wrap.append(body);
+  const actions=uiNode('div','v14-edu-actions');
+  if(edu.mode==='meaning'||edu.mode==='reading'){
+    const submit=uiButton('primary','بررسی پاسخ');submit.id='v14EduSubmit';actions.append(submit)
+  }
+  const dontKnow=uiButton('secondary','نمی‌دانم');dontKnow.id='v14EduDontKnow';actions.append(dontKnow);
+  wrap.append(actions);p.append(wrap);
+  if(edu.mode==='meaning'||edu.mode==='reading'||edu.mode==='production'||edu.mode==='vocabulary'||edu.mode==='context'){
+    setTimeout(()=>{const input=edu.mode==='production'?$('#v14EduProductionInput'):edu.mode==='vocabulary'?$('#v14EduVocabularyInput'):edu.mode==='context'?$('#v14EduContextInput'):$('#v14EduInput');input?.focus()},0)
+  }
+}
 async function start(recoveryOverride=null){
  const p=pane(),v2=isV2();if(!p&&!v2)return;
  const seen=seenItems();
