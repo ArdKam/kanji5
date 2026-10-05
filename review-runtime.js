@@ -23,6 +23,10 @@ const CUSTOM_STUDY_STORAGE='kanji5-v2-custom-study-filter';
 let state=window.__KANJI5_STATE__.createInitial({settings:DEFAULTS});let scheduler;let customStudyCore=null;let customStudyFilter=null;let ratingTransitionLocked=false;let modernStartupReady=false;
 try{customStudyFilter=JSON.parse(sessionStorage.getItem(CUSTOM_STUDY_STORAGE)||'null')}catch(_){customStudyFilter=null}
 const $=id=>document.getElementById(id);const {todayKey,deviceId,eventId,save,loadSaved,reviveCard,hydrateCards}=window.__KANJI5_STATE__;
+function dom(tag,className='',textValue=null){const el=document.createElement(tag);if(className)el.className=className;if(textValue!==null)el.textContent=String(textValue);return el}
+function button(className,textValue,type='button'){const el=dom('button',className,textValue);el.type=type;return el}
+function metaChips(k){const chips=[];if(state.cards[k.id]?.leech)chips.push({t:'🥴 Leech',cls:'leech'});if(k.frequency)chips.push({t:'頻度 #'+k.frequency,cls:''});if(k.grade)chips.push({t:'Jōyō grade '+k.grade,cls:''});if(k.jlpt)chips.push({t:k.jlpt,cls:''});chips.push({t:String(k.strokes)+' strokes',cls:''});return chips}
+
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function speak(text){if(!text)return;if(!("speechSynthesis"in window)){toast("مرورگر شما از خواندن صدا پشتیبانی نمی‌کند.");return}try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(_){toast("پخش صدا ممکن نشد.")}}
 function initScheduler(){scheduler=fsrs({request_retention:state.settings.retention,maximum_interval:state.settings.maxInterval,enable_fuzz:true,enable_short_term:true,learning_steps:["1m","10m"],relearning_steps:["10m"]})}
@@ -91,9 +95,9 @@ function clearCustomStudyFilter(){
   next();
   return true;
 }
-function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+
 function formatInterval(card){const mins=Math.max(0,Math.round((new Date(card.due)-Date.now())/60000));if(mins<60)return`${Math.max(1,mins)}m`;const h=mins/60;if(h<24)return`${Math.round(h)}h`;return`${Math.round(h/24)}d`}
-function formatMeta(k){const chips=[];if(state.cards[k.id]?.leech)chips.push({t:"🥴 Leech",cls:" leech"});if(k.frequency)chips.push({t:`頻度 #${k.frequency}`});if(k.grade)chips.push({t:`Jōyō grade ${k.grade}`});if(k.jlpt)chips.push({t:k.jlpt});chips.push({t:`${k.strokes} strokes`});return chips.map(x=>`<span class="chip${x.cls||""}">${x.t}</span>`).join("")}
+
 function exampleComplexity(example,k){const word=String(example?.word||''),reading=String(example?.reading||'');const otherKanji=[...word].filter(ch=>/[\u3400-\u9fff]/.test(ch)&&ch!==k.character).length;return otherKanji*6+Math.max(0,[...word].length-2)*1.5+Math.max(0,[...reading].length-4)*.35}
 async function fetchExamples(k){if(state.examples[k.id])return;try{const res=await fetch(WORDS_URL(k.character),{cache:'force-cache'});if(!res.ok)return;const data=await res.json(),seen=new Set(),candidates=[];for(const e of data){for(const v of(e.variants||[])){const term=String(v.written||''),reading=String(v.pronounced||'');const meaning=(e.meanings||[]).flatMap(m=>m?.glosses||[]).slice(0,2).join('; ');if(!term||!reading||!meaning||!term.includes(k.character)||seen.has(term+'|'+reading))continue;seen.add(term+'|'+reading);candidates.push({word:term,reading,meaning})}}candidates.sort((a,b)=>exampleComplexity(a,k)-exampleComplexity(b,k)||a.word.localeCompare(b.word));state.examples[k.id]=candidates.slice(0,4);save()}catch(_){window.__KANJI5_REVIEW_EXAMPLES_DEGRADED__=true;}}
 function reviewSnapshot(){const id=state.current;if(!id)return{active:false};const item=state.deck.find(x=>x.id===id);if(!item)return{active:false};const rec=state.cards[item.id];return{active:true,character:item.character,isNew:!rec,revealed:Boolean(state.revealed),meanings:Array.isArray(item.meaning)?item.meaning.slice(0,8):[],on:Array.isArray(item.on)?item.on.slice(0,8):[],kun:Array.isArray(item.kun)?item.kun.slice(0,8):[],examples:state.revealed&&Array.isArray(state.examples[item.id])?state.examples[item.id].slice(0,6).map(x=>({word:x.word,reading:x.reading,meaning:x.meaning})):[],hint:rec?'اول خودت معنی یا خوانش را حدس بزن.':'این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر.',revealLabel:rec?'نمایش پاسخ':'نمایش اطلاعات کانجی',contentId:String(item.id||item.character)};}
