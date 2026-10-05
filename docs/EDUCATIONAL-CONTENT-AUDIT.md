@@ -1,7 +1,7 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
 **Audit date:** 2026-10-05
-**Audited implementation baseline:** `c4-educational-validity` @ `0b53e1b629c58e627bd64bdbfcedd509a6aa9da6`
+**Audited implementation baseline:** `c4-educational-validity` @ `a986dc6fa5ae29fa9f9da63a910f2184f15d62c1`
 **Release-candidate note:** this SHA is the pre-documentation verification baseline; C4 is not marked DONE until the remaining empirical/content-review gates are independently satisfied.  
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
@@ -50,7 +50,7 @@ The product currently has several places where implementation is more conservati
 
 ## 3. Verification evidence — 2026-10-05
 
-The C4 release candidate was inspected against `main` @ `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d`. The implementation verification baseline recorded above is the final code/test SHA before this documentation update.
+The C4 release candidate was inspected against `main` @ `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d`. The implementation verification baseline recorded above is the final code/test SHA before this documentation update; no code changes follow this baseline.
 
 Focused runtime spot checks executed in the isolated verification environment:
 - learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, duplicate/invalid example rejection;
