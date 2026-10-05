@@ -791,9 +791,9 @@ Audit:
 
 ## C4. Educational content & assessment validity — BLOCKER for Public Beta
 
-### Status — 2026-10-03
+### Status — 2026-10-05
 
-**BLOCKER.** The educational/content audit found that several features are technically implemented but not yet strong enough to support their strongest learner-facing claims.
+**PARTIAL — implementation gates materially advanced; Public Beta acceptance still blocked.** The C4 implementation now corrects the Production default, exposes conservative Vocabulary/Context modality labels, adds learner-priority meaning/reading projection, and surfaces placement uncertainty. Remaining Public Beta blockers are empirical placement-stability validation and independent human/content QA.
 
 See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
@@ -811,22 +811,27 @@ Implemented on current `main`:
 - regression coverage for answer-position assumptions and the 16-question contract.
 
 Remaining before Public Beta:
-- explicit boundary-case/uncertainty presentation and empirical validation of placement stability;
-- broader synonym/ambiguous-meaning fixtures;
-- explicit policy/evidence for how N1 should be treated for users above N2.
+- empirical validation of placement stability/bias across representative boundary response patterns;
+- broader high-risk synonym/ambiguous-meaning fixture coverage;
+- independent human/content QA recorded against the frozen release SHA.
 
 
 ### C4.2 Exercise-modality fidelity
 
-- Production: independent Kanji production is the default; reveal/self-report is lower-evidence fallback.
-- Vocabulary: distinguish word recognition, missing-Kanji completion, and independent word production.
-- Context: distinguish guided recognition, sentence completion, and free contextual retrieval.
+**Updated on 2026-10-05.**
+
+- Production: typed independent Kanji production is now the default; reveal/self-report and choice-hint paths are lower-evidence alternatives.
+- Vocabulary: current UI is explicitly labeled cued Kanji completion.
+- Context: current UI is explicitly labeled cued sentence completion.
+- Evidence preserves modality, independence, recovery, and reveal metadata; hint-assisted production is recorded as `cued_production` rather than independent production.
 - Preserve modality, independence, recovery, and reveal metadata in evidence and Stats.
 - Ensure UI copy describes the modality actually being tested.
 
 ### C4.3 Learner-facing Kanji content model
 
-Add a learner-oriented content layer over dictionary/source data:
+**Implementation added on 2026-10-05; human QA still pending.**
+
+The learner-facing projection now defines:
 
 - primary meanings
 - secondary/common meanings
@@ -840,6 +845,8 @@ Add a learner-oriented content layer over dictionary/source data:
 Do not delete source meanings; reclassify their learner priority.
 
 ### C4.4 Vocabulary and Context content QA
+
+**Implementation/fixture layer added on 2026-10-05; independent human QA remains required.**
 
 For sampled and high-priority content, review:
 
@@ -857,6 +864,8 @@ Structural validation alone is not sufficient for public-beta content acceptance
 
 ### C4.5 Mnemonic quality
 
+**Provenance checks retained and regression-covered on 2026-10-05; human review remains pending.**
+
 - Keep curated, generated/scaffolded, and personal mnemonics explicitly distinct.
 - Grow curated coverage for high-frequency, high-confusion, irregular-reading, and visually deceptive Kanji.
 - Add human review alongside structural/regex checks.
@@ -873,7 +882,7 @@ Structural validation alone is not sufficient for public-beta content acceptance
 
 ### C4.7 Acceptance evidence
 
-C4 is complete only when applicable:
+**Current status: PARTIAL.** C4 is not marked DONE. It is complete only when applicable:
 
 - the Educational Content Audit has no unresolved P0 issue;
 - placement bias/validity tests pass;
