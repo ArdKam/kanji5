@@ -12,6 +12,7 @@ const SESSION_HISTORY_KEY=K.sessionHistory;
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
+const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
 const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
 let supabaseRuntimePromise = null;
 
@@ -80,6 +81,13 @@ function localPayload() {
 
 function safeJSON(raw, fallback) {
   try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
+}
+
+function assertSyncPayloadWithinLimit(payload) {
+  const json = JSON.stringify(stablePayload(payload || {}));
+  const bytes = typeof TextEncoder === 'function' ? new TextEncoder().encode(json).byteLength : json.length;
+  if (bytes > MAX_SYNC_PAYLOAD_BYTES) throw new Error('SYNC_PAYLOAD_TOO_LARGE');
+  return payload;
 }
 
 function readSyncSummary() {
@@ -187,12 +195,14 @@ async function readRemote() {
     .eq('user_id', user.id)
     .maybeSingle();
   if (error) throw error;
+  if (data?.payload) assertSyncPayloadWithinLimit(data.payload);
   return data ? { payload: data.payload || null, updatedAt: data.updated_at || null } : null;
 }
 
 async function replaceRemote(payload, expectedUpdatedAt = null) {
   const c = await getClient();
   const now = new Date().toISOString();
+  assertSyncPayloadWithinLimit(payload);
   const rowPayload = stablePayload({ ...payload });
   if (expectedUpdatedAt) {
     const { data, error } = await c.from('user_learning_state')
