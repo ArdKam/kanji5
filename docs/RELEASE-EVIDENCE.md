@@ -57,3 +57,18 @@ Performance evidence on that exact main candidate:
 
 The final A1 candidate is this commit. Its exact-SHA React workflow and GitHub Pages deployment are the authoritative promotion gate; no A1 completion claim is valid unless both are successful and the live artifact/smoke checks remain green for this exact SHA.
 
+
+## Current-main post-A1 changes — 2026-10-05
+
+The exact A1 candidate recorded above was later advanced on `main`. The following merged changes are verified on current `main` and therefore count as implemented, but they invalidate the earlier A1 candidate for release-lock purposes until the new head is re-verified.
+
+- **PR #463 / merge `708244a5ae096fba4c926ca6bb25c33978341d83` — R11 observability hardening.** Runtime diagnostics now cover service-worker registration/install failure, dynamic-import/runtime load failures, network/runtime load failures, education/migration failures, sync-client/bootstrap failures, and asset-load failures, with bounded local diagnostics. Earlier merged React render-failure containment remains the actionable UI recovery layer.
+- **PR #464 / merge `2618d779222c00b906466a122762a19eb44a4f6c` — final Kanji public UX/accessibility QA.** Concrete defects were closed in Production Recall keyboard shortcuts, Handwriting radio-group keyboard navigation, Settings destructive confirmations/focus restoration, and Reading Lab dictionary-catalog error/retry behavior, with regression coverage.
+- **R2 onboarding implementation** remains on current `main` through the merged placement/onboarding work (#451/#453/#454/#456); its remaining status is release/device/educational evidence, not missing core implementation.
+
+### Current-main release-lock state
+
+- Current `main`: `2618d779222c00b906466a122762a19eb44a4f6c`.
+- React presentation workflow for this SHA: run `37358688159`, **failed** at the account shell gate after earlier build, artifact, E2E, accessibility, browser, PWA, and release-matrix steps passed.
+- GitHub Pages deployment for this SHA: run `37359308280`, **skipped** because the React presentation workflow did not complete successfully.
+- Therefore this SHA is **not an A1 release candidate**. A fresh exact-SHA release lock requires green React CI, matching Pages deployment, same-SHA live artifact/hash equality, live smoke, cache/stale-client/offline verification, and the applicable device/accessibility evidence.
