@@ -192,7 +192,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
-- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md; C4 is required before Public Beta.
+- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 implements and verifies the C4 runtime/assessment changes, but C4 remains PARTIAL until representative psychometric validation and independent human/content QA are recorded against the final candidate.
 
 **PENDING:**
 - R18 Public Beta.
