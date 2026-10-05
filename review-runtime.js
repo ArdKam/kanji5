@@ -105,9 +105,54 @@ function notifyV2Learning(){if(!IS_LEGACY&&!modernStartupReady)return;try{window
 function directReveal(){if(!state.current)return false;state.revealed=true;const item=state.deck.find(x=>x.id===state.current);if(item)void fetchExamples(item).then(()=>notifyV2Learning());notifyV2Learning();return true}
 async function directRate(rating){await ensureFsrs();if(!Rating||Rating[rating]===undefined)return false;return review(rating)}
 function updateRuntimeSettings(next={}){state.settings={...state.settings,...next,dailyNew:Math.min(30,Math.max(1,Number(next.dailyNew)||state.settings.dailyNew)),dailyGoal:Math.min(500,Math.max(1,Number(next.dailyGoal)||state.settings.dailyGoal)),leechThreshold:Math.min(30,Math.max(2,Number(next.leechThreshold)||state.settings.leechThreshold))};if(fsrs)initScheduler();save();return true}
-function renderEmpty(){const remaining=state.deck.filter(k=>!state.cards[k.id]).length;$("study").innerHTML=`<div class="empty"><div style="font-size:58px">✓</div><h2>${remaining?"برای امروز تمام شد.":"دورهٔ ۲۱۳۶ کانجی تمام شد!"}</h2><p>${remaining?"مرورهای انجام‌شده ذخیره شدند؛ فردا ۵ کانجی جدید اضافه می‌شود.":"می‌توانی مرورهایت را ادامه بدهی یا دوره را از تنظیمات بازنشانی کنی."}</p>${!remaining?'<button class="secondary" id="resetInline">شروع دوباره</button>':""}</div>`;$("resetInline")?.addEventListener("click",resetAll)}
-let upcomingReviewsTimerStarted=false;function ensureUpcomingReviewsUI(){const studyPanel=$("studyPanel");if(!studyPanel)return null;let panel=$("upcomingReviews");if(panel)return panel;panel=document.createElement('section');panel.id='upcomingReviews';panel.className='panel';panel.style.marginTop='14px';panel.innerHTML='<div style="font-weight:850;font-size:16px;margin-bottom:8px">مرورهای پیش‌رو</div><div id="upcomingReviewsBody" style="color:var(--muted);font-size:13px">—</div>';studyPanel.insertAdjacentElement('afterend',panel);return panel}
-function updateUpcomingReviews(){const panel=ensureUpcomingReviewsUI(),body=$("upcomingReviewsBody");if(!panel||!body)return;const now=Date.now();const rows=state.deck.map(item=>{const card=state.cards[item.id]?.card;if(!card?.due)return null;const due=new Date(card.due).getTime();return Number.isFinite(due)&&due>now?{item,due}:null}).filter(Boolean).sort((a,b)=>a.due-b.due).slice(0,6);if(!rows.length){body.textContent='فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';return}body.innerHTML=rows.map(row=>{const mins=Math.max(1,Math.round((row.due-now)/60000));let when;if(mins<60)when=String(mins)+' دقیقه دیگر';else if(mins<1440)when=String(Math.round(mins/60))+' ساعت دیگر';else when=String(Math.round(mins/1440))+' روز دیگر';return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><strong>'+row.item.character+'</strong><span>'+when+'</span></div>'}).join('')}
+function renderEmpty(){
+  const study=$("study");
+  if(!study)return;
+  const remaining=state.deck.filter(k=>!state.cards[k.id]).length;
+  study.replaceChildren();
+  const empty=dom('div','empty');
+  empty.append(dom('div','', '✓'),dom('h2','',remaining?'برای امروز تمام شد.':'دورهٔ ۲۱۳۶ کانجی تمام شد!'),dom('p','',remaining?'مرورهای انجام‌شده ذخیره شدند؛ فردا ۵ کانجی جدید اضافه می‌شود.':'می‌توانی مرورهایت را ادامه بدهی یا دوره را از تنظیمات بازنشانی کنی.'));
+  const resetButton=!remaining?button('secondary','شروع دوباره'):null;
+  if(resetButton){resetButton.id='resetInline';empty.append(resetButton);}
+  if(!remaining)empty.querySelector('div').style.fontSize='58px';
+  study.append(empty);
+  resetButton?.addEventListener('click',resetAll);
+}
+let upcomingReviewsTimerStarted=false;
+function ensureUpcomingReviewsUI(){
+  const studyPanel=$("studyPanel");
+  if(!studyPanel)return null;
+  let panel=$("upcomingReviews");
+  if(panel)return panel;
+  panel=dom('section','panel');
+  panel.id='upcomingReviews';
+  panel.style.marginTop='14px';
+  const heading=dom('div','', 'مرورهای پیش‌رو');
+  heading.style.fontWeight='850';heading.style.fontSize='16px';heading.style.marginBottom='8px';
+  const body=dom('div','', '—');
+  body.id='upcomingReviewsBody';body.style.color='var(--muted)';body.style.fontSize='13px';
+  panel.append(heading,body);
+  studyPanel.parentNode.insertBefore(panel,studyPanel.nextSibling);
+  return panel;
+}
+function updateUpcomingReviews(){
+  const panel=ensureUpcomingReviewsUI(),body=$("upcomingReviewsBody");
+  if(!panel||!body)return;
+  const now=Date.now();
+  const rows=state.deck.map(item=>{
+    const card=state.cards[item.id]?.card;if(!card?.due)return null;
+    const due=new Date(card.due).getTime();
+    return Number.isFinite(due)&&due>now?{item,due}:null;
+  }).filter(Boolean).sort((a,b)=>a.due-b.due).slice(0,6);
+  body.replaceChildren();
+  if(!rows.length){body.textContent='فعلاً مرور زمان‌بندی‌شده‌ای در آینده وجود ندارد.';return}
+  rows.forEach(row=>{
+    const mins=Math.max(1,Math.round((row.due-now)/60000));
+    let when;if(mins<60)when=String(mins)+' دقیقه دیگر';else if(mins<1440)when=String(Math.round(mins/60))+' ساعت دیگر';else when=String(Math.round(mins/1440))+' روز دیگر';
+    const line=dom('div');line.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)';
+    line.append(dom('strong','',row.item.character),dom('span','',when));body.append(line);
+  });
+}
 function startUpcomingReviews(){if(upcomingReviewsTimerStarted)return;upcomingReviewsTimerStarted=true;updateUpcomingReviews();setInterval(updateUpcomingReviews,15000)}
 function renderCard(){startUpcomingReviews();const id=state.current;if(!id){renderEmpty();updateStats();return}const item=state.deck.find(x=>x.id===id),rec=state.cards[item.id],card=rec?.card;if(card)reviveCard(card);const preview=card?scheduler.repeat(card,new Date()):null;const getPreview=r=>{try{return formatInterval(preview[r].card)}catch(_){return"—"}};$("study").innerHTML=`<div class="kanjirow"><div class="kanji" data-kanji-id="${item.id}">${item.character}</div></div><div class="first-exposure-reading" style="display:${!rec?"block":"none"}"><div class="hira">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3):[]).join(" · ")}</div></div><div style="text-align:center;margin:-6px 0 14px"><button class="audiobtn" id="speakKanjiBtn" aria-label="تلفظ کانجی">🔊 تلفظ</button></div><div class="hint">${rec?"اول خودت معنی یا خوانش را حدس بزن.":"این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر."}</div><button class="reveal" id="revealBtn">${rec?"نمایش پاسخ":"نمایش اطلاعات کانجی"}</button><div class="answer ${state.revealed?'show':''}" id="answerBox"><div class="answerbox"><div class="meaning">${item.meaning.join(" · ")||"—"}</div><div class="readings"><div class="readbox"><div class="t"><span>On'yomi</span>${item.on.length?'<button class="audiobtn" data-speak="'+item.on.join(" ")+'" aria-label="تلفظ آن‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.on.length?item.on.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div><div class="readbox"><div class="t"><span>Kun'yomi</span>${item.kun.length?'<button class="audiobtn" data-speak="'+item.kun.join(" ")+'" aria-label="تلفظ آن‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.kun.length?item.kun.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div></div><div class="examples" id="examples"></div><div class="meta">${formatMeta(item)}</div></div><div class="ratings ${state.revealed?'show':''}" id="ratings"><button class="rate again" data-r="Again">Again<small>${getPreview(Rating.Again)}</small></button><button class="rate hard" data-r="Hard">Hard<small>${getPreview(Rating.Hard)}</small></button><button class="rate good" data-r="Good">Good<small>${getPreview(Rating.Good)}</small></button><button class="rate easy" data-r="Easy">Easy<small>${getPreview(Rating.Easy)}</small></button></div></div>`;
 $("revealBtn").addEventListener("click",()=>{if(!window.__KANJI5_CANONICAL_REVEAL__&&rec){window.__KANJI5_V12_OPEN_RECALL__?.();return}if(window.__KANJI5_CANONICAL_REVEAL__)delete window.__KANJI5_CANONICAL_REVEAL__;state.revealed=true;renderCard();fetchExamples(item).then(renderExamples)});
