@@ -1043,7 +1043,7 @@ Verify:
 
 Do **not** start with a full IndexedDB rewrite just because public users are coming.
 
-First establish a domain-neutral storage abstraction. This remains pending on current `main`; PR #389 is the candidate seam and is not counted until merged and re-verified.
+Domain-neutral persistence is now implemented on current `main` via the Data Trust R4 stream (PR #467). R4 remains open only for final external evidence: live authenticated production sync/conflict verification and post-merge re-verification.
 
 Conceptually:
 
@@ -1070,7 +1070,7 @@ justify it.
 
 ## R5. Review-history scalability
 
-Current state is bounded/compacted rather than an unlimited event store.
+Current state is bounded/compacted rather than an unlimited event store. R5 is implemented on current `main` with a 2,000-event operational cap, separate cumulative review aggregates, and a 90-day daily rollup; final completion still requires post-merge verification.
 
 Do not assume an obsolete numeric cap from older audits.
 
@@ -1086,7 +1086,7 @@ Required work:
 
 ## R6. Backup / Restore
 
-Make Backup/Restore a public-quality feature.
+Backup/Restore is implemented on current `main` as a versioned v2 envelope with v1 migration, integrity validation, and journaled rollback/startup recovery. R6 remains open only for physical real-device success/failure/rollback evidence and post-merge verification.
 
 Backup must be:
 
