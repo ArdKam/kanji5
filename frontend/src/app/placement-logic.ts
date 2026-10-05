@@ -55,11 +55,7 @@ function stableHash(value: string): number {
 }
 
 function seededUnit(seed: number, salt: string): number {
-  let x = (seed ^ stableHash(salt)) >>> 0;
-  x ^= x << 13;
-  x ^= x >>> 17;
-  x ^= x << 5;
-  return (x >>> 0) / 4294967296;
+  return stableHash(String(seed) + ":" + salt) / 4294967296;
 }
 
 function shuffleWithSeed<T>(values: T[], seed: number, salt: string): T[] {
