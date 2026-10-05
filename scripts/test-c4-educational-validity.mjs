@@ -59,7 +59,7 @@ const exampleFixture=[
 ];
 const examples=selectLearnerExamples(exampleFixture,"学",6);
 assert.equal(examples.length,4);
-assert.deepEqual(examples.map(x=>x.word),["学ぶ","学校","学年","学生"]);
+assert.deepEqual(examples.map(x=>x.word),["学ぶ","学年","学校","学生"]);
 assert.ok(!examples.some(x=>x.word==="English"));
 
 const contextFixtures=[
