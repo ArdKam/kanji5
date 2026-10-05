@@ -4,7 +4,7 @@ export const DOMAINS=Object.freeze(['kanji','vocabulary','context','grammar']);
 const MODE_DEFINITIONS=Object.freeze({
   meaning:Object.freeze({domain:'kanji',skill:'meaning',exercise:'free-recall'}),
   reading:Object.freeze({domain:'kanji',skill:'reading',exercise:'free-recall'}),
-  production:Object.freeze({domain:'kanji',skill:'production',exercise:'recognition-choice'}),
+  production:Object.freeze({domain:'kanji',skill:'production',exercise:'typed-kanji-production'}),
   vocabulary:Object.freeze({domain:'kanji',skill:'word-completion',exercise:'word-completion'}),
   context:Object.freeze({domain:'kanji',skill:'context',exercise:'kanji-cloze'})
 });
