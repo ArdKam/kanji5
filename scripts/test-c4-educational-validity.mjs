@@ -24,7 +24,7 @@ for(const marker of [
   "content-exposure",
 ]) assert.ok(education.includes(marker),`missing educational modality marker: ${marker}`);
 
-assert.match(app,/production\.\.showProductionOptions\?\{hintUsed:true\}/);
+assert.match(app,/production&&showProductionOptions\?\{hintUsed:true\}/);
 assert.match(boundary,/submitExercise\(value,meta=\{\}\)/);
 assert.match(boundary,/fn\(String\(value\?\?''\),meta&&typeof meta==='object'\?meta:\{\}\)/);
 
