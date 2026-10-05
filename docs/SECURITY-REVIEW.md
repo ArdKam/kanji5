@@ -49,9 +49,9 @@ A live transaction tested an authenticated role with a non-owner JWT subject: it
 
 ### 5. Backup integrity / tampering — VERIFIED for local restore path in source tests
 
-Portable backups are now version 2 and use Web Crypto SHA-256 over the complete backup envelope (format, version, timestamp, data, metadata, and summary). The restore path verifies the checksum before applying the data.
+Portable backups are now version 2 and use SHA-256 over the complete backup envelope (format, version, timestamp, data, metadata, and summary). The restore path verifies the checksum before applying the data.
 
-R12 also limits imported backup files to 5 MiB in the UI and adds a focused tamper regression. A modified backup is rejected without replacing current state.
+R12 also limits imported backup files to 5 MiB in the UI and adds a focused tamper regression. The checksum implementation is synchronous so the existing backup boundary contract is unchanged. A modified backup is rejected without replacing current state.
 
 This is an **integrity check, not authenticity**: a party that can arbitrarily execute trusted client code can recompute a client-side checksum. Cloud synchronization remains protected by authenticated Supabase access controls and RLS.
 
