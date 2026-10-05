@@ -147,6 +147,7 @@ function validPortableBackup(backup){
   if(!data||!safeObject(data.core)||!safeObject(data.education)||!Array.isArray(data.sessionHistory)||safeObject(data.components)===null||!metadata||!summary)return false;
   try{return String(backup.checksum||'')===portableChecksum(backup)}catch(_){return false}
 }
+function clampNumber(value,min,max,fallback){const n=Number(value);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):fallback}
 function sanitizePortableData(backup){
   const data=backup.data||{},core=data.core||{},education=data.education||{};
   const statePayload={settings:{...defaults,dailyNew:Math.round(clampNumber(core.settings?.dailyNew,1,30,defaults.dailyNew)),retention:clampNumber(core.settings?.retention,.8,.98,defaults.retention),maxInterval:Math.round(clampNumber(core.settings?.maxInterval,1,36500,defaults.maxInterval)),dailyGoal:Math.round(clampNumber(core.settings?.dailyGoal,1,500,defaults.dailyGoal)),leechThreshold:Math.round(clampNumber(core.settings?.leechThreshold,2,30,defaults.leechThreshold))},today:typeof core.today==='string'?core.today:'',todayNew:Math.max(0,Math.round(Number(core.todayNew)||0)),todayReviewCount:Math.max(0,Math.round(Number(core.todayReviewCount)||0)),goalCelebrated:Boolean(core.goalCelebrated),streak:safeObject(core.streak)||{current:0,longest:0,lastActiveDate:null},cards:safeObject(core.cards)||{},reviews:compactReviews(core.reviews,2000),knowledge:safeObject(core.knowledge)||{}};
