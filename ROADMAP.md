@@ -407,26 +407,20 @@ This phase makes the existing Kanji product trustworthy before new learning doma
 
 ## A1. Release/runtime integrity
 
-### PARTIAL — final release verification remains
+### DONE — 2026-10-05
 
-- \`app-bootstrap.js\` loading restored.
-- \`react-dist/\` removed from git.
-- CI builds React from source.
-- production artifact checks exist.
-- \`index.html\` substantially reduced and inline CSS removed.
-- legacy path explicitly gated.
+The release/runtime integrity gate is verified through the exact promoted main candidate and production deployment.
 
-### PENDING
+- React presentation workflow passed all 43 release steps on the candidate SHA.
+- GitHub Pages deployed the same candidate SHA and recorded the same `pages_build_version`.
+- Staged/live SHA-256 equality passed for `index.html`, `react-entry.js`, `sw.js`, React JS, and React CSS.
+- Live production smoke passed first open, React shell/bootstrap, Learning reveal/rating, review persistence across reload, Active Recall, Dictionary, Reading Lab persistence, Stats, Settings/backup, Account, cache checks, and uncaught-error detection.
+- Offline and stale-client PWA gates passed.
+- Firefox, WebKit, accessibility, final release matrix, onboarding, account, mnemonic, Learning/Review, and Production Recall release gates passed.
+- Startup performance budgets passed for desktop and the 390×844 mobile profile.
+- Release evidence is recorded in `docs/RELEASE-EVIDENCE.md`, bound to the exact immutable candidate commit.
 
-- finish current-main React/engine release verification
-- verify the live Pages asset graph for the merged release
-- verify cold/repeat offline behavior
-- verify cache invalidation and stale-client recovery
-- measure startup on representative mobile devices
-- track LCP/INP/CLS and long-task causes
-- treat missing assets/font failures/dynamic imports/offline regressions as blockers
-
----
+No Vocabulary, Grammar, R4 persistence migration, R11 observability, R12 security redesign, C4 educational-content work, or unrelated product changes are included in A1.
 
 ## A2. Learning / Active Recall
 
