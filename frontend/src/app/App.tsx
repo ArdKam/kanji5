@@ -654,6 +654,19 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
     }
   };
 
+  useEffect(()=>{
+    if(!production||!productionRevealed||busy||result)return;
+    const onGradeKeyDown=(event:KeyboardEvent)=>{
+      if(event.defaultPrevented||(event.key!=="1"&&event.key!=="2"))return;
+      const active=document.activeElement;
+      if(active instanceof HTMLElement && active.closest("input,textarea,select,button,a,summary,[role],[contenteditable='true']"))return;
+      event.preventDefault();
+      void handleProductionGrade(event.key==="1");
+    };
+    window.addEventListener("keydown",onGradeKeyDown);
+    return()=>window.removeEventListener("keydown",onGradeKeyDown);
+  },[busy,handleProductionGrade,production,productionRevealed,result]);
+
   const resultClass=result?(result.correct?" is-correct exercise-result-correct":" is-wrong exercise-result-wrong"):"";
   const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
   const disabled=busy||lockedRef.current||Boolean(result);
