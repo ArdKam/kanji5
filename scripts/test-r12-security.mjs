@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const read = file => fs.readFileSync(file, "utf8");
 const root = path.resolve(".");
@@ -10,6 +11,15 @@ const runtimeFiles = fs.readdirSync(root, { withFileTypes: true })
   .sort();
 
 for (const file of runtimeFiles) assert.ok(fs.existsSync(path.join(root, file)), `R12_RUNTIME_FILE_MISSING: ${file}`);
+
+for (const file of runtimeFiles) {
+  const check = spawnSync(process.execPath, ["--check", path.join(root, file)], { encoding: "utf8" });
+  assert.equal(
+    check.status,
+    0,
+    `R12_RUNTIME_SYNTAX_INVALID: ${file}${check.stderr ? `\\n${check.stderr}` : ""}`
+  );
+}
 
 const unsafeSink = /(?:dangerouslySetInnerHTML|\.innerHTML\s*=|insertAdjacentHTML\s*\(|outerHTML\s*=|srcdoc\s*=|document\.write\s*\()/;
 for (const file of runtimeFiles) {
