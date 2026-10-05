@@ -24,7 +24,6 @@ const runtimeFiles = [
   "v1.5-network.js",
   "v1.5-p0.js",
   "v1.5-recall-core.js",
-  "v1.5-session.js",
   "v1.5-session-analytics.js",
   "v1.5-session-core.js",
   "v1.5-session-feedback.js",
