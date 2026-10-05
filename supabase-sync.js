@@ -13,6 +13,7 @@ const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
 const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
+const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
 const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
 let supabaseRuntimePromise = null;
 
@@ -77,6 +78,14 @@ function localPayload() {
     components: components && typeof components === 'object' ? components : {},
     skillProfile: components?.v16SkillProfile && typeof components.v16SkillProfile === 'object' ? components.v16SkillProfile : null
   };
+}
+
+function assertSyncPayloadWithinLimit(payload){
+  const bytes=typeof TextEncoder==='undefined'
+    ? JSON.stringify(payload).length
+    : new TextEncoder().encode(JSON.stringify(payload)).byteLength;
+  if(bytes>MAX_SYNC_PAYLOAD_BYTES)throw new Error('SYNC_PAYLOAD_TOO_LARGE');
+  return payload;
 }
 
 function safeJSON(raw, fallback) {
@@ -253,7 +262,7 @@ async function refreshPresentationAfterSync() {
 }
 
 async function syncOnce() {
-  const local = localPayload();
+  const local = assertSyncPayloadWithinLimit(localPayload());
   const remoteRow = await readRemote();
   if (!remoteRow?.payload) {
     const result = await replaceRemote(local);
@@ -263,10 +272,11 @@ async function syncOnce() {
     return { retry: false };
   }
 
-  const merged = mergedPayload(local, remoteRow.payload);
+  const merged = assertSyncPayloadWithinLimit(mergedPayload(local, remoteRow.payload));
   const localHash = hashPayload(local);
   const mergedHash = hashPayload(merged);
-  const remoteHash = hashPayload(remoteRow.payload);
+  const remotePayload = assertSyncPayloadWithinLimit(remoteRow.payload);
+  const remoteHash = hashPayload(remotePayload);
 
   if (mergedHash === localHash && mergedHash === remoteHash) {
     localStorage.setItem(SYNC_META_KEY, JSON.stringify({
