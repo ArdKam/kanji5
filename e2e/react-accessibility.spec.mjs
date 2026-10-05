@@ -428,3 +428,65 @@ test('English shell does not retain Persian presentation labels',async({page})=>
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('button',{name:'Close menu'})).toBeVisible();
 });
+
+test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
+  await clean(page);
+  const original=await page.evaluate(()=>{
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    if(!boundary)throw new Error("V2 boundary unavailable");
+    const original=boundary.listKanji;
+    boundary.listKanji=async()=>{throw new Error("intentional test failure");};
+    (window).__kanji5OriginalListKanji=original;
+    return true;
+  });
+
+  await page.getByRole("button",{name:"بیشتر"}).click();
+  await page.getByRole("button",{name:"آزمایشگاه خواندن"}).click();
+  const labDialog=page.locator(".reading-lab-dialog");
+  await expect(labDialog).toBeVisible({timeout:10000});
+  await expect(labDialog.locator(".reading-lab-catalog-error")).toContainText("دادهٔ فرهنگ لغت در دسترس نیست.");
+  const retry=labDialog.getByRole("button",{name:"دوباره تلاش کن",exact:true});
+  await expect(retry).toBeVisible();
+
+  await page.evaluate(()=>{
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    const original=(window).__kanji5OriginalListKanji;
+    if(!boundary||typeof original!=="function")throw new Error("Original listKanji unavailable");
+    boundary.listKanji=original;
+  });
+  await retry.click();
+  await expect(labDialog.locator(".reading-lab")).toBeVisible({timeout:10000});
+});
+
+test("Settings destructive confirmations move focus into the confirmation and keep Tab inside it",async({page})=>{
+  await clean(page);
+  await page.getByRole("button",{name:"بیشتر"}).click();
+  await page.getByRole("button",{name:"تنظیمات"}).click();
+  const settings=page.locator(".settings-dialog");
+  await expect(settings).toBeVisible({timeout:10000});
+
+  const numberInput=settings.locator('input[type="number"]').first();
+  await numberInput.fill("6");
+  await settings.locator(".settings-save-actions .button.secondary").click();
+
+  const discard=settings.locator(".settings-discard-dialog");
+  await expect(discard).toBeVisible();
+  const buttons=discard.getByRole("button");
+  await expect(buttons).toHaveCount(2);
+  await expect(buttons.first()).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(buttons.last()).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(buttons.first()).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(discard).toBeHidden();
+
+  const reset=settings.locator(".settings-reset-trigger");
+  await reset.click();
+  const resetDialog=settings.locator(".settings-reset-confirmation");
+  await expect(resetDialog).toBeVisible();
+  const resetButtons=resetDialog.getByRole("button");
+  await expect(resetButtons.first()).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(resetDialog).toBeHidden();
+});
