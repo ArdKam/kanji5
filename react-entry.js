@@ -2,8 +2,24 @@
 'use strict';
 document.documentElement.classList.add('kanji5-react-default');
 const buildId=(document.querySelector('meta[name="kanji5-build-id"]')?.getAttribute('content')||'dev').trim()||'dev';
+const observability=()=>window.__KANJI5_OBSERVABILITY__;
 const assetVersion='?v='+encodeURIComponent(buildId);
 const startupRoot=document.getElementById('kanji5-startup-shell');
+function downloadBackup(){
+  const createBackup=window.__KANJI5_V19_V2_BOUNDARY__?.createBackup;
+  if(typeof createBackup!=='function')throw new Error('KANJI5_BACKUP_UNAVAILABLE');
+  return Promise.resolve(createBackup()).then(backup=>{
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+    anchor.href=url;anchor.download=`kanji5-startup-backup-${new Date().toISOString().slice(0,10)}.json`;anchor.click();URL.revokeObjectURL(url);
+  });
+}
+async function copyDiagnostics(error){
+  const capture=observability()?.capture;
+  const entry=typeof capture==='function'?capture('react-startup-report-requested',error,{module:'react-dist/kanji5-react.js',dataAffected:'unknown'}):null;
+  const report={release:buildId,path:location.pathname,error:{name:String(error?.name||'Error'),message:String(error?.message||error||'')},recent:observability()?.list?.().slice(-8)||[],entry};
+  await navigator.clipboard.writeText(JSON.stringify(report,null,2));
+}
 const startupObserver=startupRoot?new MutationObserver(()=>{
   if(document.querySelector('#root .app-shell')){
     startupRoot.classList.add('is-ready');
@@ -26,6 +42,7 @@ if(!reactStylesheet){
   document.head.appendChild(reactStylesheet);
 }
 function showReactBootFailure(error){
+  observability()?.capture?.('react-startup-failure',error,{module:'react-dist/kanji5-react.js',dataAffected:'unknown'});
   if(!startupRoot)return;
   startupRoot.classList.remove('is-ready');
   startupRoot.classList.add('is-error');
@@ -41,32 +58,42 @@ function showReactBootFailure(error){
   title.className='kanji5-startup-error-title';
   const copy=document.createElement('p');
   copy.className='kanji5-startup-error-copy';
-  const action=document.createElement('button');
-  action.className='kanji5-startup-error-action';
-  action.type='button';
+  const actions=document.createElement('div');
+  actions.className='kanji5-startup-error-actions';
+  const makeAction=(label,onClick,primary=false)=>{const button=document.createElement('button');button.className=primary?'kanji5-startup-error-action':'kanji5-startup-error-secondary';button.type='button';button.textContent=label;button.addEventListener('click',onClick);actions.appendChild(button);return button};
   const isFa=document.documentElement.lang==='fa';
   title.textContent=isFa?'کانجی‌یار باز نشد':'Kanji5 could not start';
   copy.textContent=isFa?'یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد. صفحه را دوباره بارگذاری کنید.':'A required application file could not be loaded for this release. Reload the page and try again.';
-  action.textContent=isFa?'بارگذاری دوباره':'Reload';
-  action.addEventListener('click',()=>window.location.reload());
-  card.append(mark,title,copy,action);
+  makeAction(isFa?'بارگذاری دوباره':'Reload',()=>window.location.reload(),true);
+  makeAction(isFa?'پشتیبان‌گیری':'Export backup',button=>{const target=button.currentTarget;target.disabled=true;void downloadBackup().then(()=>{target.disabled=false}).catch(err=>{target.disabled=false;observability()?.capture?.('startup-backup-failure',err,{dataAffected:'unknown'})})});
+  makeAction(isFa?'گزارش خطا':'Copy diagnostics',button=>{const target=button.currentTarget;target.disabled=true;void copyDiagnostics(error).then(()=>{target.textContent=isFa?'کپی شد':'Copied'}).catch(err=>{observability()?.capture?.('startup-report-copy-failure',err,{dataAffected:'unknown'});target.disabled=false})});
+  card.append(mark,title,copy,actions);
   startupRoot.appendChild(card);
   console.error('Kanji 5 React presentation failed to boot.',{buildId,error});
 }
 import('./react-dist/kanji5-react.js'+assetVersion)
-  .catch(error=>showReactBootFailure(error));
+  .catch(error=>{
+    observability()?.capture?.('dynamic-import-failure',error,{module:'react-dist/kanji5-react.js',dataAffected:'unknown'});
+    showReactBootFailure(error);
+  });
 
 function scheduleAccountFallback(){
   const load=()=>{
     if(document.querySelector('#root .account-button:not([data-kanji5-account-fallback])'))return;
-    void import('./account-fallback.js'+assetVersion).catch(error=>console.error('Kanji 5 account fallback failed to boot.',error));
+    void import('./account-fallback.js'+assetVersion).catch(error=>{
+      observability()?.capture?.('dynamic-import-failure',error,{module:'account-fallback.js',dataAffected:'unknown'});
+      console.error('Kanji 5 account fallback failed to boot.',error);
+    });
   };
   window.setTimeout(load,1000);
 }
 scheduleAccountFallback();
 
 function scheduleAccountSync(){
-  const load=()=>import('./supabase-sync.js').catch(error=>console.error('Kanji 5 account sync failed to boot.',error));
+  const load=()=>import('./supabase-sync.js').catch(error=>{
+    observability()?.capture?.('dynamic-import-failure',error,{module:'supabase-sync.js',dataAffected:'unknown'});
+    console.error('Kanji 5 account sync failed to boot.',error);
+  });
   if('requestIdleCallback' in window){
     window.requestIdleCallback(load,{timeout:1500});
   }else{

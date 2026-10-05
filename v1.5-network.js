@@ -20,9 +20,13 @@ function sentenceContentId(id,text,english){
 async function requestJSON(url){
   try{
     const response=await fetch(url,{cache:'force-cache'});
-    if(!response.ok)return null;
+    if(!response.ok){
+      globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',new Error(`Network request failed (${response.status})`),{endpoint:new URL(url).pathname,status:response.status,dataAffected:'false'});
+      return null;
+    }
     return await response.json();
-  }catch(_){
+  }catch(error){
+    globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',error,{endpoint:(()=>{try{return new URL(url).pathname}catch(_){return 'unknown'}})(),dataAffected:'false'});
     return null;
   }
 }

@@ -171,6 +171,8 @@ async function getClient() {
       return client;
     } catch (error) {
       lastError = error;
+      window.__KANJI5_OBSERVABILITY__?.capture?.('dynamic-import-failure',error,{module:source,dataAffected:'false'});
+      window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:source,dataAffected:'false'});
       console.warn('Kanji 5 Supabase client source failed', source, error);
     }
   }
@@ -393,6 +395,7 @@ async function boot() {
       startSyncLifecycle();
     }
   } catch (error) {
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{dataAffected:'false'});
     console.warn('Kanji 5 account unavailable', error);
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
