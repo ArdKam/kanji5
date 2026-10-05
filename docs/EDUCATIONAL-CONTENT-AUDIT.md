@@ -1,12 +1,12 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
 **Audit date:** 2026-10-06
-**Audited implementation/verification candidate:** `c4-educational-validity-v2` @ `917c40fd99edffbf806b9f426b487febdf5c67cb`
-**Base:** `main` (base may advance independently; C4 remains an open PR and is not counted as current-main completion until merged and reverified)
+**Audited implementation/verification candidate:** merged PR #469 @ `81957a6065c7b271a3a697e0f41fd25f8bb048d8`
+**Base:** `main` @ `81957a6065c7b271a3a697e0f41fd25f8bb048d8` (post-merge verification status is tracked separately; no post-merge workflow run is currently recorded)
 **Release-candidate note:** C4 is not marked DONE until the remaining psychometric/content-review gates are independently satisfied.
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
-This document records the findings of the 2026-10-03 educational/content audit. It supplements `ROADMAP.md`; it does not replace the roadmap's implementation/status rules.
+This document records the findings of the 2026-10-03 educational/content audit and the 2026-10-06 post-merge documentation reconciliation. It supplements `ROADMAP.md`; it does not replace the roadmap's implementation/status rules.
 
 ## 1. Executive finding
 
@@ -51,7 +51,7 @@ The product currently has several places where implementation is more conservati
 
 ## 3. Verification evidence — 2026-10-06
 
-The C4 candidate was reverified at head `917c40fd99edffbf806b9f426b487febdf5c67cb`. The implementation changes are limited to the C4 educational-validity boundary: learner-priority content projection, independent Production Recall as the primary path, explicit assisted/revealed evidence semantics, placement uncertainty/ambiguity handling, deterministic example/context quality gates, and empirical answer-position-bias screening.
+The C4 implementation was verified before merge at candidate head `917c40fd99edffbf806b9f426b487febdf5c67cb` and is now merged into `main` at `81957a6065c7b271a3a697e0f41fd25f8bb048d8`. The implementation changes are limited to the C4 educational-validity boundary: learner-priority content projection, independent Production Recall as the primary path, explicit assisted/revealed evidence semantics, placement uncertainty/ambiguity handling, deterministic example/context quality gates, and empirical answer-position-bias screening.
 
 Focused runtime/contract checks cover:
 - learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, and duplicate/invalid example rejection;
@@ -61,7 +61,7 @@ Focused runtime/contract checks cover:
 - placement uses stable option IDs, documented uncertainty/upper-range handling, and the corrected deterministic seed mixer;
 - mnemonic provenance remains explicit.
 
-The final React presentation workflow passed on run `37363072127`, with all 40 gates green, including build/typecheck, repository/unit coverage, Active Recall content, offline/PWA, accessibility, Firefox/WebKit, Learning Card, mnemonic, Review/Practice separation, and Production Recall keyboard gates. Earlier engine validation for the same runtime candidate was also successful. A later engine workflow was queued/cancelled by the Actions runner after that successful validation; it introduced no runtime changes.
+The final pre-merge React presentation workflow passed on run `37363072127`, with all 40 gates green, including build/typecheck, repository/unit coverage, Active Recall content, offline/PWA, accessibility, Firefox/WebKit, Learning Card, mnemonic, Review/Practice separation, and Production Recall keyboard gates. Earlier engine validation for the same runtime candidate was also successful. A later engine workflow was queued/cancelled by the Actions runner after that successful validation; it introduced no runtime changes.
 
 ### Empirical placement screen
 
