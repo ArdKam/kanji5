@@ -83,8 +83,8 @@ function ensurePanel(){
   const app=$('#app');if(!app||$('#v16Session'))return $('#v16Session');
   const p=document.createElement('section');p.id='v16Session';p.setAttribute('aria-labelledby','v16SessionTitle');
   const head=uiNode('div','v16-head');
-  const copy=uiNode('div');copy.append(uiNode('h2','v16-title','جلسهٔ امروز')).lastChild.id='v16SessionTitle';
-  copy.append(uiNode('p','v16-sub','وضعیت مرور، جلسهٔ جاری و نقاط ضعف یادگیری'));
+  const copy=uiNode('div');const heading=uiNode('h2','v16-title','جلسهٔ امروز');heading.id='v16SessionTitle';
+  copy.append(heading,uiNode('p','v16-sub','وضعیت مرور، جلسهٔ جاری و نقاط ضعف یادگیری'));
   const live=uiNode('span','v16-live');const dot=uiNode('span','v16-dot');dot.setAttribute('aria-hidden','true');live.append(dot,document.createTextNode('زنده'));head.append(copy,live);p.append(head);
 
   const topGrid=uiNode('div','v16-grid');
