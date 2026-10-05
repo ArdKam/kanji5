@@ -7,6 +7,8 @@ try {
   const context = await browser.newContext({ serviceWorkers: 'allow' });
   try {
     const page = await context.newPage();
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error?.stack || String(error)));
     await page.addInitScript(() => {
       localStorage.setItem('kanji5-ui-language', 'en');
       for (const key of Object.keys(localStorage)) {
@@ -45,6 +47,21 @@ try {
     await reveal.waitFor({ state: 'visible', timeout: 10000 });
     await reveal.click();
     await page.getByRole('button', { name: 'Good', exact: true }).click();
+    const reviewCountBeforeReload = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      const reviews = raw ? JSON.parse(raw) : [];
+      return Array.isArray(reviews) ? reviews.length : 0;
+    });
+    if (reviewCountBeforeReload < 1) throw new Error('LIVE_SMOKE_REVIEW_NOT_PERSISTED_BEFORE_RELOAD');
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
+    await page.locator('#root .learning-card').waitFor({ state: 'visible', timeout: 15000 });
+    const reviewCountAfterReload = await page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      const reviews = raw ? JSON.parse(raw) : [];
+      return Array.isArray(reviews) ? reviews.length : 0;
+    });
+    if (reviewCountAfterReload < reviewCountBeforeReload) throw new Error('LIVE_SMOKE_LEARNING_STATE_LOST_AFTER_RELOAD');
 
     await page.getByRole('button', { name: 'Active Recall', exact: true }).click();
     await page.locator('#root .practice-home').waitFor({ state: 'visible', timeout: 10000 });
@@ -52,6 +69,39 @@ try {
     await page.locator('#exercise').waitFor({ state: 'visible', timeout: 15000 });
     await page.getByRole('button', { name: 'Learning', exact: true }).click();
     await page.locator('#root .learning-card').waitFor({ state: 'visible', timeout: 15000 });
+
+    await page.locator('.experience-nav .experience-tab').nth(2).click();
+    const dictionaryPage = page.locator('.dictionary-page');
+    await dictionaryPage.waitFor({ state: 'visible', timeout: 10000 });
+    const dictionarySearch = dictionaryPage.locator('.dictionary-page-search input');
+    await dictionarySearch.fill('学');
+    const dictionaryTile = dictionaryPage.locator('.kanji-catalog-tile').filter({ hasText: '学' }).first();
+    await dictionaryTile.waitFor({ state: 'visible', timeout: 10000 });
+    await dictionaryTile.click();
+    const dictionaryCard = page.locator('.dictionary-card-dialog:visible');
+    await dictionaryCard.waitFor({ state: 'visible', timeout: 10000 });
+    await dictionaryCard.getByRole('button', { name: 'Close', exact: true }).click();
+    await dictionaryCard.waitFor({ state: 'hidden', timeout: 10000 });
+
+    await page.getByRole('button', { name: 'More', exact: true }).click();
+    await page.locator('#header-tools-menu').getByRole('button', { name: 'Reading lab', exact: true }).click();
+    const readingDialog = page.getByRole('dialog', { name: 'Reading lab' });
+    const readingLab = readingDialog.locator('.reading-lab');
+    await readingLab.waitFor({ state: 'visible', timeout: 10000 });
+    const readingText = '今日は学生です。明日は先生です。';
+    await readingLab.locator('textarea').fill(readingText);
+    await readingLab.locator('.reading-lab-sentence-next').click();
+    await readingDialog.getByRole('button', { name: 'Close', exact: true }).click();
+    await readingDialog.waitFor({ state: 'hidden', timeout: 10000 });
+    await page.getByRole('button', { name: 'More', exact: true }).click();
+    await page.locator('#header-tools-menu').getByRole('button', { name: 'Reading lab', exact: true }).click();
+    const reopenedReadingDialog = page.getByRole('dialog', { name: 'Reading lab' });
+    const reopenedReadingLab = reopenedReadingDialog.locator('.reading-lab');
+    await reopenedReadingLab.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(reopenedReadingLab.locator('textarea')).toHaveValue(readingText);
+    await expect(reopenedReadingLab.locator('.reading-lab-sentence-position')).toContainText('2 / 2');
+    await reopenedReadingDialog.getByRole('button', { name: 'Close', exact: true }).click();
+    await reopenedReadingDialog.waitFor({ state: 'hidden', timeout: 10000 });
 
     await page.getByRole('button', { name: 'More', exact: true }).click();
     await page.locator('#header-tools-menu').getByRole('button', { name: 'Stats', exact: true }).click();
@@ -102,6 +152,7 @@ try {
     await offlinePage.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
     await offlinePage.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
     await offlinePage.locator('#root .daily-summary').waitFor({ state: 'visible', timeout: 10000 });
+    if (pageErrors.length) throw new Error('LIVE_SMOKE_PAGE_ERRORS: ' + pageErrors.join(' | '));
     console.log('LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED');
   } finally {
     await context.close();
