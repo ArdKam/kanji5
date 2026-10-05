@@ -1,8 +1,8 @@
 # C4 — Sampled Content QA Record
 
-**Review date:** 2026-10-05  
-**Implementation baseline reviewed:** `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83` plus frozen C4 candidate @ `688c7ef384a748145adfd8ef72f9bb4e01ca3ce8`  
-**Review type:** implementer/content review; this is evidence, not independent sign-off. Final E2E verification passed on React workflow run `37360811744`.
+**Review date:** 2026-10-06  
+**Implementation candidate reviewed:** `c4-educational-validity-v2` @ `917c40fd99edffbf806b9f426b487febdf5c67cb`  
+**Review type:** implementer/content review; this is evidence, not independent sign-off. Final React presentation verification passed on workflow run `37363072127` (40/40 gates).
 
 ## Scope
 
@@ -43,5 +43,5 @@ These are short, grammatical benchmark sentences with explicit target usage and 
 
 ## Remaining QA gap
 
-This review does **not** constitute independent human approval of the remote kanjiapi.dev/Tatoeba result sets. The runtime still fetches those providers dynamically, so a full Public Beta gate needs a frozen sample from production providers and independent content review recorded against the final candidate SHA.
+This review does **not** constitute independent human approval of the remote kanjiapi.dev/Tatoeba result sets. The runtime still fetches those providers dynamically, so a full Public Beta gate needs a frozen sample from production providers and independent content review recorded against the final release candidate SHA. The current record therefore remains implementer evidence, not the required independent sign-off.
 
