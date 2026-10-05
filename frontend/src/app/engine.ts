@@ -40,6 +40,9 @@ export type Snapshot = {
     meanings?: string[];
     on?: string[];
     kun?: string[];
+    sourceMeanings?: string[];
+    learnerMeanings?: { primary?: string[]; secondary?: string[]; reference?: string[] };
+    learnerReadings?: { coreOn?: string[]; coreKun?: string[]; vocabularySupported?: string[]; referenceOn?: string[]; referenceKun?: string[] };
     examples?: { word?: string; reading?: string; meaning?: string }[];
     hint?: string;
     revealLabel?: string;
@@ -60,6 +63,7 @@ export type Snapshot = {
     contentId?: string;
      contentStage?: "introduction" | "guided" | "retrieval";
      contentState?: string;
+    modality?: string;
   };
   feedback?: {
     outcome?: string;
