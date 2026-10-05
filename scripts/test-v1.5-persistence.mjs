@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
@@ -186,8 +187,12 @@ backupApi.saveState(backupState);
 backupApi.writeSessionHistory([{ status: 'done', sessionId: 'session-1', endedAt: '2026-09-04T00:00:00.000Z', reviews: 1 }]);
 backupApi.writeComponents({ a: { meaning: { school: { attempts: 2 } } } });
 const portable = backupApi.portableBackup();
+const integrityPayload = JSON.stringify({format: portable.format, version: portable.version, createdAt: portable.createdAt, data: portable.data, metadata: portable.metadata, summary: portable.summary});
+const expectedChecksum = 'sha256:' + createHash('sha256').update(integrityPayload).digest('hex');
+assert.equal(portable.checksum, expectedChecksum);
+assert.match(portable.checksum, /^sha256:[a-f0-9]{64}$/);
 assert.equal(portable.format, 'kanji5-backup');
-assert.equal(portable.version, 1);
+assert.equal(portable.version, 2);
 assert.equal(portable.summary.cards, 1);
 assert.equal(portable.summary.reviews, 1);
 assert.equal(portable.summary.personalMnemonics, 1);

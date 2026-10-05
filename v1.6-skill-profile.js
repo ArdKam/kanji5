@@ -17,7 +17,22 @@ let fingerprint='';
 function publish(p){window.__KANJI5_V16_PROFILE_PRIOR__=p?Object.freeze({schemaVersion:p.schemaVersion,sessions:p.sessions,skills:Object.freeze({...p.skills})}):null}
 function update(){const rows=completed();if(!rows.length){publish(null);render();return false}const source=rows.map(x=>`${x.sessionId||''}:${x.endedAt||''}:${JSON.stringify(x.modeResults||{})}`).join('|');if(source===fingerprint){publish(read());render();return true}fingerprint=source;const components=state.readComponents?.()||{};const next=buildProfile(rows);const ok=Boolean(state.writeComponents?.({...components,[KEY]:next}));publish(next);render();return ok}
 function rank(){const p=read();return p?MODES.map(mode=>({mode,label:LABELS[mode],...norm(p.skills?.[mode]),recentAccuracy:Number(p.skills?.[mode]?.recentAccuracy)||0,momentum:Number(p.skills?.[mode]?.momentum)||0,recentErrors:Number(p.skills?.[mode]?.recentErrors)||0,recoveryRate:Number(p.skills?.[mode]?.recoveryRate)||0})).sort((a,b)=>a.accuracy-b.accuracy||b.recentErrors-a.recentErrors||a.momentum-b.momentum||b.attempts-a.attempts):[]}
-function render(){const host=document.getElementById('v16Session');if(!host)return;let box=document.getElementById('v16SkillProfile');if(!box){box=document.createElement('section');box.id='v16SkillProfile';box.style.cssText='margin-top:12px;padding:12px;border:1px solid var(--line,#e5e7eb);border-radius:14px;background:#fff';host.appendChild(box)}const p=read(),rows=rank();if(!p||!p.sessions){box.innerHTML='<strong style="font-size:13px">پروفایل مهارت بلندمدت</strong><div style="font-size:12px;color:var(--muted,#6b7280);margin-top:5px">پس از اولین جلسهٔ کامل، سابقهٔ مهارت‌ها ذخیره می‌شود.</div>';return}const weak=rows.find(x=>x.attempts),strong=[...rows].reverse().find(x=>x.attempts);const trendLabel=v=>v>0.03?'بهتر':v<-0.03?'ضعیف‌تر':'پایدار';box.innerHTML=`<strong style="font-size:13px">پروفایل مهارت بلندمدت</strong><div style="font-size:11px;color:var(--muted,#6b7280);margin:4px 0 8px">بر اساس ${p.sessions.toLocaleString('fa-IR')} جلسهٔ کامل · روند ۳ جلسهٔ اخیر</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px">${rows.map(x=>`<span>${x.label}: ${x.attempts?`${Math.round(x.accuracy).toLocaleString('fa-IR')}٪ · اخیر ${Math.round(x.recentAccuracy).toLocaleString('fa-IR')}٪ · خطای اخیر ${x.recentErrors.toLocaleString('fa-IR')} · ${trendLabel(x.momentum)}`:'—'}`).join('')}</div><div style="margin-top:8px;font-size:11px;color:#4b5563">نیازمند توجه: ${weak?.label||'—'} · قوی‌ترین: ${strong?.label||'—'}</div>`}
+function render(){
+  const host=document.getElementById('v16Session');if(!host)return;
+  let box=document.getElementById('v16SkillProfile');
+  if(!box){box=document.createElement('section');box.id='v16SkillProfile';box.style.cssText='margin-top:12px;padding:12px;border:1px solid var(--line,#e5e7eb);border-radius:14px;background:#fff';host.appendChild(box)}
+  const p=read(),rows=rank();box.replaceChildren();
+  const title=document.createElement('strong');title.textContent='پروفایل مهارت بلندمدت';title.style.fontSize='13px';box.append(title);
+  if(!p||!p.sessions){
+    const copy=document.createElement('div');copy.textContent='پس از اولین جلسهٔ کامل، سابقهٔ مهارت‌ها ذخیره می‌شود.';copy.style.cssText='font-size:12px;color:var(--muted,#6b7280);margin-top:5px';box.append(copy);return
+  }
+  const meta=document.createElement('div');meta.textContent='بر اساس '+p.sessions.toLocaleString('fa-IR')+' جلسهٔ کامل · روند ۳ جلسهٔ اخیر';meta.style.cssText='font-size:11px;color:var(--muted,#6b7280);margin:4px 0 8px';box.append(meta);
+  const weak=rows.find(x=>x.attempts),strong=[...rows].reverse().find(x=>x.attempts);
+  const trendLabel=v=>v>0.03?'بهتر':v<-0.03?'ضعیف‌تر':'پایدار';
+  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:5px';
+  rows.forEach(x=>{const span=document.createElement('span');span.textContent=x.label+': '+(x.attempts?Math.round(x.accuracy).toLocaleString('fa-IR')+'٪ · اخیر '+Math.round(x.recentAccuracy).toLocaleString('fa-IR')+'٪ · خطای اخیر '+x.recentErrors.toLocaleString('fa-IR')+' · '+trendLabel(x.momentum):'—');grid.append(span)});
+  const summary=document.createElement('div');summary.textContent='نیازمند توجه: '+(weak?.label||'—')+' · قوی‌ترین: '+(strong?.label||'—');summary.style.cssText='margin-top:8px;font-size:11px;color:#4b5563';box.append(grid,summary)
+}
 const api=Object.freeze({read,update,rank});
 window.__KANJI5_V16_SKILL_PROFILE__=api;
 publish(read());

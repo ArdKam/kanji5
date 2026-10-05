@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { createBackup, restoreBackup, type BackupSummary, type PortableBackup } from "./engine";
 import { formatNumber, t, type Language } from "./i18n";
 
+const MAX_BACKUP_FILE_BYTES = 5 * 1024 * 1024;
+
 function summaryLabel(summary: BackupSummary, language: Language) {
   const format = (value: number) => formatNumber(value, language);
   return language === "fa"
@@ -13,7 +15,7 @@ function isPortableBackup(value: unknown): value is PortableBackup {
   if (!value || typeof value !== "object") return false;
   const backup = value as Partial<PortableBackup>;
   return backup.format === "kanji5-backup"
-    && Number(backup.version) === 1
+    && Number(backup.version) === 2
     && typeof backup.createdAt === "string"
     && Boolean(backup.data)
     && Boolean(backup.metadata)
@@ -72,6 +74,7 @@ export function DataBackup({ language }: { language: Language }) {
     setStatus("");
     setCandidate(null);
     try {
+      if (file.size > MAX_BACKUP_FILE_BYTES) throw new Error("BACKUP_TOO_LARGE");
       const raw = JSON.parse(await file.text()) as unknown;
       if (!isPortableBackup(raw)) throw new Error("INVALID");
       setCandidate(raw);
