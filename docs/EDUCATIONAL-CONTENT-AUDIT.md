@@ -1,9 +1,9 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
-**Audit date:** 2026-10-05
-**Audited implementation/verification candidate:** `c4-educational-validity-v2` @ `688c7ef384a748145adfd8ef72f9bb4e01ca3ce8`
-**Base:** `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`
-**Release-candidate note:** C4 is not marked DONE until the remaining psychometric/content-review gates are independently satisfied.  
+**Audit date:** 2026-10-06
+**Audited implementation/verification candidate:** `c4-educational-validity-v2` @ `917c40fd99edffbf806b9f426b487febdf5c67cb`
+**Base:** `main` (base may advance independently; C4 remains an open PR and is not counted as current-main completion until merged and reverified)
+**Release-candidate note:** C4 is not marked DONE until the remaining psychometric/content-review gates are independently satisfied.
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
 This document records the findings of the 2026-10-03 educational/content audit. It supplements `ROADMAP.md`; it does not replace the roadmap's implementation/status rules.
@@ -49,16 +49,19 @@ The product currently has several places where implementation is more conservati
 12. Grammar Guide is a beginner primer, not yet a complete grammar-learning curriculum.
 13. Adaptive planning is evidence-aware, but current architecture does not establish that adaptive planning itself produces better learning outcomes than a baseline.
 
-## 3. Verification evidence — 2026-10-05
+## 3. Verification evidence — 2026-10-06
 
-The C4 release candidate was rebuilt from and inspected against `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`. The frozen candidate is `688c7ef384a748145adfd8ef72f9bb4e01ca3ce8`; the final delta after the first verification pass consisted only of E2E contract alignment for the explicit reference-reading split and Production Recall recovery affordances/timing.
+The C4 candidate was reverified at head `917c40fd99edffbf806b9f426b487febdf5c67cb`. The implementation changes are limited to the C4 educational-validity boundary: learner-priority content projection, independent Production Recall as the primary path, explicit assisted/revealed evidence semantics, placement uncertainty/ambiguity handling, deterministic example/context quality gates, and empirical answer-position-bias screening.
 
-Focused runtime spot checks executed in the isolated verification environment:
-- learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, duplicate/invalid example rejection;
-- content-evidence semantics: non-independent/revealed attempts do not inflate practice/correct counters, while guided recovery remains isolated;
-- source-level contract review: Production default modality, Vocabulary/Context labels, stable-ID placement scoring, uncertainty/upper-bound presentation, and mnemonic provenance checks.
+Focused runtime/contract checks cover:
+- learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, and duplicate/invalid example rejection;
+- content-evidence semantics: non-independent/revealed attempts do not inflate independent practice/correct counters, while guided recovery remains isolated;
+- production contract: typed independent Kanji production is the default path; reveal/self-report and hint-assisted production remain lower-evidence recovery paths;
+- Vocabulary/Context modality labels reflect the actual cued-completion interactions;
+- placement uses stable option IDs, documented uncertainty/upper-range handling, and the corrected deterministic seed mixer;
+- mnemonic provenance remains explicit.
 
-The full repository `npm test` and React build gates were executed by GitHub Actions on the candidate branch. The v1.8/v1.9 validation workflow passed (run `37359773035`), and the final React presentation workflow passed (run `37360811744`), including the Learning Card, Review/Practice, Production Recall, offline/PWA, accessibility, Firefox, and WebKit gates. Local execution was unavailable because the environment cannot resolve GitHub; CI is therefore the authoritative repository-level verification evidence.
+The final React presentation workflow passed on run `37363072127`, with all 40 gates green, including build/typecheck, repository/unit coverage, Active Recall content, offline/PWA, accessibility, Firefox/WebKit, Learning Card, mnemonic, Review/Practice separation, and Production Recall keyboard gates. Earlier engine validation for the same runtime candidate was also successful. A later engine workflow was queued/cancelled by the Actions runner after that successful validation; it introduced no runtime changes.
 
 ### Empirical placement screen
 
