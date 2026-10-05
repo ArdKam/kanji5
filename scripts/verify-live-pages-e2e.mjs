@@ -47,12 +47,19 @@ try {
     await reveal.waitFor({ state: 'visible', timeout: 10000 });
     await reveal.click();
     await page.getByRole('button', { name: 'Good', exact: true }).click();
+    await expect.poll(async () => page.evaluate(() => {
+      const raw = localStorage.getItem('kanji5-v1-reviews');
+      const reviews = raw ? JSON.parse(raw) : [];
+      return Array.isArray(reviews) ? reviews.length : 0;
+    }), {
+      timeout: 10000,
+      message: 'LIVE_SMOKE_REVIEW_NOT_PERSISTED_BEFORE_RELOAD',
+    }).toBeGreaterThan(0);
     const reviewCountBeforeReload = await page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1-reviews');
       const reviews = raw ? JSON.parse(raw) : [];
       return Array.isArray(reviews) ? reviews.length : 0;
     });
-    if (reviewCountBeforeReload < 1) throw new Error('LIVE_SMOKE_REVIEW_NOT_PERSISTED_BEFORE_RELOAD');
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('#root .app-shell').waitFor({ state: 'visible', timeout: 30000 });
     await page.locator('#root .learning-card').waitFor({ state: 'visible', timeout: 15000 });
