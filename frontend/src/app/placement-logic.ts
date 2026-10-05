@@ -55,7 +55,13 @@ function stableHash(value: string): number {
 }
 
 function seededUnit(seed: number, salt: string): number {
-  return stableHash(String(seed) + ":" + salt) / 4294967296;
+  let x = stableHash(String(seed) + ":" + salt);
+  x ^= x >>> 16;
+  x = Math.imul(x, 0x85ebca6b);
+  x ^= x >>> 13;
+  x = Math.imul(x, 0xc2b2ae35);
+  x ^= x >>> 16;
+  return (x >>> 0) / 4294967296;
 }
 
 function shuffleWithSeed<T>(values: T[], seed: number, salt: string): T[] {
