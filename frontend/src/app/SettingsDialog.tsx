@@ -325,7 +325,7 @@ export function SettingsDialog({
         </section>
         <section className="settings-danger-zone" aria-label={language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}>
           {resetArmed ? (
-            <div className="settings-reset-confirmation" role="alertdialog" aria-modal="true" aria-labelledby="settings-reset-title" aria-describedby="settings-reset-hint" onKeyDown={event => handleConfirmationKeyDown(event, () => setResetArmed(false))}>
+            <div className="settings-reset-confirmation" role="alertdialog" aria-modal="true" aria-labelledby="settings-reset-title" aria-describedby="settings-reset-hint" onKeyDown={event => handleConfirmationKeyDown(event, dismissResetConfirmation)}>
               <strong id="settings-reset-title">{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
               <p id="settings-reset-hint">{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
               <div className="settings-danger-actions">
