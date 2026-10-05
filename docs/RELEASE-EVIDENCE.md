@@ -25,21 +25,35 @@ Security/privacy/legal sign-off must use the production Supabase project, header
 
 Do not convert a configured workflow or a PR CI result into a production claim without the corresponding live evidence.
 
-## A1 candidate release lock
+## A1 final release lock
 
-- Candidate branch: `release/a1-integrity-20261005`.
-- Candidate base SHA: `bc028900c8178163e21f97cfb2862759af748dbd`.
-- Candidate commit identity: **the exact SHA of the commit containing this section**. This self-reference is intentional: the candidate SHA is the Git commit that contains the final A1 ledger update; the final exact SHA is also reported in the release PR/merge record.
-- This candidate intentionally contains no product feature work; only A1 evidence documentation.
+- Final candidate commit: **the exact SHA of the commit containing this section**.
+- Final candidate base: `feb4cf31121e4124aaa2cb57b801d1aba3fa8b23`.
+- Final candidate scope: release-integrity documentation only; no product feature, scheduler, learner-model, grading, Vocabulary, Grammar, R4, R11, R12, or C4 implementation work.
+- The candidate SHA is intentionally self-referential so the ledger remains attached to the immutable commit that is promoted and verified.
 
-## Candidate verification record
+## A1 verification evidence
 
-The pre-candidate current-main release path already established the following concrete evidence, which is being carried forward into the frozen A1 candidate while the candidate-specific CI/Pages/live checks run:
+The immediately preceding exact-main candidate established the complete release path and exposed/fixed two test-harness issues without weakening the product checks:
 
-- React presentation build workflow: run 37151754816, success on `bc028900c8178163e21f97cfb2862759af748dbd`.
-- GitHub Pages deployment workflow: run 37152198644, success on `bc028900c8178163e21f97cfb2862759af748dbd`.
-- Pages build version recorded by the deploy action: `bc028900c8178163e21f97cfb2862759af748dbd`.
-- Same-SHA live artifact verification: pass for index, React entry, service worker, React JS, and React CSS.
-- Live core/offline smoke marker: `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
-- Automated source/contract suite: 150/150.
-- Production performance baseline: desktop LCP 604 ms / CLS 0.006; mobile profile LCP 428 ms / CLS 0.005; zero long tasks in the measured startup window; application transfer approximately 1,885 KB.
+- PR #459 raised the React release job timeout from 15 to 30 minutes after the exact-main run was cancelled during Playwright browser dependency installation.
+- PR #460 made the live review persistence assertion wait for the asynchronous React review action to commit.
+- PR #461 fixed the live-smoke initialization so cleanup runs once per test context and does not erase learner state on the reload used to verify persistence.
+
+Exact-main verification on `feb4cf31121e4124aaa2cb57b801d1aba3fa8b23`:
+
+- React presentation workflow: run `37342578633`, **success**, all 43 steps passed.
+- GitHub Pages deployment: run `37343502696`, **success**.
+- Pages deployment recorded `pages_build_version=feb4cf31121e4124aaa2cb57b801d1aba3fa8b23`.
+- Live artifact checks: HTTP 200 and staged/live SHA-256 equality for index, React entry, service worker, React JS, and React CSS.
+- Live smoke/offline marker: `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
+- Exact-main browser gates included React E2E, performance, offline, stale-client PWA, accessibility, Firefox, WebKit, final release matrix, onboarding, account, Stats, mnemonic, Learning flip, Review/Practice, and Production Recall keyboard checks; all passed.
+
+Performance evidence on that exact main candidate:
+
+- Desktop: navigation 304 ms; DOMContentLoaded 303 ms; load 304 ms; FCP 196 ms; LCP 600 ms; CLS 0.006; long tasks 0; app transfer approximately 1,885 KB; interaction 9 ms.
+- Mobile profile (390×844): navigation 244 ms; DOMContentLoaded 236 ms; load 244 ms; FCP 144 ms; LCP 440 ms; CLS 0.005; long tasks 0; app transfer approximately 1,885 KB; interaction 12 ms.
+- All configured release budgets passed.
+
+The final A1 candidate is this commit. Its exact-SHA React workflow and GitHub Pages deployment are the authoritative promotion gate; no A1 completion claim is valid unless both are successful and the live artifact/smoke checks remain green for this exact SHA.
+
