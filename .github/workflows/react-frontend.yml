@@ -16,6 +16,14 @@ on:
       - "scripts/stage-pages-site.mjs"
       - "scripts/test-public-doc-staging.mjs"
       - "scripts/test-architecture-build-cleanup.mjs"
+      - "scripts/test-r12-security.mjs"
+      - "scripts/vendor-supabase.mjs"
+      - "legacy-loader.js"
+      - "theme-bootstrap.js"
+      - "supabase/schema.sql"
+      - "supabase/migrations/**"
+      - "docs/SECURITY-REVIEW.md"
+      - "docs/THIRD-PARTY-LICENSES.md"
       - "scripts/test-prepared-mnemonics.mjs"
       - "scripts/test-mnemonic-support.mjs"
       - "scripts/test-kanji-radical-system.mjs"
@@ -89,8 +97,16 @@ jobs:
         with:
           node-version: 24
       - run: npm ci --no-audit --no-fund
+      - name: Dependency audit (frontend)
+        run: npm audit --audit-level=high --no-fund
       - run: npm run typecheck
       - run: npm run build
+      - name: Vendor pinned Supabase browser runtime
+        working-directory: .
+        run: node scripts/vendor-supabase.mjs
+      - name: Run R12 public-release security checks
+        working-directory: .
+        run: node scripts/test-r12-security.mjs
       - name: Validate shipped React artifact
         working-directory: .
         run: node scripts/test-react-shipped-artifact.mjs
@@ -118,6 +134,9 @@ jobs:
       - name: Install root test dependencies
         working-directory: .
         run: npm ci
+      - name: Dependency audit (root)
+        working-directory: .
+        run: npm audit --audit-level=high --no-fund
       - name: Run root contract/unit suite
         working-directory: .
         run: npm test
