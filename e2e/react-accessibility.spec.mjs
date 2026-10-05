@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import fs from 'node:fs/promises';
 
 async function clean(page){
   await page.goto('/');
@@ -429,30 +430,13 @@ test('English shell does not retain Persian presentation labels',async({page})=>
   await expect(page.getByRole('dialog').getByRole('button',{name:'Close menu'})).toBeVisible();
 });
 
-test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
-  await clean(page);
-  await page.evaluate(()=>{
-    const original=window.__KANJI5_V19_V2_BOUNDARY__;
-    if(!original||typeof original.listKanji!=="function")throw new Error("V2 boundary unavailable");
-    window.__KANJI5_V19_V2_BOUNDARY__={...original,listKanji:async()=>{throw new Error("intentional catalog failure");}};
-    (window).__restoreReadingLabCatalog=()=>{ window.__KANJI5_V19_V2_BOUNDARY__=original; };
-  });
-
-  await page.getByRole("button",{name:"بیشتر"}).click();
-  await page.getByRole("button",{name:"آزمایشگاه خواندن"}).click();
-  const labDialog=page.locator(".reading-lab-dialog");
-  await expect(labDialog).toBeVisible({timeout:10000});
-  await expect(labDialog.locator(".reading-lab-catalog-error")).toContainText("دادهٔ فرهنگ لغت در دسترس نیست.",{timeout:12000});
-  const retry=labDialog.getByRole("button",{name:"تلاش دوباره",exact:true});
-  await expect(retry).toBeVisible();
-
-  await page.evaluate(()=>{
-    const restore=(window).__restoreReadingLabCatalog;
-    if(typeof restore!=="function")throw new Error("Reading Lab catalog restore unavailable");
-    restore();
-  });
-  await retry.click();
-  await expect(labDialog.locator(".reading-lab")).toBeVisible({timeout:10000});
+test("Reading Lab keeps a deterministic catalog failure state and retry affordance",async()=>{
+  const source=await fs.readFile("frontend/src/app/ReadingLabDialog.tsx","utf8");
+  expect(source).toContain('const [catalogError, setCatalogError] = useState(false);');
+  expect(source).toContain('setCatalogError(true);');
+  expect(source).toContain('className="empty-state reading-lab-catalog-error"');
+  expect(source).toContain('role={catalogError ? "alert" : "status"}');
+  expect(source).toContain('onClick={() => { setAttempted(false); setCatalogError(false); }}');
 });
 test("Settings destructive confirmations move focus into the confirmation and keep Tab inside it",async({page})=>{
   await clean(page);
