@@ -2,9 +2,9 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `098fab1f4d37d8e2538813e7dc039c13bc2079ec` (2026-10-03). The matching GitHub Pages deployment for this SHA has completed successfully. Full public-release evidence still requires the same-SHA release ledger to record the complete CI/deploy/live-smoke/device matrix.
+> **Implementation baseline reviewed:** `main` at commit `2618d779222c00b906466a122762a19eb44a4f6c` (2026-10-05). This baseline includes the merged R11 observability hardening (#463) and final Kanji public UX/accessibility pass (#464). It is **not yet release-locked** because the exact-main React presentation workflow for this SHA failed at the account shell gate, so Pages was skipped for this SHA.
 
-> **Important status rule:**> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
+> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
 ---
 
@@ -161,7 +161,7 @@ A feature may remain technically implemented while its educational validity rema
 
 ---
 
-### 2.1 Verified current status ledger — 2026-10-03
+### 2.1 Verified current status ledger — 2026-10-05
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
 
@@ -169,6 +169,9 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - Bootstrap/runtime and React artifact hygiene.
 - Guest-first account safeguards and learner-state preservation/boot recovery.
 - Product positioning foundation, public Help/Browser/Privacy/Feedback surface.
+- R11 runtime failure diagnostics/observability implementation and React render-failure recovery are present on current `main` (merged #463 plus the earlier merged render-containment work); final production/release verification remains part of the release lock.
+- R2 onboarding implementation is present on current `main` (merged #451/#453/#454/#456); representative device/release evidence and educational validity evidence remain separate gates.
+- Final Kanji public UX/accessibility pass is present on current `main` via merged #464, covering concrete Learning, Active Recall, Stats, Settings, Dictionary, Reading Lab, Mnemonics, and Handwriting defects. Representative-device and assistive-technology evidence remains a release gate.
 - D1/D2/D3/D4/D5 cross-domain foundations.
 - Stats/Advanced Stats/learning-efficacy foundations.
 - Learning vs Active Recall, Learning Card pager/swipe/rating, keyboard/mobile contracts.
@@ -179,14 +182,14 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- A1 release integrity: current `main` Pages deployment is green, but a frozen/tagged release candidate with same-SHA live artifact/hash, smoke, cache, offline, and representative-device evidence is still required.
-- R2 onboarding redesign is **DONE on current `main`**: dedicated first-open value/setup/placement/account flow is implemented, guest-first, and covered by desktop/mobile E2E. Remaining work is release evidence on representative target environments, not the core onboarding implementation.
+- A1 release integrity: the previously verified candidate `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d` passed its exact-SHA React + Pages gate, but current `main` has since advanced through #463 and #464. The current head `2618d779222c00b906466a122762a19eb44a4f6c` is **not release-locked** because its React workflow failed at the account shell gate and Pages was skipped. A new exact-SHA candidate, green CI, same-SHA deployment/live artifact equality, smoke, cache/stale-client/offline, and representative-device evidence are required.
+- R2 onboarding redesign is **DONE on current `main`**: dedicated first-open value/setup/placement/account flow is implemented, guest-first, and covered by desktop/mobile E2E. Remaining work is release/real-device evidence plus the C4 educational validity gate for placement.
 - R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
 - R5/R6 review-history and backup/restore public-release evidence remain incomplete.
 - R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
 - R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
 - R10 full i18n audit remains.
-- R11 broader controlled-failure observability remains in open PR #392; global React render-failure containment/error-boundary recovery is also not yet on current `main`.
+- R11 is **DONE as implementation on current `main`**: merged #463 closes runtime diagnostic gaps across service-worker, dynamic-import, network, migration, sync, and asset failure paths, while the previously merged React render-failure containment provides actionable recovery. Final production failure-injection/release evidence remains required.
 - R12 production security review remains: production RLS verification, CSP, unsafe-DOM/`innerHTML` audit, CDN supply-chain hardening, and dependency-security evidence are still required.
 - R13 Terms, exact production-service disclosure, account/local deletion semantics, retention/export behavior, and target-market legal review remain.
 - R14 docs are now staged in the release path; production smoke verification remains.
@@ -209,9 +212,15 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - D1, D2, D3, D4, D5.
 
 **Open PRs not counted as completion:**
-- #389: persistence adapter.
-- #392: controlled runtime-failure observability.
-- #398: superseded by this current-main roadmap sync.
+**Current release-critical PRs not yet counted as complete:**
+- #467: R4–R6 persistence/history/backup safety.
+- #468: R12 security hardening.
+- #469: C4 educational content and assessment validity.
+- #465: R13 privacy/legal reconciliation.
+
+**Superseded/stale PRs that must not be treated as pending implementation:**
+- #392: superseded by merged R11 work in #463.
+- #398: superseded by current-main roadmap reconciliation.
 ---
 
 
@@ -656,7 +665,7 @@ Continue auditing:
 
 ---
 
-## A8. Responsive/accessibility/performance polish
+## A8. Responsive/accessibility/performance polish — DONE for current Kanji UX implementation; release/device evidence pending
 
 ### Responsive widths
 
@@ -958,7 +967,7 @@ The first-open experience must not assume personal knowledge of the project.
 
 ---
 
-## R2. Onboarding — PARTIAL
+## R2. Onboarding — DONE on current `main`; release/device/C4 evidence pending
 
 ### New user
 
@@ -1199,7 +1208,7 @@ Keep engine behavior independent from presentation language.
 
 ---
 
-## R11. Error handling and observability — PARTIAL
+## R11. Error handling and observability — DONE on current `main`; final release verification pending
 
 Public users need actionable failure states.
 
