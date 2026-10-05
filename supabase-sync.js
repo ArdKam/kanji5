@@ -13,7 +13,6 @@ const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
 const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
-const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
 const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
 let supabaseRuntimePromise = null;
 
@@ -78,14 +77,6 @@ function localPayload() {
     components: components && typeof components === 'object' ? components : {},
     skillProfile: components?.v16SkillProfile && typeof components.v16SkillProfile === 'object' ? components.v16SkillProfile : null
   };
-}
-
-function assertSyncPayloadWithinLimit(payload){
-  const bytes=typeof TextEncoder==='undefined'
-    ? JSON.stringify(payload).length
-    : new TextEncoder().encode(JSON.stringify(payload)).byteLength;
-  if(bytes>MAX_SYNC_PAYLOAD_BYTES)throw new Error('SYNC_PAYLOAD_TOO_LARGE');
-  return payload;
 }
 
 function safeJSON(raw, fallback) {
@@ -190,11 +181,17 @@ function loadSupabaseRuntime(){
 async function getClient() {
   if (client) return client;
   if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
-  const createClient=await loadSupabaseRuntime();
-  client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
-  });
-  return client;
+  try {
+    const createClient=await loadSupabaseRuntime();
+    client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    return client;
+  } catch (error) {
+    window.__KANJI5_OBSERVABILITY__?.capture?.('dynamic-import-failure',error,{module:'supabase-browser-runtime',dataAffected:'false'});
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:'supabase-browser-runtime',dataAffected:'false'});
+    throw error;
+  }
 }
 
 async function readRemote() {
@@ -406,6 +403,7 @@ async function boot() {
       startSyncLifecycle();
     }
   } catch (error) {
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{dataAffected:'false'});
     console.warn('Kanji 5 account unavailable', error);
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
