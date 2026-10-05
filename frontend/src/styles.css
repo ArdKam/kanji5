@@ -1474,7 +1474,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .dialog.secondary-page-dialog.account-dialog{position:relative;}
 .account-dialog{position:fixed;max-width:660px;}
 .account-dialog-close{position:absolute!important;inset-block-start:12px;inset-inline-end:12px;float:none!important;border:0!important;background:transparent!important;z-index:2;}
-.account-page-header{display:flex;align-items:center;padding:4px 44px 16px 0;border-bottom:1px solid var(--line);margin-bottom:16px;}
+.account-page-header{position:relative;display:flex;align-items:center;padding:4px 44px 16px 0;border-bottom:1px solid var(--line);margin-bottom:16px;}
 [dir="rtl"] .account-page-header{padding-inline:0 44px;}
 .account-page-brand{display:flex;align-items:center;gap:12px;min-width:0;}
 .account-hanko{width:40px;height:40px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--shu) 38%,var(--line));border-radius:12px;color:var(--shu);font-family:var(--jp-font);font-size:20px;background:color-mix(in srgb,var(--shu) 5%,var(--paper));}

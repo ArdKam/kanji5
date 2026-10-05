@@ -267,11 +267,10 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
   const summary = state.syncSummary;
 
   return <dialog ref={dialogRef} className="dialog account-dialog" aria-labelledby="account-title">
-    <button className="dialog-close account-dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>
-      <UiIcon name="close" size={19} />
-    </button>
-
     <header className="account-page-header">
+      <button className="dialog-close account-dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>
+        <UiIcon name="close" size={19} />
+      </button>
       <div className="account-page-brand">
         <span className="account-hanko" aria-hidden="true">印</span>
         <div>
