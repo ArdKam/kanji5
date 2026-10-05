@@ -13,7 +13,7 @@ function isPortableBackup(value: unknown): value is PortableBackup {
   if (!value || typeof value !== "object") return false;
   const backup = value as Partial<PortableBackup>;
   return backup.format === "kanji5-backup"
-    && Number(backup.version) === 1
+    && (Number(backup.version) === 1 || Number(backup.version) === 2)
     && typeof backup.createdAt === "string"
     && Boolean(backup.data)
     && Boolean(backup.metadata)
@@ -93,7 +93,7 @@ export function DataBackup({ language }: { language: Language }) {
       window.setTimeout(() => window.location.reload(), 450);
     } catch (error) {
       const code = String(error instanceof Error ? error.message : error || "");
-      setStatus(code === "KANJI5_INVALID_BACKUP" ? t("backupInvalid", language) : t("backupWriteError", language));
+      setStatus(code === "KANJI5_INVALID_BACKUP" || code === "KANJI5_BACKUP_VERSION_UNSUPPORTED" ? t("backupInvalid", language) : t("backupWriteError", language));
       setCandidate(null);
       setBusy("");
       return;

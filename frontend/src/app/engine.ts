@@ -185,7 +185,7 @@ export type BackupSummary = {
 };
 export type PortableBackup = {
   format: "kanji5-backup";
-  version: 1;
+  version: 1 | 2;
   createdAt: string;
   data: Record<string, unknown>;
   metadata: Record<string, unknown>;

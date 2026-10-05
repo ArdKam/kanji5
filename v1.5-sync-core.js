@@ -3,6 +3,8 @@ import { mergeReviewEvents, replayCards } from './v1.5-fsrs-sync-core.js';
 import { fsrs } from './vendor/ts-fsrs-5.4.1.mjs';
 
 export const SYNC_SCHEMA_VERSION = 1;
+const REVIEW_HISTORY_LIMIT = 2000;
+const REVIEW_EVENT_IDS_LIMIT = REVIEW_HISTORY_LIMIT;
 const clone = value => structuredClone(value);
 const todayKey = date => new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date instanceof Date ? date : new Date(date));
 const reviewsFor = state => Array.isArray(state?.reviews) ? state.reviews : [];
@@ -13,7 +15,6 @@ const lastReviewAt = (state, id) => {
   if (card?.learnedAt && card.learnedAt > latest) latest = card.learnedAt;
   return latest;
 };
-
 const schedulerFactory = settings => {
   const scheduler = fsrs({
     request_retention: Number(settings?.retention) || 0.9,
@@ -25,6 +26,75 @@ const schedulerFactory = settings => {
   });
   return { next: scheduler.next.bind(scheduler), Rating: { Again: 1, Hard: 2, Good: 3, Easy: 4 } };
 };
+
+function reviewSummaryFromReviews(reviews) {
+  const events = Array.isArray(reviews) ? reviews.slice(-REVIEW_HISTORY_LIMIT) : [];
+  const deviceTotals = {}, dailyByDevice = {}, knownEventIds = [];
+  for (const event of events) {
+    if (!event || typeof event !== 'object') continue;
+    const eventId = String(event.eventId || event.id || '');
+    const device = String(event.deviceId || 'legacy').slice(0, 160) || 'legacy';
+    const date = String(event.at || '').slice(0, 10);
+    if (!eventId || date.length !== 10 || date[4] !== '-' || date[7] !== '-') continue;
+    const totals = deviceTotals[device] || (deviceTotals[device] = { total: 0, nonAgain: 0 });
+    totals.total += 1;
+    if (String(event.rating || '') !== 'Again') totals.nonAgain += 1;
+    const dateRows = dailyByDevice[date] || (dailyByDevice[date] = {});
+    const daily = dateRows[device] || (dateRows[device] = { count: 0, nonAgain: 0 });
+    daily.count += 1;
+    if (String(event.rating || '') !== 'Again') daily.nonAgain += 1;
+    knownEventIds.push(eventId);
+  }
+  const totalReviews = Object.values(deviceTotals).reduce((sum, row) => sum + row.total, 0);
+  const nonAgainReviews = Math.min(totalReviews, Object.values(deviceTotals).reduce((sum, row) => sum + Math.min(row.total, row.nonAgain), 0));
+  const daily = Object.entries(dailyByDevice).sort(([a], [b]) => a.localeCompare(b)).slice(-90).map(([date, devices]) => ({
+    date,
+    count: Object.values(devices).reduce((sum, row) => sum + row.count, 0),
+    nonAgain: Object.values(devices).reduce((sum, row) => sum + Math.min(row.count, row.nonAgain), 0)
+  }));
+  return { schemaVersion: 1, totalReviews, nonAgainReviews, daily, lastReviewKey: knownEventIds.at(-1) || null, lastReviewAt: events.at(-1)?.at || null, knownEventIds: [...new Set(knownEventIds)].slice(-REVIEW_EVENT_IDS_LIMIT), deviceTotals, dailyByDevice };
+}
+
+function mergeReviewSummary(local, remote, localReviews = [], remoteReviews = []) {
+  const a = local && typeof local === 'object'
+    ? local
+    : (!local && Array.isArray(localReviews) && localReviews.length ? reviewSummaryFromReviews(localReviews) : null);
+  const b = remote && typeof remote === 'object'
+    ? remote
+    : (!remote && Array.isArray(remoteReviews) && remoteReviews.length ? reviewSummaryFromReviews(remoteReviews) : null);
+  if (!a) return b ? clone(b) : null;
+  if (!b) return clone(a);
+  const deviceTotals = {}, dailyByDevice = {};
+  for (const source of [a,b]) {
+    const sourceTotals = source.deviceTotals && typeof source.deviceTotals === 'object' && Object.keys(source.deviceTotals).length
+      ? source.deviceTotals
+      : { legacy: { total: Math.max(0, Number(source.totalReviews) || 0), nonAgain: Math.max(0, Number(source.nonAgainReviews) || 0) } };
+    const sourceDailyByDevice = source.dailyByDevice && typeof source.dailyByDevice === 'object' && Object.keys(source.dailyByDevice).length
+      ? source.dailyByDevice
+      : Object.fromEntries((Array.isArray(source.daily) ? source.daily : []).map(row => [String(row?.date || '').slice(0, 10), { legacy: { count: Math.max(0, Number(row?.count) || 0), nonAgain: Math.max(0, Number(row?.nonAgain) || 0) } }]));
+    for (const [device,value] of Object.entries(sourceTotals)) {
+      const current=deviceTotals[device]; const candidate={total:Math.max(0,Number(value?.total)||0),nonAgain:Math.max(0,Number(value?.nonAgain)||0)};
+      if (!current || candidate.total>current.total || (candidate.total===current.total && candidate.nonAgain>current.nonAgain)) deviceTotals[device]=candidate;
+    }
+    for (const [date,devices] of Object.entries(sourceDailyByDevice)) {
+      const target=dailyByDevice[date]||(dailyByDevice[date]={});
+      for (const [device,value] of Object.entries(devices && typeof devices === 'object' ? devices : {})) {
+        const current=target[device],candidate={count:Math.max(0,Number(value?.count)||0),nonAgain:Math.max(0,Number(value?.nonAgain)||0)};
+        if(!current||candidate.count>current.count||(candidate.count===current.count&&candidate.nonAgain>current.nonAgain))target[device]=candidate;
+      }
+    }
+  }
+  const totalReviews=Object.values(deviceTotals).reduce((sum,row)=>sum+row.total,0);
+  const nonAgainReviews=Math.min(totalReviews,Object.values(deviceTotals).reduce((sum,row)=>sum+Math.min(row.total,row.nonAgain),0));
+  const daily=[...Object.keys(dailyByDevice)].sort().slice(-90).map(date=>{
+    const devices=dailyByDevice[date]||{},row={date,count:0,nonAgain:0};
+    for(const value of Object.values(devices)){row.count+=Math.max(0,Number(value?.count)||0);row.nonAgain+=Math.max(0,Math.min(Number(value?.count)||0,Number(value?.nonAgain)||0))}
+    return row;
+  });
+  const knownEventIds=[...new Set([...(Array.isArray(a.knownEventIds)?a.knownEventIds:[]),...(Array.isArray(b.knownEventIds)?b.knownEventIds:[])].map(String))].slice(-REVIEW_EVENT_IDS_LIMIT);
+  const last = String(a.lastReviewAt||'') >= String(b.lastReviewAt||'') ? a : b;
+  return {schemaVersion:1,totalReviews,nonAgainReviews,daily,lastReviewKey:last.lastReviewKey||null,lastReviewAt:last.lastReviewAt||null,knownEventIds,deviceTotals,dailyByDevice};
+}
 
 export function stablePayload(payload) {
   return {
@@ -62,7 +132,8 @@ export function mergeState(local, remote, now = new Date()) {
     else if (!rc) merged.cards[id] = clone(lc);
     else merged.cards[id] = lastReviewAt(local, id) >= lastReviewAt(remote, id) ? clone(lc) : clone(rc);
   }
-  merged.reviews = mergeReviewEvents(reviewsFor(local), reviewsFor(remote), 5000);
+  merged.reviews = mergeReviewEvents(reviewsFor(local), reviewsFor(remote), REVIEW_HISTORY_LIMIT);
+  merged.reviewSummary = mergeReviewSummary(local.reviewSummary, remote.reviewSummary, reviewsFor(local), reviewsFor(remote));
   if (merged.reviews.some(event => event?.eventId && event?.baseRecord)) {
     merged.cards = replayCards(merged.cards, merged.reviews, () => schedulerFactory(merged.settings), Number(merged.settings?.leechThreshold) || 8);
   }

@@ -4,16 +4,17 @@ if(window.__KANJI5_BOOTSTRAP__)return;
 window.__KANJI5_BOOTSTRAP__=true;
 const DATA_VERSION='v1.2-dataset-2136';
 const K=window.__KANJI5_STORAGE_KEYS__;
+const storage=window.__KANJI5_STORAGE__||localStorage;
 if(!K)throw new Error('KANJI5_STORAGE_KEYS_NOT_LOADED');
 const DECK_KEY=K.deck;
 const VERSION_KEY=K.deckVersion;
 try{
-  if(localStorage.getItem(VERSION_KEY)!==DATA_VERSION){
+  if(storage.getItem(VERSION_KEY)!==DATA_VERSION){
     // Never delete learner data merely because the content dataset version changed.
     // review-runtime.js will reject the stale deck cache, load the current dataset,
     // and atomically stamp the new deck version after successful validation.
     window.__KANJI5_DECK_REFRESH_NEEDED__=Object.freeze({
-      from:localStorage.getItem(VERSION_KEY),
+      from:storage.getItem(VERSION_KEY),
       to:DATA_VERSION
     });
   }

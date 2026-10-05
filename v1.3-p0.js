@@ -3,11 +3,12 @@
 const DATA_URL='./kanji-data.json';
 const FSRS_URL='./vendor/ts-fsrs-5.4.1.mjs';
 const K=window.__KANJI5_STORAGE_KEYS__;
+const storage=window.__KANJI5_STORAGE__||localStorage;
 if(!K)throw new Error('KANJI5_STORAGE_KEYS_NOT_LOADED');
 const ensureStatus=()=>{let loading=document.getElementById('loading');if(!loading)return;let status=document.getElementById('loadStatus');if(!status){status=document.createElement('div');status.id='loadStatus';status.style.cssText='display:none';loading.querySelector(':scope > div')?.appendChild(status)}};
 const hasCachedDeck=()=>{
   try{
-    return localStorage.getItem('kanji5-deck-version')==='v1.2-dataset-2136'&&Boolean(localStorage.getItem('kanji5-deck'));
+    return storage.getItem('kanji5-deck-version')==='v1.2-dataset-2136'&&Boolean(storage.getItem('kanji5-deck'));
   }catch(_){return false}
 };
 if(!hasCachedDeck()&&!window.__KANJI5_P0_DATA_PROMISE){

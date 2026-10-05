@@ -52,10 +52,11 @@ function runtimePresentationData(now=Date.now(),includeStats=true){
   let stats=baseStats;
   if(includeStats){
     const reviews=state.readReviews?.()||[];
+    const reviewSummary=state.readReviewSummary?.()||null;
     let nonAgainReviews=0;
     const days=[],keyFormatter=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}),labelFormatter=new Intl.DateTimeFormat('fa-IR',{weekday:'short'}),dayBuckets=new Map();
     for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);const key=keyFormatter.format(d);days.push({label:labelFormatter.format(d),count:0,key});dayBuckets.set(key,days.length-1);}
-    for(const item of reviews){if(String(item.rating||'')!=='Again')nonAgainReviews++;const dayIndex=dayBuckets.get(String(item.at||'').slice(0,10));if(dayIndex!==undefined)days[dayIndex].count++;}
+    if(Array.isArray(reviewSummary?.daily)){for(const row of reviewSummary.daily){const dayIndex=dayBuckets.get(String(row?.date||''));if(dayIndex!==undefined)days[dayIndex].count=Math.max(0,Number(row?.count)||0);}}else{for(const item of reviews){if(String(item.rating||'')!=='Again')nonAgainReviews++;const dayIndex=dayBuckets.get(String(item.at||'').slice(0,10));if(dayIndex!==undefined)days[dayIndex].count++;}}
     const trimmedDays=days.map(({label,count})=>({label,count}));
     let leechCount=0;for(const item of Object.values(cards))if(item?.leech)leechCount++;
     const masteryDistribution={unseen:Math.max(0,deck.length-studiedCount),learning:0,attention:0,stable:0,mastered:0,average:0,total:deck.length};
@@ -70,7 +71,7 @@ function runtimePresentationData(now=Date.now(),includeStats=true){
       studiedMasteryTotal+=kanjiMastery(character,knowledge,model);studiedMasteryCount++;
     }
     masteryDistribution.average=studiedMasteryCount?studiedMasteryTotal/studiedMasteryCount:0;
-    stats={...baseStats,totalReviews:reviews.length,nonAgainRate:reviews.length?nonAgainReviews/reviews.length:0,leechCount,last7:trimmedDays,masteryDistribution};
+    if(reviewSummary)nonAgainReviews=Math.max(0,Math.min(Number(reviewSummary.totalReviews)||0,Number(reviewSummary.nonAgainReviews)||0));const totalReviews=reviewSummary?Math.max(0,Number(reviewSummary.totalReviews)||0):reviews.length;stats={...baseStats,totalReviews,nonAgainRate:totalReviews?nonAgainReviews/totalReviews:0,leechCount,last7:trimmedDays,masteryDistribution};
   }
   const newCount=Math.min(Math.max(0,Number(app.todayNew)||0),Math.max(1,Number(settings.dailyNew)||5));
   return {dailySummary:{dueCount,newCount,masteredCount,streak:Number(app.streak?.current)||0},dailyGoal:{completed:Number(app.todayReviewCount)||0,target:Math.max(1,Number(settings.dailyGoal)||20),celebrated:Boolean(app.goalCelebrated)},upcomingReviews:upcoming.slice(0,6),settings,stats};

@@ -178,6 +178,9 @@ jobs:
       - name: Run Lovable-style experience navigation gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-experience-nav-visual.spec.mjs
+      - name: Run Data Trust tab persistence gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/data-trust.spec.mjs
       - name: Run account shell gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
