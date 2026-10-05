@@ -71,7 +71,7 @@ function eventId(){return crypto.randomUUID?.()||`review-${Date.now()}-${Math.ra
 function createInitial(overrides={}){const created={schemaVersion:PERSISTENCE_SCHEMA_VERSION,settings:{...defaults,...(overrides.settings||{})},deck:Array.isArray(overrides.deck)?overrides.deck:[],cards:overrides.cards&&typeof overrides.cards==='object'?overrides.cards:{},reviews:Array.isArray(overrides.reviews)?overrides.reviews:[],knowledge:overrides.knowledge&&typeof overrides.knowledge==='object'?overrides.knowledge:{},today:overrides.today||'',todayNew:Number(overrides.todayNew)||0,todayReviewCount:Number(overrides.todayReviewCount)||0,goalCelebrated:Boolean(overrides.goalCelebrated),queue:Array.isArray(overrides.queue)?overrides.queue:[],current:overrides.current||null,revealed:Boolean(overrides.revealed),examples:overrides.examples&&typeof overrides.examples==='object'?overrides.examples:{},streak:{current:0,longest:0,lastActiveDate:null,...(overrides.streak||{})}};activeState=created;return created}
 function normalizeReviewEvent(event){if(!event||typeof event!=='object')return event;const normalized={...event};if(!normalized.eventSchemaVersion)normalized.eventSchemaVersion=1;if(normalized.eventSchemaVersion===1&&normalized.baseRecord&&!normalized.resultRecord)normalized.resultRecord=structuredClone(normalized.baseRecord);const legacyId=identityText(normalized.id,200);if(legacyId&&!normalized.contentId){const identity=inferLegacyIdentity(legacyId,null,normalized);Object.assign(normalized,identity)}return normalized}
 function reviewKey(event){return String(event?.eventId||`${event?.id||''}|${event?.at||''}|${event?.rating||''}|${event?.due||''}|${event?.scheduledDays||0}`)}
-const PORTABLE_BACKUP_FORMAT='kanji5-backup',PORTABLE_BACKUP_VERSION=1;
+const PORTABLE_BACKUP_FORMAT='kanji5-backup',PORTABLE_BACKUP_VERSION=2;
 function compactReviews(reviews,limit=2000){const map=new Map();for(const raw of Array.isArray(reviews)?reviews:[]){const event=normalizeReviewEvent(raw);if(!event||!event.id||!event.at)continue;map.set(reviewKey(event),event)}return[...map.values()].sort((a,b)=>String(a.at||'').localeCompare(String(b.at||''))||reviewKey(a).localeCompare(reviewKey(b))).slice(-Math.max(1,Number(limit)||2000))}
 function safeParse(raw){try{return raw?JSON.parse(raw):null}catch(_){return null}}
 function safeObject(value){return value&&typeof value==='object'&&!Array.isArray(value)?value:null}
@@ -91,14 +91,26 @@ function writeMnemonics(value){const next=value&&typeof value==='object'&&!Array
 function writeComponents(value){return writeObject(COMPONENT_KEY,value&&typeof value==='object'&&!Array.isArray(value)?value:{})}
 function writeLastAttempt(value){try{localStorage.setItem(LAST_ATTEMPT_KEY,JSON.stringify(value&&typeof value==='object'?value:{}));return true}catch(_){return false}}
 function backupSummary(data){const core=data?.core||{};const knowledge=core.knowledge&&typeof core.knowledge==='object'?core.knowledge:{};const mnemonics=knowledge.v2Mnemonics&&typeof knowledge.v2Mnemonics==='object'?knowledge.v2Mnemonics:{};return{cards:Object.keys(core.cards&&typeof core.cards==='object'?core.cards:{}).length,reviews:Array.isArray(core.reviews)?core.reviews.length:0,personalMnemonics:Object.values(mnemonics).filter(value=>typeof value==='string'&&value.trim()).length,completedSessions:Array.isArray(data?.sessionHistory)?data.sessionHistory.length:0}}
-function portableBackup(state=activeState||loadState()){
+async function sha256Text(value){
+  if(typeof crypto==='undefined'||!crypto.subtle||typeof TextEncoder==='undefined')throw new Error('KANJI5_BACKUP_CRYPTO_UNAVAILABLE');
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+function portableIntegrityPayload(record){return JSON.stringify({format:record.format,version:record.version,createdAt:record.createdAt,data:record.data,metadata:record.metadata,summary:record.summary})}
+async function portableChecksum(record){return 'sha256:'+await sha256Text(portableIntegrityPayload(record))}
+async function portableBackup(state=activeState||loadState()){
   const core=makeSnapshot(state,2000).payload;
   const data={core:{settings:core.settings,today:core.today,todayNew:core.todayNew,todayReviewCount:core.todayReviewCount,goalCelebrated:core.goalCelebrated,streak:core.streak,cards:core.cards,reviews:core.reviews,knowledge:core.knowledge},education:{...readSettings()},sessionHistory:readSessionHistory().filter(row=>row?.status!=='active'),components:readComponents()};
   const metadata={deckVersion:readValue('kanji5-deck-version',null),persistenceSchemaVersion:PERSISTENCE_SCHEMA_VERSION,reviewEventSchemaVersion:REVIEW_EVENT_SCHEMA_VERSION};
-  const signed={data,metadata};
-  return{format:PORTABLE_BACKUP_FORMAT,version:PORTABLE_BACKUP_VERSION,createdAt:new Date().toISOString(),data,metadata,summary:backupSummary(data),checksum:fnv1a(signed)};
+  const record={format:PORTABLE_BACKUP_FORMAT,version:PORTABLE_BACKUP_VERSION,createdAt:new Date().toISOString(),data,metadata,summary:backupSummary(data)};
+  return{...record,checksum:await portableChecksum(record)};
 }
-function validPortableBackup(backup){if(!backup||typeof backup!=='object'||backup.format!==PORTABLE_BACKUP_FORMAT||Number(backup.version)!==PORTABLE_BACKUP_VERSION)return false;const data=safeObject(backup.data),metadata=safeObject(backup.metadata);return !!data&&!!safeObject(data.core)&&!!safeObject(data.education)&&Array.isArray(data.sessionHistory)&&safeObject(data.components)!==null&&safeObject(metadata)!==null&&String(backup.checksum||'')===fnv1a({data,metadata})}
+async function validPortableBackup(backup){
+  if(!backup||typeof backup!=='object'||backup.format!==PORTABLE_BACKUP_FORMAT||Number(backup.version)!==PORTABLE_BACKUP_VERSION||typeof backup.createdAt!=='string')return false;
+  const data=safeObject(backup.data),metadata=safeObject(backup.metadata),summary=safeObject(backup.summary);
+  if(!data||!safeObject(data.core)||!safeObject(data.education)||!Array.isArray(data.sessionHistory)||safeObject(data.components)===null||!metadata||!summary)return false;
+  try{return String(backup.checksum||'')===await portableChecksum(backup)}catch(_){return false}
+}
 function clampNumber(value,min,max,fallback){const n=Number(value);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):fallback}
 function sanitizePortableData(backup){
   const data=backup.data||{},core=data.core||{},education=data.education||{};
@@ -116,9 +128,9 @@ function applyPortableData(prepared){
   activeState=hydrateCards(applyLoaded(createInitial({today:todayKey()}),prepared.snapshot.payload,defaults));
   return prepared.summary;
 }
-function restorePortableBackup(backup){
-  if(!validPortableBackup(backup))throw new Error('KANJI5_INVALID_BACKUP');
-  const current=portableBackup();
+async function restorePortableBackup(backup){
+  if(!await validPortableBackup(backup))throw new Error('KANJI5_INVALID_BACKUP');
+  const current=await portableBackup();
   const prepared=sanitizePortableData(backup);
   try{return applyPortableData(prepared)}catch(error){try{applyPortableData(sanitizePortableData(current))}catch(_){ }throw error}
 }
