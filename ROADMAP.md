@@ -801,7 +801,7 @@ See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
 **PARTIAL — core implementation complete; broader validity evidence remains.**
 
-Implemented on current `main`:
+Implemented in the C4 release candidate:
 - randomized answer order with stable option IDs;
 - documented 4-item-per-level blueprint across N5–N2, sampling the beginning/middle/end of each level;
 - 16-question onboarding diagnostic contract;
