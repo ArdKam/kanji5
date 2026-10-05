@@ -19,12 +19,16 @@ try{
   }
 }catch(_){window.__KANJI5_BOOTSTRAP_STORAGE_DEGRADED__=true;}
 const buildId=(document.querySelector('meta[name="kanji5-build-id"]')?.getAttribute('content')||'dev').trim()||'dev';
-void import('./v2-observability.js').catch(error=>console.error('Kanji 5 observability failed to boot.',error));
 const registerServiceWorker=()=>{
   if(!('serviceWorker' in navigator))return;
-  navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(buildId)).catch(error=>{
+  navigator.serviceWorker.register('./sw.js?v='+encodeURIComponent(buildId)).then(registration=>{
+    const worker=registration.installing||registration.waiting||registration.active;
+    worker?.addEventListener('statechange',()=>{
+      if(worker.state==='redundant')window.__KANJI5_OBSERVABILITY__?.capture?.('service-worker-install-failure',new Error('Service worker became redundant before activation'),{scope:registration.scope,dataAffected:'unknown'});
+    });
+  }).catch(error=>{
     window.__KANJI5_SW_REGISTRATION_FAILED__=String(error?.message||error||'unknown');
-    window.__KANJI5_OBSERVABILITY__?.capture?.('service-worker-registration-failure',error);
+    window.__KANJI5_OBSERVABILITY__?.capture?.('service-worker-registration-failure',error,{dataAffected:'unknown'});
   });
 };
 if('requestIdleCallback' in window){
@@ -34,6 +38,7 @@ if('requestIdleCallback' in window){
 }
 import('./v1.6-session.js').catch(error=>{
   window.__KANJI5_V16_SESSION_LOAD_FAILED__=String(error?.message||error||'unknown');
-  window.__KANJI5_OBSERVABILITY__?.capture?.('session-runtime-load-failure',error);
+  window.__KANJI5_OBSERVABILITY__?.capture?.('dynamic-import-failure',error,{module:'v1.6-session.js',dataAffected:'unknown'});
+  window.__KANJI5_OBSERVABILITY__?.capture?.('session-runtime-load-failure',error,{module:'v1.6-session.js',dataAffected:'unknown'});
 });
 })();
