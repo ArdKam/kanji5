@@ -27,6 +27,7 @@ for(const marker of [
 
 assert.match(app,/production&&showProductionOptions\?\{hintUsed:true\}/);
 assert.match(boundary,/submitExercise\(value,meta=\{\}\)/);
+assert.match(serviceWorker, /"\\.\/v1\.9-learner-content-core\\.js"/);
 assert.match(boundary,/fn\(String\(value\?\?''\),meta&&typeof meta==='object'\?meta:\{\}\)/);
 
 const production=buildLearnerContent({character:"一",meanings:["one","one radical (no.1)"],on:["イチ","イツ"],kun:["ひと-","ひと.つ"]});
