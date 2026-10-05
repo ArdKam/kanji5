@@ -280,3 +280,35 @@ test('handwriting vector loading failure exposes retry and recovers on the next 
     await context.close();
   }
 });
+
+test("handwriting hint radios support roving-focus keyboard navigation",async({page})=>{
+  await page.route("**/kanji/05b66.svg",route=>route.fulfill({
+    status:200,
+    contentType:"image/svg+xml",
+    body:svgFor("学"),
+  }));
+  await clean(page);
+  const handwriting=await openSchoolHandwriting(page);
+  const radios=handwriting.getByRole("radio");
+  await expect(radios).toHaveCount(3);
+
+  const active=handwriting.locator(".handwriting-hint-segment.is-active");
+  await expect(active).toHaveCount(1);
+  await active.focus();
+  const activeIndex=await radios.evaluateAll(nodes=>nodes.findIndex(node=>node===document.activeElement));
+  expect(activeIndex).toBeGreaterThanOrEqual(0);
+
+  const nextIndex=(activeIndex+1)%3;
+  await page.keyboard.press("ArrowRight");
+  await expect(radios.nth(nextIndex)).toBeFocused();
+  await expect(radios.nth(nextIndex)).toHaveAttribute("aria-checked","true");
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(radios.nth(activeIndex)).toBeFocused();
+  await expect(radios.nth(activeIndex)).toHaveAttribute("aria-checked","true");
+
+  await page.keyboard.press("End");
+  await expect(radios.nth(2)).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(radios.nth(0)).toBeFocused();
+});
