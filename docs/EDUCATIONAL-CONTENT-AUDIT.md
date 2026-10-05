@@ -1,8 +1,9 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
 **Audit date:** 2026-10-05
-**Audited implementation baseline:** `c4-educational-validity` @ `a986dc6fa5ae29fa9f9da63a910f2184f15d62c1`
-**Release-candidate note:** this SHA is the pre-documentation verification baseline; C4 is not marked DONE until the remaining empirical/content-review gates are independently satisfied.  
+**Audited implementation/verification candidate:** `c4-educational-validity-v2` @ `50841606b7fb4a451a43e96807e0d367651697bc`
+**Base:** `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`
+**Release-candidate note:** C4 is not marked DONE until the remaining psychometric/content-review gates are independently satisfied.  
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
 This document records the findings of the 2026-10-03 educational/content audit. It supplements `ROADMAP.md`; it does not replace the roadmap's implementation/status rules.
@@ -37,9 +38,9 @@ The product currently has several places where implementation is more conservati
 
 ### P1 — important content quality work
 
-4. Learner-facing meanings are too close to raw dictionary glosses.
-5. Readings are not tiered into core/secondary/reference learning targets.
-6. Vocabulary examples are validated for structural quality, but not yet sufficiently curated for learner stage, usefulness, naturalness, and pedagogical priority.
+4. Learner-facing meanings now have a separate priority layer, but human review of high-risk/ambiguous entries is still required.
+5. Readings now have core/reference treatment; vocabulary-supported reading prioritization still needs broader content QA.
+6. Vocabulary examples have deterministic structural/pedagogical filtering, but still require sampled human review for usefulness, naturalness, learner stage, and pedagogical priority.
 7. Context sentences have useful structural filters, but limited semantic/grammar difficulty modeling.
 8. Curated mnemonics are materially stronger than generated scaffolds; 100% coverage is not equivalent to 100% mnemonic quality.
 9. Component/radical visualization is useful but does not yet constitute a complete component-learning curriculum.
@@ -50,14 +51,14 @@ The product currently has several places where implementation is more conservati
 
 ## 3. Verification evidence — 2026-10-05
 
-The C4 release candidate was inspected against `main` @ `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d`. The implementation verification baseline recorded above is the final code/test SHA before this documentation update; no code changes follow this baseline.
+The C4 candidate was rebuilt from and inspected against `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`. No code changes follow the verification candidate; subsequent changes are documentation-only.
 
 Focused runtime spot checks executed in the isolated verification environment:
 - learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, duplicate/invalid example rejection;
 - content-evidence semantics: non-independent/revealed attempts do not inflate practice/correct counters, while guided recovery remains isolated;
 - source-level contract review: Production default modality, Vocabulary/Context labels, stable-ID placement scoring, uncertainty/upper-bound presentation, and mnemonic provenance checks.
 
-The full repository `npm test` / TypeScript build was not executed in this environment because there is no local repository checkout and GitHub Actions exposed no workflow runs/statuses for the C4 branch at verification time. This is an execution limitation, not a pass claim.
+The full repository `npm test` and React build gates were executed by GitHub Actions on the candidate branch: the v1.8/v1.9 validation job passed on the C4 candidate. Local execution was unavailable because the environment cannot resolve GitHub; CI is therefore the authoritative repository-level verification evidence.
 
 ### Empirical placement screen
 
