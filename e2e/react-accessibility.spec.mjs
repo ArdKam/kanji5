@@ -430,23 +430,12 @@ test('English shell does not retain Persian presentation labels',async({page})=>
 });
 
 test("Reading Lab exposes a retry when its Kanji catalog fails to load",async({page})=>{
-  await page.addInitScript(()=>{
-    const realFreeze=Object.freeze;
-    (window).__kanji5RealFreeze=realFreeze;
-    Object.freeze=value=>{
-      if(value&&typeof value==="object"&&typeof value.listKanji==="function"&&typeof value.snapshot==="function")return value;
-      return realFreeze(value);
-    };
-  });
   await clean(page);
   await page.evaluate(()=>{
-    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
-    if(!boundary||typeof boundary.listKanji!=="function")throw new Error("V2 boundary unavailable");
-    const original=boundary.listKanji;
-    boundary.listKanji=async()=>{throw new Error("intentional catalog failure");};
-    (window).__restoreReadingLabCatalog=()=>{ boundary.listKanji=original; };
-    const realFreeze=(window).__kanji5RealFreeze;
-    if(typeof realFreeze==="function")Object.freeze=realFreeze;
+    const original=window.__KANJI5_V19_V2_BOUNDARY__;
+    if(!original||typeof original.listKanji!=="function")throw new Error("V2 boundary unavailable");
+    window.__KANJI5_V19_V2_BOUNDARY__={...original,listKanji:async()=>{throw new Error("intentional catalog failure");}};
+    (window).__restoreReadingLabCatalog=()=>{ window.__KANJI5_V19_V2_BOUNDARY__=original; };
   });
 
   await page.getByRole("button",{name:"بیشتر"}).click();
