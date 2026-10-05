@@ -7,6 +7,7 @@ import { validateContextSentence, contentDifficulty } from "../v1.9-data-quality
 import { legacyEducationDefinition } from "../v2-domain-core.js";
 
 const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
+const kanjiCatalog=JSON.parse(fs.readFileSync("kanji-data.json","utf8")).kanji;
 const education=fs.readFileSync("v1.5-education-ui.js","utf8");
 const boundary=fs.readFileSync("v1.9-v2-boundary.js","utf8");
 const placement=fs.readFileSync("frontend/src/app/placement-logic.ts","utf8");
@@ -35,6 +36,12 @@ assert.deepEqual(production.readings.coreOn,["イチ"]);
 assert.deepEqual(production.readings.coreKun,["ひと-"]);
 assert.ok(production.readings.referenceOn.includes("イツ"));
 assert.equal(learnerContentPolicy().version,"1.0.0");
+for(const item of kanjiCatalog.slice(0,80).filter(item=>item?.character)){
+  const model=buildLearnerContent({character:item.character,meanings:item.meanings||item.meaning,on:item.on,kun:item.kun});
+  const source=new Set(model.sourceMeanings);
+  for(const value of [...model.meanings.primary,...model.meanings.secondary,...model.meanings.reference]) assert.ok(source.has(value),`learner layer must not invent gloss: ${item.character} / ${value}`);
+}
+
 
 const ambiguous=buildLearnerContent({character:"日",meanings:["day","sun","Japan"]});
 assert.deepEqual(ambiguous.meanings.primary,["day","sun"]);
