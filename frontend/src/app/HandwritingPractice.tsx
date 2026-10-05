@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 import { gradeHandwriting, gradeHandwritingStroke, type HandwritingGrade, type HandwritingStroke, type HandwritingStrokeGrade } from "./handwriting-grader";
@@ -387,7 +387,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                       )?.focus();
                     });
                   };
-                  const handleHintKeyDown = (event:React.KeyboardEvent<HTMLButtonElement>) => {
+                  const handleHintKeyDown = (event:ReactKeyboardEvent<HTMLButtonElement>) => {
                     const forward = language === "fa" ? event.key === "ArrowLeft" : event.key === "ArrowRight";
                     const backward = language === "fa" ? event.key === "ArrowRight" : event.key === "ArrowLeft";
                     if(forward){ event.preventDefault(); moveHintFocus(1); }
