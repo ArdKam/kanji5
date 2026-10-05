@@ -154,15 +154,126 @@ function updateUpcomingReviews(){
   });
 }
 function startUpcomingReviews(){if(upcomingReviewsTimerStarted)return;upcomingReviewsTimerStarted=true;updateUpcomingReviews();setInterval(updateUpcomingReviews,15000)}
-function renderCard(){startUpcomingReviews();const id=state.current;if(!id){renderEmpty();updateStats();return}const item=state.deck.find(x=>x.id===id),rec=state.cards[item.id],card=rec?.card;if(card)reviveCard(card);const preview=card?scheduler.repeat(card,new Date()):null;const getPreview=r=>{try{return formatInterval(preview[r].card)}catch(_){return"—"}};$("study").innerHTML=`<div class="kanjirow"><div class="kanji" data-kanji-id="${item.id}">${item.character}</div></div><div class="first-exposure-reading" style="display:${!rec?"block":"none"}"><div class="hira">${(!rec?[...(item.on||[]),...(item.kun||[])].slice(0,3):[]).join(" · ")}</div></div><div style="text-align:center;margin:-6px 0 14px"><button class="audiobtn" id="speakKanjiBtn" aria-label="تلفظ کانجی">🔊 تلفظ</button></div><div class="hint">${rec?"اول خودت معنی یا خوانش را حدس بزن.":"این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر."}</div><button class="reveal" id="revealBtn">${rec?"نمایش پاسخ":"نمایش اطلاعات کانجی"}</button><div class="answer ${state.revealed?'show':''}" id="answerBox"><div class="answerbox"><div class="meaning">${item.meaning.join(" · ")||"—"}</div><div class="readings"><div class="readbox"><div class="t"><span>On'yomi</span>${item.on.length?'<button class="audiobtn" data-speak="'+item.on.join(" ")+'" aria-label="تلفظ آن‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.on.length?item.on.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div><div class="readbox"><div class="t"><span>Kun'yomi</span>${item.kun.length?'<button class="audiobtn" data-speak="'+item.kun.join(" ")+'" aria-label="تلفظ آن‌یومی">🔊</button>':""}</div><div class="v reading-list">${item.kun.length?item.kun.map(r=>`<span class="reading-entry"><span>${r}</span><button class="audiobtn" data-speak="${r}" aria-label="تلفظ خوانش">🔊</button></span>`).join(""):"—"}</div></div></div><div class="examples" id="examples"></div><div class="meta">${formatMeta(item)}</div></div><div class="ratings ${state.revealed?'show':''}" id="ratings"><button class="rate again" data-r="Again">Again<small>${getPreview(Rating.Again)}</small></button><button class="rate hard" data-r="Hard">Hard<small>${getPreview(Rating.Hard)}</small></button><button class="rate good" data-r="Good">Good<small>${getPreview(Rating.Good)}</small></button><button class="rate easy" data-r="Easy">Easy<small>${getPreview(Rating.Easy)}</small></button></div></div>`;
-$("revealBtn").addEventListener("click",()=>{if(!window.__KANJI5_CANONICAL_REVEAL__&&rec){window.__KANJI5_V12_OPEN_RECALL__?.();return}if(window.__KANJI5_CANONICAL_REVEAL__)delete window.__KANJI5_CANONICAL_REVEAL__;state.revealed=true;renderCard();fetchExamples(item).then(renderExamples)});
-document.querySelectorAll(".rate").forEach(b=>b.addEventListener("click",()=>review(b.dataset.r)));$("speakKanjiBtn")?.addEventListener("click",()=>speak(item.character));document.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)));renderExamples();if(state.revealed)fetchExamples(item).then(renderExamples)}
+function renderCard(){
+  startUpcomingReviews();
+  const id=state.current;
+  if(!id){renderEmpty();updateStats();return}
+  const item=state.deck.find(x=>x.id===id),rec=state.cards[item.id],card=rec?.card;
+  if(card)reviveCard(card);
+  const preview=card?scheduler.repeat(card,new Date()):null;
+  const getPreview=r=>{try{return formatInterval(preview[r].card)}catch(_){return"—"}};
+
+  const study=$("study");
+  study.replaceChildren();
+
+  const row=dom('div','kanjirow');
+  const kanji=dom('div','kanji',item.character);
+  kanji.dataset.kanjiId=String(item.id);
+  row.append(kanji);
+
+  const exposure=dom('div','first-exposure-reading');
+  exposure.style.display=!rec?'block':'none';
+  const hira=dom('div','hira',[...(rec?[]:[...(item.on||[]),...(item.kun||[])].slice(0,3))].join(' · '));
+  exposure.append(hira);
+
+  const audioWrap=dom('div');
+  audioWrap.style.cssText='text-align:center;margin:-6px 0 14px';
+  const speakButton=button('audiobtn','🔊 تلفظ');
+  speakButton.id='speakKanjiBtn';speakButton.setAttribute('aria-label','تلفظ کانجی');
+  audioWrap.append(speakButton);
+
+  const hint=dom('div','hint',rec?'اول خودت معنی یا خوانش را حدس بزن.':'این اولین آشنایی تو با این کانجی است؛ فعلاً فقط آن را یاد بگیر.');
+  const reveal=button('reveal',rec?'نمایش پاسخ':'نمایش اطلاعات کانجی');
+  reveal.id='revealBtn';
+
+  const answer=dom('div','answer');
+  answer.id='answerBox';
+  answer.classList.toggle('show',Boolean(state.revealed));
+  const answerBox=dom('div','answerbox');
+  const meaning=dom('div','meaning',item.meaning.join(' · ')||'—');
+
+  const readings=dom('div','readings');
+  const buildReadbox=(title,items)=>{
+    const box=dom('div','readbox');
+    const t=dom('div','t');
+    t.append(dom('span','',title));
+    if(items.length){
+      const speakAll=button('audiobtn','🔊');
+      speakAll.dataset.speak=items.join(' ');
+      speakAll.setAttribute('aria-label','تلفظ آن‌یومی');
+      t.append(speakAll);
+    }
+    const values=dom('div','v reading-list');
+    if(items.length){
+      items.forEach(value=>{
+        const entry=dom('span','reading-entry');
+        entry.append(dom('span','',value));
+        const speakOne=button('audiobtn','🔊');
+        speakOne.dataset.speak=value;
+        speakOne.setAttribute('aria-label','تلفظ خوانش');
+        entry.append(speakOne);
+        values.append(entry);
+      });
+    }else values.textContent='—';
+    box.append(t,values);
+    return box;
+  };
+  readings.append(buildReadbox("On'yomi",Array.isArray(item.on)?item.on:[]),buildReadbox("Kun'yomi",Array.isArray(item.kun)?item.kun:[]));
+
+  const examples=dom('div','examples');examples.id='examples';
+  const meta=dom('div','meta');
+  for(const chipData of metaChips(item)){
+    const chip=dom('span','chip'+(chipData.cls?' '+chipData.cls:''),chipData.t);
+    meta.append(chip);
+  }
+  answerBox.append(meaning,readings,examples,meta);
+  answer.append(answerBox);
+
+  const ratings=dom('div','ratings');
+  ratings.id='ratings';ratings.classList.toggle('show',Boolean(state.revealed));
+  for(const ratingName of ['Again','Hard','Good','Easy']){
+    const rate=button('rate '+ratingName.toLowerCase(),ratingName);
+    rate.dataset.r=ratingName;
+    rate.append(dom('small','',getPreview(Rating[ratingName])));
+    ratings.append(rate);
+  }
+
+  study.append(row,exposure,audioWrap,hint,reveal,answer,ratings);
+
+  reveal.addEventListener("click",()=>{
+    if(!window.__KANJI5_CANONICAL_REVEAL__&&rec){window.__KANJI5_V12_OPEN_RECALL__?.();return}
+    if(window.__KANJI5_CANONICAL_REVEAL__)delete window.__KANJI5_CANONICAL_REVEAL__;
+    state.revealed=true;
+    renderCard();
+    fetchExamples(item).then(renderExamples)
+  });
+  ratings.querySelectorAll(".rate").forEach(b=>b.addEventListener("click",()=>review(b.dataset.r)));
+  speakButton.addEventListener("click",()=>speak(item.character));
+  readings.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)));
+  renderExamples();
+  if(state.revealed)fetchExamples(item).then(renderExamples)
+}
 function renderExamples(){
   const el=$("examples");
   if(!el||!state.current)return;
   const ex=state.examples[state.current]||[];
-  if(!ex.length){el.innerHTML="";return}
-  el.innerHTML=`<h3>نمونه‌های واژگانی</h3><div class="words">${ex.map(x=>{const word=escapeHtml(x.word),reading=escapeHtml(x.reading),speech=escapeHtml(x.reading||x.word);return `<div class="word"><span>${word}</span> <small style="color:#6b7280;direction:ltr;display:inline-block">${reading}</small><button class="audiobtn" data-speak="${speech}" aria-label="تلفظ واژه">🔊</button></div>`}).join("")}</div>`;
+  el.replaceChildren();
+  if(!ex.length)return;
+  el.append(dom('h3','', 'نمونه‌های واژگانی'));
+  const words=dom('div','words');
+  ex.forEach(x=>{
+    const line=dom('div','word');
+    const word=dom('span','',String(x.word??''));
+    const reading=dom('small','',String(x.reading??''));
+    reading.style.cssText='color:#6b7280;direction:ltr;display:inline-block';
+    const speech=String(x.reading||x.word||'');
+    const play=button('audiobtn','🔊');
+    play.dataset.speak=speech;
+    play.setAttribute('aria-label','تلفظ واژه');
+    line.append(word,document.createTextNode(' '),reading,play);
+    words.append(line);
+  });
+  el.append(words);
   el.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)));
 }
 function next(){if(state.queue.length===0){state.current=null;state.revealed=false;if(IS_LEGACY){renderEmpty();updateStats();}notifyV2Learning();return}state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats();}notifyV2Learning()}
@@ -181,9 +292,98 @@ $("settingsBtn").addEventListener("click",()=>{$("dailyNew").value=state.setting
 $("closeSettings").addEventListener("click",()=>$("settingsDialog").close());
 $("saveSettings").addEventListener("click",()=>{state.settings.dailyNew=Math.min(30,Math.max(1,Number($("dailyNew").value)||5));state.settings.dailyGoal=Math.min(500,Math.max(1,Number($("dailyGoal").value)||20));state.settings.leechThreshold=Math.min(30,Math.max(2,Number($("leechThreshold").value)||8));initScheduler();save();$("settingsDialog").close();buildQueue();next();updateStats()});
 $("resetBtn").addEventListener("click",resetAll);
-function renderStats(){const total=state.reviews.length,correct=state.reviews.filter(r=>r.rating!=="Again").length,accuracy=total?Math.round(correct/total*100):0,leechCount=Object.values(state.cards).filter(c=>c.leech).length,studied=state.deck.filter(k=>state.cards[k.id]).length,stateNames=["جدید (New)","یادگیری (Learning)","مرور (Review)","بازآموزی (Relearning)"],stateCounts=[0,0,0,0];for(const c of Object.values(state.cards)){const s=c.card?.state;if(s!=null&&stateCounts[s]!=null)stateCounts[s]++}const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(d),label=new Intl.DateTimeFormat("fa-IR",{weekday:"short"}).format(d),count=state.reviews.filter(r=>r.at.slice(0,10)===key).length;days.push({label,count})}const maxDay=Math.max(1,...days.map(d=>d.count));$("statsBody").innerHTML=`<div class="statsgrid"><div class="box"><div class="n">${total}</div><div class="l">کل مرورها</div></div><div class="box"><div class="n">${accuracy}%</div><div class="l">دقت (غیر از Again)</div></div><div class="box"><div class="n">${studied}/${state.deck.length}</div><div class="l">کانجی مطالعه‌شده</div></div><div class="box"><div class="n">${state.streak.longest||0}🔥</div><div class="l">طولانی‌ترین رشته</div></div><div class="box"><div class="n">${leechCount}</div><div class="l">Leech (کانجی دشوار)</div></div><div class="box"><div class="n">${state.streak.current||0}</div><div class="l">رشتهٔ فعلی (روز)</div></div></div><h3 style="font-size:14px;color:var(--muted);margin:14px 0 4px">مرورهای ۷ روز اخیر</h3><div class="bars">${days.map(d=>`<div class="col"><div class="fill" style="height:${Math.round(d.count/maxDay*80)+2}px"></div><div class="lbl">${d.label}<br>${d.count}</div></div>`).join('')}</div><h3 style="font-size:14px;color:var(--muted);margin:14px 0 4px">وضعیت کارت‌ها</h3><div class="statesrow">${stateNames.map((n,i)=>`<span class="chip">${n}: ${stateCounts[i]}</span>`).join('')}</div>`;}
+function renderStats(){
+  const total=state.reviews.length;
+  const correct=state.reviews.filter(r=>r.rating!=="Again").length;
+  const accuracy=total?Math.round(correct/total*100):0;
+  const leechCount=Object.values(state.cards).filter(c=>c.leech).length;
+  const studied=state.deck.filter(k=>state.cards[k.id]).length;
+  const stateNames=["جدید (New)","یادگیری (Learning)","مرور (Review)","بازآموزی (Relearning)"],stateCounts=[0,0,0,0];
+  for(const c of Object.values(state.cards)){const st=c.card?.state;if(st!=null&&stateCounts[st]!=null)stateCounts[st]++}
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(d);
+    const label=new Intl.DateTimeFormat("fa-IR",{weekday:"short"}).format(d);
+    const count=state.reviews.filter(r=>r.at.slice(0,10)===key).length;
+    days.push({label,count})
+  }
+  const maxDay=Math.max(1,...days.map(d=>d.count));
+  const body=$("statsBody");
+  body.replaceChildren();
+
+  const grid=dom('div','statsgrid');
+  const stat=(value,label)=>{
+    const box=dom('div','box');box.append(dom('div','n',value),dom('div','l',label));return box;
+  };
+  grid.append(
+    stat(total,'کل مرورها'),
+    stat(accuracy+'%','دقت (غیر از Again)'),
+    stat(studied+'/'+state.deck.length,'کانجی مطالعه‌شده'),
+    stat((state.streak.longest||0)+'🔥','طولانی‌ترین رشته'),
+    stat(leechCount,'Leech (کانجی دشوار)'),
+    stat(state.streak.current||0,'رشتهٔ فعلی (روز)')
+  );
+
+  const historyTitle=dom('h3','', 'مرورهای ۷ روز اخیر');
+  historyTitle.style.cssText='font-size:14px;color:var(--muted);margin:14px 0 4px';
+  const bars=dom('div','bars');
+  days.forEach(d=>{
+    const col=dom('div','col'),fill=dom('div','fill'),label=dom('div','lbl');
+    fill.style.height=(Math.round(d.count/maxDay*80)+2)+'px';
+    label.append(document.createTextNode(String(d.label)),document.createElement('br'),document.createTextNode(String(d.count)));
+    col.append(fill,label);bars.append(col);
+  });
+
+  const stateTitle=dom('h3','', 'وضعیت کارت‌ها');
+  stateTitle.style.cssText='font-size:14px;color:var(--muted);margin:14px 0 4px';
+  const states=dom('div','statesrow');
+  stateNames.forEach((name,i)=>states.append(dom('span','chip',name+': '+stateCounts[i])));
+
+  body.append(grid,historyTitle,bars,stateTitle,states);
+}
 $("statsBtn").addEventListener("click",()=>{renderStats();$("statsDialog").showModal()});
 $("closeStats").addEventListener("click",()=>$("statsDialog").close());
 document.addEventListener("keydown",e=>{if(document.querySelector("dialog[open]")||!state.current)return;if(!state.revealed&&(e.code==="Space"||e.key==="Enter")){e.preventDefault();$("revealBtn")?.click();return}if(state.revealed){const map={"1":"Again","2":"Hard","3":"Good","4":"Easy"};if(map[e.key])document.querySelector(`.rate[data-r="${map[e.key]}"]`)?.click()}});
 }
-async function start(){if(IS_LEGACY){try{await ensureFsrs();}catch(e){console.error(e);$("loading").innerHTML="<div><div style=\"font-size:42px\">⚠️</div><div style=\"font-weight:800;margin:10px 0\">موتور مرور بارگذاری نشد.</div><div style=\"color:#6b7280;font-size:13px;line-height:1.8\">اتصال به کتابخانه مرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.</div><button class=\"primary\" id=\"v12FsrsRetry\" style=\"margin-top:14px\">تلاش دوباره</button></div>";$("v12FsrsRetry").addEventListener("click",()=>location.reload());return;}}state=loadSaved(state,DEFAULTS);state=hydrateCards(state);customStudyCore=await import('./v2-custom-study-core.js');if(customStudyFilter)customStudyFilter=customStudyCore.normalizeCustomStudyFilter(customStudyFilter);const cached=loadDeckFromCache();try{if(!cached)await loadDeck();if(IS_LEGACY){if(fsrs)initScheduler();$("loading").hidden=true;$("app").hidden=false;}buildQueue();next();modernStartupReady=true;document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'));if(!IS_LEGACY){const warm=()=>{void ensureFsrs().catch(error=>console.warn("Kanji 5 FSRS idle warmup failed.",error))};if("requestIdleCallback" in window)window.requestIdleCallback(warm,{timeout:2500});else window.setTimeout(warm,100);}if(IS_LEGACY)updateStats()}catch(e){console.error(e);if(IS_LEGACY){$("loadStatus").innerHTML=`بارگذاری داده ممکن نشد.<br><br><button class="primary" id="retry">تلاش دوباره</button>`;$("retry").addEventListener("click",()=>location.reload())}}}start();
+async function start(){
+  if(IS_LEGACY){
+    try{await ensureFsrs();}
+    catch(e){
+      console.error(e);
+      const loading=$("loading");
+      loading.replaceChildren();
+      const icon=dom('div','', '⚠️');icon.style.fontSize='42px';
+      const title=dom('div','', 'موتور مرور بارگذاری نشد.');title.style.fontWeight='800';title.style.margin='10px 0';
+      const copyText=dom('div','', 'اتصال به کتابخانه مرور برقرار نشد. اتصال اینترنت را بررسی کن و دوباره تلاش کن.');copyText.style.cssText='color:#6b7280;font-size:13px;line-height:1.8';
+      const retry=button('primary','تلاش دوباره');retry.id='v12FsrsRetry';retry.style.marginTop='14px';retry.addEventListener("click",()=>location.reload());
+      loading.append(icon,title,copyText,retry);
+      return;
+    }
+  }
+  state=loadSaved(state,DEFAULTS);state=hydrateCards(state);
+  customStudyCore=await import('./v2-custom-study-core.js');
+  if(customStudyFilter)customStudyFilter=customStudyCore.normalizeCustomStudyFilter(customStudyFilter);
+  const cached=loadDeckFromCache();
+  try{
+    if(!cached)await loadDeck();
+    if(IS_LEGACY){if(fsrs)initScheduler();$("loading").hidden=true;$("app").hidden=false;}
+    buildQueue();next();modernStartupReady=true;
+    document.dispatchEvent(new CustomEvent('kanji5:v1.9-review-ready'));
+    if(!IS_LEGACY){
+      const warm=()=>{void ensureFsrs().catch(error=>console.warn("Kanji 5 FSRS idle warmup failed.",error))};
+      if("requestIdleCallback" in window)window.requestIdleCallback(warm,{timeout:2500});else window.setTimeout(warm,100);
+    }
+    if(IS_LEGACY)updateStats()
+  }catch(e){
+    console.error(e);
+    if(IS_LEGACY){
+      const status=$("loadStatus");
+      status.replaceChildren();
+      status.append(document.createTextNode('بارگذاری داده ممکن نشد.'),document.createElement('br'),document.createElement('br'));
+      const retry=button('primary','تلاش دوباره');retry.id='retry';retry.addEventListener("click",()=>location.reload());
+      status.append(retry);
+    }
+  }
+}
+start();
