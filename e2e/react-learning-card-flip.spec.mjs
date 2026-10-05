@@ -163,7 +163,8 @@ test("learning card exposes five full-content back pages in Persian and English"
       await expect(card.locator(".learning-back-page-shortcut")).toHaveCount(4);
       await expect(card.locator(".learning-back-page-shortcut.active")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".meanings")).toBeVisible();
-      await expect(card.locator(".learning-back-page").nth(0).locator(".readings")).toHaveCount(1);
+      await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings").first()).toBeVisible();
+      await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-reference-readings")).toHaveCount(0);
       const exampleCount = await card.locator(".learning-back-page").nth(1).locator(".example-row").count();
       expect(exampleCount).toBeGreaterThan(2);
       await expect(card.locator(".learning-back-page").nth(2).locator(".mnemonic-page")).toHaveCount(1);
