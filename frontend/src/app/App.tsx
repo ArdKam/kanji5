@@ -752,7 +752,7 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
             <>
               <label className="active-recall-input-wrap">
                 <span>{t("answerYourself")}</span>
-                <input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))} lang="ja" inputMode="text" autoComplete="off" spellCheck={false}/>
+                <input value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))} lang="ja" inputMode="text" autoComplete="off" spellCheck={false}/>
               </label>
               <div className="active-recall-actions">
                 <button className="active-recall-primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>
