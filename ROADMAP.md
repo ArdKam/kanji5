@@ -793,7 +793,7 @@ Audit:
 
 ### Status — 2026-10-05
 
-**PARTIAL — implementation gates materially advanced; Public Beta acceptance still blocked.** The C4 implementation now corrects the Production default, exposes conservative Vocabulary/Context modality labels, adds learner-priority meaning/reading projection, and surfaces placement uncertainty. Remaining Public Beta blockers are empirical placement-stability validation and independent human/content QA.
+**PARTIAL — implementation gates materially advanced; Public Beta acceptance still blocked.** The C4 implementation now corrects the Production default, exposes conservative Vocabulary/Context modality labels, adds learner-priority meaning/reading projection, and surfaces placement uncertainty. The implementation-level placement position-bias screen now passes on the actual 2,136-item dataset; remaining Public Beta blockers are psychometric/representative response validation and independent human/content QA.
 
 See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
@@ -811,9 +811,9 @@ Implemented in the C4 release candidate:
 - regression coverage for answer-position assumptions and the 16-question contract.
 
 Remaining before Public Beta:
-- empirical validation of placement stability/bias across representative boundary response patterns;
+- representative-response validation of placement stability/bias beyond the implementation-level shuffle screen;
 - broader high-risk synonym/ambiguous-meaning fixture coverage;
-- independent human/content QA recorded against the frozen release SHA.
+- independent human/content QA recorded against the frozen release SHA;
 
 
 ### C4.2 Exercise-modality fidelity
