@@ -48,6 +48,17 @@ The product currently has several places where implementation is more conservati
 12. Grammar Guide is a beginner primer, not yet a complete grammar-learning curriculum.
 13. Adaptive planning is evidence-aware, but current architecture does not establish that adaptive planning itself produces better learning outcomes than a baseline.
 
+## 3. Verification evidence — 2026-10-05
+
+The C4 release candidate was inspected against `main` @ `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d`. The implementation verification baseline recorded above is the final code/test SHA before this documentation update.
+
+Focused runtime spot checks executed in the isolated verification environment:
+- learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, duplicate/invalid example rejection;
+- content-evidence semantics: non-independent/revealed attempts do not inflate practice/correct counters, while guided recovery remains isolated;
+- source-level contract review: Production default modality, Vocabulary/Context labels, stable-ID placement scoring, uncertainty/upper-bound presentation, and mnemonic provenance checks.
+
+The full repository `npm test` / TypeScript build was not executed in this environment because there is no local repository checkout and GitHub Actions exposed no workflow runs/statuses for the C4 branch at verification time. This is an execution limitation, not a pass claim.
+
 ## 3. Dataset audit
 
 Current `kanji-data.json` contains:
