@@ -72,3 +72,13 @@ The exact A1 candidate recorded above was later advanced on `main`. The followin
 - React presentation workflow for this SHA: run `37358688159`, **failed** at the account shell gate after earlier build, artifact, E2E, accessibility, browser, PWA, and release-matrix steps passed.
 - GitHub Pages deployment for this SHA: run `37359308280`, **skipped** because the React presentation workflow did not complete successfully.
 - Therefore this SHA is **not an A1 release candidate**. A fresh exact-SHA release lock requires green React CI, matching Pages deployment, same-SHA live artifact/hash equality, live smoke, cache/stale-client/offline verification, and the applicable device/accessibility evidence.
+
+
+## Data Trust R4-R6 landed on main — 2026-10-06
+
+PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25a3f15417`. The landed implementation includes the domain-neutral storage adapter (R4), bounded 2,000-event operational review history with separate cumulative/90-day aggregates and cross-device merge semantics (R5), and backup v2 with v1 migration, checksum/future-version rejection, and journaled rollback/startup recovery (R6).
+
+- Branch-level engineering evidence before merge: 152/152 `scripts/test-*.mjs` tests passed; dedicated Data Trust browser persistence/backup coverage passed on the previously verified branch head.
+- The React workflow also contains the dedicated `e2e/data-trust.spec.mjs` gate.
+- Final completion is **not** claimed yet: live authenticated production Supabase sync/conflict evidence and physical real-device Backup/Restore success + failure/rollback evidence remain outstanding.
+- An unrelated React presentation E2E (`personal mnemonic editor auto-scrolls fully into view when opened`) was red on the pre-merge branch head and was intentionally not changed under Data Trust scope.
