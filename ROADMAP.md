@@ -144,7 +144,7 @@ Configured workflows, open PRs, and prior-release evidence do not satisfy this g
 
 ### 2.0.1 Educational Content & Assessment Hard Gate
 
-The 2026-10-03 educational/content audit is recorded in docs/EDUCATIONAL-CONTENT-AUDIT.md. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
+The 2026-10-06 educational/content audit is recorded in `docs/EDUCATIONAL-CONTENT-AUDIT.md`. C4 PR #469 is the current implementation candidate; it is not counted as DONE until merged into current `main` and the remaining educational acceptance gates are independently satisfied. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
 
 Before Public Beta, the following educational gates are release blockers:
 
@@ -192,7 +192,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
 - R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
-- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 implements and verifies the C4 runtime/assessment changes, but C4 remains PARTIAL until representative psychometric validation and independent human/content QA are recorded against the final candidate.
+- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 implements and verifies the C4 runtime/assessment changes, with the final React presentation verification green (40/40 gates). C4 remains PARTIAL until representative psychometric/placement validation and independent human/content QA are recorded against the final release candidate and the change is present on current `main`.
 
 **PENDING:**
 - R18 Public Beta.
