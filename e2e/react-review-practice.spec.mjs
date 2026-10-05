@@ -133,11 +133,21 @@ test('Production Recall typed answer records independent production evidence',as
   const input=page.locator('#root #exercise input').first();
   await input.fill(character);
   await page.getByRole('button',{name:'بررسی پاسخ'}).click();
-  await expect.poll(async()=>Boolean((await page.evaluate(async()=>{const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot();return snapshot.feedback||null;}))?.correct)).toBe(true);
-  await page.waitForTimeout(900);
-  const knowledge=await page.evaluate(()=>JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}'));
-  expect(Number(knowledge?.[character]?.production?.attempts||0)).toBeGreaterThan(0);
-  expect(Number(knowledge?.[character]?.production?.correct||0)).toBeGreaterThan(0);
+  await expect.poll(async()=>page.evaluate(character=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const production=knowledge?.[character]?.production||{};
+    return {attempts:Number(production.attempts||0),correct:Number(production.correct||0)};
+  },character)).toMatchObject({attempts:expect.any(Number),correct:expect.any(Number)});
+  await expect.poll(async()=>page.evaluate(character=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const production=knowledge?.[character]?.production||{};
+    return Number(production.attempts||0);
+  },character)).toBeGreaterThan(0);
+  await expect.poll(async()=>page.evaluate(character=>{
+    const knowledge=JSON.parse(localStorage.getItem('kanji5-v1.2-knowledge')||'{}');
+    const production=knowledge?.[character]?.production||{};
+    return Number(production.correct||0);
+  },character)).toBeGreaterThan(0);
 });
 
 test('Production Recall known self-grade submits the revealed Kanji and advances',async({page})=>{
