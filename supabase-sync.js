@@ -12,11 +12,8 @@ const SESSION_HISTORY_KEY=K.sessionHistory;
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
-const SUPABASE_UMD = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js';
-const SUPABASE_JS_CANDIDATES = [
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm',
-  'https://esm.sh/@supabase/supabase-js@2.57.4'
-];
+const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
+let supabaseRuntimePromise = null;
 
 const emptyState = {
   status: 'loading',
@@ -148,43 +145,39 @@ function mergedPayload(local, remote) {
   };
 }
 
+function loadSupabaseRuntime(){
+  if(globalThis.supabase?.createClient)return Promise.resolve(globalThis.supabase.createClient);
+  if(supabaseRuntimePromise)return supabaseRuntimePromise;
+  supabaseRuntimePromise=new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-kanji5-supabase-runtime]');
+    const finish=()=>{
+      const factory=globalThis.supabase?.createClient;
+      if(factory)resolve(factory);else reject(new Error('SUPABASE_JS_UNAVAILABLE'));
+    };
+    if(existing){
+      existing.addEventListener('load',finish,{once:true});
+      existing.addEventListener('error',()=>reject(new Error('SUPABASE_JS_LOAD_FAILED')),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=SUPABASE_BROWSER_RUNTIME;
+    script.async=true;
+    script.dataset.kanji5SupabaseRuntime='true';
+    script.onload=finish;
+    script.onerror=()=>reject(new Error('SUPABASE_JS_LOAD_FAILED'));
+    document.head.appendChild(script);
+  });
+  return supabaseRuntimePromise;
+}
+
 async function getClient() {
   if (client) return client;
   if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
-  if (globalThis.supabase?.createClient) {
-    client = globalThis.supabase.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
-    return client;
-  }
-  let lastError = null;
-  for (const source of SUPABASE_JS_CANDIDATES) {
-    try {
-      const mod = await import(source);
-      client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
-      });
-      return client;
-    } catch (error) {
-      lastError = error;
-      console.warn('Kanji 5 Supabase client source failed', source, error);
-    }
-  }
-  throw lastError || new Error('SUPABASE_JS_UNAVAILABLE');
-  /*
-  client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
+  const createClient=await loadSupabaseRuntime();
+  client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   return client;
-  */
 }
 
 async function readRemote() {
