@@ -1,7 +1,7 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
 **Audit date:** 2026-10-05
-**Audited implementation/verification candidate:** `c4-educational-validity-v2` @ `50841606b7fb4a451a43e96807e0d367651697bc`
+**Audited implementation/verification candidate:** `c4-educational-validity-v2` @ `688c7ef384a748145adfd8ef72f9bb4e01ca3ce8`
 **Base:** `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`
 **Release-candidate note:** C4 is not marked DONE until the remaining psychometric/content-review gates are independently satisfied.  
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
@@ -51,14 +51,14 @@ The product currently has several places where implementation is more conservati
 
 ## 3. Verification evidence — 2026-10-05
 
-The C4 candidate was rebuilt from and inspected against `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`. No code changes follow the verification candidate; subsequent changes are documentation-only.
+The C4 release candidate was rebuilt from and inspected against `main` @ `708244a5ae096fba4c926ca6bb25c33978341d83`. The frozen candidate is `688c7ef384a748145adfd8ef72f9bb4e01ca3ce8`; the final delta after the first verification pass consisted only of E2E contract alignment for the explicit reference-reading split and Production Recall recovery affordances/timing.
 
 Focused runtime spot checks executed in the isolated verification environment:
 - learner-content projection: primary/reference meanings, core/reference readings, ambiguity overrides, duplicate/invalid example rejection;
 - content-evidence semantics: non-independent/revealed attempts do not inflate practice/correct counters, while guided recovery remains isolated;
 - source-level contract review: Production default modality, Vocabulary/Context labels, stable-ID placement scoring, uncertainty/upper-bound presentation, and mnemonic provenance checks.
 
-The full repository `npm test` and React build gates were executed by GitHub Actions on the candidate branch: the v1.8/v1.9 validation job passed on the C4 candidate. Local execution was unavailable because the environment cannot resolve GitHub; CI is therefore the authoritative repository-level verification evidence.
+The full repository `npm test` and React build gates were executed by GitHub Actions on the candidate branch. The v1.8/v1.9 validation workflow passed (run `37359773035`), and the final React presentation workflow passed (run `37360811744`), including the Learning Card, Review/Practice, Production Recall, offline/PWA, accessibility, Firefox, and WebKit gates. Local execution was unavailable because the environment cannot resolve GitHub; CI is therefore the authoritative repository-level verification evidence.
 
 ### Empirical placement screen
 
