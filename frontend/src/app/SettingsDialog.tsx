@@ -137,6 +137,35 @@ export function SettingsDialog({
   const discardConfirmRef = useRef<HTMLButtonElement | null>(null);
   const resetCancelRef = useRef<HTMLButtonElement | null>(null);
   const resetConfirmRef = useRef<HTMLButtonElement | null>(null);
+  const confirmationReturnFocusRef = useRef<HTMLElement | null>(null);
+
+  const restoreConfirmationFocus = () => {
+    const opener = confirmationReturnFocusRef.current;
+    confirmationReturnFocusRef.current = null;
+    window.requestAnimationFrame(() => {
+      if (opener?.isConnected && !opener.hasAttribute("disabled") && opener.getAttribute("aria-hidden") !== "true") opener.focus({ preventScroll: true });
+    });
+  };
+
+  const openDiscardConfirmation = () => {
+    confirmationReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setDiscardOpen(true);
+  };
+
+  const dismissDiscardConfirmation = () => {
+    setDiscardOpen(false);
+    restoreConfirmationFocus();
+  };
+
+  const openResetConfirmation = () => {
+    confirmationReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setResetArmed(true);
+  };
+
+  const dismissResetConfirmation = () => {
+    setResetArmed(false);
+    restoreConfirmationFocus();
+  };
 
   const handleConfirmationKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>, onEscape: () => void) => {
     if (event.key === "Escape") {
@@ -177,7 +206,7 @@ export function SettingsDialog({
 
   const dirty = settingsKey(draft) !== savedKey;
   const requestClose = () => {
-    if (dirty) setDiscardOpen(true);
+    if (dirty) openDiscardConfirmation();
     else onClose();
   };
   const requestCloseRef = useRef(requestClose);
@@ -300,14 +329,14 @@ export function SettingsDialog({
               <strong id="settings-reset-title">{language === "fa" ? "مطمئنی می‌خواهی ادامه بدهی؟" : "Are you sure you want to continue?"}</strong>
               <p id="settings-reset-hint">{language === "fa" ? "همهٔ پیشرفت یادگیری و سابقهٔ مرور این دستگاه پاک می‌شود. این عمل قابل بازگشت نیست." : "All learning progress and review history on this device will be erased. This action cannot be undone."}</p>
               <div className="settings-danger-actions">
-                <button ref={resetCancelRef} className="button secondary" type="button" onClick={() => setResetArmed(false)} disabled={effectiveBusy}>{t("cancel", language)}</button>
+                <button ref={resetCancelRef} className="button secondary" type="button" onClick={dismissResetConfirmation} disabled={effectiveBusy}>{t("cancel", language)}</button>
                 <button ref={resetConfirmRef} className="button danger" type="button" onClick={() => { setResetArmed(false); void onReset(); }} disabled={effectiveBusy}>
                   {effectiveBusy ? "…" : (language === "fa" ? "بله، پیشرفت را پاک کن" : "Yes, reset progress")}
                 </button>
               </div>
             </div>
           ) : (
-            <button className="settings-reset-trigger" type="button" onClick={() => setResetArmed(true)} disabled={effectiveBusy}>
+            <button className="settings-reset-trigger" type="button" onClick={openResetConfirmation} disabled={effectiveBusy}>
               <span>{language === "fa" ? "پاک کردن پیشرفت" : "Reset learning progress"}</span>
               <span aria-hidden="true">›</span>
             </button>
@@ -327,13 +356,13 @@ export function SettingsDialog({
           </div>
         </div>
       </form>      {discardOpen ? (
-        <div className="settings-discard-dialog" role="alertdialog" aria-modal="true" aria-labelledby="settings-discard-title" aria-describedby="settings-discard-hint" onKeyDown={event => handleConfirmationKeyDown(event, () => setDiscardOpen(false))}>
+        <div className="settings-discard-dialog" role="alertdialog" aria-modal="true" aria-labelledby="settings-discard-title" aria-describedby="settings-discard-hint" onKeyDown={event => handleConfirmationKeyDown(event, dismissDiscardConfirmation)}>
           <div className="settings-discard-dialog-card">
             <p className="eyebrow red">{language === "fa" ? "تغییر ذخیره‌نشده" : "Unsaved changes"}</p>
             <h3 id="settings-discard-title">{t("settingsDiscardTitle", language)}</h3>
             <p id="settings-discard-hint">{t("settingsDiscardHint", language)}</p>
             <div className="settings-discard-actions">
-              <button ref={discardKeepEditingRef} className="button secondary" type="button" onClick={() => setDiscardOpen(false)}>{t("settingsKeepEditing", language)}</button>
+              <button ref={discardKeepEditingRef} className="button secondary" type="button" onClick={dismissDiscardConfirmation}>{t("settingsKeepEditing", language)}</button>
               <button ref={discardConfirmRef} className="button danger" type="button" onClick={() => { setDiscardOpen(false); onClose(); }}>{t("settingsDiscardChanges", language)}</button>
             </div>
           </div>
