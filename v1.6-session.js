@@ -117,7 +117,7 @@ function update(){
   $('#v16New').textContent=read('#newCount')||'۰';
   $('#v16Mastered').textContent=read('#masteredCount')||'۰';
   $('#v16Streak').textContent=text('#streakCount');
-  const g=text('#goalLabel').match(/([0-9۰-۹]+)s*/s*([0-9۰-۹]+)/);
+  const g=text('#goalLabel').match(/([0-9۰-۹]+)\s*\/\s*([0-9۰-۹]+)/);
   let done=0,total=0;
   if(g){const cv=x=>Number(String(x).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));done=cv(g[1]);total=cv(g[2])}
   $('#v16GoalText').textContent=g?'هدف روزانه: '+g[1]+'/'+g[2]:'هدف روزانه';
