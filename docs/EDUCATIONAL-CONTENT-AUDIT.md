@@ -1,7 +1,7 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
 **Audit date:** 2026-10-05
-**Audited implementation baseline:** `c4-educational-validity` @ `40f1a93d9dfc6d2cf35c7098e87482c80963a868`
+**Audited implementation baseline:** `c4-educational-validity` @ `0b53e1b629c58e627bd64bdbfcedd509a6aa9da6`
 **Release-candidate note:** this SHA is the pre-documentation verification baseline; C4 is not marked DONE until the remaining empirical/content-review gates are independently satisfied.  
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
@@ -206,7 +206,7 @@ Tests must demonstrate that:
 
 The runtime has a deterministic Vocabulary grader, content validation, adaptive difficulty selection, provenance, and content evidence.
 
-The current presentation usually exposes a multiple-choice/missing-kanji interaction.
+The current presentation exposes a missing-Kanji choice interaction for Vocabulary/Context retrieval.
 
 ### Educational interpretation
 
@@ -505,16 +505,13 @@ After a baseline comparison exists, evaluate:
 
 Do not automatically change FSRS/planner parameters from observational metrics without an explicit evaluated decision record.
 
-## 18. Recommended educational order of work
+## 18. Recommended remaining educational work
 
-1. Placement redesign.
-2. Production primary-path correction.
-3. Vocabulary/Context modality correction.
-4. Learner-facing meaning/reading content layer.
-5. Curated vocabulary/context QA.
-6. Mnemonic curation expansion.
-7. Component-learning curriculum.
-8. Grammar progression beyond primer.
-9. Empirical adaptive-learning comparison.
+1. Empirical placement stability/bias validation.
+2. Independent human/content QA for sampled high-risk meanings/readings/examples/context.
+3. Curated mnemonic human review and curation expansion.
+4. Broader learner-priority Vocabulary/Context QA as real content coverage grows.
+5. Component-learning curriculum.
+6. Grammar progression beyond primer.
 
 The existing learning-engine architecture should be preserved while these content/validity improvements are implemented through its established boundaries.
