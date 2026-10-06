@@ -2,7 +2,7 @@
 
 Audit date: 2026-10-06  
 Audit evidence baseline: `2e54187c745d2639b329c5335a164145e420d8ab`  
-Current `main` after documentation reconciliation: `ea03ee5f02225bebf7b7d960edfc77046853d912`  
+Current `main`: the latest documentation-reconciliation commit on `main`; exact-SHA runtime evidence must be re-recorded for the promotion candidate.  
 R12 PR: #468 — merged at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`  
 Status: **NOT COMPLETE**
 
