@@ -2,137 +2,39 @@
 
 This file is an operational ledger, not a user-facing promise.
 
-## Verified baseline
+## Current R13 governance evidence
 
-- efbfaf1912f99e3ae6afc607e675efcd9cb2ff62: release artifact/cache/stale-client/offline production verification recorded in roadmap PR #377.
-- a580a2024aaec58d8fc700b399957656f17c23d8: expanded live Pages smoke gate through onboarding, Learning, Active Recall, Stats, Settings/backup export, Account, and offline reload. The PR's CI validation passed.
+Audit date: 2026-10-06.
 
-## Current-main pre-Vocabulary additions
+Repository-side verification against current `main` before the R13 branch was rebased:
 
-- PR #389: historical candidate for the domain-neutral persistence adapter; superseded by the merged R4 implementation in PR #467.
-- PR #390: explicit PWA install metadata and 192/512 icon assets are prepared on a current-main branch; merge/CI evidence must be captured before marking them complete.
-- PR #388: Help, browser support, privacy/data, and feedback are discoverable from Settings.
+- The current account API exposes authentication, profile/password management, sign-out, and sync, but **no account-delete operation**.
+- The current Settings reset is scoped to learning progress and does not provide complete browser-data erasure.
+- The Supabase schema's `ON DELETE CASCADE` relationship is database behavior, not a user-facing deletion workflow.
+- The portable backup is schema/checksum validated and is not a complete representation of every browser-held datum.
+- The Supabase browser runtime is vendored at the current pinned version; no third-party CDN is required for that runtime path.
+- Repository search found no application-level product-analytics/advertising SDK or analytics-cookie implementation in the audited code surface.
+- Public issue forms are available for general product/content feedback; security guidance routes vulnerabilities away from public issues.
+- No dedicated private privacy/account request channel is operational.
+- No approved project-level software license is present.
 
-## Evidence still requiring external execution
+## R13 evidence status
 
-Representative-device performance must be recorded on actual target hardware.
+**Repository-side:** PASS for documentation/governance reconciliation on this branch.
 
-Browser compatibility should be recorded per browser/OS/device, not inferred from one Chromium run.
+**External/legal:** BLOCKED until owner/counsel decisions and production verification are recorded.
 
-Public beta observations must come from real users.
+Required external evidence:
+- production account deletion workflow, if implemented;
+- complete local-data deletion semantics and verification;
+- exact production Supabase/provider configuration;
+- retention/deletion policy approval;
+- target-market and age/child-user review;
+- user-rights/private request channel;
+- final Terms/Privacy approval;
+- project license approval;
+- third-party licensing/attribution approval.
 
-Security/privacy/legal sign-off must use the production Supabase project, headers, enabled third-party services, and actual target markets.
+## Existing release evidence
 
-Do not convert a configured workflow or a PR CI result into a production claim without the corresponding live evidence.
-
-## A1 final release lock
-
-- Final candidate commit: **the exact SHA of the commit containing this section**.
-- Final candidate base: `feb4cf31121e4124aaa2cb57b801d1aba3fa8b23`.
-- Final candidate scope: release-integrity documentation only; no product feature, scheduler, learner-model, grading, Vocabulary, Grammar, R4, R11, R12, or C4 implementation work.
-- The candidate SHA is intentionally self-referential so the ledger remains attached to the immutable commit that is promoted and verified.
-
-## A1 verification evidence
-
-The immediately preceding exact-main candidate established the complete release path and exposed/fixed two test-harness issues without weakening the product checks:
-
-- PR #459 raised the React release job timeout from 15 to 30 minutes after the exact-main run was cancelled during Playwright browser dependency installation.
-- PR #460 made the live review persistence assertion wait for the asynchronous React review action to commit.
-- PR #461 fixed the live-smoke initialization so cleanup runs once per test context and does not erase learner state on the reload used to verify persistence.
-
-Exact-main verification on `feb4cf31121e4124aaa2cb57b801d1aba3fa8b23`:
-
-- React presentation workflow: run `37342578633`, **success**, all 43 steps passed.
-- GitHub Pages deployment: run `37343502696`, **success**.
-- Pages deployment recorded `pages_build_version=feb4cf31121e4124aaa2cb57b801d1aba3fa8b23`.
-- Live artifact checks: HTTP 200 and staged/live SHA-256 equality for index, React entry, service worker, React JS, and React CSS.
-- Live smoke/offline marker: `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
-- Exact-main browser gates included React E2E, performance, offline, stale-client PWA, accessibility, Firefox, WebKit, final release matrix, onboarding, account, Stats, mnemonic, Learning flip, Review/Practice, and Production Recall keyboard checks; all passed.
-
-Performance evidence on that exact main candidate:
-
-- Desktop: navigation 304 ms; DOMContentLoaded 303 ms; load 304 ms; FCP 196 ms; LCP 600 ms; CLS 0.006; long tasks 0; app transfer approximately 1,885 KB; interaction 9 ms.
-- Mobile profile (390×844): navigation 244 ms; DOMContentLoaded 236 ms; load 244 ms; FCP 144 ms; LCP 440 ms; CLS 0.005; long tasks 0; app transfer approximately 1,885 KB; interaction 12 ms.
-- All configured release budgets passed.
-
-The final A1 candidate is this commit. Its exact-SHA React workflow and GitHub Pages deployment are the authoritative promotion gate; no A1 completion claim is valid unless both are successful and the live artifact/smoke checks remain green for this exact SHA.
-
-
-## Current documentation baseline — 2026-10-06
-
-The release-candidate process has already been exercised repeatedly across the current Kanji release work. This ledger therefore does **not** treat “run the RC again” as a backlog item. A new RC/release lock is required only when an intentionally frozen promotion candidate changes the release artifact/runtime or when the final promotion evidence itself is being recorded.
-
-Recent merged release-path changes:
-- **#471** — account-dialog geometry fix.
-- **#472** — Production Recall keyboard-gate fix.
-- **#467** — R4–R6 Data Trust implementation.
-- **#469** — C4 educational/content validity implementation; educational acceptance remains PARTIAL.
-
-The current documentation reconciliation also corrects the roadmap distinction between:
-1. completed RC/CI execution,
-2. implementation work landed on `main`, and
-3. remaining external acceptance/legal/security evidence.
-
-## Current-main post-A1 changes — 2026-10-06
-
-The previously verified A1 candidate was advanced by subsequent merges. The current `main` head is now `d5c19809c9659fd5ff4951af5e1a619d3434a12e`, so earlier exact-SHA A1 evidence remains historical and does not apply to the current head.
-
-- **PR #463** — R11 runtime failure diagnostics/observability hardening.
-- **PR #464** — final Kanji public UX/accessibility defect pass.
-- **PR #469** — C4 educational content and assessment validity implementation.
-- **PR #470** — release/documentation reconciliation.
-- **PR #471 / merge `b32ff2a90ee30a35308b30cd20347e37ae11638b`** — A1 account-dialog geometry fix.
-- **PR #472 / merge `d5c19809c9659fd5ff4951af5e1a619d3434a12e`** — A1 Production Recall keyboard-gate fix; removed the conflicting Production Recall input autofocus so the global Space reveal shortcut remains available.
-
-### Current-main A1 verification state
-
-- Current `main`: `d5c19809c9659fd5ff4951af5e1a619d3434a12e`.
-- Exact-main React presentation workflow: run `37378192793`, **success**.
-- GitHub Pages deployment for this exact SHA: run `37379018058`, **success**.
-- The merge cleared the prior A1 CI blocker and triggered the matching Pages deployment.
-- **Release lock is not yet marked complete in this ledger:** same-SHA live HTTP/artifact hash equality, live smoke/offline markers, and the remaining applicable production/device evidence must still be recorded for this exact SHA.
-
-
-## Data Trust R4-R6 landed on main — 2026-10-06
-
-PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25a3f15417`. The landed implementation includes the domain-neutral storage adapter (R4), bounded 2,000-event operational review history with separate cumulative/90-day aggregates and cross-device merge semantics (R5), and backup v2 with v1 migration, checksum/future-version rejection, and journaled rollback/startup recovery (R6).
-
-- Branch-level engineering evidence before merge: 152/152 `scripts/test-*.mjs` tests passed; dedicated Data Trust browser persistence/backup coverage passed on the previously verified branch head.
-- The React workflow also contains the dedicated `e2e/data-trust.spec.mjs` gate.
-- **Implementation is landed on `main`; do not count R4/R5/R6 as pending implementation.**
-- Final acceptance evidence remains outstanding: live authenticated production Supabase sync/conflict behavior and physical real-device Backup/Restore success + failure/rollback evidence.
-- An unrelated React presentation E2E (`personal mnemonic editor auto-scrolls fully into view when opened`) was red on the pre-merge branch head and was intentionally not changed under Data Trust scope.
-
-
-
-PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25a3f15417`. The landed implementation includes the domain-neutral storage adapter (R4), bounded 2,000-event operational review history with separate cumulative/90-day aggregates and cross-device merge semantics (R5), and backup v2 with v1 migration, checksum/future-version rejection, and journaled rollback/startup recovery (R6).
-
-- Branch-level engineering evidence before merge: 152/152 `scripts/test-*.mjs` tests passed; dedicated Data Trust browser persistence/backup coverage passed on the previously verified branch head.
-- The React workflow also contains the dedicated `e2e/data-trust.spec.mjs` gate.
-- Final completion is **not** claimed yet: live authenticated production Supabase sync/conflict evidence and physical real-device Backup/Restore success + failure/rollback evidence remain outstanding.
-- An unrelated React presentation E2E (`personal mnemonic editor auto-scrolls fully into view when opened`) was red on the pre-merge branch head and was intentionally not changed under Data Trust scope.
-
-
-## R12 security hardening — merged, acceptance still open — 2026-10-06
-
-- PR **#468** was merged into `main` at **`fa37b536a50cf120b8f20062adcab57fc50d4bf2`** after reconciling the R12 branch with the then-current `main` and preserving the current Data Trust/R11 behavior in overlapping files.
-- Verified production Supabase state: `public.user_learning_state` has RLS enabled; SELECT/INSERT/UPDATE/DELETE policies require `auth.uid() = user_id`; `anon` has no table grants. A non-owner authenticated transaction observed zero visible rows; INSERT was rejected by RLS; UPDATE/DELETE of the owner's row affected no rows; all test writes were rolled back.
-- The production Supabase Security Advisor was re-checked after the merge and still reports **`auth_leaked_password_protection` disabled**. This remains a release-blocking external configuration finding and could not be changed through the available repository/Supabase tool surface.
-- The audit baseline commit had no workflow runs attached through the current GitHub workflow-run query. Therefore the earlier R12 PR CI evidence remains historical and no current-main green CI claim is made from it.
-- Exact live Pages candidate/hash/header evidence for this SHA is not yet claimed. The release ledger must be updated only after the exact-SHA workflows and live artifact checks complete.
-
-
-## R12 disposition / do-not-reopen register — 2026-10-06
-
-PR **#468** is **MERGED** into `main` at **`fa37b536a50cf120b8f20062adcab57fc50d4bf2`**. R12 repository hardening is therefore not a pending implementation task.
-
-**Do not restart R12 implementation or repeat its full audit** unless a concrete regression or newly introduced security finding is demonstrated on current `main`.
-
-R12 acceptance remains open only for:
-1. current-main R12 security/source/dependency/build/staged-artifact gate evidence;
-2. same-SHA Pages artifact/hash/header/live-smoke evidence for the promotion candidate; and
-3. production Supabase `auth_leaked_password_protection` clearance.
-
-The third item is an external Supabase configuration/plan blocker, not missing repository implementation. Historical PR CI is not current-main evidence.
-
-**Future-task documentation rule:** when a major stream lands, this ledger must record its implementation state, exact merge/commit evidence, acceptance-only remainder, blocker/owner, and an explicit do-not-reopen rule. Do not infer pending implementation from historical roadmap entries.
+Historical exact-SHA Pages, artifact-equality, smoke, cache/stale-client, and offline evidence remains tied to its recorded candidate SHA. Do not treat historical evidence as proof for a different candidate SHA.

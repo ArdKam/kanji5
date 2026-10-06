@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible product or runtime problem.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include passwords, tokens, private backups, or sensitive learner data.
+  - type: input
+    id: environment
+    attributes:
+      label: Browser / OS / device
+      placeholder: Chrome / Windows / desktop
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: dropdown
+    id: connectivity
+    attributes:
+      label: Connectivity
+      options:
+        - Online
+        - Offline
+        - Online then offline
+        - Unknown
+    validations:
+      required: true
