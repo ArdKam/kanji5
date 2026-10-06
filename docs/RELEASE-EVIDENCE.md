@@ -118,7 +118,7 @@ PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25
 - PR **#468** was merged into `main` at **`fa37b536a50cf120b8f20062adcab57fc50d4bf2`** after reconciling the R12 branch with the then-current `main` and preserving the current Data Trust/R11 behavior in overlapping files.
 - Verified production Supabase state: `public.user_learning_state` has RLS enabled; SELECT/INSERT/UPDATE/DELETE policies require `auth.uid() = user_id`; `anon` has no table grants. A non-owner authenticated transaction observed zero visible rows; INSERT was rejected by RLS; UPDATE/DELETE of the owner's row affected no rows; all test writes were rolled back.
 - The production Supabase Security Advisor was re-checked after the merge and still reports **`auth_leaked_password_protection` disabled**. This remains a release-blocking external configuration finding and could not be changed through the available repository/Supabase tool surface.
-- Post-merge GitHub Actions were triggered for the exact SHA. At documentation time, the React presentation and v1.8/v1.9 workflows were **in progress**, so no green post-merge CI claim is made yet.
+- The audit baseline commit had no workflow runs attached through the current GitHub workflow-run query. Therefore the earlier R12 PR CI evidence remains historical and no current-main green CI claim is made from it.
 - Exact live Pages candidate/hash/header evidence for this SHA is not yet claimed. The release ledger must be updated only after the exact-SHA workflows and live artifact checks complete.
 
 
