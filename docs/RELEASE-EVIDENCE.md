@@ -58,6 +58,21 @@ Performance evidence on that exact main candidate:
 The final A1 candidate is this commit. Its exact-SHA React workflow and GitHub Pages deployment are the authoritative promotion gate; no A1 completion claim is valid unless both are successful and the live artifact/smoke checks remain green for this exact SHA.
 
 
+## Current documentation baseline — 2026-10-06
+
+The release-candidate process has already been exercised repeatedly across the current Kanji release work. This ledger therefore does **not** treat “run the RC again” as a backlog item. A new RC/release lock is required only when an intentionally frozen promotion candidate changes the release artifact/runtime or when the final promotion evidence itself is being recorded.
+
+Recent merged release-path changes:
+- **#471** — account-dialog geometry fix.
+- **#472** — Production Recall keyboard-gate fix.
+- **#467** — R4–R6 Data Trust implementation.
+- **#469** — C4 educational/content validity implementation; educational acceptance remains PARTIAL.
+
+The current documentation reconciliation also corrects the roadmap distinction between:
+1. completed RC/CI execution,
+2. implementation work landed on `main`, and
+3. remaining external acceptance/legal/security evidence.
+
 ## Current-main post-A1 changes — 2026-10-06
 
 The previously verified A1 candidate was advanced by subsequent merges. The current `main` head is now `d5c19809c9659fd5ff4951af5e1a619d3434a12e`, so earlier exact-SHA A1 evidence remains historical and does not apply to the current head.
@@ -79,6 +94,16 @@ The previously verified A1 candidate was advanced by subsequent merges. The curr
 
 
 ## Data Trust R4-R6 landed on main — 2026-10-06
+
+PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25a3f15417`. The landed implementation includes the domain-neutral storage adapter (R4), bounded 2,000-event operational review history with separate cumulative/90-day aggregates and cross-device merge semantics (R5), and backup v2 with v1 migration, checksum/future-version rejection, and journaled rollback/startup recovery (R6).
+
+- Branch-level engineering evidence before merge: 152/152 `scripts/test-*.mjs` tests passed; dedicated Data Trust browser persistence/backup coverage passed on the previously verified branch head.
+- The React workflow also contains the dedicated `e2e/data-trust.spec.mjs` gate.
+- **Implementation is landed on `main`; do not count R4/R5/R6 as pending implementation.**
+- Final acceptance evidence remains outstanding: live authenticated production Supabase sync/conflict behavior and physical real-device Backup/Restore success + failure/rollback evidence.
+- An unrelated React presentation E2E (`personal mnemonic editor auto-scrolls fully into view when opened`) was red on the pre-merge branch head and was intentionally not changed under Data Trust scope.
+
+
 
 PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25a3f15417`. The landed implementation includes the domain-neutral storage adapter (R4), bounded 2,000-event operational review history with separate cumulative/90-day aggregates and cross-device merge semantics (R5), and backup v2 with v1 migration, checksum/future-version rejection, and journaled rollback/startup recovery (R6).
 
