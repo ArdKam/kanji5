@@ -120,3 +120,19 @@ PR #467 was merged into `main` at merge commit `ff1ec47018e12d8f4a45c78159dc3a25
 - The production Supabase Security Advisor was re-checked after the merge and still reports **`auth_leaked_password_protection` disabled**. This remains a release-blocking external configuration finding and could not be changed through the available repository/Supabase tool surface.
 - Post-merge GitHub Actions were triggered for the exact SHA. At documentation time, the React presentation and v1.8/v1.9 workflows were **in progress**, so no green post-merge CI claim is made yet.
 - Exact live Pages candidate/hash/header evidence for this SHA is not yet claimed. The release ledger must be updated only after the exact-SHA workflows and live artifact checks complete.
+
+
+## R12 disposition / do-not-reopen register — 2026-10-06
+
+PR **#468** is **MERGED** into `main` at **`fa37b536a50cf120b8f20062adcab57fc50d4bf2`**. R12 repository hardening is therefore not a pending implementation task.
+
+**Do not restart R12 implementation or repeat its full audit** unless a concrete regression or newly introduced security finding is demonstrated on current `main`.
+
+R12 acceptance remains open only for:
+1. current-main R12 security/source/dependency/build/staged-artifact gate evidence;
+2. same-SHA Pages artifact/hash/header/live-smoke evidence for the promotion candidate; and
+3. production Supabase `auth_leaked_password_protection` clearance.
+
+The third item is an external Supabase configuration/plan blocker, not missing repository implementation. Historical PR CI is not current-main evidence.
+
+**Future-task documentation rule:** when a major stream lands, this ledger must record its implementation state, exact merge/commit evidence, acceptance-only remainder, blocker/owner, and an explicit do-not-reopen rule. Do not infer pending implementation from historical roadmap entries.
