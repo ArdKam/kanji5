@@ -4,74 +4,53 @@ Audit date: 2026-10-06
 
 ## Evidence policy
 
-A roadmap item is only considered complete when implementation, automated tests, CI, production/live verification, and real-device evidence have the evidence required by that item's gate. An open PR is not completion evidence.
+A roadmap item is complete only when its implementation and applicable CI, production/live, real-device, security, or legal evidence is recorded. An open PR or stale branch is not completion evidence.
 
-The release candidate must be identified by an exact commit SHA and frozen before the Public Beta Gate.
+## R13 current status
 
-## Current repository/legal state
+R13 engineering/governance reconciliation is **implemented on this branch but not yet merged to current `main`**.
 
-- A project-level software license file is not currently present in the repository.
-- Third-party license inventory exists in docs/THIRD-PARTY-LICENSES.md.
-- docs/PRIVACY-AND-DATA.md is an intended-data notice and still requires legal review against production services.
-- docs/TERMS-OF-USE-DRAFT.md records current account deletion, local-data, backup, and third-party-service semantics but is not final legal text.
+Verified repository-side reconciliation:
+- Privacy/data documentation matches the current browser/runtime model.
+- Terms remain explicitly a legal-review draft.
+- Account deletion is **not** claimed as implemented; the current account API has no delete operation or UI.
+- Reset learning progress is distinguished from complete local-data deletion.
+- Backup/export scope and exclusions are documented without claiming a complete cloud export.
+- Retention is not assigned an invented fixed period.
+- Supabase, Google OAuth, KanjiAPI/EDRDG, Tatoeba, KanjiVG, GitHub Pages/Issues, and the vendored Supabase runtime are disclosed at repository level.
+- No application-level third-party analytics/advertising SDK or analytics-cookie implementation was found in the audited surface.
+- Third-party licensing/attribution inventory is maintained separately from the project license.
+- Repository governance files, issue forms, PR template, legal checklist, and release procedure are staged.
 
-The absence of a project-level license is a release blocker until an explicit license decision is recorded by the owner.
+## Remaining release blockers
 
-## Public Beta acceptance evidence
+1. **Account deletion:** no end-user account-deletion operation is implemented in the current browser runtime.
+2. **Local-data deletion:** Reset learning progress is not complete browser-data erasure.
+3. **Project license:** no owner-approved project-level license exists.
+4. **Private privacy/account request channel:** no dedicated non-public channel is operational.
+5. **Legal review:** target markets, user-rights handling, age/child-user treatment, transfers, retention, user-content/IP, terms acceptance, licensing, and cookie/consent requirements remain owner/counsel decisions.
+6. **Production configuration evidence:** exact enabled Supabase/provider configuration must be confirmed against the final deployment.
+7. **External service/data licensing:** provider terms/attribution and production usage require final review.
 
-Before opening Public Beta, record:
+## Explicitly not claimed
 
-1. exact frozen release SHA and matching deployed Pages artifact;
-2. production Supabase/RLS/auth/delete/export evidence;
-3. security evidence for CSP, unsafe DOM, dependency audit, secret/source-map review, and third-party runtime inventory;
-4. global runtime failure containment and observability checks;
-5. current onboarding/RTL/empty-state validation;
-6. Tier 1 real-device evidence for installability, cold/repeat start, learning/review, offline/reconnect, backup/restore, and key accessibility paths;
-7. Kanji dataset/provenance/placement QA and a user-facing content-reporting path;
-8. final privacy/terms/license/legal review.
+- No fixed cloud retention period.
+- No legal compliance certification.
+- No child/age classification.
+- No account-deletion availability.
+- No complete “delete all local data” capability.
+- No project license grant from the placeholder LICENSE.
 
-## Known unverified items on 2026-10-03
+## Public Beta gate
 
-No claim of representative real-device validation is made from repository CI alone.
+Before Public Beta, record on one frozen candidate SHA:
+1. exact SHA and matching deployed artifact;
+2. production auth/RLS/delete/export evidence;
+3. R12 security evidence;
+4. R11 failure containment/observability evidence;
+5. onboarding/device/accessibility evidence;
+6. content/provenance/placement evidence;
+7. final Privacy/Terms/license/legal approval;
+8. operational private privacy/account request channel.
 
-Production authenticated account deletion has been deployed, but a credentialed end-to-end invocation has not been executed in this environment.
-
-HTTP response-header verification against the deployed Pages site has not yet been completed.
-
-The current Supabase Security Advisor warning for leaked-password protection remains open.
-
-The Supabase browser client is still CDN-loaded in supabase-sync.js; the release hardening plan still requires a reviewed local/vendor path or an explicitly approved exception.
-
-## Decision rule
-
-Any unresolved item above keeps the release candidate in a non-final state. Do not infer release readiness from green source/CI checks alone.
-
-## Current-main reconciliation — 2026-10-06
-
-Current `main` is `d5c19809c9659fd5ff4951af5e1a619d3434a12e`.
-
-Since the previously verified A1 candidate, the following relevant implementation/documentation work has landed on `main`:
-
-- PR #463 — R11 runtime failure diagnostics/observability hardening.
-- PR #464 — final Kanji public UX/accessibility defect pass.
-- PR #469 — C4 educational content and assessment validity.
-- PR #470 — release/documentation reconciliation.
-- PR #471 — A1 account-dialog geometry correction.
-- PR #472 — A1 Production Recall keyboard-gate correction.
-
-The exact-main React presentation workflow for the current SHA is **successful** (run `37378192793`), and the matching GitHub Pages deployment is **successful** (run `37379018058`). This is necessary A1 promotion evidence, but not sufficient by itself to declare the release lock complete.
-
-### A1 release-lock decision
-
-The current head is a valid release candidate pending completion of the remaining exact-SHA live verification ledger. Do not infer final release readiness from CI and deployment success alone.
-
-Required remaining evidence includes:
-
-1. same-SHA live HTTP 200 checks for the shipped entry artifacts;
-2. staged/live SHA-256 equality for the release artifacts;
-3. live smoke/offline/stale-client evidence and the corresponding markers;
-4. applicable real-device, accessibility, security, privacy/legal, and production-service evidence required by the Public Beta Gate.
-
-Open PRs or green branch CI that do not correspond to the exact frozen candidate SHA must not be counted as completion evidence.
-
-PR #392 (older R11 observability work) remains superseded by the merged #463 implementation.
+Any unresolved blocker above keeps the candidate non-final.
