@@ -46,5 +46,5 @@ assert.match(schema, /auth\.uid\(\).*user_id/);
 
 console.log("Kanji 5 Supabase account integration contract passed.");
 
-assert.match(sync, /cdn\.jsdelivr\.net\/npm\/\@supabase\/supabase-js\@2\.57\.4\/\+esm/);
-assert.match(sync, /dist\/umd\/supabase\.js/);
+assert.match(sync, /SUPABASE_BROWSER_RUNTIME\s*=\s*['"]\.\/vendor\/supabase-js-2\.117\.2\.js['"]/);
+assert.doesNotMatch(sync, /cdn\.jsdelivr\.net|esm\.sh|unpkg\.com/);

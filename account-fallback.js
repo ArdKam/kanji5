@@ -57,25 +57,175 @@ const boot=()=>{
   const safe=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const render=()=>{
     const s=state(), c=copy;
+    const node=(tag,className='',textValue=null)=>{
+      const el=document.createElement(tag);
+      if(className)el.className=className;
+      if(textValue!==null)el.textContent=String(textValue);
+      return el;
+    };
+    const button=(className,textValue,type='button')=>{
+      const el=node('button',className,textValue);
+      el.type=type;
+      return el;
+    };
     if(s.status==='signed-in'){
       notice='';
-      const name=s.user?.name||s.user?.email||c('signedIn'); const letter=Array.from(name.trim())[0]||'◎';
+      const name=s.user?.name||s.user?.email||c('signedIn');
+      const letter=Array.from(name.trim())[0]||'◎';
       btn.setAttribute('aria-label',name); btn.title=name; btn.classList.add('is-signed-in');
-      btn.innerHTML='<span class="account-avatar account-avatar-fallback" aria-hidden="true">'+safe(letter.toUpperCase())+'</span><span class="account-button-label">'+safe(name)+'</span>';
-      dialog.innerHTML=(notice?'<p class="account-message" role="status">'+notice+'</p>':'')+'<button class="dialog-close" type="button" aria-label="'+c('close')+'">×</button><div class="account-dialog-heading"><span class="account-avatar account-avatar-fallback" aria-hidden="true">'+safe(letter.toUpperCase())+'</span><div><p class="eyebrow">'+c('account')+'</p><h2>'+safe(name)+'</h2></div></div><div class="account-user-card"><div class="account-user-copy"><strong>'+safe(c('signedIn'))+'</strong>'+(s.user?.email?'<span>'+safe(s.user.email)+'</span>':'')+'</div><span class="sync-pill">'+c(s.syncStatus==='syncing'?'syncing':'synced')+'</span></div><div class="account-actions"><button class="button secondary" data-account-sync type="button">'+c('sync')+'</button><button class="button secondary" data-account-signout type="button">'+c('signOut')+'</button></div>';
-      dialog.querySelector('.dialog-close').onclick=()=>dialog.close();
-      dialog.querySelector('[data-account-sync]').onclick=async()=>{if(busy)return;busy=true;render();try{const a=await waitForApi();await a.syncNow();}catch(_){}finally{busy=false;render();}};
-      dialog.querySelector('[data-account-signout]').onclick=async()=>{if(busy)return;busy=true;try{const a=await waitForApi();await a.signOut();dialog.close();}catch(_){}finally{busy=false;render();}};
+      btn.replaceChildren();
+      const btnAvatar=node('span','account-avatar account-avatar-fallback',letter.toUpperCase());
+      btnAvatar.setAttribute('aria-hidden','true');
+      btn.append(btnAvatar,node('span','account-button-label',name));
+
+      dialog.replaceChildren();
+      if(notice){
+        dialog.append(node('p','account-message',notice));
+      }
+      const close=button('dialog-close','×');
+      close.setAttribute('aria-label',c('close'));
+      const heading=node('div','account-dialog-heading');
+      const headingAvatar=node('span','account-avatar account-avatar-fallback',letter.toUpperCase());
+      headingAvatar.setAttribute('aria-hidden','true');
+      const headingCopy=node('div');
+      headingCopy.append(node('p','eyebrow',c('account')),node('h2','',name));
+      heading.append(headingAvatar,headingCopy);
+
+      const userCard=node('div','account-user-card');
+      const userCopy=node('div','account-user-copy');
+      userCopy.append(node('strong','',c('signedIn')));
+      if(s.user?.email) userCopy.append(node('span','',s.user.email));
+      const syncPill=node('span','sync-pill',c(s.syncStatus==='syncing'?'syncing':'synced'));
+      userCard.append(userCopy,syncPill);
+
+      const actions=node('div','account-actions');
+      const syncButton=button('button secondary',c('sync'));
+      syncButton.dataset.accountSync='true';
+      const signOutButton=button('button secondary',c('signOut'));
+      signOutButton.dataset.accountSignout='true';
+      actions.append(syncButton,signOutButton);
+      dialog.append(close,heading,userCard,actions);
+
+      close.onclick=()=>dialog.close();
+      syncButton.onclick=async()=>{if(busy)return;busy=true;render();try{const a=await waitForApi();await a.syncNow();}catch(_){}finally{busy=false;render();}};
+      signOutButton.onclick=async()=>{if(busy)return;busy=true;try{const a=await waitForApi();await a.signOut();dialog.close();}catch(_){}finally{busy=false;render();}};
       return;
     }
-    btn.classList.remove('is-signed-in'); btn.setAttribute('aria-label',c('account')); btn.title=c('account'); btn.innerHTML='<span class="account-avatar account-avatar-guest" aria-hidden="true">◎</span><span class="account-button-label">'+c('signIn')+'</span>';
-    if(s.status==='unavailable'){dialog.innerHTML='<button class="dialog-close" type="button" aria-label="'+c('close')+'">×</button><h2>'+c('unavailable')+'</h2><p class="account-copy">'+c('unavailableHint')+'</p>';dialog.querySelector('.dialog-close').onclick=()=>dialog.close();return;}
-    dialog.innerHTML='<button class="dialog-close" type="button" aria-label="'+c('close')+'">×</button><div class="account-dialog-heading"><span class="account-avatar account-avatar-guest" aria-hidden="true">◎</span><div><p class="eyebrow">'+c('account')+'</p><h2>'+c('signIn')+'</h2></div></div><div class="account-auth-tabs"><button type="button" data-mode="email" class="'+(mode==='email'?'is-active':'')+'">'+c('emailTab')+'</button><button type="button" data-mode="magic" class="'+(mode==='magic'?'is-active':'')+'">'+c('magicTab')+'</button></div>'+(mode==='email'?'<div class="account-intent-tabs" role="tablist" aria-label="'+c('account')+'"><button type="button" data-intent-choice="sign-in" role="tab" aria-selected="'+(intent==='sign-in')+'" class="'+(intent==='sign-in'?'is-active':'')+'">'+c('login')+'</button><button type="button" data-intent-choice="sign-up" role="tab" aria-selected="'+(intent==='sign-up')+'" class="'+(intent==='sign-up'?'is-active':'')+'">'+c('signup')+'</button></div>':'')+'<form class="account-auth-form" data-auth-intent="'+intent+'" data-auth-mode="'+mode+'"><label><span>'+c('email')+'</span><input name="email" type="email" autocomplete="email" required></label>'+(mode==='email'?'<label><span>'+c('password')+'</span><input name="password" type="password" minlength="6" autocomplete="'+(intent==='sign-in'?'current-password':'new-password')+'" required></label>':'')+'<button class="button primary account-email-button" type="submit">'+(mode==='magic'?c('magic'):intent==='sign-in'?c('login'):c('signup'))+'</button></form>'+'<div class="account-divider"><span>or</span></div><button class="button secondary account-google-button" type="button" disabled>'+c('google')+'</button>';
-    dialog.querySelector('.dialog-close').onclick=()=>dialog.close();
-    const preserveAuthFields=(nextMode,nextIntent)=>{const email=String(dialog.querySelector('[name="email"]')?.value||'');const password=String(dialog.querySelector('[name="password"]')?.value||'');mode=nextMode;intent=nextIntent;notice='';render();const nextEmail=dialog.querySelector('[name="email"]');const nextPassword=dialog.querySelector('[name="password"]');if(nextEmail)nextEmail.value=email;if(nextPassword)nextPassword.value=password;};
+
+    btn.classList.remove('is-signed-in');
+    btn.setAttribute('aria-label',c('account')); btn.title=c('account');
+    btn.replaceChildren();
+    const guestAvatar=node('span','account-avatar account-avatar-guest','◎');
+    guestAvatar.setAttribute('aria-hidden','true');
+    btn.append(guestAvatar,node('span','account-button-label',c('signIn')));
+
+    if(s.status==='unavailable'){
+      dialog.replaceChildren();
+      const close=button('dialog-close','×');
+      close.setAttribute('aria-label',c('close'));
+      dialog.append(close,node('h2','',c('unavailable')),node('p','account-copy',c('unavailableHint')));
+      close.onclick=()=>dialog.close();
+      return;
+    }
+
+    dialog.replaceChildren();
+    const close=button('dialog-close','×');
+    close.setAttribute('aria-label',c('close'));
+    const heading=node('div','account-dialog-heading');
+    const headingAvatar=node('span','account-avatar account-avatar-guest','◎');
+    headingAvatar.setAttribute('aria-hidden','true');
+    const headingCopy=node('div');
+    headingCopy.append(node('p','eyebrow',c('account')),node('h2','',c('signIn')));
+    heading.append(headingAvatar,headingCopy);
+
+    const authTabs=node('div','account-auth-tabs');
+    const emailTab=button('',c('emailTab'));
+    emailTab.dataset.mode='email';
+    if(mode==='email')emailTab.classList.add('is-active');
+    const magicTab=button('',c('magicTab'));
+    magicTab.dataset.mode='magic';
+    if(mode==='magic')magicTab.classList.add('is-active');
+    authTabs.append(emailTab,magicTab);
+
+    let intentTabs=null;
+    if(mode==='email'){
+      intentTabs=node('div','account-intent-tabs');
+      intentTabs.setAttribute('role','tablist');
+      intentTabs.setAttribute('aria-label',c('account'));
+      const signInTab=button('',c('login'));
+      signInTab.dataset.intentChoice='sign-in'; signInTab.setAttribute('role','tab');
+      signInTab.setAttribute('aria-selected',String(intent==='sign-in'));
+      if(intent==='sign-in')signInTab.classList.add('is-active');
+      const signUpTab=button('',c('signup'));
+      signUpTab.dataset.intentChoice='sign-up'; signUpTab.setAttribute('role','tab');
+      signUpTab.setAttribute('aria-selected',String(intent==='sign-up'));
+      if(intent==='sign-up')signUpTab.classList.add('is-active');
+      intentTabs.append(signInTab,signUpTab);
+    }
+
+    const form=node('form','account-auth-form');
+    form.dataset.authIntent=intent;
+    form.dataset.authMode=mode;
+    const emailLabel=node('label');
+    emailLabel.append(node('span','',c('email')));
+    const emailInput=node('input');
+    emailInput.name='email'; emailInput.type='email'; emailInput.autocomplete='email'; emailInput.required=true;
+    emailLabel.append(emailInput);
+    form.append(emailLabel);
+    if(mode==='email'){
+      const passwordLabel=node('label');
+      passwordLabel.append(node('span','',c('password')));
+      const passwordInput=node('input');
+      passwordInput.name='password'; passwordInput.type='password'; passwordInput.minLength=6;
+      passwordInput.autocomplete=intent==='sign-in'?'current-password':'new-password';
+      passwordInput.required=true;
+      passwordLabel.append(passwordInput);
+      form.append(passwordLabel);
+    }
+    const submit=button('button primary account-email-button',mode==='magic'?c('magic'):intent==='sign-in'?c('login'):c('signup'),'submit');
+    form.append(submit);
+
+    const divider=node('div','account-divider');
+    divider.append(node('span','', 'or'));
+    const google=button('button secondary account-google-button',c('google'));
+    google.disabled=true;
+
+    dialog.append(close,heading,authTabs);
+    if(intentTabs)dialog.append(intentTabs);
+    dialog.append(form,divider,google);
+
+    const preserveAuthFields=(nextMode,nextIntent)=>{
+      const email=String(dialog.querySelector('[name="email"]')?.value||'');
+      const password=String(dialog.querySelector('[name="password"]')?.value||'');
+      mode=nextMode; intent=nextIntent; notice=''; render();
+      const nextEmail=dialog.querySelector('[name="email"]');
+      const nextPassword=dialog.querySelector('[name="password"]');
+      if(nextEmail)nextEmail.value=email;
+      if(nextPassword)nextPassword.value=password;
+    };
+    close.onclick=()=>dialog.close();
     dialog.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>preserveAuthFields(b.dataset.mode==='magic'?'magic':'email',b.dataset.mode==='magic'?'sign-in':intent));
     dialog.querySelectorAll('[data-intent-choice]').forEach(b=>b.onclick=()=>preserveAuthFields('email',b.dataset.intentChoice==='sign-up'?'sign-up':'sign-in'));
-    dialog.querySelector('form').onsubmit=async ev=>{ev.preventDefault();if(busy)return;const form=ev.currentTarget;const currentMode=form.dataset.authMode==='magic'?'magic':'email';const currentIntent=form.dataset.authIntent==='sign-up'?'sign-up':'sign-in';const email=String(form.querySelector('[name=email]')?.value||'').trim();const password=String(form.querySelector('[name=password]')?.value||'');const submit=form.querySelector('button[type="submit"]');busy=true;notice='';if(submit){submit.disabled=true;submit.textContent=currentMode==='magic'?c('magic')+'…':currentIntent==='sign-up'?c('signup')+'…':c('login')+'…';}try{const a=await waitForApi();if(currentMode==='magic'){await a.sendMagicLink(email);notice=c('sent');}else if(currentIntent==='sign-in'){await a.signInWithPassword(email,password);dialog.close();return;}else{const r=await a.signUpWithPassword(email,password);notice=r.needsEmailConfirmation?c('confirm'):c('signedIn');if(!r.needsEmailConfirmation){dialog.close();return;}}}catch(error){const code=String(error?.code||'');const detail=error instanceof Error?String(error.message||''):String(error||'');notice=(code?code+': ':'')+(detail&&detail!=='AUTH_EMAIL_PASSWORD_REQUIRED'?c('error')+' '+detail:c('error'));}finally{busy=false;render();}};
+    form.onsubmit=async ev=>{
+      ev.preventDefault();
+      if(busy)return;
+      const currentMode=ev.currentTarget.dataset.authMode==='magic'?'magic':'email';
+      const currentIntent=ev.currentTarget.dataset.authIntent==='sign-up'?'sign-up':'sign-in';
+      const email=String(ev.currentTarget.querySelector('[name=email]')?.value||'').trim();
+      const password=String(ev.currentTarget.querySelector('[name=password]')?.value||'');
+      busy=true; notice=''; submit.disabled=true;
+      submit.textContent=currentMode==='magic'?c('magic')+'…':currentIntent==='sign-up'?c('signup')+'…':c('login')+'…';
+      try{
+        const a=await waitForApi();
+        if(currentMode==='magic'){await a.sendMagicLink(email);notice=c('sent');}
+        else if(currentIntent==='sign-in'){await a.signInWithPassword(email,password);dialog.close();return;}
+        else{const result=await a.signUpWithPassword(email,password);notice=result.needsEmailConfirmation?c('confirm'):c('signedIn');if(!result.needsEmailConfirmation){dialog.close();return;}}
+      }catch(error){
+        const code=String(error?.code||'');
+        const detail=error instanceof Error?String(error.message||''):String(error||'');
+        notice=(code?code+': ':'')+(detail&&detail!=='AUTH_EMAIL_PASSWORD_REQUIRED'?c('error')+' '+detail:c('error'));
+      }finally{busy=false;render();}
+    };
   };
   btn.onclick=()=>{const reactAccount=document.querySelector('#root .account-button:not(#kanji5-account-launcher)');if(reactAccount){reactAccount.click();return;}render();try{if(dialog.open)dialog.close();if(typeof dialog.show==='function')dialog.show();else dialog.setAttribute('open','');}catch(_){dialog.setAttribute('open','');}dialog.style.setProperty('display','block','important');dialog.style.setProperty('visibility','visible','important');dialog.style.setProperty('opacity','1','important');dialog.style.setProperty('z-index','1000','important');if(!dialog.open)dialog.setAttribute('open','');};
   dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});

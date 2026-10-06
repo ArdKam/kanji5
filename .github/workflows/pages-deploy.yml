@@ -53,6 +53,12 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci --no-audit --no-fund
+      - name: Dependency audit (frontend)
+        working-directory: frontend
+        run: npm audit --audit-level=high --no-fund
+      - name: Vendor pinned Supabase browser runtime
+        working-directory: .
+        run: node scripts/vendor-supabase.mjs
 
       - name: Typecheck frontend
         working-directory: frontend
@@ -75,6 +81,8 @@ jobs:
 
       - name: Install root test dependencies
         run: npm ci
+      - name: Dependency audit (root)
+        run: npm audit --audit-level=high --no-fund
 
       - name: Run root contract/unit suite
         run: npm test
@@ -88,6 +96,8 @@ jobs:
       - name: Stage production GitHub Pages site
         run: node scripts/stage-pages-site.mjs
 
+      - name: Run R12 public-release security checks
+        run: node scripts/test-r12-security.mjs _site
       - name: Verify staged production site
         run: node scripts/verify-pages-site.mjs
 
@@ -130,6 +140,20 @@ jobs:
           fetch_with_retry "$base/sw.js" /tmp/kanji5-sw.js "react-dist/kanji5-react.js"
           fetch_with_retry "$base/react-dist/kanji5-react.js" /tmp/kanji5-react.js "practice-home"
           fetch_with_retry "$base/react-dist/kanji5-react.css" /tmp/kanji5-react.css "dictionary-card"
+          echo "---- live security response headers ----"
+          headers="$(curl -sSI -L "$base/" || true)"
+          printf '%s\n' "$headers"
+          csp_header="$(printf '%s\n' "$headers" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} /^content-security-policy:/{sub(/^[^:]*:[[:space:]]*/,"");print}')"
+          if [ -n "$csp_header" ]; then
+            printf '%s\n' "$csp_header" | grep -F "script-src 'self'" >/dev/null
+            if printf '%s\n' "$csp_header" | grep -Eiq "cdn\\.jsdelivr\\.net|esm\\.sh|unpkg\\.com"; then
+              echo "LIVE_CSP_HEADER_REMOTE_RUNTIME_PRESENT"
+              exit 1
+            fi
+            echo "LIVE_CSP_HEADER=verified"
+          else
+            echo "LIVE_CSP_HEADER=absent; HTML meta CSP remains the source-level control for this Pages deployment."
+          fi
 
           verify_live_matches_staged() {
             local url="$1"
@@ -158,6 +182,7 @@ jobs:
           verify_live_matches_staged "$base/sw.js" _site/sw.js /tmp/kanji5-live-sw.js
           verify_live_matches_staged "$base/react-dist/kanji5-react.js" _site/react-dist/kanji5-react.js /tmp/kanji5-live-react.js
           verify_live_matches_staged "$base/react-dist/kanji5-react.css" _site/react-dist/kanji5-react.css /tmp/kanji5-live-react.css
+          verify_live_matches_staged "$base/vendor/supabase-js-2.117.2.js" _site/vendor/supabase-js-2.117.2.js /tmp/kanji5-live-supabase.js
           echo "LIVE_PAGES_ARTIFACT_VERIFIED"
 
       - name: Run live GitHub Pages offline and core-product E2E

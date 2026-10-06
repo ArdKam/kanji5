@@ -15,6 +15,7 @@ const required=new Set([
   "sw.js",
   "kanji-data.json",
   "kanji-components.json",
+  "vendor/supabase-js-2.117.2.js",
   ...shell.filter(item=>item!=="./").map(item=>String(item).replace(/^\.\//,""))
 ]);
 required.add("react-dist");

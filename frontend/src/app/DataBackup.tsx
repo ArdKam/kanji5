@@ -21,6 +21,8 @@ function isPortableBackup(value: unknown): value is PortableBackup {
     && Boolean(backup.summary);
 }
 
+const MAX_BACKUP_FILE_BYTES = 5 * 1024 * 1024;
+
 export function DataBackup({ language }: { language: Language }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [currentSummary, setCurrentSummary] = useState<BackupSummary | null>(null);
@@ -72,6 +74,7 @@ export function DataBackup({ language }: { language: Language }) {
     setStatus("");
     setCandidate(null);
     try {
+      if (file.size > MAX_BACKUP_FILE_BYTES) throw new Error("BACKUP_TOO_LARGE");
       const raw = JSON.parse(await file.text()) as unknown;
       if (!isPortableBackup(raw)) throw new Error("INVALID");
       setCandidate(raw);
