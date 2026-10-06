@@ -15,7 +15,8 @@ const required=[
   "manifest.webmanifest",
   "kanji-data.json",
   "kanji-components.json",
-  "vendor/ts-fsrs-5.4.1.mjs"
+  "vendor/ts-fsrs-5.4.1.mjs",
+  "vendor/supabase-js-2.117.2.js"
 ];
 for(const relative of required){
   assert.ok(fs.existsSync(path.join(site,relative)),"PAGES_SITE_REQUIRED_ASSET_MISSING: "+relative);
@@ -51,5 +52,15 @@ for(const item of shell){
   assert.ok(fs.existsSync(path.join(site,relative)),"PAGES_SITE_SW_ASSET_MISSING: "+relative);
 }
 assert.ok(fs.existsSync(path.join(site,"react-dist/assets")),"PAGES_SITE_REACT_ASSETS_MISSING");
+const maps=[];
+(function walk(dir){
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+    const full=path.join(dir,entry.name);
+    if(entry.isDirectory())walk(full);
+    else if(entry.name.endsWith(".map"))maps.push(path.relative(site,full));
+  }
+})(site);
+assert.deepEqual(maps,[],"PAGES_SITE_SOURCE_MAPS_EXPOSED: "+maps.join(","));
+
 
 console.log(`GitHub Pages staging verification passed (${shell.length} SW shell entries).`);

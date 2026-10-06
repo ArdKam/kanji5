@@ -15,11 +15,10 @@ const SESSION_HISTORY_KEY=K.sessionHistory;
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
-const SUPABASE_UMD = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js';
-const SUPABASE_JS_CANDIDATES = [
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm',
-  'https://esm.sh/@supabase/supabase-js@2.57.4'
-];
+const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
+const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
+const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
+let supabaseRuntimePromise = null;
 
 const emptyState = {
   status: 'loading',
@@ -85,8 +84,23 @@ function localPayload() {
   };
 }
 
+function assertSyncPayloadWithinLimit(payload){
+  const bytes=typeof TextEncoder==='undefined'
+    ? JSON.stringify(payload).length
+    : new TextEncoder().encode(JSON.stringify(payload)).byteLength;
+  if(bytes>MAX_SYNC_PAYLOAD_BYTES)throw new Error('SYNC_PAYLOAD_TOO_LARGE');
+  return payload;
+}
+
 function safeJSON(raw, fallback) {
   try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
+}
+
+function assertSyncPayloadWithinLimit(payload) {
+  const json = JSON.stringify(stablePayload(payload || {}));
+  const bytes = typeof TextEncoder === 'function' ? new TextEncoder().encode(json).byteLength : json.length;
+  if (bytes > MAX_SYNC_PAYLOAD_BYTES) throw new Error('SYNC_PAYLOAD_TOO_LARGE');
+  return payload;
 }
 
 function readSyncSummary() {
@@ -154,45 +168,39 @@ function mergedPayload(local, remote) {
   };
 }
 
+function loadSupabaseRuntime(){
+  if(globalThis.supabase?.createClient)return Promise.resolve(globalThis.supabase.createClient);
+  if(supabaseRuntimePromise)return supabaseRuntimePromise;
+  supabaseRuntimePromise=new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-kanji5-supabase-runtime]');
+    const finish=()=>{
+      const factory=globalThis.supabase?.createClient;
+      if(factory)resolve(factory);else reject(new Error('SUPABASE_JS_UNAVAILABLE'));
+    };
+    if(existing){
+      existing.addEventListener('load',finish,{once:true});
+      existing.addEventListener('error',()=>reject(new Error('SUPABASE_JS_LOAD_FAILED')),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=SUPABASE_BROWSER_RUNTIME;
+    script.async=true;
+    script.dataset.kanji5SupabaseRuntime='true';
+    script.onload=finish;
+    script.onerror=()=>reject(new Error('SUPABASE_JS_LOAD_FAILED'));
+    document.head.appendChild(script);
+  });
+  return supabaseRuntimePromise;
+}
+
 async function getClient() {
   if (client) return client;
   if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
-  if (globalThis.supabase?.createClient) {
-    client = globalThis.supabase.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
-    return client;
-  }
-  let lastError = null;
-  for (const source of SUPABASE_JS_CANDIDATES) {
-    try {
-      const mod = await import(source);
-      client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
-      });
-      return client;
-    } catch (error) {
-      lastError = error;
-      window.__KANJI5_OBSERVABILITY__?.capture?.('dynamic-import-failure',error,{module:source,dataAffected:'false'});
-      window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:source,dataAffected:'false'});
-      console.warn('Kanji 5 Supabase client source failed', source, error);
-    }
-  }
-  throw lastError || new Error('SUPABASE_JS_UNAVAILABLE');
-  /*
-  client = mod.createClient(window.KANJI5_SUPABASE.url, window.KANJI5_SUPABASE.anonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
+  const createClient=await loadSupabaseRuntime();
+  client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   return client;
-  */
 }
 
 async function readRemote() {
@@ -202,12 +210,14 @@ async function readRemote() {
     .eq('user_id', user.id)
     .maybeSingle();
   if (error) throw error;
+  if (data?.payload) assertSyncPayloadWithinLimit(data.payload);
   return data ? { payload: data.payload || null, updatedAt: data.updated_at || null } : null;
 }
 
 async function replaceRemote(payload, expectedUpdatedAt = null) {
   const c = await getClient();
   const now = new Date().toISOString();
+  assertSyncPayloadWithinLimit(payload);
   const rowPayload = stablePayload({ ...payload });
   if (expectedUpdatedAt) {
     const { data, error } = await c.from('user_learning_state')
@@ -258,7 +268,7 @@ async function refreshPresentationAfterSync() {
 }
 
 async function syncOnce() {
-  const local = localPayload();
+  const local = assertSyncPayloadWithinLimit(localPayload());
   const remoteRow = await readRemote();
   if (!remoteRow?.payload) {
     const result = await replaceRemote(local);
@@ -268,10 +278,11 @@ async function syncOnce() {
     return { retry: false };
   }
 
-  const merged = mergedPayload(local, remoteRow.payload);
+  const merged = assertSyncPayloadWithinLimit(mergedPayload(local, remoteRow.payload));
   const localHash = hashPayload(local);
   const mergedHash = hashPayload(merged);
-  const remoteHash = hashPayload(remoteRow.payload);
+  const remotePayload = assertSyncPayloadWithinLimit(remoteRow.payload);
+  const remoteHash = hashPayload(remotePayload);
 
   if (mergedHash === localHash && mergedHash === remoteHash) {
     storage.setItem(SYNC_META_KEY, JSON.stringify({
@@ -401,7 +412,6 @@ async function boot() {
       startSyncLifecycle();
     }
   } catch (error) {
-    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{dataAffected:'false'});
     console.warn('Kanji 5 account unavailable', error);
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
