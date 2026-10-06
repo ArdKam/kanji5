@@ -161,6 +161,24 @@ A feature may remain technically implemented while its educational validity rema
 
 ---
 
+## 2.0.0 Agent-safe completion register — 2026-10-06
+
+This register is intentionally explicit so future contributors and agents do not restart completed work from historical roadmap text.
+
+### R12 — repository implementation COMPLETE; acceptance OPEN
+
+- **Implementation status:** **DONE / LANDED** on `main` through PR **#468**, merged at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`.
+- **Do not reimplement, re-audit from scratch, or reopen R12 repository hardening** unless a concrete regression or newly introduced security finding is demonstrated on current `main`.
+- R12 hardening already landed includes the audited unsafe-DOM/XSS cleanup, restrictive CSP/remote-runtime hardening, pinned/vendored Supabase client, backup integrity and payload bounds, dependency/source-map/security gates, and production RLS/non-owner denial verification.
+- **What remains is acceptance evidence only:** current-main security gate execution, same-SHA deployed artifact/header/live-smoke evidence, and clearance of the production `auth_leaked_password_protection` finding.
+- The leaked-password-protection finding is an **external Supabase configuration/plan blocker**, not missing R12 repository implementation. Do not attempt to solve it by duplicating R12 code in the repository.
+- Historical R12 PR CI is evidence of the PR branch only; it must not be presented as current-main CI evidence.
+- If no R12 regression is demonstrated, **skip R12 implementation and proceed to the next roadmap item** while carrying these acceptance items as release evidence work.
+
+### Documentation rule for future work
+
+For every major task/stream, once implementation lands, record **(1) implementation status, (2) exact merge/commit evidence, (3) remaining acceptance-only items, (4) explicit blockers/ownership, and (5) a DO-NOT-REOPEN instruction** in the canonical roadmap and the relevant evidence document. Historical PR sections must never override the current-main status ledger.
+
 ### 2.1 Verified current status ledger — 2026-10-06
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
