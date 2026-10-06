@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at commit `81957a6065c7b271a3a697e0f41fd25f8bb048d8` (2026-10-05). This baseline includes merged C4 educational-validity work (#469), in addition to the previously merged R11 observability hardening (#463) and final Kanji public UX/accessibility pass (#464). It is **not yet release-locked** because post-merge workflow status is not yet recorded for this exact SHA.
+> **Implementation baseline reviewed:** `main` at the current documentation baseline `47afcdf171751807a80c4f049d77e72a971419d1` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
@@ -182,10 +182,9 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
 
 **PARTIAL / remaining before Public Product Readiness:**
-- A1 release integrity: the previously verified candidate `7d9d413ccb1a236d535ea2ff36d1a124587d7d2d` passed its exact-SHA React + Pages gate, but current `main` has since advanced through #463 and #464. The current head `81957a6065c7b271a3a697e0f41fd25f8bb048d8` is **not release-locked** because post-merge CI/deployment evidence has not yet been recorded for this exact SHA. A new exact-SHA candidate, green CI, same-SHA deployment/live artifact equality, smoke, cache/stale-client/offline, and representative-device evidence are required.
+- A1 release integrity / RC execution: **DONE as a release-candidate process**. The project has already gone through repeated exact-SHA RC/CI/Pages verification cycles, including the A1 account-dialog and Production Recall keyboard fixes (#471/#472). Do **not** treat “run the release candidate again” as an implementation backlog item. A final release lock is a promotion/evidence action only when a new release candidate is intentionally frozen.
 - R2 onboarding redesign is **DONE on current `main`**: dedicated first-open value/setup/placement/account flow is implemented, guest-first, and covered by desktop/mobile E2E. Remaining work is release/real-device evidence plus the C4 educational validity gate for placement.
-- R4 persistence abstraction is not yet on current `main`; PR #389 is open and not counted.
-- R5/R6 review-history and backup/restore public-release evidence remain incomplete.
+- R4/R5/R6 implementation is **DONE on current `main`** via merged #467: domain-neutral storage adapter, bounded operational review history with cumulative aggregates, and versioned/integrity-checked backup with rollback journal. Remaining work is external acceptance evidence only: authenticated production sync/conflict verification and physical real-device Backup/Restore success/failure/rollback evidence.
 - R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
 - R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
 - R10 full i18n audit remains.
@@ -211,13 +210,22 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - A7 mnemonic infrastructure/provenance/coverage.
 - D1, D2, D3, D4, D5.
 
-**Current release-critical PRs not yet counted as complete:**
-- #467: R4–R6 persistence/history/backup safety.
-- #468: R12 security hardening.
-- #465: R13 privacy/legal reconciliation.
+**Current release-critical open PRs not yet counted as complete:**
+- #468: R12 security hardening (implementation remains off `main` until its production security blockers are resolved and merged).
+- #465: R13 privacy/legal reconciliation (governance/legal work remains off `main` until reviewed/merged).
+
+**Recently merged and present on `main`:**
+- #467: R4–R6 Data Trust implementation.
+- #469: C4 educational content/assessment implementation; educational acceptance remains PARTIAL.
+- #471/#472: A1 account-dialog and Production Recall keyboard fixes.
 
 **Merged and now present on current `main`:**
-- #469: C4 educational content and assessment validity, merged as `81957a6065c7b271a3a697e0f41fd25f8bb048d8`.
+- #467: R4–R6 Data Trust implementation.
+- #469: C4 educational content and assessment validity; educational acceptance remains PARTIAL.
+- #471/#472: A1 release-gate fixes.
+
+**Documentation reconciliation:**
+- The current roadmap/release ledger has been updated to distinguish completed RC execution from the final promotion lock and to avoid counting merged R4–R6 as pending implementation.
 
 **Superseded/stale PRs that must not be treated as pending implementation:**
 - #392: superseded by merged R11 work in #463.
