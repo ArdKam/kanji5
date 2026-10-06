@@ -58,20 +58,24 @@ Performance evidence on that exact main candidate:
 The final A1 candidate is this commit. Its exact-SHA React workflow and GitHub Pages deployment are the authoritative promotion gate; no A1 completion claim is valid unless both are successful and the live artifact/smoke checks remain green for this exact SHA.
 
 
-## Current-main post-A1 changes — 2026-10-05
+## Current-main post-A1 changes — 2026-10-06
 
-The exact A1 candidate recorded above was later advanced on `main`. The following merged changes are verified on current `main` and therefore count as implemented, but they invalidate the earlier A1 candidate for release-lock purposes until the new head is re-verified.
+The previously verified A1 candidate was advanced by subsequent merges. The current `main` head is now `d5c19809c9659fd5ff4951af5e1a619d3434a12e`, so earlier exact-SHA A1 evidence remains historical and does not apply to the current head.
 
-- **PR #463 / merge `708244a5ae096fba4c926ca6bb25c33978341d83` — R11 observability hardening.** Runtime diagnostics now cover service-worker registration/install failure, dynamic-import/runtime load failures, network/runtime load failures, education/migration failures, sync-client/bootstrap failures, and asset-load failures, with bounded local diagnostics. Earlier merged React render-failure containment remains the actionable UI recovery layer.
-- **PR #464 / merge `2618d779222c00b906466a122762a19eb44a4f6c` — final Kanji public UX/accessibility QA.** Concrete defects were closed in Production Recall keyboard shortcuts, Handwriting radio-group keyboard navigation, Settings destructive confirmations/focus restoration, and Reading Lab dictionary-catalog error/retry behavior, with regression coverage.
-- **R2 onboarding implementation** remains on current `main` through the merged placement/onboarding work (#451/#453/#454/#456); its remaining status is release/device/educational evidence, not missing core implementation.
+- **PR #463** — R11 runtime failure diagnostics/observability hardening.
+- **PR #464** — final Kanji public UX/accessibility defect pass.
+- **PR #469** — C4 educational content and assessment validity implementation.
+- **PR #470** — release/documentation reconciliation.
+- **PR #471 / merge `b32ff2a90ee30a35308b30cd20347e37ae11638b`** — A1 account-dialog geometry fix.
+- **PR #472 / merge `d5c19809c9659fd5ff4951af5e1a619d3434a12e`** — A1 Production Recall keyboard-gate fix; removed the conflicting Production Recall input autofocus so the global Space reveal shortcut remains available.
 
-### Current-main release-lock state
+### Current-main A1 verification state
 
-- Current `main`: `2618d779222c00b906466a122762a19eb44a4f6c`.
-- React presentation workflow for this SHA: run `37358688159`, **failed** at the account shell gate after earlier build, artifact, E2E, accessibility, browser, PWA, and release-matrix steps passed.
-- GitHub Pages deployment for this SHA: run `37359308280`, **skipped** because the React presentation workflow did not complete successfully.
-- Therefore this SHA is **not an A1 release candidate**. A fresh exact-SHA release lock requires green React CI, matching Pages deployment, same-SHA live artifact/hash equality, live smoke, cache/stale-client/offline verification, and the applicable device/accessibility evidence.
+- Current `main`: `d5c19809c9659fd5ff4951af5e1a619d3434a12e`.
+- Exact-main React presentation workflow: run `37378192793`, **success**.
+- GitHub Pages deployment for this exact SHA: run `37379018058`, **success**.
+- The merge cleared the prior A1 CI blocker and triggered the matching Pages deployment.
+- **Release lock is not yet marked complete in this ledger:** same-SHA live HTTP/artifact hash equality, live smoke/offline markers, and the remaining applicable production/device evidence must still be recorded for this exact SHA.
 
 
 ## Data Trust R4-R6 landed on main — 2026-10-06
