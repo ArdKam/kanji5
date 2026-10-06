@@ -8,7 +8,7 @@ A roadmap item is complete only when its implementation and applicable CI, produ
 
 ## R13 current status
 
-R13 engineering/governance reconciliation is **implemented on this branch but not yet merged to current `main`**.
+R13 engineering/governance reconciliation is **merged to current `main`**. Repository-side work is complete; external/legal blockers remain explicit.
 
 Verified repository-side reconciliation:
 - Privacy/data documentation matches the current browser/runtime model.
