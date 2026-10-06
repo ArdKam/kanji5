@@ -6,7 +6,7 @@ This file is an operational ledger, not a user-facing promise.
 
 Audit date: 2026-10-06.
 
-Repository-side verification against current `main` before the R13 branch was rebased:
+Repository-side verification against current `main` at the post-R13 merge baseline `c5997a432aa4b60bc2913cbaec277127b96935db`:
 
 - The current account API exposes authentication, profile/password management, sign-out, and sync, but **no account-delete operation**.
 - The current Settings reset is scoped to learning progress and does not provide complete browser-data erasure.
@@ -20,7 +20,7 @@ Repository-side verification against current `main` before the R13 branch was re
 
 ## R13 evidence status
 
-**Repository-side:** PASS for documentation/governance reconciliation on this branch.
+**Repository-side:** PASS for documentation/governance reconciliation on current `main`.
 
 **External/legal:** BLOCKED until owner/counsel decisions and production verification are recorded.
 
