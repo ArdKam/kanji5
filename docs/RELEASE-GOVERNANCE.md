@@ -1,6 +1,6 @@
 # Kanji5 — Release Governance & Public Beta Gate
 
-Audit date: 2026-10-03
+Audit date: 2026-10-06
 
 ## Evidence policy
 
@@ -46,22 +46,32 @@ The Supabase browser client is still CDN-loaded in supabase-sync.js; the release
 
 Any unresolved item above keeps the release candidate in a non-final state. Do not infer release readiness from green source/CI checks alone.
 
-## Current-main reconciliation — 2026-10-05
+## Current-main reconciliation — 2026-10-06
 
-Current `main` is `2618d779222c00b906466a122762a19eb44a4f6c`. Since the previously verified A1 candidate, the following implementation work has landed on `main`:
+Current `main` is `d5c19809c9659fd5ff4951af5e1a619d3434a12e`.
+
+Since the previously verified A1 candidate, the following relevant implementation/documentation work has landed on `main`:
 
 - PR #463 — R11 runtime failure diagnostics/observability hardening.
 - PR #464 — final Kanji public UX/accessibility defect pass.
-- The R2 onboarding implementation is already on `main` through the merged placement/onboarding sequence (#451/#453/#454/#456).
+- PR #469 — C4 educational content and assessment validity.
+- PR #470 — release/documentation reconciliation.
+- PR #471 — A1 account-dialog geometry correction.
+- PR #472 — A1 Production Recall keyboard-gate correction.
 
-These changes are implementation evidence on current `main`; they are not, by themselves, release evidence.
+The exact-main React presentation workflow for the current SHA is **successful** (run `37378192793`), and the matching GitHub Pages deployment is **successful** (run `37379018058`). This is necessary A1 promotion evidence, but not sufficient by itself to declare the release lock complete.
 
-The current-main React presentation workflow (run `37358688159`) is **failed** at the account shell gate, and the corresponding Pages deployment (run `37359308280`) is **skipped**. The repository therefore remains in a pre-release-lock state until the current head is repaired and re-verified on one exact candidate SHA.
+### A1 release-lock decision
 
-Open PRs currently targeting the remaining release gates are not counted as complete:
-- #467 — R4–R6 persistence/history/backup safety.
-- #468 — R12 security hardening.
-- #469 — C4 educational content and assessment validity.
-- #465 — R13 privacy/legal reconciliation.
+The current head is a valid release candidate pending completion of the remaining exact-SHA live verification ledger. Do not infer final release readiness from CI and deployment success alone.
 
-PR #392 (older R11 observability work) is superseded by the merged #463 implementation and should not be used as evidence that R11 is still unimplemented.
+Required remaining evidence includes:
+
+1. same-SHA live HTTP 200 checks for the shipped entry artifacts;
+2. staged/live SHA-256 equality for the release artifacts;
+3. live smoke/offline/stale-client evidence and the corresponding markers;
+4. applicable real-device, accessibility, security, privacy/legal, and production-service evidence required by the Public Beta Gate.
+
+Open PRs or green branch CI that do not correspond to the exact frozen candidate SHA must not be counted as completion evidence.
+
+PR #392 (older R11 observability work) remains superseded by the merged #463 implementation.
