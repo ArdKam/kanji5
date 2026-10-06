@@ -9,7 +9,7 @@ This file is an operational ledger, not a user-facing promise.
 
 ## Current-main pre-Vocabulary additions
 
-- PR #389: domain-neutral persistence adapter over the existing localStorage backend.
+- PR #389: historical candidate for the domain-neutral persistence adapter; superseded by the merged R4 implementation in PR #467.
 - PR #390: explicit PWA install metadata and 192/512 icon assets are prepared on a current-main branch; merge/CI evidence must be captured before marking them complete.
 - PR #388: Help, browser support, privacy/data, and feedback are discoverable from Settings.
 
