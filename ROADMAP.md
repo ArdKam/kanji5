@@ -1311,29 +1311,24 @@ In particular, existing runtime \`innerHTML\` paths must be reviewed before exte
 
 ---
 
-## R13. Privacy and legal surface
+## R13. Privacy and legal surface — PARTIAL / release blocker
 
-Before broad release establish:
+- Product-accurate Privacy & Data draft reconciled with current runtime.
+- Terms remain a legal-review draft and do not claim unimplemented capabilities.
+- Account deletion: **NOT IMPLEMENTED** in the current browser account API/UI.
+- Local-data deletion: learning-progress reset exists, but complete browser-data erasure is **NOT IMPLEMENTED**.
+- Export/backup scope and exclusions are documented.
+- Retention periods are intentionally **UNDEFINED** until owner/counsel approval; no fixed period is invented.
+- Supabase/Auth, Google OAuth, KanjiAPI/EDRDG, Tatoeba, KanjiVG, GitHub Pages/Issues, and the vendored Supabase runtime are disclosed at repository level.
+- No application-level product analytics/advertising SDK or analytics-cookie implementation was found in the audited surface.
+- Security/public feedback channels are documented; a dedicated private privacy/account request channel is **NOT OPERATIONAL**.
+- Age/child-user treatment and final target markets are **UNDECIDED** and remain owner/legal decisions.
+- Project-level LICENSE is **NOT APPROVED**; the repository placeholder is not a license grant.
+- Final owner/counsel approval remains required before Public Beta.
 
-- Privacy Policy
-- Terms of Use
-- account/data deletion behavior
-- data export behavior
-- third-party service disclosure
-- analytics/cookie policy if analytics are introduced
-- content licensing/attribution policy
-- third-party notices
+Legal requirements must be reviewed against actual production configuration, target markets, and business model. Do not infer legal rights, retention periods, deletion capabilities, age restrictions, or license grants from repository documentation alone.
 
-Document what is:
-- stored locally
-- synced
-- optional
-- deleted on account deletion
-- retained by third parties
-
-Before beta/release, verify the implemented account-deletion path against the production backend and document the resulting local/cloud deletion semantics. Reconcile the privacy notice with the actual runtime third parties, including authentication/sync, content APIs, CDN dependencies, hosted assets, and any analytics if introduced.
-
-Legal requirements must be reviewed against actual target markets and business model.
+- **R13 repository-side status:** documentation/governance reconciliation complete on the R13 branch; non-engineering blockers remain explicit.
 
 ---
 
