@@ -200,9 +200,10 @@ function sha256Text(value){
 function portableIntegrityPayload(record){return JSON.stringify({format:record.format,version:record.version,createdAt:record.createdAt,data:record.data,metadata:record.metadata,summary:record.summary})}
 function portableChecksum(record){return 'sha256:'+sha256Text(portableIntegrityPayload(record))}
 function portableBackup(state=activeState||loadState()){
-  const core=makeSnapshot(state,2000).payload;
-  const data={core:{settings:core.settings,today:core.today,todayNew:core.todayNew,todayReviewCount:core.todayReviewCount,goalCelebrated:core.goalCelebrated,streak:core.streak,cards:core.cards,reviews:core.reviews,knowledge:core.knowledge},education:{...readSettings()},sessionHistory:readSessionHistory().filter(row=>row?.status!=='active'),components:readComponents()};
-  const metadata={deckVersion:readValue('kanji5-deck-version',null),persistenceSchemaVersion:PERSISTENCE_SCHEMA_VERSION,reviewEventSchemaVersion:REVIEW_EVENT_SCHEMA_VERSION};
+  state.reviewSummary=ensureReviewSummary(state.reviewSummary||readReviewSummary(),state.reviews);
+  const core=makeSnapshot(state,REVIEW_HISTORY_LIMIT).payload;
+  const data={core:{settings:core.settings,today:core.today,todayNew:core.todayNew,todayReviewCount:core.todayReviewCount,goalCelebrated:core.goalCelebrated,streak:core.streak,cards:core.cards,reviews:core.reviews,reviewSummary:core.reviewSummary,knowledge:core.knowledge},education:{...readSettings()},sessionHistory:readSessionHistory().filter(row=>row?.status!=='active'),components:readComponents()};
+  const metadata={backupSchemaVersion:PORTABLE_BACKUP_VERSION,reviewSummarySchemaVersion:1,deckVersion:readValue(DECK_VERSION_KEY,null),persistenceSchemaVersion:PERSISTENCE_SCHEMA_VERSION,reviewEventSchemaVersion:REVIEW_EVENT_SCHEMA_VERSION};
   const record={format:PORTABLE_BACKUP_FORMAT,version:PORTABLE_BACKUP_VERSION,createdAt:new Date().toISOString(),data,metadata,summary:backupSummary(data)};
   return{...record,checksum:portableChecksum(record)};
 }
@@ -226,7 +227,7 @@ function migratePortableBackup(backup){
     migrated.data={...data,core};
     migrated.version=PORTABLE_BACKUP_VERSION;
     migrated.metadata={...safeObject(migrated.metadata),backupSchemaVersion:PORTABLE_BACKUP_VERSION,reviewSummarySchemaVersion:1};
-    migrated.checksum=portableChecksum({...migrated,summary:migrated.summary});
+    migrated.checksum=portableChecksum(migrated);
   }
   return migrated;
 }
