@@ -2,7 +2,7 @@
 
 > **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
-> **Implementation baseline reviewed:** `main` at the current documentation baseline `47afcdf171751807a80c4f049d77e72a971419d1` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
+> **Implementation baseline reviewed:** `main` at the current documentation baseline `f0c75285f4cee2e3df5ab1d419b8d43dc04dd0b9` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
