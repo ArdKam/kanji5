@@ -1,8 +1,8 @@
 # Kanji5 — Educational Content & Learning Validity Audit
 
-**Audit date:** 2026-10-06
-**Audited implementation/verification candidate:** merged PR #469 @ `81957a6065c7b271a3a697e0f41fd25f8bb048d8`
-**Base:** `main` @ `81957a6065c7b271a3a697e0f41fd25f8bb048d8` (post-merge verification status is tracked separately; no post-merge workflow run is currently recorded)
+**Audit date:** 2026-10-07
+**Audited implementation/verification candidate:** current `main` @ `f1f9e6066e24674254616ec90267f6562db9fa61`
+**Base:** `main` @ `f1f9e6066e24674254616ec90267f6562db9fa61` (includes merged PR #475, the radical learning-aid change)
 **Release-candidate note:** C4 is not marked DONE until the remaining psychometric/content-review gates are independently satisfied.
 **Scope:** learner-facing educational quality, content validity, assessment validity, and alignment between product claims and actual learning behavior.
 
@@ -397,17 +397,41 @@ rather than implying complete handwriting proficiency assessment.
 
 The project correctly distinguishes visual decomposition from Kangxi radical semantics.
 
-Current component coverage is 2,100 / 2,136.
+Current component coverage is 2,100 / 2,136 (98.31%). Traditional-radical infrastructure covers the 2,136 Jōyō Kanji set and remains a reference/content layer.
 
-### Educational limitation
+### Current educational status — 2026-10-07
 
-The current experience is primarily explanatory/visual. A graph of components is not yet a component-learning curriculum.
+The first pedagogical step is now implemented on `main`: the Dictionary structure view explicitly presents the traditional radical as an **optional visual learning cue**. Learners are told to use it to notice recurring structure and support memory, without treating it as something that must be memorized separately.
 
-A full component-learning loop would need:
+This is intentionally a **learning-aid layer**, not a new learning domain:
 
-**teach component → retrieve component → use in compound Kanji → reinforce/recover**
+- no radical-specific Card ID;
+- no radical-specific learner state;
+- no independent FSRS scheduling;
+- no separate evidence stream;
+- no prerequisite relationship for Kanji mastery;
+- no claim that knowing a radical equals knowing the Kanji.
 
-This remains a future educational enhancement, not a reason to rewrite the existing decomposition boundary.
+The visual component breakdown remains the primary structural explanation. Radical classification and visual decomposition remain separate concepts and should not be merged into one data model merely for convenience.
+
+### What remains
+
+A true component/radical curriculum would require an evidence-backed loop such as:
+
+**teach → retrieve → apply in related Kanji → reinforce/recover**
+
+Before introducing that loop, the product needs:
+
+1. evidence that the current learning cue is useful to learners;
+2. curated selection of which components/radicals are worth explicitly teaching;
+3. clear educational distinction between traditional radicals and visually recurring components;
+4. an explicit skill/evidence model only if a later curriculum justifies scheduled practice.
+
+Therefore the current status is:
+
+**Radical infrastructure: mature/reference-ready → Radical learning cue: implemented → Radical curriculum: not started / intentionally deferred.**
+
+This remains a future educational enhancement, not a public-release blocker or reason to rewrite the existing decomposition boundary.
 
 ## 14. Reading Lab
 
