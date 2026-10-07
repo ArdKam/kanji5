@@ -377,6 +377,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           language={language}
           onClose={() => setSelected(null)}
           onSelectKanji={setSelected}
+          navigationItems={visible}
           mnemonicContent={<PreparedMnemonicPanel item={selected} language={language} draft={mnemonicDrafts[selected.character]} onDraftChange={value => setMnemonicDrafts(previous => ({ ...previous, [selected.character]: value }))} />}
         />
       ) : null}
