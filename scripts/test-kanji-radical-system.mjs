@@ -25,6 +25,8 @@ assert.match(boundary,/function getRadicalInfo\(character\)/);
 assert.match(boundary,/getRadicalInfo,getComponentInfo|getComponentInfo,getRadicalInfo/);
 assert.match(card,/TraditionalRadical/);
 assert.match(card,/getRadicalInfo\(item\.character\)/);
+assert.match(card,/Learning cue/);
+assert.match(card,/سرنخ یادگیری/);
 
 const byId=new Map(catalog.radicals.map(r=>[r.id,r]));
 for(const [character,id] of Object.entries(map.kanji)){
