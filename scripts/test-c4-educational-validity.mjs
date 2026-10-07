@@ -19,12 +19,12 @@ assert.equal(legacyEducationDefinition("production").exercise,"typed-kanji-produ
 
 for(const marker of [
   "independent-typed-production",
-  "cued-kanji-choice",
   "cued-kanji-completion",
   "cued-sentence-completion",
   "revealed_self_report",
   "content-exposure",
 ]) assert.ok(education.includes(marker),`missing educational modality marker: ${marker}`);
+assert.match(app,/cued-kanji-choice/);
 
 assert.match(app,/production&&showProductionOptions\?\{hintUsed:true\}/);
 assert.match(boundary,/submitExercise\(value,meta=\{\}\)/);
