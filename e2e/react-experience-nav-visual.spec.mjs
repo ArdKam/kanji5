@@ -84,15 +84,17 @@ test('Dictionary Kanji card supports adjacent navigation without closing', async
   await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
 
   const firstTile = page.locator('.kanji-catalog-tile').first();
+  const firstCharacter = (await firstTile.locator('.kanji-catalog-character').textContent())?.trim();
+  expect(firstCharacter).toBeTruthy();
   await firstTile.click();
   const dialog = page.locator('.dictionary-card-dialog');
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator('.dictionary-card-header-character')).toHaveText('一');
+  await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
 
   const card = dialog.locator('.dictionary-card');
   await card.dispatchEvent('pointerdown', { pointerType: 'touch', clientX: 120, clientY: 300, bubbles: true });
   await card.dispatchEvent('pointerup', { pointerType: 'touch', clientX: 190, clientY: 300, bubbles: true });
-  await expect(dialog.locator('.dictionary-card-header-character')).not.toHaveText('一');
+  await expect(dialog.locator('.dictionary-card-header-character')).not.toHaveText(firstCharacter);
 
   const nextCharacter = await dialog.locator('.dictionary-card-header-character').textContent();
   expect(nextCharacter).toBeTruthy();
@@ -100,10 +102,10 @@ test('Dictionary Kanji card supports adjacent navigation without closing', async
 
   await card.dispatchEvent('pointerdown', { pointerType: 'touch', clientX: 190, clientY: 300, bubbles: true });
   await card.dispatchEvent('pointerup', { pointerType: 'touch', clientX: 120, clientY: 300, bubbles: true });
-  await expect(dialog.locator('.dictionary-card-header-character')).toHaveText('一');
+  await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
 
   await page.keyboard.press('ArrowRight');
-  await expect(dialog.locator('.dictionary-card-header-character')).not.toHaveText('一');
+  await expect(dialog.locator('.dictionary-card-header-character')).not.toHaveText(firstCharacter);
   await page.keyboard.press('ArrowLeft');
-  await expect(dialog.locator('.dictionary-card-header-character')).toHaveText('一');
+  await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
 });
