@@ -44,4 +44,9 @@ for(const file of cssSources){
   assert.equal(bad.length,0,`8px/9px font-size remains in ${file}: ${bad.map(m=>m[1]).join(", ")}`);
 }
 
+assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-view-button[\s\S]*?transition:background var\(--motion-interaction\) ease/);
+assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--motion-interaction\) ease/);
+assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--motion-hover\) ease/);
+assert.match(fs.readFileSync("frontend/src/app/reading-lab-playback.css","utf8"),/\.reading-lab-sentence-repeat[\s\S]*?transition:background var\(--motion-interaction\) ease/);
+
 console.log("Kanji5 UI hardening final design/motion/dark-mode contract passed.");
