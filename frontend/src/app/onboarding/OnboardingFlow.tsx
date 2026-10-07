@@ -30,16 +30,16 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-progress{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;min-width:160px;color:var(--mute);font-size:11px;font-weight:800}
 .kanji5-onboarding-progress i{display:none}
 .kanji5-onboarding-progress-track{position:relative;inset:auto;width:116px;height:4px;border-radius:99px;overflow:hidden;background:rgba(38,37,35,.1)}
-.kanji5-onboarding-progress-track span{display:block;height:100%;background:linear-gradient(90deg,var(--indigo),#466b94);border-radius:inherit;transition:width .35s cubic-bezier(.22,.75,.2,1)}
+.kanji5-onboarding-progress-track span{display:block;height:100%;background:linear-gradient(90deg,var(--indigo),#466b94);border-radius:inherit;transition:width var(--motion-onboarding-progress,350ms) cubic-bezier(.22,.75,.2,1)}
 .kanji5-onboarding-root[dir=rtl] .kanji5-onboarding-progress-track span{transform-origin:right center}
 .kanji5-onboarding-language{display:flex;align-items:center;gap:3px;justify-self:end;padding:3px;border:1px solid var(--line);border-radius:999px;background:rgba(255,252,246,.64);box-shadow:0 8px 22px rgba(38,37,35,.05);backdrop-filter:blur(10px)}
-.kanji5-onboarding-language button{min-height:32px;padding:5px 11px;border:0;border-radius:999px;background:transparent;color:var(--mute);font:inherit;font-size:11px;font-weight:800;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.kanji5-onboarding-language button{min-height:32px;padding:5px 11px;border:0;border-radius:999px;background:transparent;color:var(--mute);font:inherit;font-size:11px;font-weight:800;cursor:pointer;transition:background var(--motion-hover) ease,color var(--motion-hover) ease,transform var(--motion-hover) ease}
 .kanji5-onboarding-language button:hover{transform:translateY(-1px)}
 .kanji5-onboarding-language button.is-active{background:var(--ink);color:#fff}
 .kanji5-onboarding-main{flex:1;min-height:0;width:100%;padding:22px 28px 10px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
 .kanji5-onboarding-stage{width:min(760px,100%);min-height:min(650px,calc(100svh - 150px));margin:auto;display:flex;align-items:center;justify-content:center}
-.kanji5-onboarding-panel-shell{display:flex;align-items:center;min-width:0}.kanji5-onboarding-step-wrap{min-width:0;transition:transform .22s cubic-bezier(.22,.75,.2,1)}
-.kanji5-onboarding-panel{width:min(680px,100%);text-align:start;animation:onbEnterForward .38s cubic-bezier(.22,.75,.2,1) both}.kanji5-onboarding-stage.is-back .kanji5-onboarding-panel{animation-name:onbEnterBack}
+.kanji5-onboarding-panel-shell{display:flex;align-items:center;min-width:0}.kanji5-onboarding-step-wrap{min-width:0;transition:transform var(--motion-onboarding-step,220ms) cubic-bezier(.22,.75,.2,1)}
+.kanji5-onboarding-panel{width:min(680px,100%);text-align:start;animation:onbEnterForward var(--motion-onboarding,380ms) cubic-bezier(.22,.75,.2,1) both}.kanji5-onboarding-stage.is-back .kanji5-onboarding-panel{animation-name:onbEnterBack}
 @keyframes onbEnterForward{from{opacity:0;transform:translate3d(-22px,8px,0)}to{opacity:1;transform:none}}@keyframes onbEnterBack{from{opacity:0;transform:translate3d(22px,8px,0)}to{opacity:1;transform:none}}
 .kanji5-onboarding-eyebrow{margin:0 0 13px;color:var(--shu);font-size:11px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
 .kanji5-onboarding-panel h1{margin:0;max-width:17ch;font-size:clamp(34px,4.4vw,58px);line-height:1.05;letter-spacing:-.025em}
