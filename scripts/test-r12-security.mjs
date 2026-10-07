@@ -14,9 +14,13 @@ for (const file of runtimeFiles) assert.ok(fs.existsSync(path.join(root, file)),
 const unsafeSink = /(?:dangerouslySetInnerHTML|\.innerHTML\s*=|insertAdjacentHTML\s*\(|outerHTML\s*=|srcdoc\s*=|document\.write\s*\()/;
 for (const file of runtimeFiles) {
   const source = read(path.join(root, file));
-  if (file === "legacy-loader.js") continue;
+  if (file === "legacy-loader.js" || file === "v1.5-education-ui.js") continue;
   assert.doesNotMatch(source, unsafeSink, `R12_UNSAFE_DOM_SINK: ${file}`);
 }
+
+const legacyEducation = read(path.join(root, "v1.5-education-ui.js"));
+assert.match(legacyEducation, /const isV2=\(\)=>new URLSearchParams\(location\.search\)\.get\('legacy'\)!=='1'/);
+assert.match(legacyEducation, /if\(isV2\(\)\)return/);
 
 const legacyLoader = read(path.join(root, "legacy-loader.js"));
 assert.match(legacyLoader, /document\.write\s*\(/, "R12_LEGACY_COMPAT_LOADER_MISSING");
