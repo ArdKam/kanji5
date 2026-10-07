@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { ComponentLearningPath } from "./ComponentLearningPath";
 import { TraditionalRadical } from "./TraditionalRadical";
@@ -33,6 +33,7 @@ export function DictionaryKanjiCard({
   onClose,
   catalog,
   onSelectKanji,
+  navigationItems,
   mnemonicContent,
 }: {
   item: KanjiCatalogItem;
@@ -40,6 +41,7 @@ export function DictionaryKanjiCard({
   onClose: () => void;
   catalog: KanjiCatalogItem[];
   onSelectKanji: (item: KanjiCatalogItem) => void;
+  navigationItems: KanjiCatalogItem[];
   mnemonicContent?: ReactNode;
 }) {
   const dialogRef = useModalDialog(true, onClose);
@@ -48,6 +50,8 @@ export function DictionaryKanjiCard({
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [activeSection, setActiveSection] = useState<SectionKey>("overview");
+  const [navigationDirection, setNavigationDirection] = useState<"next" | "previous" | null>(null);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +90,39 @@ export function DictionaryKanjiCard({
     setActiveSection("overview");
   }, [item.character]);
 
+  useEffect(() => {
+    if (!navigationDirection) return;
+    const timer = window.setTimeout(() => setNavigationDirection(null), 240);
+    return () => window.clearTimeout(timer);
+  }, [item.character, navigationDirection]);
+
+
+  const navigateKanji = (direction: "next" | "previous") => {
+    const index = navigationItems.findIndex(candidate => candidate.character === item.character);
+    if (index < 0) return;
+    const nextIndex = direction === "next" ? index + 1 : index - 1;
+    const nextItem = navigationItems[nextIndex];
+    if (!nextItem) return;
+    setNavigationDirection(direction);
+    onSelectKanji(nextItem);
+  };
+
+  const handleCardPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse") return;
+    if ((event.target as HTMLElement).closest("button, input, textarea, select, a")) return;
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handleCardPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
+    if (!start || event.pointerType === "mouse") return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < 56 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
+    // Dictionary contract: swipe right = next, swipe left = previous.
+    navigateKanji(dx > 0 ? "next" : "previous");
+  };
 
   const selectSection = (section: SectionKey) => {
     if (section === activeSection) return;
@@ -245,15 +282,37 @@ export function DictionaryKanjiCard({
   const masteryRingOffset = masteryRingCircumference * (1 - mastery / 100);
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
 
+  const navigationIndex = navigationItems.findIndex(candidate => candidate.character === item.character);
+  const hasPrevious = navigationIndex > 0;
+  const hasNext = navigationIndex >= 0 && navigationIndex < navigationItems.length - 1;
+
   return (
     <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-labelledby="dictionary-card-title">
-      <div className="dictionary-card">
+      <div
+        className={"dictionary-card" + (navigationDirection ? " is-navigation-" + navigationDirection : "")}
+        onPointerDown={handleCardPointerDown}
+        onPointerUp={handleCardPointerUp}
+      >
         <header className="dictionary-card-header">
           <div className="dictionary-card-classification">
             <span className="dictionary-card-jlpt badge badge-red">{item.jlpt || "—"}</span>
             {item.grade ? <span className="dictionary-card-grade">G{formatNumber(item.grade, language)}</span> : null}
           </div>
+          <button
+            className="dictionary-card-nav dictionary-card-nav-previous"
+            type="button"
+            aria-label={language === "fa" ? "کانجی قبلی" : "Previous kanji"}
+            onClick={() => navigateKanji("previous")}
+            disabled={!hasPrevious}
+          >‹</button>
           <span id="dictionary-card-title" className="dictionary-card-header-character" lang="ja">{item.character}</span>
+          <button
+            className="dictionary-card-nav dictionary-card-nav-next"
+            type="button"
+            aria-label={language === "fa" ? "کانجی بعدی" : "Next kanji"}
+            onClick={() => navigateKanji("next")}
+            disabled={!hasNext}
+          >›</button>
           <div className="dictionary-card-header-end">
             <div className="dictionary-card-mastery" role="img" aria-label={t("dictionaryMastery", language) + " " + formatNumber(mastery, language) + "%"}>
               <svg className="dictionary-mastery-ring" viewBox="0 0 44 44" aria-hidden="true">
@@ -266,6 +325,9 @@ export function DictionaryKanjiCard({
             <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
           </div>
         </header>
+        <div className="dictionary-card-navigation-hint" aria-live="polite">
+          {hasPrevious || hasNext ? (language === "fa" ? "← قبلی · سوایپ به راست: بعدی · سوایپ به چپ: قبلی · → بعدی" : "Swipe right: next · swipe left: previous") : null}
+        </div>
         <div className="dictionary-section-nav" role="tablist" aria-label={t("dictionaryCardOptions", language)}>
           {(["overview", "structure", "writing", "vocabulary", "mnemonic"] as SectionKey[]).map(tabButton)}
         </div>
