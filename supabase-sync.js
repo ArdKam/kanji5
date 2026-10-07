@@ -16,7 +16,6 @@ const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
 const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
-const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
 const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
 let supabaseRuntimePromise = null;
 
