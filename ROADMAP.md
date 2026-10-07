@@ -291,6 +291,7 @@ All work before Vocabulary must follow this order. Work may overlap only when it
 **Stage 5 — Content Quality**
 - Establish recurring QA for all 2,136 Kanji with a documented sampling protocol and recorded results.
 - Audit readings, meanings, examples, stroke data, radicals/components, pronunciation fallback, and mnemonic quality; explicitly recheck known grading/meaning-match edge cases.
+- Radical status: infrastructure/reference layer is established; the Dictionary now presents traditional radicals as optional visual learning cues. Do not create a radical deck, prerequisite, independent scheduler, or evidence stream before separate educational validation.
 - Treat coverage as necessary but not sufficient.
 - Add provenance labels and clear distinction between curated, generated/guided, and personal memory aids.
 - Establish context-aware content-report and correction workflow for readings, meanings, examples, strokes, radicals/components, and mnemonics.
