@@ -16,7 +16,7 @@ for(const token of [
 ]) assert.ok(css.includes(token),`missing design token: ${token}`);
 
 assert.match(css,/\.button:active:not\(:disabled\)[\s\S]*?transform:scale\(\.97\)/);
-assert.match(css,/\.experience-tab-indicator[\s\S]*?transition:transform \.28s cubic-bezier\(\.2,\.7,\.2,1\)/);
+assert.match(css,/\.experience-tab-indicator[\s\S]*?transition:transform \.28s cubic-bezier\(\.2,\.7,\.2,1\)/);\nassert.match(css,/@keyframes kanji5-dialog-in/);\nassert.match(css,/\.dialog\\[open\\][\\s\\S]*?animation:kanji5-dialog-in/);\nassert.match(css,/@keyframes dictionary-panel-in/);\nassert.match(css,/\.dictionary-tabpanel[\\s\\S]*?animation:dictionary-panel-in/);
 assert.match(css,/@keyframes kanji5GoalCelebrate/);
 assert.match(css,/kanji5ExerciseCorrectGlow/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
