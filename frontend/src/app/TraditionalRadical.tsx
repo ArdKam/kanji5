@@ -25,6 +25,11 @@ export function TraditionalRadical({ info, language }: { info: RadicalInfo; lang
           <span>{language === "fa" ? formatNumber(info.radical.strokeCount, language) + " ضربه" : info.radical.strokeCount + " strokes"}</span>
         </div>
       </div>
+      <p className="traditional-radical-learning-cue">
+        {language === "fa"
+          ? "سرنخ یادگیری: از این رادیکال به‌عنوان یک نشانهٔ دیداری برای یادآوری کانجی استفاده کن؛ لازم نیست آن را جداگانه حفظ کنی."
+          : "Learning cue: use the radical as a visual memory cue for the kanji; you do not need to memorize it as a separate prerequisite."}
+      </p>
     </section>
   );
 }
