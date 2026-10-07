@@ -282,6 +282,22 @@ export function DictionaryKanjiCard({
   const masteryRingOffset = masteryRingCircumference * (1 - mastery / 100);
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
 
+  useEffect(() => {
+    const handleNavigationKey = (event: globalThis.KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, button, a, [contenteditable='true']")) return;
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        navigateKanji("next");
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        navigateKanji("previous");
+      }
+    };
+    document.addEventListener("keydown", handleNavigationKey);
+    return () => document.removeEventListener("keydown", handleNavigationKey);
+  }, [item.character, navigationItems]);
+
   const navigationIndex = navigationItems.findIndex(candidate => candidate.character === item.character);
   const hasPrevious = navigationIndex > 0;
   const hasNext = navigationIndex >= 0 && navigationIndex < navigationItems.length - 1;
