@@ -113,6 +113,10 @@ export function DictionaryKanjiCard({
     pointerStartRef.current = { x: event.clientX, y: event.clientY };
   };
 
+  const handleCardPointerCancel = () => {
+    pointerStartRef.current = null;
+  };
+
   const handleCardPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = pointerStartRef.current;
     pointerStartRef.current = null;
@@ -308,6 +312,7 @@ export function DictionaryKanjiCard({
         className={"dictionary-card" + (navigationDirection ? " is-navigation-" + navigationDirection : "")}
         onPointerDown={handleCardPointerDown}
         onPointerUp={handleCardPointerUp}
+        onPointerCancel={handleCardPointerCancel}
       >
         <header className="dictionary-card-header">
           <div className="dictionary-card-classification">
