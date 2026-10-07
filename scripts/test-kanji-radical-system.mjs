@@ -9,6 +9,7 @@ const kanji=await readJSON("kanji-data.json");
 const sw=await readFile(new URL("../sw.js",import.meta.url),"utf8");
 const boundary=await readFile(new URL("../v1.9-v2-boundary.js",import.meta.url),"utf8");
 const card=await readFile(new URL("../frontend/src/app/DictionaryKanjiCard.tsx",import.meta.url),"utf8");
+const radicalComponent=await readFile(new URL("../frontend/src/app/TraditionalRadical.tsx",import.meta.url),"utf8");
 
 assert.equal(catalog.schema,"kanji-radicals/v1");
 assert.equal(catalog.radicals.length,214);
@@ -25,8 +26,8 @@ assert.match(boundary,/function getRadicalInfo\(character\)/);
 assert.match(boundary,/getRadicalInfo,getComponentInfo|getComponentInfo,getRadicalInfo/);
 assert.match(card,/TraditionalRadical/);
 assert.match(card,/getRadicalInfo\(item\.character\)/);
-assert.match(card,/Learning cue/);
-assert.match(card,/سرنخ یادگیری/);
+assert.match(radicalComponent,/Learning cue/);
+assert.match(radicalComponent,/سرنخ یادگیری/);
 
 const byId=new Map(catalog.radicals.map(r=>[r.id,r]));
 for(const [character,id] of Object.entries(map.kanji)){
