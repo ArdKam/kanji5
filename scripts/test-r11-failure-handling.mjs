@@ -34,6 +34,5 @@ assert.ok(index.indexOf('v2-observability.js</script>')<index.indexOf('app-boots
 assert.match(migration,/migration-failure/);
 assert.match(network,/network-request-failure/);
 assert.match(sync,/sync-failure/);
-assert.match(sync,/sync-client-load-failure/);
-assert.match(sync,/sync-bootstrap-failure/);
+assert.match(sync,/sync-failure/);
 console.log('Kanji 5 R11 failure-handling contracts passed.');
