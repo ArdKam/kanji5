@@ -294,7 +294,7 @@
   color:var(--mute);
   font:inherit;
   cursor:pointer;
-  transition:background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease;
+  transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease,box-shadow var(--motion-interaction) ease;
 }
 .dictionary-view-button.active{
   border-color:var(--line);
@@ -411,7 +411,7 @@
   font:inherit;
   cursor:pointer;
   isolation:isolate;
-  transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+  transition:transform var(--motion-interaction) ease, border-color var(--motion-interaction) ease, box-shadow var(--motion-interaction) ease;
 }
 .kanji-catalog-tile:hover{
   transform:translateY(-1px);
@@ -1138,7 +1138,7 @@
   font-size:var(--text-base);
   line-height:1;
   transform:rotate(180deg);
-  transition:transform .18s ease;
+  transition:transform var(--motion-hover) ease;
 }
 .handwriting-practice.is-expanded .handwriting-toggle-icon{transform:rotate(0deg);}
 .handwriting-canvas-wrap{
@@ -1200,7 +1200,7 @@
   color:var(--mute);
   font:700 13px/1 Inter,system-ui,sans-serif;
   cursor:pointer;
-  transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease;
+  transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease,transform var(--motion-interaction) ease;
 }
 .handwriting-info-button:hover,
 .handwriting-info-button[aria-expanded="true"]{
@@ -1832,7 +1832,7 @@
   text-align:center;
   white-space:nowrap;
   cursor:pointer;
-  transition:background .16s ease,border-color .16s ease,color .16s ease;
+  transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease;
 }
 .dictionary-section-tab:hover{
   background:var(--washi);
@@ -2233,7 +2233,7 @@
   border:1px solid transparent;
   border-radius:13px;
   scroll-margin-block:12px;
-  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;
+  transition:border-color var(--motion-hover) ease,background var(--motion-hover) ease,box-shadow var(--motion-hover) ease;
 }
 .reading-lab-sentence-support{grid-column:2;display:grid;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);}
 .reading-lab-sentence-support-actions{display:flex;flex-wrap:wrap;gap:6px;}
