@@ -95,13 +95,6 @@ function safeJSON(raw, fallback) {
   try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
 }
 
-function assertSyncPayloadWithinLimit(payload) {
-  const json = JSON.stringify(stablePayload(payload || {}));
-  const bytes = typeof TextEncoder === 'function' ? new TextEncoder().encode(json).byteLength : json.length;
-  if (bytes > MAX_SYNC_PAYLOAD_BYTES) throw new Error('SYNC_PAYLOAD_TOO_LARGE');
-  return payload;
-}
-
 function readSyncSummary() {
   const cards = safeJSON(storage.getItem(CARDS_STORAGE_KEY), {});
   const reviews = safeJSON(storage.getItem(REVIEWS_STORAGE_KEY), []);
@@ -178,7 +171,7 @@ function loadSupabaseRuntime(){
     };
     if(existing){
       existing.addEventListener('load',finish,{once:true});
-      existing.addEventListener('error',()=>reject(new Error('SUPABASE_JS_LOAD_FAILED')),{once:true});
+      existing.addEventListener('error',()=>{ const error=new Error('SUPABASE_JS_LOAD_FAILED'); window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error); reject(error); },{once:true});
       return;
     }
     const script=document.createElement('script');
@@ -186,7 +179,7 @@ function loadSupabaseRuntime(){
     script.async=true;
     script.dataset.kanji5SupabaseRuntime='true';
     script.onload=finish;
-    script.onerror=()=>reject(new Error('SUPABASE_JS_LOAD_FAILED'));
+    script.onerror=()=>{ const error=new Error('SUPABASE_JS_LOAD_FAILED'); window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error); reject(error); };
     document.head.appendChild(script);
   });
   return supabaseRuntimePromise;
@@ -412,6 +405,7 @@ async function boot() {
     }
   } catch (error) {
     console.warn('Kanji 5 account unavailable', error);
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{code:String(error?.code||'')});
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
 }
