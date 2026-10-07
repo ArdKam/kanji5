@@ -43,7 +43,7 @@ The product currently has several places where implementation is more conservati
 6. Vocabulary examples have deterministic structural/pedagogical filtering, but still require sampled human review for usefulness, naturalness, learner stage, and pedagogical priority.
 7. Context sentences have useful structural filters, but limited semantic/grammar difficulty modeling.
 8. Curated mnemonics are materially stronger than generated scaffolds; 100% coverage is not equivalent to 100% mnemonic quality.
-9. Component/radical visualization is useful but does not yet constitute a complete component-learning curriculum.
+9. Component/radical structure now includes an explicit low-stakes learning cue: radicals are presented as optional visual memory aids, not prerequisites or independently scheduled skills. This improves teaching value without introducing a second scheduler; it still does not constitute a complete component-learning curriculum.
 10. Handwriting grading is good geometric feedback, but should not be interpreted as a full measure of natural Japanese handwriting quality.
 11. Reading Lab coverage metrics are useful navigation signals, but must not be interpreted as reading-comprehension proficiency.
 12. Grammar Guide is a beginner primer, not yet a complete grammar-learning curriculum.
@@ -149,6 +149,12 @@ A learner-first card should emphasize:
 - stroke order
 
 Reference meanings/readings should remain accessible but lower-priority.
+
+### Radical/component learning-aid decision — 2026-10-07
+
+The Dictionary structure view now explicitly teaches the traditional radical as an **optional visual memory cue**. The learner is told to use the radical to notice recurring structure while not treating it as a prerequisite that must be memorized separately. Radical data remains reference/content infrastructure; no radical-specific learner state, Card ID, scheduler, or evidence stream was introduced.
+
+The visual component breakdown remains the primary structural explanation. Radical classification is intentionally kept separate from visual decomposition because the two concepts are not interchangeable. A future radical/component curriculum would require independent educational validation before becoming a scheduled skill.
 
 ## 5. Meaning Recall audit
 
