@@ -102,11 +102,6 @@
 .learning-card.is-revealed .learning-card-flip{transform:rotateY(180deg);}
 .learning-card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:16px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;min-width:0;}
 .learning-card-back{transform:rotateY(180deg);justify-content:flex-start;min-height:0;gap:0;}
-.learning-back-topline-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;}
-.learning-reference-popover{position:absolute;inset:56px 20px 122px;z-index:40;padding:12px;overflow:hidden}
-.learning-reference-close{width:36px;min-width:36px;padding:0;border-radius:50%}
-.learning-reference-info-grid .stat-row{padding:7px 9px}
-@media(max-width:760px){.learning-reference-popover{inset:54px 12px 122px;padding:10px 11px}}
 .learning-back-scroll{flex:1 1 auto;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:10px 4px 18px 0;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;container-type:inline-size;container-name:learning-back;}
 .learning-back-overview{display:grid;gap:8px;min-width:0;}
 .learning-back-kanji{font-family:var(--jp-font);font-size:var(--text-display-compact);line-height:.95;font-weight:650;text-align:center;direction:ltr;}
