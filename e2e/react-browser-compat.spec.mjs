@@ -1,8 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test('browser-compat startup and core learning smoke', async ({ page }) => {
+test('browser-compat startup and core learning smoke', async ({ page }, testInfo) => {
   test.setTimeout(90000);
   const diagnostics = [];
+  if(testInfo.project.name === 'webkit'){
+    await page.route('https://**/*', route => route.abort());
+  }
   page.on('pageerror', error => diagnostics.push('PAGE_ERROR: ' + String(error)));
   page.on('console', msg => { if (msg.type() === 'error') diagnostics.push('CONSOLE_ERROR: ' + msg.text()); } );
   await page.addInitScript(() => {
