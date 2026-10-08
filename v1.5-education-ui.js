@@ -15,6 +15,7 @@ const network=()=>networkPromise||(networkPromise=import('./v1.5-network.js'));
 const sessionFeedback=import('./v1.6-session-feedback.js');
 const outcomeCore=import('./v1.9-outcome-core.js');
 const contentEvidencePromise=import('./v1.9-content-evidence.js');
+const learnerContentPromise=import('./v1.9-learner-content-core.js');
 async function sessionApi(){try{await sessionFeedback}catch(_){}return window.__KANJI5_V16_SESSION_AUTH__||window.__KANJI5_V16_SESSION_API__}
 async function normalizeOutcome(mode,result,meta={}){const api=await outcomeCore;return api.normalizeOutcome(mode,result,meta)}
 function pane(){return $('#v14EducationPane')}
