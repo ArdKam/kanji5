@@ -552,7 +552,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
-          {referenceInfoOpen?<div id="learning-reference-info" className="surface" style={{position:"absolute",inset:"56px 12px 122px",zIndex:40,padding:12,overflow:"auto"}} role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
+          {referenceInfoOpen?<div id="learning-reference-info" className="surface" style={{position:"absolute",inset:"56px 20px 122px",zIndex:40,padding:12,overflow:"hidden"}} role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
             <div className="card-topline"><strong id="learning-reference-info-title">{t("additionalInformation")}</strong><button ref={referenceInfoCloseRef} className="learning-reference-close button secondary" style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%"}} type="button" aria-label={t("close")} title={t("close")} onClick={()=>{setReferenceInfoOpen(false);requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}))}}><UiIcon name="close" size={17}/></button></div>
             <div className="dialog-grid" style={{gridTemplateColumns:"1fr"}}>
               {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
