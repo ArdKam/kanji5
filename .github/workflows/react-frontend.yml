@@ -190,6 +190,13 @@ jobs:
       - name: Run React accessibility gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-accessibility.spec.mjs
+      - name: Prepare HTTPS compatibility server
+        working-directory: .
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes             -keyout /tmp/kanji5-compat-key.pem             -out /tmp/kanji5-compat-cert.pem             -days 1             -subj "/CN=127.0.0.1"             -addext "subjectAltName = IP:127.0.0.1"
+          echo "KANJI5_COMPAT_HTTPS=1" >> "$GITHUB_ENV"
+          echo "KANJI5_TLS_KEY=/tmp/kanji5-compat-key.pem" >> "$GITHUB_ENV"
+          echo "KANJI5_TLS_CERT=/tmp/kanji5-compat-cert.pem" >> "$GITHUB_ENV"
       - name: Install Firefox and WebKit compatibility browsers
         working-directory: .
         run: npx playwright install --with-deps firefox webkit
@@ -198,7 +205,7 @@ jobs:
         run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
       - name: Run WebKit compatibility smoke
         working-directory: .
-        run: npx playwright test --config=playwright.compat.config.mjs --timeout=60000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
+        run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
       - name: Run React PWA release gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs
