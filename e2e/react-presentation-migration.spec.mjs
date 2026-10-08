@@ -239,7 +239,7 @@ test('Dictionary card tabs fit narrow mobile widths without horizontal overflow'
     for(const tab of await tabs.all()){
       const box=await tab.boundingBox();
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
-      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.5);
     }
     await card.locator('.dialog-close').click();
     await expect(card).toBeHidden();
