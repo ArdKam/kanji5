@@ -16,7 +16,6 @@ const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
 const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
-const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
 const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
 let supabaseRuntimePromise = null;
 
@@ -175,11 +174,18 @@ function loadSupabaseRuntime(){
     const existing=document.querySelector('script[data-kanji5-supabase-runtime]');
     const finish=()=>{
       const factory=globalThis.supabase?.createClient;
-      if(factory)resolve(factory);else reject(new Error('SUPABASE_JS_UNAVAILABLE'));
+      if(factory){resolve(factory);return;}
+      const error=new Error('SUPABASE_JS_UNAVAILABLE');
+      window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:SUPABASE_BROWSER_RUNTIME,dataAffected:'unknown'});
+      reject(error);
     };
     if(existing){
       existing.addEventListener('load',finish,{once:true});
-      existing.addEventListener('error',()=>reject(new Error('SUPABASE_JS_LOAD_FAILED')),{once:true});
+      existing.addEventListener('error',()=>{
+        const error=new Error('SUPABASE_JS_LOAD_FAILED');
+        window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:SUPABASE_BROWSER_RUNTIME,dataAffected:'unknown'});
+        reject(error);
+      },{once:true});
       return;
     }
     const script=document.createElement('script');
@@ -187,7 +193,11 @@ function loadSupabaseRuntime(){
     script.async=true;
     script.dataset.kanji5SupabaseRuntime='true';
     script.onload=finish;
-    script.onerror=()=>reject(new Error('SUPABASE_JS_LOAD_FAILED'));
+    script.onerror=()=>{
+      const error=new Error('SUPABASE_JS_LOAD_FAILED');
+      window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:SUPABASE_BROWSER_RUNTIME,dataAffected:'unknown'});
+      reject(error);
+    };
     document.head.appendChild(script);
   });
   return supabaseRuntimePromise;
@@ -413,6 +423,7 @@ async function boot() {
     }
   } catch (error) {
     console.warn('Kanji 5 account unavailable', error);
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{dataAffected:'unknown'});
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
 }
