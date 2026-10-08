@@ -286,7 +286,7 @@ export function DictionaryKanjiCard({
   useEffect(() => {
     const handleNavigationKey = (event: globalThis.KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target?.closest("input, textarea, select, button, a, [contenteditable='true']")) return;
+      if (target?.closest("input, textarea, select, a, [contenteditable='true'], [role='tab']")) return;
       if (event.key === "ArrowRight") {
         event.preventDefault();
         navigateKanji("next");
