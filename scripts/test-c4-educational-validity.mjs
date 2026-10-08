@@ -95,8 +95,8 @@ store.recordOutcome({mode:"vocabulary",contentId:"vocabulary:test",character:"å­
 row=store.get("vocabulary","vocabulary:test");
 assert.equal(row.recoveryCount,1);
 
-assert.match(education,/const independent=!isRecoveryAttempt&&!productionSelfReport&&!productionHintAssisted/);
-assert.match(education,/attemptType=isRecoveryAttempt\?'guided_recovery':productionSelfReport\?'revealed_self_report':productionHintAssisted\?'cued_production':edu\.mode==='production'\?'independent_production'/);
+assert.match(education,/const independent=!isRecoveryAttempt&&!productionSelfReport/);
+assert.match(education,/attemptType=isRecoveryAttempt\?'guided_recovery':productionSelfReport\?'revealed_self_report':edu\.mode==='meaning'\|\|edu\.mode==='reading'\?'free_recall':'cued_recognition'/);
 assert.match(education,/const primaryMeanings=learnerContent\.meanings\.primary\.length\?learnerContent\.meanings\.primary:\(edu\.item\.meaning\|\|\[\]\)/);
 assert.match(education,/primary:primaryMeanings\.join\(' Â· '\)/);
 
