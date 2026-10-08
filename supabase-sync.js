@@ -16,7 +16,6 @@ const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
 const MAX_SYNC_ATTEMPTS = 3;
 const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
-const MAX_SYNC_PAYLOAD_BYTES = 5 * 1024 * 1024;
 const SUPABASE_BROWSER_RUNTIME = './vendor/supabase-js-2.117.2.js';
 let supabaseRuntimePromise = null;
 
@@ -196,11 +195,16 @@ function loadSupabaseRuntime(){
 async function getClient() {
   if (client) return client;
   if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
-  const createClient=await loadSupabaseRuntime();
-  client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
-  });
-  return client;
+  try {
+    const createClient=await loadSupabaseRuntime();
+    client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    return client;
+  } catch (error) {
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{runtime:SUPABASE_BROWSER_RUNTIME});
+    throw error;
+  }
 }
 
 async function readRemote() {
@@ -412,6 +416,7 @@ async function boot() {
       startSyncLifecycle();
     }
   } catch (error) {
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{configured:configured()});
     console.warn('Kanji 5 account unavailable', error);
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }

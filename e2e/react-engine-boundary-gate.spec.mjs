@@ -31,7 +31,13 @@ test("engine exercise state reaches React and remains isolated from the Learning
   const character = await page.locator(".learning-card .kanji-display").textContent();
   await page.locator(".learning-card .button.wide").click();
   await expect(page.locator(".learning-card .rating-good")).toBeVisible({ timeout: 5_000 });
+  const reviewsBefore = await page.evaluate(() => JSON.parse(localStorage.getItem("kanji5-v1-reviews") || "[]").length);
   await page.locator(".learning-card .rating-good").click();
+  await expect.poll(async (before) => page.evaluate((value) => JSON.parse(localStorage.getItem("kanji5-v1-reviews") || "[]").length > value, reviewsBefore)).toBe(true, { timeout: 10_000 });
+  await expect.poll(async (target) => page.evaluate((value) => {
+    const cards = JSON.parse(localStorage.getItem("kanji5-v1-cards") || "{}");
+    return Object.prototype.hasOwnProperty.call(cards, value);
+  }, String(character || "").trim())).toBe(true, { timeout: 10_000 });
   await expect.poll(async () => page.evaluate(async () => Boolean((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).session?.status))).not.toBe("");
   await page.evaluate((target) => {
     window.__KANJI5_V19_RECOVERY_TARGET__ = { character: target, mode: "reading", contentId: target };

@@ -408,7 +408,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="learning-back-topline-actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={t("additionalInformation")} title={t("additionalInformation")} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary"+(referenceInfoOpen?" active":"")} style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%",display:"grid",placeItems:"center"}} type="button" aria-label={t("additionalInformation")} title={t("additionalInformation")} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
@@ -552,12 +552,12 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
-          {referenceInfoOpen?<div id="learning-reference-info" className="learning-reference-popover" role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
-            <div className="learning-reference-popover-head"><strong id="learning-reference-info-title">{t("additionalInformation")}</strong><button ref={referenceInfoCloseRef} className="learning-reference-close" type="button" aria-label={t("close")} title={t("close")} onClick={()=>{setReferenceInfoOpen(false);requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}))}}><UiIcon name="close" size={18}/></button></div>
-            <div className="learning-reference-info-grid">
-              {referenceMeanings.length?<section><span>{t("meaning")}</span><p>{referenceMeanings.join(" · ")}</p></section>:null}
-              {referenceOn.length?<section><span>On’yomi</span><p lang="ja">{referenceOn.join(" · ")}</p></section>:null}
-              {referenceKun.length?<section><span>Kun’yomi</span><p lang="ja">{referenceKun.join(" · ")}</p></section>:null}
+          {referenceInfoOpen?<div id="learning-reference-info" className="surface" style={{position:"absolute",inset:"56px 12px 122px",zIndex:40,padding:12,overflow:"auto"}} role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
+            <div className="card-topline"><strong id="learning-reference-info-title">{t("additionalInformation")}</strong><button ref={referenceInfoCloseRef} className="learning-reference-close button secondary" style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%"}} type="button" aria-label={t("close")} title={t("close")} onClick={()=>{setReferenceInfoOpen(false);requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}))}}><UiIcon name="close" size={17}/></button></div>
+            <div className="dialog-grid" style={{gridTemplateColumns:"1fr"}}>
+              {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
+              {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
+              {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
             </div>
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
