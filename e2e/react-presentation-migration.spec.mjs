@@ -1,3 +1,156 @@
+import {test,expect} from '@playwright/test';
+
+async function clean(page){
+  page.on('pageerror',error=>console.error(`[E2E_PAGEERROR] ${error?.stack||error}`));
+  page.on('console',message=>{if(message.type()==='error')console.error(`[E2E_CONSOLE_ERROR] ${message.text()}`)});
+  await page.goto('/');
+  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear();localStorage.setItem('kanji5-onboarding-v2','complete')});
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+}
+async function seedSeenCard(page){
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  await page.locator('#root .learning-card .button.wide').click();
+  await expect(page.locator('#root .learning-card .rating-good')).toBeVisible({timeout:5000});
+  await page.locator('#root .learning-card .rating-good').click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+}
+
+
+test('first-open onboarding runs as a dedicated resumable entry flow',async({page})=>{
+  await page.goto('/');
+  const onboarding=page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({timeout:15000});
+  await expect(page.locator('#root .app-shell')).toHaveCount(0);
+  await expect(onboarding).toContainText('به Kanji5 خوش آمدی');
+  await expect(onboarding.getByRole('button',{name:'شروع کنیم',exact:true})).toBeVisible();
+  await onboarding.getByRole('button',{name:'شروع کنیم',exact:true}).click();
+  await expect(onboarding).toContainText('هر کانجی را چطور یاد می‌گیری؟');
+  await expect(onboarding).toContainText('معنی و خوانش را یک‌جا می‌بینی.');
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
+  await expect(onboarding.getByRole('heading',{name:'از کجا شروع کنیم؟'})).toBeVisible();
+  await onboarding.getByRole('button',{name:/از ابتدا/}).click();
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
+  await expect(onboarding.getByRole('heading',{name:'روزانه چند کانجی جدید؟'})).toBeVisible();
+  await onboarding.getByRole('button',{name:'ادامه',exact:true}).click();
+  await expect(onboarding.getByRole('heading',{name:'حساب اختیاری است'})).toBeVisible();
+  await onboarding.getByRole('button',{name:'ادامه به‌عنوان مهمان',exact:true}).click();
+  await expect(onboarding).toHaveCount(0);
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:15000});
+  await expect.poll(async()=>page.evaluate(()=>localStorage.getItem('kanji5-onboarding-v2'))).toBe('complete');
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:15000});
+  await expect(page.locator('[data-testid="onboarding-flow"]')).toHaveCount(0);
+});
+test('React is the sole default presentation renderer',async({page})=>{
+  await clean(page);
+  await expect(page.locator('#root .daily-summary')).toBeVisible({timeout:10000});
+  await expect(page.locator('#root .learning-card-front .badge').filter({hasText:'جدید'})).toBeVisible({timeout:10000});
+  await expect(page.locator('#root .learning-card-front .hint')).toHaveCount(0);
+  await expect(page.locator('#v2App')).toHaveCount(0);
+  await expect(page.locator('.wrap, #app, #loading')).toHaveCount(0);
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_V2_BOUNDARY__))).toBe(true);
+  await expect(page.locator('#root .experience-nav')).toBeVisible();
+});
+
+test('React learning and review actions stay behind the authoritative boundary',async({page})=>{
+  await clean(page);
+  const kanji=page.locator('#root .kanji-display');
+  await expect(kanji).toHaveText(/\S/);
+  await page.getByRole('button',{name:/نمایش (پاسخ|اطلاعات کانجی)/}).dispatchEvent('click');
+  await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
+  await page.getByRole('button',{name:'خوب'}).dispatchEvent('click');
+  await expect(kanji).toHaveText(/\S/,{timeout:10000});
+});
+
+test('React exercise path can start and expose a boundary-backed exercise',async({page})=>{
+  test.setTimeout(40000);
+  await clean(page);
+  await seedSeenCard(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(async()=>Boolean((await window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.())?.exercise))).toBe(true);
+});
+
+test('React presentation can switch language from More Menu and keep Settings focused',async({page})=>{
+  await clean(page);
+  await expect(page.locator('html')).toHaveAttribute('lang','fa');
+  await expect(page.locator('html')).toHaveAttribute('dir','rtl');
+
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  const menu=page.locator('#header-tools-menu');
+  await expect(menu).toHaveClass(/open/);
+  await expect(menu.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','false');
+  await menu.getByRole('button',{name:'English',exact:true}).click();
+  await expect(page.locator('html')).toHaveAttribute('lang','en');
+  await expect(page.locator('html')).toHaveAttribute('dir','ltr');
+  await expect(menu.getByRole('button',{name:'English',exact:true})).toHaveAttribute('aria-pressed','true');
+
+  await menu.getByRole('button',{name:'Settings',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.settings-language-switcher')).toHaveCount(0);
+  await expect(dialog).not.toContainText('Theme');
+  await expect(dialog).toContainText('Learning');
+  await expect(dialog).toContainText('Review scheduling');
+  await expect(dialog).toContainText('Data & backup');
+  await dialog.locator('.dialog-close').click();
+
+  await page.getByRole('button',{name:'More',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:'فارسی',exact:true}).click();
+  await expect(page.locator('html')).toHaveAttribute('lang','fa');
+  await expect(page.locator('html')).toHaveAttribute('dir','rtl');
+
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang','fa');
+  await expect(page.locator('html')).toHaveAttribute('dir','rtl');
+});
+
+test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
+  await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');localStorage.setItem('kanji5-onboarding-v2','complete')});
+  await page.goto('/');
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  await page.getByRole('button',{name:'Show kanji information',exact:true}).click();
+  await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
+  await expect(page.locator('.rating-grid .rating')).toHaveText(['Easy','Good','Hard','Again']);
+});
+
+test('empty session progress indicator is absent before a session starts',async({page})=>{
+  await clean(page);
+  await expect(page.locator('.session-progress')).toHaveCount(0);
+});
+
+test('custom study starts a filtered JLPT/new-card session',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  const practiceHome=page.locator('.practice-home');
+  await expect(practiceHome).toBeVisible({timeout:10000});
+  const panel=practiceHome.locator('.practice-custom-study');
+  await expect(panel).toBeVisible();
+  await panel.locator('select').first().selectOption('N5');
+  await panel.getByRole('button',{name:'فقط جدیدها',exact:true}).click();
+  await panel.getByRole('button',{name:'شروع مطالعه',exact:true}).click();
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  const selection=await page.evaluate(async()=>{
+    const boundary=window.__KANJI5_V19_V2_BOUNDARY__;
+    const snapshot=await boundary?.snapshot?.();
+    const catalog=await boundary?.listKanji?.();
+    const character=snapshot?.learning?.character||'';
+    const item=(catalog?.results||[]).find(row=>row.character===character);
+    return {character,jlpt:item?.jlpt||null};
+  });
+  if(!selection.character) throw new Error('Custom study did not produce a learning card');
+  expect(selection.jlpt).toBe('N5');
+  await expect(page.locator('.experience-nav .experience-tab').nth(0)).toHaveClass(/active/);
+});
+
+test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji card',async({page})=>{
+  await clean(page);
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
+  const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
   await expect(pageRoot.locator('.mastery-map-summary')).toHaveCount(0);
   await expect(pageRoot.locator('.kanji-catalog-tile').first()).toHaveAttribute('data-mastery-state');
@@ -23,6 +176,389 @@
   await tile.click();
   const card=page.getByRole('dialog');
   await expect(card).toBeVisible();
+  await expect(card.locator('.dictionary-card-character')).toHaveCount(0);
+  const stroke = card.locator('.dictionary-stroke-order');
+  await expect(stroke).toBeVisible({timeout:10000});
+  await expect(stroke.locator('svg')).toBeVisible();
+  await expect(stroke).toHaveAttribute('data-stroke-order-completed', '0');
+  await expect(stroke.locator('.stroke-order-active')).toHaveCount(1);
+  await expect.poll(async()=>stroke.locator('.stroke-order-active').getAttribute('d'), {timeout:2000}).toBe('M10,10 L30,30');
+  const strokeControls = card.locator('.dictionary-stroke-controls');
+  await expect(strokeControls).toBeVisible();
+  await expect(strokeControls.locator('button')).toHaveCount(1);
+  await expect(strokeControls.locator('.primary')).toHaveText('مکث');
+  await expect(stroke).toHaveAttribute('data-stroke-order-playing','true');
+  await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:2500}).toBe('1');
+  await expect.poll(async()=>stroke.getAttribute('data-stroke-order-completed'), {timeout:3500}).toBe('3');
+  await expect(stroke).toHaveAttribute('data-stroke-order-playing','false');
+  await card.locator('.dictionary-stroke-controls .primary').click();
+  await expect(stroke).toHaveAttribute('data-stroke-order-playing','true');
+  await card.locator('.dictionary-stroke-controls .primary').click();
+  await expect(stroke).toHaveAttribute('data-stroke-order-playing','false');
+  await expect(card.locator('.dictionary-card-section').first()).toContainText('study');
+  await expect(card).toContainText('N5');
+  await expect(card).toContainText('تسلط');
+  await expect(card).toHaveAttribute('aria-labelledby','dictionary-card-title');
+  await expect(card.locator('#dictionary-card-title')).toHaveText(/\S/);
+  await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(1);
+  const currentCharacter=await card.locator('#dictionary-card-title').textContent();
+  const cardShell=card.locator('.dictionary-card');
   await search.fill('');
   await expect.poll(async()=>pageRoot.locator('.kanji-catalog-tile').count(),{timeout:10000}).toBeGreaterThan(1);
-  await expect(card.locator('.dictionary-card-character')).toHaveCount(0);
+  const navNext=card.locator('.dictionary-card-nav-next');
+  await expect(navNext).toBeEnabled();
+  const box=await cardShell.boundingBox();
+  if(!box)throw new Error('Dictionary card bounds unavailable');
+  const swipeY=box.y+box.height/2;
+  const pointerId=4901;
+  await cardShell.dispatchEvent('pointerdown',{pointerType:'touch',pointerId,isPrimary:true,button:0,buttons:1,clientX:box.x+box.width*0.25,clientY:swipeY});
+  await cardShell.dispatchEvent('pointermove',{pointerType:'touch',pointerId,isPrimary:true,button:0,buttons:1,clientX:box.x+box.width*0.72,clientY:swipeY});
+  await cardShell.dispatchEvent('pointerup',{pointerType:'touch',pointerId,isPrimary:true,button:0,buttons:0,clientX:box.x+box.width*0.88,clientY:swipeY});
+  await expect(card.locator('#dictionary-card-title')).not.toHaveText(currentCharacter||'');
+  await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-next/);
+  const nextBox=await card.locator('.dictionary-card').boundingBox();
+  if(!nextBox)throw new Error('Dictionary card bounds unavailable after swipe');
+  const swipeBackY=nextBox.y+nextBox.height/2;
+  const pointerIdBack=4902;
+  const shell=card.locator('.dictionary-card');
+  await shell.dispatchEvent('pointerdown',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:1,clientX:nextBox.x+nextBox.width*0.72,clientY:swipeBackY});
+  await shell.dispatchEvent('pointermove',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:1,clientX:nextBox.x+nextBox.width*0.25,clientY:swipeBackY});
+  await shell.dispatchEvent('pointerup',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:0,clientX:nextBox.x+nextBox.width*0.12,clientY:swipeBackY});
+  await expect(card.locator('#dictionary-card-title')).toHaveText(currentCharacter||'');
+  await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-previous/);
+  await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
+  await expect(card.locator('.component-breakdown')).toHaveCount(0);
+  await expect(card.locator('.component-learning-path')).toHaveCount(0);
+  await card.getByRole('tab',{name:'کالبد',exact:true}).click();
+  await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','true');
+  await expect(card.locator('.component-breakdown')).toBeVisible({timeout:5000});
+  await expect(card.locator('.component-learning-path')).toBeVisible({timeout:5000});
+  await expect.poll(async()=>card.locator('.component-learning-path-node.depth-0').count(),{timeout:5000}).toBeGreaterThan(0);
+  await expect.poll(async()=>card.locator('.component-learning-path-node.depth-1').count(),{timeout:5000}).toBeGreaterThan(0);
+  await expect(card.locator('.component-learning-path-node.depth-0 .component-learning-path-kanji').first()).toBeVisible();
+  await expect(card).not.toContainText('کارت کانجی');
+  await expect(card.locator('.examples')).toHaveCount(0);
+  await expect(card.locator('.rating-grid')).toHaveCount(0);
+  await card.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(card).toBeHidden();
+});
+
+test('Dictionary card tabs fit narrow mobile widths without horizontal overflow',async({page})=>{
+  await clean(page);
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible();
+  const tile=pageRoot.locator('.kanji-catalog-tile').first();
+  await expect(tile).toBeVisible();
+  for(const width of [360,375,390]){
+    await page.setViewportSize({width,height:844});
+    await tile.click();
+    const card=page.getByRole('dialog');
+    await expect(card).toBeVisible();
+    const nav=card.locator('.dictionary-section-nav');
+    const tabs=nav.locator('.dictionary-section-tab');
+    await expect(tabs).toHaveCount(5);
+    const metrics=await nav.evaluate(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth}));
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth+1);
+    for(const tab of await tabs.all()){
+      const box=await tab.boundingBox();
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+    await card.locator('.dialog-close').click();
+    await expect(card).toBeHidden();
+  }
+});
+
+test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible({timeout:10000});
+  const textValue='一番目の文です。二番目の文も続きます。';
+  await lab.locator('textarea').fill(textValue);
+  await lab.locator('.reading-lab-speech-rate select').selectOption('1.15');
+  await lab.locator('.reading-lab-sentence-next').click();
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await dialog.locator('.dialog-close').click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const reopened=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const restored=reopened.locator('.reading-lab');
+  await expect(restored).toBeVisible();
+  await expect(restored.locator('textarea')).toHaveValue(textValue);
+  await expect(restored.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(restored.locator('.reading-lab-speech-rate select')).toHaveValue('1.15');
+  await expect(restored.locator('.reading-lab-session-status')).toBeVisible();
+});
+
+test('Reading Lab focuses the next unfamiliar kanji without changing the reading session',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible({timeout:10000});
+  const textValue='今日は学生です。明日は先生です。';
+  await lab.locator('textarea').fill(textValue);
+
+  const targets=lab.locator('.reading-lab-reader-kanji:not(.familiar)');
+  const targetCount=await targets.count();
+  expect(targetCount).toBeGreaterThan(1);
+
+  const focusNext=lab.locator('.reading-lab-focus-button').first();
+  const nextUnknown=lab.locator('.reading-lab-focus-button').nth(1);
+  await expect(focusNext).toBeEnabled();
+  await expect(nextUnknown).toBeEnabled();
+
+  const targetKeys=await targets.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-reading-lab-sentence-index')+':'+node.getAttribute('data-reading-lab-character-index')));
+  await focusNext.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).toBe(targetKeys[0]);
+
+  await focusNext.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).toBe(targetKeys[1]);
+
+  await nextUnknown.click();
+  await expect.poll(async()=>page.evaluate(()=>document.activeElement?.matches('.reading-lab-reader-kanji.new')?document.activeElement.getAttribute('data-reading-lab-sentence-index')+':'+document.activeElement.getAttribute('data-reading-lab-character-index'):null)).not.toBeNull();
+  await expect(lab.locator('textarea')).toHaveValue(textValue);
+
+});
+
+test('Reading Lab exposes occurrence-weighted coverage and bounded hardest-sentence focus',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('textarea').fill('今日は学生です。明日は先生です。');
+  const analysisStats=lab.locator('.reading-lab-analysis-stats > div');
+  await expect(analysisStats.nth(2)).toContainText('پوشش بر اساس تعداد تکرار');
+  const hardest=lab.locator('.reading-lab-focus-button').filter({hasText:'سخت‌ترین جمله'});
+  await expect(hardest).toBeEnabled();
+  const expectedIndex=await lab.locator('.reading-lab-reader-sentence').evaluateAll((sentences)=>{
+    const weights={attention:3,new:2,learning:1,familiar:0};
+    const scores=sentences.map(sentence=>[...sentence.querySelectorAll('.reading-lab-reader-kanji')].reduce((sum,node)=>{
+      for(const bucket of Object.keys(weights)){
+        if(node.classList.contains(bucket)) return sum+weights[bucket];
+      }
+      return sum;
+    },0));
+    const max=Math.max(...scores);
+    return scores.findIndex(score=>score===max&&score>0);
+  });
+  expect(expectedIndex).toBeGreaterThanOrEqual(0);
+  await hardest.click();
+  await expect(lab.locator('.reading-lab-reader-sentence.active')).toHaveAttribute('data-reading-lab-sentence-index',String(expectedIndex));
+  await expect(lab.locator('textarea')).toHaveValue('今日は学生です。明日は先生です。');
+});
+
+test('Reading Lab resolves a contextual vocabulary word before falling back to kanji',async({page})=>{
+  await clean(page);
+  await page.route('https://kanjiapi.dev/v1/words/%E6%97%A5',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{variants:[{written:'今日',pronounced:'きょう'}],meanings:[{glosses:['today']}]}])});
+  });
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('textarea').fill('今日は学生です。');
+  await lab.locator('.reading-lab-reader-kanji').filter({hasText:'日'}).first().click();
+  const wordCard=page.locator('.reading-word-dialog:visible');
+  await expect(wordCard).toBeVisible({timeout:10000});
+  await expect(wordCard.locator('#reading-word-title')).toHaveText('今日');
+  await expect(wordCard).toContainText('きょう');
+  await expect(wordCard).toContainText('today');
+  await expect(wordCard.locator('.reading-word-context .is-word')).toHaveText(['今','日']);
+  await wordCard.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('textarea')).toHaveValue('今日は学生です。');
+});
+
+test('Reading Lab preserves SRT cue timing and follows audio time',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('.reading-lab-action-primary input[type=file]').setInputFiles({
+    name:'lesson.srt',mimeType:'text/plain',
+    buffer:Buffer.from('1\n00:00:00,000 --> 00:00:02,000\n一番目の文。\n\n2\n00:00:02,000 --> 00:00:04,000\n二番目の文。\n')
+  });
+  await expect(lab.locator('textarea')).toHaveValue('一番目の文。\n二番目の文。');
+  await expect(lab.locator('.reading-lab-sentence-list')).toHaveAttribute('data-reading-lab-sync-cue-count','2');
+  await lab.locator('.reading-lab-action-audio input[type=file]').setInputFiles({name:'lesson.mp3',mimeType:'audio/mpeg',buffer:Buffer.from([0,1,2,3])});
+  await expect(lab.locator('[data-reading-lab-sync-ready="true"]')).toBeVisible();
+  await page.evaluate(()=>{
+    const audio=document.querySelector('.reading-lab-audio');
+    if(!audio) throw new Error('audio element missing');
+    Object.defineProperty(audio,'currentTime',{configurable:true,value:2.5,writable:true});
+    audio.dispatchEvent(new Event('timeupdate'));
+  });
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(lab.locator('.reading-lab-reader-sentence').nth(1)).toHaveClass(/active/);
+});
+
+test('Reading Lab provides controllable Japanese text playback',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await expect(dialog).toBeVisible({timeout:10000});
+  const lab=dialog.locator('.reading-lab');
+  await expect(lab).toBeVisible();
+  await lab.locator('textarea').fill('これは日本語の読み上げテストです。二番目の文もここで読みます。');
+  await expect(lab.locator('.reading-lab-speech-row')).toBeVisible();
+  await page.evaluate(()=>{
+    const calls=[];
+    Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+      cancel:()=>calls.push({type:'cancel'}),
+      speak:(utterance)=>{window.__KANJI5_LAST_UTTERANCE__=utterance;calls.push({type:'speak',text:utterance.text,lang:utterance.lang,rate:utterance.rate});utterance.onstart?.();},
+    }});
+    Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
+      constructor(text){this.text=text;this.lang='';this.rate=1;this.onstart=null;this.onend=null;this.onerror=null;}
+    }});
+    window.__KANJI5_SPEECH_CALLS__=calls;
+  });
+  // Keep the locators stable while the accessible label changes during playback.
+  const speechButtons=lab.locator('.reading-lab-speech-row > button');
+  const speak=speechButtons.nth(0);
+  const stop=speechButtons.nth(1);
+  await expect(speak).toBeEnabled();
+  await expect(stop).toBeDisabled();
+  await lab.locator('.reading-lab-speech-rate select').selectOption('1');
+  await speak.click();
+  await expect(speak).toHaveText('در حال خواندن…');
+  const calls=await page.evaluate(()=>(window.__KANJI5_SPEECH_CALLS__||[]));
+  expect(calls.some(call=>call.type==='speak'&&call.text.includes('日本語')&&call.lang==='ja-JP'&&call.rate===1)).toBe(true);
+  await expect(stop).toBeEnabled();
+  await stop.click();
+  await expect(speak).toHaveText('خواندن متن');
+  await expect(stop).toBeDisabled();
+
+  const sentences=lab.locator('.reading-lab-reader-sentence');
+  await expect(sentences).toHaveCount(2);
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۱ / ۲');
+  await expect(lab.locator('.reading-lab-sentence-prev')).toBeDisabled();
+  await expect(lab.locator('.reading-lab-sentence-next')).toBeEnabled();
+  await lab.locator('.reading-lab-sentence-next').click();
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await expect(lab.locator('.reading-lab-sentence-prev')).toBeEnabled();
+  const readSentence=lab.getByRole('button',{name:'خواندن جمله',exact:true});
+  await readSentence.click();
+  const sentenceCalls=await page.evaluate(()=>(window.__KANJI5_SPEECH_CALLS__||[]));
+  expect(sentenceCalls.some(call=>call.type==='speak'&&call.text==='二番目の文もここで読みます。'&&call.lang==='ja-JP'&&call.rate===1)).toBe(true);
+  await expect(stop).toBeEnabled();
+  await stop.click();
+  await expect(stop).toBeDisabled();
+
+  const repeatSentence=lab.getByRole('button',{name:'تکرار جمله',exact:true});
+  await expect(repeatSentence).toBeEnabled();
+  await repeatSentence.click();
+  const repeatCalls=await page.evaluate(()=>(window.__KANJI5_SPEECH_CALLS__||[]));
+  expect(repeatCalls.some(call=>call.type==='speak'&&call.text==='二番目の文もここで読みます。'&&call.lang==='ja-JP'&&call.rate===1)).toBe(true);
+  await stop.click();
+
+  await lab.locator('.reading-lab-sentence-prev').click();
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۱ / ۲');
+  const autoplay=lab.getByRole('button',{name:'پخش خودکار',exact:true});
+  await autoplay.click();
+  await expect(autoplay).toHaveAttribute('aria-pressed','true');
+  const autoplayFirst=await page.evaluate(()=>(window.__KANJI5_LAST_UTTERANCE__?.text)||'');
+  expect(autoplayFirst).toBe('これは日本語の読み上げテストです。');
+  await page.evaluate(()=>window.__KANJI5_LAST_UTTERANCE__?.onend?.());
+  await expect.poll(async()=>page.evaluate(()=>(window.__KANJI5_LAST_UTTERANCE__?.text)||''),{timeout:1000}).toBe('二番目の文もここで読みます。');
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await page.evaluate(()=>window.__KANJI5_LAST_UTTERANCE__?.onend?.());
+  await expect(autoplay).toHaveAttribute('aria-pressed','false');
+
+  const labText='これは日本語の読み上げテストです。二番目の文もここで読みます。';
+  await expect(lab.locator('textarea')).toHaveValue(labText);
+  await lab.locator('.reading-lab-reader-kanji').first().click();
+  const dictionaryCard=page.locator('.dictionary-card-dialog:visible');
+  await expect(dictionaryCard).toBeVisible({timeout:10000});
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('textarea')).toHaveValue(labText);
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+  await dictionaryCard.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(dictionaryCard).toBeHidden();
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('textarea')).toHaveValue(labText);
+  await expect(lab.locator('.reading-lab-sentence-position')).toContainText('۲ / ۲');
+});
+
+test('Reading Lab persists sentence notes, reuses exact translation matches, and supports Japanese voice selection',async({page})=>{
+  await clean(page);
+  const sentence='今日は学生です。';
+  await page.evaluate(()=>{
+    Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+      cancel:()=>{},
+      speak:(utterance)=>{window.__KANJI5_LAST_UTTERANCE__=utterance;utterance.onstart?.();},
+      getVoices:()=>[{name:'Test Japanese',lang:'ja-JP'}],
+      addEventListener:()=>{},
+      removeEventListener:()=>{},
+    }});
+    Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class {
+      constructor(text){this.text=text;this.lang='';this.rate=1;this.voice=null;this.onstart=null;this.onend=null;this.onerror=null;}
+    }});
+  });
+  await page.route(/https:\/\/api\.tatoeba\.org\/v1\/sentences\?.*/,async route=>{
+    const url=new URL(route.request().url());
+    if(url.searchParams.get('q')!==sentence){ await route.continue(); return; }
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:[{text:sentence,translations:[[{text:'Today I am a student.'}]]}]})});
+  });
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  const lab=dialog.locator('.reading-lab');
+  await lab.locator('textarea').fill(sentence);
+  const sentenceRow=lab.locator('.reading-lab-reader-sentence').first();
+  await sentenceRow.getByRole('button',{name:'ترجمهٔ جمله',exact:true}).click();
+  await expect(sentenceRow.locator('.reading-lab-sentence-translation')).toContainText('Today I am a student.');
+  await sentenceRow.getByRole('button',{name:'یادداشت',exact:true}).click();
+  await sentenceRow.locator('.reading-lab-annotation-editor textarea').fill('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
+  await sentenceRow.getByRole('button',{name:'ذخیرهٔ یادداشت',exact:true}).click();
+  await expect(sentenceRow.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
+  const voiceSelect=lab.locator('.reading-lab-speech-voice select');
+  await voiceSelect.selectOption('Test Japanese');
+  await expect(voiceSelect).toHaveValue('Test Japanese');
+  await lab.getByRole('button',{name:'خواندن جمله',exact:true}).click();
+  const voice=await page.evaluate(()=>({name:window.__KANJI5_LAST_UTTERANCE__?.voice?.name||'',lang:window.__KANJI5_LAST_UTTERANCE__?.voice?.lang||''}));
+  expect(voice).toEqual({name:'Test Japanese',lang:'ja-JP'});
+
+  await dialog.getByRole('button',{name:'بستن',exact:true}).click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
+  const reopened=page.getByRole('dialog',{name:'آزمایشگاه خواندن'}).locator('.reading-lab').locator('.reading-lab-reader-sentence').first();
+  await expect(reopened.locator('.reading-lab-sentence-translation')).toContainText('Today I am a student.');
+  await expect(reopened.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
+});
+
+test('analytics remain in Stats and Learning keeps only compact session feedback',async({page})=>{
+  await clean(page);
+  await expect(page.locator('.insights')).toHaveCount(0);
+  await page.getByRole('button',{name:'بیشتر'}).click();
+  await page.getByRole('button',{name:'آمار'}).click();
+  const stats=page.locator('.stats-dashboard');
+  await expect(stats).toBeVisible({timeout:10000});
+  await expect(stats.locator('.stats-activity')).toBeVisible({timeout:10000});
+  await expect(stats.locator('.stats-mastery-bar')).toBeVisible({timeout:10000});
+  await expect(stats.locator('.stats-skills-list').first()).toBeVisible({timeout:10000});
+});
+
+
+
+test('React surfaces an actionable state when the shipped presentation chunk fails',async({page})=>{
+  await page.route('**/react-dist/kanji5-react.js*',async route=>{
+    await route.fulfill({status:503,contentType:'text/plain',body:'simulated missing release asset'});
+  });
+  await page.goto('/');
+  await expect(page.locator('#kanji5-startup-shell')).toHaveClass(/is-error/,{timeout:10000});
+  await expect(page.locator('html')).toHaveAttribute('lang','fa');
+  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('کانجی‌یار باز نشد');
+  await expect(page.locator('.kanji5-startup-error-copy')).toContainText('یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد.');
+  await expect(page.locator('.kanji5-startup-error-action')).toHaveText('بارگذاری دوباره');
+});
