@@ -44,6 +44,15 @@ test("engine exercise state reaches React and remains isolated from the Learning
   }, String(character || "").trim());
 
   await page.getByRole("button", { name: /Active Recall|یادآوری فعال/i }).click();
+  await page.waitForTimeout(1_000);
+  console.log("ENGINE_GATE_AFTER_ACTIVE_RECALL", await page.evaluate(() => ({
+    experienceTabs: Array.from(document.querySelectorAll(".experience-tab")).map(el => ({ text: el.textContent, active: el.classList.contains("active") })),
+    practiceHomeCount: document.querySelectorAll(".practice-home").length,
+    practiceStartCount: document.querySelectorAll(".practice-start-button").length,
+    exerciseCount: document.querySelectorAll("#exercise").length,
+    error: document.querySelector(".app-error-banner")?.textContent || "",
+    body: document.body.innerText.slice(0, 1800),
+  })));
   await expect(page.locator(".practice-start-button")).toBeVisible({ timeout: 5_000 });
   await page.locator(".practice-start-button").click();
   await expect(page.locator("#exercise")).toBeVisible({ timeout: 15_000 });
