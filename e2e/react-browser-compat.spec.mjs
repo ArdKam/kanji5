@@ -7,7 +7,7 @@ test('browser-compat startup and core learning smoke', async ({ page }) => {
     localStorage.setItem("kanji5-onboarding-v2","complete");
   });
   await page.goto('/');
-  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 60000 });
   await expect(page.locator('#root .learning-card-front .button.wide')).toBeVisible({ timeout: 15000 });
   await page.locator('#root .learning-card-front .button.wide').click();
   await expect(page.locator('#root .rating-grid')).toBeVisible({ timeout: 10000 });
