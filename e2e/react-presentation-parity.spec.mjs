@@ -39,6 +39,7 @@ test('Learning keeps session feedback compact and does not render analytics deta
   const card=page.locator('#root .learning-card');
   await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
+  await page.waitForTimeout(520);
   await card.locator('.rating-grid button').nth(2).click();
   const feedbackVisible=await page.locator('#root .session-feedback').isVisible().catch(()=>false);
   const summary=await page.evaluate(async()=>window.__KANJI5_V19_V2_BOUNDARY__?.snapshot?.().then((snapshot)=>snapshot?.sessionSummary??{}));
