@@ -93,7 +93,7 @@ export function DictionaryKanjiCard({
 
   useEffect(() => {
     if (!navigationDirection) return;
-    const timer = window.setTimeout(() => setNavigationDirection(null), 240);
+    const timer = window.setTimeout(() => setNavigationDirection(null), 320);
     return () => window.clearTimeout(timer);
   }, [item.character, navigationDirection]);
 
@@ -308,7 +308,7 @@ export function DictionaryKanjiCard({
 
   return (
     <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-labelledby="dictionary-card-title">
-      <div className={"dictionary-card" + (navigationDirection ? " is-navigation-" + navigationDirection : "")}
+      <div key={item.character} className={"dictionary-card" + (navigationDirection ? " is-navigation-" + navigationDirection : "")}
         onPointerDown={handleCardPointerDown}
         onPointerUp={handleCardPointerUp}
         onPointerCancel={handleCardPointerCancel}>
