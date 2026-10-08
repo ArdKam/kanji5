@@ -190,29 +190,12 @@ jobs:
       - name: Run React accessibility gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-accessibility.spec.mjs
-      - name: Prepare HTTPS compatibility server
+      - name: Run Firefox compatibility smoke
         working-directory: .
-        run: |
-          openssl req -x509 -newkey rsa:2048 -nodes             -keyout /tmp/kanji5-compat-key.pem             -out /tmp/kanji5-compat-cert.pem             -days 1             -subj "/CN=127.0.0.1"             -addext "subjectAltName = IP:127.0.0.1"
-          echo "KANJI5_COMPAT_HTTPS=1" >> "$GITHUB_ENV"
-          echo "KANJI5_TLS_KEY=/tmp/kanji5-compat-key.pem" >> "$GITHUB_ENV"
-          echo "KANJI5_TLS_CERT=/tmp/kanji5-compat-cert.pem" >> "$GITHUB_ENV"
-      - name: Install Firefox and WebKit compatibility browsers
+        run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
+      - name: Run WebKit compatibility smoke
         working-directory: .
-        run: npx playwright install --with-deps firefox webkit
-      - name: Run Firefox and WebKit compatibility smoke
-        working-directory: .
-        run: |
-          node scripts/serve-static.mjs 4173 >/tmp/kanji5-compat-server.log 2>&1 &
-          server_pid=$!
-          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          for attempt in {1..30}; do
-            if curl -ksSf https://127.0.0.1:4173/ >/dev/null; then break; fi
-            sleep 1
-          done
-          curl -ksSf https://127.0.0.1:4173/ >/dev/null
-          npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
-          npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
+        run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
       - name: Run React PWA release gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs
