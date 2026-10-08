@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-test.use({ serviceWorkers: 'allow' });
-
 test('browser-compat startup and core learning smoke', async ({ page }) => {
   await page.addInitScript(() => {
     for (const key of Object.keys(localStorage)) if (key.startsWith('kanji5-')) localStorage.removeItem(key);
