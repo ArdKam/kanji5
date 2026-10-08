@@ -19,7 +19,7 @@ assert.equal(legacyEducationDefinition("production").exercise,"typed-kanji-produ
 
 for(const marker of [
   "independent-typed-production",
-  "cued-kanji-choice",
+  "cued-kanji-completion",
   "cued-kanji-completion",
   "cued-sentence-completion",
   "revealed_self_report",
