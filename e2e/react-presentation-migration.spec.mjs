@@ -173,7 +173,11 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   const tile=pageRoot.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
   await expect(tile).toBeVisible({timeout:10000});
   await expect(tile).toHaveAttribute('data-jlpt','N5');
-  await tile.click();
+  await search.fill('');
+  const tileAfterClear=pageRoot.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
+  await expect(tileAfterClear).toBeVisible({timeout:10000});
+  await expect.poll(async()=>pageRoot.locator('.kanji-catalog-tile').count(),{timeout:10000}).toBeGreaterThan(1);
+  await tileAfterClear.click();
   const card=page.getByRole('dialog');
   await expect(card).toBeVisible();
   await expect(card.locator('.dictionary-card-character')).toHaveCount(0);
