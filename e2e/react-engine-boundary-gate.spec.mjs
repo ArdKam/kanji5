@@ -33,9 +33,6 @@ test("engine exercise state reaches React and remains isolated from the Learning
   await expect(page.locator(".learning-card .rating-good")).toBeVisible({ timeout: 5_000 });
   await page.locator(".learning-card .rating-good").click();
   await expect.poll(async () => page.evaluate(async () => Boolean((await window.__KANJI5_V19_V2_BOUNDARY__.snapshot()).session?.status))).not.toBe("");
-  await page.evaluate((target) => {
-    window.__KANJI5_V19_RECOVERY_TARGET__ = { character: target, mode: "reading", contentId: target };
-  }, String(character || "").trim());
 
   await page.getByRole("button", { name: /Active Recall|یادآوری فعال/i }).click();
   await expect(page.locator(".practice-start-button")).toBeVisible({ timeout: 5_000 });
@@ -60,8 +57,8 @@ test("engine exercise state reaches React and remains isolated from the Learning
   });
 
   expect(snapshot?.exercise?.mode).toBe("reading");
-  await expect(page.locator(".active-recall-task")).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator("#exercise")).toBeVisible({ timeout: 5_000 });
   await expect(page.locator(".learning-card")).toHaveCount(0);
-  await expect(page.locator(".active-recall-task")).toBeVisible();
-  await expect(page.locator(".active-recall-task")).not.toHaveText("");
+  await expect(page.locator("#exercise")).toBeVisible();
+  await expect(page.locator("#exercise")).not.toHaveText("");
 });
