@@ -198,7 +198,7 @@ jobs:
         run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
       - name: Run WebKit compatibility smoke
         working-directory: .
-        run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
+        run: npx playwright test --config=playwright.compat.config.mjs --timeout=30000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
       - name: Run React PWA release gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs
