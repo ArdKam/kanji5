@@ -89,6 +89,9 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
   const [componentInfoReady,setComponentInfoReady]=useState(false);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
+  const [referenceInfoOpen,setReferenceInfoOpen]=useState(false);
+  const referenceInfoTriggerRef=useRef<HTMLButtonElement|null>(null);
+  const referenceInfoCloseRef=useRef<HTMLButtonElement|null>(null);
   const [personalMnemonic,setPersonalMnemonic]=useState("");
   const [mnemonicDraft,setMnemonicDraft]=useState("");
   const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
@@ -173,7 +176,26 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     };
   },[mnemonicEditing,scrollMnemonicEditorIntoView]);
 
-  useEffect(()=>{setHiraganaReadings(false)},[card.character]);
+  useEffect(()=>{
+    setHiraganaReadings(false);
+    setReferenceInfoOpen(false);
+  },[card.character]);
+  useEffect(()=>{
+    if(!referenceInfoOpen)return;
+    const frame=requestAnimationFrame(()=>referenceInfoCloseRef.current?.focus({preventScroll:true}));
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){
+        event.preventDefault();
+        setReferenceInfoOpen(false);
+        requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}));
+      }
+    };
+    window.addEventListener("keydown",onKeyDown);
+    return()=>{
+      cancelAnimationFrame(frame);
+      window.removeEventListener("keydown",onKeyDown);
+    };
+  },[referenceInfoOpen]);
   useEffect(()=>{
     let active=true;
     setPersonalMnemonic("");
@@ -230,6 +252,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const displayedKun=(learnerReadingModel.coreKun?.length?learnerReadingModel.coreKun:(card.kun??[])).map(v=>hiraganaReadings?toHiragana(v):v);
   const referenceOn=learnerReadingModel.referenceOn??[];
   const referenceKun=learnerReadingModel.referenceKun??[];
+  const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
   const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
   const [examplesResolved,setExamplesResolved]=useState(false);
   const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
@@ -296,10 +319,12 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const jumpToBackPage=useCallback((page:number)=>{
     const next=Math.max(0,Math.min(backPageCount-1,page));
     if(next!==backPage)clearLearningFocus();
+    setReferenceInfoOpen(false);
     setBackPage(next);
   },[backPage,backPageCount,clearLearningFocus]);
   const handleRate=useCallback((rating:Rating)=>{
     clearLearningFocus();
+    setReferenceInfoOpen(false);
     onRate(rating);
   },[clearLearningFocus,onRate]);
   const snapPagerTrack=useCallback((page:number)=>{
@@ -383,7 +408,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><span>{t("cardBack")}</span></div>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="learning-back-topline-actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={t("additionalInformation")} title={t("additionalInformation")} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
@@ -400,11 +425,11 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
 
                     {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                     {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
-                    {referenceMeanings.length?<details className="learning-back-reference-meanings"><summary>{t("additionalInformation")}</summary><div className="learning-back-secondary-meaning">{referenceMeanings.join(" · ")}</div></details>:null}
+                    
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
-                      {(referenceOn.length||referenceKun.length)?<details className="learning-back-reference-readings"><summary>{t("additionalInformation")}</summary><div className="readings learning-back-readings"><Reading title="On’yomi · reference" values={referenceOn}/><Reading title="Kun’yomi · reference" values={referenceKun}/></div></details>:null}
+                      
                     </div>
                   </div>
                 </div>
@@ -526,6 +551,14 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             <span className="pager-current sr-only" aria-live="polite">
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
+          </div>:null}
+          {referenceInfoOpen?<div id="learning-reference-info" className="learning-reference-popover" role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
+            <div className="learning-reference-popover-head"><strong id="learning-reference-info-title">{t("additionalInformation")}</strong><button ref={referenceInfoCloseRef} className="learning-reference-close" type="button" aria-label={t("close")} title={t("close")} onClick={()=>{setReferenceInfoOpen(false);requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}))}}><UiIcon name="close" size={18}/></button></div>
+            <div className="learning-reference-info-grid">
+              {referenceMeanings.length?<section><span>{t("meaning")}</span><p>{referenceMeanings.join(" · ")}</p></section>:null}
+              {referenceOn.length?<section><span>On’yomi</span><p lang="ja">{referenceOn.join(" · ")}</p></section>:null}
+              {referenceKun.length?<section><span>Kun’yomi</span><p lang="ja">{referenceKun.join(" · ")}</p></section>:null}
+            </div>
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>

@@ -132,6 +132,55 @@ test("learning first page keeps readings above the rating footer on desktop", as
   expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
 });
 
+test("learning reference details stay out of the main flow and open from an info icon", async ({ page }) => {
+  for (const scenario of [
+    { language: "en", viewport: { width: 1280, height: 720 }, trigger: "Additional information" },
+    { language: "fa", viewport: { width: 390, height: 844 }, trigger: "اطلاعات تکمیلی" },
+  ]) {
+    await page.setViewportSize(scenario.viewport);
+    const card = await revealLearningCard(page, scenario.language);
+    const trigger = card.locator(".learning-reference-trigger");
+    await expect(trigger).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
+    await expect(card.locator(".learning-back-reference-meanings,.learning-back-reference-readings")).toHaveCount(0);
+
+    await trigger.click();
+    const popover = card.locator("#learning-reference-info");
+    await expect(popover).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(popover.locator(".learning-reference-popover-head")).toBeVisible();
+    await expect(popover.locator("p")).toHaveCount(1);
+    const metrics = await popover.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      return {
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+        card: el.closest(".learning-card")?.getBoundingClientRect(),
+        overflowY: style.overflowY,
+        scrollable: el.scrollHeight > el.clientHeight + 1,
+      };
+    });
+    expect(metrics.card).toBeTruthy();
+    expect(metrics.left).toBeGreaterThanOrEqual((metrics.card?.left ?? 0) + 1);
+    expect(metrics.right).toBeLessThanOrEqual((metrics.card?.right ?? Infinity) - 1);
+    expect(metrics.overflowY).not.toBe("auto");
+    expect(metrics.overflowY).not.toBe("scroll");
+    expect(metrics.scrollable).toBe(false);
+
+    await page.keyboard.press("Escape");
+    await expect(popover).toBeHidden();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+    await trigger.click();
+    await popover.getByRole("button", { name: scenario.language === "fa" ? "بستن" : "Close" }).click();
+    await expect(popover).toBeHidden();
+  }
+});
+
 test("learning card stays within a short desktop landscape viewport", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 844, height: 390 });
