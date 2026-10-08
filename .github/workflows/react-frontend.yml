@@ -148,9 +148,9 @@ jobs:
       - name: Run root contract/unit suite
         working-directory: .
         run: npm test
-      - name: Install Chromium, Firefox, and WebKit
+      - name: Install Chromium for React E2E
         working-directory: .
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: npx playwright install --with-deps chromium
       - name: Run engine-to-React boundary gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
@@ -190,6 +190,9 @@ jobs:
       - name: Run React accessibility gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-accessibility.spec.mjs
+      - name: Install Firefox and WebKit compatibility browsers
+        working-directory: .
+        run: npx playwright install firefox webkit
       - name: Run Firefox compatibility smoke
         working-directory: .
         run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
