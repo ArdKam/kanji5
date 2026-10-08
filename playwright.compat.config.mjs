@@ -3,7 +3,6 @@ import { defineConfig } from '@playwright/test';
 const secure = process.env.KANJI5_COMPAT_HTTPS === '1';
 const protocol = secure ? 'https' : 'http';
 const baseURL = `${protocol}://127.0.0.1:4173`;
-const webServerURL = secure ? 'http://127.0.0.1:4174/' : `${baseURL}/`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -22,8 +21,9 @@ export default defineConfig({
   ],
   webServer: {
     command: 'node scripts/serve-static.mjs 4173',
-    url: webServerURL,
+    url: `${baseURL}/`,
     reuseExistingServer: false,
     timeout: 30_000,
+    ignoreHTTPSErrors: secure,
   },
 });
