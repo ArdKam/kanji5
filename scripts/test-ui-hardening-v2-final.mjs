@@ -19,7 +19,7 @@ assert.match(css,/\.button:active:not\(:disabled\)[\s\S]*?transform:scale\(\.97\
 for(const token of ['--motion-interaction:160ms;','--motion-hover:180ms;','--motion-tab:280ms;','--motion-pager:420ms;','--motion-flip:480ms;']) assert.ok(css.includes(token),`missing motion timing token: ${token}`);
 assert.match(css,/\.experience-tab-indicator[\s\S]*?transition:transform \.28s cubic-bezier\(\.2,\.7,\.2,1\)/);
 assert.match(css,/@keyframes kanji5-dialog-in/);
-assert.match(css,/\.dialog\\[open\\][\\s\\S]*?animation:kanji5-dialog-in/);
+assert.match(css,/dialog\[open\][\s\S]*?animation:kanji5-dialog-in/);
 assert.match(css,/@keyframes dictionary-panel-in/);
 assert.match(css,/\.dictionary-tabpanel[\\s\\S]*?animation:dictionary-panel-in/);
 assert.match(css,/@keyframes kanji5GoalCelebrate/);
