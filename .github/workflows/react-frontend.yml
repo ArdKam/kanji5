@@ -200,12 +200,19 @@ jobs:
       - name: Install Firefox and WebKit compatibility browsers
         working-directory: .
         run: npx playwright install --with-deps firefox webkit
-      - name: Run Firefox compatibility smoke
+      - name: Run Firefox and WebKit compatibility smoke
         working-directory: .
-        run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
-      - name: Run WebKit compatibility smoke
-        working-directory: .
-        run: npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
+        run: |
+          node scripts/serve-static.mjs 4173 >/tmp/kanji5-compat-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl -ksSf https://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -ksSf https://127.0.0.1:4173/ >/dev/null
+          npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=firefox e2e/react-browser-compat.spec.mjs
+          npx playwright test --config=playwright.compat.config.mjs --timeout=20000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
       - name: Run React PWA release gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-pwa-release.spec.mjs
