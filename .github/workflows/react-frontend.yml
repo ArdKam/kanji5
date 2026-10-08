@@ -227,6 +227,7 @@ jobs:
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-production-recall-keyboard.spec.mjs
 
+  # WebKit compatibility is isolated to a macOS runner.
   webkit-compat:
     runs-on: macos-latest
     timeout-minutes: 30
