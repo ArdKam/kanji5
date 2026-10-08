@@ -19,11 +19,10 @@ export default defineConfig({
     { name: 'firefox', use: { browserName: 'firefox', serviceWorkers: 'allow' } },
     { name: 'webkit', use: { browserName: 'webkit', serviceWorkers: 'allow' } },
   ],
-  webServer: {
+  webServer: secure ? undefined : {
     command: 'node scripts/serve-static.mjs 4173',
     url: `${baseURL}/`,
     reuseExistingServer: false,
     timeout: 30_000,
-    ignoreHTTPSErrors: secure,
   },
 });
