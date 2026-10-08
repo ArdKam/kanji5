@@ -83,14 +83,6 @@ function localPayload() {
   };
 }
 
-function assertSyncPayloadWithinLimit(payload){
-  const bytes=typeof TextEncoder==='undefined'
-    ? JSON.stringify(payload).length
-    : new TextEncoder().encode(JSON.stringify(payload)).byteLength;
-  if(bytes>MAX_SYNC_PAYLOAD_BYTES)throw new Error('SYNC_PAYLOAD_TOO_LARGE');
-  return payload;
-}
-
 function safeJSON(raw, fallback) {
   try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
 }
