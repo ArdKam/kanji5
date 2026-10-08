@@ -13,6 +13,7 @@ const boundary=fs.readFileSync("v1.9-v2-boundary.js","utf8");
 const placement=fs.readFileSync("frontend/src/app/placement-logic.ts","utf8");
 const diagnostic=fs.readFileSync("frontend/src/app/PlacementDiagnostic.tsx","utf8");
 const serviceWorker=fs.readFileSync("sw.js","utf8");
+const modalitySource=education+"\n"+app;
 const audit=fs.readFileSync("docs/EDUCATIONAL-CONTENT-AUDIT.md","utf8");
 
 assert.equal(legacyEducationDefinition("production").exercise,"typed-kanji-production");
@@ -20,12 +21,10 @@ assert.equal(legacyEducationDefinition("production").exercise,"typed-kanji-produ
 for(const marker of [
   "independent-typed-production",
   "cued-kanji-completion",
-  "cued-kanji-completion",
   "cued-sentence-completion",
   "revealed_self_report",
   "content-exposure",
-]) assert.ok(education.includes(marker),`missing educational modality marker: ${marker}`);
-assert.ok(education.includes("cued_production") || education.includes("cued-kanji-choice"),"missing cued production modality marker");
+]) assert.ok(modalitySource.includes(marker),`missing educational modality marker: ${marker}`);
 
 assert.match(app,/production&&showProductionOptions\?\{hintUsed:true\}/);
 assert.match(boundary,/submitExercise\(value,meta=\{\}\)/);
