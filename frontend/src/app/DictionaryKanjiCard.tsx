@@ -41,9 +41,10 @@ export function DictionaryKanjiCard({
   onClose: () => void;
   catalog: KanjiCatalogItem[];
   onSelectKanji: (item: KanjiCatalogItem) => void;
-  navigationItems: KanjiCatalogItem[];
+  navigationItems?: KanjiCatalogItem[];
   mnemonicContent?: ReactNode;
 }) {
+  const navItems = navigationItems ?? [item];
   const dialogRef = useModalDialog(true, onClose);
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
@@ -98,10 +99,10 @@ export function DictionaryKanjiCard({
 
 
   const navigateKanji = (direction: "next" | "previous") => {
-    const index = navigationItems.findIndex(candidate => candidate.character === item.character);
+    const index = navItems.findIndex(candidate => candidate.character === item.character);
     if (index < 0) return;
     const nextIndex = direction === "next" ? index + 1 : index - 1;
-    const nextItem = navigationItems[nextIndex];
+    const nextItem = navItems[nextIndex];
     if (!nextItem) return;
     setNavigationDirection(direction);
     onSelectKanji(nextItem);
@@ -298,9 +299,9 @@ export function DictionaryKanjiCard({
     return () => document.removeEventListener("keydown", handleNavigationKey);
   }, [item.character, navigationItems]);
 
-  const navigationIndex = navigationItems.findIndex(candidate => candidate.character === item.character);
+  const navigationIndex = navItems.findIndex(candidate => candidate.character === item.character);
   const hasPrevious = navigationIndex > 0;
-  const hasNext = navigationIndex >= 0 && navigationIndex < navigationItems.length - 1;
+  const hasNext = navigationIndex >= 0 && navigationIndex < navItems.length - 1;
 
   const masteryRingOffset = masteryRingCircumference * (1 - mastery / 100);
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
