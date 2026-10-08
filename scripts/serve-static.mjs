@@ -57,10 +57,4 @@ const server = secure
 server.listen(port, '127.0.0.1', () => {
   const protocol = secure ? 'https' : 'http';
   console.log(`Kanji 5 test server listening on ${protocol}://127.0.0.1:${port}/`);
-  if (secure) {
-    const healthPort = Number(process.env.KANJI5_HEALTH_PORT || (port + 1));
-    http.createServer((_req, res) => res.writeHead(200).end('ok')).listen(healthPort, '127.0.0.1', () => {
-      console.log(`Kanji 5 HTTPS test server readiness on http://127.0.0.1:${healthPort}/`);
-    });
-  }
 });
