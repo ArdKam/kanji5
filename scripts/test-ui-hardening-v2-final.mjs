@@ -22,7 +22,7 @@ assert.match(css,/\.experience-tab-indicator[\s\S]*?transition:transform \.28s c
 assert.match(css,/@keyframes kanji5-dialog-in/);
 assert.match(css,/\.dialog\[open\][\s\S]*?animation:kanji5-dialog-in/);
 assert.match(dictionaryCss,/@keyframes dictionary-panel-in/);
-assert.match(dictionaryCss,/\.dictionary-tabpanel[\\s\\S]*?animation:dictionary-panel-in/);
+assert.match(dictionaryCss,/\.dictionary-tabpanel[\s\S]*?animation:dictionary-panel-in/);
 assert.match(css,/@keyframes kanji5GoalCelebrate/);
 assert.match(css,/kanji5ExerciseCorrectGlow/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
