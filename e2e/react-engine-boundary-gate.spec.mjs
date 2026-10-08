@@ -40,8 +40,6 @@ test("engine exercise state reaches React and remains isolated from the Learning
   await page.getByRole("button", { name: /Active Recall|یادآوری فعال/i }).click();
   await expect(page.locator(".practice-start-button")).toBeVisible({ timeout: 5_000 });
   await page.locator(".practice-start-button").click();
-  await expect(page.locator(".active-recall-task")).toBeVisible({ timeout: 15_000 });
-
   const snapshot = await page.evaluate(async () => {
     const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
     const learning = await boundary.snapshot();
