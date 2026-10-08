@@ -197,7 +197,6 @@ jobs:
           echo "KANJI5_COMPAT_HTTPS=1" >> "$GITHUB_ENV"
           echo "KANJI5_TLS_KEY=/tmp/kanji5-compat-key.pem" >> "$GITHUB_ENV"
           echo "KANJI5_TLS_CERT=/tmp/kanji5-compat-cert.pem" >> "$GITHUB_ENV"
-          echo "KANJI5_HEALTH_PORT=4174" >> "$GITHUB_ENV"
       - name: Install Firefox and WebKit compatibility browsers
         working-directory: .
         run: npx playwright install --with-deps firefox webkit
