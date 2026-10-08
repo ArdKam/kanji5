@@ -13,7 +13,7 @@ export default defineConfig({
   outputDir: 'test-results/compat',
   projects: [
     { name: 'firefox', use: { browserName: 'firefox', serviceWorkers: 'allow' } },
-    { name: 'webkit', use: { browserName: 'webkit', serviceWorkers: 'block' } },
+    { name: 'webkit', use: { browserName: 'webkit', serviceWorkers: 'block', offline: true } },
   ],
   webServer: {
     command: 'node scripts/serve-static.mjs 4173',
