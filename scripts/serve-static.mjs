@@ -1,10 +1,14 @@
 import http from 'node:http';
+import https from 'node:https';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.argv[2] || 4173);
+const secure = process.env.KANJI5_SERVE_PROTOCOL === 'https';
+const tlsKeyPath = process.env.KANJI5_TLS_KEY || '';
+const tlsCertPath = process.env.KANJI5_TLS_CERT || '';
 
 const mime = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -16,7 +20,7 @@ const mime = new Map([
   ['.webmanifest', 'application/manifest+json; charset=utf-8'],
 ]);
 
-const server = http.createServer((req, res) => {
+function handleRequest(req, res) {
   try {
     const requestPath = decodeURIComponent((req.url || '/').split('?')[0]);
     const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
@@ -41,8 +45,16 @@ const server = http.createServer((req, res) => {
   } catch {
     res.writeHead(404).end('Not Found');
   }
-});
+}
+
+const server = secure
+  ? https.createServer({
+      key: fs.readFileSync(tlsKeyPath),
+      cert: fs.readFileSync(tlsCertPath),
+    }, handleRequest)
+  : http.createServer(handleRequest);
 
 server.listen(port, '127.0.0.1', () => {
-  console.log(`Kanji 5 test server listening on http://127.0.0.1:${port}/`);
+  const protocol = secure ? 'https' : 'http';
+  console.log(`Kanji 5 test server listening on ${protocol}://127.0.0.1:${port}/`);
 });
