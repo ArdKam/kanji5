@@ -560,7 +560,6 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
               {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
             </div>
           </div>:null}
-          <div className="rating-grid"></div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
       </div>
