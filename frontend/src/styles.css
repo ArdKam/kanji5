@@ -2125,6 +2125,8 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
   max-height:calc(100dvh - 32px);
   margin:0;
   padding:24px;
+  display:flex;
+  flex-direction:column;
   overflow:auto;
   overscroll-behavior:contain;
   border:1px solid color-mix(in srgb,var(--line) 88%,transparent);
