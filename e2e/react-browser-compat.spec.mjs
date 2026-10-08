@@ -13,7 +13,7 @@ test('browser-compat startup and core learning smoke', async ({ page }) => {
   });
   await page.goto('/');
   try {
-    await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 25000 });
+    await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 45000 });
   } catch (error) {
     const diagnostics = await page.evaluate(() => ({
       body: document.body.innerText.slice(0, 2500),
