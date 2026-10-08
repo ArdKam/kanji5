@@ -872,7 +872,7 @@ function LoadingLearning(){
 }
 function App(){
   const [onboardingComplete,setOnboardingComplete]=useState(()=>isOnboardingComplete());
-  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
   useEffect(()=>{
     if(!sessionFeedbackVisible)return;
@@ -1039,7 +1039,7 @@ function App(){
               {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
               {showExercise ? (
-  practiceMode==="exercise" && snapshot?.exercise?.mode ? (
+  snapshot?.exercise?.mode ? (
     <>
       <Exercise snapshot={snapshot} busy={busy} onSubmit={(v,meta)=>action(()=>submitExercise(v,meta),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
@@ -1051,7 +1051,6 @@ function App(){
       onStartActiveRecall={async()=>{
         await action(async()=>{
           await startExercise();
-          setPracticeMode("exercise");
         });
       }}
       onStartCustomStudy={async(filter: CustomStudyFilter)=>{
