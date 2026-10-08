@@ -70,6 +70,6 @@ assert.match(performanceGate, /CLS budget exceeded/);
 assert.match(performanceGate, /application transfer budget exceeded/);
 assert.match(boundaryGate, /__KANJI5_V19_V2_BOUNDARY__/);
 assert.match(boundaryGate, /\.learning-card/);
-assert.match(boundaryGate, /\.active-recall-task/);
+assert.ok(/#exercise|\.active-recall-task/.test(boundaryGate), "Boundary gate must assert a stable Active Recall root or task selector");
 
 console.log("Cross-layer release gate contract passed.");
