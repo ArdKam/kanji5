@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import type { CustomStudyFilter, CustomStudyFocus } from "./engine";
 import { UiIcon } from "./UiIcon";
@@ -25,7 +25,7 @@ export function TopicLearningDialog({
   const [focus, setFocus] = useState<CustomStudyFocus>("available");
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const styleId = "topic-learning-dynamic-styles";
     let style = document.getElementById(styleId) as HTMLStyleElement | null;
     const alreadyPresent = Boolean(style);
