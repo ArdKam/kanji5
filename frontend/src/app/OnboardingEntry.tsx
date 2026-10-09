@@ -212,6 +212,7 @@ export function OnboardingEntry({
       startingPoint: null,
       placementAnswers: [],
       suggestedLevel: null,
+      placementSummary: null,
       dailyNew: 5,
     };
     setAccountOpen(false);
