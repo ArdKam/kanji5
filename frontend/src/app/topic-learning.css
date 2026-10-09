@@ -20,6 +20,7 @@
 .topic-learning-close { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--washi); color: var(--ink); }
 .topic-learning-search { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--washi); color: var(--mute); }
 .topic-learning-search input { width: 100%; min-width: 0; min-height: 46px; border: 0; outline: 0; background: transparent; color: var(--sumi); font: inherit; }
+.topic-learning-search:focus-within { outline: 3px solid rgba(38, 64, 107, .32); outline-offset: 3px; border-color: var(--ai); }
 .topic-learning-search input:focus-visible { outline: 0; }
 .topic-learning-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
 .topic-learning-tile { display: grid; grid-template-columns: 68px minmax(0, 1fr) 20px; align-items: center; gap: 12px; min-width: 0; min-height: 88px; padding: 12px; border: 1px solid var(--line-soft); border-radius: var(--radius-lg); background: var(--color-surface-elevated); color: var(--sumi); text-align: start; transition: border-color var(--motion-hover) ease, background var(--motion-hover) ease, transform var(--motion-hover) ease; }
