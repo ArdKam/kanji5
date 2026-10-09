@@ -1,4 +1,4 @@
-# Kanji5 — Feedback & Support
+# Rinemi — Feedback & Support
 
 For bugs, UX problems, accessibility issues, or feature requests, use the repository's public issue tracker:
 
