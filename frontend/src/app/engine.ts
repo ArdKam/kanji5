@@ -164,7 +164,7 @@ export type KanjiDictionaryResult = {
 
 export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:string };
 export type CustomStudyFocus = "available" | "due" | "new" | "weak" | "mistakes";
-export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number; characterScope?: string[] };
+export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number; characterScope?: string[]; topicId?: string };
 
 export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
 export type RadicalInfo = { character:string; available:boolean; radicalId:number|null; radical:{id:number;glyph:string;strokeCount:number;meanings:string[];sourceForms?:string[]}|null; coverage?:{available?:number;total?:number;fraction?:number}|null; source?:{name?:string;upstreamVersion?:string;license?:string;radicalDefinitionsRevision?:number}|null; };
