@@ -164,6 +164,7 @@ test("handwriting UI gives reliable real-time stroke feedback",async({page})=>{
   await clean(page);
   const handwriting=await openSchoolHandwriting(page);
   const canvas=handwriting.locator(".handwriting-ink-canvas");
+  await canvas.scrollIntoViewIfNeeded();
   const box=await canvas.boundingBox();
   if(!box)throw new Error("handwriting canvas has no bounding box");
   const points=[
