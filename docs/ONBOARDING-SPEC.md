@@ -1,10 +1,10 @@
-# Kanji5 First-Run Onboarding
+# Rinemi First-Run Onboarding
 
 Status: assessment v2 implemented in the placement blueprint candidate; final CI, merge, and live verification remain separate acceptance steps.
 
 ## Product contract
 
-Kanji5's first-open experience is a dedicated full-page entry journey rather than a card inside Learning. It explains the learning loop, establishes a Kanji starting point, optionally runs a short placement diagnostic, sets the new-Kanji daily rhythm, and ends with an optional account choice.
+Rinemi's first-open experience is a dedicated full-page entry journey rather than a card inside Learning. It explains the learning loop, establishes a Kanji starting point, optionally runs a short placement diagnostic, sets the new-Kanji daily rhythm, and ends with an optional account choice.
 
 The flow is guest-first. Account creation and sign-in reuse the existing account surface; onboarding does not create a second authentication system.
 
@@ -13,7 +13,7 @@ The diagnostic is a **Kanji starting-point estimate**, not a JLPT examination an
 ## Flow
 
 1. Welcome
-2. How Kanji5 works
+2. How Rinemi works
 3. Starting point
 4. Optional Kanji placement
 5. Placement result and per-band profile

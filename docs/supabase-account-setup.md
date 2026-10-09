@@ -1,6 +1,6 @@
-# Kanji 5 — Account & cloud sync setup
+# Rinemi — Account & cloud sync setup
 
-This integration keeps Kanji 5 local-first while adding optional accounts and cloud synchronization. Google can be enabled later without changing the account boundary.
+This integration keeps Rinemi local-first while adding optional accounts and cloud synchronization. Google can be enabled later without changing the account boundary.
 
 ## 1. Create the Supabase project
 
@@ -10,12 +10,12 @@ Run the SQL in [\`supabase/schema.sql\`](../supabase/schema.sql) in the Supabase
 
 ## 2. Configure account sign-in
 
-The Kanji5 account dialog currently supports:
+The Rinemi account dialog currently supports:
 - Email + password
 - Magic link email sign-in
 - Google (ready in the UI, but unavailable until the Google provider is configured)
 
-Email/password and magic-link flows use Supabase Auth directly. Google can be enabled later by creating a Google OAuth client for a **Web application**, then entering its client ID and client secret in the Supabase Google provider configuration. Supabase Auth handles the Google callback before redirecting back to Kanji5.
+Email/password and magic-link flows use Supabase Auth directly. Google can be enabled later by creating a Google OAuth client for a **Web application**, then entering its client ID and client secret in the Supabase Google provider configuration. Supabase Auth handles the Google callback before redirecting back to Rinemi.
 
 For local development, register the local origin you actually use in the relevant redirect configuration.
 
@@ -23,8 +23,8 @@ For local development, register the local origin you actually use in the relevan
 
 In Supabase Authentication → URL Configuration:
 
-- Set the production Site URL to the canonical Kanji 5 origin.
-- Add the exact Kanji 5 production URL used by the app as an allowed redirect URL.
+- Set the production Site URL to the canonical Rinemi origin.
+- Add the exact Rinemi production URL used by the app as an allowed redirect URL.
 - Add the local development URL while testing locally.
 
 The app sends \`location.origin + location.pathname\` as its OAuth \`redirectTo\`, so the configured redirect URL must match that deployed path.
@@ -48,14 +48,14 @@ The public key is used only from the browser; database access is constrained by 
 
 A production smoke test should cover:
 
-1. Open Kanji 5 while signed out.
+1. Open Rinemi while signed out.
 2. Open the account control in the header.
 3. Choose **Email & password** and test an existing account.
 4. Test **Create account** with a new email.
-5. Test **Magic link** and confirm the email returns to the same Kanji 5 URL.
+5. Test **Magic link** and confirm the email returns to the same Rinemi URL.
 6. Optionally configure Google and test **Continue with Google**.
 7. Review a Kanji and confirm the account state becomes **Synced**.
-8. Open Kanji 5 on a second device/browser, sign in with the same account, and verify that the learning state is restored.
+8. Open Rinemi on a second device/browser, sign in with the same account, and verify that the learning state is restored.
 9. Sign out and confirm the app remains usable in local guest mode.
 
 ## 6. Important architecture boundary

@@ -17,7 +17,7 @@ assert.match(packageJson.scripts?.['test:v1.6:release'] ?? '', /test-v1\.6-relea
 assert.match(readme, /^## v1\.6 — Adaptive Session Intelligence$/m);
 assert.match(readme, /## v1\.8 — Rich Learner-Facing Recall/);
 assert.match(readme, /## Release status/);
-assert.match(architecture, /^# Kanji 5 Architecture$/m);
+assert.match(architecture, /^# Rinemi Architecture$/m);
 assert.match(architecture, /session planning and lifecycle/);
 assert.match(architecture, /## Long-term skill profile/);
 assert.match(architecture, /## Adaptive recall/);

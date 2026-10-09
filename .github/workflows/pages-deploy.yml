@@ -1,4 +1,4 @@
-name: Deploy Kanji 5 to GitHub Pages
+name: Deploy Rinemi to GitHub Pages
 
 on:
   workflow_run:

@@ -1,4 +1,4 @@
-# Kanji5 — Public Beta Checklist
+# Rinemi — Public Beta Checklist
 
 ## Before inviting users
 

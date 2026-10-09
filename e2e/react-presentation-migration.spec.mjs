@@ -22,7 +22,7 @@ test('first-open onboarding runs as a dedicated resumable entry flow',async({pag
   const onboarding=page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({timeout:15000});
   await expect(page.locator('#root .app-shell')).toHaveCount(0);
-  await expect(onboarding).toContainText('به Kanji5 خوش آمدی');
+  await expect(onboarding).toContainText('به Rinemi خوش آمدی');
   await expect(onboarding.getByRole('button',{name:'شروع کنیم',exact:true})).toBeVisible();
   await onboarding.getByRole('button',{name:'شروع کنیم',exact:true}).click();
   await expect(onboarding).toContainText('هر کانجی را چطور یاد می‌گیری؟');
@@ -584,7 +584,7 @@ test('React surfaces an actionable state when the shipped presentation chunk fai
   await page.goto('/');
   await expect(page.locator('#kanji5-startup-shell')).toHaveClass(/is-error/,{timeout:10000});
   await expect(page.locator('html')).toHaveAttribute('lang','fa');
-  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('کانجی‌یار باز نشد');
+  await expect(page.locator('.kanji5-startup-error-title')).toHaveText('Rinemi باز نشد');
   await expect(page.locator('.kanji5-startup-error-copy')).toContainText('یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد.');
   await expect(page.locator('.kanji5-startup-error-action')).toHaveText('بارگذاری دوباره');
 });

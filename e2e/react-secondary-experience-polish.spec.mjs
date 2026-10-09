@@ -214,7 +214,7 @@ test("Data backup exports and restores the authoritative learning data", async (
   const downloadPromise = page.waitForEvent("download");
   await settings.getByRole("button", { name: "Export backup", exact: true }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^kanji5-backup-\d{4}-\d{2}-\d{2}\.json$/);
+  expect(download.suggestedFilename()).toMatch(/^rinemi-backup-\d{4}-\d{2}-\d{2}\.json$/);
   const backupPath = await download.path();
   expect(backupPath).toBeTruthy();
 
@@ -231,8 +231,8 @@ test("Data backup exports and restores the authoritative learning data", async (
   settings = await openMenuItem(page, "Settings");
   await expect(settings.getByLabel("New kanji per day", { exact: true })).toHaveValue("9");
   await settings.locator(".settings-backup-import input").setInputFiles(backupPath);
-  await expect(settings.getByRole("alert").filter({ hasText: "Restore this Kanji5 backup?" })).toBeVisible();
-  await settings.getByRole("alert").filter({ hasText: "Restore this Kanji5 backup?" }).getByRole("button", { name: "Restore backup", exact: true }).click();
+  await expect(settings.getByRole("alert").filter({ hasText: "Restore this Rinemi backup?" })).toBeVisible();
+  await settings.getByRole("alert").filter({ hasText: "Restore this Rinemi backup?" }).getByRole("button", { name: "Restore backup", exact: true }).click();
 
   await expect.poll(async () => page.locator("#root .app-shell").count(), { timeout: 20000 }).toBe(1);
   settings = await openMenuItem(page, "Settings");

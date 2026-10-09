@@ -1,11 +1,11 @@
-# Kanji5 — Architecture, Build & Runtime Cleanup Contract
+# Rinemi — Architecture, Build & Runtime Cleanup Contract
 
 Repository: ArdKam/kanji5
 Default production branch: main
 
 ## Mission
 
-Simplify Kanji5 without changing educational authority, FSRS behavior, persistence semantics, offline guarantees, or learner-facing functionality.
+Simplify Rinemi without changing educational authority, FSRS behavior, persistence semantics, offline guarantees, or learner-facing functionality.
 
 The target architecture is:
 

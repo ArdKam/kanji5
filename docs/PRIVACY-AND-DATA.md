@@ -1,4 +1,4 @@
-# Kanji5 — Privacy & Data Policy (Product Draft)
+# Rinemi — Privacy & Data Policy (Product Draft)
 
 **Status: product-accurate engineering draft for owner/counsel review. Not legal advice and not final public policy.**
 
@@ -6,7 +6,7 @@ Last reconciled: 2026-10-06 against the current runtime on the R13 branch rebase
 
 ## Scope
 
-Kanji5 is a local-first browser application. Core learning data is stored in browser-controlled storage by default. An optional account can use Supabase Authentication and the `user_learning_state` table for synchronization.
+Rinemi is a local-first browser application. Core learning data is stored in browser-controlled storage by default. An optional account can use Supabase Authentication and the `user_learning_state` table for synchronization.
 
 This document describes observed repository behavior. It does not create legal commitments or promise capabilities that are not implemented.
 

@@ -39,7 +39,7 @@ export function MnemonicBackup({ catalog, language }: { catalog: KanjiCatalogIte
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = "kanji5-personal-mnemonics.json";
+      anchor.download = "rinemi-personal-mnemonics.json";
       anchor.click();
       URL.revokeObjectURL(url);
       setStatus(language === "fa" ? `${formatNumber(rows.length, language)} یادسپار خروجی گرفته شد.` : `${formatNumber(rows.length, language)} personal mnemonics exported.`);

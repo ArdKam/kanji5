@@ -1,4 +1,4 @@
-# Kanji 5 — scripts/
+# Rinemi — scripts/
 
 This directory contains repository-level tests plus a small number of maintenance/build helpers.
 

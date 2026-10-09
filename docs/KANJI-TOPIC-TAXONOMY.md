@@ -1,4 +1,4 @@
-# Kanji5 — Curated Kanji Topic Taxonomy
+# Rinemi — Curated Kanji Topic Taxonomy
 
 **Taxonomy version:** 4  
 **Status:** Expanded Dictionary topic filters  

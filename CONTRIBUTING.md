@@ -1,4 +1,4 @@
-# Contributing to Kanji5
+# Contributing to Rinemi
 
 Thanks for contributing.
 

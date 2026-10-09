@@ -1,4 +1,4 @@
-# Kanji5 — Browser Support
+# Rinemi — Browser Support
 
 ## Support policy
 

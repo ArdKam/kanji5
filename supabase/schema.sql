@@ -1,4 +1,4 @@
--- Kanji 5 account + learning sync schema.
+-- Rinemi account + learning sync schema.
 -- Run this script in the Supabase SQL Editor after creating the project.
 -- The browser uses only the publishable/anon key; RLS keeps each user's row private.
 

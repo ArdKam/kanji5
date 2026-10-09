@@ -2,7 +2,7 @@
 
 ## KanjiVG
 
-Kanji 5 uses KanjiVG stroke-order SVG data for the learning-card Stroke Order viewer.
+Rinemi uses KanjiVG stroke-order SVG data for the learning-card Stroke Order viewer.
 
 - Project: KanjiVG (Kanji Vector Graphics)
 - Source: https://github.com/KanjiVG/kanjivg
