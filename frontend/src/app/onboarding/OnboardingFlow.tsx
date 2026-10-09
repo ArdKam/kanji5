@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { t, type Language } from "../i18n";
+import { formatNumber, t, type Language } from "../i18n";
 import {
   canProceedFromPlacement,
   canProceedFromStartingPoint,
@@ -13,6 +13,7 @@ import {
   type OnboardingStep,
   type PlacementAnswer,
   type PlacementQuestion,
+  type PlacementSummary,
   type StartingPointChoice,
 } from "./onboarding-model";
 
@@ -58,15 +59,16 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:7px 28px 20px;min-height:54px}.kanji5-onboarding-footer-action{padding:10px 0;font-size:12px}.kanji5-onboarding-primary:focus-visible,.kanji5-onboarding-secondary:focus-visible,.kanji5-onboarding-ghost:focus-visible,.kanji5-onboarding-footer-action:focus-visible,.kanji5-onboarding-language button:focus-visible,.kanji5-onboarding-choice:focus-visible,.kanji5-onboarding-option:focus-visible,.kanji5-onboarding-range-option:focus-visible{outline:3px solid rgba(48,79,116,.26);outline-offset:3px}.kanji5-onboarding-host-error{position:fixed;left:50%;bottom:20px;z-index:3;transform:translateX(-50%);max-width:min(640px,calc(100% - 32px));padding:12px 15px;border:1px solid rgba(181,109,114,.28);border-radius:16px;background:rgba(255,252,246,.95);color:var(--mute);font-size:12px;line-height:1.5;box-shadow:0 12px 30px rgba(38,37,35,.14);text-align:center}
 @media(max-width:860px){.kanji5-onboarding-header{padding:13px 16px 8px}.kanji5-onboarding-main{padding:12px 16px 10px}.kanji5-onboarding-stage{display:block;min-height:0;width:min(680px,100%)}.kanji5-onboarding-visual{min-height:210px;height:30svh;max-height:260px;margin-bottom:18px;padding:16px;border-radius:28px}.kanji5-onboarding-visual-art{width:min(74vw,290px)}.kanji5-onboarding-visual-kanji{font-size:90px}.kanji5-onboarding-panel-shell{display:block}.kanji5-onboarding-panel{width:100%}.kanji5-onboarding-panel h1{max-width:none;font-size:clamp(31px,8vw,44px)}.kanji5-onboarding-body{margin-top:14px;font-size:15px}.kanji5-onboarding-loop{grid-template-columns:1fr}.kanji5-onboarding-loop-step+.kanji5-onboarding-loop-step{border-inline-start:0;border-top:1px solid var(--line)}.kanji5-onboarding-loop-step{padding:15px 0}.kanji5-onboarding-option-grid,.kanji5-onboarding-range{grid-template-columns:1fr}.kanji5-onboarding-range-option{min-height:82px;grid-template-columns:auto minmax(0,1fr);align-items:center}.kanji5-onboarding-account-actions{width:100%}.kanji5-onboarding-footer{padding:6px 16px 14px}.kanji5-onboarding-progress{min-width:122px}.kanji5-onboarding-progress-track{width:78px}.kanji5-onboarding-brand strong{display:none}}
 @media(max-width:500px){.kanji5-onboarding-header{grid-template-columns:1fr auto}.kanji5-onboarding-progress{grid-column:1/-1;grid-row:2;justify-self:center;order:3;margin-top:4px}.kanji5-onboarding-language{grid-column:2}.kanji5-onboarding-main{padding-top:9px}.kanji5-onboarding-visual{height:24svh;min-height:166px;max-height:205px;margin-bottom:15px}.kanji5-onboarding-visual:before{top:26px;left:28px}.kanji5-onboarding-visual:after{right:26px;bottom:28px}.kanji5-onboarding-visual-kanji{font-size:78px}.kanji5-onboarding-stimulus{width:118px;height:118px;font-size:62px}.kanji5-onboarding-choice{grid-template-columns:30px minmax(0,1fr) auto;padding:15px}.kanji5-onboarding-choice-arrow{width:27px}.kanji5-onboarding-actions{margin-top:19px}.kanji5-onboarding-actions .kanji5-onboarding-primary{flex:1}.kanji5-onboarding-actions .kanji5-onboarding-ghost{flex:0 0 auto}.kanji5-onboarding-swipe-hint{margin-top:11px}}
-@media(prefers-reduced-motion:reduce){.kanji5-onboarding-panel,.kanji5-onboarding-visual-art,.kanji5-onboarding-primary,.kanji5-onboarding-secondary,.kanji5-onboarding-choice,.kanji5-onboarding-option,.kanji5-onboarding-range-option,.kanji5-onboarding-language button,.kanji5-onboarding-progress-track span{animation:none!important;transition:none!important}}`;
+.kanji5-onboarding-placement-total{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:15px 0 0;color:var(--mute);font-size:12px}.kanji5-onboarding-placement-total strong{color:var(--ink);font-variant-numeric:tabular-nums}.kanji5-onboarding-placement-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:17px}.kanji5-onboarding-placement-band{display:flex;flex-direction:column;gap:6px;padding:11px 9px;border:1px solid var(--line);border-radius:12px;background:rgba(255,252,246,.56);min-width:0}.kanji5-onboarding-placement-band span{color:var(--mute);font-size:11px;font-weight:800}.kanji5-onboarding-placement-band strong{font-size:15px;font-variant-numeric:tabular-nums}.kanji5-onboarding-placement-status{margin:13px 0 0;color:var(--mute);font-size:13px;line-height:1.75}.kanji5-onboarding-placement-breakdown+.kanji5-onboarding-placement-status{margin-top:13px}@media(max-width:540px){.kanji5-onboarding-placement-breakdown{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.kanji5-onboarding-panel,.kanji5-onboarding-visual-art,.kanji5-onboarding-primary,.kanji5-onboarding-secondary,.kanji5-onboarding-choice,.kanji5-onboarding-option,.kanji5-onboarding-range-option,.kanji5-onboarding-language button,.kanji5-onboarding-progress-track span{animation:none!important;transition:none!important}}`;
 
 export type OnboardingFlowProps = {
   language: Language;
   placementQuestions?: PlacementQuestion[];
+  placementSeed?: number;
   placementLoading?: boolean;
   placementError?: string;
   onRetryPlacement?: () => void;
-  onPlacementComplete?: (answers: PlacementAnswer[]) => string | null;
+  onPlacementComplete?: (answers: PlacementAnswer[]) => PlacementSummary | null;
   onPlacementRestart?: () => void;
   initialProgress?: OnboardingProgress | null;
   busy?: boolean;
@@ -126,6 +128,7 @@ function Progress({
 export function OnboardingFlow({
   language,
   placementQuestions = [],
+  placementSeed = 0,
   placementLoading = false,
   placementError = "",
   onRetryPlacement,
@@ -166,9 +169,10 @@ export function OnboardingFlow({
       placementIndex,
       placementAnswer,
       completedPlacement,
+      placementSeed,
     };
     onProgressChange?.(progress);
-  }, [draft, step, placementIndex, placementAnswer, completedPlacement, onProgressChange]);
+  }, [draft, step, placementIndex, placementAnswer, completedPlacement, placementSeed, onProgressChange]);
 
   useEffect(() => {
     if (step !== "placement" || currentQuestion) return;
@@ -203,8 +207,9 @@ export function OnboardingFlow({
     setDraft(current => ({
       ...current,
       startingPoint: value,
-      placementAnswers: value === "assess" ? current.placementAnswers : [],
+      placementAnswers: [],
       suggestedLevel: value === "beginner" ? "N5" : value === "some-knowledge" ? "N4" : null,
+      placementSummary: null,
     }));
     setPlacementIndex(0);
     setPlacementAnswer("");
@@ -229,9 +234,10 @@ export function OnboardingFlow({
       );
       return;
     }
-    const suggestedLevel = onPlacementComplete?.(answers) ?? "N5";
+    const placementSummary = onPlacementComplete?.(answers) ?? null;
+    const suggestedLevel = placementSummary?.suggestedLevel ?? "N5";
     setCompletedPlacement(true);
-    setDraft(current => ({ ...current, placementAnswers: answers, suggestedLevel }));
+    setDraft(current => ({ ...current, placementAnswers: answers, suggestedLevel, placementSummary }));
     setTransitionDirection("forward");
     setDragX(0);
     setStep("placement-result");
@@ -270,7 +276,7 @@ export function OnboardingFlow({
     setPlacementIndex(0);
     setPlacementAnswer("");
     setCompletedPlacement(false);
-    setDraft(current => ({ ...current, placementAnswers: [], suggestedLevel: null }));
+    setDraft(current => ({ ...current, placementAnswers: [], suggestedLevel: null, placementSummary: null }));
     setTransitionDirection("back");
     setDragX(0);
     setStep("placement");
@@ -431,7 +437,43 @@ export function OnboardingFlow({
               <div className="kanji5-onboarding-result-scale" aria-hidden="true">
                 {["N5","N4","N3","N2","N1"].map(level => <span key={level} className={draft.suggestedLevel === level ? "is-hit" : ""} />)}
               </div>
+              {draft.placementSummary ? (
+                <p className="kanji5-onboarding-placement-total">
+                  {language === "fa" ? "نتیجهٔ کلی تشخیص معنی کانجی" : "Overall Kanji-meaning recognition"}
+                  <strong>{formatNumber(draft.placementSummary.score, language)} / {formatNumber(draft.placementSummary.total, language)}</strong>
+                </p>
+              ) : null}
             </div>
+            {draft.placementSummary ? (
+              <>
+                <div className="kanji5-onboarding-placement-breakdown" aria-label={language === "fa" ? "نتیجه به تفکیک سطح" : "Score by band"}>
+                  {["N5","N4","N3","N2"].map(level => {
+                    const result = draft.placementSummary?.levelScores[level] ?? { correct: 0, total: 0 };
+                    return <div className="kanji5-onboarding-placement-band" key={level}><span>{level}</span><strong>{formatNumber(result.correct, language)} / {formatNumber(result.total, language)}</strong></div>;
+                  })}
+                </div>
+                <p className="kanji5-onboarding-placement-status" role="note">
+                  {draft.placementSummary.confidence === "limited"
+                    ? (language === "fa"
+                      ? "برای یک برآورد قابل‌اتکا، از بعضی سطح‌ها سؤال کافی پاسخ داده نشده است. پیشنهاد فعلی را محافظه‌کارانه در نظر بگیر."
+                      : "Some bands have insufficient answered items. Treat this recommendation as conservative.")
+                    : draft.placementSummary.confidence === "boundary"
+                      ? (language === "fa"
+                        ? "نتیجه نزدیک مرز قبولی در دست‌کم یک سطح است؛ این پیشنهاد اولیه است و ممکن است با چند سؤال دیگر تغییر کند."
+                        : "At least one band is near the decision threshold. This is a provisional estimate that may change with more items.")
+                      : (language === "fa"
+                        ? "این یک برآورد اولیه از تشخیص معنی کانجی است، نه آزمون JLPT یا سنجش کلی مهارت زبان ژاپنی."
+                        : "This is a provisional Kanji-meaning estimate, not a JLPT exam or a measure of overall Japanese proficiency.")}
+                </p>
+                {draft.placementSummary.upperBoundReached ? (
+                  <p className="kanji5-onboarding-placement-status" role="note">
+                    {language === "fa"
+                      ? "در هر چهار گروه تا N2 به حدنصاب رسیدی؛ این آزمون N1 را پوشش نمی‌دهد."
+                      : "You met the threshold through N2. This diagnostic does not assess N1."}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
             <div className="kanji5-onboarding-actions">
               <button className="kanji5-onboarding-ghost" type="button" onClick={startOverPlacement} disabled={busy || completing || !placementQuestions.length}>{t("onboardingPlacementRestart", language)}</button>
               <button className="kanji5-onboarding-primary" type="button" onClick={advance} disabled={busy || completing || !completedPlacement}>{t("onboardingPlacementUse", language)}</button>
