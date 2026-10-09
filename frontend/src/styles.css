@@ -3882,3 +3882,94 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   .dialog[open],
   .dialog[open]::backdrop{animation:none!important;}
 }
+
+
+/* UX remediation 2026-10: mobile navigation, dialog scroll regions, and coherent controls. */
+/* Keep the persistent navigation legible above content instead of letting cards bleed through it. */
+.experience-nav{
+  background:var(--paper);
+  border-color:var(--line);
+  box-shadow:0 12px 32px -20px rgba(32,30,26,.66);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+/* Product UI headings use the interface face; Japanese study text keeps its own editorial face. */
+.dialog.secondary-page-dialog:not(.reading-lab-dialog) h2{
+  font-family:var(--ui-font);
+  overflow-wrap:anywhere;
+}
+
+/* A modal covers the persistent navigation, so its content must not reserve space for that hidden bar. */
+@media(max-width:760px){
+  .dialog.secondary-page-dialog{
+    padding:22px 16px 18px;
+  }
+  .dialog.secondary-page-dialog.stats-dashboard{
+    padding:22px 16px 18px!important;
+  }
+}
+
+/* Settings: the scroll area must stop above an opaque, always-readable action footer. */
+.dialog.secondary-page-dialog.settings-dialog .settings-form-scroll{
+  padding-block:0 16px;
+  scrollbar-gutter:stable;
+}
+.dialog.secondary-page-dialog.settings-dialog .settings-save-region{
+  background:var(--paper);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+
+/* Reading Lab keeps its title and close affordance visible while its long workbench scrolls. */
+.dialog.secondary-page-dialog.reading-lab-dialog{
+  overflow:hidden;
+}
+.dialog.secondary-page-dialog.reading-lab-dialog>h2{
+  flex:0 0 auto;
+}
+.dialog.secondary-page-dialog.reading-lab-dialog>.reading-lab{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:max(16px,env(safe-area-inset-bottom));
+}
+.dialog.secondary-page-dialog.reading-lab-dialog>.reading-lab-catalog-error{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+}
+
+/* Statistics: preserve the summary header while the longer evidence sections own the scroll. */
+.dialog.secondary-page-dialog.stats-dashboard{
+  overflow:hidden;
+}
+.stats-dashboard>.stats-header,
+.stats-dashboard>.stats-overview,
+.stats-dashboard>.stats-advanced-trigger{
+  flex:0 0 auto;
+}
+.stats-dashboard>.stats-dashboard-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  padding-inline:2px;
+  -webkit-overflow-scrolling:touch;
+}
+.stats-dashboard>.stats-dashboard-scroll>.stats-section:first-child{
+  border-top:0;
+  padding-top:12px;
+}
+
+/* Make the magic-link action read as an interactive control and meet the touch target guideline. */
+.account-magic-link{
+  min-height:44px;
+  padding:8px 12px;
+  border-radius:var(--radius-md);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
