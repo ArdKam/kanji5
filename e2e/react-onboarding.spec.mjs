@@ -173,7 +173,7 @@ test("first-run language selector changes the document direction before setup st
   await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "fa");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(onboarding).toContainText("به Kanji5 خوش آمدی");
+  await expect(onboarding).toContainText("به Rinemi خوش آمدی");
   await onboarding.getByRole("button", { name: "EN", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
