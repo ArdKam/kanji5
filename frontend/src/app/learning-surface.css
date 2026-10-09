@@ -45,3 +45,5 @@
 @media(max-width:760px){.app-shell .content>.learning-card{height:min(640px,calc(100dvh - 290px));min-height:min(380px,calc(100dvh - 290px))}.learning-session-toolbar{align-items:flex-start}.learning-route-button{padding-inline:10px;font-size:var(--text-xs)}.learning-card-front .kanji-row{min-height:clamp(155px,22vh,190px)}.learning-card-front .kanji-display{font-size:clamp(100px,28vw,132px)}.learning-card-back .example-row{padding-block:10px}.learning-card-back .rating-grid{gap:7px}}
 @media(max-width:380px){.learning-session-toolbar{gap:8px}.learning-route-button{gap:5px;padding-inline:8px}.learning-session-context strong{font-size:var(--text-xs)}}
 @media(prefers-reduced-motion:reduce){.learning-card-back .rating{transition:none}.learning-card-back .rating:hover:not(:disabled){transform:none}}
+
+@media(max-width:760px){.app-shell .content>.learning-card.has-open-mnemonic{height:min(640px,calc(100dvh - 150px));min-height:min(380px,calc(100dvh - 150px));}}
