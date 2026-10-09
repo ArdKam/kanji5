@@ -18,7 +18,7 @@ assert.ok(manifest.name === "Rinemi" && manifest.short_name === "Rinemi", "PWA n
 assert.ok(manifest.description === "Japanese kanji learning with adaptive spaced repetition", "PWA description must use the canonical product description");
 assert.ok(manifest.theme_color === "#505F83" && manifest.background_color === "#F7F4EE", "PWA colors must match the Rinemi palette");
 assert.ok(manifest.display === "standalone" && manifest.start_url === "./" && manifest.scope === "./", "PWA install paths and display mode must remain stable");
-assert.ok(app.includes('<h1 dir="ltr">Rinemi</h1>'), "main app header must render the canonical wordmark in LTR");
+assert.ok(app.includes('<h1 dir="ltr">Rinemi</h1>') && app.includes('className="header-brand-mark" src="./icon.svg"'), "main app header must render the wordmark and brand mark");
 assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — یادگیری کانجی ژاپنی" : "Rinemi — Japanese kanji learning";'), "dynamic document title must use Rinemi in both languages");
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
