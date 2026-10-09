@@ -851,18 +851,18 @@ See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
 
 **PARTIAL — core implementation complete; broader validity evidence remains.**
 
-Implemented in the C4 release candidate:
-- randomized answer order with stable option IDs;
-- documented 4-item-per-level blueprint across N5–N2, sampling the beginning/middle/end of each level;
-- 16-question onboarding diagnostic contract;
-- stronger 3/4 per-level threshold instead of tiny-sample level decisions;
-- retake reshuffling;
-- explicit **Kanji starting-point diagnostic** wording rather than overall Japanese proficiency;
-- regression coverage for answer-position assumptions and the 16-question contract.
+Implemented in the placement assessment v2 candidate:
+- 20-item N5–N2 blueprint with five items per band, stratified across each band's frequency-order range;
+- new Kanji samples as well as answer-position randomization on retake;
+- four unique options with one answer key, using learner-priority meaning projection;
+- 4/5 (80%) provisional band threshold and a contiguous recommendation that cannot skip a failed lower band;
+- persisted assessment seed so a resumed onboarding run reconstructs the same questionnaire;
+- per-band result profile with provisional, boundary, or limited confidence wording;
+- regression coverage against the actual Kanji catalog and same-seed reproducibility.
 
 Remaining before Public Beta:
-- representative-response validation of placement stability/bias beyond the implementation-level shuffle screen;
-- broader high-risk synonym/ambiguous-meaning fixture coverage;
+- representative-response validation of placement stability/bias beyond implementation-level sampling and answer-position screens;
+- independent production-item review for gloss correctness and distractor plausibility;
 - independent human/content QA recorded against the frozen release SHA;
 
 
