@@ -13,11 +13,13 @@ assert(source.includes('className="component-breakdown"'), "Component root class
 assert(source.includes('role="list"'), "Component list semantics missing");
 assert(source.includes('role="listitem"'), "Component list item semantics missing");
 assert(source.includes('component.components.map((child, index) => renderComponent(child, path + "." + index, language))'), "Nested structural hierarchy must be rendered recursively");
-assert(source.includes('component.variant ? "component-breakdown-part is-variant"'), "Source variant forms must remain distinguishable");
+assert(source.includes("component.variant"), "Source variant forms must remain distinguishable");
+assert(source.includes("component.partial"), "Source partial components must remain distinguishable");
+assert(source.includes("component.original"), "Original glyph metadata must be available for partial components");
 assert(source.includes("component.position"), "Source-authored component position must be retained in the presentation");
 assert(source.includes('lang="ja"'), "Japanese language semantics missing");
 assert(!/localStorage|sessionStorage|fetch\(|__KANJI5_|v1\.9-|planner|learner/i.test(source), "Presentation component must not access engine or persistence internals");
-for (const selector of [".component-breakdown", ".component-breakdown-target", ".component-breakdown-part", ".component-breakdown-plus", ".component-breakdown-subparts"]) {
+for (const selector of [".component-breakdown", ".component-breakdown-target", ".component-breakdown-part", ".component-breakdown-plus", ".component-breakdown-subparts", ".component-breakdown-part.is-partial", ".component-breakdown-partial"]) {
   assert(css.includes(selector), `Missing style selector: ${selector}`);
 }
 
