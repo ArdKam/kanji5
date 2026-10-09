@@ -110,7 +110,8 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   },FIXTURE.characters["学"].paths);
 
   await drawReference(page,canvas,reference);
-  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
+  // This trace dispatches hundreds of real pointer moves; allow slower CI runners to finish capture.
+  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled({timeout:20000});
   await handwriting.locator(".handwriting-actions .primary").click();
   const result=handwriting.locator(".handwriting-result");
   await expect(result).toBeVisible();
