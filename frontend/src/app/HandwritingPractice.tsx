@@ -248,7 +248,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
 
   const beginStroke=(event:PointerEvent<HTMLCanvasElement>)=>{
     if(loading||error||!referenceStrokes.length)return;
-    try{event.currentTarget.setPointerCapture(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Rinemi pointer capture unavailable.',error);}
+    try{event.currentTarget.setPointerCapture(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Kanji 5 pointer capture unavailable.',error);}
     setResult(null);
     setLiveFeedback(null);
     activeStrokeRef.current=[];
@@ -286,13 +286,13 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
       redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current,-1);
     }
     activeStrokeRef.current=[];
-    try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Rinemi pointer release unavailable.',error);}
+    try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Kanji 5 pointer release unavailable.',error);}
   };
 
   const cancelStroke=(event:PointerEvent<HTMLCanvasElement>)=>{
     activeStrokeRef.current=[];
     if(inkCanvasRef.current&&wrapRef.current)redrawUserInk(inkCanvasRef.current,strokesRef.current,wrapRef.current,dprRef.current,-1);
-    try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Rinemi pointer release unavailable.',error);}
+    try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Kanji 5 pointer release unavailable.',error);}
   };
 
   const undoLastStroke=()=>{
