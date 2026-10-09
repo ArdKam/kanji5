@@ -9,7 +9,18 @@ export function normalizeCustomStudyFilter(filter = {}) {
   const level = LEVELS.has(String(input.level || "all")) ? String(input.level || "all") : "all";
   const focus = FOCUSES.has(String(input.focus || "available")) ? String(input.focus || "available") : "available";
   const limit = Math.max(1, Math.min(100, Math.round(n(input.limit) || 20)));
-  return Object.freeze({ version: CUSTOM_STUDY_VERSION, level, focus, limit });
+  const rawTopicId = String(input.topicId || "").trim();
+  const topicId = /^[a-z0-9-]{1,64}$/i.test(rawTopicId) ? rawTopicId : "";
+  const topicCharacters = topicId && Array.isArray(input.topicCharacters)
+    ? [...new Set(input.topicCharacters.map(value => String(value || "").trim()).filter(value => [...value].length === 1 && /[\u3400-\u9fff々〆ヵヶ]/u.test(value)))].slice(0, 500)
+    : [];
+  return Object.freeze({
+    version: CUSTOM_STUDY_VERSION,
+    level,
+    focus,
+    limit,
+    ...(topicId ? { topicId, topicCharacters: Object.freeze(topicCharacters) } : {}),
+  });
 }
 
 function isDue(card, now) {
@@ -38,9 +49,15 @@ function isWeak(character, learner) {
 export function selectCustomStudyItems({ deck = [], cards = {}, learner = {}, components = {}, filter = {}, now = Date.now(), dailyNew = 5, todayNew = 0 } = {}) {
   const normalized = normalizeCustomStudyFilter(filter);
   const allowed = Array.isArray(deck) ? deck.filter(Boolean) : [];
+  // A topic scope narrows candidates before level, due/new, weakness, and daily-budget rules.
+  // A valid topic with no characters matches none; it never falls back to the full deck.
+  const topicCharacterSet = new Set(normalized.topicCharacters || []);
+  const topicFiltered = normalized.topicId
+    ? allowed.filter(item => topicCharacterSet.has(String(item?.character || item?.id || "").trim()))
+    : allowed;
   const levelFiltered = normalized.level === "all"
-    ? allowed
-    : allowed.filter((item) => String(item?.jlpt || "") === normalized.level);
+    ? topicFiltered
+    : topicFiltered.filter((item) => String(item?.jlpt || "") === normalized.level);
 
   const mistakeSet = mistakeCharacters(components);
   const rows = levelFiltered.map((item, index) => {
