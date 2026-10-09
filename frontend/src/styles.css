@@ -2361,7 +2361,6 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
 /* Settings page refinement — learner-first controls, calm hierarchy, explicit save state. */
 .dialog.secondary-page-dialog.settings-dialog{
   width:min(720px,calc(100vw - 32px));
-  max-width:720px;
 }
 .settings-dialog{
   color:var(--ink);
