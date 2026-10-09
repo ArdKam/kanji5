@@ -9,6 +9,7 @@ const required=[
   "index.html",
   "sw.js",
   "app-bootstrap.js",
+  "legacy-loader.js",
   "react-entry.js",
   "react-dist/kanji5-react.js",
   "react-dist/kanji5-react.css",
