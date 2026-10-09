@@ -9,7 +9,8 @@ The data model preserves:
 - direct children in source order;
 - repeated components as separate nodes;
 - nested component groups;
-- source-authored placement, variant-form, radical-role, and phonetic-role metadata when present.
+- source-authored placement, variant-form, radical-role, phonetic-role, partial-form, and original-glyph metadata when present;
+- groups split across multiple SVG records but explicitly marked as one component through `kvg:part`, normalized to one visual component while retaining the original `sourceParts` IDs.
 
 A node with an empty `components` array means that the pinned KanjiVG structure contains no finer component group for that character. It is not a claim about the character's historical etymology.
 
@@ -36,4 +37,4 @@ A radical, a visible component, and a learning dependency are not interchangeabl
 
 Run `node scripts/build-kanji-visual-structure.mjs` with network access to retrieve the exact pinned KanjiVG files and regenerate the snapshot. The generator fails rather than silently accepting a missing Jōyō kanji or malformed root structure.
 
-The `scripts/test-kanji-visual-structure.mjs` contract test validates complete Jōyō coverage, tree integrity, provenance, and known repeated/nested structures. The production staging check verifies that all 2,136 structure records are included in the shipped artifact.
+The `scripts/test-kanji-visual-structure.mjs` contract test validates complete Jōyō coverage, tree integrity, provenance, repeated/nested structures, and rejoining of source-marked fragments (for example the enclosure in 国). Groups explicitly marked partial are not presented as complete standalone components. The production staging check verifies that all 2,136 structure records are included in the shipped artifact.
