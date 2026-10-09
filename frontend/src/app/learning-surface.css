@@ -6,7 +6,7 @@
 .learning-route-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;flex:0 0 auto;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--paper);color:var(--ink);font-size:var(--text-sm);font-weight:750}
 .learning-route-button:hover:not(:disabled){border-color:var(--line-interactive);background:var(--color-surface-elevated)}
 .learning-card-topline .learning-context-label{color:var(--mute);font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;overflow-wrap:anywhere}
-.app-shell .content>.learning-card{height:min(590px,calc(100dvh - 230px));min-height:min(500px,calc(100dvh - 230px))}
+.app-shell .content>.learning-card{height:min(590px,calc(100dvh - 32px));min-height:min(500px,calc(100dvh - 32px))}
 .learning-card-front .kanji-row{min-height:clamp(180px,28vh,240px);gap:14px}
 .learning-card-front .kanji-display{font-size:clamp(104px,16vw,150px)}
 .learning-card-front .audio-button{border-radius:50%;background:transparent}
@@ -23,6 +23,11 @@
 .learning-card-back .mnemonic-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;min-height:44px;padding:8px 12px;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:750}
 .learning-card-back .mnemonic-saved{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid var(--line-soft);border-radius:var(--radius-md);background:color-mix(in srgb,var(--matcha) 7%,var(--paper))}
 .learning-card-back .mnemonic-saved p{margin:0}
+/* The rating footer is in the card's flex flow now; drop the legacy spacer that used to sit behind an overlaid footer. */
+.app-shell .learning-card-back .learning-back-scroll{padding-bottom:12px}
+.app-shell .learning-card-back .mnemonic-tool.is-open{grid-template-areas:"trigger trigger" "editor editor";gap:4px;padding:4px 6px}
+.app-shell .learning-card-back .mnemonic-tool.is-open .mnemonic-editor{grid-template-columns:minmax(0,1fr);align-items:stretch;gap:3px}
+.app-shell .learning-card-back .mnemonic-tool.is-open .mnemonic-editor textarea{min-height:40px;height:40px;padding:4px 6px;resize:none}
 .learning-card-back .stroke-order-panel .stroke-order-controls .button{min-height:44px}
 .learning-card-back .stroke-order-stage{border-radius:var(--radius-lg);background:color-mix(in srgb,var(--washi) 65%,var(--paper))}
 .learning-card-back .rating{min-height:46px;font-weight:800;transition:transform var(--motion-fast) ease}
