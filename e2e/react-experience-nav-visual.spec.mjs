@@ -121,3 +121,34 @@ test('Dictionary Kanji card supports adjacent navigation without closing', async
   await page.keyboard.press('ArrowLeft');
   await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
 });
+
+
+test('Dictionary advanced filters are progressive and can be reset without clearing search', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+
+  const search = page.locator('.dictionary-page-search input');
+  await search.fill('学');
+  const advanced = page.locator('.dictionary-advanced-filters');
+  await expect(advanced).toHaveJSProperty('open', false);
+  await advanced.locator('summary').click();
+  await expect(advanced).toHaveJSProperty('open', true);
+
+  const mastery = advanced.getByLabel('Mastery');
+  const grade = advanced.getByLabel('Grade');
+  await mastery.selectOption('mastered');
+  await grade.selectOption('1');
+  await expect(advanced.locator('.dictionary-filter-count')).toHaveText('2');
+
+  await advanced.getByRole('button', { name: 'Clear extra filters', exact: true }).click();
+  await expect(mastery).toHaveValue('all');
+  await expect(grade).toHaveValue('all');
+  await expect(advanced.locator('.dictionary-filter-count')).toHaveCount(0);
+  await expect(search).toHaveValue('学');
+});
