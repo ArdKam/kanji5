@@ -1261,7 +1261,6 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 
 
 /* Menu redesign: structured navigation, compact inline preferences, responsive drawer/popover. */
-.header.menu-open .account-button{visibility:visible!important;pointer-events:auto!important;z-index:130!important;}
 .header-tools-menu{
   gap:0;
   color:var(--sumi);
