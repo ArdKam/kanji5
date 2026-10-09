@@ -1084,7 +1084,7 @@ function App(){
         </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
               {!showExercise ? <div className="learning-session-toolbar">
                 <div className="learning-session-context">
-                  <span className="learning-session-context-label">{topicStudyLabel?learningCopy("topicSessionLabel",language):learningCopy("recommendedLearning",language)}</span>
+                  <span className="learning-session-context-label">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</span>
                   <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
                   {!topicStudyLabel?<small>{learningCopy("recommendedLearningHint",language)}</small>:null}
                 </div>
