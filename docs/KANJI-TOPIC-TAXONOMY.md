@@ -1,6 +1,6 @@
 # Kanji5 — Curated Kanji Topic Taxonomy
 
-**Taxonomy version:** 3  
+**Taxonomy version:** 4  
 **Status:** Expanded Dictionary topic filters  
 **Scope:** Content navigation only; this is not a new learning scheduler or a statement of mastery.
 
@@ -8,11 +8,11 @@
 
 The pinned `kanji-data.json` dataset contains 2,136 kanji with glosses, readings, school-grade, and JLPT metadata. It does not include a reviewed topical taxonomy. Matching English gloss strings mechanically can misclassify ambiguous meanings, so membership remains explicit and curated.
 
-## Version 3 coverage after semantic QA
+## Version 4 coverage after two semantic QA rounds
 
-The taxonomy provides **24 topics**, **1,012 topic assignments**, and **737 unique tagged kanji** (34.5% of the catalog). A character may belong to multiple relevant topics. Coverage is still partial by design: a missing topic assignment does not mean a kanji is irrelevant, and untagged kanji remain searchable and visible when “All topics” is selected.
+The taxonomy provides **24 topics**, **1,156 topic assignments**, and **849 unique tagged kanji** (39.7% of the catalog). A character may belong to multiple relevant topics. Coverage is still partial by design: a missing topic assignment does not mean a kanji is irrelevant, and untagged kanji remain searchable and visible when “All topics” is selected.
 
-The first-edition taxonomy contained 16 topics, 495 assignments, and 422 unique characters. Version 2 added eight topic families and widened membership in several existing families. Version 3 is a quality correction, not a coverage expansion: it removes 13 overbroad topic assignments and reduces unique coverage from 741 to 737 characters.
+The first-edition taxonomy contained 16 topics, 495 assignments, and 422 unique characters. Version 2 added eight topic families and widened membership in several existing families. Version 3 removed 13 overbroad assignments, reducing unique coverage from 741 to 737 characters. Version 4 adds 144 curated memberships across 112 previously untagged kanji, raising unique coverage to 849 while retaining intentional partial coverage.
 
 The authoritative entries, bilingual labels, and exact character membership live in `frontend/src/app/kanji-topics.json`. They are bundled with the React app, so filtering needs no network request and works offline.
 
@@ -62,6 +62,36 @@ This pass removes the following **13 overbroad assignments**; these characters r
 | Arts & culture | `福`, `授`, `統`, `産` | Blessing/fortune, impart/grant, rule/relationship, and products/birth are too broad or belong more naturally to other domains without a specific arts/culture meaning. |
 
 The regression test now asserts these exclusions in addition to catalog integrity, bilingual labels, representative membership, duplicate checks, and audited counts. This is a conservative first pass, not a claim that every remaining association is beyond debate. Future edits should record both the semantic rationale and any common-compound basis for context-dependent entries.
+
+
+## Coverage expansion — round 2 (2026-10-09)
+
+This round reviews previously untagged entries in catalog order (the pinned dataset is ordered by newspaper frequency) and adds memberships only where the catalog meaning or an explicit common-compound relationship provides a defensible topic link. It adds **144 assignments** covering **112 newly tagged kanji**; cross-topic reuse is intentional. The number of untagged catalog entries falls from 1,399 to **1,287**. Nothing was removed from the underlying kanji catalog, and all of the untagged entries remain available through “All topics” and text search.
+
+| Topic | Added kanji | Semantic basis |
+|---|---|---|
+| Numbers & quantity | `点`, `量`, `率`, `比`, `差`, `残`, `周`, `総` | Point/mark, quantity, rate, ratio, difference, remainder, circuit/lap, and total/whole. |
+| Nature & land | `井`, `河`, `岡`, `湾`, `浜`, `景`, `幹`, `藤`, `沢` | Well, river, hill, bay, shore, scenery, tree trunk, wisteria, and marsh. |
+| Time & calendar | `初`, `去`, `旧`, `未`, `予` | Beginning/first time, past, old times, not-yet, and beforehand. |
+| Family & relationships | `育`, `児`, `婦`, `郎` | Raising/bringing up, child, wife/woman, and son. |
+| People & society | `位`, `衆`, `性`, `独`, `副`, `師`, `雄`, `児`, `婦`, `郎`, `将` | Rank, groups of people, gender, individual/aloneness, assistant, teacher/expert, male, child/family roles, and leader/commander. |
+| School & learning | `課`, `例`, `師`, `講`, `修` | Lesson/section, example, teacher, lecture, and study/training. |
+| Places & travel | `宅`, `境`, `域`, `線`, `段`, `席`, `座`, `韓`, `欧`, `井`, `河`, `岡`, `湾`, `浜` | Residence, region/boundary, track, steps/stairs, seating/place, Korea/Europe, and named natural land or water features. |
+| Directions & position | `側`, `逆`, `対`, `境`, `界`, `域` | Side, reverse/opposite, boundary, world/border, and region/limits. |
+| Weather & temperature | `候` | Climate, season, and weather. |
+| Plants & trees | `幹`, `藤` | Tree trunk and wisteria. |
+| Actions & change | `参`, `援`, `施`, `付`, `配`, `導`, `備`, `視`, `断`, `違`, `去`, `失`, `整`, `迎`, `捜`, `競`, `育`, `守`, `捕`, `撃`, `殺`, `与`, `供`, `遣`, `献`, `換` | Participation/going, help, carry out/give, attach, distribute, guide, equip/prepare, inspect/regard, refuse/cut off, differ, leave/quit, lose, organize, welcome, search, compete, raise, protect, capture, attack, kill, bestow/offer, dispatch, present, and change/exchange. |
+| Work & economy | `案`, `策`, `件`, `局`, `企`, `副`, `労` | Plan/draft, policy, case/matter, office/bureau, undertake/design, assistant, and labor. |
+| Thoughts & feelings | `情` | Feelings and emotion. |
+| Qualities & comparison | `常`, `格`, `状`, `質`, `形`, `非`, `負`, `色`, `白`, `黒`, `赤`, `青`, `型`, `性`, `独`, `雄`, `逆`, `違`, `比`, `差` | Ordinary/normal, rank/capacity, condition, quality/substance, shape, negative/non-, colors, type/model, nature/gender, single/alone, masculine, reverse, difference, compare, and variation. |
+| Government & law | `反`, `策`, `証`, `条`, `票`, `命`, `訴`, `盟`, `将` | Opposition, policy, evidence/certificate, legal article/clause, ballot, command/decree, accusation/lawsuit, alliance/oath, and commander. |
+| Communication & media | `声`, `評`, `写` | Voice, evaluation/commentary, and copy/photography/description. |
+| Transport & travel | `線`, `券`, `票` | Track/line and tickets; `票` has a common ticket sense alongside ballot/label. |
+| Technology & industry | `型`, `核` | Mold/type/model and core/nucleus, including technical and industrial uses. |
+| Money & finance | `融` | Added based on established compounds `金融` and `融資` (finance/financing), not inferred from the English gloss “dissolve/melt”; see [Kanji Pedia's entry for 融](https://www.kanjipedia.jp/kanji/0006891000). |
+| Arts & culture | `和`, `神`, `写`, `色`, `形`, `景`, `調` | Japanese style/harmony, religion/deities, photography, color, form, scenery, and musical tone/tuning. |
+
+The regression test checks every membership added in this round, while retaining the exclusions from the prior semantic audit. It also checks exact assignment and unique-character counts so accidental drift is visible in CI. Categories without additions in this batch (for example, Food & drink, Animals, Human body, and Health & medicine) were left unchanged rather than filled with weak matches; they remain candidates for later reviewed batches.
 
 ## Product and architecture rules
 
