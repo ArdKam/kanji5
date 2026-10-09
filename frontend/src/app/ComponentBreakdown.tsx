@@ -10,16 +10,18 @@ export type ComponentBreakdownProps = {
   ariaLabel: string;
 };
 
-function renderComponent(component: VisualStructureNode, index: number, language: "fa" | "en") {
+function renderComponent(component: VisualStructureNode, path: string, language: "fa" | "en") {
   const label = getComponentLabel(component.character, language);
+  const childrenLabel = language === "fa" ? "اجزای این جزء" : "Subcomponents";
   return (
-    <span className="component-breakdown-part-wrap" role="listitem" key={component.character + "-" + index}>
+    <span className="component-breakdown-part-wrap" role="listitem" key={path}>
       <span className="component-breakdown-part-wrap-inner">
         <span className={component.variant ? "component-breakdown-part is-variant" : "component-breakdown-part"} lang="ja">{component.character}</span>
         {label ? <span className="component-breakdown-label">{label}</span> : null}
+        {component.position ? <span className="component-breakdown-label component-breakdown-position">{component.position}</span> : null}
         {component.components.length ? (
-          <span className="component-breakdown-label" aria-label={language === "fa" ? "اجزای این جزء" : "Subcomponents"}>
-            {component.components.map(child => child.character).join(" + ")}
+          <span className="component-breakdown-subparts" role="group" aria-label={childrenLabel}>
+            {component.components.map((child, index) => renderComponent(child, path + "." + index, language))}
           </span>
         ) : null}
       </span>
@@ -44,7 +46,7 @@ export function ComponentBreakdown({ info, title, note, ariaLabel }: ComponentBr
         </div>
         <span className="component-breakdown-connector" aria-hidden="true">↳</span>
         <div className="component-breakdown-parts" role="group" aria-label={language === "fa" ? "اجزای مستقیم دیداری" : "Direct visual components"}>
-          {info.components.map((component, index) => renderComponent(component, index, language))}
+          {info.components.map((component, index) => renderComponent(component, String(index), language))}
         </div>
       </div>
     </section>
