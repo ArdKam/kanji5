@@ -100,7 +100,9 @@ jobs:
               node --input-type=module -e '
                 import fs from "node:fs";
                 const r = JSON.parse(fs.readFileSync("test-results/visual-audit/report.json", "utf8"));
-                console.log("- Captured screens: " + r.screens.length);
+                console.log("- Captured viewport screenshots: " + r.screens.filter(s => s.screenshotMode === "viewport").length);
+                console.log("- Captured scrolled states: " + r.screens.filter(s => s.scrollTarget && s.scrollTarget.kind !== "page-top").length);
+                console.log("- Requested scroll states skipped (no meaningful scroll range): " + (r.skippedScrollCaptures || []).length);
                 console.log("- Uncaught page errors: " + r.pageErrors.length);
                 console.log("- First-party HTTP errors: " + r.failedResponses.length);
                 console.log("- First-party failed requests: " + r.failedRequests.length);
