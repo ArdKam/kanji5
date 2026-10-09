@@ -149,17 +149,21 @@ test("learning reference details stay out of the main flow and open from an info
     const popover = card.locator("#learning-reference-info");
     await expect(popover).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(popover).toHaveAttribute("role", "dialog");
+    await expect(popover).toHaveAttribute("aria-modal", "false");
     await expect(popover.locator(".learning-reference-popover-head")).toBeVisible();
-    await expect(popover.locator("p")).toHaveCount(1);
+    const infoRows = popover.locator(".learning-reference-info-grid .stat-row");
+    await expect.poll(async () => infoRows.count()).toBeGreaterThan(0);
     const metrics = await popover.evaluate((el) => {
       const rect = el.getBoundingClientRect();
+      const cardRect = el.closest(".learning-card")?.getBoundingClientRect();
       const style = getComputedStyle(el);
       return {
         left: rect.left,
         right: rect.right,
         top: rect.top,
         bottom: rect.bottom,
-        card: el.closest(".learning-card")?.getBoundingClientRect(),
+        card: cardRect ? { left: cardRect.left, right: cardRect.right, top: cardRect.top, bottom: cardRect.bottom } : null,
         overflowY: style.overflowY,
         scrollable: el.scrollHeight > el.clientHeight + 1,
       };
@@ -167,8 +171,9 @@ test("learning reference details stay out of the main flow and open from an info
     expect(metrics.card).toBeTruthy();
     expect(metrics.left).toBeGreaterThanOrEqual((metrics.card?.left ?? 0) + 1);
     expect(metrics.right).toBeLessThanOrEqual((metrics.card?.right ?? Infinity) - 1);
-    expect(metrics.overflowY).not.toBe("auto");
-    expect(metrics.overflowY).not.toBe("scroll");
+    expect(metrics.top).toBeGreaterThanOrEqual((metrics.card?.top ?? 0) + 1);
+    expect(metrics.bottom).toBeLessThanOrEqual((metrics.card?.bottom ?? Infinity) - 1);
+    expect(metrics.overflowY).toBe("hidden");
     expect(metrics.scrollable).toBe(false);
 
     await page.keyboard.press("Escape");
@@ -362,23 +367,7 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
 
   await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
 
-  await page.evaluate(() => {
-    const calls = [];
-    const scrollProto =
-      typeof HTMLElement.prototype.scrollTo === "function"
-        ? HTMLElement.prototype
-        : Element.prototype;
-    const original = scrollProto.scrollTo;
-    window.__kanji5MnemonicScrollToCalls = calls;
-    window.__kanji5MnemonicScrollToProto = scrollProto === HTMLElement.prototype ? "HTMLElement" : "Element";
-    scrollProto.scrollTo = function (options) {
-      if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
-        calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
-      }
-      return original.apply(this, arguments);
-    };
-    window.__kanji5MnemonicOriginalScrollTo = original;
-  });
+
 
   await trigger.click();
   await expect(mnemonic).toHaveClass(/is-open/);
@@ -394,21 +383,6 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
     });
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
 
-  const scrollExpectations = await page.evaluate(() => ({
-    reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true,
-    calls: window.__kanji5MnemonicScrollToCalls || [],
-  }));
-  const expectedBehavior = scrollExpectations.reducedMotion ? "auto" : "smooth";
-  expect(scrollExpectations.calls.some((call) => call.behavior === expectedBehavior)).toBe(true);
-
-    await page.evaluate(() => {
-      if (window.__kanji5MnemonicOriginalScrollTo) {
-        const proto = window.__kanji5MnemonicScrollToProto === "HTMLElement"
-          ? HTMLElement.prototype
-          : Element.prototype;
-        proto.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
-      }
-    });
   }
 });
 

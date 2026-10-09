@@ -83,14 +83,6 @@ function localPayload() {
   };
 }
 
-function assertSyncPayloadWithinLimit(payload){
-  const bytes=typeof TextEncoder==='undefined'
-    ? JSON.stringify(payload).length
-    : new TextEncoder().encode(JSON.stringify(payload)).byteLength;
-  if(bytes>MAX_SYNC_PAYLOAD_BYTES)throw new Error('SYNC_PAYLOAD_TOO_LARGE');
-  return payload;
-}
-
 function safeJSON(raw, fallback) {
   try { return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
 }
@@ -105,8 +97,7 @@ function assertSyncPayloadWithinLimit(payload) {
 function readSyncSummary() {
   const cards = safeJSON(storage.getItem(CARDS_STORAGE_KEY), {});
   const reviews = safeJSON(storage.getItem(REVIEWS_STORAGE_KEY), []);
-  const reviewSummary = safeJSON(storage.getItem(REVIEW_SUMMARY_KEY), null);
-  const knowledge = safeJSON(storage.getItem(KNOWLEDGE_KEY), {});
+  const reviewSummary = safeJSON(storage.getItem(REVIEW_SUMMARY_KEY), null);  const knowledge = safeJSON(storage.getItem(KNOWLEDGE_KEY), {});
   const meta = safeJSON(storage.getItem(SYNC_META_KEY), {});
   const activeCards = cards && typeof cards === 'object' ? Object.values(cards).filter(entry => entry?.card).length : 0;
   const personalMnemonics = knowledge && typeof knowledge === 'object' && knowledge.v2Mnemonics && typeof knowledge.v2Mnemonics === 'object'
@@ -174,11 +165,18 @@ function loadSupabaseRuntime(){
     const existing=document.querySelector('script[data-kanji5-supabase-runtime]');
     const finish=()=>{
       const factory=globalThis.supabase?.createClient;
-      if(factory)resolve(factory);else reject(new Error('SUPABASE_JS_UNAVAILABLE'));
+      if(factory){resolve(factory);return;}
+      const error=new Error('SUPABASE_JS_UNAVAILABLE');
+      window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:SUPABASE_BROWSER_RUNTIME,dataAffected:'unknown'});
+      reject(error);
     };
     if(existing){
       existing.addEventListener('load',finish,{once:true});
-      existing.addEventListener('error',()=>reject(new Error('SUPABASE_JS_LOAD_FAILED')),{once:true});
+      existing.addEventListener('error',()=>{
+        const error=new Error('SUPABASE_JS_LOAD_FAILED');
+        window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:SUPABASE_BROWSER_RUNTIME,dataAffected:'unknown'});
+        reject(error);
+      },{once:true});
       return;
     }
     const script=document.createElement('script');
@@ -186,7 +184,11 @@ function loadSupabaseRuntime(){
     script.async=true;
     script.dataset.kanji5SupabaseRuntime='true';
     script.onload=finish;
-    script.onerror=()=>reject(new Error('SUPABASE_JS_LOAD_FAILED'));
+    script.onerror=()=>{
+      const error=new Error('SUPABASE_JS_LOAD_FAILED');
+      window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{module:SUPABASE_BROWSER_RUNTIME,dataAffected:'unknown'});
+      reject(error);
+    };
     document.head.appendChild(script);
   });
   return supabaseRuntimePromise;
@@ -194,17 +196,11 @@ function loadSupabaseRuntime(){
 
 async function getClient() {
   if (client) return client;
-  if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');
-  try {
-    const createClient=await loadSupabaseRuntime();
-    client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
-    });
-    return client;
-  } catch (error) {
-    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-client-load-failure',error,{runtime:SUPABASE_BROWSER_RUNTIME});
-    throw error;
-  }
+  if (!configured()) throw new Error('KANJI5_SUPABASE_NOT_CONFIGURED');  const createClient=await loadSupabaseRuntime();
+  client=createClient(window.KANJI5_SUPABASE.url,window.KANJI5_SUPABASE.anonKey,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  return client;
 }
 
 async function readRemote() {
@@ -300,7 +296,6 @@ async function syncOnce() {
     setSyncStatus('synced');
     return { retry: false };
   }
-
   if (mergedHash === remoteHash) {
     writeLocal(merged, remoteRow.updatedAt);
     setSyncStatus('synced');
@@ -400,7 +395,6 @@ async function boot() {
         setState({ recoveryPending: false });
       }
     });
-
     const { data, error } = await c.auth.getSession();
     if (error) throw error;
     user = data.session?.user || null;
@@ -416,8 +410,8 @@ async function boot() {
       startSyncLifecycle();
     }
   } catch (error) {
-    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{configured:configured()});
     console.warn('Kanji 5 account unavailable', error);
+    window.__KANJI5_OBSERVABILITY__?.capture?.('sync-bootstrap-failure',error,{dataAffected:'unknown'});
     setState({ status: 'unavailable', syncStatus: 'error', error: 'AUTH_UNAVAILABLE', recoveryPending: false });
   }
 }
@@ -499,8 +493,7 @@ const api = {
         shouldCreateUser: true
       }
     });
-    if (error) throw error;
-  },
+    if (error) throw error;  },
   async sendPasswordReset(email) {
     const normalizedEmail = String(email || '').trim().toLowerCase();
     if (!normalizedEmail) throw new Error('AUTH_RESET_EMAIL_REQUIRED');

@@ -118,7 +118,6 @@ test('English learning rating buttons are ordered Easy, Good, Hard, Again',async
   await expect(page.locator('.rating-grid .rating')).toHaveText(['Easy','Good','Hard','Again']);
 });
 
-
 test('empty session progress indicator is absent before a session starts',async({page})=>{
   await clean(page);
   await expect(page.locator('.session-progress')).toHaveCount(0);
@@ -174,7 +173,11 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   const tile=pageRoot.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
   await expect(tile).toBeVisible({timeout:10000});
   await expect(tile).toHaveAttribute('data-jlpt','N5');
-  await tile.click();
+  await search.fill('');
+  const tileAfterClear=pageRoot.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
+  await expect(tileAfterClear).toBeVisible({timeout:10000});
+  await expect.poll(async()=>pageRoot.locator('.kanji-catalog-tile').count(),{timeout:10000}).toBeGreaterThan(1);
+  await tileAfterClear.click();
   const card=page.getByRole('dialog');
   await expect(card).toBeVisible();
   await expect(card.locator('.dictionary-card-character')).toHaveCount(0);
@@ -202,6 +205,31 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card).toHaveAttribute('aria-labelledby','dictionary-card-title');
   await expect(card.locator('#dictionary-card-title')).toHaveText(/\S/);
   await expect.poll(async()=>card.locator('.dictionary-audio-button').count()).toBeGreaterThanOrEqual(1);
+  const currentCharacter=await card.locator('#dictionary-card-title').textContent();
+  const cardShell=card.locator('.dictionary-card');
+  await search.fill('');
+  await expect.poll(async()=>pageRoot.locator('.kanji-catalog-tile').count(),{timeout:10000}).toBeGreaterThan(1);
+  const navNext=card.locator('.dictionary-card-nav-next');
+  await expect(navNext).toBeEnabled();
+  const box=await cardShell.boundingBox();
+  if(!box)throw new Error('Dictionary card bounds unavailable');
+  const swipeY=box.y+box.height/2;
+  const pointerId=4901;
+  await cardShell.dispatchEvent('pointerdown',{pointerType:'touch',pointerId,isPrimary:true,button:0,buttons:1,clientX:box.x+box.width*0.25,clientY:swipeY});
+  await cardShell.dispatchEvent('pointermove',{pointerType:'touch',pointerId,isPrimary:true,button:0,buttons:1,clientX:box.x+box.width*0.72,clientY:swipeY});
+  await cardShell.dispatchEvent('pointerup',{pointerType:'touch',pointerId,isPrimary:true,button:0,buttons:0,clientX:box.x+box.width*0.88,clientY:swipeY});
+  await expect(card.locator('#dictionary-card-title')).not.toHaveText(currentCharacter||'');
+  await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-next/);
+  const nextBox=await card.locator('.dictionary-card').boundingBox();
+  if(!nextBox)throw new Error('Dictionary card bounds unavailable after swipe');
+  const swipeBackY=nextBox.y+nextBox.height/2;
+  const pointerIdBack=4902;
+  const shell=card.locator('.dictionary-card');
+  await shell.dispatchEvent('pointerdown',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:1,clientX:nextBox.x+nextBox.width*0.72,clientY:swipeBackY});
+  await shell.dispatchEvent('pointermove',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:1,clientX:nextBox.x+nextBox.width*0.25,clientY:swipeBackY});
+  await shell.dispatchEvent('pointerup',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:0,clientX:nextBox.x+nextBox.width*0.12,clientY:swipeBackY});
+  await expect(card.locator('#dictionary-card-title')).toHaveText(currentCharacter||'');
+  await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-previous/);
   await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);
   await expect(card.locator('.component-learning-path')).toHaveCount(0);

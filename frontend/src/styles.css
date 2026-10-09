@@ -133,11 +133,11 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 .learning-back-page.active .learning-back-scroll{animation:learningPagerContentIn .36s cubic-bezier(.22,1,.36,1) both;}
 @keyframes learningPagerContentIn{0%{opacity:.72;transform:scale(.985)}100%{opacity:1;transform:scale(1)}}
 .learning-reference-trigger{width:44px;height:44px;min-width:44px;padding:0;border-radius:50%}
-.learning-reference-popover{position:absolute;inset:56px 20px 122px;z-index:40;padding:12px;overflow:hidden}
+.learning-reference-popover{position:absolute;inset:56px 20px 100px;z-index:40;padding:8px 10px;overflow:hidden}
 .learning-reference-close{width:36px;min-width:36px;padding:0;border-radius:50%}
-.learning-reference-info-grid .stat-row{padding:7px 9px}
+.learning-reference-info-grid .stat-row{padding:5px 8px;gap:2px}.learning-reference-info-grid .stat-row strong{font-size:var(--text-sm);line-height:1.25;overflow-wrap:anywhere}
 @media(max-width:760px){
-  .learning-reference-popover{inset:54px 12px 122px;padding:10px 11px;}
+  .learning-reference-popover{inset:54px 12px 100px;padding:7px 9px;}
   .learning-reference-info-grid{grid-template-columns:1fr;gap:5px;}
   .learning-reference-info-grid section{padding:6px 8px;}
   .learning-back-pager-track{transition-duration:.46s;}
