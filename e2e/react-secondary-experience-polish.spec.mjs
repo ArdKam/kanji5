@@ -263,7 +263,7 @@ test("Reading Lab analysis metrics keep an even grid across desktop and mobile",
   await expect(metrics.locator("> div")).toHaveCount(6);
 
   const columnCount = async () => metrics.evaluate(element =>
-    getComputedStyle(element).gridTemplateColumns.trim().split(/\\s+/).length
+    getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
   );
   await expect.poll(columnCount).toBe(3);
 
