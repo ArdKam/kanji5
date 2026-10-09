@@ -77,16 +77,25 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
   try {
     await page.setViewportSize({ width: 1440, height: 960 });
     await page.addInitScript(() => {
-      localStorage.clear();
-      localStorage.setItem('kanji5-ui-language', 'en');
+      if (sessionStorage.getItem('kanji5-visual-audit-initialized') !== '1') {
+        localStorage.clear();
+        localStorage.setItem('kanji5-ui-language', 'en');
+        sessionStorage.setItem('kanji5-visual-audit-initialized', '1');
+      }
     });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     const onboarding = page.locator('[data-testid="onboarding-flow"]');
     await expect(onboarding).toBeVisible({ timeout: 30_000 });
     await capture('01-onboarding-desktop');
+    await onboarding.getByRole('button', { name: 'فارسی', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    await capture('02-onboarding-persian-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('02-onboarding-mobile');
+    await capture('03-onboarding-persian-mobile');
+    await onboarding.getByRole('button', { name: 'EN', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+    await capture('04-onboarding-mobile');
     await page.setViewportSize({ width: 1440, height: 960 });
 
     await onboarding.getByRole('button', { name: 'Skip setup', exact: true }).click();
@@ -136,7 +145,8 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
       return dialog;
     };
     const closeDialog = async (dialog) => {
-      await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+      // Dialog surfaces can expose both an accessible × control and a footer Close button.
+      await dialog.getByRole('button', { name: 'Close', exact: true }).last().click();
       await expect(dialog).toBeHidden();
     };
 
@@ -164,9 +174,35 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
       await accountButton.click();
       const accountDialog = page.locator('.account-dialog:visible');
       await expect(accountDialog).toBeVisible({ timeout: 10_000 });
-      await capture('16-account-dialog-desktop');
+      await capture('18-account-dialog-desktop');
       await closeDialog(accountDialog);
     }
+
+    // Repeat core product surfaces in Persian/RTL to detect layout regressions that an
+    // English-only screenshot set would miss. Preserve the same clean guest profile.
+    await page.evaluate(() => localStorage.setItem('kanji5-ui-language', 'fa'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 15_000 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await capture('19-learning-persian-mobile');
+
+    await page.locator('.experience-nav .experience-tab').nth(1).click();
+    await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 15_000 });
+    await capture('20-active-recall-persian-mobile');
+
+    await page.locator('.experience-nav .experience-tab').nth(2).click();
+    await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 15_000 });
+    await capture('21-dictionary-persian-mobile');
+
+    await page.getByRole('button', { name: 'بیشتر', exact: true }).click();
+    const persianMenu = page.locator('#header-tools-menu');
+    await expect(persianMenu).toHaveClass(/open/);
+    await persianMenu.getByRole('button', { name: 'تنظیمات', exact: true }).click();
+    const persianSettings = page.getByRole('dialog').last();
+    await expect(persianSettings).toBeVisible({ timeout: 10_000 });
+    await capture('22-settings-persian-mobile');
   } finally {
     await fs.writeFile(path.join(outputDir, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   }
