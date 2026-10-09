@@ -3,6 +3,7 @@ import topicTaxonomy from "./kanji-topics.json";
 import { formatNumber, t, type Language } from "./i18n";
 import type { CustomStudyFilter, CustomStudyFocus } from "./engine";
 import { UiIcon } from "./UiIcon";
+import { learningCopy } from "./learning-copy";
 import "./topic-learning.css";
 
 export type TopicStudyTopic = {
@@ -67,9 +68,9 @@ export function TopicLearningDialog({
 
   const selectedTopic = TOPICS.find(topic => topic.id === selectedTopicId) ?? null;
   const focusOptions: Array<{ value: CustomStudyFocus; label: string }> = [
-    { value: "available", label: t("topicAvailable", language) },
-    { value: "due", label: t("topicDue", language) },
-    { value: "new", label: t("topicNewOnly", language) },
+    { value: "available", label: learningCopy("topicAvailable", language) },
+    { value: "due", label: learningCopy("topicDue", language) },
+    { value: "new", label: learningCopy("topicNewOnly", language) },
   ];
 
   const start = async () => {
@@ -81,7 +82,7 @@ export function TopicLearningDialog({
       characterScope: selectedTopic.characters,
     });
     if (started) onClose();
-    else setMessage(t("topicNoEligibleItems", language));
+    else setMessage(learningCopy("topicNoEligibleItems", language));
   };
 
   return (
@@ -97,9 +98,9 @@ export function TopicLearningDialog({
       <div className="topic-learning-dialog-inner">
         <header className="topic-learning-heading">
           <div>
-            <p className="eyebrow red">{t("learnByTopic", language)}</p>
-            <h2 id="topic-learning-title">{t("topicLearningTitle", language)}</h2>
-            <p>{t("topicLearningIntro", language)}</p>
+            <p className="eyebrow red">{learningCopy("learnByTopic", language)}</p>
+            <h2 id="topic-learning-title">{learningCopy("topicLearningTitle", language)}</h2>
+            <p>{learningCopy("topicLearningIntro", language)}</p>
           </div>
           <button className="topic-learning-close" type="button" aria-label={t("close", language)} onClick={onClose}>
             <UiIcon name="close" size={19} />
@@ -111,13 +112,13 @@ export function TopicLearningDialog({
           <input
             value={query}
             onChange={event => setQuery(event.target.value)}
-            placeholder={t("topicSearch", language)}
-            aria-label={t("topicSearch", language)}
+            placeholder={learningCopy("topicSearch", language)}
+            aria-label={learningCopy("topicSearch", language)}
             autoComplete="off"
           />
         </label>
 
-        <div className="topic-learning-grid" aria-label={t("topicLearningTitle", language)}>
+        <div className="topic-learning-grid" aria-label={learningCopy("topicLearningTitle", language)}>
           {visibleTopics.map(topic => {
             const selected = topic.id === selectedTopicId;
             return (
@@ -132,21 +133,21 @@ export function TopicLearningDialog({
                 <span className="topic-learning-kanji" lang="ja" dir="ltr">{topic.characters.slice(0, 3).join(" ")}</span>
                 <span className="topic-learning-tile-copy">
                   <strong>{topic.label[language]}</strong>
-                  <small>{formatNumber(topic.characters.length, language)} {t("topicItemCount", language)}</small>
+                  <small>{formatNumber(topic.characters.length, language)} {learningCopy("topicItemCount", language)}</small>
                 </span>
                 <span className="topic-learning-selection" aria-hidden="true">{selected ? "✓" : ""}</span>
               </button>
             );
           })}
-          {!visibleTopics.length ? <p className="topic-learning-empty" role="status">{t("topicNoMatches", language)}</p> : null}
+          {!visibleTopics.length ? <p className="topic-learning-empty" role="status">{learningCopy("topicNoMatches", language)}</p> : null}
         </div>
 
         {selectedTopic ? (
-          <section className="topic-learning-session" aria-label={t("topicSessionLabel", language)}>
+          <section className="topic-learning-session" aria-label={learningCopy("topicSessionLabel", language)}>
             <div className="topic-learning-selected">
-              <span className="topic-learning-selected-label">{t("topicSessionLabel", language)}</span>
+              <span className="topic-learning-selected-label">{learningCopy("topicSessionLabel", language)}</span>
               <strong>{selectedTopic.label[language]}</strong>
-              <small>{formatNumber(selectedTopic.characters.length, language)} {t("topicItemCount", language)}</small>
+              <small>{formatNumber(selectedTopic.characters.length, language)} {learningCopy("topicItemCount", language)}</small>
             </div>
             <div className="topic-learning-focus" role="group" aria-label={t("customFocus", language)}>
               {focusOptions.map(option => (
@@ -164,12 +165,12 @@ export function TopicLearningDialog({
             </div>
             {message ? <p className="topic-learning-message" role="status">{message}</p> : null}
             <button className="button primary topic-learning-start" type="button" disabled={busy || !selectedTopic.characters.length} onClick={() => void start()}>
-              {busy ? "…" : t("topicStart", language)}
+              {busy ? "…" : learningCopy("topicStart", language)}
               <UiIcon name="next" size={17} />
             </button>
           </section>
         ) : (
-          <p className="topic-learning-footer-note">{t("topicLearningIntro", language)}</p>
+          <p className="topic-learning-footer-note">{learningCopy("topicLearningIntro", language)}</p>
         )}
       </div>
     </dialog>
