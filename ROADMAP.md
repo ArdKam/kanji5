@@ -2352,3 +2352,14 @@ Post-merge evidence for exact current-main SHA `e56247730030916fd813ed3c4360b328
 This taxonomy is an explicit curated navigation aid, not a complete curriculum, frequency list, JLPT syllabus, vocabulary database, or evidence of learner mastery. Untagged kanji remain visible/searchable when “All topics” is selected. Do not infer memberships from raw English gloss strings or silently treat lack of a tag as lack of relevance.
 
 **Next content-quality action:** expand/review topic membership only with sampled semantic QA and clear provenance. Do not extend topic-specific selection into Learning or Active Recall until the Dictionary taxonomy's coverage and usefulness are evaluated; FSRS, the Learner Model, and Adaptive Planner remain authoritative and unchanged.
+
+
+---
+
+# 25. Dictionary topic taxonomy expansion — 2026-10-09
+
+**Scope:** Curated navigation metadata for the existing Kanji catalog; no learning-engine or persistence changes.
+
+The expanded taxonomy defines 24 bilingual topics and 1,025 topic assignments across 741 unique kanji (34.7% of the 2,136-item catalog). Eight topic families were added: qualities/comparison, government/law, communication/media, money/finance, transport/travel, health/medicine, technology/industry, and arts/culture. Existing topic families were also expanded using explicit curated associations.
+
+Coverage remains deliberately partial; untagged characters are still available through “All topics” and text search. The next quality step is sampled semantic review of topic membership, then coverage expansion based on reviewed additions—not automatic gloss matching. Topic navigation must remain independent of FSRS, Learner Model, Adaptive Planner, and evidence authority.

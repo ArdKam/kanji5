@@ -174,6 +174,13 @@ test('Dictionary curated topic filters combine with other filters and work in Pe
   await expect(page.locator('.kanji-catalog-tile[aria-label^="食 —"]')).toHaveCount(0);
   await expect(advanced.locator('.dictionary-filter-count')).toHaveText('1');
 
+  await topic.selectOption('government');
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="政 —"]')).toHaveCount(1);
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="食 —"]')).toHaveCount(0);
+  await topic.selectOption('qualities');
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="大 —"]')).toHaveCount(1);
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="政 —"]')).toHaveCount(0);
+
   await topic.selectOption('numbers');
   await expect(page.locator('.kanji-catalog-tile[aria-label^="一 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(0);

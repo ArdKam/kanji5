@@ -9,10 +9,10 @@ const [taxonomy, dataset] = await Promise.all([
   fs.readFile(path.join(root, "kanji-data.json"), "utf8").then(value => JSON.parse(value)),
 ]);
 
-assert.equal(taxonomy.version, 1, "Topic taxonomy version must be explicit");
-assert.equal(dataset.count, 2136, "Expected the pinned Jōyō catalog size");
+assert.equal(taxonomy.version, 2, "Topic taxonomy version must be explicit");
+assert.equal(dataset.count, 2136, "Expected the pinned catalog size");
 assert.equal(dataset.kanji.length, dataset.count, "Dataset count must match its items");
-assert.ok(Array.isArray(taxonomy.topics) && taxonomy.topics.length >= 12, "Expected a useful curated topic set");
+assert.ok(Array.isArray(taxonomy.topics) && taxonomy.topics.length >= 20, "Expected a useful curated topic set");
 
 const catalogCharacters = new Set(dataset.kanji.map(item => item.character));
 const ids = taxonomy.topics.map(topic => topic.id);
@@ -35,6 +35,14 @@ const expectedTopics = {
   actions: "行",
   work: "事",
   emotions: "心",
+  qualities: "大",
+  government: "政",
+  communication: "発",
+  money: "価",
+  transport: "車",
+  health: "病",
+  industry: "機",
+  culture: "演",
 };
 const seenCharacters = new Set();
 let assignmentCount = 0;
@@ -48,7 +56,7 @@ for (const topic of taxonomy.topics) {
   assert.equal(new Set(characters).size, characters.length, `Duplicate character within topic ${topic.id}`);
   for (const character of characters) {
     assert.equal(Array.from(character).length, 1, `Topic entries must be single Kanji: ${character}`);
-    assert.ok(catalogCharacters.has(character), `Topic ${topic.id} contains a character outside kanji-data.json: ${character}`);
+    assert.ok(catalogCharacters.has(character), `Topic ${topic.id} contains a character outside the catalog: ${character}`);
     assignmentCount += 1;
     seenCharacters.add(character);
   }
@@ -56,8 +64,9 @@ for (const topic of taxonomy.topics) {
 for (const [topicId, sample] of Object.entries(expectedTopics)) {
   const topic = taxonomy.topics.find(entry => entry.id === topicId);
   assert.ok(topic, `Missing expected topic: ${topicId}`);
-  assert.ok(topic.characters.trim().split(" ").filter(Boolean).includes(sample), `Topic ${topicId} is missing its representative character ${sample}`);
+  assert.ok(topic.characters.trim().split(" ").includes(sample), `Topic ${topicId} is missing representative character ${sample}`);
 }
-assert.equal(seenCharacters.size, 422, "Update the documented curated coverage when topic coverage changes");
-assert.equal(taxonomy.topics.length, 16, "Update the taxonomy audit when the initial topic set changes");
-console.log(`Validated ${taxonomy.topics.length} curated topics, ${assignmentCount} topic assignments, and ${seenCharacters.size}/${dataset.count} unique Jōyō kanji.`);
+assert.equal(assignmentCount, 1025, "Update the documented topic-assignment count when taxonomy coverage changes");
+assert.equal(seenCharacters.size, 741, "Update the documented unique-character coverage when taxonomy changes");
+assert.equal(taxonomy.topics.length, 24, "Update the topic audit when the topic set changes");
+console.log(`Validated version ${taxonomy.version}: ${taxonomy.topics.length} curated topics, ${assignmentCount} topic assignments, and ${seenCharacters.size}/2136 unique kanji (${(seenCharacters.size / dataset.count * 100).toFixed(1)}% coverage).`);
