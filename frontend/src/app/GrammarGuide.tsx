@@ -32,7 +32,7 @@ export function GrammarGuide({language}:{language:Language}){
  const [index,setIndex]=useState(0),[checked,setChecked]=useState(false),[selectedOption,setSelectedOption]=useState(""),[completed,setCompleted]=useState<number[]>(readGrammarProgress);
  const lesson=LESSONS[index], percent=Math.round(completed.length/LESSONS.length*100);
  const remaining=Math.max(0,LESSONS.length-completed.length);
- useEffect(()=>{try{sessionStorage.setItem(GRAMMAR_PROGRESS_KEY,JSON.stringify(completed));}catch(error){if(import.meta.env.DEV)console.debug('Rinemi grammar progress persistence unavailable.',error);}},[completed]);
+ useEffect(()=>{try{sessionStorage.setItem(GRAMMAR_PROGRESS_KEY,JSON.stringify(completed));}catch(error){if(import.meta.env.DEV)console.debug('Kanji 5 grammar progress persistence unavailable.',error);}},[completed]);
  const selectAnswer=(option:string)=>{setSelectedOption(option);setChecked(true);if(option===lesson.answer)setCompleted(p=>p.includes(index)?p:p.concat(index));};
  const retry=()=>{setChecked(false);setSelectedOption("");};
  const move=(delta:number)=>{setIndex(v=>Math.max(0,Math.min(LESSONS.length-1,v+delta)));retry();};
