@@ -81,8 +81,7 @@ function parseKanjiVG(svg, expectedCharacter) {
   }
 
   const metadataKey = node => JSON.stringify([
-    node.character, node.position || "", Boolean(node.variant), node.radicalRole || "",
-    node.phoneticRole || "", Boolean(node.partial), node.original || ""
+    node.character, Boolean(node.variant), Boolean(node.partial), node.original || ""
   ]);
 
   // KanjiVG sometimes splits one logical glyph component into several SVG groups
@@ -108,6 +107,12 @@ function parseKanjiVG(svg, expectedCharacter) {
       const merged = {
         ...group[0],
         sourceParts: group.map(node => node.part),
+        sourcePartDetails: group.map(node => ({
+          part: node.part,
+          ...(node.position ? { position: node.position } : {}),
+          ...(node.radicalRole ? { radicalRole: node.radicalRole } : {}),
+          ...(node.phoneticRole ? { phoneticRole: node.phoneticRole } : {})
+        })),
         components: group.flatMap(node => node.components)
       };
       delete merged.part;
