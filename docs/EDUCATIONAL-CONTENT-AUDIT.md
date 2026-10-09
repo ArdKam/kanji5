@@ -1,4 +1,4 @@
-# Kanji5 — Educational Content & Learning Validity Audit
+# Rinemi — Educational Content & Learning Validity Audit
 
 **Audit date:** 2026-10-07
 **Audited implementation/verification candidate:** current `main` @ `f1f9e6066e24674254616ec90267f6562db9fa61`
@@ -10,7 +10,7 @@ This document records the findings of the 2026-10-03 educational/content audit a
 
 ## 1. Executive finding
 
-Kanji5 has a strong educational architecture:
+Rinemi has a strong educational architecture:
 
 - Learn → Recall → Review → Recover → Improve
 - FSRS for long-term review scheduling
