@@ -475,7 +475,7 @@ test("critical header title and drawer direction stay on the correct viewport ed
   }
 });
 
-test("structured header menu keeps account accessible and exposes inline preferences", async ({ page }) => {
+test("structured header menu keeps account inactive until the menu closes and exposes inline preferences", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("kanji5-ui-language", "en");
     localStorage.setItem("kanji5-theme", "light");
@@ -484,10 +484,13 @@ test("structured header menu keeps account accessible and exposes inline prefere
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
 
+  const account = page.locator(".account-button");
+  await expect(account).toBeVisible();
   await page.getByRole("button", { name: "More", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
-  await expect(page.locator(".account-button:visible")).toBeVisible();
+  await expect(account).toBeHidden();
+  await expect(account).toHaveCSS("pointer-events", "none");
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Reading lab", exact: true })).toBeVisible();
@@ -498,27 +501,42 @@ test("structured header menu keeps account accessible and exposes inline prefere
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await menu.getByRole("button", { name: "فارسی", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.locator(".account-button:visible")).toBeVisible();
+  await expect(account).toBeHidden();
+  await expect(account).toHaveCSS("pointer-events", "none");
 
   await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
   await expect(page.getByRole("button", { name: "بیشتر", exact: true })).toBeFocused();
+  await expect(account).toBeVisible();
 });
 
-test("mobile menu leaves the account control above the drawer and clickable", async ({ page }) => {
+test("mobile menu prevents account click-through until the drawer closes", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "fa"));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
 
-  await page.getByRole("button", { name: "بیشتر", exact: true }).click();
-  await expect(page.locator("#header-tools-menu")).toBeVisible();
-  const account = page.locator(".account-button:visible");
-  await expect(account).toBeVisible();
-
+  const account = page.locator(".account-button");
   const accountBounds = await account.boundingBox();
-  if (!accountBounds) throw new Error("Account bounds unavailable");
-  expect(await account.evaluate((el) => getComputedStyle(el).zIndex)).toBe("130");
+  if (!accountBounds) throw new Error("Account bounds unavailable before opening the menu");
+
+  await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+  const menu = page.locator("#header-tools-menu");
+  await expect(menu).toBeVisible();
+  await expect(account).toBeHidden();
+  await expect(account).toHaveCSS("visibility", "hidden");
+  await expect(account).toHaveCSS("pointer-events", "none");
+
+  // Click the account button's former screen position. The hidden control must not
+  // receive this pointer event or open its dialog through the menu overlay.
+  await page.mouse.click(
+    accountBounds.x + accountBounds.width / 2,
+    accountBounds.y + accountBounds.height / 2
+  );
+  await expect(page.locator(".account-dialog:visible")).toHaveCount(0);
+  await expect(menu).toBeHidden();
+
+  await expect(account).toBeVisible();
   await account.click();
   await expect(page.locator(".account-dialog:visible")).toBeVisible();
 });
