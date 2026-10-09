@@ -1,0 +1,59 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const readJSON = async path => JSON.parse(await readFile(new URL("../" + path, import.meta.url), "utf8"));
+const catalog = await readJSON("kanji-data.json");
+const visual = await readJSON("kanji-visual-structure.json");
+
+assert.equal(visual.schema, "kanji-visual-structure/v1");
+assert.equal(visual.version, 1);
+assert.equal(visual.target?.count, 2136);
+assert.equal(visual.coverage?.available, 2136);
+assert.equal(visual.coverage?.total, 2136);
+assert.equal(visual.coverage?.fraction, 1);
+assert.equal(visual.source?.name, "KanjiVG");
+assert.equal(visual.source?.commit, "70a0b7ae0c18ceb5cb358274b029cce0234a43bc");
+assert.equal(visual.source?.license, "CC BY-SA 3.0");
+assert.deepEqual(visual.missing, []);
+
+const characters = (catalog?.kanji || []).map(entry => String(entry?.character || ""));
+assert.equal(characters.length, 2136);
+assert.equal(new Set(characters).size, 2136);
+const structures = visual.structures || {};
+assert.equal(Object.keys(structures).length, 2136);
+
+function validateNode(node, context) {
+  assert.ok(node && typeof node.character === "string" && node.character.length > 0, `Missing component glyph: ${context}`);
+  assert.ok(Array.isArray(node.components), `Component children must be arrays: ${context}/${node.character}`);
+  if (node.position !== undefined) assert.equal(typeof node.position, "string");
+  if (node.variant !== undefined) assert.equal(node.variant, true);
+  if (node.radicalRole !== undefined) assert.equal(typeof node.radicalRole, "string");
+  if (node.phoneticRole !== undefined) assert.equal(typeof node.phoneticRole, "string");
+  for (const [index, child] of node.components.entries()) validateNode(child, `${context}/${node.character}[${index}]`);
+}
+
+for (const character of characters) {
+  const root = structures[character];
+  assert.ok(root, `Missing verified visual tree for ${character}`);
+  assert.equal(root.character, character, `Root glyph mismatch for ${character}`);
+  validateNode(root, character);
+}
+
+const direct = character => (structures[character]?.components || []).map(node => node.character);
+const expectDirect = (character, expected) => {
+  assert.deepEqual(direct(character), expected, `Unexpected direct visual structure for ${character}`);
+};
+expectDirect("林", ["木", "木"]);
+expectDirect("森", ["木", "林"]);
+expectDirect("品", ["口", "口", "口"]);
+expectDirect("晶", ["日", "日", "日"]);
+expectDirect("炎", ["火", "火"]);
+expectDirect("多", ["夕", "夕"]);
+expectDirect("北", ["匕", "匕"]);
+expectDirect("海", ["氵", "毎"]);
+expectDirect("語", ["言", "吾"]);
+expectDirect("明", ["日", "月"]);
+expectDirect("時", ["日", "寺"]);
+expectDirect("国", ["囗", "玉"]);
+
+console.log("KanjiVG visual structure contract passed (2,136/2,136 trees; repeated components and nesting preserved).");
