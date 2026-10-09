@@ -39,8 +39,14 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
 }
 
 async function drawReference(page,canvas,strokes){
+  // Real mouse input cannot hit-test canvas coordinates outside the viewport, even if Playwright calls it visible.
+  await canvas.scrollIntoViewIfNeeded();
   const box=await canvas.boundingBox();
   if(!box)throw new Error("handwriting canvas has no bounding box");
+  const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
+  if(box.x<0||box.y<0||box.x+box.width>viewport.width||box.y+box.height>viewport.height){
+    throw new Error(`handwriting canvas must be inside the viewport before drawing: ${JSON.stringify({box,viewport})}`);
+  }
   const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
   for(const stroke of strokes){
     const first=toClient(stroke[0]);
@@ -80,6 +86,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(handwriting.locator(".handwriting-hint-segment")).toHaveCount(3);
   await expect(handwriting.locator(".handwriting-hint-segment.is-active")).toBeVisible();
   const canvas=handwriting.locator(".handwriting-ink-canvas");
+  await canvas.scrollIntoViewIfNeeded();
   await expect(handwriting.locator(".handwriting-guide-canvas")).toBeVisible();
   const penBox=await canvas.boundingBox();
   if(!penBox)throw new Error("handwriting canvas has no bounding box");
