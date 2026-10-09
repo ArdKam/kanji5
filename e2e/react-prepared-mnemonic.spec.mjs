@@ -43,7 +43,7 @@ test("prepared mnemonic is available on every learning card and can be saved as 
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 20000 });
 
-  await card.getByRole("button", { name: "Show kanji information" }).click();
+  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
   await goToMnemonicPage(card);

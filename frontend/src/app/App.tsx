@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
@@ -14,6 +14,10 @@ import { MnemonicsDialog } from "./MnemonicsDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { OnboardingEntry } from "./OnboardingEntry";
+import { getTopicLabel } from "./topic-taxonomy";
+const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
+import { learningCopy } from "./learning-copy";
+import learningSurfaceStyles from "./learning-surface.css?inline";
 import { isOnboardingComplete } from "./onboarding";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -78,7 +82,7 @@ const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
 const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
 
-function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;onReveal:()=>void;onRate:(r:Rating)=>void}){
+function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
@@ -158,9 +162,15 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     const target=mnemonicToolRef.current;
     const scrollContainer=target?.closest<HTMLElement>(".learning-back-scroll");
     if(!target||!scrollContainer)return;
+    const scrollBounds=scrollContainer.getBoundingClientRect();
+    const targetBounds=target.getBoundingClientRect();
     const maxScrollTop=Math.max(0,scrollContainer.scrollHeight-scrollContainer.clientHeight);
-    const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    scrollContainer.scrollTo({top:maxScrollTop,behavior:reducedMotion?"auto":"smooth"});
+    const bottomOverflow=targetBounds.bottom-(scrollBounds.bottom-10);
+    const topOverflow=(scrollBounds.top+10)-targetBounds.top;
+    const delta=bottomOverflow>0?bottomOverflow:topOverflow>0?-topOverflow:0;
+    const nextTop=Math.max(0,Math.min(maxScrollTop,scrollContainer.scrollTop+delta));
+    // This is a layout-recovery action, so prefer a stable final position over animated scrolling.
+    scrollContainer.scrollTo({top:nextTop,behavior:"auto"});
   },[]);
   useEffect(()=>{
     if(!mnemonicEditing)return;
@@ -178,6 +188,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   useEffect(()=>{
     setHiraganaReadings(false);
     setReferenceInfoOpen(false);
+    setExamplesExpanded(false);
   },[card.character]);
   useEffect(()=>{
     if(!referenceInfoOpen)return;
@@ -254,6 +265,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
   const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
   const [examplesResolved,setExamplesResolved]=useState(false);
+  const [examplesExpanded,setExamplesExpanded]=useState(false);
   const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
   useEffect(()=>{
     let active=true;
@@ -277,6 +289,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     return ()=>{active=false};
   },[card.character,card.examples?.length]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
+  const visibleExamples=examplesExpanded?displayExamples:displayExamples.slice(0,4);
   const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
   const mnemonicSupport=buildMnemonicSupport({
     character:card.character??"",
@@ -396,14 +409,13 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   };
   const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event);
   const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
-  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
+  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")+(mnemonicEditing?" has-open-mnemonic":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
-        <div className="card-topline"><span className="badge badge-red">{t("learningBadge")}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
-        <h2>{t("learningCard")}</h2>
+        <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
+        <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <div className="first-readings" lang="ja">{[...(learnerReadingModel.coreOn??card.on??[]),...(learnerReadingModel.coreKun??card.kun??[])].slice(0,3).join(" · ")}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{localizeDynamic(card.revealLabel,getLanguage(),t("showKanjiInfo"))}</button>
+        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
@@ -436,7 +448,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
             </div>
             {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
-                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{displayExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}</div>
+                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}{displayExamples.length>4?<button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button>:null}</div>
               </div>
             </div>:null}
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
@@ -492,7 +504,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
                           </details>
                         :null}
                       <button
-                        className="mnemonic-trigger"
+                        className="button secondary mnemonic-action"
                         type="button"
                         aria-label={personalMnemonic?t("editMnemonic"):t("personalMnemonic")}
                         title={t("personalMnemonic")}
@@ -505,9 +517,9 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
                           setMnemonicEditing(value=>!value);
                         }}
                       >
-                        <span aria-hidden="true">✎</span>
+                        <UiIcon name="writing" size={16}/><span>{personalMnemonic?t("editMnemonic"):t("personalMnemonic")}</span>
                       </button>
-                      {personalMnemonic&&!mnemonicEditing?<div className="mnemonic-saved"><span aria-hidden="true">🧠</span><p id="personal-mnemonic-title">{personalMnemonic}</p></div>:null}
+                      {personalMnemonic&&!mnemonicEditing?<div className="mnemonic-saved"><UiIcon name="mnemonic" size={17}/><p id="personal-mnemonic-title">{personalMnemonic}</p></div>:null}
                       {mnemonicEditing?
                         <div className="mnemonic-editor" id="personal-mnemonic-editor">
                           <div className="mnemonic-editor-heading"><strong>{t("personalMnemonic")}</strong><span>{fa(mnemonicDraft.length)}/{fa(600)}</span></div>
@@ -906,6 +918,9 @@ function App(){
   const [onboardingComplete,setOnboardingComplete]=useState(()=>isOnboardingComplete());
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
+  const [topicBrowserOpen,setTopicBrowserOpen]=useState(false);
+  const topicStudyId=snapshot?.customStudyTopicId??null;
+  const topicStudyLabel=topicStudyId?getTopicLabel(topicStudyId,language):null;
   useEffect(()=>{
     if(!sessionFeedbackVisible)return;
     const timeout=window.setTimeout(()=>setSessionFeedbackVisible(false),4000);
@@ -1009,6 +1024,7 @@ function App(){
   if(showOnboarding)return <OnboardingEntry language={language} snapshot={snapshot} busy={busy} onFinished={()=>setOnboardingComplete(true)} onLanguageChange={changeLanguage}/>;
   if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>{t("learningCoreError")}</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>{t("tryAgain")}</button></section></div>;
   return <div className="app-shell">
+    <style data-learning-surface>{learningSurfaceStyles}</style>
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
     <header className={"header"+(headerMenuOpen?" menu-open":"")}><div className="header-brand"><p className="eyebrow red">{t("smartLearning")}</p><div className="header-brand-lockup"><img className="header-brand-mark" src="./icon.svg" alt="" aria-hidden="true" /><h1 dir="ltr">Rinemi</h1></div></div>
       <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-labelledby="header-tools-menu-title">
@@ -1037,7 +1053,7 @@ function App(){
   </div>
 </aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
     </header>
-    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
+    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await clearCustomStudyFilter();await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
         {secondaryPage==="settings" ? <SettingsDialog
@@ -1067,6 +1083,15 @@ function App(){
           onClose={closeSecondaryPage}
         /> : null}
         </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
+              {!showExercise ? <div className="card-topline">
+                <div className="learning-session-context">
+                  <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
+                  <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
+                </div>
+                <button className="button secondary learning-route-button" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
+                  <UiIcon name="dictionary" size={17}/><span>{learningCopy("learnByTopic",language)}</span>
+                </button>
+              </div> : null}
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
@@ -1094,13 +1119,25 @@ function App(){
     />
     
   )
-) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} topicLabel={topicStudyLabel} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot&&topicStudyLabel?<section className="surface empty-state topic-session-complete"><p className="eyebrow red">{learningCopy("topicSessionLabel",language)}</p><h2>{learningCopy("topicSessionComplete",language)}</h2><p>{learningCopy("topicSessionCompleteHint",language)}</p><button className="button primary" type="button" onClick={()=>{void action(async()=>{await startLearningExperience();await clearTransient()})}}>{learningCopy("backToRecommended",language)}</button></section>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}        {!showExercise?(snapshotHydrated&&snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
 
       </>}
     </main>
+    <Suspense fallback={null}>
+      {topicBrowserOpen ? <TopicLearningDialog
+        open={true}
+        language={language}
+        busy={busy}
+        onClose={()=>setTopicBrowserOpen(false)}
+        onStart={async(topic,filter)=>{
+          const result=await action(async()=>{await clearTransient();return await startCustomStudy(filter)});
+          return Boolean(result?.started);
+        }}
+      /> : null}
+    </Suspense>
     <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
 <footer className="footer">{t("footerTagline",language)}</footer>
   </div>

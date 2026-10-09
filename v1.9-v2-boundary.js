@@ -266,6 +266,10 @@ async function getVisualStructureInfo(character){
   };
 }
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
+function attachStudyTopicContext(viewModel){
+  const topicId=window.__KANJI5_V19_REVIEW_BRIDGE__?.getCustomStudyTopicId?.();
+  return typeof topicId==='string'&&topicId?{...viewModel,customStudyTopicId:topicId}:viewModel;
+}
 let startupSnapshotInFlight=null;
 async function startupSnapshot(){
   if(startupSnapshotInFlight)return startupSnapshotInFlight;
@@ -283,11 +287,11 @@ async function startupSnapshot(){
     if(bridge?.snapshot)learning=core.buildLearningCardViewModel(await bridge.snapshot());
     const session=activeSession()||completedSession();
     const runtime=startupPresentationData();
-    return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:[],adaptiveReason,...runtime});
+    return attachStudyTopicContext(core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:[],adaptiveReason,...runtime}));
   })();
   try{return await startupSnapshotInFlight}finally{startupSnapshotInFlight=null}
 }
-let snapshotInFlight=null;async function snapshot(){if(snapshotInFlight)return snapshotInFlight;snapshotInFlight=(async()=>{const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData(Date.now(),false);return core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime})})();try{return await snapshotInFlight}finally{snapshotInFlight=null}}
+let snapshotInFlight=null;async function snapshot(){if(snapshotInFlight)return snapshotInFlight;snapshotInFlight=(async()=>{const core=await load(),session=activeSession()||completedSession(),runtime=runtimePresentationData(Date.now(),false);return attachStudyTopicContext(core.buildBoundarySnapshot({session,learning,exercise,feedback,learner:learner(),recentOutcomes:recentOutcomes(),adaptiveReason,...runtime}))})();try{return await snapshotInFlight}finally{snapshotInFlight=null}}
 let statsInFlight=null;
 async function getStats(){
   if(statsInFlight)return statsInFlight;

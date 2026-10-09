@@ -22,6 +22,8 @@ for(const viewport of viewports){
     await expect(reveal).toBeVisible();
     await reveal.click();
     await page.getByRole('button',{name:'خوب',exact:true}).click();
+    // Wait until rating is reflected in the card state before switching experiences.
+    await expect(page.locator('#root .learning-card')).not.toHaveClass(/is-revealed/,{timeout:10000});
 
     await recall.click();
     await expect(recall).toHaveAttribute('aria-current','page');

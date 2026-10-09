@@ -18,10 +18,10 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 20000 });
 
-  await card.getByRole("button", { name: "Show kanji information" }).click();
+  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await goToMnemonicPage(card);
-  await card.locator(".mnemonic-trigger").click();
+  await card.locator(".mnemonic-tool").getByRole("button", { name: "Personal mnemonic" }).click();
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
 
@@ -30,7 +30,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await expect(card.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
   const mnemonicGeometry = await card.evaluate(() => {
     const root = document.querySelector(".mnemonic-tool");
-    const trigger = root?.querySelector(".mnemonic-trigger");
+    const trigger = root?.querySelector(".mnemonic-action");
     const saved = root?.querySelector(".mnemonic-saved");
     if (!(root instanceof HTMLElement) || !(trigger instanceof HTMLElement) || !(saved instanceof HTMLElement)) throw new Error("mnemonic layout missing");
     const a = trigger.getBoundingClientRect();
@@ -46,7 +46,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   const reloadedCard = page.locator("#root .learning-card");
   await expect(reloadedCard).toBeVisible({ timeout: 20000 });
   if (!(await reloadedCard.evaluate((el) => el.classList.contains("is-revealed")))) {
-    await reloadedCard.getByRole("button", { name: "Show kanji information" }).click();
+    await reloadedCard.getByRole("button", { name: "Reveal meaning & readings" }).click();
   }
   await goToMnemonicPage(reloadedCard);
   await expect(reloadedCard.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
