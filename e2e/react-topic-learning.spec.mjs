@@ -57,6 +57,14 @@ test("topic learning opens from Learning and starts a scoped topic session", asy
 
   const dialog = page.getByRole("dialog", { name: "Choose a learning topic" });
   await page.waitForTimeout(500);
+  const reactEntryUrls = await page.evaluate(() =>
+    performance.getEntriesByType("resource")
+      .map(resource => resource.name)
+      .filter(url => new URL(url).pathname.endsWith("/react-dist/kanji5-react.js"))
+  );
+  expect(reactEntryUrls.length).toBeGreaterThan(0);
+  expect(new Set(reactEntryUrls.map(url => new URL(url).search)).size).toBe(1);
+  expect(new URL(reactEntryUrls[0]).search).toBe("");
   if (!(await dialog.isVisible().catch(() => false))) {
     const state = await page.evaluate(() => ({
       rootPresent: Boolean(document.querySelector("#root .app-shell")),
