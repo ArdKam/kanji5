@@ -158,6 +158,12 @@ The Dictionary structure view now explicitly teaches the traditional radical as 
 
 The visual component breakdown remains the primary structural explanation. Radical classification is intentionally kept separate from visual decomposition because the two concepts are not interchangeable. A future radical/component curriculum would require independent educational validation before becoming a scheduled skill.
 
+### Visual-structure correction — 2026-10-09
+
+The structural breakdown has been separated from TopoKanji's learning-dependency graph. The new `kanji-visual-structure.json` snapshot contains source-authored KanjiVG `kvg:element` trees for all 2,136 Jōyō kanji. Repeated components and nested groups are preserved; the Learning Card and Dictionary both render this same canonical hierarchy. TopoKanji data remains only for mnemonic scaffolds and the optional learning-dependency path, with its UI label now explicitly stating that these links are learning cues rather than a literal decomposition.
+
+The structural snapshot is pinned to KanjiVG commit `70a0b7ae0c18ceb5cb358274b029cce0234a43bc`, licensed CC BY-SA 3.0, and documented in `docs/KANJI-VISUAL-STRUCTURE.md`. The test contract checks all 2,136 roots, tree integrity, provenance, and known repeated/nested structures. The data-completeness contract does not by itself establish historical/etymological truth for every component; the product describes source-authored visual grouping, not character etymology.
+
 ## 5. Meaning Recall audit
 
 ### Strengths
