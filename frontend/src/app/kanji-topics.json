@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "curation": "Hand-curated topical associations for dictionary navigation. Partial coverage is intentional; tags are not inferred from source gloss strings.",
+  "topics": [
+    {
+      "id": "numbers",
+      "label": {
+        "fa": "اعداد و کمیت",
+        "en": "Numbers & quantity"
+      },
+      "characters": "一 二 三 四 五 六 七 八 九 十 百 千 万 億 円 零 数 何 番 半 倍 第 両"
+    },
+    {
+      "id": "body",
+      "label": {
+        "fa": "بدن انسان",
+        "en": "Human body"
+      },
+      "characters": "目 耳 口 手 足 頭 顔 首 体 心 血 骨 歯 毛 皮 胃 腹 背 肩 腕 指 爪 肺 脳 肉 髪 鼻 舌 肌 胸 腰"
+    },
+    {
+      "id": "nature",
+      "label": {
+        "fa": "طبیعت و زمین",
+        "en": "Nature & land"
+      },
+      "characters": "山 川 田 土 石 岩 地 空 天 日 月 星 雲 雨 雪 風 火 水 氷 海 池 湖 島 谷 森 林 木 花 草 竹 葉 根 枝 実 光 影 砂 野 岸 波 原 泉 里"
+    },
+    {
+      "id": "time",
+      "label": {
+        "fa": "زمان و تقویم",
+        "en": "Time & calendar"
+      },
+      "characters": "日 月 年 時 分 秒 今 昨 明 朝 昼 夜 夕 週 曜 春 夏 秋 冬 午 前 後 間 期 早 遅 末 始 終 毎 晩 暮 歳 刻"
+    },
+    {
+      "id": "family",
+      "label": {
+        "fa": "خانواده و روابط",
+        "en": "Family & relationships"
+      },
+      "characters": "父 母 子 兄 姉 弟 妹 親 家 族 夫 妻 祖 孫 男 女 友"
+    },
+    {
+      "id": "people",
+      "label": {
+        "fa": "افراد و جامعه",
+        "en": "People & society"
+      },
+      "characters": "人 者 男 女 民 国 世 会 社 友 私 自 他 彼 名 主 長 員 王 公 客 先 生 学"
+    },
+    {
+      "id": "food",
+      "label": {
+        "fa": "خوراک و نوشیدنی",
+        "en": "Food & drink"
+      },
+      "characters": "食 飲 米 肉 魚 牛 豚 鳥 卵 乳 茶 飯 菜 果 塩 酒 味 皿 箸 豆 麦 油 汁 焼 煮 甘 苦"
+    },
+    {
+      "id": "school",
+      "label": {
+        "fa": "مدرسه و یادگیری",
+        "en": "School & learning"
+      },
+      "characters": "学 校 先 生 教 室 習 書 読 語 文 字 本 漢 紙 筆 算 数 試 験 題 問 答 考 知 理 科 英 国 図 表 黒 白 勉 強 研 究 説 明 記 録 作 画"
+    },
+    {
+      "id": "places",
+      "label": {
+        "fa": "مکان‌ها و سفر",
+        "en": "Places & travel"
+      },
+      "characters": "国 都 県 市 町 村 区 京 家 室 店 駅 道 橋 門 戸 所 港 寺 社 院 館 庭 屋 辺 旅 宿 通 路 園 城 建 物 銀 行"
+    },
+    {
+      "id": "directions",
+      "label": {
+        "fa": "جهت و موقعیت",
+        "en": "Directions & position"
+      },
+      "characters": "上 下 左 右 中 外 内 前 後 東 西 南 北 近 遠 高 低 横 縦 方 向 平 直 奥 端"
+    },
+    {
+      "id": "weather",
+      "label": {
+        "fa": "آب‌وهوا و دما",
+        "en": "Weather & temperature"
+      },
+      "characters": "天 気 晴 曇 雨 雪 雲 風 雷 暑 寒 温 暖 冷 氷 春 夏 冬"
+    },
+    {
+      "id": "animals",
+      "label": {
+        "fa": "حیوانات",
+        "en": "Animals"
+      },
+      "characters": "犬 猫 鳥 魚 馬 牛 羊 豚 虫 貝 蛇 熊 虎 鹿 猿 象 羽 鳴 獣"
+    },
+    {
+      "id": "plants",
+      "label": {
+        "fa": "گیاهان و درختان",
+        "en": "Plants & trees"
+      },
+      "characters": "木 林 森 花 草 竹 葉 根 枝 実 種 苗 果 菜 麦 米 豆 茶 松 杉 梅 桜 菊 稲 芋 桃 梨"
+    },
+    {
+      "id": "actions",
+      "label": {
+        "fa": "کارها و حرکت‌ها",
+        "en": "Actions & movement"
+      },
+      "characters": "行 来 出 入 見 聞 話 語 読 書 食 飲 立 休 走 歩 待 持 使 作 買 売 言 思 知 学 開 閉 起 寝 働 乗 取 送 帰 着 洗 借 貸 投 打 切 歌 踊 泳 飛 登 降 止 動 住 置 消 進 退 呼 助 返 押 引 運 浴"
+    },
+    {
+      "id": "work",
+      "label": {
+        "fa": "کار و اقتصاد",
+        "en": "Work & economy"
+      },
+      "characters": "仕 事 働 職 工 商 農 業 会 社 店 売 買 金 円 費 貿 易 産 銀 行 員 製 造 便 鉄 技 術 研 究 建 設 運 輸 役"
+    },
+    {
+      "id": "emotions",
+      "label": {
+        "fa": "احساسات و اندیشه",
+        "en": "Thoughts & feelings"
+      },
+      "characters": "心 思 愛 好 悪 楽 悲 苦 怒 感 意 想 念 忘 怖 夢 幸 信 願 笑 泣 迷 安 勇 疲 恥 驚 喜 寂 急 絶 望"
+    }
+  ]
+}

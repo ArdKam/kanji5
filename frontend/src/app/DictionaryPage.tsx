@@ -3,6 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
+import topicData from "./kanji-topics.json";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
 type MasteryFilter = "all" | "unseen" | "learning" | "attention" | "mastered";
@@ -10,6 +11,17 @@ type ViewMode = "matrix" | "detailed";
 type SortMode = "level-asc" | "level-desc" | "mastery-desc" | "mastery-asc" | "order";
 const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
 const DETAILED_PAGE_SIZE = 160;
+
+type DictionaryTopic = { id: string; label: { fa: string; en: string }; characters: string };
+const KANJI_TOPICS = topicData.topics as DictionaryTopic[];
+const TOPIC_IDS_BY_CHARACTER = new Map<string, Set<string>>();
+for (const entry of KANJI_TOPICS) {
+  for (const character of entry.characters.trim().split(" ").filter(Boolean)) {
+    const ids = TOPIC_IDS_BY_CHARACTER.get(character) ?? new Set<string>();
+    ids.add(entry.id);
+    TOPIC_IDS_BY_CHARACTER.set(character, ids);
+  }
+}
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
@@ -130,12 +142,13 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [level, setLevel] = useState<LevelFilter>("all");
   const [masteryFilter, setMasteryFilter] = useState<MasteryFilter>("all");
   const [grade, setGrade] = useState("all");
+  const [topic, setTopic] = useState("all");
   const [viewMode, setViewMode] = useState<ViewMode>("matrix");
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
-  const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1);
+  const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1) + (topic === "all" ? 0 : 1);
 
   useEffect(() => {
     let active = true;
@@ -184,6 +197,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           return false;
         }
       }
+      if (topic !== "all" && !(TOPIC_IDS_BY_CHARACTER.get(item.character)?.has(topic) ?? false)) return false;
       if (!q) return true;
       return [item.character, ...item.meanings, ...item.on, ...item.kun].some((value) => normalize(value).includes(q));
     });
@@ -196,11 +210,11 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       return (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
     });
     return rows;
-  }, [catalog, grade, level, masteryFilter, query, sort]);
+  }, [catalog, grade, level, masteryFilter, query, sort, topic]);
 
   useEffect(() => {
     setDetailedVisibleCount(DETAILED_PAGE_SIZE);
-  }, [query, level, masteryFilter, grade, sort]);
+  }, [query, level, masteryFilter, grade, sort, topic]);
 
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
@@ -275,8 +289,15 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                   <option value="secondary">{language === "fa" ? "متوسطه" : "Secondary"}</option>
                 </select>
               </label>
+              <label className="dictionary-select-filter">
+                <span>{language === "fa" ? "موضوع" : "Topic"}</span>
+                <select aria-label={language === "fa" ? "موضوع" : "Topic"} value={topic} onChange={(event) => setTopic(event.target.value)}>
+                  <option value="all">{language === "fa" ? "همهٔ موضوع‌ها" : "All topics"}</option>
+                  {KANJI_TOPICS.map(entry => <option key={entry.id} value={entry.id}>{language === "fa" ? entry.label.fa : entry.label.en}</option>)}
+                </select>
+              </label>
               {activeAdvancedFilterCount > 0 ? (
-                <button className="button secondary wide" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); }}>
+                <button className="button secondary wide" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}>
                     {t("dictionaryClearExtraFilters", language)}
                 </button>
               ) : null}
