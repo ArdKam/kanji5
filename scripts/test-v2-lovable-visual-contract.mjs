@@ -14,7 +14,7 @@ const requiredTokens=[
   ['--line-soft','#E9E3DA']
 ];
 for(const [token,value] of requiredTokens){
-  assert.ok(css.includes(token+':'+value) || css.includes(token), 'Rinemi visual token missing: '+token);
+  assert.ok(css.includes(token+':'+value), 'Rinemi visual token missing: '+token);
 }
 assert.ok(css.includes('font-family:var(--ui-font)'), 'UI must use the semantic sans font token');
 assert.ok(css.includes('--jp-font:"Noto Serif JP"'), 'Japanese content must use the Japanese font stack');
