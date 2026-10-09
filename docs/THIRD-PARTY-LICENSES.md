@@ -1,4 +1,4 @@
-# Kanji5 — Third-Party License & Service Audit
+# Rinemi — Third-Party License & Service Audit
 
 Audit date: 2026-10-06
 

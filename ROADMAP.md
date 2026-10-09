@@ -1,6 +1,8 @@
-# Kanji5 — Unified Product, Engineering & Public-Release Roadmap
+# Rinemi — Unified Product, Engineering & Public-Release Roadmap
 
-> **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
+> **Brand naming rule (2026-10-09):** Rinemi is the canonical customer-facing name in the application, PWA metadata, brand assets, and public product copy. `kanji5` repository/deployment paths, `KANJI5_*` runtime contracts, stored data keys, backup-format identifiers and build asset names remain compatibility identifiers until a separate migration is designed and tested.
+
+> **Canonical roadmap:** this document is the forward-looking source of truth for Rinemi product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
 > **Implementation baseline reviewed:** `main` at the R13 merge baseline `c5997a432aa4b60bc2913cbaec277127b96935db` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
 
@@ -10,7 +12,7 @@
 
 ## 0. Product direction
 
-Kanji5 started as a personal PWA for learning essential Japanese kanji. The project is now being prepared for broader public distribution.
+Rinemi started as a personal PWA for learning essential Japanese kanji. The project is now being prepared for broader public distribution.
 
 The product must therefore satisfy two goals at the same time:
 
@@ -23,7 +25,7 @@ The product must therefore satisfy two goals at the same time:
    - lightweight daily practice
    - a calm, focused learning experience
 
-2. Become robust enough for users who have never seen Kanji5 before:
+2. Become robust enough for users who have never seen Rinemi before:
    - clear product positioning
    - understandable onboarding
    - trustworthy data persistence and recovery
@@ -1004,7 +1006,7 @@ It sits **before broad Vocabulary/Grammar expansion**.
 
 Define and expose:
 
-- what Kanji5 is
+- what Rinemi is
 - who it is for
 - what the daily learning loop is
 - what FSRS does
@@ -1350,7 +1352,7 @@ Legal requirements must be reviewed against actual production configuration, tar
 
 Provide user-facing documentation for:
 
-- How Kanji5 works
+- How Rinemi works
 - How FSRS works at a user-appropriate level
 - Learning vs Active Recall
 - rating meanings
@@ -1405,7 +1407,7 @@ External providers must never silently become learning authorities.
 
 A new user should be able to:
 
-- open Kanji5
+- open Rinemi
 - understand what it does
 - start without help
 - complete a session
@@ -1443,7 +1445,7 @@ Do not interpret automated test success as proof of public usability.
 
 ## R19. Public Release Gate
 
-Do not publicly promote Kanji5 beyond beta until:
+Do not publicly promote Rinemi beyond beta until:
 
 - no known critical data-loss path
 - no known critical asset/deploy path
@@ -2069,7 +2071,7 @@ Move from an indefinitely empty “Unreleased” section to real release entries
 
 # 16. Competitive/product-quality guardrails
 
-Kanji5 should remain differentiated through its actual learning behavior rather than feature count.
+Rinemi should remain differentiated through its actual learning behavior rather than feature count.
 
 Keep these product boundaries:
 
@@ -2241,7 +2243,7 @@ For public-release blockers, “implemented in code” is insufficient; the beha
 **Result:** a real-user cohort completes onboarding and learning, returns later, uses offline mode, can recover data, and can report problems; high-severity issues are fixed and regression-tested.
 
 ## Milestone M7 — Public Kanji Release
-**Result:** the Public Release Gate in R19 passes and Kanji5 can be promoted as a public Kanji-learning product.
+**Result:** the Public Release Gate in R19 passes and Rinemi can be promoted as a public Kanji-learning product.
 
 ## Milestone M8 — Vocabulary MVP
 **Result:** Vocabulary becomes a real learning domain using the existing cross-domain identity/evidence/scheduling architecture, with local content, deterministic learning behavior, persistence, offline support, UX, and QA.
@@ -2288,7 +2290,7 @@ Grammar reference can remain interim, but its authoritative learning model shoul
 
 # 23. Current strategic conclusion
 
-Kanji5 must reach a trustworthy public Kanji release before major domain expansion.
+Rinemi must reach a trustworthy public Kanji release before major domain expansion.
 
 The canonical transition is:
 
