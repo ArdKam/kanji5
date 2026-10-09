@@ -5,11 +5,8 @@
 .learning-session-context strong{font-size:var(--text-sm);font-weight:750;overflow-wrap:anywhere}
 .learning-session-context small{color:var(--mute);font-size:var(--text-xs)}
 .learning-route-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;flex:0 0 auto;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--paper);color:var(--ink);font-size:var(--text-sm);font-weight:750}
-.learning-route-button:hover:not(:disabled){border-color:var(--line-interactive);background:var(--color-surface-elevated)}
-.learning-card-topline .badge{flex:0 0 auto}
 .app-shell .content>.learning-card{height:min(590px,calc(100dvh - 230px));min-height:min(500px,calc(100dvh - 230px))}
 .learning-card-front .button.primary{min-height:50px;border-radius:var(--radius-lg)}
-.learning-card-back .learning-back-meaning{font-size:clamp(22px,2.8vw,30px);line-height:1.35}
 .learning-example-expand{display:inline-flex;align-items:center;min-height:38px;margin-top:7px;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-full);background:var(--paper);color:var(--ai);font-size:var(--text-xs);font-weight:800}
 @media(max-width:760px){.app-shell .content>.learning-card{height:min(640px,calc(100dvh - 290px));min-height:min(380px,calc(100dvh - 180px))}.learning-session-toolbar{align-items:flex-start}.learning-route-button{padding-inline:10px;font-size:var(--text-xs)}}
 @media(max-width:380px){.learning-session-toolbar{gap:8px}.learning-route-button{gap:5px;padding-inline:8px}.learning-session-context strong{font-size:var(--text-xs)}}
