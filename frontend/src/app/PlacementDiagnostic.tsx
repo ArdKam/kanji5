@@ -3,7 +3,7 @@ import { formatNumber, t, type Language } from "./i18n";
 import type { CustomStudyFilter, KanjiCatalogItem } from "./engine";
 import { buildPlacementQuestions, DIAGNOSTIC_LEVELS, scorePlacementAnswers } from "./placement-logic";
 
-export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, autoOpen = false }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>; autoOpen?: boolean }) {
+export function PlacementDiagnostic({ catalog, language, onStartCustomStudy }: { catalog: KanjiCatalogItem[]; language: Language; onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean> }) {
   const [diagnosticSeed, setDiagnosticSeed] = useState(0);
   const questions = useMemo(
     () => buildPlacementQuestions(catalog, t("diagnosticMeaningPrompt", language), diagnosticSeed),
@@ -67,12 +67,16 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
   if (!questions.length) return null;
 
   return (
-    <details className="placement-panel" open={autoOpen || active || finished} data-placement-confidence={placementScore.confidence} data-placement-upper-bound={placementScore.upperBoundReached ? "true" : "false"}>
-      <summary>{t("placementDiagnostic", language)}</summary>
+    <section className="placement-panel" aria-labelledby="placement-diagnostic-title" data-placement-confidence={placementScore.confidence} data-placement-upper-bound={placementScore.upperBoundReached ? "true" : "false"}>
+      <header className="placement-panel-header">
+        <div>
+          <h3 id="placement-diagnostic-title">{t("practicePlacementTitle", language)}</h3>
+          <p>{t("practicePlacementHint", language)}</p>
+        </div>
+      </header>
       {!active ? (
         <div className="placement-intro">
-          <p>{t("placementDiagnosticHint", language)}</p>
-          <button className="button primary" type="button" onClick={start}>{t("startDiagnostic", language)}</button>
+          <button className="button secondary" type="button" onClick={start}>{t("startDiagnostic", language)}</button>
         </div>
       ) : finished ? (
         <div className="placement-result" aria-live="polite">
@@ -121,6 +125,6 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy, aut
           {selected ? <button className="button primary" type="button" onClick={next}>{index + 1 >= questions.length ? t("finishDiagnostic", language) : t("nextDiagnostic", language)}</button> : null}
         </div>
       ) : null}
-    </details>
+    </section>
   );
 }
