@@ -16,8 +16,11 @@ const scoped = normalizeCustomStudyFilter({
   focus: "available",
   limit: 20,
   characterScope: ["山", "川", "山", "𠮟", "not-a-kanji", ""],
+  topicId: "nature",
 });
 assert.deepEqual(scoped.characterScope, ["山", "川", "𠮟"], "scope is unique and supports single Han characters, including supplementary-plane kanji");
+assert.equal(scoped.topicId, "nature", "stable topic identity travels with the session filter");
+assert.equal(normalizeCustomStudyFilter({ topicId: "nature & land" }).topicId, undefined, "topic identity accepts only a bounded stable ID");
 
 const selected = selectCustomStudyItems({
   deck, cards, filter: { focus: "available", limit: 20, characterScope: ["山", "川"] },
