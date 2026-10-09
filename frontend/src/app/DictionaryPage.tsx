@@ -256,7 +256,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 <span aria-hidden="true">⌄</span>
               </span>
             </summary>
-            <div className="dialog-grid dictionary-advanced-filter-controls">
+            <div className="dictionary-filter-row dictionary-advanced-filter-controls">
               <label className="dictionary-select-filter">
                 <span>{language === "fa" ? "تسلط" : "Mastery"}</span>
                 <select value={masteryFilter} onChange={(event) => setMasteryFilter(event.target.value as MasteryFilter)}>
