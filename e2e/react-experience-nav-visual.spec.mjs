@@ -92,13 +92,13 @@ test('Dictionary Kanji card supports adjacent navigation without closing', async
   await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
 
   const card = dialog.locator('.dictionary-card');
-  await card.dispatchEvent('pointerdown', { pointerType: 'touch', clientX: 120, clientY: 300, bubbles: true });
-  await card.dispatchEvent('pointerup', { pointerType: 'touch', clientX: 190, clientY: 300, bubbles: true });
+  await card.dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 5101, isPrimary: true, button: 0, buttons: 1, clientX: 120, clientY: 300, bubbles: true });
+  await card.dispatchEvent('pointerup', { pointerType: 'touch', pointerId: 5101, isPrimary: true, button: 0, buttons: 0, clientX: 190, clientY: 300, bubbles: true });
   await expect(dialog.locator('.dictionary-card-header-character')).not.toHaveText(firstCharacter);
   await expect(dialog).toBeVisible();
 
-  await card.dispatchEvent('pointerdown', { pointerType: 'touch', clientX: 190, clientY: 300, bubbles: true });
-  await card.dispatchEvent('pointerup', { pointerType: 'touch', clientX: 120, clientY: 300, bubbles: true });
+  await card.dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 5102, isPrimary: true, button: 0, buttons: 1, clientX: 190, clientY: 300, bubbles: true });
+  await card.dispatchEvent('pointerup', { pointerType: 'touch', pointerId: 5102, isPrimary: true, button: 0, buttons: 0, clientX: 120, clientY: 300, bubbles: true });
   await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
 
   await page.keyboard.press('ArrowRight');

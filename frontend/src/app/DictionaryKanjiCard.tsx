@@ -52,7 +52,7 @@ export function DictionaryKanjiCard({
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [activeSection, setActiveSection] = useState<SectionKey>("overview");
   const [navigationDirection, setNavigationDirection] = useState<"next" | "previous" | null>(null);
-  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const pointerStartRef = useRef<{ x: number; y: number; pointerId: number } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -109,9 +109,19 @@ export function DictionaryKanjiCard({
   };
 
   const handleCardPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse") return;
-    if ((event.target as HTMLElement).closest("button, input, textarea, select, a")) return;
-    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+    const target = event.target as HTMLElement;
+    if (event.button !== 0 || !event.isPrimary || target.closest("button, input, textarea, select, a")) {
+      pointerStartRef.current = null;
+      return;
+    }
+    pointerStartRef.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+    // Keep receiving the end of a drag even if its pointer leaves the card.
+    // Synthetic PointerEvents used by tests do not establish native pointer capture.
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Native devices establish capture automatically for touch; tests may dispatch synthetic events.
+    }
   };
 
   const handleCardPointerCancel = () => {
@@ -121,7 +131,7 @@ export function DictionaryKanjiCard({
   const handleCardPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = pointerStartRef.current;
     pointerStartRef.current = null;
-    if (!start || event.pointerType === "mouse") return;
+    if (!start || start.pointerId !== event.pointerId) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
     if (Math.abs(dx) < 56 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
