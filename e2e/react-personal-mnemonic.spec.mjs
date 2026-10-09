@@ -21,7 +21,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await goToMnemonicPage(card);
-  await card.locator(".mnemonic-trigger").click();
+  await card.getByRole("button", { name: "Personal mnemonic" }).click();
   const editor = card.locator(".mnemonic-editor textarea");
   await expect(editor).toBeVisible();
 
