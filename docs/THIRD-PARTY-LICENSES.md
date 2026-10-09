@@ -28,7 +28,7 @@ No project-level open-source license has been approved. `LICENSE` is intentional
 
 - `ts-fsrs 5.4.1` — MIT; vendored under `vendor/`.
 - Noto Serif JP — OFL-1.1 where used; license file retained with the assets.
-- KanjiVG — CC BY-SA 3.0 for the pinned stroke-order source revision.
+- KanjiVG — CC BY-SA 3.0 for the pinned stroke-order SVG source and the generated visual-structure hierarchy. Structure snapshot commit: `70a0b7ae0c18ceb5cb358274b029cce0234a43bc`; see [docs/KANJI-VISUAL-STRUCTURE.md](KANJI-VISUAL-STRUCTURE.md).
 - Supabase JS 2.117.2 — MIT; vendored as `vendor/supabase-js-2.117.2.js`.
 
 ## Datasets and providers

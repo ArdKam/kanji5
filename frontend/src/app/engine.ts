@@ -177,6 +177,30 @@ export type ComponentInfo = {
   source?: { name?: string; commit?: string; license?: string; semantics?: string } | null;
 };
 
+export type VisualStructureNode = {
+  character: string;
+  components: VisualStructureNode[];
+  position?: string;
+  variant?: boolean;
+  radicalRole?: string;
+  phoneticRole?: string;
+  part?: string;
+  partial?: boolean;
+  original?: string;
+  sourceParts?: string[];
+  sourcePartDetails?: Array<{ part: string; position?: string; radicalRole?: string; phoneticRole?: string }>;
+};
+export type VisualStructureInfo = {
+  character: string;
+  available: boolean;
+  root: VisualStructureNode | null;
+  components: VisualStructureNode[];
+  atomic: boolean;
+  sourceGap: boolean;
+  coverage?: { available?: number; total?: number; fraction?: number } | null;
+  source?: { name?: string; commit?: string; license?: string; attribution?: string; url?: string; semantics?: string } | null;
+};
+
 export type BackupSummary = {
   cards: number;
   reviews: number;
@@ -199,6 +223,7 @@ export type Boundary = {
   startupSnapshot: () => Promise<Snapshot>;
   getVocabulary: (character: string) => Promise<{ character: string; items: VocabularyItem[] }>;
   getComponentInfo: (character: string) => Promise<ComponentInfo>;
+  getVisualStructureInfo: (character: string) => Promise<VisualStructureInfo>;
   getRadicalInfo: (character: string) => Promise<RadicalInfo>;
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
@@ -358,6 +383,10 @@ export async function getVocabulary(character: string): Promise<{ character: str
 
 export async function getComponentInfo(character: string): Promise<ComponentInfo> {
   return (await waitForEngine()).getComponentInfo(character);
+}
+
+export async function getVisualStructureInfo(character: string): Promise<VisualStructureInfo> {
+  return (await waitForEngine()).getVisualStructureInfo(character);
 }
 
 export async function getRadicalInfo(character: string): Promise<RadicalInfo> {

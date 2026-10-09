@@ -41,7 +41,7 @@ const output = {
     commit: SOURCE_COMMIT,
     license: "MIT",
     url: `https://github.com/scriptin/topokanji/blob/${SOURCE_COMMIT}/dependencies/1-to-N.json`,
-    semantics: "Visual decomposition dependencies/components; not equivalent to Kangxi radical numbers.",
+    semantics: "Learning dependencies for mnemonic scaffolds and optional learning paths; not canonical written-form structure or Kangxi radical classification.",
   },
   missing,
   components,

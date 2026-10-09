@@ -16,7 +16,7 @@
     "commit": "cd04afc2c4335336c9243b8aef01c0d2a69c3009",
     "license": "MIT",
     "url": "https://github.com/scriptin/topokanji/blob/cd04afc2c4335336c9243b8aef01c0d2a69c3009/dependencies/1-to-N.json",
-    "semantics": "Visual decomposition dependencies/components; not equivalent to Kangxi radical numbers."
+    "semantics": "Learning dependencies for mnemonic scaffolds and optional learning paths; not canonical written-form structure or Kangxi radical classification."
   },
   "missing": [
     "諮",

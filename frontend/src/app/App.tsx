@@ -22,7 +22,7 @@ import {
   clearCustomStudyFilter,
   clearTransient,
   dontKnow,
-  getComponentInfo,
+  getVisualStructureInfo,
   getVocabulary,
   getMnemonic,
   nextExercise,
@@ -40,7 +40,7 @@ import {
   saveMnemonic,
   updateSettings,
   type Rating,
-  type ComponentInfo,
+  type VisualStructureInfo,
   type Settings,
   type Snapshot,
   type CustomStudyFilter,
@@ -86,8 +86,8 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const secondaryMeanings=learnerMeaningModel.secondary??[];
   const referenceMeanings=learnerMeaningModel.reference??[];
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
-  const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
-  const [componentInfoReady,setComponentInfoReady]=useState(false);
+  const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
+  const [visualStructureReady,setVisualStructureReady]=useState(false);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
   const [referenceInfoOpen,setReferenceInfoOpen]=useState(false);
   const referenceInfoTriggerRef=useRef<HTMLButtonElement|null>(null);
@@ -119,13 +119,13 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   useEffect(()=>{
     let active=true;
     if(!card.character){
-      setComponentInfo(null);
-      setComponentInfoReady(false);
+      setVisualStructureInfo(null);
+      setVisualStructureReady(false);
       setPreparedMnemonic(null);
       return ()=>{active=false};
     }
-    setComponentInfo(null);
-    setComponentInfoReady(false);
+    setVisualStructureInfo(null);
+    setVisualStructureReady(false);
     const character = card.character;
     const meanings = [...primaryMeanings,...secondaryMeanings];
     const mnemonicModule = import("./prepared-mnemonic-core");
@@ -135,22 +135,21 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     }).catch(()=>{
       if(active)setPreparedMnemonic(null);
     });
-    const componentInfoPromise = getComponentInfo(card.character);
-    void componentInfoPromise.then(info=>{
+    void getVisualStructureInfo(card.character).then(info=>{
       if(!active)return;
-      setComponentInfo(info);
-      setComponentInfoReady(true);
+      setVisualStructureInfo(info);
+      setVisualStructureReady(true);
       void mnemonicModule.then(({buildPreparedMnemonic})=>{
         if(!active)return;
         setPreparedMnemonic(buildPreparedMnemonic(
           {character,meanings},
-          info.components??[]
+          info.available ? info.components.map(component=>component.character) : []
         ));
       });
     }).catch(()=>{
       if(!active)return;
-      setComponentInfo(null);
-      setComponentInfoReady(true);
+      setVisualStructureInfo(null);
+      setVisualStructureReady(true);
     });
     return ()=>{active=false};
   },[card.character,preparedMeaningKey]);
@@ -278,14 +277,14 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     return ()=>{active=false};
   },[card.character,card.examples?.length]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
-  const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
+  const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
   const mnemonicSupport=buildMnemonicSupport({
     character:card.character??"",
     meanings:card.meanings??[],
     on:displayedOn,
     kun:displayedKun,
     examples:displayExamples,
-    components:componentInfo?.available?(componentInfo.components??[]):[]
+    components:visualStructureInfo?.available?visualStructureInfo.components.map(component=>component.character):[]
   });
   const mnemonicHintContext={
     character:card.character,
@@ -415,10 +414,10 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
-                    <div className="learning-back-identity-visual" aria-busy={!componentInfoReady}>
-                      {componentInfoReady
-                        ? componentInfo?.available&&componentInfo.components.length
-                          ? <ComponentBreakdown info={componentInfo} title={t("kanjiStructure")} note={t("visualComponents")} ariaLabel={t("visualKanjiStructure")}/>
+                    <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
+                      {visualStructureReady
+                        ? visualStructureInfo?.available&&visualStructureInfo.components.length
+                          ? <ComponentBreakdown info={visualStructureInfo} title={t("kanjiStructure")} note={t("visualComponents")} ariaLabel={t("visualKanjiStructure")}/>
                           : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>
                         : <div className="learning-back-identity-placeholder" aria-hidden="true"><span /></div>}
                     </div>

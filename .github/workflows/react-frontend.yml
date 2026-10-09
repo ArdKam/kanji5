@@ -75,6 +75,9 @@ on:
       - "vendor/**"
       - "kanji-data.json"
       - "kanji-components.json"
+      - "kanji-visual-structure.json"
+      - "scripts/build-kanji-visual-structure.mjs"
+      - "scripts/test-kanji-visual-structure.mjs"
   push:
     branches:
       - main
@@ -139,6 +142,9 @@ jobs:
       - name: Run traditional radical contract test
         working-directory: .
         run: node scripts/test-kanji-radical-system.mjs
+      - name: Run complete visual structure contract
+        working-directory: .
+        run: node scripts/test-kanji-visual-structure.mjs
       - name: Install root test dependencies
         working-directory: .
         run: npm ci

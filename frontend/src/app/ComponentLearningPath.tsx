@@ -77,7 +77,7 @@ export function ComponentLearningPath({
               <span className="component-learning-path-kanji is-static" lang="ja">{component}</span>
             )}
             <div className="component-learning-path-copy">
-              <strong>{item ? (language === "fa" ? "کانجیِ جویو" : "Jōyō kanji") : (language === "fa" ? "جزء دیداری" : "Visual component")}</strong>
+              <strong>{item ? (language === "fa" ? "کانجیِ جویو" : "Jōyō kanji") : (language === "fa" ? "سرنخ یادگیری" : "Learning cue")}</strong>
               {children.length ? <span lang="ja">{children.join(" + ")}</span> : <span>{t("componentLearningPathLeaf", language)}</span>}
             </div>
           </div>

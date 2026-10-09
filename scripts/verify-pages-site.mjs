@@ -17,12 +17,21 @@ const required=[
   "manifest.webmanifest",
   "kanji-data.json",
   "kanji-components.json",
+  "kanji-visual-structure.json",
   "vendor/ts-fsrs-5.4.1.mjs",
   "vendor/supabase-js-2.117.2.js"
 ];
 for(const relative of required){
   assert.ok(fs.existsSync(path.join(site,relative)),"PAGES_SITE_REQUIRED_ASSET_MISSING: "+relative);
 }
+
+const visualStructure=JSON.parse(fs.readFileSync(path.join(site,"kanji-visual-structure.json"),"utf8"));
+assert.equal(visualStructure.schema,"kanji-visual-structure/v1","PAGES_SITE_VISUAL_STRUCTURE_SCHEMA_INVALID");
+assert.equal(visualStructure.coverage?.available,2136,"PAGES_SITE_VISUAL_STRUCTURE_COVERAGE_INCOMPLETE");
+assert.equal(visualStructure.coverage?.total,2136,"PAGES_SITE_VISUAL_STRUCTURE_TOTAL_MISMATCH");
+assert.equal(Object.keys(visualStructure.structures||{}).length,2136,"PAGES_SITE_VISUAL_STRUCTURE_RECORD_COUNT_MISMATCH");
+assert.deepEqual(visualStructure.missing,[],"PAGES_SITE_VISUAL_STRUCTURE_HAS_UNREVIEWED_GAPS");
+
 
 for(const forbidden of [
   "frontend",

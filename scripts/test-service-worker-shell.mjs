@@ -13,6 +13,9 @@ assert.ok(Array.isArray(shell)&&shell.length>0,'Service worker SHELL must be non
 for(const required of ['./v2-domain-core.js','./v2-evidence-core.js','./v2-relationship-core.js','./v2-scheduling-core.js','./v2-observability.js']){
   assert.ok(shell.includes(required),`Service worker SHELL must precache ${required}`);
 }
+assert.ok(!shell.includes("./kanji-visual-structure.json"),"Large canonical visual data must not be cached twice in the shell and data caches");
+assert.ok(sw.includes("c.addAll(['./kanji-data.json','./kanji-components.json','./kanji-visual-structure.json'])"),"Canonical visual structure must be precached in the offline data cache");
+assert.ok(sw.includes("u.pathname.endsWith('/kanji-visual-structure.json')"),"Canonical visual structure requests must be served from the data cache");
 const duplicates=shell.filter((item,index)=>shell.indexOf(item)!==index);
 assert.deepEqual(duplicates,[],'Service worker SHELL contains duplicate entries.');
 
