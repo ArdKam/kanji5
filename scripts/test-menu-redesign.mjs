@@ -12,11 +12,11 @@ for(const token of [
   "menu-segmented",
   "menu-theme-segmented",
   "menu-settings-item",
-  "headerMenuPopoverIn",
-  ".header.menu-open .account-button{",
-  "visibility:visible!important;",
-  "pointer-events:auto!important;"
+  "headerMenuPopoverIn"
 ]) assert.ok(css.includes(token),`menu redesign contract missing: ${token}`);
+
+assert.match(css,/\.header\.menu-open \.account-button\{visibility:hidden!important;pointer-events:none!important;\}/, "account button must be hidden and non-interactive while the menu is open");
+assert.doesNotMatch(css,/\.header\.menu-open \.account-button\{[^}]*visibility:\s*visible/i, "no later rule may reactivate the account button while the menu is open");
 
 assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:absolute!important;[\s\S]*?max-height:min\(640px/);
 assert.match(css,/@media\(max-width:760px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:fixed!important;[\s\S]*?inset-inline-start:0!important;[\s\S]*?inset-inline-end:auto!important;/);
