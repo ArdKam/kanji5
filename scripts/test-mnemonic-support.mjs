@@ -192,6 +192,11 @@ assert.match(panel, /plan\.showReading/);
 assert.match(panel, /plan\.showVocabulary/);
 assert.match(sw, /const DATA_CACHE='kanji5-data-v26'/, "Mnemonic component data cache must be versioned");
 assert.match(sw, /kanji-components\.json/, "Component data must be included in the offline data cache");
+assert.match(sw, /kanji-visual-structure\.json/, "Canonical visual structure must be included in the offline data cache");
+const mnemonicLibrary = fs.readFileSync("frontend/src/app/MnemonicsDialog.tsx", "utf8");
+assert.match(mnemonicLibrary, /kanji-visual-structure\.json/, "Prepared mnemonic library must use canonical visual structure");
+assert.doesNotMatch(mnemonicLibrary, /kanji-components\.json/, "Prepared mnemonic library must not use flattened learning dependencies as shape structure");
+
 
 assert.match(panel, /hintFocus\?: MnemonicHintFocus/);
 assert.match(support, /wordStartsWithCharacter/);
