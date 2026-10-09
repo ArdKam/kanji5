@@ -13,6 +13,7 @@ export type Settings = {
 };
 
 export type Snapshot = {
+  customStudyTopicId?: string | null;
   dailySummary?: {
     dueCount?: number;
     newCount?: number;
