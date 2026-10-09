@@ -99,7 +99,7 @@ export function PracticeHome({
     const isSelected = selectedTopicId === topic.id;
     return (
       <button
-        className={"practice-topic-card" + (isSelected ? " is-selected" : "")}
+        className={"surface practice-topic-card" + (isSelected ? " is-selected" : "")}
         type="button"
         key={topic.id}
         aria-pressed={isSelected}
@@ -131,7 +131,7 @@ export function PracticeHome({
         <p>{t("practiceIntro", language)}</p>
       </header>
 
-      <section className="practice-home-hero" aria-labelledby="practice-recommended-title">
+      <section className="surface card practice-home-hero" aria-labelledby="practice-recommended-title">
         <div className="practice-home-hero-copy">
           <p className="practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
           <h3 id="practice-recommended-title">{t("practiceRecommendedTitle", language)}</h3>
@@ -152,11 +152,11 @@ export function PracticeHome({
         </div>
 
         {catalogLoading && !catalog.length ? (
-          <div className="practice-topic-status" role="status">{t("practiceTopicsLoading", language)}</div>
+          <div className="surface practice-topic-status" role="status">{t("practiceTopicsLoading", language)}</div>
         ) : null}
 
         {catalogError && !catalog.length ? (
-          <div className="practice-topic-status is-error" role="alert">
+          <div className="surface practice-topic-status is-error" role="alert">
             <span>{t("practiceTopicsLoadError", language)}</span>
             <button className="button secondary" type="button" onClick={() => setCatalogAttempt(value => value + 1)}>
               {t("practiceTopicsRetry", language)}
@@ -179,7 +179,7 @@ export function PracticeHome({
         ) : null}
 
         {selectedTopic ? (
-          <section className="practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
+          <section className="surface practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
             <div className="practice-topic-selected-copy">
               <p className="practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
               <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
