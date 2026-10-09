@@ -80,6 +80,7 @@ export function TopicLearningDialog({
       focus,
       limit: 20,
       characterScope: selectedTopic.characters,
+      topicId: selectedTopic.id,
     });
     if (started) onClose();
     else setMessage(learningCopy("topicNoEligibleItems", language));
