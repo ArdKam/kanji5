@@ -1,6 +1,6 @@
 # Kanji5 — Curated Kanji Topic Taxonomy
 
-**Taxonomy version:** 2  
+**Taxonomy version:** 3  
 **Status:** Expanded Dictionary topic filters  
 **Scope:** Content navigation only; this is not a new learning scheduler or a statement of mastery.
 
@@ -8,11 +8,11 @@
 
 The pinned `kanji-data.json` dataset contains 2,136 kanji with glosses, readings, school-grade, and JLPT metadata. It does not include a reviewed topical taxonomy. Matching English gloss strings mechanically can misclassify ambiguous meanings, so membership remains explicit and curated.
 
-## Version 2 coverage
+## Version 3 coverage after semantic QA
 
-The taxonomy provides **24 topics**, **1,025 topic assignments**, and **741 unique tagged kanji** (34.7% of the catalog). A character may belong to multiple relevant topics. Coverage is still partial by design: a missing topic assignment does not mean a kanji is irrelevant, and untagged kanji remain searchable and visible when “All topics” is selected.
+The taxonomy provides **24 topics**, **1,012 topic assignments**, and **737 unique tagged kanji** (34.5% of the catalog). A character may belong to multiple relevant topics. Coverage is still partial by design: a missing topic assignment does not mean a kanji is irrelevant, and untagged kanji remain searchable and visible when “All topics” is selected.
 
-The first-edition taxonomy contained 16 topics, 495 assignments, and 422 unique characters. Version 2 adds eight topic families and widens membership in several existing families.
+The first-edition taxonomy contained 16 topics, 495 assignments, and 422 unique characters. Version 2 added eight topic families and widened membership in several existing families. Version 3 is a quality correction, not a coverage expansion: it removes 13 overbroad topic assignments and reduces unique coverage from 741 to 737 characters.
 
 The authoritative entries, bilingual labels, and exact character membership live in `frontend/src/app/kanji-topics.json`. They are bundled with the React app, so filtering needs no network request and works offline.
 
@@ -44,6 +44,24 @@ The authoritative entries, bilingual labels, and exact character membership live
 | `health` | Health & medicine | سلامت و پزشکی |
 | `industry` | Technology & industry | فناوری و صنعت |
 | `culture` | Arts & culture | هنر و فرهنگ |
+
+
+## Semantic QA — first conservative pass (2026-10-09)
+
+Reviewed the current memberships against the pinned catalog's meanings. The goal is not to make every association a literal one-word gloss: well-established, transparent compounds can justify a topic (for example, `学生` / `先生` for school, `新聞` / `放送` for media, `貿易` for finance, and `鉄道` for transport). However, a generic or incidental sense alone is not enough.
+
+This pass removes the following **13 overbroad assignments**; these characters remain available in the general Dictionary and may still belong to other topics:
+
+| Topic | Removed kanji | Reason |
+|---|---|---|
+| People & society | `学` | Its pinned meanings are study/learning/science, not a person or social role. |
+| School & learning | `明`, `黒`, `白` | Brightness and the colors black/white are not school-specific meanings or clear school-topic anchors on their own. |
+| Places & travel | `銀`, `物`, `建` | Silver, generic things/objects, and the verb “build” do not denote a place; `銀` and `物` remain in other relevant topic families. |
+| Government & law | `庫` | “Warehouse/storehouse” alone does not establish a government or law association. |
+| Thoughts & feelings | `絶` | “Sever/discontinue/cut off” is not itself an emotion; any link through compounds such as despair is too indirect for this tag. |
+| Arts & culture | `福`, `授`, `統`, `産` | Blessing/fortune, impart/grant, rule/relationship, and products/birth are too broad or belong more naturally to other domains without a specific arts/culture meaning. |
+
+The regression test now asserts these exclusions in addition to catalog integrity, bilingual labels, representative membership, duplicate checks, and audited counts. This is a conservative first pass, not a claim that every remaining association is beyond debate. Future edits should record both the semantic rationale and any common-compound basis for context-dependent entries.
 
 ## Product and architecture rules
 
