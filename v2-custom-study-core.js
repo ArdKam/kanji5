@@ -1,4 +1,4 @@
-export const CUSTOM_STUDY_VERSION = "1.0.0";
+export const CUSTOM_STUDY_VERSION = "1.1.0";
 const LEVELS = new Set(["all", "N5", "N4", "N3", "N2", "N1"]);
 const FOCUSES = new Set(["available", "due", "new", "weak", "mistakes"]);
 
