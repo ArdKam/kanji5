@@ -40,38 +40,129 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     } catch { /* Ignore malformed URLs. */ }
   });
 
-  const capture = async (name) => {
+  let currentScrollTarget = { kind: 'page-top', label: 'Page top', scrollTop: 0, maxScrollTop: 0 };
+
+  const resetScrollPositions = async () => {
+    await page.evaluate(() => {
+      document.scrollingElement?.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      for (const element of document.querySelectorAll('body *')) {
+        const style = getComputedStyle(element);
+        if (element.scrollHeight > element.clientHeight + 24 && /(auto|scroll)/.test(style.overflowY)) {
+          element.scrollTop = 0;
+        }
+      }
+    });
+  };
+
+  const capture = async (name, { resetScroll = true, suffix = 'viewport' } = {}) => {
+    if (resetScroll) {
+      await resetScrollPositions();
+      currentScrollTarget = { kind: 'page-top', label: 'Page top', scrollTop: 0, maxScrollTop: 0 };
+    }
     await page.evaluate(async () => { await document.fonts.ready; });
-    const screenshot = path.join(outputDir, name + '.png');
-    await page.screenshot({ path: screenshot, fullPage: true, animations: 'disabled' });
+    const screenshot = path.join(outputDir, name + '-' + suffix + '.png');
+    // Capture the visible browser viewport. Full-page stitching misrepresents fixed
+    // dialogs and navigation because it places them at document rather than screen coordinates.
+    await page.screenshot({ path: screenshot, fullPage: false, animations: 'disabled', caret: 'hide' });
     const state = await page.evaluate(() => {
-      const visible = (element) => {
+      const visible = element => {
         const rect = element.getBoundingClientRect();
         const style = getComputedStyle(element);
         return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
       };
+      const label = element => {
+        const cls = typeof element.className === 'string' ? element.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
+        return element.id ? '#' + element.id : (element.tagName.toLowerCase() + (cls ? '.' + cls : ''));
+      };
       const tabs = [...document.querySelectorAll('.experience-tab')];
       const currentTab = tabs.find(tab => tab.getAttribute('aria-current') === 'page');
-      const dialogs = [...document.querySelectorAll('[role="dialog"], dialog')].filter(visible).map(dialog =>
-        (dialog.getAttribute('aria-label') || dialog.getAttribute('aria-labelledby') ||
-         dialog.querySelector('h1,h2,h3')?.textContent || dialog.className || dialog.tagName).toString().trim()
-      );
+      const dialogs = [...document.querySelectorAll('[role="dialog"], dialog')].filter(visible).map(dialog => {
+        const labelledBy = dialog.getAttribute('aria-labelledby');
+        return (dialog.getAttribute('aria-label') ||
+          (labelledBy ? document.getElementById(labelledBy)?.textContent : '') ||
+          dialog.querySelector('h1,h2,h3')?.textContent || dialog.className || dialog.tagName).toString().trim();
+      });
+      const scrollables = [...document.querySelectorAll('body *')].filter(element => {
+        if (!visible(element) || element.scrollHeight <= element.clientHeight + 24) return false;
+        return /(auto|scroll)/.test(getComputedStyle(element).overflowY);
+      }).map(element => ({
+        element: label(element),
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+        scrollTop: Math.round(element.scrollTop),
+        maxScrollTop: element.scrollHeight - element.clientHeight,
+      })).sort((a, b) => (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight)).slice(0, 8);
       const brokenImages = [...document.images]
         .filter(image => image.complete && image.naturalWidth === 0)
         .map(image => image.currentSrc || image.src);
+      const fixedElements = [...document.querySelectorAll('body *')].filter(element => {
+        if (!visible(element)) return false;
+        return ['fixed', 'sticky'].includes(getComputedStyle(element).position);
+      }).map(element => {
+        const rect = element.getBoundingClientRect();
+        return {
+          element: label(element), position: getComputedStyle(element).position, zIndex: getComputedStyle(element).zIndex,
+          rect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
+        };
+      }).slice(0, 20);
+      const scroller = document.scrollingElement;
       return {
         title: document.title,
         language: document.documentElement.lang,
         direction: document.documentElement.dir,
         viewport: { width: innerWidth, height: innerHeight },
         document: { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight },
+        pageScroll: { x: Math.round(window.scrollX), y: Math.round(window.scrollY),
+          maxY: Math.max(0, (scroller?.scrollHeight || 0) - innerHeight) },
         horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
         currentTab: currentTab?.textContent?.trim() || null,
         visibleDialogs: dialogs,
+        scrollables,
+        fixedElements,
         brokenImages,
       };
     });
-    report.screens.push({ name, file: path.basename(screenshot), ...state });
+    report.screens.push({ name, file: path.basename(screenshot), screenshotMode: 'viewport', scrollTarget: currentScrollTarget, ...state });
+  };
+
+  const captureScrolled = async (name, { scope = 'page', ratio = 0.78 } = {}) => {
+    currentScrollTarget = await page.evaluate(({ scope, ratio }) => {
+      const visible = element => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return rect.width > 0 && rect.height > 0 && style.display !== 'none' &&
+          style.visibility !== 'hidden' && style.opacity !== '0';
+      };
+      const label = element => {
+        const cls = typeof element.className === 'string' ? element.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
+        return element.id ? '#' + element.id : (element.tagName.toLowerCase() + (cls ? '.' + cls : ''));
+      };
+      const activeDialogs = [...document.querySelectorAll('[role="dialog"], dialog')].filter(visible);
+      const scopeRoot = scope === 'dialog' && activeDialogs.length
+        ? activeDialogs[activeDialogs.length - 1]
+        : document.body;
+      const candidates = [...scopeRoot.querySelectorAll('*')].filter(element => {
+        if (!visible(element) || element.scrollHeight <= element.clientHeight + 24) return false;
+        return /(auto|scroll)/.test(getComputedStyle(element).overflowY);
+      }).sort((a, b) =>
+        (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight)
+      );
+      if (candidates.length) {
+        const target = candidates[0];
+        const maxScrollTop = Math.max(0, target.scrollHeight - target.clientHeight);
+        target.scrollTo({ top: Math.round(maxScrollTop * Math.max(0, Math.min(1, ratio))), behavior: 'instant' });
+        return { kind: 'element', label: label(target), scrollTop: Math.round(target.scrollTop), maxScrollTop };
+      }
+      if (scope === 'page') {
+        const root = document.scrollingElement;
+        const maxScrollTop = Math.max(0, (root?.scrollHeight || 0) - innerHeight);
+        window.scrollTo({ top: Math.round(maxScrollTop * Math.max(0, Math.min(1, ratio))), behavior: 'instant' });
+        return { kind: 'page', label: 'window/document', scrollTop: Math.round(window.scrollY), maxScrollTop };
+      }
+      return { kind: 'none', label: 'No scrollable dialog content', scrollTop: 0, maxScrollTop: 0 };
+    }, { scope, ratio });
+    await page.waitForTimeout(120);
+    await capture(name, { resetScroll: false, suffix: 'scrolled' });
   };
 
   try {
@@ -83,6 +174,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
         sessionStorage.setItem('kanji5-visual-audit-initialized', '1');
       }
     });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     const onboarding = page.locator('[data-testid="onboarding-flow"]');
@@ -93,17 +185,21 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await capture('02-onboarding-persian-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('03-onboarding-persian-mobile');
+    await captureScrolled('03-onboarding-persian-mobile-bottom', { scope: 'page', ratio: 1 });
     await onboarding.getByRole('button', { name: 'EN', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
     await capture('04-onboarding-mobile');
+    await captureScrolled('04-onboarding-mobile-bottom', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 1440, height: 960 });
 
     await onboarding.getByRole('button', { name: 'Skip setup', exact: true }).click();
     await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 15_000 });
     await capture('05-learning-desktop');
+    await captureScrolled('05-learning-desktop', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('06-learning-mobile');
+    await captureScrolled('06-learning-mobile', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 1440, height: 960 });
 
     const tabs = page.locator('.experience-nav .experience-tab');
@@ -111,8 +207,10 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await tabs.nth(1).click();
     await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 15_000 });
     await capture('07-active-recall-desktop');
+    await captureScrolled('07-active-recall-desktop', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('08-active-recall-mobile');
+    await captureScrolled('08-active-recall-mobile', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 1440, height: 960 });
 
     await tabs.nth(0).click();
@@ -121,8 +219,10 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('.kanji-catalog-tile').first()).toBeVisible({ timeout: 15_000 });
     await capture('09-dictionary-desktop');
+    await captureScrolled('09-dictionary-desktop-mid-catalog', { scope: 'page', ratio: 0.5 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('10-dictionary-mobile');
+    await captureScrolled('10-dictionary-mobile-mid-catalog', { scope: 'page', ratio: 0.5 });
 
     await page.locator('.dictionary-page-search input').fill('学');
     await expect(page.locator('.kanji-catalog-tile').first()).toBeVisible({ timeout: 10_000 });
@@ -132,6 +232,10 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     const dictionaryDialog = page.locator('.dictionary-card-dialog:visible');
     await expect(dictionaryDialog).toBeVisible({ timeout: 10_000 });
     await capture('12-dictionary-card-desktop');
+    await captureScrolled('12-dictionary-card-desktop-dialog', { scope: 'dialog', ratio: 0.8 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await capture('12-dictionary-card-mobile');
+    await captureScrolled('12-dictionary-card-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
     await dictionaryDialog.getByRole('button', { name: 'Close', exact: true }).click();
     await expect(dictionaryDialog).toBeHidden();
 
@@ -152,20 +256,29 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
 
     let dialog = await openMenuItem('Settings');
     await capture('13-settings-desktop');
+    await captureScrolled('13-settings-desktop-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('14-settings-mobile');
+    await captureScrolled('14-settings-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
     dialog = await openMenuItem('Stats');
     await capture('15-statistics-desktop');
+    await captureScrolled('15-statistics-desktop-dialog', { scope: 'dialog', ratio: 0.8 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await capture('15-statistics-mobile');
+    await captureScrolled('15-statistics-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
+    await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
     dialog = await openMenuItem('Reading lab');
     await expect(dialog.locator('.reading-lab')).toBeVisible({ timeout: 10_000 });
     await capture('16-reading-lab-desktop');
+    await captureScrolled('16-reading-lab-desktop-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('17-reading-lab-mobile');
+    await captureScrolled('17-reading-lab-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
@@ -175,6 +288,10 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
       const accountDialog = page.locator('.account-dialog:visible');
       await expect(accountDialog).toBeVisible({ timeout: 10_000 });
       await capture('18-account-dialog-desktop');
+      await page.setViewportSize({ width: 390, height: 844 });
+      await capture('18-account-dialog-mobile');
+      await captureScrolled('18-account-dialog-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
+      await page.setViewportSize({ width: 1440, height: 960 });
       await closeDialog(accountDialog);
     }
 
@@ -187,14 +304,17 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 15_000 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('19-learning-persian-mobile');
+    await captureScrolled('19-learning-persian-mobile', { scope: 'page', ratio: 1 });
 
     await page.locator('.experience-nav .experience-tab').nth(1).click();
     await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 15_000 });
     await capture('20-active-recall-persian-mobile');
+    await captureScrolled('20-active-recall-persian-mobile', { scope: 'page', ratio: 1 });
 
     await page.locator('.experience-nav .experience-tab').nth(2).click();
     await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 15_000 });
     await capture('21-dictionary-persian-mobile');
+    await captureScrolled('21-dictionary-persian-mobile-mid-catalog', { scope: 'page', ratio: 0.5 });
 
     await page.getByRole('button', { name: 'بیشتر', exact: true }).click();
     const persianMenu = page.locator('#header-tools-menu');
@@ -203,6 +323,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     const persianSettings = page.getByRole('dialog').last();
     await expect(persianSettings).toBeVisible({ timeout: 10_000 });
     await capture('22-settings-persian-mobile');
+    await captureScrolled('22-settings-persian-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
   } finally {
     await fs.writeFile(path.join(outputDir, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   }
