@@ -27,6 +27,9 @@ function renderComponent(component: VisualStructureNode, path: string, language:
       ? (language === "fa" ? "بخشی از " : "Part of ") + component.original
       : (language === "fa" ? "شکل جزئی" : "Partial form")
     : "";
+  const originalLabel = !component.partial && component.original && component.original !== component.character
+    ? (language === "fa" ? "گونهٔ " : "Form of ") + component.original
+    : "";
   const partLabel = component.part
     ? (language === "fa" ? "قطعهٔ " : "Fragment ") + component.part
     : "";
@@ -40,6 +43,7 @@ function renderComponent(component: VisualStructureNode, path: string, language:
         <span className={classes.join(" ")} lang="ja">{component.character}</span>
         {label ? <span className="component-breakdown-label">{label}</span> : null}
         {partialLabel ? <span className="component-breakdown-label component-breakdown-partial">{partialLabel}</span> : null}
+        {originalLabel ? <span className="component-breakdown-label component-breakdown-partial">{originalLabel}</span> : null}
         {partLabel ? <span className="component-breakdown-label component-breakdown-partial">{partLabel}</span> : null}
         {position ? <span className="component-breakdown-label component-breakdown-position">{position}</span> : null}
         {component.components.length ? (
