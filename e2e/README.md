@@ -53,3 +53,29 @@ Use `scripts/test-*.mjs` for deterministic contracts that do not need a browser.
 Use `e2e/*.spec.mjs` when correctness depends on DOM state, user interaction, browser APIs, routing, PWA behavior, or visual/browser integration.
 
 When a UI change is made under `frontend/`, check the current React workflow before adding or modifying a historical `v1.*` browser suite.
+
+## Automated visual audit
+
+Use the purpose-built visual audit to review the real React product without manually navigating and screenshotting every screen:
+
+```bash
+npm run e2e:visual
+```
+
+For a local run, prepare the same built assets and browser used by CI first:
+
+```bash
+npm ci
+cd frontend
+npm ci
+npm run typecheck
+npm run build
+cd ..
+node scripts/vendor-supabase.mjs
+npx playwright install chrome
+npm run e2e:visual
+```
+
+The test writes viewport-sized PNG screenshots (rather than relying on stitched full-page captures) and `test-results/visual-audit/report.json`. It covers first-run onboarding in English and Persian, Learning, Active Recall, Dictionary/search/card detail, Settings, Statistics, Reading Lab, and Account, including desktop/mobile and RTL/LTR views. For long content, it saves separate screenshots after scrolling the page or the active dialog's own content. The report records viewport and document dimensions, scroll position and target, scrollable containers, visible fixed/sticky elements, direction, horizontal overflow, broken images, page exceptions, console errors, and first-party network failures.
+
+The **Automated UI visual audit** GitHub Actions workflow runs on matching pull requests or can be started manually from Actions → Automated UI visual audit → Run workflow. It uploads the images and report as a 14-day artifact and places a direct artifact link and summary metrics in the workflow summary. This makes the evidence retrievable for review without asking the project owner to supply screenshots.
