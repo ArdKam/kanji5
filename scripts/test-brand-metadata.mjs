@@ -5,6 +5,9 @@ const index = await fs.readFile("index.html", "utf8");
 const manifest = JSON.parse(await fs.readFile("manifest.webmanifest", "utf8"));
 const app = await fs.readFile("frontend/src/app/App.tsx", "utf8");
 const onboarding = await fs.readFile("frontend/src/app/onboarding/OnboardingFlow.tsx", "utf8");
+const backups = await fs.readFile("frontend/src/app/DataBackup.tsx", "utf8");
+const errorBoundary = await fs.readFile("frontend/src/app/ReactErrorBoundary.tsx", "utf8");
+const startup = await fs.readFile("react-entry.js", "utf8");
 const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
@@ -44,5 +47,8 @@ for (const [name, source] of [["rinemi-logo.svg", logo], ["rinemi-logo-dark.svg"
 assert.ok(logo.includes("#505F83") && logo.includes("#D6A1AA"), "primary logo must use indigo and sakura");
 assert.ok(logoDark.includes("#F7F4EE") && logoDark.includes("#A8B5D8"), "dark logo must preserve readable contrast");
 assert.ok(logoMono.includes("#292B2D"), "monochrome logo must use the sumi ink color");
+assert.ok(backups.includes('`rinemi-backup-${date}.json`') && !backups.includes('`kanji5-backup-${date}.json`'), "user-exported backup filename must use Rinemi");
+assert.ok(errorBoundary.includes('`rinemi-error-backup-${date}.json`'), "error-recovery backup filename must use Rinemi");
+assert.ok(startup.includes('`rinemi-startup-backup-${new Date().toISOString().slice(0,10)}.json`'), "startup recovery backup filename must use Rinemi");
 
 console.log("Rinemi brand metadata contract passed.");
