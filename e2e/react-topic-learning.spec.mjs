@@ -44,12 +44,35 @@ test("learning card and rating footer stay clear of the fixed bottom navigation"
 });
 
 test("topic learning opens from Learning and starts a scoped topic session", async ({ page }) => {
+  page.on("pageerror", error => console.log("[topic-learning pageerror]", error.stack || error.message));
+  page.on("console", message => {
+    if (message.type() === "error") console.log("[topic-learning console]", message.text());
+  });
+  page.on("requestfailed", request => console.log("[topic-learning requestfailed]", request.url(), request.failure()?.errorText || ""));
+
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
   await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 20000 });
   await page.getByRole("button", { name: "Learn by topic" }).click();
 
   const dialog = page.getByRole("dialog", { name: "Choose a learning topic" });
+  await page.waitForTimeout(500);
+  if (!(await dialog.isVisible().catch(() => false))) {
+    const state = await page.evaluate(() => ({
+      rootPresent: Boolean(document.querySelector("#root .app-shell")),
+      bodyText: document.body.innerText.slice(-1800),
+      dialogs: [...document.querySelectorAll("dialog")].map(item => ({
+        className: item.className,
+        open: item.open,
+        ariaLabelledBy: item.getAttribute("aria-labelledby"),
+        text: item.innerText.slice(0, 500),
+      })),
+      topicResources: performance.getEntriesByType("resource")
+        .map(item => item.name)
+        .filter(name => name.includes("TopicLearningDialog")),
+    }));
+    console.log("[topic-learning state]", JSON.stringify(state));
+  }
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".topic-learning-tile")).toHaveCount(24);
   await dialog.getByRole("button", { name: /Nature & land/ }).click();
