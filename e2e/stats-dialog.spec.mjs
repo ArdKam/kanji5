@@ -46,7 +46,7 @@ test('Statistics dashboard switches labels consistently to English',async({page}
   const englishDialog=page.getByRole('dialog');
   await expect(englishDialog.locator('.stats-header h2')).toHaveText('Your learning progress');
   await expect(englishDialog.locator('.stats-activity')).toContainText('7-day review activity');
-  await expect(englishDialog.locator('.stats-overview')).toContainText('Jōyō coverage');
+  await expect(englishDialog.locator('.stats-overview')).toContainText("Today's reviews");
 });
 
 
@@ -131,5 +131,5 @@ test('Statistics uses persisted kanji exposure for studied coverage',async({page
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   const dialog=await openStats(page);
   await expect(dialog.locator('.stats-overview-primary')).toContainText('۱ / ۲۱۳۶');
-  await expect(dialog.locator('.stats-overview')).toContainText('۰%');
+  await expect(dialog.locator('.stats-overview-track > span')).toHaveAttribute('style', /width:\s*0%/);
 });
