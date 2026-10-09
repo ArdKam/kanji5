@@ -2345,7 +2345,7 @@ The feature branch was validated at PR head `22221cd27e1175b20c3e39ad78a30ed3c7f
 - [v1.8/v1.9 learning-engine validation](https://github.com/ArdKam/kanji5/actions/runs/37923425986) — success.
 - WebKit compatibility — success within the React workflow.
 
-The post-merge main build and Pages deployment must be recorded from their own current-main run evidence; PR validation alone is not proof that the live site has updated.
+Post-merge evidence for exact current-main SHA `e56247730030916fd813ed3c4360b328fc4a2627`: [React presentation build](https://github.com/ArdKam/kanji5/actions/runs/37924302201) passed all 50 workflow steps; [v1.8/v1.9 engine validation](https://github.com/ArdKam/kanji5/actions/runs/37924302208) passed; [GitHub Pages deployment and live verification](https://github.com/ArdKam/kanji5/actions/runs/37925097594) succeeded. The live-verification step checked HTTP 200 and exact SHA-256 equality for the staged/live `index.html`, `react-entry.js`, `sw.js`, React JS/CSS bundles, and pinned Supabase runtime; it emitted `LIVE_PAGES_ARTIFACT_VERIFIED`. The live offline/core-product E2E also passed.
 
 ## Scope and remaining content-quality work
 
