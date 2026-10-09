@@ -97,6 +97,11 @@ test("placement reload resumes the same sampled paper and scored answers", async
 
   await onboarding.locator(".kanji5-onboarding-option").first().click();
   await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 2 / 20");
+  await expect.poll(() => page.evaluate(() => {
+    const raw = localStorage.getItem("kanji5-onboarding-progress-v2");
+    try { const value = raw ? JSON.parse(raw) : null; return [value?.placementIndex, value?.draft?.placementAnswers?.length]; }
+    catch { return null; }
+  })).toEqual([1, 1]);
   const before = await page.evaluate(() => {
     const raw = localStorage.getItem("kanji5-onboarding-progress-v2");
     if (!raw) return null;
