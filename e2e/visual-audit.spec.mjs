@@ -212,6 +212,8 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await captureScrolled('05-learning-desktop', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('06-learning-mobile');
+    const navBackground = await page.locator('.experience-nav').evaluate(element => getComputedStyle(element).backgroundColor);
+    expect(navBackground).toBe('rgb(252, 250, 244)');
     await captureScrolled('06-learning-mobile', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 1440, height: 960 });
 
@@ -235,6 +237,17 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await captureScrolled('09-dictionary-desktop-mid-catalog', { scope: 'page', ratio: 0.5 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('10-dictionary-mobile');
+    const filterLayout = await page.locator('.dictionary-controls>.dictionary-filter-row').evaluate(row => {
+      const level = row.querySelector('.dictionary-level-filter');
+      const more = row.querySelector('details.dictionary-advanced-filters summary');
+      const bounds = [level, more].filter(Boolean).map(element => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth + 1;
+      });
+      return { display: level ? getComputedStyle(level).display : '', inViewport: bounds.length === 2 && bounds.every(Boolean) };
+    });
+    expect(filterLayout.display).toBe('grid');
+    expect(filterLayout.inViewport).toBe(true);
     await captureScrolled('10-dictionary-mobile-mid-catalog', { scope: 'page', ratio: 0.5 });
 
     await page.locator('.dictionary-page-search input').fill('学');
@@ -277,6 +290,9 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('14-settings-mobile');
     await captureScrolled('14-settings-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
+    await expect(dialog.locator('.settings-page-header')).toBeInViewport();
+    await expect(dialog.locator('.settings-save-region')).toBeInViewport();
+    await expect(dialog.locator('.dialog-close')).toBeInViewport();
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
@@ -285,6 +301,8 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await captureScrolled('15-statistics-desktop-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('15-statistics-mobile');
+    await expect(dialog.locator('.stats-activity-section .empty-text')).toBeVisible();
+    await expect(dialog.locator('.activity-chart')).toHaveCount(0);
     await captureScrolled('15-statistics-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
@@ -295,7 +313,10 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await captureScrolled('16-reading-lab-desktop-dialog', { scope: 'dialog', ratio: 0.8 });
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('17-reading-lab-mobile');
+    await expect(dialog.locator('.reading-lab')).toHaveCSS('overflow-y', 'auto');
     await captureScrolled('17-reading-lab-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
+    await expect(dialog.locator('h2')).toBeInViewport();
+    await expect(dialog.locator('.dialog-close')).toBeInViewport();
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
