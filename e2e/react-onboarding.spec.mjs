@@ -56,10 +56,10 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.locator(".kanji5-onboarding-stimulus")).toBeVisible({ timeout: 20000 });
   await expect(onboarding.getByRole("button", { name: "Next question", exact: true })).toHaveCount(0);
-  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 16");
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 20");
   const progress = onboarding.getByRole("progressbar", { name: "Question progress" });
   await expect(progress).toHaveAttribute("aria-valuenow", "1");
-  await expect(progress).toHaveAttribute("aria-valuemax", "16");
+  await expect(progress).toHaveAttribute("aria-valuemax", "20");
 
   const surface = onboarding.locator(".kanji5-onboarding-main");
   const box = await surface.boundingBox();
@@ -68,18 +68,21 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.5, { steps: 5 });
   await page.mouse.up();
-  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 16");
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 20");
 
-  for (let index = 0; index < 16; index += 1) {
+  for (let index = 0; index < 20; index += 1) {
     await onboarding.locator(".kanji5-onboarding-option").first().click();
     if (index === 0) await expect(progress).toHaveAttribute("aria-valuenow", "2");
-    if (index < 15) {
-      await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText(`Question ${index + 2} / 16`);
+    if (index < 19) {
+      await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText(`Question ${index + 2} / 20`);
     }
   }
 
   await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-result")).toContainText(/N[2-5]/);
+  await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toBeVisible();
+  await expect(onboarding.locator(".kanji5-onboarding-placement-breakdown .kanji5-onboarding-placement-band")).toHaveCount(4);
+  await expect(onboarding.locator(".kanji5-onboarding-placement-status")).toBeVisible();
   await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
 });
