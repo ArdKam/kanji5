@@ -60,7 +60,7 @@ export function OnboardingEntry({
   const [placementLoading, setPlacementLoading] = useState(false);
   const [placementError, setPlacementError] = useState("");
   const [placementRetry, setPlacementRetry] = useState(0);
-  const [placementSeed, setPlacementSeed] = useState(() => Date.now() >>> 0);
+  const [placementSeed, setPlacementSeed] = useState(() => initialProgress?.placementSeed ?? (Date.now() >>> 0));
   // The first-run shell must stay interactive while the authoritative engine warms in the background.
   const [busy, setBusy] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -117,7 +117,7 @@ export function OnboardingEntry({
   const resolvePlacement = useCallback(
     (answers: OnboardingCompletion["draft"]["placementAnswers"]) => {
       const map = Object.fromEntries(answers.map(answer => [answer.questionId, answer.optionId]));
-      return scorePlacementAnswers(placementRecords, map).suggestedLevel;
+      return scorePlacementAnswers(placementRecords, map);
     },
     [placementRecords],
   );
@@ -224,11 +224,12 @@ export function OnboardingEntry({
         <OnboardingFlow
           language={language}
           placementQuestions={placementQuestions}
+          placementSeed={placementSeed}
           placementLoading={placementLoading}
           placementError={placementError}
           onRetryPlacement={() => setPlacementRetry(value => value + 1)}
           onPlacementComplete={resolvePlacement}
-          onPlacementRestart={() => setPlacementSeed(seed => ((seed + 0x9e3779b9) ^ (Date.now() >>> 0)) >>> 0)}
+          onPlacementRestart={() => { setPlacementRecords([]); setPlacementSeed(seed => ((seed + 0x9e3779b9) ^ (Date.now() >>> 0)) >>> 0); }}
           initialProgress={initialProgress}
           busy={busy}
           onSkip={() => void handleSkip()}
