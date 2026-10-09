@@ -101,18 +101,18 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await onboarding.getByRole('button', { name: 'Skip setup', exact: true }).click();
     await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 15_000 });
-    await capture('03-learning-desktop');
+    await capture('05-learning-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('04-learning-mobile');
+    await capture('06-learning-mobile');
     await page.setViewportSize({ width: 1440, height: 960 });
 
     const tabs = page.locator('.experience-nav .experience-tab');
     await expect(tabs).toHaveCount(3);
     await tabs.nth(1).click();
     await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 15_000 });
-    await capture('05-active-recall-desktop');
+    await capture('07-active-recall-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('06-active-recall-mobile');
+    await capture('08-active-recall-mobile');
     await page.setViewportSize({ width: 1440, height: 960 });
 
     await tabs.nth(0).click();
@@ -120,18 +120,18 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await tabs.nth(2).click();
     await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('.kanji-catalog-tile').first()).toBeVisible({ timeout: 15_000 });
-    await capture('07-dictionary-desktop');
+    await capture('09-dictionary-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('08-dictionary-mobile');
+    await capture('10-dictionary-mobile');
 
     await page.locator('.dictionary-page-search input').fill('学');
     await expect(page.locator('.kanji-catalog-tile').first()).toBeVisible({ timeout: 10_000 });
-    await capture('09-dictionary-search-mobile');
+    await capture('11-dictionary-search-mobile');
     await page.setViewportSize({ width: 1440, height: 960 });
     await page.locator('.kanji-catalog-tile').first().click();
     const dictionaryDialog = page.locator('.dictionary-card-dialog:visible');
     await expect(dictionaryDialog).toBeVisible({ timeout: 10_000 });
-    await capture('10-dictionary-card-desktop');
+    await capture('12-dictionary-card-desktop');
     await dictionaryDialog.getByRole('button', { name: 'Close', exact: true }).click();
     await expect(dictionaryDialog).toBeHidden();
 
@@ -151,21 +151,21 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     };
 
     let dialog = await openMenuItem('Settings');
-    await capture('11-settings-desktop');
+    await capture('13-settings-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('12-settings-mobile');
+    await capture('14-settings-mobile');
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
     dialog = await openMenuItem('Stats');
-    await capture('13-statistics-desktop');
+    await capture('15-statistics-desktop');
     await closeDialog(dialog);
 
     dialog = await openMenuItem('Reading lab');
     await expect(dialog.locator('.reading-lab')).toBeVisible({ timeout: 10_000 });
-    await capture('14-reading-lab-desktop');
+    await capture('16-reading-lab-desktop');
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('15-reading-lab-mobile');
+    await capture('17-reading-lab-mobile');
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
