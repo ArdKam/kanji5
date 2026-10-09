@@ -1,4 +1,4 @@
-# Kanji5 Runtime Dependency Inventory
+# Rinemi Runtime Dependency Inventory
 
 As of the architecture/build cleanup branch on 2026-10-01.
 
