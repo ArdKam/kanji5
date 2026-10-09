@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 const index = await fs.readFile("index.html", "utf8");
 const manifest = JSON.parse(await fs.readFile("manifest.webmanifest", "utf8"));
 const app = await fs.readFile("frontend/src/app/App.tsx", "utf8");
+const onboarding = await fs.readFile("frontend/src/app/onboarding/OnboardingFlow.tsx", "utf8");
 const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
@@ -23,6 +24,7 @@ assert.ok(manifest.description === "Japanese kanji learning with adaptive spaced
 assert.ok(manifest.theme_color === "#505F83" && manifest.background_color === "#F7F4EE", "PWA colors must match the Rinemi palette");
 assert.ok(manifest.display === "standalone" && manifest.start_url === "./" && manifest.scope === "./", "PWA install paths and display mode must remain stable");
 assert.ok(app.includes('<h1 dir="ltr">Rinemi</h1>') && app.includes('className="header-brand-mark" src="./icon.svg"'), "main app header must render the wordmark and brand mark");
+assert.ok(onboarding.includes("<strong>Rinemi</strong>") && !onboarding.includes("<strong>Kanji5</strong>"), "onboarding header must use Rinemi rather than the legacy brand");
 assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — یادگیری کانجی ژاپنی" : "Rinemi — Japanese kanji learning";'), "dynamic document title must use Rinemi in both languages");
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
