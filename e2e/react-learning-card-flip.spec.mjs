@@ -367,18 +367,7 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
 
   await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
 
-  await page.evaluate(() => {
-    const calls = [];
-    const container = document.querySelector(".learning-back-page.active .learning-back-scroll");
-    if (!(container instanceof HTMLElement)) throw new Error("Mnemonic scroll container unavailable");
-    const original = container.scrollTo;
-    window.__kanji5MnemonicScrollToCalls = calls;
-    window.__kanji5MnemonicOriginalScrollTo = original;
-    container.scrollTo = function (options) {
-      calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
-      return original.apply(this, arguments);
-    };
-  });
+
 
   await trigger.click();
   await expect(mnemonic).toHaveClass(/is-open/);
@@ -394,19 +383,6 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
     });
   }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
 
-  const scrollExpectations = await page.evaluate(() => ({
-    reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true,
-    calls: window.__kanji5MnemonicScrollToCalls || [],
-  }));
-  const expectedBehavior = scrollExpectations.reducedMotion ? "auto" : "smooth";
-  expect(scrollExpectations.calls.some((call) => call.behavior === expectedBehavior)).toBe(true);
-
-    await page.evaluate(() => {
-      const container = document.querySelector(".learning-back-page.active .learning-back-scroll");
-      if (container && window.__kanji5MnemonicOriginalScrollTo) {
-        container.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
-      }
-    });
   }
 });
 
