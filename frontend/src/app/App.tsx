@@ -22,7 +22,6 @@ import {
   clearCustomStudyFilter,
   clearTransient,
   dontKnow,
-  getComponentInfo,
   getVisualStructureInfo,
   getVocabulary,
   getMnemonic,
@@ -41,7 +40,6 @@ import {
   saveMnemonic,
   updateSettings,
   type Rating,
-  type ComponentInfo,
   type VisualStructureInfo,
   type Settings,
   type Snapshot,
@@ -88,7 +86,6 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const secondaryMeanings=learnerMeaningModel.secondary??[];
   const referenceMeanings=learnerMeaningModel.reference??[];
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
-  const [componentInfo,setComponentInfo]=useState<ComponentInfo|null>(null);
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
   const [visualStructureReady,setVisualStructureReady]=useState(false);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
@@ -122,13 +119,11 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   useEffect(()=>{
     let active=true;
     if(!card.character){
-      setComponentInfo(null);
       setVisualStructureInfo(null);
       setVisualStructureReady(false);
       setPreparedMnemonic(null);
       return ()=>{active=false};
     }
-    setComponentInfo(null);
     setVisualStructureInfo(null);
     setVisualStructureReady(false);
     const character = card.character;
@@ -140,25 +135,17 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     }).catch(()=>{
       if(active)setPreparedMnemonic(null);
     });
-    const componentInfoPromise = getComponentInfo(card.character);
-    void componentInfoPromise.then(info=>{
-      if(!active)return;
-      setComponentInfo(info);
-      void mnemonicModule.then(({buildPreparedMnemonic})=>{
-        if(!active)return;
-        setPreparedMnemonic(buildPreparedMnemonic(
-          {character,meanings},
-          info.components??[]
-        ));
-      });
-    }).catch(()=>{
-      if(!active)return;
-      setComponentInfo(null);
-    });
     void getVisualStructureInfo(card.character).then(info=>{
       if(!active)return;
       setVisualStructureInfo(info);
       setVisualStructureReady(true);
+      void mnemonicModule.then(({buildPreparedMnemonic})=>{
+        if(!active)return;
+        setPreparedMnemonic(buildPreparedMnemonic(
+          {character,meanings},
+          info.available ? info.components.map(component=>component.character) : []
+        ));
+      });
     }).catch(()=>{
       if(!active)return;
       setVisualStructureInfo(null);
@@ -290,14 +277,14 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     return ()=>{active=false};
   },[card.character,card.examples?.length]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
-  const componentCount=componentInfo?.available?(componentInfo.components??[]).length:0;
+  const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
   const mnemonicSupport=buildMnemonicSupport({
     character:card.character??"",
     meanings:card.meanings??[],
     on:displayedOn,
     kun:displayedKun,
     examples:displayExamples,
-    components:componentInfo?.available?(componentInfo.components??[]):[]
+    components:visualStructureInfo?.available?visualStructureInfo.components.map(component=>component.character):[]
   });
   const mnemonicHintContext={
     character:card.character,
