@@ -217,7 +217,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
 - R10 full i18n audit remains.
 - R11 is **DONE as implementation on current `main`**: merged #463 closes runtime diagnostic gaps across service-worker, dynamic-import, network, migration, sync, and asset failure paths, while the previously merged React render-failure containment provides actionable recovery. Final production failure-injection/release evidence remains required.
-- R12 implementation is **DONE on current `main`** via merged #468 at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`. Production RLS/non-owner denial is verified and the repository security hardening is landed. R12 remains **OPEN for external acceptance only**: the production Supabase Security Advisor still reports `auth_leaked_password_protection`, and the exact post-merge CI/Pages artifact evidence must be recorded before security sign-off.
+- R12 implementation is **DONE on current `main`** via merged #468 at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`. Production RLS/non-owner denial is verified and the repository security hardening is landed. R12 remains **OPEN for external acceptance only**: the production Supabase Security Advisor still reports `auth_leaked_password_protection`; exact post-merge CI/Pages artifact, hash, and live-smoke evidence is now recorded in §2.1.1. Do not claim external security sign-off until that Supabase finding is cleared.
 - R13 Terms, exact production-service disclosure, account/local deletion semantics, retention/export behavior, and target-market legal review remain.
 - R14 docs are now staged in the release path; production smoke verification remains.
 - R16 public Vocabulary/Context provenance rules remain to be finalized.
@@ -239,7 +239,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - D1, D2, D3, D4, D5.
 
 **Current release-critical open PRs not yet counted as complete:**
-- #468: R12 security hardening — **MERGED** into `main` at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`; production security acceptance remains open for the verified leaked-password-protection finding and exact post-merge release evidence.
+- #468: R12 security hardening — **MERGED** into `main` at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`; production acceptance remains open for the verified leaked-password-protection finding. Exact post-merge CI/Pages evidence is recorded in §2.1.1.
 - #465: R13 privacy/legal reconciliation (governance/legal work remains off `main` until reviewed/merged).
 
 **Recently merged and present on `main`:**
