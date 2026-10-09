@@ -37,7 +37,7 @@ test('Learning keeps session feedback compact and does not render analytics deta
   await expect(page.locator('#root .insights')).toHaveCount(0);
   await expect(page.locator('#root .session-feedback')).toHaveCount(0);
   const card=page.locator('#root .learning-card');
-  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await card.getByRole('button',{name:'نمایش معنی و خوانش‌ها'}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   await card.locator('.rating-grid button').nth(2).click();
   await expect(page.locator('#root .session-feedback')).toBeVisible({timeout:10000});

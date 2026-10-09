@@ -180,7 +180,7 @@ test('changing the learning-card information page clears focus before hiding the
 
   await clean(page);
   const card=page.locator('#root .learning-card');
-  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await card.getByRole('button',{name:'نمایش معنی و خوانش‌ها'}).click();
   await expect(card.locator('.learning-back-page.active')).toBeVisible();
 
   const overviewAudio=card.locator('.learning-back-page.active .audio-button').first();
@@ -207,7 +207,7 @@ test('rating a revealed learning card clears focus before the back face is hidde
 
   await clean(page);
   const card=page.locator('#root .learning-card');
-  await card.getByRole('button',{name:'نمایش اطلاعات کانجی'}).click();
+  await card.getByRole('button',{name:'نمایش معنی و خوانش‌ها'}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   await page.waitForTimeout(520);
   const rating=card.locator('.rating-grid button').nth(2);
@@ -283,7 +283,7 @@ test('learning-card Stroke Order is permanently open and has no accordion trigge
   await page.reload();
   const card=page.locator("#root .learning-card");
   await expect(card).toBeVisible({timeout:20000});
-  await card.getByRole("button",{name:"Show kanji information"}).click();
+  await card.getByRole("button",{name:"Reveal meaning & readings"}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   const pager=card.locator(".learning-back-page-nav");
   const nextPage=pager.locator(".learning-back-page-shortcut").last();
