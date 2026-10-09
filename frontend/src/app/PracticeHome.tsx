@@ -63,7 +63,9 @@ export function PracticeHome({
       glyph: TOPIC_GLYPHS[topic.id] ?? characterList[0] ?? "字",
     };
   }), [catalogByCharacter]);
-  const featuredTopics = topics.filter(topic => FEATURED_TOPIC_IDS.includes(topic.id));
+  const featuredTopics = FEATURED_TOPIC_IDS
+    .map(id => topics.find(topic => topic.id === id))
+    .filter((topic): topic is TopicCardData => Boolean(topic));
   const otherTopics = topics.filter(topic => !FEATURED_TOPIC_IDS.includes(topic.id));
   const selectedTopic = topics.find(topic => topic.id === selectedTopicId) ?? null;
   const selectedTopicScope = selectedTopic ? {
@@ -124,7 +126,7 @@ export function PracticeHome({
   return (
     <section className="practice-home" aria-labelledby="practice-home-title">
       <header className="practice-home-header">
-        <p className="eyebrow">{t("smartLearning", language)}</p>
+        <p className="eyebrow">{t("activeRecallLabel", language)}</p>
         <h2 id="practice-home-title">{t("practiceTitle", language)}</h2>
         <p>{t("practiceIntro", language)}</p>
       </header>
