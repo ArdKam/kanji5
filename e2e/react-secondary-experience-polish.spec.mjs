@@ -231,8 +231,8 @@ test("Data backup exports and restores the authoritative learning data", async (
   settings = await openMenuItem(page, "Settings");
   await expect(settings.getByLabel("New kanji per day", { exact: true })).toHaveValue("9");
   await settings.locator(".settings-backup-import input").setInputFiles(backupPath);
-  await expect(settings.getByRole("alert").filter({ hasText: "Restore this Kanji5 backup?" })).toBeVisible();
-  await settings.getByRole("alert").filter({ hasText: "Restore this Kanji5 backup?" }).getByRole("button", { name: "Restore backup", exact: true }).click();
+  await expect(settings.getByRole("alert").filter({ hasText: "Restore this Rinemi backup?" })).toBeVisible();
+  await settings.getByRole("alert").filter({ hasText: "Restore this Rinemi backup?" }).getByRole("button", { name: "Restore backup", exact: true }).click();
 
   await expect.poll(async () => page.locator("#root .app-shell").count(), { timeout: 20000 }).toBe(1);
   settings = await openMenuItem(page, "Settings");
