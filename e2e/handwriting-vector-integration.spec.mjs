@@ -38,33 +38,22 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
   return handwriting;
 }
 
-async function drawReference(_page,canvas,strokes){
-  // Dispatch a deterministic, complete pointer trace for shape-grading assertions. Native mouse
-  // hit-testing and pointer capture are exercised separately by the real-pointer integration test.
-  await canvas.evaluate((node,trace)=>{
-    const rect=node.getBoundingClientRect();
-    const toClient=point=>({
-      x:rect.left+(Number(point.x)/109)*rect.width,
-      y:rect.top+(Number(point.y)/109)*rect.height,
-    });
-    const dispatch=(type,point,button,buttons)=>node.dispatchEvent(new PointerEvent(type,{
-      bubbles:true,
-      cancelable:true,
-      pointerId:73,
-      pointerType:"pen",
-      isPrimary:true,
-      button,
-      buttons,
-      clientX:point.x,
-      clientY:point.y,
-    }));
-    for(const stroke of trace){
-      if(!Array.isArray(stroke)||stroke.length<2)throw new Error("Reference stroke must contain at least two points");
-      dispatch("pointerdown",toClient(stroke[0]),0,1);
-      for(let i=1;i<stroke.length;i+=1)dispatch("pointermove",toClient(stroke[i]),-1,1);
-      dispatch("pointerup",toClient(stroke[stroke.length-1]),0,0);
+async function drawReference(page,canvas,strokes){
+  const box=await canvas.boundingBox();
+  if(!box)throw new Error("handwriting canvas has no bounding box");
+  const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
+  for(const stroke of strokes){
+    const first=toClient(stroke[0]);
+    if(!Number.isFinite(first.x)||!Number.isFinite(first.y))throw new Error(`Invalid first point: ${JSON.stringify(stroke[0])}`);
+    await page.mouse.move(first.x,first.y);
+    await page.mouse.down();
+    for(let i=1;i<stroke.length;i+=1){
+      const point=toClient(stroke[i]);
+      if(!Number.isFinite(point.x)||!Number.isFinite(point.y))throw new Error(`Invalid point: ${JSON.stringify(stroke[i])}`);
+      await page.mouse.move(point.x,point.y);
     }
-  },strokes);
+    await page.mouse.up();
+  }
 }
 
 async function seedSeenCard(page){
@@ -164,7 +153,6 @@ test("handwriting UI gives reliable real-time stroke feedback",async({page})=>{
   await clean(page);
   const handwriting=await openSchoolHandwriting(page);
   const canvas=handwriting.locator(".handwriting-ink-canvas");
-  await canvas.scrollIntoViewIfNeeded();
   const box=await canvas.boundingBox();
   if(!box)throw new Error("handwriting canvas has no bounding box");
   const points=[
@@ -173,10 +161,13 @@ test("handwriting UI gives reliable real-time stroke feedback",async({page})=>{
     {x:box.x+box.width*0.94,y:box.y+box.height*0.88},
     {x:box.x+box.width*0.74,y:box.y+box.height*0.58},
   ];
-  await page.mouse.move(points[0].x,points[0].y);
-  await page.mouse.down();
-  for(let i=1;i<points.length;i+=1)await page.mouse.move(points[i].x,points[i].y,{steps:3});
-  await page.mouse.up();
+  await canvas.dispatchEvent("pointerdown",{pointerId:81,pointerType:"pen",isPrimary:true,button:0,buttons:1,clientX:points[0].x,clientY:points[0].y});
+  for(let i=1;i<points.length;i+=1){
+    const point=points[i];
+    await canvas.dispatchEvent("pointermove",{pointerId:81,pointerType:"pen",isPrimary:true,button:-1,buttons:1,clientX:point.x,clientY:point.y});
+  }
+  const last=points[points.length-1];
+  await canvas.dispatchEvent("pointerup",{pointerId:81,pointerType:"pen",isPrimary:true,button:0,buttons:0,clientX:last.x,clientY:last.y});
   await expect(handwriting).toHaveAttribute("data-stroke-count","1");
   await expect(handwriting).toHaveAttribute("data-live-feedback",/^(?!none$).+/);
   await expect(handwriting.locator(".handwriting-live-feedback")).toBeVisible();
