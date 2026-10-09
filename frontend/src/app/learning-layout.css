@@ -1,1 +1,0 @@
-.app-shell .content>.learning-card{height:min(590px,calc(100dvh - 230px));min-height:min(500px,calc(100dvh - 230px))}@media(max-width:760px){.app-shell .content>.learning-card{height:min(640px,calc(100dvh - 290px));min-height:min(380px,calc(100dvh - 180px))}}
