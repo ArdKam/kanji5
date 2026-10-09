@@ -1127,7 +1127,6 @@ function App(){
       onStart={async(topic,filter)=>{
         
         const result=await action(async()=>{await clearTransient();return await startCustomStudy(filter)});
-        if(result?.started)setTopicStudyId(topic.id);
         return Boolean(result?.started);
       }}
     />
