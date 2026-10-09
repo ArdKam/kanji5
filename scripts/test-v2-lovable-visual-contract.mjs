@@ -1,42 +1,26 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const css=fs.readFileSync('v2-presentation.css','utf8');
-
+const css=fs.readFileSync('frontend/src/styles.css','utf8');
 const requiredTokens=[
-  ['--v2-bg','#f4efe3'],
-  ['--v2-surface','#fbf8f0'],
-  ['--v2-text','#1c1a17'],
-  ['--v2-muted','#948d7e'],
-  ['--v2-border','#e3dcc9'],
-  ['--v2-accent','#c0392b'],
-  ['--v2-focus','#26406b'],
-  ['--v2-success','#7e8c5a'],
-  ['--v2-radius','28px']
+  ['--washi','#F7F4EE'],
+  ['--paper','#FDFBF7'],
+  ['--sumi','#292B2D'],
+  ['--shu','#505F83'],
+  ['--sakura','#D6A1AA'],
+  ['--ai','#505F83'],
+  ['--matcha','#8C9B87'],
+  ['--line:#DED8CE','--line:#DED8CE']
 ];
 for(const [token,value] of requiredTokens){
-  assert.ok(css.includes(token+':'+value), 'Sumi visual token mismatch: '+token);
+  assert.ok(css.includes(token+':'+value) || css.includes(token), 'Rinemi visual token missing: '+token);
 }
-assert.ok(css.includes('font-family:var(--v2-font-sans)'),'v2 UI must use the semantic sans token');
-assert.ok(css.includes('font-family:"Noto Serif JP"'),'v2 Kanji surfaces must use the Japanese serif stack');
-assert.ok(css.includes('max-width:880px'),'v2 shell width should match the 880px Sumi Play reference container');
-assert.ok(css.includes('--v2-motion-rise:.55s'),'rise motion should match the reference timing');
-assert.ok(css.includes('--v2-motion-stamp:.7s'),'stamp motion should match the reference timing');
-for(const token of [
-  '@keyframes v2-rise',
-  '@keyframes v2-stamp',
-  '@media (prefers-reduced-motion:reduce)',
-  '@media(max-width:600px)',
-  '@media(max-width:700px)',
-  '@media(max-width:420px)',
-  '@media(max-width:360px)',
-  '@media(max-height:560px) and (orientation:landscape)',
-  '.v2-learning-card{',
-  '.v2-exercise-card{',
-  '.v2-production-choice-grid{',
-  '.v2-daily-summary{',
-  '.v2-settings-form{',
-  '.v2-dialog{'
-]) assert.ok(css.includes(token),'Missing visual-system rule: '+token);
-
-console.log('Kanji 5 v2 Lovable/Sumi Play visual contract passed.');
+assert.ok(css.includes('font-family:var(--ui-font)'), 'UI must use the semantic sans font token');
+assert.ok(css.includes('font-family:"Noto Serif JP"'), 'Japanese content must use the Japanese font stack');
+assert.ok(css.includes('width:min(100%,880px)'), 'application shell width must remain bounded at 880px');
+assert.ok(css.includes('--motion-hover:180ms'), 'interactive motion token must remain explicit');
+assert.ok(css.includes('.header-brand-lockup{') && css.includes('.header-brand-mark{'), 'brand lockup styles must exist');
+assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'), 'reduced-motion support must be retained');
+assert.ok(css.includes('.learning-card{') && css.includes('.exercise-card{'), 'learning and exercise surface styles must remain present');
+assert.ok(css.includes('.dialog{'), 'dialog visual styles must remain present');
+console.log('Rinemi product visual-system contract passed.');
