@@ -13,7 +13,7 @@ export function normalizeCustomStudyFilter(filter = {}) {
   const characterScope = hasCharacterScope
     ? [...new Set(input.characterScope
       .map(value => String(value || "").trim())
-      .filter(value => /^[\u3400-\u9fff]$/u.test(value)))]
+      .filter(value => /^\p{Script=Han}$/u.test(value)))]
         .slice(0, 2136)
     : undefined;
   return Object.freeze({
