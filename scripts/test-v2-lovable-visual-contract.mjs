@@ -17,7 +17,7 @@ for(const [token,value] of requiredTokens){
   assert.ok(css.includes(token+':'+value) || css.includes(token), 'Rinemi visual token missing: '+token);
 }
 assert.ok(css.includes('font-family:var(--ui-font)'), 'UI must use the semantic sans font token');
-assert.ok(css.includes('font-family:"Noto Serif JP"'), 'Japanese content must use the Japanese font stack');
+assert.ok(css.includes('--jp-font:"Noto Serif JP"'), 'Japanese content must use the Japanese font stack');
 assert.ok(css.includes('width:min(100%,880px)'), 'application shell width must remain bounded at 880px');
 assert.ok(css.includes('--motion-hover:180ms'), 'interactive motion token must remain explicit');
 assert.ok(css.includes('.header-brand-lockup{') && css.includes('.header-brand-mark{'), 'brand lockup styles must exist');
