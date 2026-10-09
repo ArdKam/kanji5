@@ -28,7 +28,7 @@ const mime = new Map([
 const server = https.createServer({ key, cert }, (req, res) => {
   try {
     const requestPath = decodeURIComponent((req.url || '/').split('?')[0]);
-    const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\\/+/, '');
+    const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
     const filePath = path.resolve(root, relative);
 
     if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
