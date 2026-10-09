@@ -177,7 +177,7 @@ test("Settings is learner-first: placement stays in Active Recall and changes re
   await practice.locator(".dialog-close").click();
 
   await page.getByRole("button", { name: "Active Recall", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Placement check", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Not sure where to start?", exact: true })).toBeVisible();
 });
 
 test("Settings keeps Save changes visible while its content scrolls", async ({ page }) => {
@@ -247,7 +247,7 @@ test("Placement has one discoverable home in Active Recall", async ({ page }) =>
   await settings.locator(".dialog-close").click();
 
   await page.getByRole("button", { name: "Active Recall", exact: true }).click();
-  const placement = page.getByRole("heading", { name: "Placement check", exact: true });
+  const placement = page.getByRole("heading", { name: "Not sure where to start?", exact: true });
   await expect(placement).toBeVisible();
   await expect(page.getByRole("button", { name: "Start diagnostic", exact: true })).toBeVisible();
 });
