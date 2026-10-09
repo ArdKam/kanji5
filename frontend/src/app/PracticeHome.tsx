@@ -112,7 +112,7 @@ export function PracticeHome({
         <span className="practice-topic-glyph" lang="ja" aria-hidden="true">{topic.glyph}</span>
         <span className="practice-topic-copy">
           <strong>{label}</strong>
-          <span className="practice-topic-count">
+          <span className="subtitle practice-topic-count">
             {catalogLoading
               ? t("loading", language)
               : formatNumber(topic.count, language) + " " + t("practiceTopicCount", language)}
@@ -128,14 +128,14 @@ export function PracticeHome({
       <header className="practice-home-header">
         <p className="eyebrow">{t("activeRecallLabel", language)}</p>
         <h2 id="practice-home-title">{t("practiceTitle", language)}</h2>
-        <p>{t("practiceIntro", language)}</p>
+        <p className="subtitle">{t("practiceIntro", language)}</p>
       </header>
 
       <section className="surface card practice-home-hero" aria-labelledby="practice-recommended-title">
         <div className="practice-home-hero-copy">
           <p className="eyebrow red practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
           <h3 id="practice-recommended-title">{t("practiceRecommendedTitle", language)}</h3>
-          <p>{t("practiceRecommendedHint", language)}</p>
+          <p className="subtitle">{t("practiceRecommendedHint", language)}</p>
         </div>
         <button className="button primary practice-start-button" type="button" disabled={busy} onClick={() => void onStartActiveRecall()}>
           <span>{t("startExercise", language)}</span>
@@ -147,7 +147,7 @@ export function PracticeHome({
         <div className="practice-section-heading">
           <div>
             <h3 id="practice-topics-title">{t("practiceTopicsTitle", language)}</h3>
-            <p>{t("practiceTopicsHint", language)}</p>
+            <p className="subtitle">{t("practiceTopicsHint", language)}</p>
           </div>
         </div>
 
@@ -174,7 +174,7 @@ export function PracticeHome({
               </summary>
               <div className="practice-topic-grid practice-topic-grid-secondary">{otherTopics.map(renderTopicCard)}</div>
             </details>
-            <p className="practice-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
+            <p className="subtitle practice-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
           </>
         ) : null}
 
@@ -183,7 +183,7 @@ export function PracticeHome({
             <div className="practice-topic-selected-copy">
               <p className="eyebrow red practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
               <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
-              <p>{t("practiceTopicSelectedHint", language)}</p>
+              <p className="subtitle">{t("practiceTopicSelectedHint", language)}</p>
             </div>
             <button className="button primary practice-topic-start" type="button" disabled={busy || topicBusy || selectedTopic.count === 0} onClick={() => void startTopicStudy()}>
               {topicBusy ? t("practiceTopicStarting", language) : t("practiceTopicStart", language)}
