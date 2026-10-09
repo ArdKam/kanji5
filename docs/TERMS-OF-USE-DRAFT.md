@@ -1,10 +1,10 @@
-# Kanji5 — Terms of Use (Legal Review Draft)
+# Rinemi — Terms of Use (Legal Review Draft)
 
 **Draft for owner/counsel review. Not final legal text.**
 
 ## Product
 
-Kanji5 is an educational browser application for Japanese kanji study. The current product is local-first with optional account synchronization.
+Rinemi is an educational browser application for Japanese kanji study. The current product is local-first with optional account synchronization.
 
 These draft terms do not create a contractual guarantee of availability, accuracy, or learning outcomes. Final legal text must be written for the actual business model and target markets.
 
