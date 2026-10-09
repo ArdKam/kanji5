@@ -185,7 +185,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
           </div>
           <div className="stroke-order-controls">
             <button className="button secondary" type="button" onClick={() => step(-1)} disabled={completed === 0}>{t("previousStroke", language)}</button>
-            <button className="button primary" type="button" onClick={() => play()}>{completed >= paths.length ? t("replayStrokeOrder", language) : t("playStrokeOrder", language)}</button>
+            <button className="button primary" type="button" aria-pressed={isPlaying} onClick={() => (isPlaying ? pause() : completed >= paths.length ? play(true) : play())}>{isPlaying ? t("strokeOrderPause", language) : completed >= paths.length ? t("replayStrokeOrder", language) : completed > 0 ? t("strokeOrderResume", language) : t("playStrokeOrder", language)}</button>
             <button className="button secondary" type="button" onClick={() => step(1)} disabled={completed >= paths.length}>{t("nextStroke", language)}</button>
           </div>
           <div className="stroke-order-source">KanjiVG · CC BY-SA 3.0</div>
