@@ -2369,7 +2369,7 @@ Coverage remains deliberately partial; untagged characters are still available t
 
 # 26. Dictionary topic semantic QA — 2026-10-09
 
-**Status:** First conservative semantic audit prepared on branch `audit/kanji-topic-semantic-qa`; pending CI/review before merge.
+**Status:** Merged in [PR #508](https://github.com/ArdKam/kanji5/pull/508) at commit `96ec5c37ae226866819dc933a832f5abde4975c9`. PR checks passed, and the post-merge [Pages deployment/live verification](https://github.com/ArdKam/kanji5/actions/runs/37950564253) emitted `LIVE_PAGES_ARTIFACT_VERIFIED` after HTTP 200 and matching staged/live SHA-256 checks for the release assets.
 
 The audit removes 13 overbroad memberships from the 24-topic Dictionary taxonomy. The curated set now has **1,012 assignments** across **737 unique kanji** (34.5% of the pinned 2,136-kanji catalog), down from 1,025 assignments / 741 unique kanji. This is an intentional precision correction, not a loss of catalog availability: untagged kanji remain searchable and visible under “All topics.”
 
