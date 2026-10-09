@@ -28,6 +28,8 @@ assert.doesNotMatch(liveVerification, /react-dist\/kanji5-react-release18\.(js|c
 console.log("GitHub Pages live-verification contract uses canonical React assets.");
 
 assert.match(source, /Upload freshly built GitHub Pages artifact/);
+assert.ok(source.includes('name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}'), "Pages artifact name must be unique per workflow run attempt to prevent duplicate-artifact deploy failures.");
+assert.ok(source.includes('artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}'), "Deployment must select the exact artifact uploaded by the current attempt.");
 assert.doesNotMatch(source, /git add react-dist/);
 assert.doesNotMatch(source, /git commit -m "chore\(build\): sync generated React artifact"/);
 assert.doesNotMatch(source, /Materialize release18 React artifact for E2E/);
