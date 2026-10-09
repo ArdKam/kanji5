@@ -2380,7 +2380,7 @@ The review distinguishes direct semantic matches from high-frequency, transparen
 
 # 27. Dictionary topic coverage expansion — round 2 — 2026-10-09
 
-**Status:** Prepared on branch `content/kanji-topic-coverage-round-2`; pending CI/review and post-merge deployment verification.
+**Status:** Merged in [PR #511](https://github.com/ArdKam/kanji5/pull/511) at commit `5ef5053213e67620257a88d1794dc29b7c67f4b7`. PR CI passed, and the post-merge [Pages deployment/live verification](https://github.com/ArdKam/kanji5/actions/runs/37956031568) completed successfully with `LIVE_PAGES_ARTIFACT_VERIFIED`, matching staged/live SHA-256 values, and passing live offline/core-product E2E.
 
 A reviewed expansion adds **144 topic assignments** across **112 previously untagged kanji**, increasing coverage from 737/2,136 (34.5%) to **849/2,136 (39.7%)**. The taxonomy remains at 24 categories and 1,156 assignments. The batch prioritizes direct catalog meanings and transparent topic associations among higher-frequency entries; `融` is the one compound-supported Money & finance assignment, explicitly grounded in `金融` / `融資` rather than automated gloss matching.
 
