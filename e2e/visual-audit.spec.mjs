@@ -11,7 +11,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
   const report = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
-    commit: process.env.GITHUB_SHA || null,
+    commit: process.env.AUDIT_COMMIT_SHA || null,
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:4173',
     screens: [],
     pageErrors: [],
