@@ -2376,3 +2376,14 @@ Coverage remains deliberately partial; untagged characters are still available t
 The audit removes 13 overbroad memberships from the 24-topic Dictionary taxonomy. The curated set now has **1,012 assignments** across **737 unique kanji** (34.5% of the pinned 2,136-kanji catalog), down from 1,025 assignments / 741 unique kanji. This is an intentional precision correction, not a loss of catalog availability: untagged kanji remain searchable and visible under “All topics.”
 
 The review distinguishes direct semantic matches from high-frequency, transparent compound relationships. It does not change Dictionary filtering mechanics, kanji data, FSRS, Learner Model, Adaptive Planner, evidence, or persistence. The taxonomy integrity test now protects the reviewed exclusions and exact coverage counts. Broader semantic curation remains an ongoing content-quality task; no automatic gloss-keyword tagging is allowed.
+
+
+---
+
+# 27. Dictionary topic coverage expansion — round 2 — 2026-10-09
+
+**Status:** Prepared on branch `content/kanji-topic-coverage-round-2`; pending CI/review and post-merge deployment verification.
+
+A reviewed expansion adds **144 topic assignments** across **112 previously untagged kanji**, increasing coverage from 737/2,136 (34.5%) to **849/2,136 (39.7%)**. The taxonomy remains at 24 categories and 1,156 assignments. The batch prioritizes direct catalog meanings and transparent topic associations among higher-frequency entries; `融` is the one compound-supported Money & finance assignment, explicitly grounded in `金融` / `融資` rather than automated gloss matching.
+
+The integrity test now enumerates all 144 new assignments, preserves the 13 negative semantic guardrails from the prior audit, and checks the exact post-expansion totals. No kanji source records, filter behavior, learning-engine decisions, evidence, or persistence changed. Remaining untagged entries: 1,287, available through “All topics” and Dictionary text search.
