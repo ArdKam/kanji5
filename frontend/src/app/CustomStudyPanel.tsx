@@ -56,7 +56,7 @@ export function CustomStudyPanel({ language, selectedTopic = null, onStartCustom
         <legend>{t("customFocus", language)}</legend>
         <div className="practice-focus-options">
           {focusOptions.map(([value, label]) => (
-            <button key={value} className={"practice-focus-option" + (customFocus === value ? " is-active" : "")} type="button" aria-pressed={customFocus === value} onClick={() => setCustomFocus(value)}>
+            <button key={value} className={"button " + (customFocus === value ? "primary is-active" : "secondary") + " practice-focus-option"} type="button" aria-pressed={customFocus === value} onClick={() => setCustomFocus(value)}>
               {label}
             </button>
           ))}
