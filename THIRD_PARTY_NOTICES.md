@@ -12,6 +12,15 @@ Kanji 5 uses KanjiVG stroke-order SVG data for the learning-card Stroke Order vi
 
 The app fetches the per-character SVG assets from the pinned KanjiVG repository revision and displays the stroke paths in their documented stroke order. The viewer does not modify the underlying KanjiVG data.
 
+The app also ships `kanji-visual-structure.json`, a generated hierarchy extracted from KanjiVG `kvg:element` groups for all 2,136 Jōyō kanji.
+
+- **Structure data commit:** `70a0b7ae0c18ceb5cb358274b029cce0234a43bc`
+- **Structure extraction:** `scripts/build-kanji-visual-structure.mjs`
+- **Dataset-specific license:** CC BY-SA 3.0, with attribution to KanjiVG and a link to https://kanjivg.tagaini.net/.
+- **Detailed data note:** [docs/KANJI-VISUAL-STRUCTURE.md](docs/KANJI-VISUAL-STRUCTURE.md)
+
+The structural JSON is a derived dataset; it stores component hierarchy and selected group metadata, not the original SVG stroke geometry.
+
 
 ## Direct build/runtime dependencies
 
