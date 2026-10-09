@@ -57,6 +57,21 @@ test('Learning, Active Recall and Dictionary use a persistent Lovable-style bott
     await expect(tabs.nth(0)).toBeVisible();
     await expect(tabs.nth(1)).toBeVisible();
     await expect(tabs.nth(2)).toBeVisible();
+    if (viewport.width === 390) {
+      const learningCard = page.locator("#root .learning-card").first();
+      const summary = page.locator("#root .daily-summary");
+      await expect(learningCard).toBeVisible({ timeout: 10000 });
+      await expect(summary).toBeVisible({ timeout: 10000 });
+      const cardTop = await learningCard.evaluate(node => node.getBoundingClientRect().top);
+      const summaryTop = await summary.evaluate(node => node.getBoundingClientRect().top);
+      expect(cardTop).toBeLessThan(summaryTop);
+      const domOrderIsLearningFirst = await page.locator(".content").evaluate(node => {
+        const card = node.querySelector(".learning-card");
+        const stats = node.querySelector(".daily-summary");
+        return Boolean(card && stats && (card.compareDocumentPosition(stats) & Node.DOCUMENT_POSITION_FOLLOWING));
+      });
+      expect(domOrderIsLearningFirst).toBe(true);
+    }
   }
 
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
@@ -105,4 +120,35 @@ test('Dictionary Kanji card supports adjacent navigation without closing', async
   await expect(dialog.locator('.dictionary-card-header-character')).not.toHaveText(firstCharacter);
   await page.keyboard.press('ArrowLeft');
   await expect(dialog.locator('.dictionary-card-header-character')).toHaveText(firstCharacter);
+});
+
+
+test('Dictionary advanced filters are progressive and can be reset without clearing search', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+
+  const search = page.locator('.dictionary-page-search input');
+  await search.fill('学');
+  const advanced = page.locator('.dictionary-advanced-filters');
+  await expect(advanced).toHaveJSProperty('open', false);
+  await advanced.locator('summary').click();
+  await expect(advanced).toHaveJSProperty('open', true);
+
+  const mastery = advanced.getByLabel('Mastery');
+  const grade = advanced.getByLabel('Grade');
+  await mastery.selectOption('mastered');
+  await grade.selectOption('1');
+  await expect(advanced.locator('.dictionary-filter-count')).toHaveText('2');
+
+  await advanced.getByRole('button', { name: 'Clear extra filters', exact: true }).click();
+  await expect(mastery).toHaveValue('all');
+  await expect(grade).toHaveValue('all');
+  await expect(advanced.locator('.dictionary-filter-count')).toHaveCount(0);
+  await expect(search).toHaveValue('学');
 });

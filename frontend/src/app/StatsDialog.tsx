@@ -319,9 +319,10 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
   const effectiveSnapshot: Snapshot = { ...snapshot, stats: resolvedStats ?? snapshot.stats };
   const studiedCount = Number(effectiveSnapshot.stats?.studiedCount ?? 0);
   const deckSize = Number(effectiveSnapshot.stats?.deckSize ?? 0);
-  const coverage = deckSize ? Math.round((studiedCount / deckSize) * 100) : 0;
+  const coverage = deckSize ? Math.round(Math.max(0, Math.min(1, studiedCount / deckSize)) * 100) : 0;
   const streak = Number(effectiveSnapshot.stats?.currentStreak ?? 0);
   const totalReviews = Number(effectiveSnapshot.stats?.totalReviews ?? 0);
+  const reviewsDueToday = effectiveSnapshot.dailySummary?.dueCount;
 
   const dialogRef = usePageDialog(open, onClose);
   if (!open) return null;
@@ -340,7 +341,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
           <div className="stats-overview-copy"><span>{language === "fa" ? "کانجی مطالعه‌شده" : "Kanji studied"}</span><strong>{formatNumber(studiedCount, language)}<small> / {formatNumber(deckSize, language)}</small></strong></div>
           <div className="stats-overview-track" aria-hidden="true"><span style={{ width: coverage + "%" }} /></div>
         </div>
-        <Metric label={language === "fa" ? "پوشش جویو" : "Jōyō coverage"} value={formatNumber(coverage, language) + "%"} />
+        <Metric label={t("todayReviews", language)} value={reviewsDueToday == null || !Number.isFinite(Number(reviewsDueToday)) ? "—" : formatNumber(Math.max(0, Number(reviewsDueToday)), language)} />
         <Metric label={t("streak", language)} value={formatNumber(streak, language)} hint={language === "fa" ? "روز" : "days"} />
         <Metric label={language === "fa" ? "کل مرورها" : "Total reviews"} value={formatNumber(totalReviews, language)} />
       </section>

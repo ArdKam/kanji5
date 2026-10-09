@@ -251,3 +251,24 @@ test("Placement has one discoverable home in Active Recall", async ({ page }) =>
   await expect(placement).toBeVisible();
   await expect(page.getByRole("button", { name: "Start diagnostic", exact: true })).toBeVisible();
 });
+
+
+test("Reading Lab analysis metrics keep an even grid across desktop and mobile", async ({ page }) => {
+  await clean(page, "en");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const dialog = await openMenuItem(page, "Reading lab");
+  await dialog.locator(".reading-lab-input").fill("私は学生です。今日、学校へ行きます。");
+  const metrics = dialog.locator(".reading-lab-analysis-stats");
+  await expect(metrics).toBeVisible({ timeout: 10000 });
+  await expect(metrics.locator("> div")).toHaveCount(6);
+
+  const columnCount = async () => metrics.evaluate(element =>
+    getComputedStyle(element).gridTemplateColumns.trim().split(/\s+/).length
+  );
+  await expect.poll(columnCount).toBe(3);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(columnCount).toBe(2);
+  await expect(metrics.locator("> div").first()).toHaveCSS("grid-column-start", "1");
+  await expect(metrics.locator("> div").first()).toHaveCSS("grid-column-end", "-1");
+});
