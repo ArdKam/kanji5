@@ -152,11 +152,11 @@ export function PracticeHome({
         </div>
 
         {catalogLoading && !catalog.length ? (
-          <div className="surface practice-topic-status" role="status">{t("practiceTopicsLoading", language)}</div>
+          <div className="surface card practice-topic-status" role="status">{t("practiceTopicsLoading", language)}</div>
         ) : null}
 
         {catalogError && !catalog.length ? (
-          <div className="surface practice-topic-status is-error" role="alert">
+          <div className="surface card practice-topic-status is-error" role="alert">
             <span>{t("practiceTopicsLoadError", language)}</span>
             <button className="button secondary" type="button" onClick={() => setCatalogAttempt(value => value + 1)}>
               {t("practiceTopicsRetry", language)}
@@ -179,7 +179,7 @@ export function PracticeHome({
         ) : null}
 
         {selectedTopic ? (
-          <section className="surface practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
+          <section className="surface card practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
             <div className="practice-topic-selected-copy">
               <p className="practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
               <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
