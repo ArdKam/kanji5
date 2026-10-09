@@ -37,6 +37,16 @@ function validateNode(node, context) {
     assert.ok(node.sourceParts.length > 1, `Only grouped source fragments should carry sourceParts: ${context}/${node.character}`);
     assert.equal(new Set(node.sourceParts).size, node.sourceParts.length, `Duplicate source fragment IDs: ${context}/${node.character}`);
   }
+  if (node.sourcePartDetails !== undefined) {
+    assert.ok(Array.isArray(node.sourcePartDetails), `Source part details must be an array: ${context}/${node.character}`);
+    assert.equal(node.sourcePartDetails.length, node.sourceParts?.length, `Source part detail count mismatch: ${context}/${node.character}`);
+    for (const detail of node.sourcePartDetails) {
+      assert.equal(typeof detail.part, "string");
+      if (detail.position !== undefined) assert.equal(typeof detail.position, "string");
+      if (detail.radicalRole !== undefined) assert.equal(typeof detail.radicalRole, "string");
+      if (detail.phoneticRole !== undefined) assert.equal(typeof detail.phoneticRole, "string");
+    }
+  }
   for (const [index, child] of node.components.entries()) validateNode(child, `${context}/${node.character}[${index}]`);
 }
 
