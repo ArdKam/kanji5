@@ -1,35 +1,43 @@
-/* Practice Home: editorial typography, restrained topic cards, responsive controls. */
+/* Practice Home — calm editorial hierarchy with shared global surfaces and actions. */
 .practice-home{display:grid;gap:20px;min-width:0}
 .practice-home :is(h2,h3,h4,p){margin:0}
-.practice-home-header{display:grid;gap:7px}
+.practice-home-header,.practice-custom-panel-header{display:grid;gap:7px}
 .practice-home-header h2{font-size:var(--text-title);line-height:1.15;letter-spacing:-.03em;font-weight:760}
 .practice-home-header>p,.practice-home-hero-copy>p:last-child,.practice-section-heading p,.practice-custom-panel-header p,.placement-panel-header p{color:var(--mute);font-size:var(--text-sm);line-height:1.65}
 .practice-home-hero{display:flex;align-items:end;justify-content:space-between;gap:18px;padding:clamp(20px,4vw,30px);background:linear-gradient(132deg,color-mix(in srgb,var(--shu) 7%,var(--paper)),var(--paper) 68%)}
 .practice-home-hero-copy{display:grid;gap:8px;max-width:510px;min-width:0}
 .practice-home-hero h3{font-size:clamp(21px,3vw,28px);font-weight:760}
+.practice-home .practice-start-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:50px;padding-inline:20px;border-radius:15px;white-space:nowrap}
 .practice-topic-section{display:grid;gap:12px}
+.practice-section-heading h3{font-size:var(--text-lg);font-weight:760}
 .practice-topic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.practice-topic-card{display:grid;grid-template-columns:40px minmax(0,1fr) 13px;align-items:center;gap:9px;min-width:0;min-height:76px;padding:10px;border-radius:var(--radius-lg);color:var(--sumi);text-align:start}
+.practice-topic-card{display:grid;grid-template-columns:40px minmax(0,1fr) 13px;align-items:center;gap:9px;min-width:0;min-height:76px;padding:10px;text-align:start}
 .practice-topic-card.is-selected{border-color:var(--shu);background:color-mix(in srgb,var(--shu) 5%,var(--paper))}
-.practice-topic-glyph{display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--line-soft);border-radius:12px;background:var(--washi);font:27px/1 var(--jp-font)}
+.practice-topic-glyph{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--washi);font:27px/1 var(--jp-font)}
 .practice-topic-copy{display:grid;gap:4px;min-width:0}
+.practice-topic-copy strong{font-size:var(--text-sm);line-height:1.4;overflow-wrap:anywhere}
+.practice-topic-count,.practice-topic-coverage-note{color:var(--mute);font-size:var(--text-xs)}
 .practice-topic-select-mark{color:var(--shu);font-size:12px;font-weight:800}
 .practice-all-topics,.practice-advanced{border-block:1px solid var(--line-soft)}
 .practice-all-topics>summary,.practice-advanced>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;color:var(--ink);font-size:var(--text-sm);font-weight:760;cursor:pointer;list-style:none}
+.practice-all-topics-count,.practice-summary-hint{margin-inline-start:auto;color:var(--mute);font-size:var(--text-xs)}
 .practice-topic-grid-secondary{padding:2px 0 14px}
 .practice-topic-coverage-note{margin:0}
 .practice-topic-selected{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px 18px;border-color:color-mix(in srgb,var(--shu) 28%,var(--line));background:color-mix(in srgb,var(--shu) 4%,var(--paper))}
 .practice-topic-selected-copy{display:grid;gap:5px;min-width:0}
-.practice-topic-status.is-error,.practice-topic-message,.practice-custom-message{color:var(--color-danger)}
 .practice-topic-status{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.practice-topic-status.is-error,.practice-topic-message,.practice-custom-message{color:var(--color-danger)}
+.practice-topic-message,.practice-custom-message{grid-column:1/-1;margin:0;font-size:var(--text-sm)}
 .practice-advanced{border-color:var(--line)}
 .practice-advanced>summary{padding-block:17px}
 .practice-advanced[open]>summary{padding-bottom:10px}
 .practice-custom-panel{display:grid;gap:15px;padding:14px 0 20px}
-.practice-custom-panel-header{display:grid;gap:6px}
 .practice-focus-fieldset{display:grid;gap:8px;min-width:0;margin:0;padding:0;border:0}
 .practice-focus-options{display:flex;flex-wrap:wrap;gap:7px}
+.practice-focus-option{min-height:42px;padding:7px 13px}
 .practice-custom-secondary-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .practice-custom-field{display:grid;gap:7px;min-width:0}
+.practice-custom-field select{width:100%;min-height:44px}
 .practice-custom-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid var(--line-soft)}
 @media(max-width:720px){.practice-home-hero{align-items:stretch;flex-direction:column}.practice-home .practice-start-button{width:100%}.practice-topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.practice-topic-card{grid-template-columns:34px minmax(0,1fr) 12px;gap:8px}.practice-topic-glyph{width:34px;height:36px;font-size:23px}.practice-topic-selected{grid-template-columns:1fr}.practice-topic-start{justify-self:start}.practice-custom-footer{align-items:stretch;flex-direction:column}.practice-custom-footer .button{width:100%}.practice-summary-hint{max-width:48%}}
+@media(max-width:420px){.practice-home-header h2{font-size:var(--text-2xl)}.practice-topic-grid{gap:8px}.practice-topic-card{grid-template-columns:29px minmax(0,1fr)}.practice-topic-glyph{width:29px;height:34px;font-size:20px}.practice-topic-select-mark{position:absolute;inset-block-start:7px;inset-inline-end:7px}.practice-topic-copy strong{font-size:12px}.practice-custom-secondary-controls{grid-template-columns:1fr}.practice-advanced>summary{flex-wrap:wrap}.practice-advanced>summary>span:first-child{flex:1 1 100%}.practice-summary-hint{max-width:calc(100% - 25px);margin-inline-start:0;text-align:start}}
