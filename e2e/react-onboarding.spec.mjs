@@ -29,6 +29,7 @@ async function reachStartingPoint(page) {
   await expect(onboarding).toContainText("Try to answer before seeing the answer.");
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
+  await expect(onboarding.getByRole("button", { name: "Back", exact: true })).toHaveCount(1);
   return onboarding;
 }
 
@@ -56,6 +57,9 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await expect(onboarding.locator(".kanji5-onboarding-stimulus")).toBeVisible({ timeout: 20000 });
   await expect(onboarding.getByRole("button", { name: "Next question", exact: true })).toHaveCount(0);
   await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 16");
+  const progress = onboarding.getByRole("progressbar", { name: "Question progress" });
+  await expect(progress).toHaveAttribute("aria-valuenow", "1");
+  await expect(progress).toHaveAttribute("aria-valuemax", "16");
 
   const surface = onboarding.locator(".kanji5-onboarding-main");
   const box = await surface.boundingBox();
@@ -68,6 +72,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
 
   for (let index = 0; index < 16; index += 1) {
     await onboarding.locator(".kanji5-onboarding-option").first().click();
+    if (index === 0) await expect(progress).toHaveAttribute("aria-valuenow", "2");
     if (index < 15) {
       await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText(`Question ${index + 2} / 16`);
     }
@@ -144,4 +149,15 @@ test("first-run horizontal swipe advances, including when the gesture starts on 
   await page.mouse.move(choiceBox.x + choiceBox.width * 0.2, choiceBox.y + choiceBox.height * 0.5, { steps: 8 });
   await page.mouse.up();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
+});
+
+
+test("Skip setup clearly starts learning without completing the optional setup choices", async ({ page }) => {
+  await fresh(page);
+  const onboarding = page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({ timeout: 20000 });
+  await onboarding.getByRole("button", { name: "Skip setup", exact: true }).click();
+  await expect(onboarding).toHaveCount(0);
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("kanji5-onboarding-v2"))).toBe("complete");
 });

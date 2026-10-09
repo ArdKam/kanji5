@@ -69,3 +69,7 @@ html[dir="rtl"] .experience-nav.active-tab-dictionary .experience-tab-indicator{
 }
 
 @media (min-width:521px){.experience-nav{bottom:max(18px,env(safe-area-inset-bottom));}}
+
+
+/* Mobile study hierarchy: prioritize the learning card before dashboard summaries. */
+@media(max-width:760px){.content>.learning-card{order:0}.content>.daily-summary,.content>.goal,.content>.upcoming{order:1}.content>.session-feedback{order:2}}

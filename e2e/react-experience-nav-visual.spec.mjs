@@ -57,6 +57,15 @@ test('Learning, Active Recall and Dictionary use a persistent Lovable-style bott
     await expect(tabs.nth(0)).toBeVisible();
     await expect(tabs.nth(1)).toBeVisible();
     await expect(tabs.nth(2)).toBeVisible();
+    if (viewport.width === 390) {
+      const learningCard = page.locator("#root .learning-card").first();
+      const summary = page.locator("#root .daily-summary");
+      await expect(learningCard).toBeVisible({ timeout: 10000 });
+      await expect(summary).toBeVisible({ timeout: 10000 });
+      const cardTop = await learningCard.evaluate(node => node.getBoundingClientRect().top);
+      const summaryTop = await summary.evaluate(node => node.getBoundingClientRect().top);
+      expect(cardTop).toBeLessThan(summaryTop);
+    }
   }
 
   await expect(tabs.nth(0)).toHaveAttribute('aria-current', 'page');
