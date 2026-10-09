@@ -1,4 +1,4 @@
-# Kanji5 — Release Procedure
+# Rinemi — Release Procedure
 
 This procedure is based on exact-SHA evidence rather than branch state or open PRs.
 
