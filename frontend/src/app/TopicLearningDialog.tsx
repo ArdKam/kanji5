@@ -14,7 +14,7 @@ export type TopicStudyTopic = {
 const TOPICS: TopicStudyTopic[] = topicTaxonomy.topics.map(topic => ({
   id: topic.id,
   label: topic.label,
-  characters: String(topic.characters || "").split(/\\s+/).filter(Boolean),
+  characters: String(topic.characters || "").split(/\s+/).filter(Boolean),
 }));
 
 export function getTopicLabel(id: string, language: Language): string | null {
