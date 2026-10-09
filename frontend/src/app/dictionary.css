@@ -526,12 +526,7 @@
 .dictionary-card-dialog{
   position:fixed;
   z-index:100;
-  width:min(520px,calc(100vw - 28px));
-  max-width:520px;
-  max-height:min(760px,calc(100dvh - 28px));
-  overflow:auto;
   overscroll-behavior:contain;
-  padding:0;
 }
 .dictionary-card-dialog::backdrop{
   background:rgb(25 20 16 / .42);
