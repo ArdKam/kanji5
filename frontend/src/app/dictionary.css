@@ -341,7 +341,6 @@
   .dictionary-display-row{align-items:stretch;flex-direction:column;}
   .dictionary-filter-row{display:grid;grid-template-columns:minmax(0,1fr);}
   .dictionary-filter-row .dictionary-level-filter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;min-width:0;}
-  .dictionary-advanced-filters{width:100%;max-width:100%;margin:0;}
   .dictionary-select-filter{justify-content:space-between;}
   .dictionary-select-filter select{flex:1;min-width:0;}
   .dictionary-view-toggle{width:auto;}
@@ -531,7 +530,7 @@
   max-width:520px;
   max-height:min(760px,calc(100dvh - 28px));
   overflow:auto;
-  overscroll-behavior:contain;
+  
   padding:0;
 }
 .dictionary-card-dialog::backdrop{
