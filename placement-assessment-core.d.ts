@@ -8,7 +8,6 @@ export type PlacementCatalogItem = {
   jlpt?: string | null;
   order?: number;
   frequency?: number;
-  [key: string]: unknown;
 };
 
 export type PlacementCoreOption = { id: string; label: string; correct: boolean };
