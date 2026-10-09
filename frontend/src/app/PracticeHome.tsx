@@ -51,7 +51,7 @@ export function PracticeHome({
   }, [catalogAttempt]);
 
   const catalogByCharacter = useMemo(
-    () => new Map(catalog.map(item => [item.character, item])),
+    () => new Map(catalog.map(item => [item.character, item] as const)),
     [catalog],
   );
   const topics = useMemo<TopicCardData[]>(() => TOPICS.map(topic => {
