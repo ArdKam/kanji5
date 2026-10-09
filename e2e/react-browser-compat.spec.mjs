@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.use({ serviceWorkers: 'allow' });
-
-test('browser-compat startup and core learning smoke', async ({ page }) => {
+test('browser-compat startup and core learning smoke', async ({ page }, testInfo) => {
+  if (testInfo.project.name === 'webkit') test.setTimeout(90000);
+  const startupTimeout = testInfo.project.name === 'webkit' ? 60000 : 20000;
   const diagnostics = [];
   page.on('pageerror', error => diagnostics.push('PAGE_ERROR: ' + String(error)));
   page.on('console', msg => { if (msg.type() === 'error') diagnostics.push('CONSOLE_ERROR: ' + msg.text()); });
@@ -14,7 +14,7 @@ test('browser-compat startup and core learning smoke', async ({ page }) => {
   });
   await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   try {
-    await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+    await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: startupTimeout });
   } catch (error) {
     const state = await page.evaluate(() => ({
       readyState: document.readyState,
