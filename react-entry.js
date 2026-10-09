@@ -92,7 +92,7 @@ scheduleAccountFallback();
 function scheduleAccountSync(){
   const load=()=>import('./supabase-sync.js').catch(error=>{
     observability()?.capture?.('dynamic-import-failure',error,{module:'supabase-sync.js',dataAffected:'unknown'});
-    console.error('Kanji 5 account sync failed to boot.',error);
+    console.error('Rinemi account sync failed to boot.',error);
   });
   if('requestIdleCallback' in window){
     window.requestIdleCallback(load,{timeout:1500});
