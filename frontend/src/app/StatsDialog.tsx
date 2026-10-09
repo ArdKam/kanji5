@@ -59,6 +59,8 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
 }
 
 function MasterySection({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
+  const studiedCount = Number(snapshot.stats?.studiedCount ?? 0);
+  const hasStudiedData = studiedCount > 0;
   const distribution = snapshot.stats?.masteryDistribution ?? {
     unseen: 0,
     learning: 0,
@@ -83,7 +85,7 @@ function MasterySection({ snapshot, language }: { snapshot: Snapshot; language: 
     <section className="stats-section" aria-labelledby="stats-mastery-title">
       <div className="stats-section-heading">
         <div><p className="eyebrow">{language === "fa" ? "تسلط" : "Mastery"}</p><h3 id="stats-mastery-title">{language === "fa" ? "توزیع وضعیت کانجی‌ها" : "Kanji mastery"}</h3></div>
-        <div className="stats-section-summary"><strong>{formatNumber(Math.round((Number(distribution.average) || 0) * 100), language)}%</strong><span>{language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery"}</span></div>
+        <div className="stats-section-summary"><strong>{hasStudiedData ? formatNumber(Math.round((Number(distribution.average) || 0) * 100), language) + "%" : "—"}</strong><span>{hasStudiedData ? (language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery") : (language === "fa" ? "پس از اولین جلسه نمایش داده می‌شود" : "Available after your first study session")}</span></div>
       </div>
       {hasData ? (
         <>
@@ -163,6 +165,7 @@ type AdvancedSkill = {
 };
 
 function formatRate(value: unknown, language: Language) {
+  if (value == null || value === "") return "—";
   const numeric = Number(value);
   return Number.isFinite(numeric) ? formatNumber(Math.round(Math.max(0, Math.min(1, numeric)) * 100), language) + "%" : "—";
 }
