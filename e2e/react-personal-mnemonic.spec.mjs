@@ -30,7 +30,7 @@ test("personal mnemonic can be saved, edited, cleared, and survives a reload", a
   await expect(card.locator(".mnemonic-saved p")).toHaveText("A student learning under a roof.");
   const mnemonicGeometry = await card.evaluate(() => {
     const root = document.querySelector(".mnemonic-tool");
-    const trigger = root?.querySelector(".mnemonic-trigger");
+    const trigger = root?.querySelector(".mnemonic-action");
     const saved = root?.querySelector(".mnemonic-saved");
     if (!(root instanceof HTMLElement) || !(trigger instanceof HTMLElement) || !(saved instanceof HTMLElement)) throw new Error("mnemonic layout missing");
     const a = trigger.getBoundingClientRect();
