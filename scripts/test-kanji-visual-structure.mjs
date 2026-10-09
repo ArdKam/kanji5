@@ -29,6 +29,14 @@ function validateNode(node, context) {
   if (node.variant !== undefined) assert.equal(node.variant, true);
   if (node.radicalRole !== undefined) assert.equal(typeof node.radicalRole, "string");
   if (node.phoneticRole !== undefined) assert.equal(typeof node.phoneticRole, "string");
+  if (node.part !== undefined) assert.equal(typeof node.part, "string");
+  if (node.partial !== undefined) assert.equal(node.partial, true);
+  if (node.original !== undefined) assert.equal(typeof node.original, "string");
+  if (node.sourceParts !== undefined) {
+    assert.ok(Array.isArray(node.sourceParts), `Source part IDs must be arrays: ${context}/${node.character}`);
+    assert.ok(node.sourceParts.length > 1, `Only grouped source fragments should carry sourceParts: ${context}/${node.character}`);
+    assert.equal(new Set(node.sourceParts).size, node.sourceParts.length, `Duplicate source fragment IDs: ${context}/${node.character}`);
+  }
   for (const [index, child] of node.components.entries()) validateNode(child, `${context}/${node.character}[${index}]`);
 }
 
@@ -57,5 +65,12 @@ expectDirect("明", ["日", "月"]);
 expectDirect("時", ["日", "寺"]);
 expectDirect("会", ["人", "云"]);
 expectDirect("学", ["⺍", "冖", "子"]);
+// SVG groups explicitly marked as parts of one component are normalized to one glyph node.
+expectDirect("国", ["囗", "玉"]);
+expectDirect("年", ["丿", "干"]);
+assert.deepEqual(structures["国"].components[0].sourceParts, ["1", "2"], "Enclosing 囗 fragments must be rejoined and their source-part IDs preserved");
+const jadeDot = structures["国"].components[1].components.find(node => node.character === "王");
+assert.equal(jadeDot?.partial, true, "The 王 glyph inside 玉 must remain marked as partial");
+assert.equal(jadeDot?.original, "玉", "The original component glyph must be preserved for partial forms");
 
-console.log("KanjiVG visual structure contract passed (2,136/2,136 source trees; nesting and repeated groups preserved).");
+console.log("KanjiVG visual structure contract passed (2,136/2,136 source trees; repeated glyphs, nested groups, partial forms, and split SVG groups validated).");
