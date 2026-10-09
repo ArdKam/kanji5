@@ -1,6 +1,8 @@
-# Kanji5 — Unified Product, Engineering & Public-Release Roadmap
+# Rinemi — Unified Product, Engineering & Public-Release Roadmap
 
-> **Canonical roadmap:** this document is the forward-looking source of truth for Kanji5 product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
+> **Canonical roadmap:** this document is the forward-looking source of truth for Rinemi product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
+>
+> **Brand naming rule (2026-10-09):** Rinemi is the canonical customer-facing name in the application, PWA metadata, brand assets, and public product copy. `kanji5` repository/deployment paths, `KANJI5_*` runtime contracts, stored data keys, backup-format identifiers and build asset names remain compatibility identifiers until a separate migration is designed and tested.
 >
 > **Implementation baseline reviewed:** `main` at the R13 merge baseline `c5997a432aa4b60bc2913cbaec277127b96935db` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
 
@@ -10,7 +12,7 @@
 
 ## 0. Product direction
 
-Kanji5 started as a personal PWA for learning essential Japanese kanji. The project is now being prepared for broader public distribution.
+Rinemi started as a personal PWA for learning essential Japanese kanji. The project is now being prepared for broader public distribution.
 
 The product must therefore satisfy two goals at the same time:
 
@@ -23,7 +25,7 @@ The product must therefore satisfy two goals at the same time:
    - lightweight daily practice
    - a calm, focused learning experience
 
-2. Become robust enough for users who have never seen Kanji5 before:
+2. Become robust enough for users who have never seen Rinemi before:
    - clear product positioning
    - understandable onboarding
    - trustworthy data persistence and recovery
