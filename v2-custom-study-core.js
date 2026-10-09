@@ -13,10 +13,16 @@ export function normalizeCustomStudyFilter(filter = {}) {
   const characterScope = hasCharacterScope
     ? [...new Set(input.characterScope
       .map(value => String(value || "").trim())
-      .filter(value => /^[\\u3400-\\u9fff]$/u.test(value)))]
+      .filter(value => /^[\u3400-\u9fff]$/u.test(value)))]
         .slice(0, 2136)
-    : null;
-  return Object.freeze({ version: CUSTOM_STUDY_VERSION, level, focus, limit, characterScope });
+    : undefined;
+  return Object.freeze({
+    version: CUSTOM_STUDY_VERSION,
+    level,
+    focus,
+    limit,
+    ...(hasCharacterScope ? { characterScope } : {}),
+  });
 }
 
 function isDue(card, now) {
@@ -48,9 +54,9 @@ export function selectCustomStudyItems({ deck = [], cards = {}, learner = {}, co
   const levelFiltered = normalized.level === "all"
     ? allowed
     : allowed.filter((item) => String(item?.jlpt || "") === normalized.level);
-  const scoped = normalized.characterScope === null
-    ? levelFiltered
-    : levelFiltered.filter((item) => normalized.characterScope.includes(String(item?.character || item?.id || "").trim()));
+  const scoped = Array.isArray(normalized.characterScope)
+    ? levelFiltered.filter((item) => normalized.characterScope.includes(String(item?.character || item?.id || "").trim()))
+    : levelFiltered;
 
   const mistakeSet = mistakeCharacters(components);
   const rows = scoped.map((item, index) => {
