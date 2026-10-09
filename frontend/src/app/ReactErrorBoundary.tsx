@@ -29,7 +29,7 @@ function downloadBackup(backup: unknown, language: Language) {
   const anchor = document.createElement("a");
   const date = new Date().toISOString().slice(0, 10);
   anchor.href = url;
-  anchor.download = `kanji5-error-backup-${date}.json`;
+  anchor.download = `rinemi-error-backup-${date}.json`;
   anchor.click();
   URL.revokeObjectURL(url);
   void language;
