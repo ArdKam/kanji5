@@ -16,6 +16,8 @@ for (const step of ["welcome","learning-loop","starting-point","placement","plac
 }
 assert.ok(model.includes("sanitizeOnboardingProgress"));
 assert.ok(model.includes("normalizeDailyNew"));
+assert.ok(model.includes("placementSeed"));
+assert.ok(model.includes("placementSummary"));
 assert.ok(persistence.includes("kanji5-onboarding-progress-v2"));
 assert.ok(persistence.includes("kanji5-onboarding-v2"));
 assert.ok(!flow.includes("localStorage") && !flow.includes("sessionStorage"));
@@ -28,7 +30,7 @@ assert.ok(host.includes("scorePlacementAnswers"));
 assert.ok(host.includes("updateSettings"));
 assert.ok(host.includes("startCustomStudy"));
 assert.ok(host.includes("completeOnboarding"));
-assert.ok(placement.includes("scorePlacementAnswers"));
+assert.ok(placement.includes("scorePlacementAnswersCore"));
 assert.ok(diagnostic.includes("buildPlacementQuestions"));
 assert.ok(app.includes("OnboardingEntry"));
 assert.ok(!app.includes("PublicOnboarding"));

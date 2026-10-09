@@ -28,7 +28,7 @@ The product currently has several places where implementation is more conservati
 ### P0 — public-beta blockers
 
 1. **Placement empirical validity / stability**
-   - The implementation now randomizes answer order, uses the 16-question N5–N2 blueprint, and applies the documented 3/4 threshold.
+   - The placement implementation has been upgraded to a 20-item stratified N5–N2 blueprint with 5 items per band, a 4/5 provisional band threshold, learner-priority answer keys, new-item sampling per retake, and contiguous lower-to-upper band decisions. Empirical calibration and independent content review remain open release gates.
    - Boundary and upper-range conditions are surfaced explicitly, with N1 treated conservatively as outside the directly tested range.
    - The remaining blocker is empirical validation of placement stability/bias on representative answer patterns; the current regression suite is deterministic/contract-focused rather than a psychometric validation study.
 
@@ -63,11 +63,13 @@ Focused runtime/contract checks cover:
 
 The final pre-merge React presentation workflow passed on run `37363072127`, with all 40 gates green, including build/typecheck, repository/unit coverage, Active Recall content, offline/PWA, accessibility, Firefox/WebKit, Learning Card, mnemonic, Review/Practice separation, and Production Recall keyboard gates. Earlier engine validation for the same runtime candidate was also successful. A later engine workflow was queued/cancelled by the Actions runner after that successful validation; it introduced no runtime changes.
 
-### Empirical placement screen
+### Updated placement assessment — 2026-10-09
 
-Using the actual 2,136-item `kanji-data.json` and the production placement shuffle design, 10,000 deterministic retake seeds × 16 questions produced correct-answer positions of 24.84%, 25.01%, 24.95%, and 25.20%. The chi-square statistic was 4.37 (df=3), maximum relative deviation was 0.80%, and all 10,000 retakes produced a distinct full questionnaire layout. This passes the implementation-level answer-position-bias screen.
+The original 16-question / four-items-per-band placement screen is superseded by assessment v2. The current candidate uses 20 items (five per supported band), seed-based stratified sampling across each band's frequency-order range, four-option item contracts, learner-priority meaning keys, and a contiguous recommendation that does not skip a failed lower band.
 
-This does **not** establish psychometric validity or real-user placement stability. Representative response-pattern data and independent human/content review are still required before Public Beta.
+The executable contract suite covers same-seed reproducibility, different retake samples, exactly one correct option and four unique labels per item, sparse-band behavior, missing-answer uncertainty, lower-band consistency, boundary scores, and N2 upper-range disclosure. The result uses `provisional`, `boundary`, or `limited`; it no longer labels an uncalibrated complete score as high confidence.
+
+This is implementation-level validation only. It does **not** establish psychometric validity or real-user placement stability. Independent review of production item/distractor quality and representative repeated-attempt data remain required before Public Beta.
 
 ## 3. Dataset audit
 
@@ -285,42 +287,32 @@ Move toward:
 
 and annotate content difficulty separately from simple sentence length.
 
-## 10. Placement diagnostic audit
+## 10. Placement diagnostic audit — updated 2026-10-09
 
-Current contract:
+### Current assessment contract
 
-- N5–N2
-- 4 sampled Kanji per level where available
-- 16-question target
-- answer order shuffled from stable option IDs
-- first source meaning remains the answer key for the diagnostic item
-- suggested level checks N2→N5
-- a level must reach 3/4 (75%) to qualify
-- results expose boundary/limited-confidence conditions
-- 4/4 at N2 exposes an explicit upper-range/N1 limitation
+The onboarding and standalone diagnostic use the shared placement assessment core:
 
-### Current validity status
+- 20 items total: five each from N5, N4, N3, and N2.
+- Items are sampled across five strata of each band's frequency-ranked pool; changing the persisted seed changes the selected Kanji as well as answer order.
+- The seed and answer IDs persist together in onboarding progress so a reload resumes the same paper.
+- A sparse band is not filled with an item assigned to a different band. Incomplete band/item coverage yields limited confidence.
+- The correct option is built from the shared learner-priority meaning projection, not the raw first dictionary gloss.
+- Each item must have four unique labels and exactly one answer key. Alternative target glosses and strongly overlapping glosses are excluded from the distractor pool.
+- A band is provisionally demonstrated at 4/5 (80%).
+- The suggested starting band moves upward from N5 only while each preceding band passes; performance in N2 cannot hide a lower-band gap.
+- A complete result is called provisional, near-cutoff results (3/5 or 4/5) are marked boundary, and incomplete evidence is limited.
+- Passing all bands through N2 produces an explicit note that N1 is outside the diagnostic range.
 
-The prior answer-position defect and tiny-sample threshold are no longer present in the current implementation. The remaining validity gap is empirical: there is no representative user/response dataset demonstrating placement stability across repeated retakes or difficult boundary populations.
+### What this assessment does and does not measure
 
-### Required redesign
+The instrument currently measures recognition of selected English glosses for isolated Kanji. It does not assess overall Japanese proficiency, reading recall, vocabulary production, sentence comprehension, grammar, handwriting, or listening. JLPT labels are strata in the source data, not a certificate that the learner is at that JLPT level.
 
-Placement must:
+The 20-item / 4-of-5 cutoff is a practical onboarding heuristic, not an empirically validated psychometric decision rule. The source dataset's level tags, meaning ambiguity, and distractor plausibility still require independent review. Retake variation and code-level score contracts do not establish stability across real learners.
 
-- randomize option order;
-- keep correct-answer scoring keyed by stable option id;
-- use a documented item blueprint instead of raw first-frequency entries;
-- sample enough items to make a level decision reasonably stable;
-- handle boundary cases explicitly;
-- define N1 behavior;
-- show uncertainty/sample-size limitations;
-- distinguish "recommended starting Kanji band" from overall Japanese proficiency.
+### Remaining release gate
 
-### Product wording
-
-Never describe this diagnostic as an assessment of overall Japanese proficiency.
-
-It is a **Kanji starting-point diagnostic** unless and until a broader language-proficiency assessment exists.
+Before Public Beta, freeze a production question-set sample against the release SHA; independently review correct glosses and distractor ambiguity; examine answer-position distribution across seeds using the shipped catalog; and collect repeated-attempt evidence to estimate recommendation stability. Keep all learner-facing copy explicit that this is only a provisional Kanji starting-point estimate.
 
 ## 11. Mnemonic audit
 
@@ -560,7 +552,7 @@ Do not automatically change FSRS/planner parameters from observational metrics w
 
 See `docs/C4-SAMPLE-CONTENT-QA.md` for the current sampled content-review record.
 
-1. Empirical placement stability/bias validation.
+1. Empirical placement stability/bias validation for the 20-item stratified assessment.
 2. Independent human/content QA for sampled high-risk meanings/readings/examples/context.
 3. Curated mnemonic human review and curation expansion.
 4. Broader learner-priority Vocabulary/Context QA as real content coverage grows.

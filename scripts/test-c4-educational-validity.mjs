@@ -100,10 +100,13 @@ assert.match(education,/attemptType=isRecoveryAttempt\?'guided_recovery':product
 assert.match(education,/const primaryMeanings=learnerContent\.meanings\.primary\.length\?learnerContent\.meanings\.primary:\(edu\.item\.meaning\|\|\[\]\)/);
 assert.match(education,/primary:primaryMeanings\.join\(' · '\)/);
 
-assert.match(placement,/confidence: "high" \| "boundary" \| "limited"/);
-assert.match(placement,/upperBoundReached/);
-assert.match(placement,/PLACEMENT_SEMANTIC_FIXTURES/);
-assert.match(placement,/semanticMeaningOverlap/);
+const placementCore = fs.readFileSync("placement-assessment-core.js", "utf8");
+assert.match(placement,/PLACEMENT_ITEMS_PER_LEVEL = ITEMS_PER_LEVEL/);
+assert.match(placement,/PLACEMENT_PASS_CORRECT = PASS_CORRECT/);
+assert.match(placementCore,/confidence = !complete \? "limited" : boundaryLevels\.length \? "boundary" : "provisional"/);
+assert.match(placementCore,/upperBoundReached/);
+assert.match(placementCore,/meaningSetsAmbiguous/);
+assert.match(placementCore,/buildLearnerContent/);
 assert.match(diagnostic,/data-placement-confidence/);
 assert.match(diagnostic,/diagnosticPlacementBoundary/);
 assert.match(diagnostic,/diagnosticPlacementUpperBound/);
