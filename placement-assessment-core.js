@@ -119,11 +119,13 @@ function getDistractors(target, allItems, seed) {
     "placement-distractors-other:" + target.character,
   );
   const selected = [];
+  const selectedMeaningSet = target.semanticLabels.slice();
   for (const candidate of [...sameBand, ...otherBands]) {
     const key = labelKey(candidate.correctLabel);
-    if (seenLabels.has(key)) continue;
+    if (seenLabels.has(key) || meaningSetsAmbiguous(selectedMeaningSet, candidate.semanticLabels)) continue;
     seenLabels.add(key);
     selected.push(candidate.correctLabel);
+    selectedMeaningSet.push(candidate.correctLabel);
     if (selected.length === 3) break;
   }
   return selected;
