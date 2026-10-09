@@ -1,74 +1,94 @@
 import { useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import type { CustomStudyFilter } from "./engine";
+import type { CustomStudyFilter, CustomStudyFocus } from "./engine";
 
 type LevelFilter = "all" | "N5" | "N4" | "N3" | "N2" | "N1";
+type StudyTopicScope = { id: string; label: string; characters: string[] };
 
-export function CustomStudyPanel({ language, onStartCustomStudy }: {
+export function CustomStudyPanel({ language, selectedTopic = null, onStartCustomStudy }: {
   language: Language;
+  selectedTopic?: StudyTopicScope | null;
   onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>;
 }) {
-  const [customFocus, setCustomFocus] = useState<CustomStudyFilter["focus"]>("available");
+  const [customFocus, setCustomFocus] = useState<CustomStudyFocus>("available");
   const [customLimit, setCustomLimit] = useState(20);
   const [level, setLevel] = useState<LevelFilter>("all");
   const [customMessage, setCustomMessage] = useState("");
+  const [starting, setStarting] = useState(false);
+  const focusOptions: Array<[CustomStudyFocus, string]> = [
+    ["available", t("customAvailable", language)],
+    ["due", t("customDue", language)],
+    ["new", t("customNew", language)],
+    ["weak", t("customWeak", language)],
+    ["mistakes", t("customRecentMistakes", language)],
+  ];
+
+  const start = async () => {
+    if (starting) return;
+    setCustomMessage("");
+    setStarting(true);
+    try {
+      const filter: CustomStudyFilter = {
+        level,
+        focus: customFocus,
+        limit: customLimit,
+        ...(selectedTopic ? { topicId: selectedTopic.id, topicCharacters: selectedTopic.characters } : {}),
+      };
+      const started = await onStartCustomStudy(filter);
+      if (!started) setCustomMessage(t("customNoCards", language));
+    } catch {
+      setCustomMessage(t("actionFailed", language));
+    } finally {
+      setStarting(false);
+    }
+  };
 
   return (
-    <section className="surface card custom-study-panel practice-custom-study" aria-labelledby="custom-study-title">
-      <div className="custom-study-panel-header">
+    <section className="practice-custom-panel" aria-labelledby="custom-study-title">
+      <div className="practice-custom-panel-header">
         <div>
-          <p className="eyebrow">{t("customStudy", language)}</p>
-          <h3 id="custom-study-title">{t("customStudy", language)}</h3>
-          <p>{t("customStudyHint", language)}</p>
+          <p className="eyebrow">{selectedTopic ? t("practiceTopicSessionLabel", language) : t("customStudy", language)}</p>
+          <h3 id="custom-study-title">{selectedTopic ? selectedTopic.label : t("customStudy", language)}</h3>
+          <p>{selectedTopic ? t("practiceTopicSelectedHint", language) : t("customStudyHint", language)}</p>
         </div>
       </div>
-      <div className="custom-study-controls">
-        <div className="custom-study-focus" role="group" aria-label={t("customFocus", language)}>
-          {([
-            ["available", t("customAvailable", language)],
-            ["due", t("customDue", language)],
-            ["new", t("customNew", language)],
-            ["weak", t("customWeak", language)],
-            ["mistakes", language === "fa" ? "اشتباهات اخیر" : "Recent mistakes"],
-          ] as const).map(([value, label]) => (
-            <button
-              key={value}
-              className={"dictionary-filter-button " + (customFocus === value ? "active" : "")}
-              type="button"
-              aria-pressed={customFocus === value}
-              onClick={() => setCustomFocus(value)}
-            >
+      <fieldset className="practice-focus-fieldset">
+        <legend>{t("customFocus", language)}</legend>
+        <div className="practice-focus-options" role="group" aria-label={t("customFocus", language)}>
+          {focusOptions.map(([value, label]) => (
+            <button key={value} className={"practice-focus-option" + (customFocus === value ? " is-active" : "")} type="button" aria-pressed={customFocus === value} onClick={() => setCustomFocus(value)}>
               {label}
             </button>
           ))}
         </div>
-        <div className="custom-study-secondary-controls">
-          <label className="custom-study-limit">
-            <span>{language === "fa" ? "سطح" : "Level"}</span>
-            <select value={level} onChange={(event) => setLevel(event.target.value as LevelFilter)}>
-              <option value="all">{t("allLevels", language)}</option>
-              {(["N5", "N4", "N3", "N2", "N1"] as const).map(value => <option key={value} value={value}>{value}</option>)}
-            </select>
-          </label>
-          <label className="custom-study-limit">
-            <span>{t("customLimit", language)}</span>
-            <select value={customLimit} onChange={(event) => setCustomLimit(Number(event.target.value))}>
-              {[5, 10, 20, 30, 50].map((value) => <option key={value} value={value}>{formatNumber(value, language)}</option>)}
-            </select>
-          </label>
-        </div>
+      </fieldset>
+      <div className="practice-custom-secondary-controls">
+        <label className="practice-custom-field">
+          <span>{language === "fa" ? "سطح" : "Level"}</span>
+          <select value={level} onChange={event => setLevel(event.target.value as LevelFilter)}>
+            <option value="all">{t("allLevels", language)}</option>
+            {(["N5", "N4", "N3", "N2", "N1"] as const).map(value => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>
+        <label className="practice-custom-field">
+          <span>{t("customLimit", language)}</span>
+          <select value={customLimit} onChange={event => setCustomLimit(Number(event.target.value))}>
+            {[5, 10, 20, 30, 50].map(value => <option key={value} value={value}>{formatNumber(value, language)}</option>)}
+          </select>
+        </label>
       </div>
-      <div className="custom-study-action">
-        <span>{level === "all" ? t("allLevels", language) : level} · {t("customStudy", language)}</span>
-        <button className="button primary" type="button" onClick={async () => {
-          setCustomMessage("");
-          const started = await onStartCustomStudy({ level, focus: customFocus, limit: customLimit });
-          if (!started) setCustomMessage(t("customNoCards", language));
-        }}>
-          {t("customStart", language)}
+      <div className="practice-custom-footer">
+        <span>
+          {selectedTopic ? selectedTopic.label + " · " : ""}
+          {level === "all" ? t("allLevels", language) : level}
+          {" · "}{focusOptions.find(([value]) => value === customFocus)?.[1]}
+          {" · "}{formatNumber(customLimit, language)}
+        </span>
+        <button className="button primary" type="button" disabled={starting} onClick={() => void start()}>
+          {starting ? t("practiceTopicStarting", language) : t("customStart", language)}
         </button>
       </div>
-      {customMessage ? <p className="custom-study-message" role="status">{customMessage}</p> : null}
+      {customMessage ? <p className="practice-custom-message" role="status">{customMessage}</p> : null}
     </section>
   );
 }
