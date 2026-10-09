@@ -552,6 +552,8 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
+          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
+        </div>
           {referenceInfoOpen?<div id="learning-reference-info" className="surface learning-reference-popover" role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
             <div className="card-topline learning-reference-popover-head"><strong id="learning-reference-info-title">{t("additionalInformation")}</strong><button ref={referenceInfoCloseRef} className="learning-reference-close button secondary" style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%"}} type="button" aria-label={t("close")} title={t("close")} onClick={()=>{setReferenceInfoOpen(false);requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}))}}><UiIcon name="close" size={17}/></button></div>
             <div className="dialog-grid learning-reference-info-grid" style={{gridTemplateColumns:"1fr"}}>
@@ -560,8 +562,6 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
               {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
             </div>
           </div>:null}
-          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
-        </div>
       </div>
     </div>
   </section>
