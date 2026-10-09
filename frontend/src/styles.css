@@ -2319,7 +2319,7 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
 .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemonic-library-list{
   max-height:none;
 }
-.dialog.secondary-page-dialog.reading-lab-dialog{width:min(860px,calc(100vw - 32px));height:min(84dvh,820px);overflow:hidden;}.dialog.secondary-page-dialog.reading-lab-dialog h2{font-family:var(--jp-font);flex:0 0 auto;}
+.dialog.secondary-page-dialog.reading-lab-dialog{width:min(860px,calc(100vw - 32px));height:min(84dvh,820px);overflow:hidden;}.dialog.secondary-page-dialog.reading-lab-dialog h2{flex:0 0 auto;}
 .prepared-mnemonic-library 
 .prepared-mnemonic-library-row{
   grid-template-columns:54px minmax(0,1fr);
@@ -2347,7 +2347,6 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
     padding:22px 16px 18px;
     border-radius:20px;
   }
-  .dialog.secondary-page-dialog.reading-lab-dialog{height:calc(100dvh - 16px);}
   .stats-hero{grid-template-columns:1fr 1fr;}
   .stats-hero-primary{grid-column:1/-1;}
   .reading-lab-analysis{grid-template-columns:1fr;}
