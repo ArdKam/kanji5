@@ -1,4 +1,4 @@
-# Kanji 5 — e2e/
+# Rinemi — e2e/
 
 This directory contains Playwright browser/integration coverage. It validates shipped behavior at the browser boundary; it is not the source of product behavior.
 
