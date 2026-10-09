@@ -113,7 +113,7 @@ test('English learning rating buttons are ordered Easy, Good, Hard, Again',async
   await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');localStorage.setItem('kanji5-onboarding-v2','complete')});
   await page.goto('/');
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
-  await page.getByRole('button',{name:'Show kanji information',exact:true}).click();
+  await page.getByRole('button',{name:'Reveal meaning & readings',exact:true}).click();
   await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
   await expect(page.locator('.rating-grid .rating')).toHaveText(['Easy','Good','Hard','Again']);
 });
