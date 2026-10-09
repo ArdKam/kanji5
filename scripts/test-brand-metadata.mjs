@@ -26,7 +26,7 @@ assert.ok(manifest.display === "standalone" && manifest.start_url === "./" && ma
 assert.ok(app.includes('<h1 dir="ltr">Rinemi</h1>') && app.includes('className="header-brand-mark" src="./icon.svg"'), "main app header must render the wordmark and brand mark");
 assert.ok(onboarding.includes("<strong>Rinemi</strong>") && !onboarding.includes("<strong>Kanji5</strong>"), "onboarding header must use Rinemi rather than the legacy brand");
 assert.ok(onboarding.includes('className="kanji5-onboarding-brand-mark" src="./icon.svg"'), "onboarding must use the canonical Rinemi mark");
-assert.ok(onboarding.includes("--paper:#F7F4EE") && onboarding.includes("--indigo:#505F83") && onboarding.includes("--shu:#D6A1AA"), "onboarding palette must match the Rinemi system");
+assert.ok(onboarding.includes("--paper:#F7F4EE") && onboarding.includes("--indigo:#505F83") && onboarding.includes("--shu:#505F83") && onboarding.includes("--sakura:#D6A1AA"), "onboarding palette must match the Rinemi system");
 assert.ok(!onboarding.includes("--indigo:#304f74") && !onboarding.includes("--shu:#b56d72"), "onboarding must not retain its legacy palette");
 assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — یادگیری کانجی ژاپنی" : "Rinemi — Japanese kanji learning";'), "dynamic document title must use Rinemi in both languages");
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
