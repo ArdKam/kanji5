@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import { getComponentInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
+import { getVisualStructureInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 import topicData from "./kanji-topics.json";
@@ -41,7 +41,7 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
       if (!active) return;
       setSuggestion(buildPreparedMnemonic(item));
       return Promise.all([
-        getComponentInfo(item.character).then(info => buildPreparedMnemonic(item, info.components)).catch(() => buildPreparedMnemonic(item)),
+        getVisualStructureInfo(item.character).then(info => buildPreparedMnemonic(item, info.available ? info.components.map(component => component.character) : [])).catch(() => buildPreparedMnemonic(item)),
         getMnemonic(item.character).catch(() => ({ text: "" })),
       ]);
     }).then(result => {
