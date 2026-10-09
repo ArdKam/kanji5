@@ -4,7 +4,7 @@ import type { CustomStudyFilter, CustomStudyFocus } from "./engine";
 import { UiIcon } from "./UiIcon";
 import { learningCopy } from "./learning-copy";
 import { TOPICS, type TopicStudyTopic } from "./topic-taxonomy";
-import "./topic-learning.css";
+import topicStyles from "./topic-learning.css?inline";
 
 export function TopicLearningDialog({
   open,
@@ -26,10 +26,21 @@ export function TopicLearningDialog({
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const styleId = "topic-learning-dynamic-styles";
+    let style = document.getElementById(styleId) as HTMLStyleElement | null;
+    const alreadyPresent = Boolean(style);
+    if (!style) {
+      style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = topicStyles;
+      document.head.append(style);
+    }
     const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    else if (!open && dialog.open) dialog.close();
+    if (dialog && open && !dialog.open) dialog.showModal();
+    else if (dialog && !open && dialog.open) dialog.close();
+    return () => {
+      if (!alreadyPresent) style?.remove();
+    };
   }, [open]);
 
   useEffect(() => {
