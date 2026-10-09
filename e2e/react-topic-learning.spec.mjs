@@ -37,9 +37,9 @@ test("learning card and rating footer stay clear of the fixed bottom navigation"
         navTop: nav.getBoundingClientRect().top,
       };
     });
-    expect(geometry).not.toBeNull();
-    expect(geometry!.footerBottom).toBeLessThanOrEqual(geometry!.navTop);
-    expect(geometry!.cardBottom).toBeLessThanOrEqual(geometry!.navTop);
+    if (!geometry) throw new Error("Card/footer/navigation geometry is unavailable");
+    expect(geometry.footerBottom).toBeLessThanOrEqual(geometry.navTop);
+    expect(geometry.cardBottom).toBeLessThanOrEqual(geometry.navTop);
   }
 });
 
