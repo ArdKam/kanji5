@@ -11,7 +11,7 @@ function downloadBackup(){
   return Promise.resolve(createBackup()).then(backup=>{
     const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),anchor=document.createElement('a');
-    anchor.href=url;anchor.download=`kanji5-startup-backup-${new Date().toISOString().slice(0,10)}.json`;anchor.click();URL.revokeObjectURL(url);
+    anchor.href=url;anchor.download=`rinemi-startup-backup-${new Date().toISOString().slice(0,10)}.json`;anchor.click();URL.revokeObjectURL(url);
   });
 }
 async function copyDiagnostics(error){
@@ -62,14 +62,14 @@ function showReactBootFailure(error){
   actions.className='kanji5-startup-error-actions';
   const makeAction=(label,onClick,primary=false)=>{const button=document.createElement('button');button.className=primary?'kanji5-startup-error-action':'kanji5-startup-error-secondary';button.type='button';button.textContent=label;button.addEventListener('click',onClick);actions.appendChild(button);return button};
   const isFa=document.documentElement.lang==='fa';
-  title.textContent=isFa?'کانجی‌یار باز نشد':'Kanji5 could not start';
+  title.textContent=isFa?'کانجی‌یار باز نشد':'Rinemi could not start';
   copy.textContent=isFa?'یک فایل برنامه با نسخهٔ فعلی بارگذاری نشد. صفحه را دوباره بارگذاری کنید.':'A required application file could not be loaded for this release. Reload the page and try again.';
   makeAction(isFa?'بارگذاری دوباره':'Reload',()=>window.location.reload(),true);
   makeAction(isFa?'پشتیبان‌گیری':'Export backup',button=>{const target=button.currentTarget;target.disabled=true;void downloadBackup().then(()=>{target.disabled=false}).catch(err=>{target.disabled=false;observability()?.capture?.('startup-backup-failure',err,{dataAffected:'unknown'})})});
   makeAction(isFa?'گزارش خطا':'Copy diagnostics',button=>{const target=button.currentTarget;target.disabled=true;void copyDiagnostics(error).then(()=>{target.textContent=isFa?'کپی شد':'Copied'}).catch(err=>{observability()?.capture?.('startup-report-copy-failure',err,{dataAffected:'unknown'});target.disabled=false})});
   card.append(mark,title,copy,actions);
   startupRoot.appendChild(card);
-  console.error('Kanji 5 React presentation failed to boot.',{buildId,error});
+  console.error('Rinemi presentation failed to boot.',{buildId,error});
 }
 import('./react-dist/kanji5-react.js'+assetVersion)
   .catch(error=>{
