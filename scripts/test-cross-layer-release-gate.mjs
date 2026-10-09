@@ -19,6 +19,7 @@ for (const pattern of [
   '      - "vendor/**"',
   '      - "kanji-data.json"',
   '      - "kanji-components.json"',
+  '      - "kanji-visual-structure.json"',
 ]) {
   assert.equal(
     reactWorkflow.split(pattern).length - 1,
