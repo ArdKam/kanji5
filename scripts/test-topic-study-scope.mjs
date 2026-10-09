@@ -15,9 +15,9 @@ const cards = {
 const scoped = normalizeCustomStudyFilter({
   focus: "available",
   limit: 20,
-  characterScope: ["山", "川", "山", "not-a-kanji", ""],
+  characterScope: ["山", "川", "山", "𠮟", "not-a-kanji", ""],
 });
-assert.deepEqual(scoped.characterScope, ["山", "川"], "scope is unique and contains only single CJK characters");
+assert.deepEqual(scoped.characterScope, ["山", "川", "𠮟"], "scope is unique and supports single Han characters, including supplementary-plane kanji");
 
 const selected = selectCustomStudyItems({
   deck, cards, filter: { focus: "available", limit: 20, characterScope: ["山", "川"] },
