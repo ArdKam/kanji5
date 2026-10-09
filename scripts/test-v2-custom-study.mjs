@@ -64,4 +64,41 @@ if (JSON.stringify(capped.characters) !== JSON.stringify(["語"])) {
 const exhaustedNew = selectCustomStudyItems({ deck, cards, learner, filter: { focus: "new", limit: 20 }, now, dailyNew: 2, todayNew: 2 });
 if (exhaustedNew.characters.length !== 0) throw new Error("Daily new budget was not respected");
 
+const topicFilter = normalizeCustomStudyFilter({
+  topicId: "nature",
+  topicCharacters: ["森", "山", "森", "", "not-a-kanji"],
+  focus: "available",
+  limit: 20,
+});
+if (topicFilter.topicId !== "nature" || JSON.stringify(topicFilter.topicCharacters) !== JSON.stringify(["森", "山"])) {
+  throw new Error("Topic filter normalization failed");
+}
+const topicAvailable = selectCustomStudyItems({
+  deck, cards, learner,
+  filter: { topicId: "nature", topicCharacters: ["森", "山"], focus: "available", limit: 20 },
+  now, dailyNew: 5, todayNew: 0,
+});
+if (JSON.stringify(topicAvailable.characters) !== JSON.stringify(["森"])) {
+  throw new Error(`Topic scoping must exclude items outside the selected topic: ${JSON.stringify(topicAvailable.characters)}`);
+}
+const topicDue = selectCustomStudyItems({
+  deck, cards, learner,
+  filter: { topicId: "school", topicCharacters: ["学", "校", "語"], level: "N5", focus: "due", limit: 20 },
+  now,
+});
+if (JSON.stringify(topicDue.characters) !== JSON.stringify(["学"])) {
+  throw new Error(`Topic, level, and due filters must compose: ${JSON.stringify(topicDue.characters)}`);
+}
+const emptyTopic = selectCustomStudyItems({
+  deck, cards, learner,
+  filter: { topicId: "empty-topic", topicCharacters: [], focus: "available", limit: 20 },
+  now,
+});
+if (emptyTopic.characters.length !== 0) {
+  throw new Error("An empty selected topic must not fall back to the full deck");
+}
+const invalidTopic = normalizeCustomStudyFilter({ topicId: "../all", topicCharacters: ["学"] });
+if (invalidTopic.topicId !== undefined || invalidTopic.topicCharacters !== undefined) {
+  throw new Error("Invalid topic IDs must be ignored safely");
+}
 console.log("Custom study filtering core contracts passed.");
