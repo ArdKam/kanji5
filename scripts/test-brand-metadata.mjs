@@ -38,7 +38,7 @@ assert.ok(onboarding.includes("<strong>Rinemi</strong>") && !onboarding.includes
 assert.ok(onboarding.includes('className="kanji5-onboarding-brand-mark" src="./icon.svg"'), "onboarding must use the canonical Rinemi mark");
 assert.ok(onboarding.includes("--paper:#F7F4EE") && onboarding.includes("--indigo:#505F83") && onboarding.includes("--shu:#505F83") && onboarding.includes("--sakura:#D6A1AA"), "onboarding palette must match the Rinemi system");
 assert.ok(!onboarding.includes("--indigo:#304f74") && !onboarding.includes("--shu:#b56d72"), "onboarding must not retain its legacy palette");
-assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — یادگیری کانجی ژاپنی" : "Rinemi — Japanese kanji learning";'), "dynamic document title must use Rinemi in both languages");
+assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — پنج کانجی در روز" : "Rinemi — Five kanji a day";'), "dynamic document title must use Rinemi in both languages");
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
 }
