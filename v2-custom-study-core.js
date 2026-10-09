@@ -1,4 +1,4 @@
-export const CUSTOM_STUDY_VERSION = "1.0.0";
+export const CUSTOM_STUDY_VERSION = "1.1.0";
 const LEVELS = new Set(["all", "N5", "N4", "N3", "N2", "N1"]);
 const FOCUSES = new Set(["available", "due", "new", "weak", "mistakes"]);
 
@@ -9,7 +9,20 @@ export function normalizeCustomStudyFilter(filter = {}) {
   const level = LEVELS.has(String(input.level || "all")) ? String(input.level || "all") : "all";
   const focus = FOCUSES.has(String(input.focus || "available")) ? String(input.focus || "available") : "available";
   const limit = Math.max(1, Math.min(100, Math.round(n(input.limit) || 20)));
-  return Object.freeze({ version: CUSTOM_STUDY_VERSION, level, focus, limit });
+  const hasCharacterScope = Array.isArray(input.characterScope);
+  const characterScope = hasCharacterScope
+    ? [...new Set(input.characterScope
+      .map(value => String(value || "").trim())
+      .filter(value => /^\p{Script=Han}$/u.test(value)))]
+        .slice(0, 2136)
+    : undefined;
+  return Object.freeze({
+    version: CUSTOM_STUDY_VERSION,
+    level,
+    focus,
+    limit,
+    ...(hasCharacterScope ? { characterScope } : {}),
+  });
 }
 
 function isDue(card, now) {
@@ -41,9 +54,12 @@ export function selectCustomStudyItems({ deck = [], cards = {}, learner = {}, co
   const levelFiltered = normalized.level === "all"
     ? allowed
     : allowed.filter((item) => String(item?.jlpt || "") === normalized.level);
+  const scoped = Array.isArray(normalized.characterScope)
+    ? levelFiltered.filter((item) => normalized.characterScope.includes(String(item?.character || item?.id || "").trim()))
+    : levelFiltered;
 
   const mistakeSet = mistakeCharacters(components);
-  const rows = levelFiltered.map((item, index) => {
+  const rows = scoped.map((item, index) => {
     const id = String(item?.id || item?.character || "").trim();
     const character = String(item?.character || item?.id || "").trim();
     const card = cards?.[id]?.card || cards?.[character]?.card || null;
