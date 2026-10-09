@@ -49,7 +49,7 @@ export function CustomStudyPanel({ language, selectedTopic = null, onStartCustom
         <div>
           <p className="eyebrow">{selectedTopic ? t("practiceTopicSessionLabel", language) : t("customStudy", language)}</p>
           <h3 id="custom-study-title">{selectedTopic ? selectedTopic.label : t("customStudy", language)}</h3>
-          <p>{selectedTopic ? t("practiceTopicSelectedHint", language) : t("customStudyHint", language)}</p>
+          <p className="subtitle">{selectedTopic ? t("practiceTopicSelectedHint", language) : t("customStudyHint", language)}</p>
         </div>
       </div>
       <fieldset className="practice-focus-fieldset">
