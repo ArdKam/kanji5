@@ -22,12 +22,21 @@ const POSITION_LABELS: Record<string, { fa: string; en: string }> = {
 function renderComponent(component: VisualStructureNode, path: string, language: "fa" | "en") {
   const label = getComponentLabel(component.character, language);
   const position = component.position ? POSITION_LABELS[component.position]?.[language] : "";
+  const partialLabel = component.partial
+    ? component.original
+      ? (language === "fa" ? "بخشی از " : "Part of ") + component.original
+      : (language === "fa" ? "شکل جزئی" : "Partial form")
+    : "";
   const childrenLabel = language === "fa" ? "اجزای این جزء" : "Subcomponents";
+  const classes = ["component-breakdown-part"];
+  if (component.variant) classes.push("is-variant");
+  if (component.partial) classes.push("is-partial");
   return (
     <span className="component-breakdown-part-wrap" role="listitem" key={path}>
       <span className="component-breakdown-part-wrap-inner">
-        <span className={component.variant ? "component-breakdown-part is-variant" : "component-breakdown-part"} lang="ja">{component.character}</span>
+        <span className={classes.join(" ")} lang="ja">{component.character}</span>
         {label ? <span className="component-breakdown-label">{label}</span> : null}
+        {partialLabel ? <span className="component-breakdown-label component-breakdown-partial">{partialLabel}</span> : null}
         {position ? <span className="component-breakdown-label component-breakdown-position">{position}</span> : null}
         {component.components.length ? (
           <span className="component-breakdown-subparts" role="list" aria-label={childrenLabel}>
