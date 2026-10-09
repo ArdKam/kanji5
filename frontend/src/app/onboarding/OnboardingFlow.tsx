@@ -525,7 +525,7 @@ export function OnboardingFlow({
         <header className="kanji5-onboarding-header">
           <div className="kanji5-onboarding-brand" aria-label={t("onboardingBrand", language)}>
             <span lang="ja" aria-hidden="true">学</span>
-            <strong>Kanji5</strong>
+            <strong>Rinemi</strong>
           </div>
           <Progress step={step} steps={steps} language={language} />
           <div className="kanji5-onboarding-language" aria-label={t("onboardingLanguage", language)}>
