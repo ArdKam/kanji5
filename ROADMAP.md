@@ -170,7 +170,7 @@ This register is intentionally explicit so future contributors and agents do not
 - **Implementation status:** **DONE / LANDED** on `main` through PR **#468**, merged at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`.
 - **Do not reimplement, re-audit from scratch, or reopen R12 repository hardening** unless a concrete regression or newly introduced security finding is demonstrated on current `main`.
 - R12 hardening already landed includes the audited unsafe-DOM/XSS cleanup, restrictive CSP/remote-runtime hardening, pinned/vendored Supabase client, backup integrity and payload bounds, dependency/source-map/security gates, and production RLS/non-owner denial verification.
-- **What remains is acceptance evidence only:** current-main security gate execution, same-SHA deployed artifact/header/live-smoke evidence, and clearance of the production `auth_leaked_password_protection` finding.
+- **Acceptance status as of 2026-10-09:** current-main security/release checks and same-SHA GitHub Pages artifact/live-smoke verification passed on merge `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d` (see §2.1.1). R12 remains open for external clearance of the production `auth_leaked_password_protection` finding. The live Pages response did not expose an HTTP CSP header; the HTML meta CSP remains the source-level control.
 - The leaked-password-protection finding is an **external Supabase configuration/plan blocker**, not missing R12 repository implementation. Do not attempt to solve it by duplicating R12 code in the repository.
 - Historical R12 PR CI is evidence of the PR branch only; it must not be presented as current-main CI evidence.
 - If no R12 regression is demonstrated, **skip R12 implementation and proceed to the next roadmap item** while carrying these acceptance items as release evidence work.
@@ -179,9 +179,18 @@ This register is intentionally explicit so future contributors and agents do not
 
 For every major task/stream, once implementation lands, record **(1) implementation status, (2) exact merge/commit evidence, (3) remaining acceptance-only items, (4) explicit blockers/ownership, and (5) a DO-NOT-REOPEN instruction** in the canonical roadmap and the relevant evidence document. Historical PR sections must never override the current-main status ledger.
 
-### 2.1 Verified current status ledger — 2026-10-06
+### 2.1 Verified current status ledger — 2026-10-09
 
 Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
+
+### 2.1.1 Same-SHA UI release and live verification — 2026-10-09
+
+- **UI implementation:** PR **#499** merged at `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d` (tested head `e21b610afddee9290d45db6480b72fdd62739916`). It improves first-run onboarding progress and controls, keeps learning content first in DOM reading order, removes the duplicate Jōyō-coverage metric from Stats in favor of today's reviews, localizes Grammar lesson headings and semantics, progressively discloses advanced Dictionary filters with active-count/reset behavior, and balances Reading Lab analysis metrics.
+- **Current-main build:** [React presentation build run 37920914709](https://github.com/ArdKam/kanji5/actions/runs/37920914709) completed successfully: build job **50/50 steps**, WebKit compatibility **11/11**. The build, typecheck, dependency audits, presentation and secondary-experience E2E, performance artifact budget, accessibility, offline/stale-client, browser compatibility, PWA release matrix, onboarding, Stats, card flip, mnemonic, Review/Practice and Production Recall gates all passed.
+- **Deployment and live evidence:** [GitHub Pages deployment run 37921553667](https://github.com/ArdKam/kanji5/actions/runs/37921553667) completed successfully (**27/27 steps**) on the same SHA. Staged production verification and R12 source/artifact security checks passed; production resources returned HTTP 200; SHA-256 hashes of `index.html`, `react-entry.js`, `sw.js`, shipped React JS/CSS, and the pinned Supabase runtime matched the staged artifact; live offline/core-product E2E passed. The published site is [https://ardkam.github.io/kanji5/](https://ardkam.github.io/kanji5/).
+- **Performance artifact:** the shipped stylesheet was reported at 231.19 kB (36.78 kB gzip); the current-main performance/artifact budget gate passed. Keep CSS within this budget on subsequent work.
+- **Scope of evidence:** this proves the exact merge was built, deployed, hash-verified, and passed the configured live smoke checks. It is not a real-device/assistive-technology sign-off or a frozen public-beta promotion lock. R12 external acceptance remains open for the production Supabase leaked-password-protection finding; the response lacked an HTTP CSP header, with the deployed HTML meta CSP remaining in force.
+
 
 **DONE on current `main`:**
 - Bootstrap/runtime and React artifact hygiene.
@@ -190,6 +199,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - R11 runtime failure diagnostics/observability implementation and React render-failure recovery are present on current `main` (merged #463 plus the earlier merged render-containment work); final production/release verification remains part of the release lock.
 - R2 onboarding implementation is present on current `main` (merged #451/#453/#454/#456); representative device/release evidence and educational validity evidence remain separate gates.
 - Final Kanji public UX/accessibility pass is present on current `main` via merged #464, covering concrete Learning, Active Recall, Stats, Settings, Dictionary, Reading Lab, Mnemonics, and Handwriting defects. Representative-device and assistive-technology evidence remains a release gate.
+- PR #499 is **DONE and live on current `main`**: onboarding/learning hierarchy, Stats metric semantics, Grammar localization/accessibility, progressive Dictionary filters, and Reading Lab metric-grid polish; exact-SHA build/deploy evidence is recorded in §2.1.1.
 - D1/D2/D3/D4/D5 cross-domain foundations.
 - Stats/Advanced Stats/learning-efficacy foundations.
 - Learning vs Active Recall, Learning Card pager/swipe/rating, keyboard/mobile contracts.
@@ -236,11 +246,13 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 - #467: R4–R6 Data Trust implementation.
 - #469: C4 educational content/assessment implementation; educational acceptance remains PARTIAL.
 - #471/#472: A1 account-dialog and Production Recall keyboard fixes.
+- #499: post-merge UI polish with exact-SHA live Pages verification; see §2.1.1.
 
 **Merged and now present on current `main`:**
 - #467: R4–R6 Data Trust implementation.
 - #469: C4 educational content and assessment validity; educational acceptance remains PARTIAL.
 - #471/#472: A1 release-gate fixes.
+- #499: onboarding, learning hierarchy, Stats, Grammar, Dictionary, and Reading Lab polish; merged and live at `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d`.
 
 **Documentation reconciliation:**
 - The current roadmap/release ledger has been updated to distinguish completed RC execution from the final promotion lock and to avoid counting merged R4–R6 as pending implementation.
@@ -248,6 +260,7 @@ Only work present on current `main` counts as implemented. PRs that are open or 
 **Superseded/stale PRs that must not be treated as pending implementation:**
 - #392: superseded by merged R11 work in #463.
 - #398: superseded by current-main roadmap reconciliation.
+- #493: stale CSS artifact-budget PR, closed on 2026-10-09 after #499 removed the same unused CSS rule and current-main artifact/performance plus same-SHA Pages verification passed. Its remaining compatibility-server changes are superseded by the current HTTPS test server and passing separate WebKit job; its unrelated dictionary keyboard behavior should be reviewed separately if still wanted.
 ---
 
 
@@ -412,7 +425,7 @@ A workflow definition is not evidence that a particular commit succeeded. Releas
 - Treat dynamic-import failures as release blockers.
 - Keep service-worker shell and runtime asset lists synchronized.
 
-Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. The current `main` Pages deployment is green, but the release ledger must still tie live artifact/hash, cache, offline, and smoke evidence to the frozen candidate SHA.
+Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. **Latest same-SHA current-main verification (2026-10-09):** merged commit `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d` passed React build and compatibility CI, was deployed to GitHub Pages, and passed live asset-hash/offline/core-product smoke checks (see §2.1.1). RC freeze/promotion lock and real-device acceptance remain separate release actions.
 
 ### 0.5 Production smoke test
 
