@@ -1,6 +1,6 @@
-# Kanji5 — Public Product Guide
+# Rinemi — Public Product Guide
 
-Kanji5 is a local-first Japanese kanji learning PWA built around a focused daily loop:
+Rinemi is a local-first Japanese kanji learning PWA built around a focused daily loop:
 
 **Learn → Recall → Review → Recover → Improve**
 
@@ -18,7 +18,7 @@ The app is designed for short, repeatable daily practice rather than long study 
 
 ## Accounts
 
-Kanji5 is designed to work without mandatory sign-up. An account is optional and is intended for persistence/recovery and, where configured, cross-device synchronization.
+Rinemi is designed to work without mandatory sign-up. An account is optional and is intended for persistence/recovery and, where configured, cross-device synchronization.
 
 Creating an account should not be required to start learning.
 
