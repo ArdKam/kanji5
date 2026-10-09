@@ -339,7 +339,9 @@
 @media(max-width:720px){
   .dictionary-filter-row,
   .dictionary-display-row{align-items:stretch;flex-direction:column;}
-  .dictionary-level-filter{justify-content:flex-start;}
+  .dictionary-filter-row{display:grid;grid-template-columns:minmax(0,1fr);}
+  .dictionary-level-filter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;min-width:0;}
+  .dictionary-advanced-filters{width:100%;max-width:100%;margin:0;}
   .dictionary-select-filter{justify-content:space-between;}
   .dictionary-select-filter select{flex:1;min-width:0;}
   .dictionary-view-toggle{width:auto;}
@@ -1348,7 +1350,7 @@
 .reading-lab-listen-primary{display:flex;flex-wrap:wrap;gap:8px;}
 .reading-lab-listen-controls>.button{min-height:42px;padding:7px 12px;font-size:var(--text-xs);}
 .reading-lab-speech-rate{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:4px 8px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--mute);font-size:var(--text-xs);font-weight:800;}
-.reading-lab-speech-rate select{min-height:32px;border:0;background:transparent;color:var(--ink);font:inherit;}
+.reading-lab-speech-rate select{min-height:32px;max-width:100%;padding:4px 20px 4px 6px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:inherit;}
 .reading-lab-speech-status,.reading-lab-audio-name{margin:0;color:var(--mute);font-size:var(--text-xs);line-height:1.5;}
 .reading-lab-audio-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .reading-lab-audio{width:100%;min-height:38px;border-radius:10px;}
@@ -1393,7 +1395,7 @@
 .reading-lab-empty .eyebrow{margin:0 0 3px;color:var(--shu);}
 .reading-lab-empty h3{margin:0 0 4px;font-size:var(--text-base);}
 .reading-lab-empty p:last-child{margin:0;color:var(--mute);font-size:var(--text-xs);line-height:1.65;}
-@media(max-width:760px){.reading-lab{padding-inline:0}.reading-lab-section{padding-block:15px}.reading-lab-input{min-height:150px;padding:14px 14px 40px;font-size:17px}.reading-lab-source-actions{align-items:stretch;flex-direction:column}.reading-lab-format-note{padding-inline:2px}.reading-lab-action-primary{width:100%}.reading-lab-listen-controls{display:grid;grid-template-columns:1fr 1fr}.reading-lab-listen-primary{display:contents}.reading-lab-listen-controls>.button,.reading-lab-speech-rate,.reading-lab-action-audio{width:100%}.reading-lab-analysis{grid-template-columns:1fr;padding:14px}.reading-lab-analysis-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.reading-lab-analysis-stats>div:first-child{grid-column:1/-1}.reading-lab-reader-text{padding:16px 14px;font-size:18px}.reading-lab-empty{grid-template-columns:40px minmax(0,1fr);padding:16px}}
+@media(max-width:760px){.reading-lab{padding-inline:0}.reading-lab-section{padding-block:15px}.reading-lab-input{height:clamp(150px,23dvh,195px);min-height:clamp(140px,20dvh,170px);max-height:32dvh;padding:14px 14px 40px;font-size:17px}.reading-lab-source-actions{align-items:stretch;flex-direction:column}.reading-lab-format-note{padding-inline:2px}.reading-lab-action-primary{width:100%}.reading-lab-listen-controls{display:grid;grid-template-columns:1fr 1fr}.reading-lab-listen-primary{display:contents}.reading-lab-listen-controls>.button,.reading-lab-speech-rate,.reading-lab-action-audio{width:100%}.reading-lab-analysis{grid-template-columns:1fr;padding:14px}.reading-lab-analysis-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.reading-lab-analysis-stats>div:first-child{grid-column:1/-1}.reading-lab-reader-text{padding:16px 14px;font-size:18px}.reading-lab-empty{grid-template-columns:40px minmax(0,1fr);padding:16px}}
 @media(prefers-reduced-motion:reduce){.reading-lab-attention-item{transition:none}}
 
 .grammar-guide{
@@ -2105,8 +2107,13 @@
   font-size:var(--text-xs);
 }
 .dialog.secondary-page-dialog .reading-lab{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
   margin:0;
-  padding:0;
+  padding:0 0 max(16px,env(safe-area-inset-bottom));
   border:0;
   border-radius:0;
   background:transparent;
@@ -2256,7 +2263,7 @@
 .reading-lab-annotation-editor textarea:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 22%,transparent);outline-offset:1px;}
 .reading-lab-annotation-actions{display:flex;flex-wrap:wrap;gap:6px;}
 .reading-lab-speech-voice{display:grid;gap:4px;min-width:min(220px,100%);}
-.reading-lab-speech-voice select{min-height:40px;min-width:0;}
+.reading-lab-speech-voice select{width:100%;min-height:42px;min-width:0;max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--paper);color:var(--ink);font:inherit;font-size:var(--text-sm);}
 @media(max-width:640px){.reading-lab-sentence-support{grid-column:2;}.reading-lab-speech-voice{min-width:0;}}
 .reading-lab-reader-sentence.active{
   border-color:color-mix(in srgb,var(--shu) 30%,var(--line));
@@ -2337,84 +2344,3 @@
 .reading-word-kanji small{color:var(--mute);font-size:10px;font-weight:850;}
 .reading-word-card-hint{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
 @media(max-width:520px){.reading-lab-heading-line{align-items:flex-start;flex-direction:column;}.reading-word-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}.reading-word-card{padding:18px;}}
-
-
-/* UX remediation 2026-10: mobile dictionary filters and Reading Lab controls. */
-@media(max-width:640px){
-  /* Three columns keep all six level filters visible without forcing the last control off-screen. */
-  .dictionary-controls>.dictionary-filter-row{
-    display:grid;
-    grid-template-columns:minmax(0,1fr);
-    align-items:stretch;
-    gap:10px;
-    min-width:0;
-  }
-  .dictionary-controls>.dictionary-filter-row>.dictionary-level-filter{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    width:100%;
-    min-width:0;
-    gap:6px;
-  }
-  .dictionary-controls>.dictionary-filter-row>.dictionary-level-filter>.dictionary-filter-button{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    padding:6px 4px;
-    white-space:normal;
-    text-align:center;
-    line-height:1.25;
-    overflow-wrap:anywhere;
-  }
-  .dictionary-controls>.dictionary-filter-row>.dictionary-advanced-filters{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    margin:0;
-  }
-  .dictionary-advanced-filter-trigger{
-    min-height:44px;
-    gap:8px;
-  }
-  .dictionary-advanced-filter-trigger>.actions{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    margin:0;
-  }
-
-  /* Textarea height follows the mobile viewport instead of its six-row intrinsic height. */
-  .reading-lab .reading-lab-input{
-    height:clamp(150px,23dvh,195px);
-    min-height:clamp(140px,20dvh,170px);
-    max-height:32dvh;
-    resize:vertical;
-  }
-}
-.reading-lab .reading-lab-speech-voice select{
-  width:100%;
-  min-height:42px;
-  max-width:100%;
-  padding:8px 10px;
-  border:1px solid var(--line);
-  border-radius:var(--radius-md);
-  background:var(--paper);
-  color:var(--ink);
-  font:inherit;
-  font-size:var(--text-sm);
-}
-.reading-lab .reading-lab-speech-rate select{
-  min-height:32px;
-  max-width:100%;
-  padding:4px 20px 4px 6px;
-  border:0;
-  border-radius:8px;
-  background:transparent;
-  color:var(--ink);
-  font:inherit;
-}
-.reading-lab .reading-lab-speech-voice select:focus-visible,
-.reading-lab .reading-lab-speech-rate select:focus-visible{
-  outline:3px solid color-mix(in srgb,var(--ai) 35%,transparent);
-  outline-offset:2px;
-}
