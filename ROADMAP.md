@@ -2363,3 +2363,14 @@ This taxonomy is an explicit curated navigation aid, not a complete curriculum, 
 The expanded taxonomy defines 24 bilingual topics and 1,025 topic assignments across 741 unique kanji (34.7% of the 2,136-item catalog). Eight topic families were added: qualities/comparison, government/law, communication/media, money/finance, transport/travel, health/medicine, technology/industry, and arts/culture. Existing topic families were also expanded using explicit curated associations.
 
 Coverage remains deliberately partial; untagged characters are still available through “All topics” and text search. The next quality step is sampled semantic review of topic membership, then coverage expansion based on reviewed additions—not automatic gloss matching. Topic navigation must remain independent of FSRS, Learner Model, Adaptive Planner, and evidence authority.
+
+
+---
+
+# 26. Dictionary topic semantic QA — 2026-10-09
+
+**Status:** First conservative semantic audit prepared on branch `audit/kanji-topic-semantic-qa`; pending CI/review before merge.
+
+The audit removes 13 overbroad memberships from the 24-topic Dictionary taxonomy. The curated set now has **1,012 assignments** across **737 unique kanji** (34.5% of the pinned 2,136-kanji catalog), down from 1,025 assignments / 741 unique kanji. This is an intentional precision correction, not a loss of catalog availability: untagged kanji remain searchable and visible under “All topics.”
+
+The review distinguishes direct semantic matches from high-frequency, transparent compound relationships. It does not change Dictionary filtering mechanics, kanji data, FSRS, Learner Model, Adaptive Planner, evidence, or persistence. The taxonomy integrity test now protects the reviewed exclusions and exact coverage counts. Broader semantic curation remains an ongoing content-quality task; no automatic gloss-keyword tagging is allowed.
