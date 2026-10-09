@@ -72,6 +72,21 @@ for (const question of first) {
   assert.equal(question.item.character, question.stimulus);
 }
 
+const positionCounts = [0, 0, 0, 0];
+for (let seed = 0; seed < 250; seed += 1) {
+  const paper = buildPlacementQuestionsCore(fixtureCatalog(10), "Choose the primary meaning", seed + 9001);
+  for (const question of paper) {
+    const position = question.options.findIndex(option => option.correct);
+    assert.ok(position >= 0 && position < 4);
+    positionCounts[position] += 1;
+  }
+}
+const positionTotal = positionCounts.reduce((sum, count) => sum + count, 0);
+for (const count of positionCounts) {
+  assert.ok(count / positionTotal > 0.21 && count / positionTotal < 0.29,
+    "correct-answer position should remain approximately balanced across seeded forms: " + positionCounts.join(","));
+}
+
 const allPass = scorePlacementAnswersCore(first, allCorrectAnswers(first));
 assert.equal(allPass.suggestedLevel, "N2");
 assert.equal(allPass.upperBoundReached, true);
@@ -98,16 +113,16 @@ const short = buildPlacementQuestionsCore(fixtureCatalog(3), "Choose the primary
 assert.equal(short.some(question => question.level === "N1" || !DIAGNOSTIC_LEVELS.includes(question.level)), false);
 assert.equal(scorePlacementAnswersCore(short, {}).confidence, "limited", "thin level pools must remain explicitly limited");
 
+const ambiguityBase = fixtureCatalog(5);
 const ambiguityCatalog = [
   { character: "会", meanings: ["meeting", "meet", "party"], jlpt: "N4", order: 1 },
-  { character: "学", meanings: ["study", "learning", "learn"], jlpt: "N5", order: 2 },
-  ...fixtureCatalog(8).map((item, i) => ({ ...item, order: i + 3 })),
+  ...ambiguityBase.filter(item => item.jlpt === "N4").map((item, i) => ({ ...item, order: i + 20 })),
+  ...ambiguityBase.filter(item => item.jlpt !== "N4"),
 ];
 const ambiguityQuestions = buildPlacementQuestionsCore(ambiguityCatalog, "Choose the primary meaning", 17);
 const kai = ambiguityQuestions.find(question => question.item.character === "会");
-if (kai) {
-  assert.equal(kai.options.find(option => option.correct).label, "meet", "the key must use learner-priority meaning, not raw source order");
-  assert.equal(kai.options.some(option => ["meeting", "party"].includes(option.label)), false, "alternate accepted/source glosses must not appear as wrong options");
-}
+assert.ok(kai, "the fixed first frequency stratum must retain the ambiguity fixture");
+assert.equal(kai.options.find(option => option.correct).label, "meet", "the key must use learner-priority meaning, not raw source order");
+assert.equal(kai.options.some(option => ["meeting", "party"].includes(option.label)), false, "alternate accepted/source glosses must not appear as wrong options");
 
 console.log("Placement assessment core: 20-item stratified sampling, key validity, retake randomization, contiguous level recommendation, and uncertainty checks passed.");
