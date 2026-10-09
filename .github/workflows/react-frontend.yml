@@ -226,6 +226,9 @@ jobs:
       - name: Run learning card flip gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-learning-card-flip.spec.mjs
+      - name: Run topic-based learning gate
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/react-topic-learning.spec.mjs
       - name: Run personal mnemonic gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-personal-mnemonic.spec.mjs

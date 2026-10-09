@@ -1,4 +1,4 @@
-export const CUSTOM_STUDY_VERSION = "1.0.0";
+export const CUSTOM_STUDY_VERSION = "1.2.0";
 const LEVELS = new Set(["all", "N5", "N4", "N3", "N2", "N1"]);
 const FOCUSES = new Set(["available", "due", "new", "weak", "mistakes"]);
 
@@ -11,15 +11,25 @@ export function normalizeCustomStudyFilter(filter = {}) {
   const limit = Math.max(1, Math.min(100, Math.round(n(input.limit) || 20)));
   const rawTopicId = String(input.topicId || "").trim();
   const topicId = /^[a-z0-9-]{1,64}$/i.test(rawTopicId) ? rawTopicId : "";
-  const topicCharacters = topicId && Array.isArray(input.topicCharacters)
-    ? [...new Set(input.topicCharacters.map(value => String(value || "").trim()).filter(value => [...value].length === 1 && /[\u3400-\u9fff々〆ヵヶ]/u.test(value)))].slice(0, 500)
-    : [];
+  const hasTopicCharacters = Array.isArray(input.topicCharacters);
+  const hasLegacyCharacterScope = Array.isArray(input.characterScope);
+  // The stable API is topicCharacters; accept characterScope during migration for older callers.
+  // Invalid topic IDs never smuggle a character filter into an otherwise unscoped session.
+  const hasTopicScope = Boolean(topicId) || (!rawTopicId && (hasTopicCharacters || hasLegacyCharacterScope));
+  const rawCharacters = hasTopicCharacters ? input.topicCharacters : (hasLegacyCharacterScope ? input.characterScope : []);
+  const topicCharacters = hasTopicScope
+    ? [...new Set(rawCharacters
+      .map(value => String(value || "").trim())
+      .filter(value => [...value].length === 1 && /^(?:\\p{Script=Han}|[々〆ヵヶ])$/u.test(value)))]
+        .slice(0, 2136)
+    : undefined;
   return Object.freeze({
     version: CUSTOM_STUDY_VERSION,
     level,
     focus,
     limit,
-    ...(topicId ? { topicId, topicCharacters: Object.freeze(topicCharacters) } : {}),
+    ...(topicId ? { topicId } : {}),
+    ...(hasTopicScope ? { topicCharacters: Object.freeze(topicCharacters) } : {}),
   });
 }
 
@@ -49,10 +59,10 @@ function isWeak(character, learner) {
 export function selectCustomStudyItems({ deck = [], cards = {}, learner = {}, components = {}, filter = {}, now = Date.now(), dailyNew = 5, todayNew = 0 } = {}) {
   const normalized = normalizeCustomStudyFilter(filter);
   const allowed = Array.isArray(deck) ? deck.filter(Boolean) : [];
-  // A topic scope narrows candidates before level, due/new, weakness, and daily-budget rules.
-  // A valid topic with no characters matches none; it never falls back to the full deck.
+  // A scoped session narrows candidates before level, due/new, weakness, and daily-budget rules.
+  // An explicitly empty/unknown scope never falls back to the full deck.
   const topicCharacterSet = new Set(normalized.topicCharacters || []);
-  const topicFiltered = normalized.topicId
+  const topicFiltered = Array.isArray(normalized.topicCharacters)
     ? allowed.filter(item => topicCharacterSet.has(String(item?.character || item?.id || "").trim()))
     : allowed;
   const levelFiltered = normalized.level === "all"
