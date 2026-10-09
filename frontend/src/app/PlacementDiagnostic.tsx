@@ -71,7 +71,7 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy }: {
       <header className="placement-panel-header">
         <div>
           <h3 id="placement-diagnostic-title">{t("practicePlacementTitle", language)}</h3>
-          <p>{t("practicePlacementHint", language)}</p>
+          <p className="subtitle">{t("practicePlacementHint", language)}</p>
         </div>
       </header>
       {!active ? (
