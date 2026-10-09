@@ -133,7 +133,7 @@ export function PracticeHome({
 
       <section className="surface card practice-home-hero" aria-labelledby="practice-recommended-title">
         <div className="practice-home-hero-copy">
-          <p className="practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
+          <p className="eyebrow red practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
           <h3 id="practice-recommended-title">{t("practiceRecommendedTitle", language)}</h3>
           <p>{t("practiceRecommendedHint", language)}</p>
         </div>
