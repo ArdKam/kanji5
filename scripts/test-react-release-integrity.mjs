@@ -12,6 +12,7 @@ assert.match(index, /href="\.\/react-dist\/kanji5-react\.css\?v=dev" data-kanji5
 // Keep the entry module URL stable so lazy chunks resolve to the same ESM instance.
 assert.match(index, /href="\.\/react-dist\/kanji5-react\.js">/);
 assert.doesNotMatch(index, /modulepreload" href="\.\/react-dist\/kanji5-react\.js\?v=/);
+assert.doesNotMatch(index, /react-dist\/kanji5-react\.js\?v=/, "The root ESM entry must not get a versioned URL separate from imports inside lazy chunks.");
 assert.doesNotMatch(index, /release18|release19/);
 assert.match(index, /<meta name="kanji5-build-id" content="[^"]+">/);
 
