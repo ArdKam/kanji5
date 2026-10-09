@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ComponentBreakdown } from "./ComponentBreakdown";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
@@ -14,7 +14,8 @@ import { MnemonicsDialog } from "./MnemonicsDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { OnboardingEntry } from "./OnboardingEntry";
-import { TopicLearningDialog, getTopicLabel } from "./TopicLearningDialog";
+import { getTopicLabel } from "./topic-taxonomy";
+const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
 import { learningCopy } from "./learning-copy";
 import "./learning-polish.css";
 import { isOnboardingComplete } from "./onboarding";
@@ -1119,17 +1120,18 @@ function App(){
 
       </>}
     </main>
-    <TopicLearningDialog
-      open={topicBrowserOpen}
-      language={language}
-      busy={busy}
-      onClose={()=>setTopicBrowserOpen(false)}
-      onStart={async(topic,filter)=>{
-        
-        const result=await action(async()=>{await clearTransient();return await startCustomStudy(filter)});
-        return Boolean(result?.started);
-      }}
-    />
+    <Suspense fallback={null}>
+      {topicBrowserOpen ? <TopicLearningDialog
+        open={true}
+        language={language}
+        busy={busy}
+        onClose={()=>setTopicBrowserOpen(false)}
+        onStart={async(topic,filter)=>{
+          const result=await action(async()=>{await clearTransient();return await startCustomStudy(filter)});
+          return Boolean(result?.started);
+        }}
+      /> : null}
+    </Suspense>
     <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
 <footer className="footer">{t("footerTagline",language)}</footer>
   </div>
