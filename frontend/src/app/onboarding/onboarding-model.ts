@@ -163,14 +163,32 @@ export function sanitizeOnboardingProgress(value: Partial<OnboardingProgress> | 
     dailyNew: normalizeDailyNew(suppliedDraft.dailyNew),
   };
   const steps = getVisibleSteps(draft);
-  const step = steps.includes(value?.step as OnboardingStep) ? value!.step as OnboardingStep : "welcome";
-  const seedValue = Number(value?.placementSeed);
+  let step = steps.includes(value?.step as OnboardingStep) ? value!.step as OnboardingStep : "welcome";
+  const rawSeed = value?.placementSeed;
+  const hasSavedSeed = rawSeed !== null && rawSeed !== undefined && Number.isFinite(Number(rawSeed));
+  const seedValue = Number(rawSeed);
+  let placementIndex = Math.max(0, Math.floor(Number(value?.placementIndex) || 0));
+  let placementAnswer = typeof value?.placementAnswer === "string" ? value.placementAnswer : "";
+  let completedPlacement = Boolean(value?.completedPlacement);
+
+  // Older onboarding records used character+index question IDs and did not save a seed.
+  // Never pair their answers with the randomized v2 questionnaire.
+  if (!hasSavedSeed && draft.startingPoint === "assess" && (step === "placement" || step === "placement-result")) {
+    draft.placementAnswers = [];
+    draft.suggestedLevel = null;
+    draft.placementSummary = null;
+    step = "placement";
+    placementIndex = 0;
+    placementAnswer = "";
+    completedPlacement = false;
+  }
+
   return {
     draft,
     step,
-    placementIndex: Math.max(0, Math.floor(Number(value?.placementIndex) || 0)),
-    placementAnswer: typeof value?.placementAnswer === "string" ? value.placementAnswer : "",
-    completedPlacement: Boolean(value?.completedPlacement),
-    placementSeed: Number.isFinite(seedValue) ? seedValue >>> 0 : initial.placementSeed,
+    placementIndex,
+    placementAnswer,
+    completedPlacement,
+    placementSeed: hasSavedSeed ? seedValue >>> 0 : initial.placementSeed,
   };
 }
