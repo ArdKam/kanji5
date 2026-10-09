@@ -181,7 +181,7 @@ export function PracticeHome({
         {selectedTopic ? (
           <section className="surface card practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
             <div className="practice-topic-selected-copy">
-              <p className="practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
+              <p className="eyebrow red practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
               <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
               <p>{t("practiceTopicSelectedHint", language)}</p>
             </div>
