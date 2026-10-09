@@ -15,7 +15,16 @@
 .learning-route-button:hover:not(:disabled) { border-color: var(--line-interactive); background: var(--color-surface-elevated); }
 .learning-card-topline .learning-context-label { min-width: 0; color: var(--mute); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; overflow-wrap: anywhere; }
 .learning-card-topline .badge { flex: 0 0 auto; }
-.app-shell .content > .learning-card { margin-bottom: 16px; }
+.app-shell .content > .learning-card {
+  height: min(590px, calc(100dvh - 220px));
+  min-height: min(500px, calc(100dvh - 220px));
+}
+@media (max-width: 760px) {
+  .app-shell .content > .learning-card {
+    height: min(640px, calc(100dvh - 280px));
+    min-height: min(380px, calc(100dvh - 180px));
+  }
+}
 .learning-card-front .kanji-row { min-height: clamp(180px, 28vh, 240px); gap: 14px; }
 .learning-card-front .kanji-display { font-size: clamp(104px, 16vw, 150px); }
 .learning-card-front .audio-button { border-radius: 50%; background: transparent; }
