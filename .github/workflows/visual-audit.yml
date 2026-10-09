@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: visual-audit-\${{ github.event.pull_request.number || github.ref }}
+  group: visual-audit-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
       - name: Checkout exact tested revision
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -66,7 +66,7 @@ jobs:
       - name: Capture automated visual audit
         env:
           CI: "true"
-          GITHUB_SHA: \${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test e2e/visual-audit.spec.mjs --timeout=30000 --retries=0 --reporter=line
 
@@ -75,7 +75,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-audit-\${{ github.run_number }}-\${{ github.run_attempt }}
+          name: visual-audit-${{ github.run_number }}-${{ github.run_attempt }}
           path: test-results/visual-audit/
           if-no-files-found: warn
           retention-days: 14
@@ -83,14 +83,14 @@ jobs:
       - name: Add evidence link to workflow summary
         if: always()
         env:
-          ARTIFACT_URL: \${{ steps.visual-evidence.outputs.artifact-url }}
+          ARTIFACT_URL: ${{ steps.visual-evidence.outputs.artifact-url }}
         run: |
           {
             echo "## Automated UI visual audit"
             echo
             echo "Screens cover onboarding, Learning, Active Recall, Dictionary, dictionary detail, Settings, Statistics, Reading Lab, and Account; desktop and mobile captures are included where applicable."
             echo
-            if [ -n "\${ARTIFACT_URL:-}" ]; then
+            if [ -n "${ARTIFACT_URL:-}" ]; then
               echo "[Download screenshots and report]($ARTIFACT_URL)"
             else
               echo "The evidence artifact was not created; inspect the job log."
