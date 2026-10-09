@@ -17,7 +17,6 @@ import { OnboardingEntry } from "./OnboardingEntry";
 import { getTopicLabel } from "./topic-taxonomy";
 const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
 import { learningCopy } from "./learning-copy";
-import "./learning-polish.css";
 import { isOnboardingComplete } from "./onboarding";
 import { UiIcon } from "./UiIcon";
 import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
@@ -406,7 +405,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
-        <div className="card-topline learning-card-topline"><span className="learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
+        <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
@@ -442,7 +441,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             </div>
             {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
-                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}{displayExamples.length>4?<button className="learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button>:null}</div>
+                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}{displayExamples.length>4?<button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button>:null}</div>
               </div>
             </div>:null}
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
@@ -498,7 +497,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                           </details>
                         :null}
                       <button
-                        className="mnemonic-trigger"
+                        className="button secondary mnemonic-action"
                         type="button"
                         aria-label={personalMnemonic?t("editMnemonic"):t("personalMnemonic")}
                         title={t("personalMnemonic")}
@@ -1076,13 +1075,12 @@ function App(){
           onClose={closeSecondaryPage}
         /> : null}
         </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
-              {!showExercise ? <div className="learning-session-toolbar">
-                <div className="learning-session-context">
-                  <span className="learning-session-context-label">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</span>
+              {!showExercise ? <div className="card-topline">
+                <div>
+                  <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
                   <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
-                  {!topicStudyLabel?<small>{learningCopy("recommendedLearningHint",language)}</small>:null}
                 </div>
-                <button className="learning-route-button" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
+                <button className="button secondary" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
                   <UiIcon name="dictionary" size={17}/><span>{learningCopy("learnByTopic",language)}</span>
                 </button>
               </div> : null}
