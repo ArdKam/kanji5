@@ -22,6 +22,8 @@ for(const viewport of viewports){
     await expect(reveal).toBeVisible();
     await reveal.click();
     await page.getByRole('button',{name:'خوب',exact:true}).click();
+    // Wait for the async rating transaction and snapshot refresh before switching experiences.
+    await expect(page.locator('#root .learning-card .rating-grid')).toHaveCount(0,{timeout:10000});
 
     await recall.click();
     await expect(recall).toHaveAttribute('aria-current','page');
