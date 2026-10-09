@@ -8,13 +8,8 @@
 .learning-route-button:hover:not(:disabled){border-color:var(--line-interactive);background:var(--color-surface-elevated)}
 .learning-card-topline .badge{flex:0 0 auto}
 .app-shell .content>.learning-card{height:min(590px,calc(100dvh - 230px));min-height:min(500px,calc(100dvh - 230px))}
-.learning-card-front .kanji-row{min-height:clamp(180px,28vh,240px);gap:14px}
-.learning-card-front .kanji-display{font-size:clamp(104px,16vw,150px)}
 .learning-card-front .button.primary{min-height:50px;border-radius:var(--radius-lg)}
 .learning-card-back .learning-back-meaning{font-size:clamp(22px,2.8vw,30px);line-height:1.35}
-.learning-card-back .example-row{gap:12px;padding:10px 2px;border-bottom-color:var(--line-soft)}
-.learning-card-back .example-main{font-size:var(--text-md);font-weight:750;line-height:1.45}
-.learning-card-back .example-meaning{font-size:var(--text-sm);line-height:1.5}
 .learning-example-expand{display:inline-flex;align-items:center;min-height:38px;margin-top:7px;padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius-full);background:var(--paper);color:var(--ai);font-size:var(--text-xs);font-weight:800}
-@media(max-width:760px){.app-shell .content>.learning-card{height:min(640px,calc(100dvh - 290px));min-height:min(380px,calc(100dvh - 180px))}.learning-session-toolbar{align-items:flex-start}.learning-route-button{padding-inline:10px;font-size:var(--text-xs)}.learning-card-front .kanji-row{min-height:clamp(155px,22vh,190px)}.learning-card-front .kanji-display{font-size:clamp(100px,28vw,132px)}}
+@media(max-width:760px){.app-shell .content>.learning-card{height:min(640px,calc(100dvh - 290px));min-height:min(380px,calc(100dvh - 180px))}.learning-session-toolbar{align-items:flex-start}.learning-route-button{padding-inline:10px;font-size:var(--text-xs)}}
 @media(max-width:380px){.learning-session-toolbar{gap:8px}.learning-route-button{gap:5px;padding-inline:8px}.learning-session-context strong{font-size:var(--text-xs)}}
