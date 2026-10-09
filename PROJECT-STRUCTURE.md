@@ -25,7 +25,7 @@ For the current product, read these in order:
 | Review scheduling | `review-runtime.js` | Review/scheduling runtime; React consumes snapshots/actions. |
 | Remote sync | `supabase-sync.js` | Transport/sync layer. |
 | Offline runtime | `sw.js` | Current service-worker wiring and precache policy. |
-| Runtime data | `kanji-data.json`, `kanji-components.json`, `kanji-radicals.json`, `kanji-radical-map.json` | Runtime data; inspect build scripts before editing. |
+| Runtime data | `kanji-data.json`, `kanji-components.json`, `kanji-visual-structure.json`, `kanji-radicals.json`, `kanji-radical-map.json` | Runtime data; inspect build scripts before editing. |
 | Browser E2E | `e2e/` | Playwright browser/integration coverage. |
 | Contract/unit tests | `scripts/test-*.mjs` | Repository-level contracts and unit/regression checks. |
 | Generated React bundle | CI/working-tree output only (`react-dist/`) | Built from `frontend/`; not source-controlled. Do not edit manually. |
