@@ -52,8 +52,8 @@ export function CustomStudyPanel({ language, selectedTopic = null, onStartCustom
           <p className="subtitle">{selectedTopic ? t("practiceTopicSelectedHint", language) : t("customStudyHint", language)}</p>
         </div>
       </div>
-      <fieldset className="practice-focus-fieldset">
-        <legend>{t("customFocus", language)}</legend>
+      <div className="practice-focus-fieldset" role="group" aria-label={t("customFocus", language)}>
+        <p className="eyebrow">{t("customFocus", language)}</p>
         <div className="practice-focus-options">
           {focusOptions.map(([value, label]) => (
             <button key={value} className={"button " + (customFocus === value ? "primary is-active" : "secondary") + " practice-focus-option"} type="button" aria-pressed={customFocus === value} onClick={() => setCustomFocus(value)}>
@@ -61,7 +61,7 @@ export function CustomStudyPanel({ language, selectedTopic = null, onStartCustom
             </button>
           ))}
         </div>
-      </fieldset>
+      </div>
       <div className="practice-custom-secondary-controls">
         <label className="practice-custom-field">
           <span>{language === "fa" ? "سطح" : "Level"}</span>
