@@ -4,7 +4,6 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("kanji5-onboarding-v2", "complete");
     localStorage.setItem("kanji5-ui-language", "en");
-    sessionStorage.removeItem("learning-topic-session-v1");
   });
 });
 
