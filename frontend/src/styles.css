@@ -2366,7 +2366,7 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
 }
 .settings-dialog{
   color:var(--ink);
-  overflow:hidden;
+  overflow:hidden!important;
 }
 .settings-form{
   flex:1 1 auto;
@@ -2772,7 +2772,7 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
   max-height:calc(100dvh - 32px)!important;
   padding:28px 30px!important;
   gap:0!important;
-  overflow:hidden;
+  overflow:hidden!important;
 }
 .stats-dashboard .dialog-close{
   inset-block-start:14px!important;
