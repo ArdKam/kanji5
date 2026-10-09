@@ -184,6 +184,10 @@ export type VisualStructureNode = {
   variant?: boolean;
   radicalRole?: string;
   phoneticRole?: string;
+  part?: string;
+  partial?: boolean;
+  original?: string;
+  sourceParts?: string[];
 };
 export type VisualStructureInfo = {
   character: string;
