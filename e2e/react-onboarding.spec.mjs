@@ -50,6 +50,7 @@ test("first-run onboarding is a dedicated full-page guest-first journey", async 
 });
 
 test("placement path shares the existing kanji diagnostic contract", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await fresh(page);
   const onboarding = await reachStartingPoint(page);
   await onboarding.getByRole("button", { name: /Check my kanji level/ }).click();
@@ -88,6 +89,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
 });
 
 test("placement reload resumes the same sampled paper and scored answers", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await fresh(page);
   const onboarding = await reachStartingPoint(page);
   await onboarding.getByRole("button", { name: /Check my kanji level/ }).click();
