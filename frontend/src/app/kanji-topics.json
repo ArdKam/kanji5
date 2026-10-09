@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "curation": "Hand-curated topical associations for Dictionary navigation. Version 2 expands the reviewed topic set; partial coverage is intentional. Tags are not inferred automatically from source gloss strings.",
+  "version": 3,
+  "curation": "Hand-curated topical associations for Dictionary navigation. Version 3 applies a conservative semantic QA pass to remove overbroad assignments; contextual associations remain explicit and reviewed, never inferred automatically from gloss strings.",
   "topics": [
     {
       "id": "numbers",
@@ -48,7 +48,7 @@
         "fa": "افراد و جامعه",
         "en": "People & society"
       },
-      "characters": "人 者 男 女 民 国 世 会 社 友 私 自 他 彼 名 主 長 員 王 公 客 先 生 学 氏 個 君 組 団 委 係 任 共 皇"
+      "characters": "人 者 男 女 民 国 世 会 社 友 私 自 他 彼 名 主 長 員 王 公 客 先 生 氏 個 君 組 団 委 係 任 共 皇"
     },
     {
       "id": "food",
@@ -64,7 +64,7 @@
         "fa": "مدرسه و یادگیری",
         "en": "School & learning"
       },
-      "characters": "学 校 先 生 教 室 習 書 読 語 文 字 本 漢 紙 筆 算 数 試 験 題 問 答 考 知 理 科 英 国 図 表 黒 白 勉 強 研 究 説 明 記 録 作 画 史 辞 訓 版 著 誌 刊 冊 句 描 訳"
+      "characters": "学 校 先 生 教 室 習 書 読 語 文 字 本 漢 紙 筆 算 数 試 験 題 問 答 考 知 理 科 英 国 図 表 勉 強 研 究 説 記 録 作 画 史 辞 訓 版 著 誌 刊 冊 句 描 訳"
     },
     {
       "id": "places",
@@ -72,7 +72,7 @@
         "fa": "مکان‌ها و سفر",
         "en": "Places & travel"
       },
-      "characters": "国 都 県 市 町 村 区 京 家 室 店 駅 道 橋 門 戸 所 港 寺 社 院 館 庭 屋 辺 旅 宿 通 路 園 城 建 物 銀 行 場 州 府 閣 庁 署 庫 堂 階"
+      "characters": "国 都 県 市 町 村 区 京 家 室 店 駅 道 橋 門 戸 所 港 寺 社 院 館 庭 屋 辺 旅 宿 通 路 園 城 行 場 州 府 閣 庁 署 庫 堂 階"
     },
     {
       "id": "directions",
@@ -128,7 +128,7 @@
         "fa": "احساسات و اندیشه",
         "en": "Thoughts & feelings"
       },
-      "characters": "心 思 愛 好 悪 楽 悲 苦 怒 感 意 想 念 忘 怖 夢 幸 信 願 笑 泣 迷 安 勇 疲 恥 驚 喜 寂 急 絶 望 恐 疑 恋 福"
+      "characters": "心 思 愛 好 悪 楽 悲 苦 怒 感 意 想 念 忘 怖 夢 幸 信 願 笑 泣 迷 安 勇 疲 恥 驚 喜 寂 急 望 恐 疑 恋 福"
     },
     {
       "id": "qualities",
@@ -144,7 +144,7 @@
         "fa": "حکومت و قانون",
         "en": "Government & law"
       },
-      "characters": "政 議 党 戦 法 制 権 派 軍 判 官 勢 税 検 裁 防 州 武 監 審 義 憲 省 隊 皇 署 闘 則 司 庁 令 庫 属 君 律 公 選 警 察 領 規 治 統 民 国 県 市 都 兵"
+      "characters": "政 議 党 戦 法 制 権 派 軍 判 官 勢 税 検 裁 防 州 武 監 審 義 憲 省 隊 皇 署 闘 則 司 庁 令 属 君 律 公 選 警 察 領 規 治 統 民 国 県 市 都 兵"
     },
     {
       "id": "communication",
@@ -192,7 +192,7 @@
         "fa": "هنر و فرهنگ",
         "en": "Arts & culture"
       },
-      "characters": "演 能 式 真 史 美 福 管 授 舞 劇 芸 儀 曲 幕 秀 像 絵 躍 詩 文 字 本 漢 紙 筆 音 楽 歌 画 術 祭 典 伝 統 歴 宗 堂 祈 礼 宮 踊 映 遺 産 説"
+      "characters": "演 能 式 真 史 美 管 舞 劇 芸 儀 曲 幕 秀 像 絵 躍 詩 文 字 本 漢 紙 筆 音 楽 歌 画 術 祭 典 伝 歴 宗 堂 祈 礼 宮 踊 映 遺 説"
     }
   ]
 }
