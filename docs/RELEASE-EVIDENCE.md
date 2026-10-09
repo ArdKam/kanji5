@@ -1,4 +1,4 @@
-# Kanji5 — Release Evidence
+# Rinemi — Release Evidence
 
 This file is an operational ledger, not a user-facing promise.
 

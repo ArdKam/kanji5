@@ -1,4 +1,4 @@
-# Kanji5 — Legal & Governance Review Checklist
+# Rinemi — Legal & Governance Review Checklist
 
 **Status: owner/counsel review required; this is not legal advice.**
 

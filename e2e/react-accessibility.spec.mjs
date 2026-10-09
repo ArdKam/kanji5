@@ -422,7 +422,7 @@ test('English shell does not retain Persian presentation labels',async({page})=>
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
   await expect(page.locator('.header .eyebrow')).toHaveText('Smart learning');
-  await expect(page.locator('.header h1')).toHaveText('Kanji-yar');
+  await expect(page.locator('.header h1')).toHaveText('Rinemi');
   await expect(page.locator('.daily-summary')).toHaveAttribute('aria-label',"Today’s summary");
   await expect(page.locator('.header-menu-trigger')).toHaveAttribute('aria-label','More');
   await page.locator('.header-menu-trigger').click();

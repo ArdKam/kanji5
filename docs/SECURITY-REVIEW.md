@@ -1,4 +1,4 @@
-# Kanji5 — Public Release Security Review
+# Rinemi — Public Release Security Review
 
 Audit date: 2026-10-06  
 Audit evidence baseline: `2e54187c745d2639b329c5335a164145e420d8ab`  

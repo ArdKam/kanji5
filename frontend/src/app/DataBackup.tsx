@@ -54,7 +54,7 @@ export function DataBackup({ language }: { language: Language }) {
       const anchor = document.createElement("a");
       const date = backup.createdAt.slice(0, 10) || "backup";
       anchor.href = url;
-      anchor.download = `kanji5-backup-${date}.json`;
+      anchor.download = `rinemi-backup-${date}.json`;
       anchor.click();
       URL.revokeObjectURL(url);
       try { localStorage.setItem("kanji5-last-backup", backup.createdAt); } catch {}

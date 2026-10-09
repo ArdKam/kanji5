@@ -1,4 +1,4 @@
-# Kanji5 — Release Governance & Public Beta Gate
+# Rinemi — Release Governance & Public Beta Gate
 
 Audit date: 2026-10-06
 
