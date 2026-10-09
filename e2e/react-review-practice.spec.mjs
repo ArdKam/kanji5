@@ -236,3 +236,31 @@ test('Active Recall start button locks during an in-flight start',async({page})=
   await expect(start).toBeDisabled();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
 });
+
+
+test('Practice Home exposes topic learning and keeps the session in the Learning flow',async({page})=>{
+  await clean(page);
+  const practice=page.getByRole('button',{name:'یادآوری فعال'});
+  await practice.click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.getByRole('heading',{name:'یادگیری بر اساس موضوع'})).toBeVisible();
+  const numbers=page.getByRole('button',{name:'اعداد و کمیت',exact:true});
+  await expect(numbers).toBeVisible();
+  await numbers.click();
+  await expect(page.locator('#root .practice-topic-selected')).toBeVisible();
+  await page.getByRole('button',{name:'شروع یادگیری موضوعی',exact:true}).click();
+  await expect(page.getByRole('button',{name:'یادگیری',exact:true})).toHaveAttribute('aria-current','page');
+  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:15000});
+  await expect(page.locator('#root .practice-home')).toHaveCount(0);
+});
+
+test('advanced practice filters can be scoped to a selected topic',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'طبیعت و زمین',exact:true}).click();
+  await page.locator('#root .practice-advanced > summary').click();
+  await expect(page.locator('#root .practice-custom-panel h3')).toHaveText('طبیعت و زمین');
+  await expect(page.getByRole('group',{name:'تمرکز مطالعه'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'قابل مطالعه',exact:true})).toHaveAttribute('aria-pressed','true');
+});
