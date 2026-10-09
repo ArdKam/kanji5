@@ -20,7 +20,7 @@ export function normalizeCustomStudyFilter(filter = {}) {
   const topicCharacters = hasTopicScope
     ? [...new Set(rawCharacters
       .map(value => String(value || "").trim())
-      .filter(value => [...value].length === 1 && /^(?:\\p{Script=Han}|[々〆ヵヶ])$/u.test(value)))]
+      .filter(value => [...value].length === 1 && /^(?:\p{Script=Han}|[々〆ヵヶ])$/u.test(value)))]
         .slice(0, 2136)
     : undefined;
   return Object.freeze({
