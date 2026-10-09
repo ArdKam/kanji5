@@ -25,9 +25,13 @@ test('Statistics dialog exposes a focused progress dashboard',async({page})=>{
   await expect(dialog.locator('.stats-overview-primary')).toBeVisible();
   await expect(dialog.locator('.stats-overview .stats-metric')).toHaveCount(3);
   await expect(dialog.locator('.stats-activity-section')).toBeVisible();
-  await expect(dialog.locator('.activity-chart')).toBeVisible();
-  await expect(dialog.locator('.activity-bar-wrap')).toHaveCount(7);
-  await expect(dialog.locator('.activity-bar-wrap .activity-label')).toHaveCount(7);
+  await expect(dialog.locator('.stats-activity-section .empty-text')).toBeVisible();
+  await expect(dialog.locator('.stats-activity-section .empty-text')).toContainText('در هفت روز اخیر هنوز مروری ثبت نشده است');
+  await expect(dialog.locator('.activity-chart')).toHaveCount(0);
+  await expect(dialog.locator('.stats-activity-footer')).toHaveCount(0);
+  const masterySummary = dialog.locator('.stats-section[aria-labelledby="stats-mastery-title"] .stats-section-summary');
+  await expect(masterySummary.locator('strong')).toHaveText('—');
+  await expect(masterySummary).toContainText('پس از اولین جلسه نمایش داده می‌شود');
   await expect(dialog.locator('.stats-dashboard .dialog-grid')).toHaveCount(0);
   await expect(dialog.locator('.stats-dashboard .stats-hero')).toHaveCount(0);
   await expect(dialog.locator('.stats-advanced-trigger')).toBeVisible();

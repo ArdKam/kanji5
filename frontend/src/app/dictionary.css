@@ -339,7 +339,8 @@
 @media(max-width:720px){
   .dictionary-filter-row,
   .dictionary-display-row{align-items:stretch;flex-direction:column;}
-  .dictionary-level-filter{justify-content:flex-start;}
+  .dictionary-filter-row{display:grid;grid-template-columns:minmax(0,1fr);}
+  .dictionary-filter-row .dictionary-level-filter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));min-width:0;}
   .dictionary-select-filter{justify-content:space-between;}
   .dictionary-select-filter select{flex:1;min-width:0;}
   .dictionary-view-toggle{width:auto;}
@@ -2105,8 +2106,12 @@
   font-size:var(--text-xs);
 }
 .dialog.secondary-page-dialog .reading-lab{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   margin:0;
-  padding:0;
+  padding:0 0 max(16px,env(safe-area-inset-bottom));
   border:0;
   border-radius:0;
   background:transparent;

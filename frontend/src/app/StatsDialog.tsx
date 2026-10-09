@@ -32,7 +32,7 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
         </div>
         <div className="stats-section-summary"><strong>{formatNumber(total, language)}</strong><span>{language === "fa" ? "مرور ثبت‌شده" : "reviews"}</span></div>
       </div>
-      {days.length ? (
+      {days.length > 0 && total > 0 ? (
         <>
           <div className="activity-chart stats-activity-chart" role="img" aria-label={days.map((day, index) => {
             const count = Math.max(0, Number(day.count) || 0);
@@ -53,12 +53,14 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
             <span>{language === "fa" ? "امروز" : "Today"} · {formatNumber(counts[todayIndex] ?? 0, language)}</span>
           </div>
         </>
-      ) : <p className="empty-text">{language === "fa" ? "هنوز داده‌ای برای نمایش فعالیت وجود ندارد." : "There is not enough activity data to show yet."}</p>}
+      ) : <p className="empty-text">{language === "fa" ? "در هفت روز اخیر هنوز مروری ثبت نشده است؛ پس از اولین جلسه، روند فعالیت اینجا نمایش داده می‌شود." : "No reviews have been recorded in the last seven days. Activity will appear here after your first review session."}</p>}
     </section>
   );
 }
 
 function MasterySection({ snapshot, language }: { snapshot: Snapshot; language: Language }) {
+  const studiedCount = Number(snapshot.stats?.studiedCount ?? 0);
+  const hasStudiedData = studiedCount > 0;
   const distribution = snapshot.stats?.masteryDistribution ?? {
     unseen: 0,
     learning: 0,
@@ -83,7 +85,7 @@ function MasterySection({ snapshot, language }: { snapshot: Snapshot; language: 
     <section className="stats-section" aria-labelledby="stats-mastery-title">
       <div className="stats-section-heading">
         <div><p className="eyebrow">{language === "fa" ? "تسلط" : "Mastery"}</p><h3 id="stats-mastery-title">{language === "fa" ? "توزیع وضعیت کانجی‌ها" : "Kanji mastery"}</h3></div>
-        <div className="stats-section-summary"><strong>{formatNumber(Math.round((Number(distribution.average) || 0) * 100), language)}%</strong><span>{language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery"}</span></div>
+        <div className="stats-section-summary"><strong>{hasStudiedData ? formatNumber(Math.round((Number(distribution.average) || 0) * 100), language) + "%" : "—"}</strong><span>{hasStudiedData ? (language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery") : (language === "fa" ? "پس از اولین جلسه نمایش داده می‌شود" : "Available after your first study session")}</span></div>
       </div>
       {hasData ? (
         <>
@@ -163,6 +165,7 @@ type AdvancedSkill = {
 };
 
 function formatRate(value: unknown, language: Language) {
+  if (value == null || value === "") return "—";
   const numeric = Number(value);
   return Number.isFinite(numeric) ? formatNumber(Math.round(Math.max(0, Math.min(1, numeric)) * 100), language) + "%" : "—";
 }
@@ -173,6 +176,10 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
   const activeDays = counts.filter(count => count > 0).length;
   const activityTotal = counts.reduce((sum, count) => sum + count, 0);
   const activityAverage = activityTotal / Math.max(1, counts.length);
+  const hasActivityEvidence = activityTotal > 0;
+  const evaluation = snapshot.stats?.evaluation;
+  const hasEvaluationEvidence = Boolean(evaluation?.evidence?.sufficient);
+  const hasCompletedSessions = Number(evaluation?.completedSessions ?? 0) > 0;
   const mastery = snapshot.stats?.masteryDistribution ?? {};
   const skillKeys = ["meaning", "reading", "production", "vocabulary", "context"] as const;
   const skillLabels: Record<typeof skillKeys[number], string> = {
@@ -201,11 +208,11 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
 
       <div className="stats-overview stats-advanced-metrics">
         <Metric label={language === "fa" ? "روزهای فعال" : "Active days"} value={formatNumber(activeDays, language)} hint={language === "fa" ? "از ۷ روز" : "of 7 days"} />
-        <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={formatNumber(Number(activityAverage.toFixed(1)), language)} hint={language === "fa" ? "در روز" : "per day"} />
-        <Metric label={language === "fa" ? "نرخ بازیابی" : "Recovery"} value={formatRate(snapshot.stats?.evaluation?.recoveryRate, language)} />
-        <Metric label={language === "fa" ? "پوشش مهارت‌ها" : "Attribute coverage"} value={formatRate(snapshot.stats?.evaluation?.attributeCoverage, language)} />
-        <Metric label={language === "fa" ? "تکمیل جلسه" : "Session completion"} value={formatRate(snapshot.stats?.evaluation?.sessionCompletionRate, language)} />
-        <Metric label={language === "fa" ? "میانگین فراخوانی" : "Recalls / session"} value={formatNumber(Number((snapshot.stats?.evaluation?.averageRecallsPerSession ?? 0).toFixed(1)), language)} />
+        <Metric label={language === "fa" ? "میانگین مرور" : "Average reviews"} value={hasActivityEvidence ? formatNumber(Number(activityAverage.toFixed(1)), language) : "—"} hint={language === "fa" ? "در روز" : "per day"} />
+        <Metric label={language === "fa" ? "نرخ بازیابی" : "Recovery"} value={hasEvaluationEvidence ? formatRate(evaluation?.recoveryRate, language) : "—"} />
+        <Metric label={language === "fa" ? "پوشش مهارت‌ها" : "Attribute coverage"} value={hasEvaluationEvidence ? formatRate(evaluation?.attributeCoverage, language) : "—"} />
+        <Metric label={language === "fa" ? "تکمیل جلسه" : "Session completion"} value={hasEvaluationEvidence ? formatRate(evaluation?.sessionCompletionRate, language) : "—"} />
+        <Metric label={language === "fa" ? "میانگین فراخوانی" : "Recalls / session"} value={hasEvaluationEvidence && hasCompletedSessions ? formatNumber(Number((evaluation?.averageRecallsPerSession ?? 0).toFixed(1)), language) : "—"} />
       </div>
 
       <div className="stats-section-summary" aria-live="polite">
@@ -253,9 +260,9 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
         })}
       </div>
       <div className="stats-section-summary" style={{ marginTop: "0.75rem" }}>
-        <span>{language === "fa" ? "نرخ ناشناخته" : "Unknown"} · {formatRate(snapshot.stats?.evaluation?.unknownRate, language)}</span>
-        <span>{language === "fa" ? "تکرار خطای کل" : "Repeated failure"} · {formatRate(snapshot.stats?.evaluation?.repeatedFailureRate, language)}</span>
-        <span>{language === "fa" ? "جلسه تکمیل‌شده" : "Completed sessions"} · {formatNumber(snapshot.stats?.evaluation?.completedSessions ?? 0, language)}</span>
+        <span>{language === "fa" ? "نرخ ناشناخته" : "Unknown"} · {hasEvaluationEvidence ? formatRate(evaluation?.unknownRate, language) : "—"}</span>
+        <span>{language === "fa" ? "تکرار خطای کل" : "Repeated failure"} · {hasEvaluationEvidence ? formatRate(evaluation?.repeatedFailureRate, language) : "—"}</span>
+        <span>{language === "fa" ? "جلسه تکمیل‌شده" : "Completed sessions"} · {formatNumber(evaluation?.completedSessions ?? 0, language)}</span>
       </div>
 
       {snapshot.stats?.evaluation?.comparison?.available ? (
@@ -360,12 +367,14 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
         <span className="stats-advanced-trigger-action">{showAdvanced ? (language === "fa" ? "بستن" : "Hide") : (language === "fa" ? "مشاهده" : "View")} <span aria-hidden="true">{showAdvanced ? "⌃" : "⌄"}</span></span>
       </button>
 
-      {showAdvanced ? <AdvancedStatsSection snapshot={effectiveSnapshot} language={language} /> : null}
+      <div className="stats-dashboard-scroll">
+        {showAdvanced ? <AdvancedStatsSection snapshot={effectiveSnapshot} language={language} /> : null}
 
-      <ActivitySection snapshot={effectiveSnapshot} language={language} />
-      <MasterySection snapshot={effectiveSnapshot} language={language} />
-      <SkillsSection snapshot={effectiveSnapshot} language={language} />
-      <AttentionSection catalog={catalog} language={language} onStudyWeak={onStudyWeak} />
+        <ActivitySection snapshot={effectiveSnapshot} language={language} />
+        <MasterySection snapshot={effectiveSnapshot} language={language} />
+        <SkillsSection snapshot={effectiveSnapshot} language={language} />
+        <AttentionSection catalog={catalog} language={language} onStudyWeak={onStudyWeak} />
+      </div>
     </dialog>
   );
 }
