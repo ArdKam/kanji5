@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "curation": "Hand-curated topical associations for dictionary navigation. Partial coverage is intentional; tags are not inferred from source gloss strings.",
+  "version": 2,
+  "curation": "Hand-curated topical associations for Dictionary navigation. Version 2 expands the reviewed topic set; partial coverage is intentional. Tags are not inferred automatically from source gloss strings.",
   "topics": [
     {
       "id": "numbers",
@@ -16,7 +16,7 @@
         "fa": "بدن انسان",
         "en": "Human body"
       },
-      "characters": "目 耳 口 手 足 頭 顔 首 体 心 血 骨 歯 毛 皮 胃 腹 背 肩 腕 指 爪 肺 脳 肉 髪 鼻 舌 肌 胸 腰"
+      "characters": "目 耳 口 手 足 頭 顔 首 体 心 血 骨 歯 毛 皮 胃 腹 背 肩 腕 指 爪 肺 脳 肉 髪 鼻 舌 肌 胸 腰 身 面 額"
     },
     {
       "id": "nature",
@@ -32,7 +32,7 @@
         "fa": "زمان و تقویم",
         "en": "Time & calendar"
       },
-      "characters": "日 月 年 時 分 秒 今 昨 明 朝 昼 夜 夕 週 曜 春 夏 秋 冬 午 前 後 間 期 早 遅 末 始 終 毎 晩 暮 歳 刻"
+      "characters": "日 月 年 時 分 秒 今 昨 明 朝 昼 夜 夕 週 曜 春 夏 秋 冬 午 前 後 間 期 早 遅 末 始 終 毎 晩 暮 歳 刻 回 次 再 元 現 際 続 久 既 度"
     },
     {
       "id": "family",
@@ -48,7 +48,7 @@
         "fa": "افراد و جامعه",
         "en": "People & society"
       },
-      "characters": "人 者 男 女 民 国 世 会 社 友 私 自 他 彼 名 主 長 員 王 公 客 先 生 学"
+      "characters": "人 者 男 女 民 国 世 会 社 友 私 自 他 彼 名 主 長 員 王 公 客 先 生 学 氏 個 君 組 団 委 係 任 共 皇"
     },
     {
       "id": "food",
@@ -56,7 +56,7 @@
         "fa": "خوراک و نوشیدنی",
         "en": "Food & drink"
       },
-      "characters": "食 飲 米 肉 魚 牛 豚 鳥 卵 乳 茶 飯 菜 果 塩 酒 味 皿 箸 豆 麦 油 汁 焼 煮 甘 苦"
+      "characters": "食 飲 米 肉 魚 牛 豚 鳥 卵 乳 茶 飯 菜 果 塩 酒 味 皿 箸 豆 麦 油 汁 焼 煮 甘 苦 畜 炊 煎 鮮"
     },
     {
       "id": "school",
@@ -64,7 +64,7 @@
         "fa": "مدرسه و یادگیری",
         "en": "School & learning"
       },
-      "characters": "学 校 先 生 教 室 習 書 読 語 文 字 本 漢 紙 筆 算 数 試 験 題 問 答 考 知 理 科 英 国 図 表 黒 白 勉 強 研 究 説 明 記 録 作 画"
+      "characters": "学 校 先 生 教 室 習 書 読 語 文 字 本 漢 紙 筆 算 数 試 験 題 問 答 考 知 理 科 英 国 図 表 黒 白 勉 強 研 究 説 明 記 録 作 画 史 辞 訓 版 著 誌 刊 冊 句 描 訳"
     },
     {
       "id": "places",
@@ -72,7 +72,7 @@
         "fa": "مکان‌ها و سفر",
         "en": "Places & travel"
       },
-      "characters": "国 都 県 市 町 村 区 京 家 室 店 駅 道 橋 門 戸 所 港 寺 社 院 館 庭 屋 辺 旅 宿 通 路 園 城 建 物 銀 行"
+      "characters": "国 都 県 市 町 村 区 京 家 室 店 駅 道 橋 門 戸 所 港 寺 社 院 館 庭 屋 辺 旅 宿 通 路 園 城 建 物 銀 行 場 州 府 閣 庁 署 庫 堂 階"
     },
     {
       "id": "directions",
@@ -109,10 +109,10 @@
     {
       "id": "actions",
       "label": {
-        "fa": "کارها و حرکت‌ها",
-        "en": "Actions & movement"
+        "fa": "کارها و تغییر",
+        "en": "Actions & change"
       },
-      "characters": "行 来 出 入 見 聞 話 語 読 書 食 飲 立 休 走 歩 待 持 使 作 買 売 言 思 知 学 開 閉 起 寝 働 乗 取 送 帰 着 洗 借 貸 投 打 切 歌 踊 泳 飛 登 降 止 動 住 置 消 進 退 呼 助 返 押 引 運 浴"
+      "characters": "行 来 出 入 見 聞 話 語 読 書 食 飲 立 休 走 歩 待 持 使 作 買 売 言 思 知 学 開 閉 起 寝 働 乗 取 送 帰 着 洗 借 貸 投 打 切 歌 踊 泳 飛 登 降 止 動 住 置 消 進 退 呼 助 返 押 引 運 浴 連 発 合 定 選 決 代 関 化 用 治 務 成 協 加 受 保 改 支 結 済 活 得 解 交 査 勝 委 告 認 集 別 求 計 死 増 示 変 提 挙 減 応 争 流 過 補 訪 追 伝 落 含 展 達 除 拡 担 復 移 寄 停 転 戻"
     },
     {
       "id": "work",
@@ -120,7 +120,7 @@
         "fa": "کار و اقتصاد",
         "en": "Work & economy"
       },
-      "characters": "仕 事 働 職 工 商 農 業 会 社 店 売 買 金 円 費 貿 易 産 銀 行 員 製 造 便 鉄 技 術 研 究 建 設 運 輸 役"
+      "characters": "仕 事 働 職 工 商 農 業 会 社 店 売 買 金 円 費 貿 易 産 銀 行 員 製 造 便 鉄 技 術 研 究 建 設 運 輸 役 部 務 株 財 値 給 販 益 債 損 払 購 貢 賃 貴 銭 稼 帳 酬 税 料 賞 秩 幣"
     },
     {
       "id": "emotions",
@@ -128,7 +128,71 @@
         "fa": "احساسات و اندیشه",
         "en": "Thoughts & feelings"
       },
-      "characters": "心 思 愛 好 悪 楽 悲 苦 怒 感 意 想 念 忘 怖 夢 幸 信 願 笑 泣 迷 安 勇 疲 恥 驚 喜 寂 急 絶 望"
+      "characters": "心 思 愛 好 悪 楽 悲 苦 怒 感 意 想 念 忘 怖 夢 幸 信 願 笑 泣 迷 安 勇 疲 恥 驚 喜 寂 急 絶 望 恐 疑 恋 福"
+    },
+    {
+      "id": "qualities",
+      "label": {
+        "fa": "ویژگی‌ها و مقایسه",
+        "en": "Qualities & comparison"
+      },
+      "characters": "大 小 同 新 全 最 当 不 要 多 正 重 品 特 各 広 必 無 真 少 難 規 鮮 若 美 極 可 割 優 良 単 個 異 確 深 浅 厚 薄 強 弱 長 短 狭 明 暗 早 遅 安 危 固 柔 高 低 軽 古 太 細 近 遠"
+    },
+    {
+      "id": "government",
+      "label": {
+        "fa": "حکومت و قانون",
+        "en": "Government & law"
+      },
+      "characters": "政 議 党 戦 法 制 権 派 軍 判 官 勢 税 検 裁 防 州 武 監 審 義 憲 省 隊 皇 署 闘 則 司 庁 令 庫 属 君 律 公 選 警 察 領 規 治 統 民 国 県 市 都 兵"
+    },
+    {
+      "id": "communication",
+      "label": {
+        "fa": "ارتباط و رسانه",
+        "en": "Communication & media"
+      },
+      "characters": "議 発 報 告 論 示 応 談 訪 述 張 伝 宣 承 聴 版 著 誌 刊 描 訳 奏 喚 唱 訓 句 冊 黙 刷 史 辞 申 呼 話 言 読 書 聞 問 答 文 字 記 録 表 説 明 題 号 新 送 放 認 紀 知 教 詩"
+    },
+    {
+      "id": "money",
+      "label": {
+        "fa": "پول و اقتصاد",
+        "en": "Money & finance"
+      },
+      "characters": "用 済 資 利 価 税 料 株 財 値 給 販 益 債 損 払 購 貢 賃 貴 銭 稼 秩 帳 酬 幣 収 貯 預 貨 費 金 円 貿 易 銀 行 産 取 引 賞 経 納"
+    },
+    {
+      "id": "transport",
+      "label": {
+        "fa": "حمل‌ونقل و سفر",
+        "en": "Transport & travel"
+      },
+      "characters": "発 車 道 駅 橋 鉄 船 港 旅 乗 運 輸 移 転 復 達 航 走 歩 飛 着 帰 送 交 路 途 寄 渉 停 載 戻 流 渡 通 進 退 速 連 関 輪 陸"
+    },
+    {
+      "id": "health",
+      "label": {
+        "fa": "سلامت و پزشکی",
+        "en": "Health & medicine"
+      },
+      "characters": "病 医 健 療 患 熱 薬 死 息 痛 身 面 額 血 骨 歯 目 耳 口 鼻 心 肺 胃 腹 背 肩 腕 指 肌 皮 頭 顔 首 体 傷 危 害 治 休 養 生 眠 疲 症 診 衛 介 護 救 急"
+    },
+    {
+      "id": "industry",
+      "label": {
+        "fa": "فناوری و صنعت",
+        "en": "Technology & industry"
+      },
+      "characters": "機 電 制 基 営 階 系 具 努 築 鋼 鎖 炭 械 銅 物 化 工 造 製 技 術 研 究 建 設 料 材 資 源 力 商 農 業 産 織 革 糸 布 紙 金 銀 鉄 輸 送 器 採 掘"
+    },
+    {
+      "id": "culture",
+      "label": {
+        "fa": "هنر و فرهنگ",
+        "en": "Arts & culture"
+      },
+      "characters": "演 能 式 真 史 美 福 管 授 舞 劇 芸 儀 曲 幕 秀 像 絵 躍 詩 文 字 本 漢 紙 筆 音 楽 歌 画 術 祭 典 伝 統 歴 宗 堂 祈 礼 宮 踊 映 遺 産 説"
     }
   ]
 }
