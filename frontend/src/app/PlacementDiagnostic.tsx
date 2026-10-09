@@ -67,7 +67,7 @@ export function PlacementDiagnostic({ catalog, language, onStartCustomStudy }: {
   if (!questions.length) return null;
 
   return (
-    <section className="placement-panel" aria-labelledby="placement-diagnostic-title" data-placement-confidence={placementScore.confidence} data-placement-upper-bound={placementScore.upperBoundReached ? "true" : "false"}>
+    <section className="surface card placement-panel" aria-labelledby="placement-diagnostic-title" data-placement-confidence={placementScore.confidence} data-placement-upper-bound={placementScore.upperBoundReached ? "true" : "false"}>
       <header className="placement-panel-header">
         <div>
           <h3 id="placement-diagnostic-title">{t("practicePlacementTitle", language)}</h3>
