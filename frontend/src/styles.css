@@ -1,5 +1,5 @@
 @import "./noto-serif-jp.css";
-:root{--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;--jp-font:"Noto Serif JP","Hiragino Mincho ProN",serif;font-family:var(--ui-font);--fa-font:"Vazirmatn",var(--ui-font),sans-serif;color:#1c1a17;background:#F7F4EE;--washi:#F7F4EE;--paper:#FDFBF7;--sumi:#292B2D;--ink:#53545A;--mute:#73777A;--shu:#505F83;--sakura:#D6A1AA;--ai:#505F83;--matcha:#8C9B87;--line:#DED8CE;--line-soft:#E9E3DA;--line-interactive:#8B93A5;
+:root{--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;--jp-font:"Noto Serif JP","Hiragino Mincho ProN",serif;font-family:var(--ui-font);--fa-font:"Vazirmatn",var(--ui-font),sans-serif;color:#292B2D;background:#F7F4EE;--washi:#F7F4EE;--paper:#FDFBF7;--sumi:#292B2D;--ink:#53545A;--mute:#73777A;--shu:#505F83;--sakura:#D6A1AA;--ai:#505F83;--matcha:#8C9B87;--line:#DED8CE;--line-soft:#E9E3DA;--line-interactive:#8B93A5;
   --text-xs:11px;
   --text-sm:13px;
   --text-base:15px;
@@ -887,6 +887,8 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   pointer-events:none;
 }
 .header-brand h1{margin:0;font-size:clamp(23px,3.5vw,29px);line-height:1;white-space:nowrap;}
+.header-brand-lockup{display:flex;align-items:center;justify-content:center;gap:8px;}
+.header-brand-mark{display:block;width:30px;height:30px;flex:0 0 30px;border-radius:9px;object-fit:contain;}
 .header-brand .eyebrow{font-size:var(--text-xs);line-height:1;margin:0 0 3px;}
 .header-actions{
   position:absolute;
