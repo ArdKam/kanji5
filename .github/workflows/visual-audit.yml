@@ -1,0 +1,120 @@
+name: Automated UI visual audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/visual-audit.yml"
+      - "frontend/**"
+      - "e2e/visual-audit.spec.mjs"
+      - "playwright.config.mjs"
+      - "playwright.compat.config.mjs"
+      - "index.html"
+      - "startup-shell.css"
+      - "theme-bootstrap.js"
+      - "app-bootstrap.js"
+      - "react-entry.js"
+      - "scripts/serve-static.mjs"
+      - "scripts/vendor-supabase.mjs"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual-audit:
+    name: Capture product screens and browser diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact tested revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install root test dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+
+      - name: Build shipped React presentation
+        working-directory: frontend
+        run: |
+          npm run typecheck
+          npm run build
+
+      - name: Prepare pinned browser runtime
+        run: node scripts/vendor-supabase.mjs
+
+      - name: Install Chrome for Playwright
+        run: npx playwright install --with-deps chrome
+
+      - name: Capture automated visual audit
+        env:
+          CI: "true"
+          AUDIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test e2e/visual-audit.spec.mjs --timeout=30000 --retries=0 --reporter=line
+
+      - name: Publish the screenshots and machine-readable audit report
+        id: visual-evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-audit-${{ github.run_number }}-${{ github.run_attempt }}
+          path: test-results/visual-audit/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Add evidence link to workflow summary
+        if: always()
+        env:
+          ARTIFACT_URL: ${{ steps.visual-evidence.outputs.artifact-url }}
+        run: |
+          {
+            echo "## Automated UI visual audit"
+            echo
+            echo "Screens cover onboarding, Learning, Active Recall, Dictionary, dictionary detail, Settings, Statistics, Reading Lab, and Account; desktop and mobile captures are included where applicable."
+            echo
+            if [ -n "${ARTIFACT_URL:-}" ]; then
+              echo "[Download screenshots and report]($ARTIFACT_URL)"
+            else
+              echo "The evidence artifact was not created; inspect the job log."
+            fi
+            echo
+            if [ -f test-results/visual-audit/report.json ]; then
+              node --input-type=module -e '
+                import fs from "node:fs";
+                const r = JSON.parse(fs.readFileSync("test-results/visual-audit/report.json", "utf8"));
+                console.log("- Captured viewport screenshots: " + r.screens.filter(s => s.screenshotMode === "viewport").length);
+                console.log("- Captured scrolled states: " + r.screens.filter(s => s.scrollTarget && s.scrollTarget.kind !== "page-top").length);
+                console.log("- Requested scroll states skipped (no meaningful scroll range): " + (r.skippedScrollCaptures || []).length);
+                console.log("- Uncaught page errors: " + r.pageErrors.length);
+                console.log("- First-party HTTP errors: " + r.failedResponses.length);
+                console.log("- First-party failed requests: " + r.failedRequests.length);
+                console.log("- Console errors (reported): " + r.consoleErrors.length);
+                console.log("- Screens with horizontal overflow: " + r.screens.filter(s => s.horizontalOverflow).length);
+                console.log("");
+                console.log("### Screen measurements");
+                console.log("| Screen | Viewport | Direction | Horizontal overflow |");
+                console.log("|---|---:|---|---|");
+                for (const s of r.screens) console.log("| " + s.name + " | " + s.viewport.width + "×" + s.viewport.height + " | " + s.direction + " | " + (s.horizontalOverflow ? "Yes" : "No") + " |");
+              ' >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No JSON report was produced; inspect the test failure output above." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
