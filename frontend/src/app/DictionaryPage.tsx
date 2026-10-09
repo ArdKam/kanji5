@@ -276,11 +276,9 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 </select>
               </label>
               {activeAdvancedFilterCount > 0 ? (
-                <div className="dictionary-advanced-filter-actions">
-                  <button className="button secondary" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); }}>
+                <button className="button secondary wide" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); }}>
                     {t("dictionaryClearExtraFilters", language)}
-                  </button>
-                </div>
+                </button>
               ) : null}
             </div>
           </details>

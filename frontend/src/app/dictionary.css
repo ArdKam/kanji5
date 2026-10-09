@@ -251,8 +251,6 @@
 .dictionary-advanced-filter-trigger{display:flex;align-items:center;justify-content:space-between;width:100%;list-style:none}
 .dictionary-advanced-filter-trigger::-webkit-details-marker{display:none}
 .dictionary-advanced-filter-controls{margin-top:8px;padding:12px;border:1px solid var(--line-soft);border-radius:var(--radius-md);background:var(--washi)}
-.dictionary-advanced-filter-controls .dictionary-select-filter select{flex:1;min-width:0}
-.dictionary-advanced-filter-actions{grid-column:1/-1;display:flex;justify-content:flex-end}
 .dictionary-display-row{
   padding-top:2px;
 }
