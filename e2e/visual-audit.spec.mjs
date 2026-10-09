@@ -18,6 +18,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     consoleErrors: [],
     failedRequests: [],
     failedResponses: [],
+    skippedScrollCaptures: [],
   };
   const expectedOrigin = new URL(report.baseURL).origin;
 
@@ -138,12 +139,23 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
         return element.id ? '#' + element.id : (element.tagName.toLowerCase() + (cls ? '.' + cls : ''));
       };
       const activeDialogs = [...document.querySelectorAll('[role="dialog"], dialog')].filter(visible);
+      if (scope === 'page') {
+        const root = document.scrollingElement;
+        const pageMaxScrollTop = Math.max(0, (root?.scrollHeight || 0) - innerHeight);
+        // Prefer the actual page scroll when the document can scroll. This prevents hidden
+        // back faces or nested learning-card internals from masquerading as a page-scroll capture.
+        if (pageMaxScrollTop > 24) {
+          window.scrollTo({ top: Math.round(pageMaxScrollTop * Math.max(0, Math.min(1, ratio))), behavior: 'instant' });
+          return { kind: 'page', label: 'window/document', scrollTop: Math.round(window.scrollY), maxScrollTop: pageMaxScrollTop };
+        }
+      }
       const scopeRoot = scope === 'dialog' && activeDialogs.length
         ? activeDialogs[activeDialogs.length - 1]
         : document.body;
       const candidates = [scopeRoot, ...scopeRoot.querySelectorAll('*')].filter(element => {
-        if (!visible(element) || element.scrollHeight <= element.clientHeight + 24) return false;
-        return /(auto|scroll)/.test(getComputedStyle(element).overflowY);
+        const style = getComputedStyle(element);
+        if (!visible(element) || style.opacity === '0' || element.scrollHeight <= element.clientHeight + 24) return false;
+        return /(auto|scroll)/.test(style.overflowY);
       }).sort((a, b) =>
         (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight)
       );
@@ -153,14 +165,15 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
         target.scrollTo({ top: Math.round(maxScrollTop * Math.max(0, Math.min(1, ratio))), behavior: 'instant' });
         return { kind: 'element', label: label(target), scrollTop: Math.round(target.scrollTop), maxScrollTop };
       }
-      if (scope === 'page') {
-        const root = document.scrollingElement;
-        const maxScrollTop = Math.max(0, (root?.scrollHeight || 0) - innerHeight);
-        window.scrollTo({ top: Math.round(maxScrollTop * Math.max(0, Math.min(1, ratio))), behavior: 'instant' });
-        return { kind: 'page', label: 'window/document', scrollTop: Math.round(window.scrollY), maxScrollTop };
-      }
-      return { kind: 'none', label: 'No scrollable dialog content', scrollTop: 0, maxScrollTop: 0 };
+      return { kind: 'none', label: 'No scrollable content in requested scope', scrollTop: 0, maxScrollTop: 0 };
     }, { scope, ratio });
+    if (currentScrollTarget.kind === 'none' || currentScrollTarget.maxScrollTop <= 24) {
+      report.skippedScrollCaptures.push({
+        name, scope, reason: 'No meaningful scroll range in the requested scope',
+        target: currentScrollTarget,
+      });
+      return;
+    }
     await page.waitForTimeout(120);
     await capture(name, { resetScroll: false, suffix: 'scrolled' });
   };
@@ -238,6 +251,10 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await captureScrolled('12-dictionary-card-mobile-dialog', { scope: 'dialog', ratio: 0.8 });
     await dictionaryDialog.getByRole('button', { name: 'Close', exact: true }).click();
     await expect(dictionaryDialog).toBeHidden();
+
+    // Start the desktop Settings dialog at the intended desktop viewport. The previous
+    // Dictionary card captures leave this journey at the mobile breakpoint.
+    await page.setViewportSize({ width: 1440, height: 960 });
 
     const openMenuItem = async (name) => {
       await page.getByRole('button', { name: 'More', exact: true }).click();
