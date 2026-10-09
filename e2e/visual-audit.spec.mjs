@@ -213,7 +213,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('06-learning-mobile');
     const navBackground = await page.locator('.experience-nav').evaluate(element => getComputedStyle(element).backgroundColor);
-    expect(navBackground).toBe('rgb(252, 250, 244)');
+    expect(navBackground).toBe('rgb(253, 251, 247)');
     await captureScrolled('06-learning-mobile', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 1440, height: 960 });
 
