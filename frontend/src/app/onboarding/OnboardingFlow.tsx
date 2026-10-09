@@ -536,7 +536,8 @@ export function OnboardingFlow({
         <main className="kanji5-onboarding-main" aria-live="polite" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel} onClickCapture={handleClickCapture}>
           <div className={"kanji5-onboarding-stage " + (transitionDirection === "back" ? "is-back" : "is-forward")}>
             <div className="kanji5-onboarding-panel-shell">
-              <div key={step + ":" + placementIndex} className="kanji5-onboarding-step-wrap" style={dragX ? { transform: "translate3d(" + dragX + "px,0,0)" } : undefined}>
+              {/* Keep the entry-animation wrapper stable between placement questions; only onboarding step changes should remount it. */}
+              <div key={step} className="kanji5-onboarding-step-wrap" style={dragX ? { transform: "translate3d(" + dragX + "px,0,0)" } : undefined}>
                 {renderStep()}
               </div>
             </div>
