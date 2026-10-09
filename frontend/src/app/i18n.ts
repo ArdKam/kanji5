@@ -588,7 +588,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
     cardBack:"پشت کارت", meaningAndStructure:"معنی و ساختار", readings:"خوانش‌ها", showHiragana:"نمایش هیراگانا", showKatakana:"نمایش کاتاکانا", pageOf:"صفحه {page} از {total}", actionFailed:"خطا در عملیات", footerTagline:"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.",
     onboardingEyebrow:"شروع ساده",
-    onboardingTitle:"Rinemi را برای اولین بار می‌بینی؟",
+    onboardingTitle:"برای اولین بار با Rinemi آشنا می‌شوی؟",
     onboardingIntro:"هر روز چند دقیقه روی کانجی‌های کاربردی کار کن؛ درس را ببین، آن را به یاد بیاور و بعد با مرور فاصله‌دار برگرد.",
     learningLoop:"چرخهٔ یادگیری",
     learningReviewLabel:"مرور",
