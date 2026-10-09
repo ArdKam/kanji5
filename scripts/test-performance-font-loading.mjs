@@ -33,4 +33,4 @@ assert.doesNotMatch(css,/^\s*@import\s+url\(["']https:\/\/fonts\.googleapis\.com
 
 function stylesHasImport(value){ return value.includes('@import "./noto-serif-jp.css";'); }
 
-console.log("Kanji 5 web-font loading contract passed.");
+console.log("Rinemi web-font loading contract passed.");
