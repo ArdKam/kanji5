@@ -369,20 +369,15 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
 
   await page.evaluate(() => {
     const calls = [];
-    const scrollProto =
-      typeof HTMLElement.prototype.scrollTo === "function"
-        ? HTMLElement.prototype
-        : Element.prototype;
-    const original = scrollProto.scrollTo;
+    const container = document.querySelector(".learning-back-page.active .learning-back-scroll");
+    if (!(container instanceof HTMLElement)) throw new Error("Mnemonic scroll container unavailable");
+    const original = container.scrollTo;
     window.__kanji5MnemonicScrollToCalls = calls;
-    window.__kanji5MnemonicScrollToProto = scrollProto === HTMLElement.prototype ? "HTMLElement" : "Element";
-    scrollProto.scrollTo = function (options) {
-      if (this instanceof HTMLElement && this.classList.contains("learning-back-scroll")) {
-        calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
-      }
+    window.__kanji5MnemonicOriginalScrollTo = original;
+    container.scrollTo = function (options) {
+      calls.push(typeof options === "object" ? { ...options } : { left: arguments[0], top: arguments[1] });
       return original.apply(this, arguments);
     };
-    window.__kanji5MnemonicOriginalScrollTo = original;
   });
 
   await trigger.click();
@@ -407,11 +402,9 @@ test("personal mnemonic editor auto-scrolls fully into view when opened", async 
   expect(scrollExpectations.calls.some((call) => call.behavior === expectedBehavior)).toBe(true);
 
     await page.evaluate(() => {
-      if (window.__kanji5MnemonicOriginalScrollTo) {
-        const proto = window.__kanji5MnemonicScrollToProto === "HTMLElement"
-          ? HTMLElement.prototype
-          : Element.prototype;
-        proto.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
+      const container = document.querySelector(".learning-back-page.active .learning-back-scroll");
+      if (container && window.__kanji5MnemonicOriginalScrollTo) {
+        container.scrollTo = window.__kanji5MnemonicOriginalScrollTo;
       }
     });
   }
