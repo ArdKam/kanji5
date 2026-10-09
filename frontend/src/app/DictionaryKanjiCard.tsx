@@ -8,7 +8,7 @@ import { DictionaryAudio, DictionaryReading } from "./DictionaryPrimitives";
 import { VocabularyExamples } from "./VocabularyExamples";
 import { formatNumber, t, type Language } from "./i18n";
 import { useModalDialog } from "./useModalDialog";
-import { getComponentInfo, getRadicalInfo, getHandwritingSkill, recordHandwritingGrade, type ComponentInfo, type HandwritingSkill, type KanjiCatalogItem, type RadicalInfo } from "./engine";
+import { getComponentInfo, getVisualStructureInfo, getRadicalInfo, getHandwritingSkill, recordHandwritingGrade, type ComponentInfo, type VisualStructureInfo, type HandwritingSkill, type KanjiCatalogItem, type RadicalInfo } from "./engine";
 
 type SectionKey = "overview" | "structure" | "writing" | "vocabulary" | "mnemonic";
 
@@ -48,6 +48,7 @@ export function DictionaryKanjiCard({
   const dialogRef = useModalDialog(true, onClose);
   const mastery = Math.round(Math.max(0, Math.min(1, item.mastery)) * 100);
   const [componentInfo, setComponentInfo] = useState<ComponentInfo | null>(null);
+  const [visualStructureInfo, setVisualStructureInfo] = useState<VisualStructureInfo | null>(null);
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [activeSection, setActiveSection] = useState<SectionKey>("overview");
@@ -61,6 +62,17 @@ export function DictionaryKanjiCard({
       if (active) setComponentInfo(info);
     }).catch(() => {
       if (active) setComponentInfo(null);
+    });
+    return () => { active = false; };
+  }, [item.character]);
+
+  useEffect(() => {
+    let active = true;
+    setVisualStructureInfo(null);
+    void getVisualStructureInfo(item.character).then(info => {
+      if (active) setVisualStructureInfo(info);
+    }).catch(() => {
+      if (active) setVisualStructureInfo(null);
     });
     return () => { active = false; };
   }, [item.character]);
@@ -220,25 +232,27 @@ export function DictionaryKanjiCard({
           tabIndex={0}
         >
           {radicalInfo?.available ? <TraditionalRadical info={radicalInfo} language={language} /> : null}
-          {componentInfo?.available && componentInfo.components.length ? (
-            <>
-              <ComponentBreakdown
-                info={componentInfo}
-                title={t("kanjiStructure", language)}
-                note={t("visualComponents", language)}
-                ariaLabel={t("visualKanjiStructure", language)}
-              />
-              <ComponentLearningPath
-                character={item.character}
-                components={componentInfo.components}
-                catalog={catalog}
-                language={language}
-                onSelectKanji={onSelectKanji}
-              />
-            </>
+          {visualStructureInfo?.available && visualStructureInfo.components.length ? (
+            <ComponentBreakdown
+              info={visualStructureInfo}
+              title={t("kanjiStructure", language)}
+              note={t("visualComponents", language)}
+              ariaLabel={t("visualKanjiStructure", language)}
+            />
+          ) : visualStructureInfo?.available ? (
+            <p className="empty-text">{t("structureAtomic", language)}</p>
           ) : (
             <p className="empty-text">{t("structureUnavailable", language)}</p>
           )}
+          {componentInfo?.available && componentInfo.components.length ? (
+            <ComponentLearningPath
+              character={item.character}
+              components={componentInfo.components}
+              catalog={catalog}
+              language={language}
+              onSelectKanji={onSelectKanji}
+            />
+          ) : null}
         </div>
       );
     }
