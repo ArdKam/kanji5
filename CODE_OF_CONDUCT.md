@@ -1,6 +1,6 @@
 # Code of Conduct
 
-Kanji5 is intended to be a respectful technical and educational project.
+Rinemi is intended to be a respectful technical and educational project.
 
 ## Expected behavior
 
