@@ -1,27 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import topicTaxonomy from "./kanji-topics.json";
 import { formatNumber, t, type Language } from "./i18n";
 import type { CustomStudyFilter, CustomStudyFocus } from "./engine";
 import { UiIcon } from "./UiIcon";
 import { learningCopy } from "./learning-copy";
+import { TOPICS, type TopicStudyTopic } from "./topic-taxonomy";
 import "./topic-learning.css";
-
-export type TopicStudyTopic = {
-  id: string;
-  label: { fa: string; en: string };
-  characters: string[];
-};
-
-const TOPICS: TopicStudyTopic[] = topicTaxonomy.topics.map(topic => ({
-  id: topic.id,
-  label: topic.label,
-  characters: String(topic.characters || "").split(/\s+/).filter(Boolean),
-}));
-
-export function getTopicLabel(id: string, language: Language): string | null {
-  const topic = TOPICS.find(item => item.id === id);
-  return topic ? topic.label[language] : null;
-}
 
 export function TopicLearningDialog({
   open,
