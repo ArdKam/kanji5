@@ -10,7 +10,7 @@ const match=sw.match(/const SHELL=(\[[\s\S]*?\]);/);
 assert.ok(match,'Service worker SHELL manifest not found.');
 const shell=JSON.parse(match[1]);
 assert.ok(Array.isArray(shell)&&shell.length>0,'Service worker SHELL must be non-empty.');
-for(const required of ['./v2-domain-core.js','./v2-evidence-core.js','./v2-relationship-core.js','./v2-scheduling-core.js','./v2-observability.js']){
+for(const required of ['./v2-domain-core.js','./v2-evidence-core.js','./v2-relationship-core.js','./v2-scheduling-core.js','./v2-observability.js','./rinemi-logo.svg','./rinemi-logo-dark.svg','./rinemi-logo-mono.svg','./rinemi-mark.svg']){
   assert.ok(shell.includes(required),`Service worker SHELL must precache ${required}`);
 }
 const duplicates=shell.filter((item,index)=>shell.indexOf(item)!==index);
@@ -22,4 +22,4 @@ const missing=shell.filter(item=>{
   return !fs.existsSync(target);
 });
 assert.deepEqual(missing,[],'Every service worker SHELL entry must resolve to a repository file.');
-console.log(`Kanji 5 service-worker shell manifest passed (${shell.length} assets).`);
+console.log(`Rinemi service-worker shell manifest passed (${shell.length} assets).`);
