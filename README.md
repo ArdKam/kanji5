@@ -11,6 +11,8 @@
 
 ## برای توسعه‌دهنده‌ای که تازه وارد پروژه شده
 
+- **راهنمای هویت بصری Rinemi:** [RINEMI-BRAND-GUIDE.md](docs/RINEMI-BRAND-GUIDE.md)
+
 برای فهم نسخهٔ فعلی لازم نیست history نسخه‌های قدیمی را دنبال کنید. از این مسیر شروع کنید:
 
 - **Presentation فعلی:** `frontend/` — سورس React/TypeScript.
