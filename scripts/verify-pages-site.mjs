@@ -9,6 +9,8 @@ const required=[
   "index.html",
   "sw.js",
   "app-bootstrap.js",
+  "legacy-loader.js",
+  "theme-bootstrap.js",
   "react-entry.js",
   "react-dist/kanji5-react.js",
   "react-dist/kanji5-react.css",
@@ -36,6 +38,17 @@ for(const forbidden of [
 }
 
 const index=fs.readFileSync(path.join(site,"index.html"),"utf8");
+
+// Every local script/link resource explicitly referenced by index.html must exist in the staged Pages artifact.
+// This catches assets that are accidentally omitted from the SW shell (which drives staging).
+const localReferences=[...index.matchAll(/<(?:script|link)\b[^>]*?\b(?:src|href)="([^"]+)"/gi)]
+  .map(match=>match[1])
+  .filter(value=>! /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value));
+for(const reference of localReferences){
+  const pathname=decodeURIComponent(reference.split(/[?#]/,1)[0]).replace(/^\.\//,"").replace(/^\//,"");
+  if(!pathname)continue;
+  assert.ok(fs.existsSync(path.join(site,pathname)),"PAGES_SITE_INDEX_RESOURCE_MISSING: "+reference);
+}
 const buildMatch=index.match(/<meta name="kanji5-build-id" content="([^"]+)">/);
 assert.ok(buildMatch&&buildMatch[1],"PAGES_SITE_BUILD_ID_MISSING");
 const buildId=buildMatch[1];
