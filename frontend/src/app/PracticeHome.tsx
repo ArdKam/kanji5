@@ -168,7 +168,7 @@ export function PracticeHome({
             <details className="practice-all-topics">
               <summary>
                 <span>{t("practiceTopicsShowAll", language)}</span>
-                <span className="practice-all-topics-count">{formatNumber(topics.length, language)}</span>
+                <span className="practice-all-topics-count">{formatNumber(otherTopics.length, language)}</span>
               </summary>
               <div className="practice-topic-grid practice-topic-grid-secondary">{otherTopics.map(renderTopicCard)}</div>
             </details>
