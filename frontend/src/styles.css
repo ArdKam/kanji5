@@ -2796,7 +2796,7 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   font-size:var(--text-sm);
   line-height:1.75;
 }
-.stats-dashboard-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+.stats-dashboard-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .stats-dashboard .stats-overview{
   display:grid;
   grid-template-columns:minmax(0,1.5fr) repeat(3,minmax(120px,.62fr));
