@@ -41,11 +41,11 @@ const index=fs.readFileSync(path.join(site,"index.html"),"utf8");
 
 // Every local script/link resource explicitly referenced by index.html must exist in the staged Pages artifact.
 // This catches assets that are accidentally omitted from the SW shell (which drives staging).
-const localReferences=[...index.matchAll(/<(?:script|link)\\b[^>]*?\\b(?:src|href)="([^"]+)"/gi)]
+const localReferences=[...index.matchAll(/<(?:script|link)\b[^>]*?\b(?:src|href)="([^"]+)"/gi)]
   .map(match=>match[1])
-  .filter(value=>! /^(?:[a-z][a-z0-9+.-]*:|\\/\\/|#)/i.test(value));
+  .filter(value=>! /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value));
 for(const reference of localReferences){
-  const pathname=decodeURIComponent(reference.split(/[?#]/,1)[0]).replace(/^\\.\\//,"").replace(/^\\//,"");
+  const pathname=decodeURIComponent(reference.split(/[?#]/,1)[0]).replace(/^\.\//,"").replace(/^\//,"");
   if(!pathname)continue;
   assert.ok(fs.existsSync(path.join(site,pathname)),"PAGES_SITE_INDEX_RESOURCE_MISSING: "+reference);
 }
