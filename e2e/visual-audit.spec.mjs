@@ -244,9 +244,9 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
         const rect = element.getBoundingClientRect();
         return rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth + 1;
       });
-      return { display: level ? getComputedStyle(level).display : '', inViewport: bounds.length === 2 && bounds.every(Boolean) };
+      return { levelDisplay: level ? getComputedStyle(level).display : '', inViewport: bounds.length === 2 && bounds.every(Boolean) };
     });
-    expect(filterLayout.display).toBe('grid');
+    expect(filterLayout.levelDisplay).toBe('grid');
     expect(filterLayout.inViewport).toBe(true);
     await captureScrolled('10-dictionary-mobile-mid-catalog', { scope: 'page', ratio: 0.5 });
 
