@@ -25,7 +25,7 @@ export type PlacementCoreScore = {
   total: number;
   answered: number;
   levelScores: Record<string, { correct: number; total: number }>;
-  suggestedLevel: string;
+  suggestedLevel: "N5" | "N4" | "N3" | "N2";
   confidence: "provisional" | "boundary" | "limited";
   boundaryLevels: string[];
   upperBoundReached: boolean;
