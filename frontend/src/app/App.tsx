@@ -361,7 +361,7 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     const track=pagerTrackRef.current;
     if(track&&swipe.lastX===swipe.startX){
       track.style.transition="none";
-      try{shell.setPointerCapture?.(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Kanji 5 pager pointer capture unavailable.',error);}
+      try{shell.setPointerCapture?.(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Rinemi pager pointer capture unavailable.',error);}
     }
     const atFirst=backPage===0&&delta>0;
     const atLast=backPage===backPageCount-1&&delta<0;
