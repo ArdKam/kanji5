@@ -149,5 +149,5 @@ const output = {
   structures
 };
 
-await writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + "\\n", "utf8");
+await writeFile(OUTPUT_PATH, JSON.stringify(output, null, 2) + "\n", "utf8");
 console.log(`Generated kanji-visual-structure.json: ${output.coverage.available}/${output.coverage.total} structures from pinned KanjiVG ${SOURCE_COMMIT}.`);
