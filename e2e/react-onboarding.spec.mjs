@@ -87,6 +87,50 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
 });
 
+test("placement reload resumes the same sampled paper and scored answers", async ({ page }) => {
+  await fresh(page);
+  const onboarding = await reachStartingPoint(page);
+  await onboarding.getByRole("button", { name: /Check my kanji level/ }).click();
+  await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(onboarding.locator(".kanji5-onboarding-stimulus")).toBeVisible({ timeout: 20000 });
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 20");
+
+  await onboarding.locator(".kanji5-onboarding-option").first().click();
+  await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 2 / 20");
+  const before = await page.evaluate(() => {
+    const raw = localStorage.getItem("kanji5-onboarding-progress-v2");
+    if (!raw) return null;
+    try {
+      const value = JSON.parse(raw);
+      return {
+        seed: value.placementSeed,
+        index: value.placementIndex,
+        answers: value.draft?.placementAnswers?.length,
+        stimulus: document.querySelector(".kanji5-onboarding-stimulus")?.textContent,
+      };
+    } catch { return null; }
+  });
+  expect(before?.seed).toEqual(expect.any(Number));
+  expect(before?.index).toBe(1);
+  expect(before?.answers).toBe(1);
+
+  await page.reload();
+  const resumed = page.locator('[data-testid="onboarding-flow"]');
+  await expect(resumed).toBeVisible({ timeout: 20000 });
+  await expect(resumed.locator(".kanji5-onboarding-stimulus")).toBeVisible({ timeout: 20000 });
+  await expect(resumed.locator(".kanji5-onboarding-question-meta")).toContainText("Question 2 / 20");
+  await expect.poll(() => resumed.locator(".kanji5-onboarding-stimulus").textContent()).toBe(before.stimulus);
+  const after = await page.evaluate(() => {
+    const raw = localStorage.getItem("kanji5-onboarding-progress-v2");
+    if (!raw) return null;
+    try {
+      const value = JSON.parse(raw);
+      return { seed: value.placementSeed, index: value.placementIndex, answers: value.draft?.placementAnswers?.length };
+    } catch { return null; }
+  });
+  expect(after).toEqual({ seed: before.seed, index: 1, answers: 1 });
+});
+
 test("onboarding resumes its transient setup after reload", async ({ page }) => {
   await fresh(page);
   const onboarding = await reachStartingPoint(page);
