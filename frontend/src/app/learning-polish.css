@@ -16,12 +16,12 @@
 .learning-card-topline .learning-context-label { min-width: 0; color: var(--mute); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; overflow-wrap: anywhere; }
 .learning-card-topline .badge { flex: 0 0 auto; }
 .app-shell .content > .learning-card {
-  height: min(590px, calc(100dvh - 220px));
-  min-height: min(500px, calc(100dvh - 220px));
+  height: min(590px, calc(100dvh - 230px));
+  min-height: min(500px, calc(100dvh - 230px));
 }
 @media (max-width: 760px) {
   .app-shell .content > .learning-card {
-    height: min(640px, calc(100dvh - 280px));
+    height: min(640px, calc(100dvh - 290px));
     min-height: min(380px, calc(100dvh - 180px));
   }
 }
