@@ -268,7 +268,7 @@ async function getVisualStructureInfo(character){
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
 function attachStudyTopicContext(viewModel){
   const topicId=window.__KANJI5_V19_REVIEW_BRIDGE__?.getCustomStudyTopicId?.();
-  return {...viewModel,customStudyTopicId:typeof topicId==='string'&&topicId?topicId:null};
+  return typeof topicId==='string'&&topicId?{...viewModel,customStudyTopicId:topicId}:viewModel;
 }
 let startupSnapshotInFlight=null;
 async function startupSnapshot(){
