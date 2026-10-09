@@ -190,7 +190,7 @@ assert.match(panel, /stage === "mastered"/);
 assert.match(panel, /plan\.showConfusable/);
 assert.match(panel, /plan\.showReading/);
 assert.match(panel, /plan\.showVocabulary/);
-assert.match(sw, /const DATA_CACHE='kanji5-data-v25'/, "Mnemonic component data cache must be versioned");
+assert.match(sw, /const DATA_CACHE='kanji5-data-v26'/, "Mnemonic component data cache must be versioned");
 assert.match(sw, /kanji-components\.json/, "Component data must be included in the offline data cache");
 
 assert.match(panel, /hintFocus\?: MnemonicHintFocus/);
