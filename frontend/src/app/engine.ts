@@ -188,6 +188,7 @@ export type VisualStructureNode = {
   partial?: boolean;
   original?: string;
   sourceParts?: string[];
+  sourcePartDetails?: Array<{ part: string; position?: string; radicalRole?: string; phoneticRole?: string }>;
 };
 export type VisualStructureInfo = {
   character: string;
