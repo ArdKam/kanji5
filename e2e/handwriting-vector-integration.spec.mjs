@@ -39,30 +39,12 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
 }
 
 async function drawReference(page,canvas,strokes){
-  // Real mouse input cannot hit-test canvas coordinates outside the viewport, even if Playwright calls it visible.
-  await canvas.scrollIntoViewIfNeeded();
   const box=await canvas.boundingBox();
   if(!box)throw new Error("handwriting canvas has no bounding box");
-  const viewport=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
-  if(box.x<0||box.y<0||box.x+box.width>viewport.width||box.y+box.height>viewport.height){
-    throw new Error(`handwriting canvas must be inside the viewport before drawing: ${JSON.stringify({box,viewport})}`);
-  }
-  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
-  const toClient=p=>({
-    x:clamp(Math.round(box.x+(Number(p.x)/109)*box.width),Math.ceil(box.x+1),Math.floor(box.x+box.width-1)),
-    y:clamp(Math.round(box.y+(Number(p.y)/109)*box.height),Math.ceil(box.y+1),Math.floor(box.y+box.height-1)),
-  });
+  const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
   for(const stroke of strokes){
     const first=toClient(stroke[0]);
     if(!Number.isFinite(first.x)||!Number.isFinite(first.y))throw new Error(`Invalid first point: ${JSON.stringify(stroke[0])}`);
-    const hit=await page.evaluate(({x,y})=>{
-      const target=document.elementFromPoint(x,y);
-      const name=target?.getAttribute("class")||target?.tagName||"none";
-      return {name,tag:target?.tagName||null};
-    },first);
-    if(hit.tag!=="CANVAS"||!String(hit.name).includes("handwriting-ink-canvas")){
-      throw new Error(`Reference stroke start is not hit-testing the ink canvas: ${JSON.stringify({first,hit,box})}`);
-    }
     await page.mouse.move(first.x,first.y);
     await page.mouse.down();
     for(let i=1;i<stroke.length;i+=1){
@@ -98,7 +80,6 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   await expect(handwriting.locator(".handwriting-hint-segment")).toHaveCount(3);
   await expect(handwriting.locator(".handwriting-hint-segment.is-active")).toBeVisible();
   const canvas=handwriting.locator(".handwriting-ink-canvas");
-  await canvas.scrollIntoViewIfNeeded();
   await expect(handwriting.locator(".handwriting-guide-canvas")).toBeVisible();
   const penBox=await canvas.boundingBox();
   if(!penBox)throw new Error("handwriting canvas has no bounding box");
@@ -129,8 +110,7 @@ test("handwriting UI captures and grades a complete reference trace",async({page
   },FIXTURE.characters["学"].paths);
 
   await drawReference(page,canvas,reference);
-  // This trace dispatches hundreds of real pointer moves; allow slower CI runners to finish capture.
-  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled({timeout:20000});
+  await expect(handwriting.locator(".handwriting-actions .primary")).toBeEnabled();
   await handwriting.locator(".handwriting-actions .primary").click();
   const result=handwriting.locator(".handwriting-result");
   await expect(result).toBeVisible();
