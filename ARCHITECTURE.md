@@ -1,4 +1,4 @@
-# Kanji 5 Architecture
+# Rinemi Architecture
 
 ## Scope
 
