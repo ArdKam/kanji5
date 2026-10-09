@@ -19,7 +19,7 @@ test("learning front has one clear focal point and a descriptive reveal action",
 });
 
 test("learning card and rating footer stay clear of the fixed bottom navigation", async ({ page }) => {
-  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 390, height: 640 }]) {
     await page.setViewportSize(viewport);
     await page.goto("/");
     const card = page.locator("#root .learning-card");
