@@ -47,10 +47,22 @@ async function drawReference(page,canvas,strokes){
   if(box.x<0||box.y<0||box.x+box.width>viewport.width||box.y+box.height>viewport.height){
     throw new Error(`handwriting canvas must be inside the viewport before drawing: ${JSON.stringify({box,viewport})}`);
   }
-  const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
+  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+  const toClient=p=>({
+    x:clamp(Math.round(box.x+(Number(p.x)/109)*box.width),Math.ceil(box.x+1),Math.floor(box.x+box.width-1)),
+    y:clamp(Math.round(box.y+(Number(p.y)/109)*box.height),Math.ceil(box.y+1),Math.floor(box.y+box.height-1)),
+  });
   for(const stroke of strokes){
     const first=toClient(stroke[0]);
     if(!Number.isFinite(first.x)||!Number.isFinite(first.y))throw new Error(`Invalid first point: ${JSON.stringify(stroke[0])}`);
+    const hit=await page.evaluate(({x,y})=>{
+      const target=document.elementFromPoint(x,y);
+      const name=target?.getAttribute("class")||target?.tagName||"none";
+      return {name,tag:target?.tagName||null};
+    },first);
+    if(hit.tag!=="CANVAS"||!String(hit.name).includes("handwriting-ink-canvas")){
+      throw new Error(`Reference stroke start is not hit-testing the ink canvas: ${JSON.stringify({first,hit,box})}`);
+    }
     await page.mouse.move(first.x,first.y);
     await page.mouse.down();
     for(let i=1;i<stroke.length;i+=1){
