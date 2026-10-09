@@ -32,7 +32,7 @@ function PreparedMnemonicLibrary({
   const [localPersonalMnemonics, setLocalPersonalMnemonics] = useState(personalMnemonics);
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [visibleLimit, setVisibleLimit] = useState(60);
-  const [componentMap, setComponentMap] = useState<Record<string, string[]>>({});
+  const [visualComponentMap, setVisualComponentMap] = useState<Record<string, string[]>>({});
   const [busyKey, setBusyKey] = useState("");
   const [appliedKey, setAppliedKey] = useState("");
   const [errorKey, setErrorKey] = useState("");
@@ -51,16 +51,22 @@ function PreparedMnemonicLibrary({
 
   useEffect(() => {
     let active = true;
-    void fetch("./kanji-components.json", { cache: "force-cache" })
+    void fetch("./kanji-visual-structure.json", { cache: "force-cache" })
       .then(response => response.ok ? response.json() : null)
       .then(data => {
         if (!active) return;
-        const raw = data && typeof data.components === "object" ? data.components : {};
+        const raw = data && typeof data.structures === "object" ? data.structures : {};
         const next: Record<string, string[]> = {};
-        for (const [character, values] of Object.entries(raw as Record<string, unknown>)) {
-          if (Array.isArray(values)) next[character] = values.map(String).filter(Boolean).slice(0, 8);
+        for (const [character, value] of Object.entries(raw as Record<string, unknown>)) {
+          if (!value || typeof value !== "object") continue;
+          const entry = value as { character?: unknown; components?: unknown };
+          if (entry.character !== character || !Array.isArray(entry.components)) continue;
+          next[character] = entry.components
+            .map(component => component && typeof component === "object" ? String((component as { character?: unknown }).character ?? "") : "")
+            .filter(Boolean)
+            .slice(0, 8);
         }
-        setComponentMap(next);
+        setVisualComponentMap(next);
       })
       .catch(() => {});
     return () => { active = false; };
@@ -68,11 +74,11 @@ function PreparedMnemonicLibrary({
 
   const entries = useMemo(
     () => preparedCore
-      ? preparedCore.buildPreparedMnemonicEntries(catalog, character => componentMap[character] ?? [])
+      ? preparedCore.buildPreparedMnemonicEntries(catalog, character => visualComponentMap[character] ?? [])
         .sort((a, b) => Number(b.suggestion.source === "curated") - Number(a.suggestion.source === "curated"))
         .map((entry, index) => ({ ...entry, index }))
       : [],
-    [catalog, componentMap, preparedCore]
+    [catalog, visualComponentMap, preparedCore]
   );
 
   const curatedCount = useMemo(
@@ -102,11 +108,11 @@ function PreparedMnemonicLibrary({
         entry.suggestion.fa,
         entry.suggestion.en,
         mnemonic,
-        ...(componentMap[entry.character] ?? [])
+        ...(visualComponentMap[entry.character] ?? [])
       ].join(" ");
       return normalize(searchable).includes(q);
     });
-  }, [entries, language, query, mode, levelFilter, catalogByCharacter, componentMap]);
+  }, [entries, language, query, mode, levelFilter, catalogByCharacter, visualComponentMap]);
 
   useEffect(() => {
     setVisibleLimit(60);
@@ -319,7 +325,7 @@ function PreparedMnemonicLibrary({
           const isApplied = appliedKey === key;
           const hasError = errorKey === key;
           const hasPersonalMnemonic = Boolean(localPersonalMnemonics[entry.character]);
-          const components = (componentMap[entry.character] ?? []).filter(value => value && value !== entry.character).slice(0, 4);
+          const components = (visualComponentMap[entry.character] ?? []).filter(value => value && value !== entry.character).slice(0, 4);
 
           return (
             <article
