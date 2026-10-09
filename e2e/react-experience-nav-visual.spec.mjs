@@ -157,7 +157,9 @@ test('Dictionary advanced filters are progressive and can be reset without clear
 test('Dictionary curated topic filters combine with other filters and work in Persian RTL', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('kanji5-onboarding-v2', 'complete');
-    localStorage.setItem('kanji5-ui-language', 'en');
+    if (!localStorage.getItem('kanji5-ui-language')) {
+      localStorage.setItem('kanji5-ui-language', 'en');
+    }
   });
   await page.goto('/');
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
