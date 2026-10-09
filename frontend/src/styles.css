@@ -295,6 +295,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   .content > .learning-card,
   .content > .empty-state{order:1;}
   .content > .daily-summary{order:2;}
+  .content > .session-feedback{order:2;}
   .content > .feedback,
   .content > .insights{order:4;}
   .daily-summary{
