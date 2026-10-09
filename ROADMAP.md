@@ -3,7 +3,7 @@
 > **Canonical roadmap:** this document is the forward-looking source of truth for Rinemi product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
 >
 > **Brand naming rule (2026-10-09):** Rinemi is the canonical customer-facing name in the application, PWA metadata, brand assets, and public product copy. `kanji5` repository/deployment paths, `KANJI5_*` runtime contracts, stored data keys, backup-format identifiers and build asset names remain compatibility identifiers until a separate migration is designed and tested.
->
+
 > **Implementation baseline reviewed:** `main` at the R13 merge baseline `c5997a432aa4b60bc2913cbaec277127b96935db` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
@@ -2365,3 +2365,14 @@ This taxonomy is an explicit curated navigation aid, not a complete curriculum, 
 The expanded taxonomy defines 24 bilingual topics and 1,025 topic assignments across 741 unique kanji (34.7% of the 2,136-item catalog). Eight topic families were added: qualities/comparison, government/law, communication/media, money/finance, transport/travel, health/medicine, technology/industry, and arts/culture. Existing topic families were also expanded using explicit curated associations.
 
 Coverage remains deliberately partial; untagged characters are still available through “All topics” and text search. The next quality step is sampled semantic review of topic membership, then coverage expansion based on reviewed additions—not automatic gloss matching. Topic navigation must remain independent of FSRS, Learner Model, Adaptive Planner, and evidence authority.
+
+
+---
+
+# 26. Dictionary topic semantic QA — 2026-10-09
+
+**Status:** Merged in [PR #508](https://github.com/ArdKam/kanji5/pull/508) at commit `96ec5c37ae226866819dc933a832f5abde4975c9`. PR checks passed, and the post-merge [Pages deployment/live verification](https://github.com/ArdKam/kanji5/actions/runs/37950564253) emitted `LIVE_PAGES_ARTIFACT_VERIFIED` after HTTP 200 and matching staged/live SHA-256 checks for the release assets.
+
+The audit removes 13 overbroad memberships from the 24-topic Dictionary taxonomy. The curated set now has **1,012 assignments** across **737 unique kanji** (34.5% of the pinned 2,136-kanji catalog), down from 1,025 assignments / 741 unique kanji. This is an intentional precision correction, not a loss of catalog availability: untagged kanji remain searchable and visible under “All topics.”
+
+The review distinguishes direct semantic matches from high-frequency, transparent compound relationships. It does not change Dictionary filtering mechanics, kanji data, FSRS, Learner Model, Adaptive Planner, evidence, or persistence. The taxonomy integrity test now protects the reviewed exclusions and exact coverage counts. Broader semantic curation remains an ongoing content-quality task; no automatic gloss-keyword tagging is allowed.
