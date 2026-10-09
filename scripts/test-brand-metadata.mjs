@@ -8,6 +8,7 @@ const onboarding = await fs.readFile("frontend/src/app/onboarding/OnboardingFlow
 const backups = await fs.readFile("frontend/src/app/DataBackup.tsx", "utf8");
 const errorBoundary = await fs.readFile("frontend/src/app/ReactErrorBoundary.tsx", "utf8");
 const startup = await fs.readFile("react-entry.js", "utf8");
+const liveVerifier = await fs.readFile("scripts/verify-live-pages-e2e.mjs", "utf8");
 const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
@@ -52,5 +53,6 @@ assert.ok(errorBoundary.includes('`rinemi-error-backup-${date}.json`'), "error-r
 assert.ok(startup.includes("title.textContent=isFa?'Rinemi باز نشد':'Rinemi could not start';"), "startup failure copy must use Rinemi in Persian and English");
 assert.ok(!startup.includes("کانجی‌یار باز نشد"), "startup failure copy must not retain the legacy Persian brand");
 assert.ok(startup.includes('`rinemi-startup-backup-${new Date().toISOString().slice(0,10)}.json`'), "startup recovery backup filename must use Rinemi");
+assert.ok(liveVerifier.includes("rinemi-backup-\\d{4}-\\d{2}-\\d{2}\\.json") && !liveVerifier.includes("kanji5-backup-\\d{4}-\\d{2}-\\d{2}\\.json"), "live Pages verifier must expect the canonical Rinemi backup filename");
 
 console.log("Rinemi brand metadata contract passed.");
