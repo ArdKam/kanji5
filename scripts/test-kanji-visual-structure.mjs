@@ -34,26 +34,28 @@ function validateNode(node, context) {
 
 for (const character of characters) {
   const root = structures[character];
-  assert.ok(root, `Missing verified visual tree for ${character}`);
+  assert.ok(root, `Missing source structure for ${character}`);
   assert.equal(root.character, character, `Root glyph mismatch for ${character}`);
   validateNode(root, character);
 }
 
 const direct = character => (structures[character]?.components || []).map(node => node.character);
 const expectDirect = (character, expected) => {
-  assert.deepEqual(direct(character), expected, `Unexpected direct visual structure for ${character}`);
+  assert.deepEqual(direct(character), expected, `Unexpected KanjiVG component hierarchy for ${character}`);
 };
+// These anchors validate source extraction, repeated nodes and nesting—not etymological decomposition.
 expectDirect("林", ["木", "木"]);
 expectDirect("森", ["木", "林"]);
 expectDirect("品", ["口", "口", "口"]);
 expectDirect("晶", ["日", "日", "日"]);
 expectDirect("炎", ["火", "火"]);
 expectDirect("多", ["夕", "夕"]);
-expectDirect("北", ["匕", "匕"]);
+expectDirect("三", ["一", "一", "一"]);
 expectDirect("海", ["氵", "毎"]);
 expectDirect("語", ["言", "吾"]);
 expectDirect("明", ["日", "月"]);
 expectDirect("時", ["日", "寺"]);
-expectDirect("国", ["囗", "玉"]);
+expectDirect("会", ["人", "云"]);
+expectDirect("学", ["⺍", "冖", "子"]);
 
-console.log("KanjiVG visual structure contract passed (2,136/2,136 trees; repeated components and nesting preserved).");
+console.log("KanjiVG visual structure contract passed (2,136/2,136 source trees; nesting and repeated groups preserved).");
