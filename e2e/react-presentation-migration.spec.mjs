@@ -230,6 +230,28 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await shell.dispatchEvent('pointerup',{pointerType:'touch',pointerId:pointerIdBack,isPrimary:true,button:0,buttons:0,clientX:nextBox.x+nextBox.width*0.12,clientY:swipeBackY});
   await expect(card.locator('#dictionary-card-title')).toHaveText(currentCharacter||'');
   await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-previous/);
+  await expect(cardShell).toHaveCSS('touch-action','pan-y');
+
+  // Exercise the same gesture path with native browser mouse pointer events as well.
+  const mouseStartBox=await cardShell.boundingBox();
+  if(!mouseStartBox)throw new Error('Dictionary card bounds unavailable for desktop drag');
+  const mouseY=mouseStartBox.y+mouseStartBox.height*0.55;
+  await page.mouse.move(mouseStartBox.x+mouseStartBox.width*0.28,mouseY);
+  await page.mouse.down();
+  await page.mouse.move(mouseStartBox.x+mouseStartBox.width*0.78,mouseY,{steps:8});
+  await page.mouse.up();
+  await expect(card.locator('#dictionary-card-title')).not.toHaveText(currentCharacter||'');
+  await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-next/);
+  const mouseNext=await card.locator('#dictionary-card-title').textContent();
+  const mouseBackBox=await cardShell.boundingBox();
+  if(!mouseBackBox)throw new Error('Dictionary card bounds unavailable for reverse desktop drag');
+  const mouseBackY=mouseBackBox.y+mouseBackBox.height*0.55;
+  await page.mouse.move(mouseBackBox.x+mouseBackBox.width*0.78,mouseBackY);
+  await page.mouse.down();
+  await page.mouse.move(mouseBackBox.x+mouseBackBox.width*0.28,mouseBackY,{steps:8});
+  await page.mouse.up();
+  await expect(card.locator('#dictionary-card-title')).toHaveText(currentCharacter||'');
+  await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-previous/);
   await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);
   await expect(card.locator('.component-learning-path')).toHaveCount(0);
