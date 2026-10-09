@@ -141,7 +141,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
       const scopeRoot = scope === 'dialog' && activeDialogs.length
         ? activeDialogs[activeDialogs.length - 1]
         : document.body;
-      const candidates = [...scopeRoot.querySelectorAll('*')].filter(element => {
+      const candidates = [scopeRoot, ...scopeRoot.querySelectorAll('*')].filter(element => {
         if (!visible(element) || element.scrollHeight <= element.clientHeight + 24) return false;
         return /(auto|scroll)/.test(getComputedStyle(element).overflowY);
       }).sort((a, b) =>
