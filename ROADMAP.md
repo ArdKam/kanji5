@@ -2321,3 +2321,34 @@ The architectural rule remains:
 **Do not rewrite the learning engine merely to enable presentation or new-domain work. Strengthen the current Kanji product first, prove the public operating model second, then expand through the existing cross-domain seams.**
 
 This ordering is the canonical pre-Vocabulary execution sequence.
+
+
+---
+
+# 24. Dictionary topic filters — 2026-10-09
+
+**Status:** MVP implementation merged to current `main` in [PR #501](https://github.com/ArdKam/kanji5/pull/501), merge commit `e56247730030916fd813ed3c4360b328fc4a2627`.
+
+## Shipped scope
+
+- Added a bilingual Persian/English, versioned topic taxonomy in `frontend/src/app/kanji-topics.json`.
+- Initial taxonomy: 16 topics, 495 topic assignments, and 422 unique tagged kanji out of 2,136 Jōyō kanji (19.8% unique coverage).
+- Added the topic selector to the existing progressive Dictionary advanced-filter panel; it combines by intersection with JLPT, grade, mastery, and text search.
+- Included topic in the active-filter count. Clearing advanced filters resets topic/grade/mastery while preserving text search and JLPT.
+- Bundled tags locally; topic filtering needs no network request and remains available offline.
+- Added taxonomy integrity tests, React browser regression coverage for category selection and filter composition/reset semantics, Persian RTL presentation, and `docs/KANJI-TOPIC-TAXONOMY.md`.
+
+## Evidence
+
+The feature branch was validated at PR head `22221cd27e1175b20c3e39ad78a30ed3c7f0cb5d`:
+- [React presentation build / full 50-step workflow](https://github.com/ArdKam/kanji5/actions/runs/37923425895) — success.
+- [v1.8/v1.9 learning-engine validation](https://github.com/ArdKam/kanji5/actions/runs/37923425986) — success.
+- WebKit compatibility — success within the React workflow.
+
+The post-merge main build and Pages deployment must be recorded from their own current-main run evidence; PR validation alone is not proof that the live site has updated.
+
+## Scope and remaining content-quality work
+
+This taxonomy is an explicit curated navigation aid, not a complete curriculum, frequency list, JLPT syllabus, vocabulary database, or evidence of learner mastery. Untagged kanji remain visible/searchable when “All topics” is selected. Do not infer memberships from raw English gloss strings or silently treat lack of a tag as lack of relevance.
+
+**Next content-quality action:** expand/review topic membership only with sampled semantic QA and clear provenance. Do not extend topic-specific selection into Learning or Active Recall until the Dictionary taxonomy's coverage and usefulness are evaluated; FSRS, the Learner Model, and Adaptive Planner remain authoritative and unchanged.
