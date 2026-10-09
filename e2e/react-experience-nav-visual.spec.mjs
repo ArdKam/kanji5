@@ -65,6 +65,12 @@ test('Learning, Active Recall and Dictionary use a persistent Lovable-style bott
       const cardTop = await learningCard.evaluate(node => node.getBoundingClientRect().top);
       const summaryTop = await summary.evaluate(node => node.getBoundingClientRect().top);
       expect(cardTop).toBeLessThan(summaryTop);
+      const domOrderIsLearningFirst = await page.locator(".content").evaluate(node => {
+        const card = node.querySelector(".learning-card");
+        const stats = node.querySelector(".daily-summary");
+        return Boolean(card && stats && (card.compareDocumentPosition(stats) & Node.DOCUMENT_POSITION_FOLLOWING));
+      });
+      expect(domOrderIsLearningFirst).toBe(true);
     }
   }
 
