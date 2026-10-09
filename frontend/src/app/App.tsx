@@ -162,9 +162,15 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     const target=mnemonicToolRef.current;
     const scrollContainer=target?.closest<HTMLElement>(".learning-back-scroll");
     if(!target||!scrollContainer)return;
+    const scrollBounds=scrollContainer.getBoundingClientRect();
+    const targetBounds=target.getBoundingClientRect();
     const maxScrollTop=Math.max(0,scrollContainer.scrollHeight-scrollContainer.clientHeight);
-    const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    scrollContainer.scrollTo({top:maxScrollTop,behavior:reducedMotion?"auto":"smooth"});
+    const bottomOverflow=targetBounds.bottom-(scrollBounds.bottom-10);
+    const topOverflow=(scrollBounds.top+10)-targetBounds.top;
+    const delta=bottomOverflow>0?bottomOverflow:topOverflow>0?-topOverflow:0;
+    const nextTop=Math.max(0,Math.min(maxScrollTop,scrollContainer.scrollTop+delta));
+    // This is a layout-recovery action, so prefer a stable final position over animated scrolling.
+    scrollContainer.scrollTo({top:nextTop,behavior:"auto"});
   },[]);
   useEffect(()=>{
     if(!mnemonicEditing)return;
@@ -403,7 +409,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   };
   const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event);
   const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
-  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
+  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")+(mnemonicEditing?" has-open-mnemonic":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
