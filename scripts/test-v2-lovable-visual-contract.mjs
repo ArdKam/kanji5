@@ -10,7 +10,8 @@ const requiredTokens=[
   ['--sakura','#D6A1AA'],
   ['--ai','#505F83'],
   ['--matcha','#8C9B87'],
-  ['--line:#DED8CE','--line:#DED8CE']
+  ['--line','#DED8CE'],
+  ['--line-soft','#E9E3DA']
 ];
 for(const [token,value] of requiredTokens){
   assert.ok(css.includes(token+':'+value) || css.includes(token), 'Rinemi visual token missing: '+token);
