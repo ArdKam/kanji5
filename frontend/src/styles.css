@@ -2319,7 +2319,7 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
 .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemonic-library-list{
   max-height:none;
 }
-.dialog.secondary-page-dialog.reading-lab-dialog{width:min(860px,calc(100vw - 32px));height:min(84dvh,820px);overflow:hidden;}.dialog.secondary-page-dialog.reading-lab-dialog h2{flex:0 0 auto;}
+.dialog.secondary-page-dialog.reading-lab-dialog{width:min(860px,calc(100vw - 32px));overflow:hidden;}.dialog.secondary-page-dialog.reading-lab-dialog h2{flex:0 0 auto;}
 .prepared-mnemonic-library 
 .prepared-mnemonic-library-row{
   grid-template-columns:54px minmax(0,1fr);
@@ -2795,7 +2795,7 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   font-size:var(--text-sm);
   line-height:1.75;
 }
-.stats-dashboard-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.stats-dashboard-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;}
 .stats-dashboard .stats-overview{
   display:grid;
   grid-template-columns:minmax(0,1.5fr) repeat(3,minmax(120px,.62fr));
