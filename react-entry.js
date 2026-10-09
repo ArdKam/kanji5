@@ -82,7 +82,7 @@ function scheduleAccountFallback(){
     if(document.querySelector('#root .account-button:not([data-kanji5-account-fallback])'))return;
     void import('./account-fallback.js'+assetVersion).catch(error=>{
       observability()?.capture?.('dynamic-import-failure',error,{module:'account-fallback.js',dataAffected:'unknown'});
-      console.error('Kanji 5 account fallback failed to boot.',error);
+      console.error('Rinemi account fallback failed to boot.',error);
     });
   };
   window.setTimeout(load,1000);
