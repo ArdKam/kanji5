@@ -95,7 +95,7 @@ async function revealLearningCard(page, language = "fa") {
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 10000 });
-  const revealButton = page.getByRole("button", { name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information|meaning & readings))/ });
+  const revealButton = page.getByRole("button", { name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/ });
   await revealButton.click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
   await page.waitForTimeout(600);
