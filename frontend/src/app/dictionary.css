@@ -2337,3 +2337,84 @@
 .reading-word-kanji small{color:var(--mute);font-size:10px;font-weight:850;}
 .reading-word-card-hint{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
 @media(max-width:520px){.reading-lab-heading-line{align-items:flex-start;flex-direction:column;}.reading-word-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}.reading-word-card{padding:18px;}}
+
+
+/* UX remediation 2026-10: mobile dictionary filters and Reading Lab controls. */
+@media(max-width:640px){
+  /* Three columns keep all six level filters visible without forcing the last control off-screen. */
+  .dictionary-controls>.dictionary-filter-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:stretch;
+    gap:10px;
+    min-width:0;
+  }
+  .dictionary-controls>.dictionary-filter-row>.dictionary-level-filter{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    width:100%;
+    min-width:0;
+    gap:6px;
+  }
+  .dictionary-controls>.dictionary-filter-row>.dictionary-level-filter>.dictionary-filter-button{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    padding:6px 4px;
+    white-space:normal;
+    text-align:center;
+    line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+  .dictionary-controls>.dictionary-filter-row>.dictionary-advanced-filters{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    margin:0;
+  }
+  .dictionary-advanced-filter-trigger{
+    min-height:44px;
+    gap:8px;
+  }
+  .dictionary-advanced-filter-trigger>.actions{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin:0;
+  }
+
+  /* Textarea height follows the mobile viewport instead of its six-row intrinsic height. */
+  .reading-lab .reading-lab-input{
+    height:clamp(150px,23dvh,195px);
+    min-height:clamp(140px,20dvh,170px);
+    max-height:32dvh;
+    resize:vertical;
+  }
+}
+.reading-lab .reading-lab-speech-voice select{
+  width:100%;
+  min-height:42px;
+  max-width:100%;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+  background:var(--paper);
+  color:var(--ink);
+  font:inherit;
+  font-size:var(--text-sm);
+}
+.reading-lab .reading-lab-speech-rate select{
+  min-height:32px;
+  max-width:100%;
+  padding:4px 20px 4px 6px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:var(--ink);
+  font:inherit;
+}
+.reading-lab .reading-lab-speech-voice select:focus-visible,
+.reading-lab .reading-lab-speech-rate select:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--ai) 35%,transparent);
+  outline-offset:2px;
+}
