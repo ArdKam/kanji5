@@ -39,7 +39,7 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
   const card = page.locator("#root .learning-card");
   await expect(card).toBeVisible({ timeout: 20000 });
 
-  await card.getByRole("button", { name: "Show kanji information" }).click();
+  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
   await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
 
   await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-meaning")).toBeVisible();
