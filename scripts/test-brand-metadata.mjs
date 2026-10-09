@@ -9,6 +9,10 @@ const styles = await fs.readFile("frontend/src/styles.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
 const icon192 = await fs.readFile("icon-192.svg", "utf8");
 const icon512 = await fs.readFile("icon-512.svg", "utf8");
+const logo = await fs.readFile("rinemi-logo.svg", "utf8");
+const logoDark = await fs.readFile("rinemi-logo-dark.svg", "utf8");
+const logoMono = await fs.readFile("rinemi-logo-mono.svg", "utf8");
+const mark = await fs.readFile("rinemi-mark.svg", "utf8");
 
 assert.ok(index.includes('<meta name="theme-color" content="#505F83" />'), "index.html theme-color must use the Rinemi indigo");
 assert.ok(index.includes('<title>Rinemi — یادگیری کانجی ژاپنی</title>'), "index.html title must use Rinemi");
@@ -28,5 +32,12 @@ for (const [name, source] of [["icon.svg", icon], ["icon-192.svg", icon192], ["i
   assert.ok(source.includes("Rinemi"), name + " must carry accessible Rinemi naming");
   assert.ok(source.includes("#505F83") && source.includes("#D6A1AA") && source.includes("#F7F4EE"), name + " must match the canonical palette");
 }
+
+for (const [name, source] of [["rinemi-logo.svg", logo], ["rinemi-logo-dark.svg", logoDark], ["rinemi-logo-mono.svg", logoMono], ["rinemi-mark.svg", mark]]) {
+  assert.ok(source.includes("Rinemi") && source.includes("<svg"), name + " must be a valid Rinemi SVG asset");
+}
+assert.ok(logo.includes("#505F83") && logo.includes("#D6A1AA"), "primary logo must use indigo and sakura");
+assert.ok(logoDark.includes("#F7F4EE") && logoDark.includes("#A8B5D8"), "dark logo must preserve readable contrast");
+assert.ok(logoMono.includes("#292B2D"), "monochrome logo must use the sumi ink color");
 
 console.log("Rinemi brand metadata contract passed.");
