@@ -12,7 +12,7 @@ let networkPromise=null;
 function loadNetwork(){
   return networkPromise||(networkPromise=import('./v1.5-network.js').catch(error=>{reportDynamicImportFailure('./v1.5-network.js','network-runtime-load-failure',error);throw error})).catch(error=>{networkPromise=null;throw error});
 }
-let componentDataPromise=null;let radicalDataPromise=null;
+let componentDataPromise=null;let visualStructureDataPromise=null;let radicalDataPromise=null;
 async function ensureEducationRuntime(){
   if(window.__KANJI5_EDU_BRIDGE__?.start)return true;
   if(educationRuntimePromise)return educationRuntimePromise;
@@ -98,6 +98,14 @@ function loadComponentData(){
     return response.json();
   }).catch(error=>{captureFailure('component-data-load-failure',error,{dataAffected:'unknown'});return null});
   return componentDataPromise;
+}
+function loadVisualStructureData(){
+  if(visualStructureDataPromise)return visualStructureDataPromise;
+  visualStructureDataPromise=fetch('./kanji-visual-structure.json',{cache:'force-cache'}).then(response=>{
+    if(!response.ok)throw new Error('KANJI5_VISUAL_STRUCTURE_DATA_UNAVAILABLE');
+    return response.json();
+  }).catch(error=>{captureFailure('visual-structure-data-load-failure',error,{dataAffected:'unknown'});return null});
+  return visualStructureDataPromise;
 }
 function loadRadicalData(){if(radicalDataPromise)return radicalDataPromise;radicalDataPromise=Promise.all([fetch('./kanji-radicals.json',{cache:'no-store'}),fetch('./kanji-radical-map.json',{cache:'no-store'})]).then(async([catalogResponse,mapResponse])=>{if(!catalogResponse.ok||!mapResponse.ok)throw new Error('KANJI5_RADICAL_DATA_UNAVAILABLE');return {catalog:await catalogResponse.json(),map:await mapResponse.json()}}).catch(error=>{captureFailure('radical-data-load-failure',error,{dataAffected:'unknown'});return null});return radicalDataPromise;}
 async function getRadicalInfo(character){const normalized=Array.from(String(character||'').trim()).slice(0,1).join('');const data=await loadRadicalData();if(!data||!normalized)return {character:normalized,available:false,radicalId:null,radical:null,coverage:data?.map?.coverage||null,source:data?.catalog?.source||null};const id=Number(data.map?.kanji?.[normalized]);const radical=Number.isInteger(id)?data.catalog?.radicals?.find(item=>Number(item.id)===id)||null:null;return {character:normalized,available:Boolean(radical&&Number.isInteger(id)),radicalId:Number.isInteger(id)?id:null,radical,coverage:data.map?.coverage||null,source:data.catalog?.source||null};}
@@ -238,6 +246,23 @@ async function getComponentInfo(character){
     sourceGap:Array.isArray(data.missing)&&data.missing.includes(normalized),
     coverage:data.coverage||null,
     source:data.source||null
+  };
+}
+async function getVisualStructureInfo(character){
+  const normalized=Array.from(String(character||'').trim()).slice(0,1).join('');
+  const data=await loadVisualStructureData();
+  const root=data?.structures?.[normalized]||null;
+  const sourceGap=Array.isArray(data?.missing)&&data.missing.includes(normalized);
+  const valid=Boolean(root&&root.character===normalized&&Array.isArray(root.components));
+  return {
+    character:normalized,
+    available:valid,
+    root:valid?root:null,
+    components:valid?[...root.components]:[],
+    atomic:valid&&root.components.length===0,
+    sourceGap:!valid&&sourceGap,
+    coverage:data?.coverage||null,
+    source:data?.source||null
   };
 }
 function recentOutcomes(){const components=state.readComponents?.()||{},all=components.v19LearnerEvidence||{},rows=[];for(const [character,evidence] of Object.entries(all)){for(const item of(Array.isArray(evidence)?evidence:[])){rows.push({...item,character})}}rows.sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));return rows.slice(0,8)}
@@ -486,7 +511,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){window.__KANJI5_V19_SESSION_STORAGE_DEGRADED__=true;}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getStats,getVocabulary,snapshot,startupSnapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime,startLearningSession,startLearningExperience,startPracticeExperience,startExercise,submitExercise,dontKnowExercise,selfReportProduction,retryExercise,nextExercise,getHandwritingSkill,recordHandwritingGrade});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getStats,getVocabulary,snapshot,startupSnapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getVisualStructureInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime,startLearningSession,startLearningExperience,startPracticeExperience,startExercise,submitExercise,dontKnowExercise,selfReportProduction,retryExercise,nextExercise,getHandwritingSkill,recordHandwritingGrade});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 if(window.__KANJI5_V19_REVIEW_BRIDGE__)void publishStartupSnapshot();else document.addEventListener('kanji5:v1.9-review-ready',()=>{void publishStartupSnapshot()},{once:true});
