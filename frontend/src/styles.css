@@ -887,8 +887,8 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   pointer-events:none;
 }
 .header-brand h1{margin:0;font-size:clamp(23px,3.5vw,29px);line-height:1;white-space:nowrap;}
-.header-brand-lockup{display:flex;align-items:center;justify-content:center;gap:8px;}
-.header-brand-mark{display:block;width:30px;height:30px;flex:0 0 30px;border-radius:9px;object-fit:contain;}
+.header-brand-lockup{display:flex;align-items:center;gap:8px;}
+.header-brand-mark{width:30px;}
 .header-brand .eyebrow{font-size:var(--text-xs);line-height:1;margin:0 0 3px;}
 .header-actions{
   position:absolute;
