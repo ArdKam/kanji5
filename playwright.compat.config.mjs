@@ -9,15 +9,15 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: process.env.CI ? 'line' : 'html',
-  use: { baseURL: 'http://127.0.0.1:4173' },
+  use: { baseURL: 'https://127.0.0.1:4173', ignoreHTTPSErrors: true },
   outputDir: 'test-results/compat',
   projects: [
     { name: 'firefox', use: { browserName: 'firefox', serviceWorkers: 'allow' } },
     { name: 'webkit', use: { browserName: 'webkit', serviceWorkers: 'block' } },
   ],
   webServer: {
-    command: 'node scripts/serve-static.mjs 4173',
-    url: 'http://127.0.0.1:4173/',
+    command: 'mkdir -p /tmp/kanji5-test-tls && openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/kanji5-test-tls/key.pem -out /tmp/kanji5-test-tls/cert.pem -days 1 -subj "/CN=127.0.0.1" && KANJI5_TEST_TLS_KEY=/tmp/kanji5-test-tls/key.pem KANJI5_TEST_TLS_CERT=/tmp/kanji5-test-tls/cert.pem node scripts/serve-static-https.mjs 4173',
+    port: 4173,
     reuseExistingServer: false,
     timeout: 30_000,
   },
