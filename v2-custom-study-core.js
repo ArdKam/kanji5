@@ -1,4 +1,4 @@
-export const CUSTOM_STUDY_VERSION = "1.1.0";
+export const CUSTOM_STUDY_VERSION = "1.2.0";
 const LEVELS = new Set(["all", "N5", "N4", "N3", "N2", "N1"]);
 const FOCUSES = new Set(["available", "due", "new", "weak", "mistakes"]);
 
@@ -16,12 +16,15 @@ export function normalizeCustomStudyFilter(filter = {}) {
       .filter(value => /^\p{Script=Han}$/u.test(value)))]
         .slice(0, 2136)
     : undefined;
+  const rawTopicId = String(input.topicId || "").trim();
+  const topicId = /^[a-z0-9-]{1,48}$/.test(rawTopicId) ? rawTopicId : undefined;
   return Object.freeze({
     version: CUSTOM_STUDY_VERSION,
     level,
     focus,
     limit,
     ...(hasCharacterScope ? { characterScope } : {}),
+    ...(topicId ? { topicId } : {}),
   });
 }
 
