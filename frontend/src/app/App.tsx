@@ -1082,7 +1082,7 @@ function App(){
                   <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
                   <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
                 </div>
-                <button className="button secondary" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
+                <button className="button secondary learning-route-button" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
                   <UiIcon name="dictionary" size={17}/><span>{learningCopy("learnByTopic",language)}</span>
                 </button>
               </div> : null}
