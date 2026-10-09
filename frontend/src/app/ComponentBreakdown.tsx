@@ -27,16 +27,20 @@ function renderComponent(component: VisualStructureNode, path: string, language:
       ? (language === "fa" ? "بخشی از " : "Part of ") + component.original
       : (language === "fa" ? "شکل جزئی" : "Partial form")
     : "";
+  const partLabel = component.part
+    ? (language === "fa" ? "قطعهٔ " : "Fragment ") + component.part
+    : "";
   const childrenLabel = language === "fa" ? "اجزای این جزء" : "Subcomponents";
   const classes = ["component-breakdown-part"];
   if (component.variant) classes.push("is-variant");
-  if (component.partial) classes.push("is-partial");
+  if (component.partial || component.part) classes.push("is-partial");
   return (
     <span className="component-breakdown-part-wrap" role="listitem" key={path}>
       <span className="component-breakdown-part-wrap-inner">
         <span className={classes.join(" ")} lang="ja">{component.character}</span>
         {label ? <span className="component-breakdown-label">{label}</span> : null}
         {partialLabel ? <span className="component-breakdown-label component-breakdown-partial">{partialLabel}</span> : null}
+        {partLabel ? <span className="component-breakdown-label component-breakdown-partial">{partLabel}</span> : null}
         {position ? <span className="component-breakdown-label component-breakdown-position">{position}</span> : null}
         {component.components.length ? (
           <span className="component-breakdown-subparts" role="list" aria-label={childrenLabel}>
