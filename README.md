@@ -1,4 +1,4 @@
-# Kanji 5
+# Rinemi
 
 یک PWA محلی‌محور برای یادگیری ۲۱۳۶ کانجی Jōyō ژاپنی، با چرخهٔ Learn → Recall → Review → Recover و مرور فاصله‌دار تطبیقی بر پایهٔ FSRS.
 
