@@ -49,6 +49,8 @@ assert.ok(logoDark.includes("#F7F4EE") && logoDark.includes("#A8B5D8"), "dark lo
 assert.ok(logoMono.includes("#292B2D"), "monochrome logo must use the sumi ink color");
 assert.ok(backups.includes('`rinemi-backup-${date}.json`') && !backups.includes('`kanji5-backup-${date}.json`'), "user-exported backup filename must use Rinemi");
 assert.ok(errorBoundary.includes('`rinemi-error-backup-${date}.json`'), "error-recovery backup filename must use Rinemi");
+assert.ok(startup.includes("title.textContent=isFa?'Rinemi باز نشد':'Rinemi could not start';"), "startup failure copy must use Rinemi in Persian and English");
+assert.ok(!startup.includes("کانجی‌یار باز نشد"), "startup failure copy must not retain the legacy Persian brand");
 assert.ok(startup.includes('`rinemi-startup-backup-${new Date().toISOString().slice(0,10)}.json`'), "startup recovery backup filename must use Rinemi");
 
 console.log("Rinemi brand metadata contract passed.");
