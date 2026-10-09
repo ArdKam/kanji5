@@ -249,14 +249,14 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             ))}
           </div>
           <details className={"dictionary-advanced-filters" + (activeAdvancedFilterCount ? " has-active-filters" : "")}>
-            <summary>
+            <summary className="button secondary dictionary-advanced-filter-trigger">
               <span>{t("dictionaryMoreFilters", language)}</span>
-              <span className="dictionary-filter-summary-end">
-                {activeAdvancedFilterCount > 0 ? <span className="dictionary-filter-count" aria-label={t("dictionaryActiveFiltersCount", language)}>{formatNumber(activeAdvancedFilterCount, language)}</span> : null}
-                <span className="dictionary-filter-chevron" aria-hidden="true">⌄</span>
+              <span className="actions">
+                {activeAdvancedFilterCount > 0 ? <span className="badge dictionary-filter-count" aria-label={t("dictionaryActiveFiltersCount", language)}>{formatNumber(activeAdvancedFilterCount, language)}</span> : null}
+                <span aria-hidden="true">⌄</span>
               </span>
             </summary>
-            <div className="dictionary-advanced-filter-controls">
+            <div className="dialog-grid dictionary-advanced-filter-controls">
               <label className="dictionary-select-filter">
                 <span>{language === "fa" ? "تسلط" : "Mastery"}</span>
                 <select value={masteryFilter} onChange={(event) => setMasteryFilter(event.target.value as MasteryFilter)}>
@@ -277,7 +277,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               </label>
               {activeAdvancedFilterCount > 0 ? (
                 <div className="dictionary-advanced-filter-actions">
-                  <button className="button secondary dictionary-clear-advanced-filters" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); }}>
+                  <button className="button secondary" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); }}>
                     {t("dictionaryClearExtraFilters", language)}
                   </button>
                 </div>
