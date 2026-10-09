@@ -28,6 +28,11 @@ test('account hub exposes a compact auth flow and RTL-safe fields', async ({ pag
   await expect(page.locator('.account-auth-surface')).toBeVisible();
   await expect(page.locator('.account-auth-tabs')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Continue with Google|ادامه با Google/ })).toBeVisible();
+  const magicLink = page.getByRole('button', { name: /ورود با لینک جادویی|Use a magic link/ });
+  await expect(magicLink).toHaveCSS('min-height', '44px');
+  await expect(magicLink).toHaveCSS('text-decoration-line', 'underline');
+  const magicLinkBounds = await magicLink.boundingBox();
+  expect(magicLinkBounds?.height).toBeGreaterThanOrEqual(44);
 
   const tabs = page.locator('.account-auth-intent [role="tab"]');
   await expect(tabs).toHaveCount(2);
