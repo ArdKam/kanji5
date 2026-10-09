@@ -54,7 +54,7 @@ test("learning card exposes reading and vocabulary memory bridges without alteri
 });
 
 
-test("component-aware mnemonic data remains available from the offline service-worker cache", async ({ page, context }) => {
+test("canonical visual structure remains available from the offline service-worker cache", async ({ page, context }) => {
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   await expect.poll(async () => page.evaluate(() => Boolean(navigator.serviceWorker?.controller))).toBe(true);
@@ -62,13 +62,15 @@ test("component-aware mnemonic data remains available from the offline service-w
 
   await context.setOffline(true);
   const result = await page.evaluate(async () => {
-    const response = await fetch("./kanji-components.json");
+    const response = await fetch("./kanji-visual-structure.json");
     const data = await response.json();
+    const lakeParts = data?.structures?.["湖"]?.components;
     return {
       ok: response.ok,
       status: response.status,
-      hasLake: Array.isArray(data?.components?.["湖"]),
+      complete: data?.coverage?.available === 2136 && Object.keys(data?.structures || {}).length === 2136,
+      hasLake: Array.isArray(lakeParts) && lakeParts.map(part => part.character).join(",") === "氵,胡",
     };
   });
-  expect(result).toEqual({ ok: true, status: 200, hasLake: true });
+  expect(result).toEqual({ ok: true, status: 200, complete: true, hasLake: true });
 });
