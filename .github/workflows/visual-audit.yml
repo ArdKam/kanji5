@@ -66,7 +66,7 @@ jobs:
       - name: Capture automated visual audit
         env:
           CI: "true"
-          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          AUDIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test e2e/visual-audit.spec.mjs --timeout=30000 --retries=0 --reporter=line
 
