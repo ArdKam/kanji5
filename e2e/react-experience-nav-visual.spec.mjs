@@ -152,3 +152,54 @@ test('Dictionary advanced filters are progressive and can be reset without clear
   await expect(advanced.locator('.dictionary-filter-count')).toHaveCount(0);
   await expect(search).toHaveValue('学');
 });
+
+
+test('Dictionary curated topic filters combine with other filters and work in Persian RTL', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    if (!localStorage.getItem('kanji5-ui-language')) {
+      localStorage.setItem('kanji5-ui-language', 'en');
+    }
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+
+  const advanced = page.locator('.dictionary-advanced-filters');
+  await advanced.locator('summary').click();
+  const topic = advanced.getByLabel('Topic');
+  await topic.selectOption('nature');
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(1);
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="食 —"]')).toHaveCount(0);
+  await expect(advanced.locator('.dictionary-filter-count')).toHaveText('1');
+
+  await topic.selectOption('numbers');
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="一 —"]')).toHaveCount(1);
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(0);
+  await page.locator('.dictionary-page-search input').fill('山');
+  await expect(page.locator('.kanji-catalog-tile')).toHaveCount(0);
+  await topic.selectOption('nature');
+  await page.locator('.dictionary-level-filter').getByRole('button', { name: 'N5', exact: true }).click();
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(1);
+
+  await advanced.getByRole('button', { name: 'Clear extra filters', exact: true }).click();
+  await expect(topic).toHaveValue('all');
+  await expect(advanced.locator('.dictionary-filter-count')).toHaveCount(0);
+  await expect(page.locator('.dictionary-page-search input')).toHaveValue('山');
+  await expect(page.locator('.dictionary-level-filter').getByRole('button', { name: 'N5', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(1);
+
+  await page.evaluate(() => localStorage.setItem('kanji5-ui-language', 'fa'));
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  const persianAdvanced = page.locator('.dictionary-advanced-filters');
+  await persianAdvanced.locator('summary').click();
+  const persianTopic = persianAdvanced.getByLabel('موضوع');
+  await persianTopic.selectOption('body');
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="手 —"]')).toHaveCount(1);
+  await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(0);
+});
