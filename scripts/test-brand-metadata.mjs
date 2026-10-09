@@ -10,6 +10,8 @@ const errorBoundary = await fs.readFile("frontend/src/app/ReactErrorBoundary.tsx
 const startup = await fs.readFile("react-entry.js", "utf8");
 const liveVerifier = await fs.readFile("scripts/verify-live-pages-e2e.mjs", "utf8");
 const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
+const settings = await fs.readFile("frontend/src/app/SettingsDialog.tsx", "utf8");
+const personalMnemonicBackup = await fs.readFile("frontend/src/app/MnemonicBackup.tsx", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
 const icon192 = await fs.readFile("icon-192.svg", "utf8");
@@ -21,6 +23,10 @@ const mark = await fs.readFile("rinemi-mark.svg", "utf8");
 
 assert.ok(index.includes('<meta name="theme-color" content="#505F83" />'), "index.html theme-color must use the Rinemi indigo");
 assert.ok(index.includes('<title>Rinemi — یادگیری کانجی ژاپنی</title>'), "index.html title must use Rinemi");
+assert.ok(settings.includes('language === "fa" ? "راهنمای Rinemi" : "How Rinemi works"'), "Settings help link must use the canonical Rinemi name");
+assert.ok(!settings.includes("راهنمای Kanji5") && !settings.includes("How Kanji5 works"), "Settings must not expose legacy customer-facing branding");
+assert.ok(personalMnemonicBackup.includes('anchor.download = "rinemi-personal-mnemonics.json";'), "personal mnemonic exports must use the Rinemi filename");
+assert.ok(!personalMnemonicBackup.includes("kanji5-personal-mnemonics.json"), "personal mnemonic exports must not use the legacy filename");
 assert.ok(index.includes('content="Rinemi — یادگیری کانجی ژاپنی با مرور فاصله‌دار تطبیقی"'), "index.html description must match the product positioning");
 assert.ok(index.includes('<p class="kanji5-startup-name" dir="ltr">Rinemi</p>'), "startup shell must display the canonical wordmark");
 assert.ok(manifest.name === "Rinemi" && manifest.short_name === "Rinemi", "PWA name and short_name must use Rinemi");
