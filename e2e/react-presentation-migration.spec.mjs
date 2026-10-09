@@ -128,7 +128,10 @@ test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await page.getByRole('button',{name:'یادآوری فعال'}).click();
   const practiceHome=page.locator('.practice-home');
   await expect(practiceHome).toBeVisible({timeout:10000});
-  const panel=practiceHome.locator('.practice-custom-study');
+  const advanced=practiceHome.locator('.practice-advanced');
+  await expect(advanced).toBeVisible();
+  await advanced.locator('summary').click();
+  const panel=advanced.locator('.practice-custom-panel');
   await expect(panel).toBeVisible();
   await panel.locator('select').first().selectOption('N5');
   await panel.getByRole('button',{name:'فقط جدیدها',exact:true}).click();

@@ -7,6 +7,7 @@ import "./plus-jakarta.css";
 import "./styles.css";
 import "./experience-nav.css";
 import "./app/dictionary.css";
+import "./app/practice-home.css";
 import "./app/exercise-layout.css";
 
 const root = document.getElementById("root");

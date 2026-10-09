@@ -3,8 +3,8 @@ import type { SVGProps } from "react";
 export type UiIconName = "learning" | "recall" | "dictionary" | "menu" | "close" | "info" | "audio" | "settings" | "stats" | "mnemonic" | "writing" | "grammar" | "reading" | "previous" | "next" | "user" | "eye" | "eyeOff";
 
 const paths: Record<UiIconName, string[]> = {
-  learning:["M4 5h16","M4 10h16","M4 15h10","M4 20h7"],
-  recall:["M12 3a9 9 0 1 0 9 9","M12 7v5l3 2"],
+  learning:["M2 9l10-5 10 5-10 5-10-5Z","M6 11v5c3.5 3 8.5 3 12 0v-5","M22 9v6"],
+  recall:["M9 4.5a3 3 0 0 0-5 2.1 3.5 3.5 0 0 0 .5 6.7 3.5 3.5 0 0 0 4.5 5.2","M15 4.5a3 3 0 0 1 5 2.1 3.5 3.5 0 0 1-.5 6.7 3.5 3.5 0 0 1-4.5 5.2","M12 3v18","M8 8h4","M12 14h4"],
   dictionary:["M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3V4.5Z","M8 20V7.5a3 3 0 0 0-3-3"],
   menu:["M4 6h16","M4 12h16","M4 18h16"],
   close:["M6 6l12 12","M18 6 6 18"],

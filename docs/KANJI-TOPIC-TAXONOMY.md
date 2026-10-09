@@ -4,6 +4,10 @@
 **Status:** Expanded Dictionary topic filters  
 **Scope:** Content navigation only; this is not a new learning scheduler or a statement of mastery.
 
+## Practice Home integration
+
+The curated topic taxonomy is available as a topic-selection path in Practice Home. Selecting a topic passes its reviewed character membership into the existing custom-study selection contract; the topic narrows the candidate pool, while JLPT, due/new, weakness, mistake, and daily-new-budget rules continue to apply. Topic selection is a content filter, not a separate scheduler or mastery claim. Characters outside a curated topic remain available through general learning and dictionary search.
+
 ## Why this exists
 
 The pinned `kanji-data.json` dataset contains 2,136 kanji with glosses, readings, school-grade, and JLPT metadata. It does not include a reviewed topical taxonomy. Matching English gloss strings mechanically can misclassify ambiguous meanings, so membership remains explicit and curated.

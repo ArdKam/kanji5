@@ -92,84 +92,6 @@
 .kanji-catalog-tile[data-mastery-state="weak"] .kanji-catalog-fill,
 .kanji-catalog-tile[data-mastery-state="recovering"] .kanji-catalog-fill{background:var(--sumi);}
 .kanji-catalog-tile[data-mastery-state="unseen"] .kanji-catalog-fill{background:var(--line);}
-.custom-study-panel{
-  margin:0 0 14px;
-  padding:12px 14px;
-  border:1px solid var(--line);
-  border-radius:var(--radius-lg);
-  background:var(--washi);
-}
-.custom-study-panel>summary{
-  cursor:pointer;
-  color:var(--ink);
-  font-size:var(--text-base);
-  font-weight:850;
-}
-.custom-study-panel>p{
-  margin:8px 0 10px;
-  color:var(--mute);
-  font-size:var(--text-sm);
-  line-height:1.6;
-}
-.custom-study-controls{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.custom-study-focus{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-}
-.custom-study-limit{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:var(--mute);
-  font-size:var(--text-sm);
-  font-weight:750;
-  white-space:nowrap;
-}
-.custom-study-limit select{
-  min-height:36px;
-  padding:5px 26px 5px 9px;
-  border:1px solid var(--line);
-  border-radius:var(--radius-sm);
-  background:var(--paper);
-  color:var(--ink);
-  font:inherit;
-  font-size:var(--text-sm);
-  font-weight:750;
-}
-.custom-study-action{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-top:10px;
-  padding-top:10px;
-  border-top:1px solid var(--line);
-  color:var(--mute);
-  font-size:var(--text-sm);
-  font-weight:750;
-}
-.custom-study-action .button{
-  min-height:44px;
-  padding:7px 12px;
-}
-.custom-study-message{
-  margin:8px 0 0;
-  color:var(--shu)!important;
-  font-weight:800;
-}
-@media(max-width:720px){
-  .custom-study-controls{align-items:stretch;flex-direction:column;}
-  .custom-study-limit{justify-content:space-between;}
-  .custom-study-limit select{flex:1;max-width:180px;}
-  .custom-study-action{align-items:stretch;flex-direction:column;}
-  .custom-study-action .button{width:100%;}
-}
 .dictionary-page-search{
   display:grid;
   gap:5px;
@@ -971,19 +893,6 @@
     white-space:normal;
   }
 }
-.placement-panel{
-  margin:0 0 14px;
-  padding:12px 14px;
-  border:1px solid var(--line);
-  border-radius:var(--radius-lg);
-  background:var(--washi);
-}
-.placement-panel>summary{
-  cursor:pointer;
-  color:var(--ink);
-  font-size:var(--text-base);
-  font-weight:850;
-}
 .placement-intro,.placement-result,.placement-question{display:grid;gap:10px;margin-top:9px;}
 .placement-intro p,.placement-suggestion{
   margin:0;
@@ -1661,51 +1570,7 @@
 .vocabulary-learning-graph{display:grid;gap:8px;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:var(--radius-md);background:color-mix(in srgb,var(--washi) 70%,var(--paper))}.vocabulary-learning-graph-header{display:flex;align-items:center;justify-content:space-between;gap:8px}.vocabulary-learning-graph-header h4{margin:0 0 3px;font-size:var(--text-xs)}.vocabulary-learning-graph-header p{margin:0;color:var(--mute);font-size:var(--text-xs);line-height:1.5}.vocabulary-learning-graph-root{display:grid;place-items:center;width:34px;height:34px;flex:0 0 auto;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);font-family:"Noto Serif JP",serif;font-size:var(--text-md)}.vocabulary-learning-graph-list{display:grid;gap:5px}.vocabulary-learning-graph-edge{display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:6px;padding:6px 7px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper)}.vocabulary-learning-graph-word{font-family:"Noto Serif JP",serif;font-size:var(--text-base);white-space:nowrap}.vocabulary-learning-graph-arrow{color:var(--mute);font-size:var(--text-xs)}.vocabulary-learning-graph-related{display:flex;flex-wrap:wrap;gap:4px;min-width:0}.vocabulary-learning-graph-kanji{display:grid;place-items:center;min-width:32px;height:32px;padding:0 6px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--washi);color:var(--ink);font-family:"Noto Serif JP",serif;font-size:var(--text-base);cursor:pointer}.vocabulary-learning-graph-kanji:hover{border-color:color-mix(in srgb,var(--shu) 35%,var(--line))}@media(max-width:520px){.vocabulary-learning-graph-edge{grid-template-columns:1fr;gap:4px}.vocabulary-learning-graph-arrow{display:none}.vocabulary-learning-graph-word{font-size:var(--text-base)}}
 
 
-/* Dictionary IA migration: compact contextual sections and Practice Home. */
-.practice-home {
-  display: grid;
-  gap: 1rem;
-}
-.practice-home-hero {
-  display: grid;
-  gap: .65rem;
-  align-items: start;
-}
-.practice-home-hero h2,
-.practice-home-hero p {
-  margin: 0;
-}
-.practice-start-button {
-  justify-self: start;
-}
-.practice-home-section-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.practice-home-section-heading > div {
-  min-width: 0;
-}
-.practice-home-section-heading h3,
-.practice-home-section-heading p {
-  margin: 0;
-}
-.practice-home-section-heading p + p {
-  margin-top: .35rem;
-}
-.custom-study-secondary-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .75rem;
-}
-.practice-placement-card {
-  display: grid;
-  gap: 1rem;
-}
-.practice-placement-card .placement-panel {
-  margin-top: 0;
-}
+/* Practice Home owns its styles in practice-home.css. */
 
 .dictionary-card-accordion {
   display: grid;
@@ -1756,18 +1621,6 @@
 .secondary-surface-dialog .grammar-guide,
 .secondary-surface-dialog .reading-lab {
   margin-top: 1rem;
-}
-@media (max-width: 640px) {
-  .practice-home-section-heading {
-    flex-direction: column;
-  }
-  .practice-start-button {
-    width: 100%;
-  }
-  .custom-study-secondary-controls {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
 }
 
 .dictionary-vocabulary-more{
