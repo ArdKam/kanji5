@@ -1,4 +1,4 @@
-# Kanji 5 — Project Structure
+# Rinemi — Project Structure
 
 This file is the quickest way to orient yourself in the repository.
 
