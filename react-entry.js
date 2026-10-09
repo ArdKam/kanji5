@@ -71,7 +71,7 @@ function showReactBootFailure(error){
   startupRoot.appendChild(card);
   console.error('Kanji 5 React presentation failed to boot.',{buildId,error});
 }
-import('./react-dist/kanji5-react.js'+assetVersion)
+import('./react-dist/kanji5-react.js')
   .catch(error=>{
     observability()?.capture?.('dynamic-import-failure',error,{module:'react-dist/kanji5-react.js',dataAffected:'unknown'});
     showReactBootFailure(error);

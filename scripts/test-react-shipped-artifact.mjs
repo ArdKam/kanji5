@@ -20,10 +20,10 @@ console.log("Shipped React CSS local assets resolved ("+localCssAssets.length+")
 
 console.log("Shipped React artifact contains bottom experience navigation CSS.");
 
-if(!/assetVersion='\?v='\+encodeURIComponent\(buildId\)/.test(entry) || !/react-dist\/kanji5-react\.js'\+assetVersion/.test(entry) || !/react-dist\/kanji5-react\.css'\+assetVersion/.test(entry)){
-  throw new Error("REACT_ENTRY_MISSING_RUNTIME_ASSET_CACHE_BUST");
+if(!/assetVersion='\?v='\+encodeURIComponent\(buildId\)/.test(entry) || /react-dist\/kanji5-react\.js'\+assetVersion/.test(entry) || !/import\('\.\/react-dist\/kanji5-react\.js'\)/.test(entry) || !/react-dist\/kanji5-react\.css'\+assetVersion/.test(entry)){
+  throw new Error("REACT_ENTRY_MODULE_IDENTITY_OR_CSS_CACHE_BUST_INVALID");
 }
-console.log("React entry uses cache-busted shipped runtime assets.");
+console.log("React entry preserves one ESM identity for code-split JS and cache-busts the stylesheet.");
 const reactJsPath="react-dist/kanji5-react.js";
 const reactJs=fs.readFileSync(reactJsPath,"utf8");
 try{
@@ -65,4 +65,4 @@ try{new Function(accountFallback);}catch(error){throw new Error("ACCOUNT_FALLBAC
 console.log("Account fallback parses as valid JavaScript.");
 
 const html=fs.readFileSync("index.html","utf8");
-if(!/react-dist\/kanji5-react\.js\?v=dev/.test(html)||!/react-dist\/kanji5-react\.css\?v=dev/.test(html)) throw new Error("INDEX_HTML_REACT_HINTS_MISSING_BUILD_VERSION");
+if(!/react-dist\/kanji5-react\.js">/.test(html)||!/react-dist\/kanji5-react\.css\?v=dev/.test(html)) throw new Error("INDEX_HTML_REACT_HINTS_OR_MODULE_IDENTITY_INVALID");
