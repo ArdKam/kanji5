@@ -283,7 +283,7 @@ test('learning-card Stroke Order is permanently open and has no accordion trigge
   await page.reload();
   const card=page.locator("#root .learning-card");
   await expect(card).toBeVisible({timeout:20000});
-  await card.getByRole("button",{name:"Show kanji information"}).click();
+  await card.getByRole("button",{name:"Reveal meaning & readings"}).click();
   await expect(card).toHaveClass(/is-revealed/,{timeout:10000});
   const pager=card.locator(".learning-back-page-nav");
   const nextPage=pager.locator(".learning-back-page-shortcut").last();
