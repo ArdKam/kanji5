@@ -251,7 +251,7 @@ const expectedCoverageExpansion = {
 for (const [topicId, expectedCharacters] of Object.entries(expectedCoverageExpansion)) {
   const topic = taxonomy.topics.find(entry => entry.id === topicId);
   assert.ok(topic, `Missing expanded topic: ${topicId}`);
-  const actual = new Set(topic.characters.trim().split(/\\s+/));
+  const actual = new Set(topic.characters.trim().split(/\s+/));
   for (const character of expectedCharacters) {
     assert.ok(actual.has(character), `Coverage expansion regression: ${character} missing from ${topicId}`);
   }
