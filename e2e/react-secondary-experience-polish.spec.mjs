@@ -145,7 +145,7 @@ test("Secondary desktop surfaces preserve centered modal geometry after the poli
   }
 });
 
-test("Settings is learner-first: placement stays in Active Recall and changes require explicit save", async ({ page }) => {
+test("Settings is learner-first: placement stays in Practice and changes require explicit save", async ({ page }) => {
   await clean(page, "en");
 
   const settings = await openMenuItem(page, "Settings");
@@ -176,7 +176,7 @@ test("Settings is learner-first: placement stays in Active Recall and changes re
   await expect(practice.getByLabel("New kanji per day", { exact: true })).toHaveValue("5");
   await practice.locator(".dialog-close").click();
 
-  await page.getByRole("button", { name: "Active Recall", exact: true }).click();
+  await page.getByRole("button", { name: "Practice", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Not sure where to start?", exact: true })).toBeVisible();
 });
 
@@ -240,13 +240,13 @@ test("Data backup exports and restores the authoritative learning data", async (
   await settings.locator(".dialog-close").click();
 });
 
-test("Placement has one discoverable home in Active Recall", async ({ page }) => {
+test("Placement has one discoverable home in Practice", async ({ page }) => {
   await clean(page, "en");
   const settings = await openMenuItem(page, "Settings");
   await expect(settings.getByText("Placement check", { exact: true })).toHaveCount(0);
   await settings.locator(".dialog-close").click();
 
-  await page.getByRole("button", { name: "Active Recall", exact: true }).click();
+  await page.getByRole("button", { name: "Practice", exact: true }).click();
   const placement = page.getByRole("heading", { name: "Not sure where to start?", exact: true });
   await expect(placement).toBeVisible();
   await expect(page.getByRole("button", { name: "Start diagnostic", exact: true })).toBeVisible();

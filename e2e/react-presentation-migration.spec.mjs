@@ -67,7 +67,7 @@ test('React exercise path can start and expose a boundary-backed exercise',async
   test.setTimeout(40000);
   await clean(page);
   await seedSeenCard(page);
-  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:20000});
@@ -125,7 +125,7 @@ test('empty session progress indicator is absent before a session starts',async(
 
 test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
   const practiceHome=page.locator('.practice-home');
   await expect(practiceHome).toBeVisible({timeout:10000});
   const advanced=practiceHome.locator('.practice-advanced');
