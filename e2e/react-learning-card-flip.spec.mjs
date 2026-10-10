@@ -132,10 +132,10 @@ test("learning first page keeps readings above the rating footer on desktop", as
   expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
 });
 
-test("learning reference details stay out of the main flow and open from an info icon", async ({ page }) => {
+test("reference meanings and readings open in a keyboard-accessible modal", async ({ page }) => {
   for (const scenario of [
-    { language: "en", viewport: { width: 1280, height: 720 }, trigger: "Additional information" },
-    { language: "fa", viewport: { width: 390, height: 844 }, trigger: "اطلاعات تکمیلی" },
+    { language: "en", viewport: { width: 1280, height: 720 }, closeLabel: "Close" },
+    { language: "fa", viewport: { width: 390, height: 844 }, closeLabel: "بستن" },
   ]) {
     await page.setViewportSize(scenario.viewport);
     const card = await revealLearningCard(page, scenario.language);
@@ -143,46 +143,42 @@ test("learning reference details stay out of the main flow and open from an info
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
-    await expect(card.locator(".learning-back-reference-meanings,.learning-back-reference-readings")).toHaveCount(0);
+    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings");
 
     await trigger.click();
-    const popover = card.locator("#learning-reference-info");
-    await expect(popover).toBeVisible();
-    await expect(trigger).toHaveAttribute("aria-expanded", "true");
-    await expect(popover).toHaveAttribute("role", "dialog");
-    await expect(popover).toHaveAttribute("aria-modal", "false");
-    await expect(popover.locator(".learning-reference-popover-head")).toBeVisible();
-    const infoRows = popover.locator(".learning-reference-info-grid .stat-row");
-    await expect.poll(async () => infoRows.count()).toBeGreaterThan(0);
-    const metrics = await popover.evaluate((el) => {
+    const dialog = page.locator("#learning-reference-info");
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveAttribute("aria-labelledby", "learning-reference-info-title");
+    await expect.poll(() => dialog.evaluate(el => el.matches(":modal"))).toBe(true);
+    await expect(dialog.getByRole("heading", { name: scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings" })).toBeVisible();
+    const rows = dialog.locator(".learning-reference-info-grid .stat-row");
+    await expect.poll(async () => rows.count()).toBeGreaterThan(0);
+
+    const metrics = await dialog.evaluate(el => {
       const rect = el.getBoundingClientRect();
-      const cardRect = el.closest(".learning-card")?.getBoundingClientRect();
-      const style = getComputedStyle(el);
+      const content = el.querySelector(".learning-reference-info-grid");
+      const contentStyle = content ? getComputedStyle(content) : null;
       return {
-        left: rect.left,
-        right: rect.right,
-        top: rect.top,
-        bottom: rect.bottom,
-        card: cardRect ? { left: cardRect.left, right: cardRect.right, top: cardRect.top, bottom: cardRect.bottom } : null,
-        overflowY: style.overflowY,
-        scrollable: el.scrollHeight > el.clientHeight + 1,
+        left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+        viewportWidth: window.innerWidth, viewportHeight: window.innerHeight,
+        overflowY: contentStyle?.overflowY ?? "",
       };
     });
-    expect(metrics.card).toBeTruthy();
-    expect(metrics.left).toBeGreaterThanOrEqual((metrics.card?.left ?? 0) + 1);
-    expect(metrics.right).toBeLessThanOrEqual((metrics.card?.right ?? Infinity) - 1);
-    expect(metrics.top).toBeGreaterThanOrEqual((metrics.card?.top ?? 0) + 1);
-    expect(metrics.bottom).toBeLessThanOrEqual((metrics.card?.bottom ?? Infinity) - 1);
-    expect(metrics.overflowY).toBe("hidden");
-    expect(metrics.scrollable).toBe(false);
+    expect(metrics.left).toBeGreaterThanOrEqual(0);
+    expect(metrics.right).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(metrics.top).toBeGreaterThanOrEqual(0);
+    expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+    expect(metrics.overflowY).toBe("auto");
 
     await page.keyboard.press("Escape");
-    await expect(popover).toBeHidden();
+    await expect(dialog).toBeHidden();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(trigger).toBeFocused();
 
     await trigger.click();
-    await popover.getByRole("button", { name: scenario.language === "fa" ? "بستن" : "Close" }).click();
-    await expect(popover).toBeHidden();
+    await dialog.getByRole("button", { name: scenario.closeLabel, exact: true }).click();
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
   }
 });
 
@@ -341,49 +337,38 @@ test("learning card replaces passive pager dots with direct page shortcuts", asy
   }
 });
 
-test("personal mnemonic editor auto-scrolls fully into view when opened", async ({ page }) => {
+test("personal mnemonic editor is a usable modal and cancel restores unsaved changes", async ({ page }) => {
   await routeExamples(page, 5);
-  await page.addInitScript(() => {
-    localStorage.setItem("kanji5-ui-language", "en");
-  });
-
-  for (const viewport of [
-    { width: 390, height: 640 },
-    { width: 1280, height: 640 },
-  ]) {
-    await page.setViewportSize(viewport);
-  await page.goto("/");
-
-  const card = page.locator("#root .learning-card");
-  await expect(card).toBeVisible({ timeout: 20000 });
-  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
-  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.setViewportSize({ width: 390, height: 640 });
+  const card = await revealLearningCard(page, "en");
   await goToBackPage(page, card, 2);
-  const scrollContainer = card.locator(".learning-back-page.active .learning-back-scroll");
-  const mnemonic = card.locator(".learning-back-page.active .mnemonic-tool");
-  const trigger = mnemonic.getByRole("button", { name: "Personal mnemonic" });
+
+  const trigger = card.locator(".mnemonic-action");
   await expect(trigger).toBeVisible();
+  await trigger.click();
 
-  await scrollContainer.evaluate((el) => { el.scrollTop = 0; });
+  const dialog = page.locator(".mnemonic-edit-dialog");
+  const textarea = dialog.locator("#personal-mnemonic-textarea");
+  await expect(dialog).toBeVisible();
+  await expect.poll(() => dialog.evaluate(el => el.matches(":modal"))).toBe(true);
+  await expect(textarea).toBeVisible();
+  await expect(textarea).toHaveAttribute("maxlength", "600");
+  const editorHeight = await textarea.evaluate(el => el.getBoundingClientRect().height);
+  expect(editorHeight).toBeGreaterThanOrEqual(180);
+  const originalValue = await textarea.inputValue();
 
-
+  await textarea.fill("unsaved mnemonic draft that must be discarded");
+  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
 
   await trigger.click();
-  await expect(mnemonic).toHaveClass(/is-open/);
-  await expect(mnemonic.locator("textarea")).toBeVisible();
-  await expect(mnemonic.locator(".mnemonic-editor-footer .actions")).toBeVisible();
-
-  await expect.poll(async () => {
-    return await mnemonic.evaluate((el) => {
-      const target = el.getBoundingClientRect();
-      const scroll = el.closest(".learning-back-scroll")?.getBoundingClientRect();
-      if (!scroll) return false;
-      return target.top >= scroll.top - 1 && target.bottom <= scroll.bottom + 1;
-    });
-  }, { timeout: 1800, intervals: [50, 100, 200] }).toBe(true);
-
-  }
+  await expect(dialog).toBeVisible();
+  await expect(textarea).toHaveValue(originalValue);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
 });
 
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
@@ -398,6 +383,46 @@ test("short learning cards stay single-page and keep examples with core informat
   await assertCardBounds(card);
 });
 
+
+test("learning-card structure is a compact preview with full details in a modal", async ({ page }) => {
+  await routeExamples(page, 5);
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const card = await revealLearningCard(page, "en");
+    const nav = card.locator(".learning-back-page-nav .learning-back-page-shortcut");
+    await expect(nav).toHaveCount(4);
+    const previewPage = card.locator(".learning-back-page.active");
+    const preview = previewPage.locator(".kanji-structure-preview-action");
+    await expect(preview).toBeVisible({ timeout: 10000 });
+    const metrics = await previewPage.evaluate(pageEl => {
+      const scroll = pageEl.querySelector(".learning-back-scroll");
+      const overview = pageEl.querySelector(".learning-back-overview");
+      const scrollRect = scroll?.getBoundingClientRect();
+      const overviewRect = overview?.getBoundingClientRect();
+      return {
+        overflowY: scroll ? getComputedStyle(scroll).overflowY : "",
+        scrollTop: scroll?.scrollTop ?? -1,
+        scrollBottom: scrollRect?.bottom ?? Infinity,
+        overviewBottom: overviewRect?.bottom ?? Infinity,
+      };
+    });
+    expect(metrics.overflowY).toBe("hidden");
+    expect(metrics.overviewBottom).toBeLessThanOrEqual(metrics.scrollBottom + 1);
+
+    await preview.click();
+    const dialog = page.locator(".kanji-structure-dialog");
+    await expect(dialog).toBeVisible();
+    await expect.poll(() => dialog.evaluate(el => el.matches(":modal"))).toBe(true);
+    await expect(dialog).toContainText("KanjiVG · CC BY-SA 3.0");
+    await expect(dialog.locator(".kanji-structure-dialog-body")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(preview).toBeFocused();
+  }
+});
 
 test("learning session feedback stays compact and auto-dismisses", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
