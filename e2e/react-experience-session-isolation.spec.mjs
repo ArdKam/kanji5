@@ -10,7 +10,7 @@ async function clean(page){
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
 
-test('Learning and Active Recall retain independent active sessions', async ({page})=>{
+test('Learning and Practice retain independent active sessions', async ({page})=>{
   await clean(page);
 
   const nav=page.locator('.experience-nav');
