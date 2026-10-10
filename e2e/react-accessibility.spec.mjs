@@ -116,7 +116,7 @@ test('dictionary card uses stable tabs with one active content viewport', async 
     expect(tab.right).toBeLessThanOrEqual(navRight+1);
   }
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
+  const structure=dialog.getByRole('tab',{name:'ساختار',exact:true});
   await expect(overview).toHaveAttribute('aria-selected','true');
   await expect(structure).toHaveAttribute('aria-selected','false');
   await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
@@ -240,7 +240,7 @@ test('dictionary card restores stable tab semantics after opening', async ({page
   const tabs=dialog.getByRole('tab');
   await expect(tabs).toHaveCount(5);
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
+  const structure=dialog.getByRole('tab',{name:'ساختار',exact:true});
   await expect(overview).toHaveAttribute('aria-selected','true');
   await expect(structure).toHaveAttribute('aria-selected','false');
   await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
@@ -405,7 +405,7 @@ test('English dictionary presentation localizes card controls and uses the share
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.dictionary-section-nav')).toHaveAttribute('aria-label','Card options');
   await expect(dialog.getByRole('tab',{name:'Overview'})).toBeVisible();
-  await expect(dialog.getByRole('tab',{name:'Anatomy'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Structure'})).toBeVisible();
   await expect(dialog.getByRole('tab',{name:'Writing'})).toBeVisible();
   await expect(dialog.getByRole('tab',{name:'Words'})).toBeVisible();
   await expect(dialog.getByRole('tab',{name:'Mnemonic'})).toHaveCount(1);
