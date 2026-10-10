@@ -10,12 +10,12 @@ async function clean(page){
   await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 }
 
-test('Learning and Active Recall retain independent active sessions', async ({page})=>{
+test('Learning and Practice retain independent active sessions', async ({page})=>{
   await clean(page);
 
   const nav=page.locator('.experience-nav');
   const learning=nav.getByRole('button',{name:'یادگیری',exact:true});
-  const recall=nav.getByRole('button',{name:'یادآوری فعال',exact:true});
+  const recall=nav.getByRole('button',{name:'تمرین',exact:true});
 
   await expect(learning).toHaveAttribute('aria-current','page');
   await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V16_SESSION_API__?.getSession?.().started)),{timeout:10000}).toBe(true);

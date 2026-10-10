@@ -24,7 +24,7 @@ npm run e2e:ui
 The `react-*.spec.mjs` suites are the main current browser coverage for the React presentation, including:
 
 - presentation migration/parity
-- Learning / Active Recall separation and session isolation
+- Learning / Practice separation and session isolation
 - mnemonic flows
 - account shell
 - accessibility

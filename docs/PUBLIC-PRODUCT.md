@@ -10,7 +10,7 @@ The current product teaches the 2,136 Jōyō kanji set. The learning engine uses
 
 **Learning** introduces or reviews a kanji and presents its meaning, readings, examples, mnemonic support, and stroke information.
 
-**Active Recall** is deliberate practice. It asks you to retrieve information rather than simply read it.
+**Practice** is deliberate, retrieval-based work. It uses active recall to help you retrieve information rather than simply reread it.
 
 **Review** records an FSRS rating (Again / Hard / Good / Easy) and updates the authoritative learner state.
 

@@ -206,7 +206,7 @@ test("handwriting is an optional skill-building layer inside Practice",async({pa
   await clean(page);
   await seedSeenCard(page);
   await expect(page.locator(".practice-handwriting")).toHaveCount(0);
-  await page.getByRole("button",{name:"یادآوری فعال",exact:true}).click();
+  await page.getByRole("button",{name:"تمرین",exact:true}).click();
   await expect(page.locator(".practice-home")).toBeVisible({timeout:20000});
   await page.getByRole("button",{name:"شروع تمرین",exact:true}).click();
   await expect(page.locator("#exercise")).toBeVisible({timeout:20000});
