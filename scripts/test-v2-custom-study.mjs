@@ -64,4 +64,61 @@ if (JSON.stringify(capped.characters) !== JSON.stringify(["語"])) {
 const exhaustedNew = selectCustomStudyItems({ deck, cards, learner, filter: { focus: "new", limit: 20 }, now, dailyNew: 2, todayNew: 2 });
 if (exhaustedNew.characters.length !== 0) throw new Error("Daily new budget was not respected");
 
+
+// Topic scoping is a content constraint layered ahead of the existing scheduler filters.
+const normalizedTopic = normalizeCustomStudyFilter({
+  topicId: "nature",
+  topicCharacters: ["森", "学", "森", "", "not-a-kanji"],
+  focus: "available",
+  limit: 20,
+});
+if (normalizedTopic.topicId !== "nature" || JSON.stringify(normalizedTopic.topicCharacters) !== JSON.stringify(["森", "学"])) {
+  throw new Error(`Topic filter normalization failed: ${JSON.stringify(normalizedTopic)}`);
+}
+
+const topicOnly = selectCustomStudyItems({
+  deck,
+  cards,
+  learner,
+  filter: { topicId: "nature", topicCharacters: ["森"], focus: "available", limit: 20 },
+  now,
+  dailyNew: 5,
+  todayNew: 0,
+});
+if (JSON.stringify(topicOnly.characters) !== JSON.stringify(["森"])) {
+  throw new Error(`Topic scoping must exclude all non-topic cards: ${JSON.stringify(topicOnly.characters)}`);
+}
+
+const topicDue = selectCustomStudyItems({
+  deck,
+  cards,
+  learner,
+  filter: { topicId: "school", topicCharacters: ["学", "校", "語"], level: "N5", focus: "due", limit: 20 },
+  now,
+});
+if (JSON.stringify(topicDue.characters) !== JSON.stringify(["学"])) {
+  throw new Error(`Topic, JLPT, and due filters must compose: ${JSON.stringify(topicDue.characters)}`);
+}
+
+const emptyTopic = selectCustomStudyItems({
+  deck,
+  cards,
+  learner,
+  filter: { topicId: "empty-topic", topicCharacters: [], focus: "available", limit: 20 },
+  now,
+});
+if (emptyTopic.characters.length !== 0) {
+  throw new Error("An empty selected topic must never fall back to an unrestricted deck");
+}
+
+const invalidTopic = normalizeCustomStudyFilter({ topicId: "../all", topicCharacters: ["学"] });
+if (invalidTopic.topicId !== undefined || invalidTopic.topicCharacters !== undefined) {
+  throw new Error("Invalid topic IDs must not smuggle a character filter into an unscoped session");
+}
+
+const legacyTopic = normalizeCustomStudyFilter({ characterScope: ["森", "森", "not-a-kanji"] });
+if (JSON.stringify(legacyTopic.topicCharacters) !== JSON.stringify(["森"])) {
+  throw new Error("The deprecated characterScope migration alias must remain normalized");
+}
+
 console.log("Custom study filtering core contracts passed.");
