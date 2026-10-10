@@ -36,4 +36,4 @@ assert.match(e2e, /learning card keeps the Stroke Order page directly open/);
 assert.doesNotMatch(e2e, /stroke-order replay auto-scrolls the expanded viewer fully into view/);
 assert.match(e2e, /personal mnemonic editor is a usable modal and cancel restores unsaved changes/);
 
-console.log("Stroke-order auto-scroll source and regression contracts passed.");
+console.log("Stroke-order interaction and learning-modal source contracts passed.");
