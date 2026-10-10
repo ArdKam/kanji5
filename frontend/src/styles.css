@@ -584,6 +584,9 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 .learning-card-back .stroke-order-controls .button{min-height:44px;padding:5px 7px;font-size:var(--text-xs);}
 .learning-card-back .stroke-order-source{font-size:var(--text-xs);}
 
+/* Preserve the preview action touch target before deferred learning-card styles arrive. */
+.kanji-structure-preview-action,.kanji-structure-preview-action-placeholder{min-height:44px;}
+
 /* Learning card page shortcuts: the old passive pager dots are now direct section controls. */
 .learning-back-page-nav{
   direction:ltr;
