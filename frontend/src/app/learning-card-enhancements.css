@@ -365,8 +365,8 @@
 }
 
 /* Closed learning-card dialogs should not participate in layout or focus navigation. */
-.learning-reference-dialog:not([open]),
-.kanji-structure-dialog:not([open]),
-.mnemonic-edit-dialog:not([open]) {
+.dialog.secondary-page-dialog.learning-reference-dialog:not([open]),
+.dialog.secondary-page-dialog.kanji-structure-dialog:not([open]),
+.dialog.secondary-page-dialog.mnemonic-edit-dialog:not([open]) {
   display: none;
 }
