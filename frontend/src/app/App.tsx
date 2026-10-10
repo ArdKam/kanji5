@@ -2,7 +2,6 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerE
 import { KanjiStructurePreview } from "./KanjiStructurePreview";
 import { KanjiStructureDialog } from "./KanjiStructureDialog";
 import { useModalDialog } from "./useModalDialog";
-import "./learning-card-enhancements.css";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
@@ -540,7 +539,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
-          <dialog ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
+          <dialog hidden={!referenceInfoOpen} ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
           <div className="learning-reference-dialog-head">
             <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"}</h2>
             <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
@@ -558,7 +557,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
           info={visualStructureInfo}
           language={getLanguage()}
         />
-        <dialog ref={mnemonicDialogRef} id="personal-mnemonic-editor" className="dialog secondary-page-dialog mnemonic-edit-dialog" aria-labelledby="personal-mnemonic-editor-title">
+        <dialog hidden={!mnemonicEditing} ref={mnemonicDialogRef} id="personal-mnemonic-editor" className="dialog secondary-page-dialog mnemonic-edit-dialog" aria-labelledby="personal-mnemonic-editor-title">
           <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} disabled={mnemonicBusy} onClick={closeMnemonicEditor}>×</button>
           <h2 id="personal-mnemonic-editor-title">{getLanguage()==="fa"?"ویرایش یادسپار شخصی":"Edit personal mnemonic"}</h2>
           <p className="secondary-surface-dialog-hint">{getLanguage()==="fa"?"یادسپار شخصی تا ۶۰۰ نویسه ذخیره می‌شود. لغو یا بستن پنجره تغییرات ذخیره‌نشده را کنار می‌گذارد.":"Personal mnemonics are limited to 600 characters. Cancel or close to discard unsaved changes."}</p>
