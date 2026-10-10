@@ -53,7 +53,7 @@ async function seedSeenCard(page){
 async function startForcedMode(page,mode){
   const character=(await page.locator('#root .learning-card .kanji-display').textContent()).trim();
   await page.evaluate(({character,mode})=>{window.__KANJI5_V19_RECOVERY_TARGET__={character,mode,contentId:character};},{character,mode});
-  await page.getByRole('button',{name:'تمرین'}).click();
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   try{
@@ -74,7 +74,7 @@ async function startForcedMode(page,mode){
 test('fresh Active Recall starts with core recall rather than higher-order content',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
-  await page.getByRole('button',{name:'تمرین'}).click();
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
