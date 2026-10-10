@@ -43,7 +43,7 @@ test("engine exercise state reaches React and remains isolated from the Learning
     window.__KANJI5_V19_RECOVERY_TARGET__ = { character: target, mode: "reading", contentId: target };
   }, String(character || "").trim());
 
-  await page.getByRole("button", { name: /Practice|تمرین/i }).click();
+  await page.getByRole("button", { name: /^(?:Practice|تمرین)$/i }).click();
   await expect(page.locator(".practice-start-button")).toBeVisible({ timeout: 5_000 });
   await page.locator(".practice-start-button").click();
   await expect(page.locator("#exercise")).toBeVisible({ timeout: 15_000 });

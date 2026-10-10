@@ -72,7 +72,7 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   await expect(reveal).toBeVisible();
   await reveal.click();
   await page.getByRole('button',{name:'خوب',exact:true}).click();
-  await page.getByRole('button',{name:'تمرین'}).click();
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
@@ -345,7 +345,7 @@ test('React presentation stays usable at the narrow 320px boundary without horiz
   expect(minVisibleLeft).toBeGreaterThanOrEqual(-1);
   expect(metrics.contentWidth).toBeLessThanOrEqual(metrics.viewport+1);
   await expect(page.locator('.experience-nav')).toBeVisible();
-  await expect(page.getByRole('button',{name:'تمرین'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'تمرین',exact:true})).toBeVisible();
 });
 
 
