@@ -586,6 +586,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 
 /* Preserve the preview action touch target before deferred learning-card styles arrive. */
 .kanji-structure-preview-action,.kanji-structure-preview-action-placeholder{min-height:46px;}
+.dialog.secondary-page-dialog:is(.learning-reference-dialog,.kanji-structure-dialog,.mnemonic-edit-dialog):not([open]){display:none}
 
 /* Learning card page shortcuts: the old passive pager dots are now direct section controls. */
 .learning-back-page-nav{
