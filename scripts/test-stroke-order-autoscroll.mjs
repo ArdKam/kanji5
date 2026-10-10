@@ -12,18 +12,17 @@ assert.match(source, /className="stroke-order-panel is-expanded"/);
 assert.match(source, /data-stroke-order-open="true"/);
 
 const app = await readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8");
-assert.match(app, /mnemonicToolRef=useRef<HTMLElement\|null>\(null\)/);
-assert.match(app, /scrollMnemonicEditorIntoView=useCallback\(\(\)=>/);
-assert.match(app, /closest<HTMLElement>\("\.learning-back-scroll"\)/);
-assert.match(app, /const scrollBounds=scrollContainer\.getBoundingClientRect\(\)/);
-assert.match(app, /const targetBounds=target\.getBoundingClientRect\(\)/);
-assert.match(app, /const bottomOverflow=targetBounds\.bottom-\(scrollBounds\.bottom-10\)/);
-assert.match(app, /const nextTop=Math\.max\(0,Math\.min\(maxScrollTop,scrollContainer\.scrollTop\+delta\)\)/);
-assert.match(app, /scrollContainer\.scrollTo\(\{top:nextTop,behavior:"auto"\}\)/);
-assert.match(app, /mnemonicEditing\?" has-open-mnemonic":""/);
-assert.match(app, /if\(!mnemonicEditing\)return;/);
-assert.match(app, /ref=\{mnemonicToolRef\}/);
+assert.match(app, /mnemonicDialogRef=useModalDialog\(mnemonicEditing,closeMnemonicEditor\)/);
+assert.match(app, /className="dialog secondary-page-dialog mnemonic-edit-dialog"/);
+assert.match(app, /id="personal-mnemonic-textarea" autoFocus value=\{mnemonicDraft\} rows=\{7\} maxLength=\{600\}/);
+assert.match(app, /aria-controls="personal-mnemonic-editor"/);
+assert.doesNotMatch(app, /mnemonicToolRef|scrollMnemonicEditorIntoView/);
+assert.doesNotMatch(app, /mnemonicEditing\?" is-open"/);
 
+const enhancementStyles = await readFile(new URL("../frontend/src/app/learning-card-enhancements.css", import.meta.url), "utf8");
+assert.match(enhancementStyles, /\.mnemonic-edit-dialog \.mnemonic-editor textarea/);
+assert.match(enhancementStyles, /min-height:220px/);
+assert.match(enhancementStyles, /\.kanji-structure-dialog\.dialog\.secondary-page-dialog/);
 const styles = await readFile(new URL("../frontend/src/styles.css", import.meta.url), "utf8");
 assert.match(styles, /\.learning-card-back \.learning-back-overview,/);
 assert.match(styles, /\.learning-card\[data-card-density="dense"\] \.learning-back-overview/);
@@ -35,6 +34,6 @@ assert.match(e2e, /learning card keeps the Stroke Order page directly open/);
 assert.match(e2e, /learning card exposes five full-content back pages in Persian and English/);
 assert.match(e2e, /learning card keeps the Stroke Order page directly open/);
 assert.doesNotMatch(e2e, /stroke-order replay auto-scrolls the expanded viewer fully into view/);
-assert.match(e2e, /personal mnemonic editor auto-scrolls fully into view when opened/);
+assert.match(e2e, /personal mnemonic editor is a usable modal and cancel restores unsaved changes/);
 
 console.log("Stroke-order auto-scroll source and regression contracts passed.");
