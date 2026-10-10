@@ -201,7 +201,7 @@ test("learning card stays within a short desktop landscape viewport", async ({ p
   await expect(card.locator(".learning-back-page.active")).toBeVisible();
 });
 
-test("learning card exposes five full-content back pages in Persian and English", async ({ page }) => {
+test("learning card exposes four full-content back pages in Persian and English", async ({ page }) => {
   await routeExamples(page, 5);
   for (const language of ["fa", "en"]) {
     for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
