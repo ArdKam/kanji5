@@ -321,3 +321,16 @@
   .learning-examples-empty,
   .learning-examples-error { padding: 10px 8px; }
 }
+
+.component-breakdown-label.component-breakdown-metadata {
+  max-width: 150px;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.kanji-structure-dialog-body .component-breakdown-label.component-breakdown-metadata {
+  max-width: 180px;
+}
