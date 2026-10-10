@@ -38,6 +38,8 @@ assert.ok(styles.includes(':root[data-theme="dark"]{color-scheme:dark;--washi:#1
 assert.ok(styles.includes("--progress-track:#35312c;"));
 assert.ok(styles.includes("background:radial-gradient(circle at 8% 6%,rgba(184,74,56,.05),transparent 24rem),var(--washi);color:var(--sumi)"));
 assert.equal(styles.includes(':root[data-theme="dark"] :root[data-theme="dark"] .progress'), false, "Broken double-root progress selector must not return");
+assert.equal(styles.includes("@media(prefers-color-scheme:dark){#kanji5-account-launcher"), false, "Account launcher OS-dark styling must not override a manually selected Light theme");
+assert.ok(styles.includes(':root[data-theme="system"] #kanji5-account-launcher'));
 
 // Theme-aware semantic colors are used for error text and destructive indicators.
 assert.ok(styles.includes("--color-danger:#a23a2a"));
