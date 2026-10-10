@@ -95,7 +95,7 @@
 .learning-card-back .learning-back-page:first-child .learning-back-readings { gap: 5px; }
 
 /* Keep both reading groups on one row when the card has enough inline space. */
-@container learning-back (min-width: 321px) {
+@container learning-back (min-width: 291px) {
   .learning-card-back .learning-back-page:first-child .learning-back-readings {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
