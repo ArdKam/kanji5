@@ -180,7 +180,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
                 />
               ) : null}
             </svg>
-            <div className="stroke-order-progress" aria-label={t("strokeOrderProgress", language)}>
+            <div className="stroke-order-progress" role="status" aria-live="polite" aria-label={t("strokeOrderProgress", language)}>
               <span>{formatNumber(completed, language)} / {formatNumber(paths.length, language)}</span>
             </div>
           </div>
