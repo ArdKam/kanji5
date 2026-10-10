@@ -255,11 +255,11 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await page.mouse.up();
   await expect(card.locator('#dictionary-card-title')).toHaveText(currentCharacter||'');
   await expect(card.locator('.dictionary-card')).toHaveClass(/is-navigation-previous/);
-  await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','false');
+  await expect(card.getByRole('tab',{name:'ساختار',exact:true})).toHaveAttribute('aria-selected','false');
   await expect(card.locator('.component-breakdown')).toHaveCount(0);
   await expect(card.locator('.component-learning-path')).toHaveCount(0);
-  await card.getByRole('tab',{name:'کالبد',exact:true}).click();
-  await expect(card.getByRole('tab',{name:'کالبد',exact:true})).toHaveAttribute('aria-selected','true');
+  await card.getByRole('tab',{name:'ساختار',exact:true}).click();
+  await expect(card.getByRole('tab',{name:'ساختار',exact:true})).toHaveAttribute('aria-selected','true');
   await expect(card.locator('.component-breakdown')).toBeVisible({timeout:5000});
   await expect(card.locator('.component-learning-path')).toBeVisible({timeout:5000});
   await expect.poll(async()=>card.locator('.component-learning-path-node.depth-0').count(),{timeout:5000}).toBeGreaterThan(0);
@@ -270,6 +270,69 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await expect(card.locator('.rating-grid')).toHaveCount(0);
   await card.getByRole('button',{name:'بستن',exact:true}).click();
   await expect(card).toBeHidden();
+});
+
+test('Dictionary active-filter feedback and card controls remain clear and touch-safe',async({page})=>{
+  await page.addInitScript(()=>localStorage.setItem('kanji5-ui-language','en'));
+  await clean(page);
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible();
+
+  const search=pageRoot.locator('.dictionary-page-search input');
+  await search.fill('学');
+  await expect(pageRoot.locator('.dictionary-active-filters')).toContainText('Search: 学');
+  await pageRoot.getByRole('button',{name:'Remove search'}).click();
+  await expect(pageRoot.locator('.dictionary-active-filters')).toHaveCount(0);
+
+  await pageRoot.locator('.dictionary-level-filter').getByRole('button',{name:'N5',exact:true}).click();
+  await expect(pageRoot.locator('.dictionary-active-filters')).toContainText('Level: N5');
+  await pageRoot.getByRole('button',{name:'Clear all',exact:true}).click();
+  await expect(pageRoot.locator('.dictionary-active-filters')).toHaveCount(0);
+
+  await page.setViewportSize({width:1440,height:960});
+  const tile=pageRoot.locator('.kanji-catalog-tile').first();
+  await expect(tile).toBeVisible();
+  await tile.click();
+  const dialog=page.locator('.dictionary-card-dialog:visible');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.dictionary-stroke-order-heading')).toHaveText('Stroke order');
+  await expect(dialog.getByRole('tab')).toHaveCount(5);
+  const desktopDialogHeight=await dialog.evaluate(element=>element.getBoundingClientRect().height);
+  expect(desktopDialogHeight).toBeLessThanOrEqual(700);
+  await page.setViewportSize({width:390,height:844});
+
+  const geometry=await dialog.evaluate(element=>{
+    const header=element.querySelector('.dictionary-card-header');
+    const navButtons=Array.from(header?.querySelectorAll('.dictionary-card-nav')??[]);
+    const closeButton=header?.querySelector('.dialog-close');
+    const hero=element.querySelector('.dictionary-overview-hero');
+    const meaning=element.querySelector('.dictionary-overview-meaning');
+    const bounds=node=>{
+      if(!(node instanceof HTMLElement))return null;
+      const rect=node.getBoundingClientRect();
+      return {width:rect.width,height:rect.height};
+    };
+    return {
+      navButtons:navButtons.map(bounds),
+      closeButton:bounds(closeButton),
+      heroBorder:hero?getComputedStyle(hero).borderTopWidth:null,
+      meaningBorder:meaning?getComputedStyle(meaning).borderTopWidth:null,
+      horizontalOverflow:element.scrollWidth>element.clientWidth+1,
+    };
+  });
+  expect(geometry.navButtons.every(item=>item&&item.width>=44&&item.height>=44),JSON.stringify(geometry)).toBe(true);
+  expect(geometry.closeButton?.width).toBeGreaterThanOrEqual(44);
+  expect(geometry.closeButton?.height).toBeGreaterThanOrEqual(44);
+  expect(geometry.heroBorder).toBe('0px');
+  expect(geometry.meaningBorder).toBe('0px');
+  expect(geometry.horizontalOverflow).toBe(false);
+
+  const legend=await pageRoot.locator('.dictionary-mastery-legend').evaluate(element=>({
+    width:element.clientWidth,
+    scrollWidth:element.scrollWidth,
+  }));
+  expect(legend.scrollWidth).toBeLessThanOrEqual(legend.width+1);
 });
 
 test('Dictionary card tabs fit narrow mobile widths without horizontal overflow',async({page})=>{
