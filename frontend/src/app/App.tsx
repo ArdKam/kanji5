@@ -18,6 +18,7 @@ import { AccountButton, AccountDialog } from "./AccountDialog";
 import { OnboardingEntry } from "./OnboardingEntry";
 import { getTopicLabel } from "./topic-taxonomy";
 const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
+const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
 import { learningCopy } from "./learning-copy";
 import learningSurfaceStyles from "./learning-surface.css?inline";
 import { isOnboardingComplete } from "./onboarding";
@@ -550,13 +551,17 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
           </div>
         </dialog>
-        <KanjiStructureDialog
-          open={structureDialogOpen}
-          onClose={closeStructureDialog}
-          character={card.character??""}
-          info={visualStructureInfo}
-          language={getLanguage()}
-        />
+        {structureDialogOpen ? (
+          <Suspense fallback={null}>
+            <KanjiStructureDialog
+              open={structureDialogOpen}
+              onClose={closeStructureDialog}
+              character={card.character??""}
+              info={visualStructureInfo}
+              language={getLanguage()}
+            />
+          </Suspense>
+        ) : null}
         <dialog hidden={!mnemonicEditing} ref={mnemonicDialogRef} id="personal-mnemonic-editor" className="dialog secondary-page-dialog mnemonic-edit-dialog" aria-labelledby="personal-mnemonic-editor-title">
           <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} disabled={mnemonicBusy} onClick={closeMnemonicEditor}>×</button>
           <h2 id="personal-mnemonic-editor-title">{getLanguage()==="fa"?"ویرایش یادسپار شخصی":"Edit personal mnemonic"}</h2>
