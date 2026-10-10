@@ -23,7 +23,7 @@ async function startProductionExercise(page){
   await page.evaluate(({character})=>{
     window.__KANJI5_V19_RECOVERY_TARGET__={character,mode:"production",contentId:character};
   },{character});
-  await page.getByRole("button",{name:"تمرین"}).click();
+  await page.getByRole("button",{name:"تمرین",exact:true}).click();
   await expect(page.locator("#root .practice-home")).toBeVisible({timeout:5000});
   await page.getByRole("button",{name:"شروع تمرین",exact:true}).click();
   await expect(page.locator("#root #exercise .production-recall")).toBeVisible({timeout:15000});
