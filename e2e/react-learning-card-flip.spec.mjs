@@ -371,6 +371,17 @@ test("personal mnemonic editor is a usable modal and cancel restores unsaved cha
   await expect(trigger).toBeFocused();
 });
 
+test("vocabulary example page shows an explicit empty state without losing its navigation slot", async ({ page }) => {
+  await routeExamples(page, 0);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const card = await revealLearningCard(page, "en");
+  await goToBackPage(page, card, 1);
+  await expect(card.locator(".learning-back-page.active .learning-examples-empty")).toBeVisible();
+  await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(0);
+  await expect(card.locator(".learning-back-page-nav .learning-back-page-shortcut")).toHaveCount(4);
+  await expect(card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(1)).toHaveClass(/active/);
+});
+
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
