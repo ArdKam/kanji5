@@ -370,12 +370,7 @@
   place-items: center;
 }
 
-/* Closed learning-card dialogs should not participate in layout or focus navigation. */
-.dialog.secondary-page-dialog.learning-reference-dialog:not([open]),
-.dialog.secondary-page-dialog.kanji-structure-dialog:not([open]),
-.dialog.secondary-page-dialog.mnemonic-edit-dialog:not([open]) {
-  display: none;
-}
+
 
 /* Keep the three stroke-navigation controls distinct from the four grading actions. */
 .learning-card .learning-card-back .stroke-order-controls{grid-template-columns:minmax(0,1fr) minmax(104px,auto) minmax(0,1fr);gap:6px;align-items:center}
