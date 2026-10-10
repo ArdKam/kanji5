@@ -21,7 +21,7 @@ async function forcedTargetCharacter(page){
   });
 }
 
-test('Learning and Active Recall are explicit independent presentation experiences',async({page})=>{
+test('Learning and Practice are explicit independent presentation experiences',async({page})=>{
   await clean(page);
   const review=page.getByRole('button',{name:'یادگیری',exact:true});
   const practice=page.getByRole('button',{name:'تمرین'});
@@ -92,7 +92,7 @@ test('experience navigation remains clickable while an engine transition is busy
   await expect(learning).toHaveAttribute('aria-current','page');
 });
 
-test('empty Active Recall state stays responsive before any card is learned',async({page})=>{
+test('empty Practice home stays responsive before any card is learned',async({page})=>{
   await clean(page);
   const learning=page.getByRole('button',{name:'یادگیری',exact:true});
   const practice=page.getByRole('button',{name:'تمرین'});
@@ -195,7 +195,7 @@ test('typed reading answer submits through the grading path and shows feedback',
   await expect(page.locator('#root .actions')).toHaveCount(0);
 });
 
-test('Active Recall start failure is recoverable without leaving the practice home locked',async({page})=>{
+test('Practice session start failure is recoverable without leaving the home locked',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'تمرین'}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
@@ -220,7 +220,7 @@ test('Active Recall start failure is recoverable without leaving the practice ho
   await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeEnabled();
 });
 
-test('Active Recall start button locks during an in-flight start',async({page})=>{
+test('Practice start button locks during an in-flight start',async({page})=>{
   await clean(page);
   await seedSeenCard(page);
   await page.getByRole('button',{name:'تمرین'}).click();
