@@ -108,10 +108,11 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const closeReferenceInfo=useCallback(()=>setReferenceInfoOpen(false),[]);
   const referenceInfoDialogRef=useModalDialog(referenceInfoOpen,closeReferenceInfo);
   const closeMnemonicEditor=useCallback(()=>{
+    if(mnemonicBusy)return;
     setMnemonicDraft(personalMnemonic);
     setMnemonicEditing(false);
     setMnemonicError("");
-  },[personalMnemonic]);
+  },[personalMnemonic,mnemonicBusy]);
   const mnemonicDialogRef=useModalDialog(mnemonicEditing,closeMnemonicEditor);
   const closeStructureDialog=useCallback(()=>setStructureDialogOpen(false),[]);
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
@@ -496,7 +497,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         aria-label={personalMnemonic?t("editMnemonic"):t("personalMnemonic")}
                         title={t("personalMnemonic")}
                         aria-expanded={mnemonicEditing}
-                        aria-controls={mnemonicEditing ? "personal-mnemonic-editor" : undefined}
+                        aria-controls="personal-mnemonic-editor"
                         onClick={()=>{
                           setBackPage(hasExamplesPage?2:1);
                           setMnemonicError("");
@@ -558,7 +559,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
           language={getLanguage()}
         />
         <dialog ref={mnemonicDialogRef} id="personal-mnemonic-editor" className="dialog secondary-page-dialog mnemonic-edit-dialog" aria-labelledby="personal-mnemonic-editor-title">
-          <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeMnemonicEditor}>×</button>
+          <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} disabled={mnemonicBusy} onClick={closeMnemonicEditor}>×</button>
           <h2 id="personal-mnemonic-editor-title">{getLanguage()==="fa"?"ویرایش یادسپار شخصی":"Edit personal mnemonic"}</h2>
           <p className="secondary-surface-dialog-hint">{getLanguage()==="fa"?"یادسپار شخصی تا ۶۰۰ نویسه ذخیره می‌شود. لغو یا بستن پنجره تغییرات ذخیره‌نشده را کنار می‌گذارد.":"Personal mnemonics are limited to 600 characters. Cancel or close to discard unsaved changes."}</p>
           <div className="mnemonic-editor">
