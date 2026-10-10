@@ -25,6 +25,30 @@ for (const entry of KANJI_TOPICS) {
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
 
+const MASTERY_FILTER_LABELS: Record<MasteryFilter, { fa: string; en: string }> = {
+  all: { fa: "همه", en: "All" },
+  unseen: { fa: "دیده‌نشده", en: "Unseen" },
+  learning: { fa: "در حال یادگیری", en: "Learning" },
+  attention: { fa: "نیازمند توجه", en: "Needs attention" },
+  mastered: { fa: "مسلط", en: "Mastered" },
+};
+
+function FilterChip({ label, removeLabel, onRemove }: { label: string; removeLabel: string; onRemove: () => void }) {
+  return (
+    <button
+      className="badge"
+      style={{ minHeight: 44, maxWidth: "100%", gap: 6, padding: "5px 10px", borderRadius: 999, background: "var(--paper)", borderColor: "var(--line)", cursor: "pointer", fontSize: 12 }}
+      type="button"
+      onClick={onRemove}
+      aria-label={removeLabel}
+    >
+      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">
+        <path d="m4 4 8 8M12 4 4 12" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      </svg>
+    </button>
+  );
+}
 
 function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item: KanjiCatalogItem; language: Language; draft?: string; onDraftChange: (value: string) => void }) {
   const [suggestion, setSuggestion] = useState<PreparedMnemonic | null>(null);
@@ -149,6 +173,8 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
   const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1) + (topic === "all" ? 0 : 1);
+  const activeTopic = topic === "all" ? null : KANJI_TOPICS.find(entry => entry.id === topic) ?? null;
+  const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim());
 
   useEffect(() => {
     let active = true;
@@ -229,7 +255,12 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       <div className="dictionary-page-search">
         <label className="dictionary-search-field">
           <span className="sr-only">{t("dictionaryPlaceholder", language)}</span>
-          <span className="dictionary-search-icon" aria-hidden="true">⌕</span>
+          <span className="dictionary-search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false">
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 4.3 4.3" />
+            </svg>
+          </span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -245,7 +276,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               type="button"
               aria-label={language === "fa" ? "پاک کردن جست‌وجو" : "Clear search"}
               onClick={() => setQuery("")}
-            >×</button>
+            ><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg></button>
           ) : null}
         </label>
         <p className="dictionary-search-hint" aria-live="polite">
@@ -267,7 +298,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               <span>{t("dictionaryMoreFilters", language)}</span>
               <span className="actions">
                 {activeAdvancedFilterCount > 0 ? <span className="badge dictionary-filter-count" aria-label={t("dictionaryActiveFiltersCount", language)}>{formatNumber(activeAdvancedFilterCount, language)}</span> : null}
-                <span aria-hidden="true">⌄</span>
+                <span className="dictionary-advanced-chevron" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path d="m5 7.5 5 5 5-5" /></svg></span>
               </span>
             </summary>
             <div className="dictionary-filter-row dictionary-advanced-filter-controls">
@@ -349,6 +380,63 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         </div>
       </div>
 
+      {hasActiveDictionaryFilters ? (
+        <div
+          className="dictionary-active-filters"
+          aria-label={language === "fa" ? "فیلترهای فعال" : "Active filters"}
+          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "7px 10px", margin: "4px 0 13px", padding: "9px 10px", border: "1px solid var(--line-soft)", borderRadius: 13, background: "var(--washi)" }}
+        >
+          <span style={{ flex: "0 0 auto", color: "var(--mute)", fontSize: 12, fontWeight: 800 }}>{language === "fa" ? "فیلترهای فعال" : "Active filters"}</span>
+          <div className="dictionary-active-filter-chips" style={{ display: "flex", flex: "1 1 180px", flexWrap: "wrap", alignItems: "center", gap: 6, minWidth: 0 }}>
+            {query.trim() ? (
+              <FilterChip
+                label={(language === "fa" ? "جست‌وجو: " : "Search: ") + query.trim()}
+                removeLabel={language === "fa" ? "حذف جست‌وجو" : "Remove search"}
+                onRemove={() => setQuery("")}
+              />
+            ) : null}
+            {level !== "all" ? (
+              <FilterChip
+                label={(language === "fa" ? "سطح: " : "Level: ") + level}
+                removeLabel={(language === "fa" ? "حذف سطح " : "Remove level ") + level}
+                onRemove={() => setLevel("all")}
+              />
+            ) : null}
+            {masteryFilter !== "all" ? (
+              <FilterChip
+                label={MASTERY_FILTER_LABELS[masteryFilter][language]}
+                removeLabel={(language === "fa" ? "حذف فیلتر تسلط" : "Remove mastery filter")}
+                onRemove={() => setMasteryFilter("all")}
+              />
+            ) : null}
+            {grade !== "all" ? (
+              <FilterChip
+                label={grade === "secondary"
+                  ? (language === "fa" ? "متوسطه" : "Secondary")
+                  : (language === "fa" ? "پایه " : "Grade ") + formatNumber(Number(grade), language)}
+                removeLabel={language === "fa" ? "حذف فیلتر پایه" : "Remove grade filter"}
+                onRemove={() => setGrade("all")}
+              />
+            ) : null}
+            {topic !== "all" ? (
+              <FilterChip
+                label={(language === "fa" ? "موضوع: " : "Topic: ") + (activeTopic ? (language === "fa" ? activeTopic.label.fa : activeTopic.label.en) : topic)}
+                removeLabel={language === "fa" ? "حذف فیلتر موضوع" : "Remove topic filter"}
+                onRemove={() => setTopic("all")}
+              />
+            ) : null}
+          </div>
+          <button
+            className="dictionary-clear-all-filters"
+            style={{ flex: "0 0 auto", minHeight: 44, padding: "5px 4px", marginInlineStart: "auto", border: 0, background: "transparent", color: "var(--shu)", font: "inherit", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+            type="button"
+            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}
+          >
+            {language === "fa" ? "پاک کردن همه" : "Clear all"}
+          </button>
+        </div>
+      ) : null}
+
       {loading ? <div className="surface loading dictionary-loading" role="status">{t("dictionaryLoading", language)}</div> : null}
       {!loading && loadError ? (
         <div className="surface dictionary-empty" role="alert">
@@ -359,10 +447,32 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
         <>
+          <div
+            className={"dictionary-mastery-legend" + (viewMode === "detailed" ? " is-detailed" : "")}
+            aria-label={language === "fa" ? "راهنمای رنگ وضعیت یادگیری" : "Learning status colour key"}
+            style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px 12px", margin: "0 0 10px", padding: "8px 1px 2px", color: "var(--mute)" }}
+          >
+            {([
+              ["unseen", language === "fa" ? "دیده‌نشده" : "Unseen", "var(--line-interactive)"],
+              ["learning", language === "fa" ? "در حال یادگیری" : "Learning", "var(--shu)"],
+              ["stable", language === "fa" ? "پایدار" : "Stable", "var(--ai)"],
+              ["attention", language === "fa" ? "نیازمند توجه" : "Needs attention", "var(--sakura)"],
+              ["mastered", language === "fa" ? "مسلط" : "Mastered", "var(--matcha)"],
+            ] as const).map(([key, label, color]) => (
+              <span key={key} className={"dictionary-mastery-key is-" + key} style={{ display: "inline-flex", flex: "0 0 auto", alignItems: "center", gap: 6, minWidth: 0, fontSize: 12, lineHeight: 1.35 }}>
+                <i aria-hidden="true" style={{ display: "block", flex: "0 0 auto", width: 7, height: 7, borderRadius: "50%", background: color }} />
+                {label}
+              </span>
+            ))}
+          </div>
           <div className={"kanji-catalog-grid" + (viewMode === "detailed" ? " is-detailed" : "")}>
           {visible.slice(0, viewMode === "detailed" ? detailedVisibleCount : visible.length).map((item) => {
             const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
-            const fillOpacity = mastery === 0 ? 0 : 0.2 + mastery * 0.8;
+            const masteryColor = item.state === "mastered" ? "var(--matcha)"
+              : item.state === "stable" ? "var(--ai)"
+              : ["weak", "recovering"].includes(item.state || "") ? "var(--sakura)"
+              : ["learning", "introduced"].includes(item.state || "") ? "var(--shu)"
+              : "var(--line-interactive)";
             return (
               <button
                 key={item.character}
@@ -374,7 +484,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 aria-label={item.character + " — " + (item.jlpt || "unknown") + " — " + formatNumber(Math.round(mastery * 100), language) + "%"}
                 onClick={() => setSelected(item)}
               >
-                <span className="kanji-catalog-fill" style={{ height: (mastery * 100) + "%", opacity: fillOpacity }} />
+                <span className="kanji-catalog-fill" style={{ height: "2px", opacity: 0.95, backgroundColor: masteryColor }} />
                 <span className="kanji-catalog-character" lang="ja">{item.character}</span>
                 {viewMode === "detailed" ? (
                   <span className="kanji-catalog-details">
