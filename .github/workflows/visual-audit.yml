@@ -88,7 +88,7 @@ jobs:
           {
             echo "## Automated UI visual audit"
             echo
-            echo "Screens cover onboarding, Learning, Active Recall, Dictionary, dictionary detail, Settings, Statistics, Reading Lab, and Account; desktop and mobile captures are included where applicable."
+            echo "Screens cover onboarding, Learning, Practice, Dictionary, dictionary detail, Settings, Statistics, Reading Lab, and Account; desktop and mobile captures are included where applicable."
             echo
             if [ -n "${ARTIFACT_URL:-}" ]; then
               echo "[Download screenshots and report]($ARTIFACT_URL)"

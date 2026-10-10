@@ -126,8 +126,7 @@ export function PracticeHome({
   return (
     <section className="practice-home" aria-labelledby="practice-home-title">
       <header className="practice-home-header">
-        <p className="eyebrow">{t("activeRecallLabel", language)}</p>
-        <h2 id="practice-home-title">{t("practiceTitle", language)}</h2>
+                <h2 id="practice-home-title">{t("practiceTitle", language)}</h2>
         <p className="subtitle">{t("practiceIntro", language)}</p>
       </header>
 
