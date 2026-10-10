@@ -21,7 +21,7 @@ assert.doesNotMatch(app, /mnemonicEditing\?" is-open"/);
 
 const enhancementStyles = await readFile(new URL("../frontend/src/app/learning-card-enhancements.css", import.meta.url), "utf8");
 assert.match(enhancementStyles, /\.mnemonic-edit-dialog \.mnemonic-editor textarea/);
-assert.match(enhancementStyles, /min-height:220px/);
+assert.match(enhancementStyles, /min-height:\s*220px/);
 assert.match(enhancementStyles, /\.kanji-structure-dialog\.dialog\.secondary-page-dialog/);
 const styles = await readFile(new URL("../frontend/src/styles.css", import.meta.url), "utf8");
 assert.match(styles, /\.learning-card-back \.learning-back-overview,/);
