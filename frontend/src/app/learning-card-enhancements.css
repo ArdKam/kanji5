@@ -334,3 +334,26 @@
 .kanji-structure-dialog-body .component-breakdown-label.component-breakdown-metadata {
   max-width: 180px;
 }
+
+/* The card's compact inline-editor rules must not constrain the modal editor. */
+.learning-card[data-card-density="dense"] .mnemonic-edit-dialog .mnemonic-editor {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+}
+.learning-card[data-card-density="dense"] .mnemonic-edit-dialog .mnemonic-editor textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 220px;
+  height: min(34dvh, 340px);
+  padding: 12px 14px;
+  resize: vertical;
+}
+.learning-card[data-card-density="dense"] .mnemonic-edit-dialog .mnemonic-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.learning-card[data-card-density="dense"] .mnemonic-edit-dialog .mnemonic-editor-footer .actions {
+  flex-wrap: wrap;
+}
