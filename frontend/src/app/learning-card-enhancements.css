@@ -363,3 +363,10 @@
   display: grid;
   place-items: center;
 }
+
+/* Closed learning-card dialogs should not participate in layout or focus navigation. */
+.learning-reference-dialog:not([open]),
+.kanji-structure-dialog:not([open]),
+.mnemonic-edit-dialog:not([open]) {
+  display: none;
+}
