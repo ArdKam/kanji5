@@ -294,3 +294,30 @@
 @media (prefers-reduced-motion: reduce) {
   .kanji-structure-preview-action { transition: none; }
 }
+
+
+/* Stable, compact status states for vocabulary examples on the learning card. */
+.learning-examples-status,
+.learning-examples-empty,
+.learning-examples-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  margin: 4px 0 0;
+  padding: 12px 10px;
+  border: 1px solid var(--line-soft, var(--line));
+  border-radius: var(--radius-md);
+  background: var(--washi);
+  color: var(--mute);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+.learning-examples-empty { align-items: flex-start; }
+.learning-examples-error { justify-content: space-between; flex-wrap: wrap; }
+.learning-examples-error .button { min-height: 44px; }
+@media (max-width: 520px) {
+  .learning-examples-status,
+  .learning-examples-empty,
+  .learning-examples-error { padding: 10px 8px; }
+}
