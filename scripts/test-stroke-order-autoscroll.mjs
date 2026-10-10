@@ -9,6 +9,7 @@ assert.doesNotMatch(source, /scrollAfterExpandRef/);
 assert.doesNotMatch(source, /openLearningTool/);
 assert.doesNotMatch(source, /closeLearningTool/);
 assert.match(source, /className="stroke-order-panel is-expanded"/);
+assert.match(source, /className="stroke-order-progress" role="status" aria-live="polite"/);
 assert.match(source, /data-stroke-order-open="true"/);
 
 const app = await readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8");
@@ -23,6 +24,7 @@ const enhancementStyles = await readFile(new URL("../frontend/src/app/learning-c
 assert.match(enhancementStyles, /\.mnemonic-edit-dialog \.mnemonic-editor textarea/);
 assert.match(enhancementStyles, /min-height:\s*220px/);
 assert.match(enhancementStyles, /\.kanji-structure-dialog\.dialog\.secondary-page-dialog/);
+assert.match(enhancementStyles, /\.learning-card \.learning-card-back \.stroke-order-controls\{grid-template-columns:minmax\(0,1fr\) minmax\(104px,auto\) minmax\(0,1fr\)/);
 const styles = await readFile(new URL("../frontend/src/styles.css", import.meta.url), "utf8");
 assert.match(styles, /\.learning-card-back \.learning-back-overview,/);
 assert.match(styles, /\.learning-card\[data-card-density="dense"\] \.learning-back-overview/);
