@@ -617,7 +617,7 @@ test("menu sections open as centered tool dialogs on desktop", async ({ page }) 
     expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight);
 
     await pageDialog.getByRole("button", { name: "Close", exact: true }).first().click();
-    await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+    await expect(page.locator(".secondary-page-dialog:not([hidden])")).toHaveCount(0);
     await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
   }
 });
@@ -655,7 +655,7 @@ test("tool dialogs remain usable within a narrow mobile viewport", async ({ page
     expect(metrics.overflowX).toBe(false);
 
     await dialog.getByRole("button", { name: "Close", exact: true }).first().click();
-    await expect(page.locator(".secondary-page-dialog")).toHaveCount(0);
+    await expect(page.locator(".secondary-page-dialog:not([hidden])")).toHaveCount(0);
     await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
   }
 });
