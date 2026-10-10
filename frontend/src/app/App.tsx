@@ -1,6 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { KanjiStructurePreview } from "./KanjiStructurePreview";
-import { KanjiStructureDialog } from "./KanjiStructureDialog";
 import { useModalDialog } from "./useModalDialog";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
