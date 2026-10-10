@@ -21,16 +21,21 @@ export function KanjiStructureDialog({
   const dialogRef = useModalDialog(open, onClose);
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
   const [radicalResolved, setRadicalResolved] = useState(false);
+  const [radicalError, setRadicalError] = useState(false);
 
   useEffect(() => {
     let active = true;
     setRadicalInfo(null);
     setRadicalResolved(false);
+    setRadicalError(false);
     if (!open || !character) return () => { active = false; };
     void getRadicalInfo(character).then((result) => {
       if (active) setRadicalInfo(result);
     }).catch(() => {
-      if (active) setRadicalInfo(null);
+      if (active) {
+        setRadicalInfo(null);
+        setRadicalError(true);
+      }
     }).finally(() => {
       if (active) setRadicalResolved(true);
     });
@@ -69,6 +74,10 @@ export function KanjiStructureDialog({
           </div>
         ) : radicalInfo?.available && radicalInfo.radical ? (
           <TraditionalRadical info={radicalInfo} language={language} />
+        ) : radicalError ? (
+          <p className="kanji-structure-dialog-empty" role="status">
+            {language === "fa" ? "اطلاعات رادیکال سنتی بارگذاری نشد." : "Traditional radical information could not be loaded."}
+          </p>
         ) : null}
         {info?.available && info.components.length ? (
           <ComponentBreakdown
