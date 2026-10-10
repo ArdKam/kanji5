@@ -55,6 +55,7 @@ export function KanjiStructureDialog({
 
   return (
     <dialog
+      hidden={!open}
       ref={dialogRef}
       className="dialog secondary-page-dialog kanji-structure-dialog"
       aria-labelledby="kanji-structure-dialog-title"
