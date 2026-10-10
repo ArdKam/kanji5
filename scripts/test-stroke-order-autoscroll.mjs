@@ -26,6 +26,7 @@ assert.match(enhancementStyles, /min-height:\s*220px/);
 assert.match(enhancementStyles, /\.kanji-structure-dialog\.dialog\.secondary-page-dialog/);
 assert.match(enhancementStyles, /\.learning-card \.learning-card-back \.stroke-order-controls\{grid-template-columns:minmax\(0,1fr\) minmax\(104px,auto\) minmax\(0,1fr\)/);
 const styles = await readFile(new URL("../frontend/src/styles.css", import.meta.url), "utf8");
+assert.match(styles, /\.kanji-structure-preview-action,.kanji-structure-preview-action-placeholder\{min-height:44px;\}/);
 assert.match(styles, /\.learning-card-back \.learning-back-overview,/);
 assert.match(styles, /\.learning-card\[data-card-density="dense"\] \.learning-back-overview/);
 assert.match(styles, /grid-template-columns:minmax\(0,1fr\);/);
