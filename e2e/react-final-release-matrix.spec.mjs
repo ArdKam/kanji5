@@ -13,7 +13,7 @@ for(const viewport of viewports){
     await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
 
     const learning=page.getByRole('button',{name:'یادگیری',exact:true});
-    const recall=page.getByRole('button',{name:'تمرین'});
+    const recall=page.getByRole('button',{name:'تمرین',exact:true});
     await expect(learning).toHaveAttribute('aria-current','page');
     await expect(page.locator('.audio-button').first()).toBeVisible();
 
