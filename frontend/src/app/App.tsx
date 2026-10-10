@@ -1,5 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
-import { ComponentBreakdown } from "./ComponentBreakdown";
+import { KanjiStructurePreview } from "./KanjiStructurePreview";
+import { KanjiStructureDialog } from "./KanjiStructureDialog";
+import { useModalDialog } from "./useModalDialog";
+import "./learning-card-enhancements.css";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
@@ -94,14 +97,23 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const [visualStructureReady,setVisualStructureReady]=useState(false);
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
   const [referenceInfoOpen,setReferenceInfoOpen]=useState(false);
+  const [structureDialogOpen,setStructureDialogOpen]=useState(false);
   const referenceInfoTriggerRef=useRef<HTMLButtonElement|null>(null);
-  const referenceInfoCloseRef=useRef<HTMLButtonElement|null>(null);
   const [personalMnemonic,setPersonalMnemonic]=useState("");
   const [mnemonicDraft,setMnemonicDraft]=useState("");
   const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
   const [mnemonicEditing,setMnemonicEditing]=useState(false);
   const [mnemonicBusy,setMnemonicBusy]=useState(false);
   const [mnemonicError,setMnemonicError]=useState("");
+  const closeReferenceInfo=useCallback(()=>setReferenceInfoOpen(false),[]);
+  const referenceInfoDialogRef=useModalDialog(referenceInfoOpen,closeReferenceInfo);
+  const closeMnemonicEditor=useCallback(()=>{
+    setMnemonicDraft(personalMnemonic);
+    setMnemonicEditing(false);
+    setMnemonicError("");
+  },[personalMnemonic]);
+  const mnemonicDialogRef=useModalDialog(mnemonicEditing,closeMnemonicEditor);
+  const closeStructureDialog=useCallback(()=>setStructureDialogOpen(false),[]);
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
@@ -157,55 +169,13 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     });
     return ()=>{active=false};
   },[card.character,preparedMeaningKey]);
-  const mnemonicToolRef=useRef<HTMLElement|null>(null);
-  const scrollMnemonicEditorIntoView=useCallback(()=>{
-    const target=mnemonicToolRef.current;
-    const scrollContainer=target?.closest<HTMLElement>(".learning-back-scroll");
-    if(!target||!scrollContainer)return;
-    const scrollBounds=scrollContainer.getBoundingClientRect();
-    const targetBounds=target.getBoundingClientRect();
-    const maxScrollTop=Math.max(0,scrollContainer.scrollHeight-scrollContainer.clientHeight);
-    const bottomOverflow=targetBounds.bottom-(scrollBounds.bottom-10);
-    const topOverflow=(scrollBounds.top+10)-targetBounds.top;
-    const delta=bottomOverflow>0?bottomOverflow:topOverflow>0?-topOverflow:0;
-    const nextTop=Math.max(0,Math.min(maxScrollTop,scrollContainer.scrollTop+delta));
-    // This is a layout-recovery action, so prefer a stable final position over animated scrolling.
-    scrollContainer.scrollTo({top:nextTop,behavior:"auto"});
-  },[]);
-  useEffect(()=>{
-    if(!mnemonicEditing)return;
-    let frame=0;
-    let nextFrame=0;
-    frame=window.requestAnimationFrame(()=>{
-      nextFrame=window.requestAnimationFrame(()=>scrollMnemonicEditorIntoView());
-    });
-    return()=>{
-      window.cancelAnimationFrame(frame);
-      window.cancelAnimationFrame(nextFrame);
-    };
-  },[mnemonicEditing,scrollMnemonicEditorIntoView]);
-
   useEffect(()=>{
     setHiraganaReadings(false);
     setReferenceInfoOpen(false);
+    setStructureDialogOpen(false);
     setExamplesExpanded(false);
   },[card.character]);
-  useEffect(()=>{
-    if(!referenceInfoOpen)return;
-    const frame=requestAnimationFrame(()=>referenceInfoCloseRef.current?.focus({preventScroll:true}));
-    const onKeyDown=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"){
-        event.preventDefault();
-        setReferenceInfoOpen(false);
-        requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}));
-      }
-    };
-    window.addEventListener("keydown",onKeyDown);
-    return()=>{
-      cancelAnimationFrame(frame);
-      window.removeEventListener("keydown",onKeyDown);
-    };
-  },[referenceInfoOpen]);
+
   useEffect(()=>{
     let active=true;
     setPersonalMnemonic("");
@@ -265,11 +235,14 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
   const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
   const [examplesResolved,setExamplesResolved]=useState(false);
+  const [examplesError,setExamplesError]=useState(false);
+  const [examplesRetryKey,setExamplesRetryKey]=useState(0);
   const [examplesExpanded,setExamplesExpanded]=useState(false);
   const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
   useEffect(()=>{
     let active=true;
     const directExamples=Array.isArray(card.examples)?card.examples:[];
+    setExamplesError(false);
     if(directExamples.length>0){
       setVocabularyExamples(directExamples);
       setExamplesResolved(true);
@@ -284,10 +257,13 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       setVocabularyExamples(items);
       setExamplesResolved(true);
     }).catch(()=>{
-      if(active)setExamplesResolved(true);
+      if(active){
+        setExamplesResolved(true);
+        setExamplesError(true);
+      }
     });
     return ()=>{active=false};
-  },[card.character,card.examples?.length]);
+  },[card.character,card.examples?.length,examplesRetryKey]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
   const visibleExamples=examplesExpanded?displayExamples:displayExamples.slice(0,4);
   const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
@@ -312,8 +288,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
   const examplesLoading=!examplesResolved;
-  const hasExamplesPage=examplesLoading||displayExamples.length>0;
-  const backPageCount=hasExamplesPage?4:3;
+  const hasExamplesPage=true;
+  const backPageCount=4;
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
@@ -419,28 +395,27 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%",display:"grid",placeItems:"center"}} type="button" aria-label={t("additionalInformation")} title={t("additionalInformation")} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%",display:"grid",placeItems:"center"}} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
-                    <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
-                      {visualStructureReady
-                        ? visualStructureInfo?.available&&visualStructureInfo.components.length
-                          ? <ComponentBreakdown info={visualStructureInfo} title={t("kanjiStructure")} note={t("visualComponents")} ariaLabel={t("visualKanjiStructure")}/>
-                          : <div className="learning-back-kanji" lang="ja">{text(card.character)}</div>
-                        : <div className="learning-back-identity-placeholder" aria-hidden="true"><span /></div>}
-                    </div>
-
                     {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                     {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
-                    
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
-                      
+                    </div>
+                    <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
+                      <KanjiStructurePreview
+                        character={card.character??""}
+                        info={visualStructureInfo}
+                        ready={visualStructureReady}
+                        language={getLanguage()}
+                        onOpen={()=>setStructureDialogOpen(true)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -448,14 +423,26 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             </div>
             {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
               <div className="learning-back-scroll">
-                <div className="examples compact-examples"><h3>{t("vocabularyExamples")}</h3>{visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>)}{displayExamples.length>4?<button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button>:null}</div>
+                <div className="examples compact-examples" aria-busy={examplesLoading}>
+                  <h3>{t("vocabularyExamples")}</h3>
+                  {examplesLoading ? <div className="learning-examples-status" role="status">{getLanguage()==="fa"?"در حال بارگذاری مثال‌های واژگانی…":"Loading vocabulary examples…"}</div> : null}
+                  {!examplesLoading && examplesError ? (
+                    <div className="learning-examples-error" role="alert">
+                      <span>{getLanguage()==="fa"?"بارگذاری مثال‌های واژگانی ناموفق بود.":"Vocabulary examples could not be loaded."}</span>
+                      <button className="button secondary" type="button" onClick={()=>setExamplesRetryKey(value=>value+1)}>{t("tryAgain")}</button>
+                    </div>
+                  ) : null}
+                  {!examplesLoading && !examplesError && !displayExamples.length ? <p className="learning-examples-empty">{getLanguage()==="fa"?"برای این کانجی مثال واژگانی در دسترس نیست.":"No vocabulary examples are available for this kanji."}</p> : null}
+                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
+                  {!examplesLoading && !examplesError && displayExamples.length>4 ? <button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button> : null}
+                </div>
               </div>
             </div>:null}
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
               <div className="learning-back-scroll">
                 <div className="mnemonic-page">
                   <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
-                  <section ref={mnemonicToolRef} className={"mnemonic-tool"+(mnemonicEditing?" is-open":"")+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                  <section className={"mnemonic-tool"+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
                       {!mnemonicEditing&&preparedMnemonic&&mnemonicHintPlan.preparedMode!=="hidden"?
                         mnemonicHintPlan.preparedMode==="expanded"?
                           <div className="mnemonic-prepared" data-mnemonic-source={preparedMnemonic.source}>
@@ -473,7 +460,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                                     setMnemonicError("");
                                     setMnemonicDraft(personalMnemonic);
                                     setMnemonicEditing(true);
-                                    requestAnimationFrame(scrollMnemonicEditorIntoView);
+                                    
                                   }}>
                                     {t("makeMnemonicYourOwn")}
                                   </button>}
@@ -496,7 +483,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                                       setMnemonicError("");
                                       setMnemonicDraft(personalMnemonic);
                                       setMnemonicEditing(true);
-                                      requestAnimationFrame(scrollMnemonicEditorIntoView);
+                                      
                                     }}>
                                       {t("makeMnemonicYourOwn")}
                                     </button>}
@@ -520,20 +507,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         <UiIcon name="writing" size={16}/><span>{personalMnemonic?t("editMnemonic"):t("personalMnemonic")}</span>
                       </button>
                       {personalMnemonic&&!mnemonicEditing?<div className="mnemonic-saved"><UiIcon name="mnemonic" size={17}/><p id="personal-mnemonic-title">{personalMnemonic}</p></div>:null}
-                      {mnemonicEditing?
-                        <div className="mnemonic-editor" id="personal-mnemonic-editor">
-                          <div className="mnemonic-editor-heading"><strong>{t("personalMnemonic")}</strong><span>{fa(mnemonicDraft.length)}/{fa(600)}</span></div>
-                          <textarea value={mnemonicDraft} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
-                          <div className="mnemonic-editor-footer">
-                            <span aria-hidden="true"></span>
-                            <div className="actions">
-                              <button className="button secondary" type="button" disabled={mnemonicBusy} onClick={()=>{setMnemonicDraft(personalMnemonic);setMnemonicEditing(false)}}>{t("cancel")}</button>
-                              <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
-                            </div>
-                          </div>
-                          {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
-                        </div>
-                        :null}
+
                     </section>
                 </div>
               </div>
@@ -565,14 +539,41 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
           </div>:null}
           <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
-          {referenceInfoOpen?<div id="learning-reference-info" className="surface learning-reference-popover" role="dialog" aria-modal="false" aria-labelledby="learning-reference-info-title" onPointerDown={event=>event.stopPropagation()}>
-            <div className="card-topline learning-reference-popover-head"><strong id="learning-reference-info-title">{t("additionalInformation")}</strong><button ref={referenceInfoCloseRef} className="learning-reference-close button secondary" style={{width:44,height:44,minWidth:44,minHeight:44,padding:0,borderRadius:"50%"}} type="button" aria-label={t("close")} title={t("close")} onClick={()=>{setReferenceInfoOpen(false);requestAnimationFrame(()=>referenceInfoTriggerRef.current?.focus({preventScroll:true}))}}><UiIcon name="close" size={17}/></button></div>
-            <div className="dialog-grid learning-reference-info-grid" style={{gridTemplateColumns:"1fr"}}>
-              {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
-              {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
-              {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
+          <dialog ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
+          <div className="learning-reference-dialog-head">
+            <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"}</h2>
+            <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
+          </div>
+          <div className="dialog-grid learning-reference-info-grid">
+            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
+            {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
+            {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
+          </div>
+        </dialog>
+        <KanjiStructureDialog
+          open={structureDialogOpen}
+          onClose={closeStructureDialog}
+          character={card.character??""}
+          info={visualStructureInfo}
+          language={getLanguage()}
+        />
+        <dialog ref={mnemonicDialogRef} id="personal-mnemonic-editor" className="dialog secondary-page-dialog mnemonic-edit-dialog" aria-labelledby="personal-mnemonic-editor-title">
+          <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeMnemonicEditor}>×</button>
+          <h2 id="personal-mnemonic-editor-title">{getLanguage()==="fa"?"ویرایش یادسپار شخصی":"Edit personal mnemonic"}</h2>
+          <p className="secondary-surface-dialog-hint">{getLanguage()==="fa"?"یادسپار شخصی تا ۶۰۰ نویسه ذخیره می‌شود. لغو یا بستن پنجره تغییرات ذخیره‌نشده را کنار می‌گذارد.":"Personal mnemonics are limited to 600 characters. Cancel or close to discard unsaved changes."}</p>
+          <div className="mnemonic-editor">
+            <div className="mnemonic-editor-heading"><strong>{t("personalMnemonic")}</strong><span aria-live="polite">{fa(mnemonicDraft.length)}/{fa(600)}</span></div>
+            <textarea id="personal-mnemonic-textarea" autoFocus value={mnemonicDraft} rows={7} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
+            <div className="mnemonic-editor-footer">
+              <span aria-hidden="true"></span>
+              <div className="actions">
+                <button className="button secondary" type="button" disabled={mnemonicBusy} onClick={closeMnemonicEditor}>{t("cancel")}</button>
+                <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
+              </div>
             </div>
-          </div>:null}
+            {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
+          </div>
+        </dialog>
       </div>
     </div>
   </section>
