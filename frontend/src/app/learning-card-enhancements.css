@@ -1,0 +1,296 @@
+/* Learning-card-only polish: keep navigation and grading visually distinct. */
+.kanji-structure-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 8px;
+  border: 1px solid var(--line-soft, var(--line));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--washi) 56%, var(--paper));
+}
+.kanji-structure-preview-glyphs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  direction: ltr;
+}
+.kanji-structure-preview-glyph,
+.kanji-structure-preview-more,
+.kanji-structure-preview-atomic {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  min-width: 32px;
+  min-height: 34px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--sumi);
+  font-family: var(--jp-font);
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+.kanji-structure-preview-more {
+  font-family: var(--ui-font);
+  font-size: var(--text-xs);
+  color: var(--mute);
+}
+.kanji-structure-preview-action,
+.kanji-structure-preview-action-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 750;
+}
+.kanji-structure-preview-action:hover {
+  background: var(--paper);
+  border-color: var(--line-interactive);
+}
+.kanji-structure-preview-action:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ai) 36%, transparent);
+  outline-offset: 2px;
+}
+.kanji-structure-preview-arrow { color: var(--mute); font-size: 15px; }
+.kanji-structure-preview-skeleton {
+  width: 108px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--line) 48%, var(--paper));
+}
+.kanji-structure-preview-action-placeholder { width: 116px; border-color: transparent; }
+.learning-back-identity-visual { min-width: 0; }
+.learning-card-back .learning-back-page:first-child .learning-back-scroll {
+  overflow-y: hidden;
+  padding: 7px 3px 8px;
+  gap: 7px;
+}
+.learning-card-back .learning-back-page:first-child .learning-back-overview,
+.learning-card-back .learning-back-page:first-child .learning-back-identity {
+  gap: 6px;
+}
+.learning-card-back .learning-back-page:first-child .learning-back-meaning {
+  font-size: clamp(19px, 2.3vw, 25px) !important;
+  line-height: 1.16;
+}
+.learning-card-back .learning-back-page:first-child .learning-back-secondary-meaning {
+  font-size: var(--text-xs);
+  line-height: 1.35;
+}
+.learning-card-back .learning-back-page:first-child .learning-back-readings-block { gap: 5px; }
+.learning-card-back .learning-back-page:first-child .learning-back-readings { gap: 5px; }
+.learning-card-back .learning-back-page:first-child .reading {
+  min-height: 42px;
+  padding: 5px 7px;
+}
+.learning-card-back .learning-back-page:first-child .reading > .audio-button {
+  width: 36px;
+  height: 36px;
+}
+.kanji-structure-dialog.dialog.secondary-page-dialog {
+  width: min(780px, calc(100vw - 28px));
+  height: min(82dvh, 760px);
+  max-height: calc(100dvh - 24px);
+  min-height: 0;
+  padding: 20px;
+  overflow: hidden;
+  gap: 12px;
+}
+.kanji-structure-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+.kanji-structure-dialog-header h2 { margin: 0 42px 5px 0; padding: 0; }
+.kanji-structure-dialog-header .secondary-surface-dialog-hint {
+  max-width: 68ch;
+  margin: 0;
+}
+.kanji-structure-dialog-body {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 2px 3px 10px 0;
+}
+.kanji-structure-dialog-body .component-breakdown {
+  padding: 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--washi) 40%, var(--paper));
+  gap: 12px;
+}
+.kanji-structure-dialog-body .component-breakdown-header {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.kanji-structure-dialog-body .component-breakdown-visual {
+  grid-template-columns: minmax(42px, auto) auto minmax(0, 1fr);
+  align-items: start;
+}
+.kanji-structure-dialog-body .component-breakdown-target {
+  font-size: clamp(26px, 4vw, 38px);
+}
+.kanji-structure-dialog-body .component-breakdown-parts {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.kanji-structure-dialog-body .component-breakdown-part-wrap-inner { gap: 4px; }
+.kanji-structure-dialog-body .component-breakdown-label {
+  max-width: 92px;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.kanji-structure-dialog-body .component-breakdown-subparts {
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.kanji-structure-dialog-body .traditional-radical { background: var(--washi); }
+.kanji-structure-radical-loading,
+.kanji-structure-dialog-empty {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--washi);
+  color: var(--mute);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+}
+.kanji-structure-dialog-footer {
+  display: grid;
+  gap: 3px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--mute);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  flex: 0 0 auto;
+}
+.learning-reference-dialog.dialog.secondary-page-dialog {
+  display: flex;
+  width: min(560px, calc(100vw - 24px));
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 24px);
+  padding: 20px;
+  overflow: hidden;
+  gap: 12px;
+}
+.learning-reference-dialog .learning-reference-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex: 0 0 auto;
+}
+.learning-reference-dialog-head h2 {
+  margin: 0;
+  padding: 0 42px 0 0;
+  font-size: var(--text-lg);
+}
+.learning-reference-dialog .learning-reference-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.learning-reference-dialog .learning-reference-info-grid .stat-row { min-width: 0; }
+.learning-reference-dialog .learning-reference-info-grid .stat-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.6;
+}
+.mnemonic-edit-dialog.dialog.secondary-page-dialog {
+  width: min(640px, calc(100vw - 24px));
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 24px);
+  padding: 22px 20px 20px;
+  overflow: auto;
+  gap: 12px;
+}
+.mnemonic-edit-dialog h2 {
+  margin: 0;
+  padding-inline-end: 44px;
+  font-size: var(--text-xl);
+}
+.mnemonic-edit-dialog .mnemonic-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.mnemonic-edit-dialog .mnemonic-editor-heading { font-size: var(--text-sm); }
+.mnemonic-edit-dialog textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 220px;
+  height: min(34dvh, 340px);
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.65;
+  resize: vertical;
+}
+.mnemonic-edit-dialog .mnemonic-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.mnemonic-edit-dialog .mnemonic-editor-footer > span { display: none; }
+.mnemonic-edit-dialog .mnemonic-editor-footer .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 520px) {
+  .kanji-structure-dialog.dialog.secondary-page-dialog { padding: 16px 13px calc(16px + env(safe-area-inset-bottom)); }
+  .kanji-structure-dialog-body .component-breakdown-visual { grid-template-columns: minmax(36px, auto) auto minmax(0, 1fr); gap: 5px; }
+  .kanji-structure-dialog-body .component-breakdown-parts { gap: 5px; }
+  .learning-reference-dialog.dialog.secondary-page-dialog,
+  .mnemonic-edit-dialog.dialog.secondary-page-dialog { padding: 18px 14px calc(18px + env(safe-area-inset-bottom)); }
+}
+@media (max-height: 460px) and (min-width: 761px) {
+  .learning-card-back .learning-back-page:first-child .learning-back-scroll { padding-top: 3px; padding-bottom: 4px; gap: 4px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity { gap: 3px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-card-back .learning-back-page:first-child .reading { grid-template-columns: minmax(0, 1fr); gap: 2px; min-height: 0; padding: 4px; }
+  .learning-card-back .learning-back-page:first-child .reading > span,
+  .learning-card-back .learning-back-page:first-child .reading > strong,
+  .learning-card-back .learning-back-page:first-child .reading > .audio-button { grid-column: 1; grid-row: auto; }
+  .learning-card-back .learning-back-page:first-child .reading > .audio-button { display: none; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview { min-height: 40px; padding: 3px 5px; }
+  .kanji-structure-preview-glyph { min-width: 28px; min-height: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kanji-structure-preview-action { transition: none; }
+}
