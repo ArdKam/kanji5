@@ -29,6 +29,7 @@ on:
       - "scripts/test-kanji-radical-system.mjs"
       - "scripts/test-cross-layer-release-gate.mjs"
       - "scripts/test-floating-experience-nav.mjs"
+      - "scripts/test-dark-mode-theme-parity.mjs"
       - "kanji-radicals.json"
       - "kanji-radical-map.json"
       - "frontend/src/app/mnemonic-support.ts"
@@ -42,6 +43,7 @@ on:
       - "e2e/react-review-practice.spec.mjs"
       - "e2e/react-active-recall-content.spec.mjs"
       - "e2e/react-learning-card-flip.spec.mjs"
+      - "e2e/theme-mode-mobile.spec.mjs"
       - "e2e/react-personal-mnemonic.spec.mjs"
       - "e2e/react-prepared-mnemonic.spec.mjs"
       - "e2e/react-mnemonic-support.spec.mjs"
@@ -157,6 +159,9 @@ jobs:
       - name: Install Chromium for React E2E
         working-directory: .
         run: npx playwright install --with-deps chromium
+      - name: Run dark-theme mobile parity E2E
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/theme-mode-mobile.spec.mjs
       - name: Run engine-to-React boundary gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-engine-boundary-gate.spec.mjs
