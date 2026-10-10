@@ -357,3 +357,9 @@
 .learning-card[data-card-density="dense"] .mnemonic-edit-dialog .mnemonic-editor-footer .actions {
   flex-wrap: wrap;
 }
+
+.learning-reference-trigger {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+}
