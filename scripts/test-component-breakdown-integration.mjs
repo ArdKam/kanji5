@@ -11,6 +11,7 @@ assert(app.includes('import { KanjiStructurePreview } from "./KanjiStructurePrev
 assert(app.includes("getVisualStructureInfo(card.character)"), "Learning card must request the canonical visual structure");
 assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typed visual structure contract");
 assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
+assert(app.includes("enabled={revealed && backPage === 0}"), "Card-specific presentation styles should be deferred until the learning back face is revealed");
 const structureDialog = await readFile(new URL("../frontend/src/app/KanjiStructureDialog.tsx", import.meta.url), "utf8");
 assert(structureDialog.includes("<ComponentBreakdown"), "Full visual structure must remain available in the detail dialog");
 assert(structureDialog.includes("<TraditionalRadical"), "Traditional radical classification must remain distinct from visual components");
