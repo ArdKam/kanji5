@@ -2036,7 +2036,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 @media(max-width:420px){
   .active-recall-session-meta{gap:5px;}
   .active-recall-session-meta > .active-recall-task-modality,
-  .active-recall-session-meta > .active-recall-divider:nth-of-type(2){display:none;}
+  .active-recall-session-meta > .active-recall-divider:nth-of-type(4){display:none;}
   .active-recall-exit{padding-inline:8px;}
 }
 @media(max-width:380px){
