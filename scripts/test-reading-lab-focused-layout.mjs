@@ -23,7 +23,7 @@ assert.ok(order.every((position,index) => index === 0 || position > order[index-
 // The source grid must use intrinsic height rather than stretching sections across the dialog.
 assert.match(css, /\.reading-lab\{display:grid;align-content:start;/);
 assert.match(css, /\.reading-lab-section\{display:grid;align-content:start;/);
-assert.match(css, /\.reading-lab-input\{[^}]*min-height:132px;/);
+assert.match(css, /\.reading-lab-input\{[^}]*height:132px;[^}]*min-height:132px;/);
 
 // Sentence text is a shared reading surface, not a stack of individually boxed cards.
 assert.match(css, /\.reading-lab-reader-text\{padding:2px 0;border:0;border-radius:0;background:transparent;/);
