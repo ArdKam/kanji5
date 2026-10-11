@@ -71,3 +71,22 @@
   .mnemonic-prepared:not(.mnemonic-prepared-collapsed){grid-template-columns:minmax(0,1fr);gap:var(--space-2)}
   .mnemonic-prepared-use{justify-self:start}
 }
+
+html[lang="fa"] .mnemonic-support-keyword{
+  font-family:var(--fa-font);
+  letter-spacing:0;
+  line-height:1.6;
+  direction:rtl;
+}
+.mnemonic-support-keyword{
+  max-width:100%;
+  overflow-wrap:anywhere;
+  line-height:1.5;
+}
+.mnemonic-support-vocab-row{
+  line-height:1.65;
+}
+@media(max-width:520px){
+  .mnemonic-support-keyword{font-size:var(--text-sm);padding:3px 8px;}
+  .mnemonic-support-vocab-row{font-size:var(--text-sm);}
+}
