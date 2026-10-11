@@ -93,7 +93,49 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await expect(dialog.locator(".prepared-mnemonic-mode-note")).toHaveCount(1);
   await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title")).toHaveCount(0);
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-generated").first()).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Open card to build", exact: true }).first()).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Write personal mnemonic", exact: true }).first()).toBeVisible();
+});
+
+test("Prepared Mnemonics supports grade and JLPT filters plus inline create/edit", async ({ page }) => {
+  await clean(page, "en");
+  const dialog = await openMenuItem(page, "Prepared mnemonics");
+  const grade = dialog.locator(".prepared-mnemonic-filter-select select").nth(0);
+  const jlpt = dialog.locator(".prepared-mnemonic-filter-select select").nth(1);
+
+  await grade.selectOption("2");
+  const gradeRows = dialog.locator(".prepared-mnemonic-library-row");
+  await expect.poll(async () => gradeRows.count()).toBeGreaterThan(0);
+  for (const value of await gradeRows.evaluateAll(rows => rows.map(row => row.getAttribute("data-grade")))) {
+    expect(value).toBe("2");
+  }
+
+  await grade.selectOption("all");
+  await jlpt.selectOption("N4");
+  await expect.poll(async () => gradeRows.count()).toBeGreaterThan(0);
+  for (const value of await gradeRows.evaluateAll(rows => rows.map(row => row.getAttribute("data-jlpt")))) {
+    expect(value).toBe("N4");
+  }
+
+  await jlpt.selectOption("all");
+  await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
+  const row = dialog.locator(".prepared-mnemonic-library-row.is-generated").first();
+  await expect(row).toBeVisible();
+  await row.getByRole("button", { name: "Write personal mnemonic", exact: true }).click();
+  const editor = row.locator(".prepared-mnemonic-inline-editor textarea");
+  await expect(editor).toBeVisible();
+  await editor.fill("A personal scene that helps me remember this kanji.");
+  await row.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(row.getByRole("button", { name: "Edit personal mnemonic", exact: true })).toBeVisible();
+
+  await row.getByRole("button", { name: "Edit personal mnemonic", exact: true }).click();
+  await expect(row.locator(".prepared-mnemonic-inline-editor textarea")).toHaveValue("A personal scene that helps me remember this kanji.");
+  await row.locator(".prepared-mnemonic-inline-editor textarea").fill("An edited personal mnemonic.");
+  await row.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(row.locator(".prepared-mnemonic-inline-editor textarea")).toHaveCount(0);
+  await row.getByRole("button", { name: "Edit personal mnemonic", exact: true }).click();
+  await expect(row.locator(".prepared-mnemonic-inline-editor textarea")).toHaveValue("An edited personal mnemonic.");
+  await row.getByRole("button", { name: "Cancel", exact: true }).click();
 });
 
 test("Prepared Mnemonics cards remain contained on mobile", async ({ page }) => {
@@ -127,6 +169,7 @@ test("Prepared Mnemonics cards remain contained on mobile", async ({ page }) => 
   expect(geometry.actionLeft).toBeGreaterThanOrEqual(geometry.rowLeft);
   expect(geometry.actionRight).toBeLessThanOrEqual(geometry.rowRight);
   await expect(row.locator(".prepared-mnemonic-library-build")).toBeVisible();
+  await expect(row.locator(".prepared-mnemonic-library-mnemonic")).toHaveCount(0);
   await dialog.locator(".dialog-close").click();
 });
 
