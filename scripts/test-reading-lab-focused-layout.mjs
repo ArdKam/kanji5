@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
-const polish = fs.readFileSync("frontend/src/app/reading-lab-focus.css", "utf8");
+const polish = fs.readFileSync("frontend/src/app/reading-lab-polish.css", "utf8");
+const dialog = fs.readFileSync("frontend/src/app/ReadingLabDialog.tsx", "utf8");
 const reading = fs.readFileSync("frontend/src/app/ReadingLab.tsx", "utf8");
 
-// Populated Reading Lab puts the reading surface ahead of optional analysis and audio setup.
+// The scoped polish layer must load after the Reader's child-component styles.
+assert.ok(dialog.includes('import "./reading-lab-polish.css"'), "Reading Lab polish stylesheet must be imported by its owning dialog");
 assert.match(polish, /\.reading-lab:has\(\.reading-lab-reader\) > \.reading-lab-reader\s*\{\s*order:2;/);
 assert.match(polish, /\.reading-lab:has\(\.reading-lab-reader\) > \.reading-lab-analysis\s*\{\s*order:3;/);
 assert.match(polish, /\.reading-lab:has\(\.reading-lab-reader\) \.reading-lab-input\s*\{[^}]*height:108px;[^}]*min-height:108px;/s);
