@@ -493,13 +493,45 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(scrim).toBeVisible();
   const scrimFilter = await scrim.evaluate((element) => {
     const style = getComputedStyle(element);
+    const matchedFilterRules = [];
+    const visitRules = (rules) => {
+      for (const rule of Array.from(rules)) {
+        if (rule.selectorText && element.matches(rule.selectorText)) {
+          const declared = rule.style;
+          const standard = declared?.getPropertyValue("backdrop-filter");
+          const webkit = declared?.getPropertyValue("-webkit-backdrop-filter");
+          if (standard || webkit) {
+            matchedFilterRules.push({
+              selector: rule.selectorText,
+              standard,
+              webkit,
+              standardPriority: declared.getPropertyPriority("backdrop-filter"),
+              webkitPriority: declared.getPropertyPriority("-webkit-backdrop-filter")
+            });
+          }
+        }
+        if (rule.cssRules) {
+          try { visitRules(rule.cssRules); } catch {}
+        }
+      }
+    };
+    const styleSheets = [];
+    for (const sheet of Array.from(document.styleSheets)) {
+      styleSheets.push({ href: sheet.href, disabled: sheet.disabled });
+      try { visitRules(sheet.cssRules); } catch {}
+    }
     return {
       standard: style.getPropertyValue("backdrop-filter"),
       webkit: style.getPropertyValue("-webkit-backdrop-filter"),
       supportsStandard: CSS.supports("backdrop-filter", "blur(4px)"),
-      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)")
+      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)"),
+      matchedFilterRules,
+      styleSheets
     };
   });
+  const shippedCssResponse = await page.request.get("/react-dist/kanji5-react.css");
+  const shippedCss = await shippedCssResponse.text();
+  console.log("shipped header menu CSS:", JSON.stringify(shippedCss.split("}").filter(rule => rule.includes(".header-menu-scrim")).map(rule => rule + "}").slice(0, 8)));
   console.log("header menu scrim filter:", JSON.stringify(scrimFilter));
   expect(
     scrimFilter.standard === "blur(4px)" || scrimFilter.webkit === "blur(4px)"
@@ -554,13 +586,45 @@ test("mobile menu prevents account click-through until the drawer closes", async
   await expect(scrim).toBeVisible();
   const scrimFilter = await scrim.evaluate((element) => {
     const style = getComputedStyle(element);
+    const matchedFilterRules = [];
+    const visitRules = (rules) => {
+      for (const rule of Array.from(rules)) {
+        if (rule.selectorText && element.matches(rule.selectorText)) {
+          const declared = rule.style;
+          const standard = declared?.getPropertyValue("backdrop-filter");
+          const webkit = declared?.getPropertyValue("-webkit-backdrop-filter");
+          if (standard || webkit) {
+            matchedFilterRules.push({
+              selector: rule.selectorText,
+              standard,
+              webkit,
+              standardPriority: declared.getPropertyPriority("backdrop-filter"),
+              webkitPriority: declared.getPropertyPriority("-webkit-backdrop-filter")
+            });
+          }
+        }
+        if (rule.cssRules) {
+          try { visitRules(rule.cssRules); } catch {}
+        }
+      }
+    };
+    const styleSheets = [];
+    for (const sheet of Array.from(document.styleSheets)) {
+      styleSheets.push({ href: sheet.href, disabled: sheet.disabled });
+      try { visitRules(sheet.cssRules); } catch {}
+    }
     return {
       standard: style.getPropertyValue("backdrop-filter"),
       webkit: style.getPropertyValue("-webkit-backdrop-filter"),
       supportsStandard: CSS.supports("backdrop-filter", "blur(4px)"),
-      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)")
+      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)"),
+      matchedFilterRules,
+      styleSheets
     };
   });
+  const shippedCssResponse = await page.request.get("/react-dist/kanji5-react.css");
+  const shippedCss = await shippedCssResponse.text();
+  console.log("shipped header menu CSS:", JSON.stringify(shippedCss.split("}").filter(rule => rule.includes(".header-menu-scrim")).map(rule => rule + "}").slice(0, 8)));
   console.log("header menu scrim filter:", JSON.stringify(scrimFilter));
   expect(
     scrimFilter.standard === "blur(4px)" || scrimFilter.webkit === "blur(4px)"
