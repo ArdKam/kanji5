@@ -11,13 +11,13 @@ import { SettingsDialog } from "./SettingsDialog";
 import { PracticeHome } from "./PracticeHome";
 import { GrammarDialog } from "./GrammarDialog";
 import { ReadingLabDialog } from "./ReadingLabDialog";
-import { MnemonicsDialog } from "./MnemonicsDialog";
 import { HandwritingPractice } from "./HandwritingPractice";
 import { AccountButton, AccountDialog } from "./AccountDialog";
 import { OnboardingEntry } from "./OnboardingEntry";
 import { getTopicLabel } from "./topic-taxonomy";
 const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
 const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
+const MnemonicsDialog = lazy(() => import("./MnemonicsDialog").then(module => ({ default: module.MnemonicsDialog })));
 import { learningCopy } from "./learning-copy";
 import learningSurfaceStyles from "./learning-surface.css?inline";
 import { isOnboardingComplete } from "./onboarding";
@@ -1074,17 +1074,21 @@ function App(){
           onSave={async s=>{const result=await action(async()=>{await updateSettings(s);return true});if(result)closeSecondaryPage();return result}}
           onReset={()=>void action(async()=>{resetProgress()})}
         /> : null}
-        {secondaryPage==="mnemonics" ? <MnemonicsDialog
-          open={mnemonicsOpen}
-          language={language}
-          catalog={mnemonicCatalog}
-          personalMnemonics={mnemonicPersonalMnemonics}
-          loading={mnemonicCatalogState==="loading"}
-          error={mnemonicCatalogState==="error" ? mnemonicCatalogError : ""}
-          onRetry={()=>setMnemonicCatalogRetry(value=>value+1)}
-          onClose={closeSecondaryPage}
-          onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
-        /> : null}
+        {secondaryPage==="mnemonics" ? (
+          <Suspense fallback={null}>
+            <MnemonicsDialog
+              open={mnemonicsOpen}
+              language={language}
+              catalog={mnemonicCatalog}
+              personalMnemonics={mnemonicPersonalMnemonics}
+              loading={mnemonicCatalogState==="loading"}
+              error={mnemonicCatalogState==="error" ? mnemonicCatalogError : ""}
+              onRetry={()=>setMnemonicCatalogRetry(value=>value+1)}
+              onClose={closeSecondaryPage}
+              onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
+            />
+          </Suspense>
+        ) : null}
         {secondaryPage==="grammar" ? <GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/> : null}
         {secondaryPage==="readingLab" ? <ReadingLabDialog
           open={readingLabOpen}
