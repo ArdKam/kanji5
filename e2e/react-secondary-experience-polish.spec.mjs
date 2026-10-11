@@ -68,7 +68,9 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated").first()).toBeVisible({ timeout: 10000 });
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("259");
   await expect(dialog.locator(".prepared-mnemonics-dialog-metrics")).toContainText("1877");
-  await expect(dialog.getByText("This is not a review and does not give SRS credit; it simply makes a memory path easier to build.", { exact: true })).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-purpose")).toHaveCount(0);
+  await expect(dialog.locator(".prepared-mnemonic-howto")).toHaveCount(0);
+  await expect(dialog.locator(".prepared-mnemonic-mode-note")).toHaveCount(0);
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").first()).toHaveAttribute("aria-pressed", "true");
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated")).toHaveCount(60);
 
@@ -83,12 +85,49 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await save.click();
   await expect(save).toContainText("Saved to personal mnemonics");
 
-  await search.fill("");
+  await search.fill("the");
   await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(search).toHaveValue("the");
+  await expect(dialog.locator(".prepared-mnemonic-mode-note")).toBeVisible();
+  await expect(dialog.locator(".prepared-mnemonic-mode-note")).toHaveCount(1);
+  await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title")).toHaveCount(0);
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-generated").first()).toBeVisible();
-  await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title").first()).toContainText("not a finished mnemonic");
   await expect(dialog.getByRole("button", { name: "Open card to build", exact: true }).first()).toBeVisible();
+});
+
+test("Prepared Mnemonics cards remain contained on mobile", async ({ page }) => {
+  await clean(page, "en");
+  await page.setViewportSize({ width: 390, height: 844 });
+  const dialog = await openMenuItem(page, "Prepared mnemonics");
+  await expect(dialog).toBeVisible();
+  await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
+  await expect(dialog.locator(".prepared-mnemonic-mode-note")).toBeVisible();
+  const row = dialog.locator(".prepared-mnemonic-library-row").first();
+  await expect(row).toBeVisible();
+  const geometry = await row.evaluate(element => {
+    const row = element.getBoundingClientRect();
+    const kanji = element.querySelector(".prepared-mnemonic-library-kanji").getBoundingClientRect();
+    const action = element.querySelector(".prepared-mnemonic-library-action").getBoundingClientRect();
+    return {
+      rowLeft: row.left,
+      rowRight: row.right,
+      rowBottom: row.bottom,
+      kanjiLeft: kanji.left,
+      kanjiRight: kanji.right,
+      actionLeft: action.left,
+      actionRight: action.right,
+      viewportWidth: window.innerWidth
+    };
+  });
+  expect(geometry.rowLeft).toBeGreaterThanOrEqual(0);
+  expect(geometry.rowRight).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+  expect(geometry.kanjiLeft).toBeGreaterThanOrEqual(geometry.rowLeft);
+  expect(geometry.kanjiRight).toBeLessThanOrEqual(geometry.rowRight);
+  expect(geometry.actionLeft).toBeGreaterThanOrEqual(geometry.rowLeft);
+  expect(geometry.actionRight).toBeLessThanOrEqual(geometry.rowRight);
+  await expect(row.locator(".prepared-mnemonic-library-build")).toBeVisible();
+  await dialog.locator(".dialog-close").click();
 });
 
 test("Prepared Mnemonics shows a retry state when the catalog fails to load", async ({ page }) => {
