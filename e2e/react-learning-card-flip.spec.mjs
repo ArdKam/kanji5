@@ -527,7 +527,8 @@ test("structured header menu keeps account inactive until the menu closes and ex
   const scrim = page.locator(".header-menu-scrim");
   await expect(menu).toBeVisible();
   await expect(scrim).toBeVisible();
-  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
+  const scrimBlur = await scrim.evaluate(element => getComputedStyle(element, "::before").backdropFilter);
+  expect(scrimBlur).toBe("blur(4px)");
   await expect(account).toBeVisible();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
@@ -573,7 +574,8 @@ test("mobile menu prevents account click-through until the drawer closes", async
   const scrim = page.locator(".header-menu-scrim");
   await expect(menu).toBeVisible();
   await expect(scrim).toBeVisible();
-  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
+  const scrimBlur = await scrim.evaluate(element => getComputedStyle(element, "::before").backdropFilter);
+  expect(scrimBlur).toBe("blur(4px)");
   await expect(account).toBeVisible();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
