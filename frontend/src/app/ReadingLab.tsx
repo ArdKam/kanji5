@@ -669,7 +669,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
             onChange={event => { setValue(event.target.value.slice(0, MAX_READING_TEXT)); if (subtitleCues.length) setSubtitleCues([]); setShowRestoreNotice(false); }}
             placeholder={t("readingTextPlaceholder", language)}
             aria-label={t("readingTextPlaceholder", language)}
-            rows={6}
+            rows={4}
           />
           {value ? <button className="reading-lab-inline-clear" type="button" onClick={clearText}>{t("clearReadingText", language)}</button> : null}
         </div>
