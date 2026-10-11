@@ -396,20 +396,23 @@ function PreparedMnemonicLibrary({
                 ) : null}
 
                 {editingKey === key ? (
-                  <div className="prepared-mnemonic-inline-editor">
-                    <label className="prepared-mnemonic-inline-editor-field">
-                      <span>{copy.personalLabel}</span>
-                      <textarea
-                        autoFocus
-                        maxLength={600}
-                        value={drafts[entry.character] ?? ""}
-                        onChange={event => setDrafts(current => ({ ...current, [entry.character]: event.target.value }))}
-                        aria-label={copy.personalLabel}
-                      />
-                      <small>{formatNumber((drafts[entry.character] ?? "").length, language)}/600</small>
-                    </label>
-                    {hasPersonalMnemonic ? <p className="prepared-mnemonic-inline-editor-hint">{copy.replaceHint}</p> : null}
-                    <div className="prepared-mnemonic-inline-editor-actions">
+                  <div className="dictionary-personal-mnemonic prepared-mnemonic-inline-editor">
+                    <div className="dictionary-personal-mnemonic-heading">
+                      <div>
+                        <h3>{copy.personalLabel}</h3>
+                        {hasPersonalMnemonic ? <p>{copy.replaceHint}</p> : null}
+                      </div>
+                      <span>{formatNumber((drafts[entry.character] ?? "").length, language)}/600</span>
+                    </div>
+                    <textarea
+                      className="dictionary-personal-mnemonic-input"
+                      autoFocus
+                      maxLength={600}
+                      value={drafts[entry.character] ?? ""}
+                      onChange={event => setDrafts(current => ({ ...current, [entry.character]: event.target.value }))}
+                      aria-label={copy.personalLabel}
+                    />
+                    <div className="dictionary-personal-mnemonic-actions">
                       {isCurated ? (
                         <button className="button secondary" type="button" disabled={busyKey !== ""}
                           onClick={() => setDrafts(current => ({ ...current, [entry.character]: mnemonic }))}>{copy.usePrepared}</button>
@@ -424,7 +427,7 @@ function PreparedMnemonicLibrary({
                       <button className="button secondary" type="button" disabled={busyKey === key}
                         onClick={() => { setEditingKey(""); setErrorKey(""); setErrorMessage(""); }}>{copy.cancel}</button>
                     </div>
-                    {hasError ? <p className="prepared-mnemonic-inline-editor-error" role="alert">{errorMessage}</p> : null}
+                    {hasError ? <p className="prepared-mnemonic-row-error" role="alert">{errorMessage}</p> : null}
                   </div>
                 ) : null}
               </div>
@@ -465,7 +468,7 @@ function PreparedMnemonicLibrary({
                     {hasPersonalMnemonic ? copy.edit : copy.build}
                   </button>
                 )}
-                {isApplied && !editingKey ? <span className="prepared-mnemonic-row-success" role="status">{copy.saved}</span> : null}
+                {isApplied && !editingKey ? <span className="prepared-mnemonic-status" role="status">{copy.saved}</span> : null}
               </div>
             </article>
           );
