@@ -1138,6 +1138,7 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:var(--washi);col
 
 /* Directional header menu contract: LTR opens from the left; RTL opens from the right. */
 .header.menu-open .account-button{visibility:visible!important;pointer-events:none!important;z-index:5!important;}
+.header.menu-open .header-tools .header-menu-scrim{backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important;}
 .header-tools-menu{
   inset-inline-start:0!important;
   inset-inline-end:auto!important;
