@@ -382,6 +382,44 @@ test("vocabulary example page shows an explicit empty state without losing its n
   await expect(card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(1)).toHaveClass(/active/);
 });
 
+test("vocabulary example errors offer a working retry without leaving the learning card", async ({ page }) => {
+  let requests = 0;
+  await page.route("https://kanjiapi.dev/v1/words/**", async (route) => {
+    requests += 1;
+    if (requests === 1) {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "temporary fixture failure" }),
+      });
+      return;
+    }
+    const url = new URL(route.request().url());
+    const character = decodeURIComponent(url.pathname.split("/").pop() || "学");
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([{
+        variants: [{ written: character + "生", pronounced: "がくせい" }],
+        meanings: [{ glosses: ["student"] }],
+      }]),
+    });
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const card = await revealLearningCard(page, "en");
+  await goToBackPage(page, card, 1);
+  const error = card.locator(".learning-examples-error");
+  await expect(error).toBeVisible();
+  await expect(error).toContainText("Vocabulary examples could not be loaded.");
+
+  await error.locator("button").click();
+  await expect(error).toHaveCount(0);
+  await expect(card.locator(".learning-back-page.active .example-row")).toHaveCount(1);
+  expect(requests).toBeGreaterThanOrEqual(2);
+  await expect(card.locator(".learning-back-page-shortcut").nth(1)).toBeEnabled();
+});
+
 test("short learning cards stay single-page and keep examples with core information", async ({ page }) => {
   await routeExamples(page, 1);
   await page.setViewportSize({ width: 390, height: 844 });
