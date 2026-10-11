@@ -13,10 +13,10 @@ assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typ
 assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
 assert(app.includes("enabled={revealed && backPage === 0}"), "Card-specific presentation styles should be deferred until the learning back face is revealed");
 const structurePreview = await readFile(new URL("../frontend/src/app/KanjiStructurePreview.tsx", import.meta.url), "utf8");
-assert.match(structurePreview, /No finer components recorded/);
-assert.match(structurePreview, /جزء دیداری ریزتری ثبت نشده/);
-assert.match(structurePreview, /className="kanji-structure-preview-empty"/);
-assert.doesNotMatch(structurePreview, /kanji-structure-preview-atomic.*character/);
+assert(/No finer components recorded/.test(structurePreview), "Atomic preview must use a concise English empty state");
+assert(/جزء دیداری ریزتری ثبت نشده/.test(structurePreview), "Atomic preview must use a concise Persian empty state");
+assert(/className="kanji-structure-preview-empty"/.test(structurePreview), "Atomic preview must use its compact empty-state style");
+assert(!/kanji-structure-preview-atomic.*character/.test(structurePreview), "Preview must not repeat the target kanji as a fake component");
 const structureDialog = await readFile(new URL("../frontend/src/app/KanjiStructureDialog.tsx", import.meta.url), "utf8");
 assert(structureDialog.includes("<ComponentBreakdown"), "Full visual structure must remain available in the detail dialog");
 assert(structureDialog.includes("<TraditionalRadical"), "Traditional radical classification must remain distinct from visual components");
