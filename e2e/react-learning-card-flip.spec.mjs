@@ -489,9 +489,20 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await page.getByRole("button", { name: "More", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
+  const scrim = page.locator(".header-menu-scrim");
+  await expect(scrim).toBeVisible();
+  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
   await expect(account).toBeVisible();
+  await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
+  const desktopAccountBounds = await account.boundingBox();
+  if (!desktopAccountBounds) throw new Error("Desktop account bounds unavailable while menu is open");
+  const desktopAccountIsBehindScrim = await page.evaluate(({ x, y }) =>
+    document.elementFromPoint(x, y)?.classList.contains("header-menu-scrim") === true,
+    { x: desktopAccountBounds.x + desktopAccountBounds.width / 2, y: desktopAccountBounds.y + desktopAccountBounds.height / 2 }
+  );
+  expect(desktopAccountIsBehindScrim).toBe(true);
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Reading lab", exact: true })).toBeVisible();
@@ -503,6 +514,7 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await menu.getByRole("button", { name: "فارسی", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(account).toBeVisible();
+  await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
 
@@ -510,6 +522,7 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(menu).toBeHidden();
   await expect(page.getByRole("button", { name: "بیشتر", exact: true })).toBeFocused();
   await expect(account).toBeVisible();
+  await expect(account).toBeEnabled();
 });
 
 test("mobile menu prevents account click-through until the drawer closes", async ({ page }) => {
@@ -525,9 +538,18 @@ test("mobile menu prevents account click-through until the drawer closes", async
   await page.getByRole("button", { name: "بیشتر", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
+  const scrim = page.locator(".header-menu-scrim");
+  await expect(scrim).toBeVisible();
+  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
   await expect(account).toBeVisible();
+  await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
+  const mobileAccountIsBehindScrim = await page.evaluate(({ x, y }) =>
+    document.elementFromPoint(x, y)?.classList.contains("header-menu-scrim") === true,
+    { x: accountBounds.x + accountBounds.width / 2, y: accountBounds.y + accountBounds.height / 2 }
+  );
+  expect(mobileAccountIsBehindScrim).toBe(true);
 
   // Click the account button's screen position. It stays visible, but the open-menu
   // state must prevent click-through and must not open the account dialog.
