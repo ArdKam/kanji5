@@ -170,12 +170,6 @@ function PreparedMnemonicLibrary({
     jlptLabel: t("dictionaryLevel", language),
     allGrades: language === "fa" ? "همهٔ پایه‌ها" : "All grades",
     allJlpt: t("allLevels", language),
-    searchResults: language === "fa" ? "نتیجه" : "match",
-    searchResultsPlural: language === "fa" ? "نتیجه" : "matches",
-    readyResults: t("preparedMnemonicCurated", language),
-    readyResultsPlural: t("preparedMnemonics", language),
-    scaffoldResults: language === "fa" ? "کانجی بدون یادسپار آماده" : "kanji without a prepared mnemonic",
-    scaffoldResultsPlural: language === "fa" ? "کانجی بدون یادسپار آماده" : "kanji without a prepared mnemonic",
     save: language === "fa" ? "ذخیره در یادسپار شخصی" : "Save to personal mnemonics",
     saving: t("saving", language),
     saved: language === "fa" ? "✓ ذخیره شد" : "✓ Saved",
@@ -200,11 +194,6 @@ function PreparedMnemonicLibrary({
       : "No kanji matched this search and filters."
   };
 
-  const resultLabel = query.trim()
-    ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.searchResults : copy.searchResultsPlural}`
-    : mode === "curated"
-      ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.readyResults : copy.readyResultsPlural}`
-      : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.scaffoldResults : copy.scaffoldResultsPlural}`;
 
   if (loading || (!preparedCore && !preparedCoreFailed)) {
     return (
@@ -307,7 +296,7 @@ function PreparedMnemonicLibrary({
       ) : null}
 
       <div className="prepared-mnemonic-results-header">
-        <strong>{resultLabel}</strong>
+        <strong>{mode === "curated" ? copy.curatedMode : copy.generatedMode}</strong>
         <span aria-live="polite" aria-atomic="true">{formatNumber(visible.length, language)} / {formatNumber(filteredEntries.length, language)}</span>
       </div>
 
