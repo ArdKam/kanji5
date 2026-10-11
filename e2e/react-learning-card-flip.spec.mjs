@@ -524,10 +524,20 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(account).toBeVisible();
   await page.getByRole("button", { name: "More", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
+  const scrim = page.locator(".header-menu-scrim");
   await expect(menu).toBeVisible();
+  await expect(scrim).toBeVisible();
+  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
   await expect(account).toBeVisible();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
+  const desktopAccountCovered = await page.evaluate(() => {
+    const button = document.querySelector<HTMLElement>(".account-button");
+    if (!button) return false;
+    const bounds = button.getBoundingClientRect();
+    return document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)?.classList.contains("header-menu-scrim") === true;
+  });
+  expect(desktopAccountCovered).toBe(true);
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Reading lab", exact: true })).toBeVisible();
@@ -560,13 +570,23 @@ test("mobile menu prevents account click-through until the drawer closes", async
 
   await page.getByRole("button", { name: "بیشتر", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
+  const scrim = page.locator(".header-menu-scrim");
   await expect(menu).toBeVisible();
+  await expect(scrim).toBeVisible();
+  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
   await expect(account).toBeVisible();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
+  const mobileAccountCovered = await page.evaluate(() => {
+    const button = document.querySelector<HTMLElement>(".account-button");
+    if (!button) return false;
+    const bounds = button.getBoundingClientRect();
+    return document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)?.classList.contains("header-menu-scrim") === true;
+  });
+  expect(mobileAccountCovered).toBe(true);
 
-  // Click the account button's screen position. It stays visible, but the open-menu
-  // state must prevent click-through and must not open the account dialog.
+  // Click the account button's screen position. The scrim must receive the pointer,
+  // close the menu, and never let the account dialog open through it.
   await page.mouse.click(
     accountBounds.x + accountBounds.width / 2,
     accountBounds.y + accountBounds.height / 2
