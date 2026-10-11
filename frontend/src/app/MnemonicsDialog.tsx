@@ -125,7 +125,6 @@ function PreparedMnemonicLibrary({
       if (jlptFilter !== "all" && item?.jlpt !== jlptFilter) return false;
 
       if (!q) return true;
-      const mnemonic = language === "fa" ? entry.suggestion.fa : entry.suggestion.en;
       const searchable = [
         entry.character,
         ...(item?.meanings ?? []),
@@ -268,7 +267,7 @@ function PreparedMnemonicLibrary({
 
   return (
     <section className="prepared-mnemonic-library">
-      <div className="prepared-mnemonic-toolbar" aria-label={language === "fa" ? "ابزارهای جست‌وجو و فیلتر" : "Search and filter tools"}>
+      <div className="prepared-mnemonic-toolbar" role="group" aria-label={language === "fa" ? "ابزارهای جست‌وجو و فیلتر" : "Search and filter tools"}>
         <label className="prepared-mnemonic-search-shell">
           <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 4.2 4.2" /></svg></span>
           <input
@@ -360,6 +359,8 @@ function PreparedMnemonicLibrary({
               className={"prepared-mnemonic-library-row " + (isCurated ? "is-curated" : "is-generated")}
               key={key}
               role="listitem"
+              data-grade={item?.grade ?? "unknown"}
+              data-jlpt={item?.jlpt ?? "unknown"}
             >
               <button
                 className="prepared-mnemonic-library-kanji"
