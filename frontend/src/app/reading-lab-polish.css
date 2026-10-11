@@ -6,6 +6,8 @@
 
 
 /* Calm start state: one clear invitation, no duplicate empty card or disabled tools. */
+.reading-lab{align-content:start;}
+.reading-lab-section{align-content:start;}
 .reading-lab .reading-lab-step{display:none;}
 .reading-lab:not(:has(.reading-lab-reader)) .reading-lab-input{height:132px;min-height:132px;padding:12px 15px 18px;}
 .reading-lab:not(:has(.reading-lab-reader)) > .reading-lab-empty{display:none;}
