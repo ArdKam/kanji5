@@ -659,9 +659,8 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               </div>
               {showRestoreNotice ? <span className="reading-lab-session-status" role="status">{t("readingLabSessionRestored", language)}</span> : null}
             </div>
-            <p>{t("readingLabSourceHint", language)}</p>
+            {!value.trim() ? <p>{t("readingLabSourceHint", language)}</p> : null}
           </div>
-          <span className="reading-lab-step" aria-hidden="true">01</span>
         </div>
         <div className="reading-lab-input-wrap">
           <textarea
@@ -697,8 +696,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                 <h3 id="reading-lab-reader-title">{t("readingReader", language)}</h3>
                 <p>{t("readingReaderHint", language)}</p>
               </div>
-              <span className="reading-lab-step" aria-hidden="true">03</span>
-            </div>
+                </div>
             <div className="reading-lab-reader-legend" aria-label={t("readingLabLegend", language)}>
               <span className="familiar"><i aria-hidden="true" />{t("readingLabLegendFamiliar", language)}</span>
               <span className="learning"><i aria-hidden="true" />{t("readingLabLegendLearning", language)}</span>
@@ -834,24 +832,15 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
 
 
         </>
-      ) : (
-        <section className="reading-lab-empty" aria-labelledby="reading-lab-empty-title">
-          <div className="reading-lab-empty-icon" aria-hidden="true">読</div>
-          <div>
-            <p className="eyebrow">{t("readingLabEmptyEyebrow", language)}</p>
-            <h3 id="reading-lab-empty-title">{t("readingLabEmptyTitle", language)}</h3>
-            <p>{t("readingLabEmptyHint", language)}</p>
-          </div>
-        </section>
-      )}
+      ) : null}}
 
+      {value.trim() ? (
       <section className="reading-lab-section reading-lab-listen" aria-labelledby="reading-lab-listen-title">
         <div className="reading-lab-section-heading reading-lab-section-heading-compact">
           <div>
             <p className="eyebrow">{t("readingLabListen", language)}</p>
             <h3 id="reading-lab-listen-title">{t("readingLabListenTitle", language)}</h3>
           </div>
-          <span className="reading-lab-step" aria-hidden="true">02</span>
         </div>
         <div className="reading-lab-listen-controls" aria-label={t("readingSpeechControls", language)}>
           <div className="reading-lab-listen-primary reading-lab-speech-row">
@@ -905,6 +894,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
           </>
         ) : null}
       </section>
+      ) : null}
     </section>
   );
 }
