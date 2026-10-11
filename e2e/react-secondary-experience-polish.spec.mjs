@@ -94,7 +94,7 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await expect(dialog.locator(".prepared-mnemonic-mode-note")).toHaveCount(1);
   await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title")).toHaveCount(0);
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-generated").first()).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Write personal mnemonic", exact: true }).first()).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Make your own mnemonic", exact: true }).first()).toBeVisible();
 });
 
 test("Prepared Mnemonics supports grade and JLPT filters plus inline create/edit", async ({ page }) => {
@@ -122,7 +122,7 @@ test("Prepared Mnemonics supports grade and JLPT filters plus inline create/edit
   await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
   const row = dialog.locator(".prepared-mnemonic-library-row.is-generated").first();
   await expect(row).toBeVisible();
-  await row.getByRole("button", { name: "Write personal mnemonic", exact: true }).click();
+  await row.getByRole("button", { name: "Make your own mnemonic", exact: true }).click();
   const editor = row.locator(".prepared-mnemonic-inline-editor textarea");
   await expect(editor).toBeVisible();
   await editor.fill("A personal scene that helps me remember this kanji.");
