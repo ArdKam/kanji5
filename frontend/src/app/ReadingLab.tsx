@@ -832,7 +832,7 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
 
 
         </>
-      ) : null}}
+      ) : null}
 
       {value.trim() ? (
       <section className="reading-lab-section reading-lab-listen" aria-labelledby="reading-lab-listen-title">
