@@ -238,6 +238,24 @@ test('Practice start button locks during an in-flight start',async({page})=>{
 });
 
 
+test('active recall can be exited back to Practice Home without submitting an answer',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+  const exit=page.getByRole('button',{name:'خروج از تمرین',exact:true});
+  await expect(exit).toBeVisible();
+  await exit.click();
+  await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await expect(page.locator('#root #exercise')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'شروع تمرین',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
+  await expect(page.locator('#root #exercise')).toBeVisible({timeout:15000});
+  await expect(page.getByRole('button',{name:'خروج از تمرین',exact:true})).toBeVisible();
+});
+
 test('Practice Home exposes topic learning and keeps the session in the Learning flow',async({page})=>{
   await clean(page);
   const practice=page.getByRole('button',{name:'تمرین',exact:true});
