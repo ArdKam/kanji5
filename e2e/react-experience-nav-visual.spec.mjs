@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Learning, Active Recall and Dictionary use a persistent Lovable-style bottom switcher', async ({ page }) => {
+test('Learning, Practice and Dictionary use a persistent Lovable-style bottom switcher', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('kanji5-onboarding-v2','complete'));
   await page.goto('/');
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });

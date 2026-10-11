@@ -38,16 +38,31 @@ function PreparedMnemonicLibrary({
   const [errorKey, setErrorKey] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [preparedCore, setPreparedCore] = useState<typeof import("./prepared-mnemonic-core") | null>(null);
+  const [preparedCoreFailed, setPreparedCoreFailed] = useState(false);
+  const [preparedCoreLoadAttempt, setPreparedCoreLoadAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setPreparedCoreFailed(false);
     void import("./prepared-mnemonic-core").then(module => {
-      if (active) setPreparedCore(module);
+      if (active) {
+        setPreparedCore(module);
+        setPreparedCoreFailed(false);
+      }
     }).catch(() => {
-      if (active) setPreparedCore(null);
+      if (active) {
+        setPreparedCore(null);
+        setPreparedCoreFailed(true);
+      }
     });
     return () => { active = false; };
-  }, []);
+  }, [preparedCoreLoadAttempt]);
+
+  const retryPreparedCore = () => {
+    setPreparedCore(null);
+    setPreparedCoreFailed(false);
+    setPreparedCoreLoadAttempt(attempt => attempt + 1);
+  };
 
   useEffect(() => {
     let active = true;
@@ -137,17 +152,13 @@ function PreparedMnemonicLibrary({
     modeLabel: "نوع کمک حافظه",
     curatedMode: "یادسپارهای آماده",
     generatedMode: "سرنخ‌های ساخت",
-    curatedCountLabel: "منتخب و آمادهٔ استفاده",
-    generatedCountLabel: "سرنخ برای ساختن یادسپار",
-    level: "سطح",
+    curatedBadge: "منتخب",
+    generatedBadge: "سرنخ ساخت",
+    generatedModeNote: "این‌ها یادسپارهای نهایی نیستند؛ از سرنخ‌ها برای ساختن ارتباطی استفاده کن که برای خودت معنادار باشد.",
+    level: "رده‌بندی",
     allLevels: "همه",
-    grade1: "پایه ۱",
-    n5: "JLPT N5",
-    howItWorks: "چطور استفاده کنی",
-    stepOne: "یک قلاب کوتاه را پیدا کن.",
-    stepTwo: "اگر با ذهن تو جور بود، آن را ذخیره یا شخصی‌سازی کن.",
-    stepThree: "بعداً همان یادسپار روی کارت کانجی به کمک یادآوری برمی‌گردد.",
-    scopeNote: "این بخش خودش مرور نیست و امتیاز SRS نمی‌دهد؛ فقط ساختن یک مسیر حافظه برای کانجی را آسان‌تر می‌کند.",
+    grade1: "پایهٔ مدرسه ۱",
+    n5: "سطح JLPT N5",
     searchResults: "نتیجه",
     searchResultsPlural: "نتیجه",
     readyResults: "یادسپار آماده",
@@ -159,8 +170,6 @@ function PreparedMnemonicLibrary({
     saved: "✓ در یادسپار شخصی ذخیره شد",
     build: "باز کردن کارت برای ساخت",
     openKanji: "مشاهدهٔ کانجی",
-    scaffoldTitle: "این متن یادسپار نهایی نیست",
-    scaffoldHint: "از اجزای شکل و این سرنخ به‌عنوان نقطهٔ شروع استفاده کن؛ یادسپار را برای خودت قابل‌معنا کن.",
     components: "اجزای شکل",
     personalExists: "این کانجی از قبل یادسپار شخصی دارد؛ برای جایگزینی، آن را از کارت کانجی ویرایش کن.",
     edit: "ویرایش یادسپار شخصی",
@@ -172,19 +181,15 @@ function PreparedMnemonicLibrary({
     modeLabel: "Memory aid type",
     curatedMode: "Ready-made mnemonics",
     generatedMode: "Build clues",
-    curatedCountLabel: "selected and ready to use",
-    generatedCountLabel: "clues for making a mnemonic",
-    level: "Level",
+    curatedBadge: "Curated",
+    generatedBadge: "Build clue",
+    generatedModeNote: "These are prompts, not finished mnemonics. Use them to create a connection that makes sense to you.",
+    level: "Classification",
     allLevels: "All",
-    grade1: "Grade 1",
+    grade1: "School grade 1",
     n5: "JLPT N5",
-    howItWorks: "How to use this",
-    stepOne: "Find a short memory hook.",
-    stepTwo: "Keep it only if it clicks; save it or make it your own.",
-    stepThree: "That personal mnemonic can then appear with the kanji card later.",
-    scopeNote: "This is not a review and does not give SRS credit; it simply makes a memory path easier to build.",
-    searchResults: "result",
-    searchResultsPlural: "results",
+    searchResults: "match",
+    searchResultsPlural: "matches",
     readyResults: "ready-made mnemonic",
     readyResultsPlural: "ready-made mnemonics",
     scaffoldResults: "build clue",
@@ -194,8 +199,6 @@ function PreparedMnemonicLibrary({
     saved: "✓ Saved to personal mnemonics",
     build: "Open card to build",
     openKanji: "Open kanji",
-    scaffoldTitle: "This is not a finished mnemonic",
-    scaffoldHint: "Use the shape clues as a starting point, then make the connection meaningful to you.",
     components: "Shape components",
     personalExists: "This kanji already has a personal mnemonic. Edit it from the kanji card before replacing it.",
     edit: "Edit personal mnemonic",
@@ -211,7 +214,7 @@ function PreparedMnemonicLibrary({
       ? `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.readyResults : copy.readyResultsPlural}`
       : `${formatNumber(filteredEntries.length, language)} ${filteredEntries.length === 1 ? copy.scaffoldResults : copy.scaffoldResultsPlural}`;
 
-  if (loading || !preparedCore) {
+  if (loading || (!preparedCore && !preparedCoreFailed)) {
     return (
       <section className="prepared-mnemonic-library" aria-busy="true" aria-live="polite">
         <div className="prepared-mnemonic-library-loading">
@@ -224,13 +227,18 @@ function PreparedMnemonicLibrary({
     );
   }
 
-  if (error) {
+  if (error || preparedCoreFailed) {
+    const libraryLoadError = preparedCoreFailed;
     return (
       <section className="prepared-mnemonic-library">
         <div className="prepared-mnemonic-library-error" role="alert">
-          <strong>{error}</strong>
-          <p>{language === "fa" ? "دادهٔ کانجی آماده نشد. دوباره تلاش کنید." : "The kanji data is not ready yet. Try loading it again."}</p>
-          <button className="button secondary" type="button" onClick={onRetry}>{t("tryAgain", language)}</button>
+          <strong>{libraryLoadError
+            ? (language === "fa" ? "کتابخانهٔ یادسپارها بارگذاری نشد." : "The mnemonic library could not be loaded.")
+            : error}</strong>
+          <p>{libraryLoadError
+            ? (language === "fa" ? "اتصال یا فایل برنامه ممکن است موقتاً در دسترس نباشد. دوباره تلاش کن." : "The app resource may be temporarily unavailable. Try loading the library again.")
+            : (language === "fa" ? "دادهٔ کانجی آماده نشد. دوباره تلاش کن." : "The kanji catalog is not ready yet. Try again.")}</p>
+          <button className="button secondary" type="button" onClick={libraryLoadError ? retryPreparedCore : onRetry}>{t("tryAgain", language)}</button>
         </div>
       </section>
     );
@@ -238,17 +246,9 @@ function PreparedMnemonicLibrary({
 
   return (
     <section className="prepared-mnemonic-library">
-      <div className="prepared-mnemonic-purpose">
-        <div className="prepared-mnemonic-purpose-icon" aria-hidden="true">🧠</div>
-        <div>
-          <strong>{copy.howItWorks}</strong>
-          <p>{copy.scopeNote}</p>
-        </div>
-      </div>
-
       <div className="prepared-mnemonic-toolbar" aria-label={language === "fa" ? "ابزارهای جست‌وجو و فیلتر" : "Search and filter tools"}>
         <label className="prepared-mnemonic-search-shell">
-          <span aria-hidden="true">⌕</span>
+          <span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 4.2 4.2" /></svg></span>
           <input
             className="prepared-mnemonic-library-search"
             type="search"
@@ -264,7 +264,7 @@ function PreparedMnemonicLibrary({
             className={"prepared-mnemonic-mode-tab" + (mode === "curated" ? " active" : "")}
             type="button"
             aria-pressed={mode === "curated"}
-            onClick={() => { setMode("curated"); setQuery(""); }}
+            onClick={() => setMode("curated")}
           >
             <span>{copy.curatedMode}</span>
             <strong>{formatNumber(curatedCount, language)}</strong>
@@ -273,7 +273,7 @@ function PreparedMnemonicLibrary({
             className={"prepared-mnemonic-mode-tab is-secondary" + (mode === "generated" ? " active" : "")}
             type="button"
             aria-pressed={mode === "generated"}
-            onClick={() => { setMode("generated"); setQuery(""); }}
+            onClick={() => setMode("generated")}
           >
             <span>{copy.generatedMode}</span>
             <strong>{formatNumber(generatedCount, language)}</strong>
@@ -302,11 +302,7 @@ function PreparedMnemonicLibrary({
         </div>
       </div>
 
-      <div className="prepared-mnemonic-howto" aria-label={copy.howItWorks}>
-        <span><b>1</b>{copy.stepOne}</span>
-        <span><b>2</b>{copy.stepTwo}</span>
-        <span><b>3</b>{copy.stepThree}</span>
-      </div>
+      {mode === "generated" ? <p className="prepared-mnemonic-mode-note">{copy.generatedModeNote}</p> : null}
 
       <div className="prepared-mnemonic-results-header">
         <strong>{resultLabel}</strong>
@@ -349,16 +345,11 @@ function PreparedMnemonicLibrary({
               <div className="prepared-mnemonic-library-content">
                 <div className="prepared-mnemonic-library-meta">
                   <span className={"prepared-mnemonic-source " + (isCurated ? "curated" : "generated")}>
-                    <span aria-hidden="true">{isCurated ? "✦" : "◇"}</span>
-                    {isCurated ? copy.curatedMode : copy.generatedMode}
+                    {isCurated ? copy.curatedBadge : copy.generatedBadge}
                   </span>
                   {meaning ? <span className="prepared-mnemonic-library-meaning">{meaning}</span> : null}
                   {reading ? <span className="prepared-mnemonic-library-reading" lang="ja">{reading}</span> : null}
                 </div>
-
-                {!isCurated ? (
-                  <p className="prepared-mnemonic-library-scaffold-title">{copy.scaffoldTitle}</p>
-                ) : null}
 
                 <p className="prepared-mnemonic-library-mnemonic">{mnemonic}</p>
 
@@ -371,7 +362,6 @@ function PreparedMnemonicLibrary({
                   </div>
                 ) : null}
 
-                {!isCurated ? <p className="prepared-mnemonic-library-scaffold-hint">{copy.scaffoldHint}</p> : null}
               </div>
 
               <div className="prepared-mnemonic-library-action">
@@ -513,8 +503,8 @@ export function MnemonicsDialog({
           <h2 id="mnemonics-dialog-title">{t("preparedMnemonicLibrary", language)}</h2>
           <p className="secondary-surface-dialog-hint">
             {language === "fa"
-              ? "اینجا برای یک کانجی، یک تصویر یا ارتباط به‌یادماندنی پیدا می‌کنی؛ سپس فقط چیزی را که برای ذهن خودت کار می‌کند نگه می‌داری."
-              : "Find a memorable image or connection for a kanji, then keep only what works for your own memory."}
+              ? "برای هر کانجی یک ارتباط به‌یادماندنی پیدا کن و فقط چیزی را نگه دار که یادآوری را برایت آسان‌تر می‌کند؛ این کتابخانه جای مرور زمان‌بندی‌شده را نمی‌گیرد."
+              : "Find a memory cue for each kanji and keep what genuinely helps you remember it; this library is separate from scheduled reviews."}
           </p>
         </div>
         <div className="prepared-mnemonics-dialog-metrics" aria-label={language === "fa" ? "پوشش یادسپارها" : "Mnemonic coverage"}>

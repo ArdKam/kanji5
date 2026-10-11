@@ -74,7 +74,7 @@ try {
     });
     if (reviewCountAfterReload < reviewCountBeforeReload) throw new Error('LIVE_SMOKE_LEARNING_STATE_LOST_AFTER_RELOAD');
 
-    await page.getByRole('button', { name: 'Active Recall', exact: true }).click();
+    await page.getByRole('button', { name: 'Practice', exact: true }).click();
     await page.locator('#root .practice-home').waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: 'Start exercise', exact: true }).click();
     await page.locator('#exercise').waitFor({ state: 'visible', timeout: 15000 });

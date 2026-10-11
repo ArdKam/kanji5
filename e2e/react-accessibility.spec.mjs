@@ -72,7 +72,7 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   await expect(reveal).toBeVisible();
   await reveal.click();
   await page.getByRole('button',{name:'خوب',exact:true}).click();
-  await page.getByRole('button',{name:'یادآوری فعال'}).click();
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
   await expect(page.locator('#exercise')).toBeVisible({timeout:10000});
@@ -116,7 +116,7 @@ test('dictionary card uses stable tabs with one active content viewport', async 
     expect(tab.right).toBeLessThanOrEqual(navRight+1);
   }
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
+  const structure=dialog.getByRole('tab',{name:'ساختار',exact:true});
   await expect(overview).toHaveAttribute('aria-selected','true');
   await expect(structure).toHaveAttribute('aria-selected','false');
   await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
@@ -240,7 +240,7 @@ test('dictionary card restores stable tab semantics after opening', async ({page
   const tabs=dialog.getByRole('tab');
   await expect(tabs).toHaveCount(5);
   const overview=dialog.getByRole('tab',{name:'نمای کلی',exact:true});
-  const structure=dialog.getByRole('tab',{name:'کالبد',exact:true});
+  const structure=dialog.getByRole('tab',{name:'ساختار',exact:true});
   await expect(overview).toHaveAttribute('aria-selected','true');
   await expect(structure).toHaveAttribute('aria-selected','false');
   await expect(dialog.locator('.dictionary-tabpanel')).toHaveCount(1);
@@ -345,7 +345,7 @@ test('React presentation stays usable at the narrow 320px boundary without horiz
   expect(minVisibleLeft).toBeGreaterThanOrEqual(-1);
   expect(metrics.contentWidth).toBeLessThanOrEqual(metrics.viewport+1);
   await expect(page.locator('.experience-nav')).toBeVisible();
-  await expect(page.getByRole('button',{name:'یادآوری فعال'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'تمرین',exact:true})).toBeVisible();
 });
 
 
@@ -405,7 +405,7 @@ test('English dictionary presentation localizes card controls and uses the share
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.dictionary-section-nav')).toHaveAttribute('aria-label','Card options');
   await expect(dialog.getByRole('tab',{name:'Overview'})).toBeVisible();
-  await expect(dialog.getByRole('tab',{name:'Anatomy'})).toBeVisible();
+  await expect(dialog.getByRole('tab',{name:'Structure'})).toBeVisible();
   await expect(dialog.getByRole('tab',{name:'Writing'})).toBeVisible();
   await expect(dialog.getByRole('tab',{name:'Words'})).toBeVisible();
   await expect(dialog.getByRole('tab',{name:'Mnemonic'})).toHaveCount(1);

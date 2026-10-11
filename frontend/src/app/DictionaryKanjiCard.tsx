@@ -15,13 +15,13 @@ type SectionKey = "overview" | "structure" | "writing" | "vocabulary" | "mnemoni
 const sectionLabel = (key: SectionKey, language: Language) => {
   if (language === "fa") {
     if (key === "overview") return "نمای کلی";
-    if (key === "structure") return "کالبد";
+    if (key === "structure") return "ساختار";
     if (key === "writing") return "نوشتن";
     if (key === "vocabulary") return "واژه";
     return "یادسپار";
   }
   if (key === "overview") return "Overview";
-  if (key === "structure") return "Anatomy";
+  if (key === "structure") return "Structure";
   if (key === "writing") return "Writing";
   if (key === "vocabulary") return "Words";
   return "Mnemonic";
@@ -52,6 +52,7 @@ export function DictionaryKanjiCard({
   const [radicalInfo, setRadicalInfo] = useState<RadicalInfo | null>(null);
   const [handwritingSkill, setHandwritingSkill] = useState<HandwritingSkill | null>(null);
   const [activeSection, setActiveSection] = useState<SectionKey>("overview");
+  const [isNarrowViewport, setIsNarrowViewport] = useState(false);
   const [navigationDirection, setNavigationDirection] = useState<"next" | "previous" | null>(null);
   const pointerStartRef = useRef<{ x: number; y: number; pointerId: number } | null>(null);
 
@@ -102,6 +103,14 @@ export function DictionaryKanjiCard({
   useEffect(() => {
     setActiveSection("overview");
   }, [item.character]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 640px)");
+    const updateViewport = () => setIsNarrowViewport(media.matches);
+    updateViewport();
+    media.addEventListener("change", updateViewport);
+    return () => media.removeEventListener("change", updateViewport);
+  }, []);
 
   useEffect(() => {
     if (!navigationDirection) return;
@@ -175,6 +184,7 @@ export function DictionaryKanjiCard({
     <button
       id={"dictionary-section-tab-" + key}
       className={"dictionary-section-tab" + (activeSection === key ? " is-active" : "")}
+      style={{ minHeight: 44, paddingInline: isNarrowViewport ? 3 : 7 }}
       type="button"
       role="tab"
       aria-selected={activeSection === key}
@@ -189,22 +199,23 @@ export function DictionaryKanjiCard({
 
   const renderOverview = () => (
     <div id="dictionary-section-panel-overview" className="dictionary-tabpanel dictionary-overview" role="tabpanel" aria-labelledby="dictionary-section-tab-overview" tabIndex={0}>
-      <div className="dictionary-overview-hero">
-        <div className="dictionary-overview-character" lang="ja" aria-label={item.character}>{item.character}</div>
+      <div className="dictionary-overview-hero" style={{ gridTemplateColumns: isNarrowViewport ? "88px minmax(0, 1fr)" : "124px minmax(0, 1fr)", gap: isNarrowViewport ? 12 : 18, padding: 0, border: 0, borderRadius: 0, background: "transparent" }}>
+        <div className="dictionary-overview-character" lang="ja" aria-label={item.character} style={{ minHeight: isNarrowViewport ? 94 : 124, border: "1px solid var(--line-soft)", borderRadius: isNarrowViewport ? 13 : 16, background: "var(--washi)", fontSize: isNarrowViewport ? 68 : "clamp(76px, 8vw, 108px)" }}>{item.character}</div>
         <div className="dictionary-overview-copy">
           <div className="dictionary-overview-reading-line">
             <span className="dictionary-overview-reading">{item.on.slice(0, 2).join(" · ") || item.kun.slice(0, 2).join(" · ") || "—"}</span>
             <DictionaryAudio value={item.on[0] || item.kun[0] || item.character} label={t("playKanjiPronunciation", language)} />
           </div>
           {item.meanings.length ? (
-            <div className="dictionary-card-section dictionary-overview-meaning" dir="auto">
-              <strong><bdi>{item.meanings[0]}</bdi></strong>
+            <div className="dictionary-card-section dictionary-overview-meaning" dir="auto" style={{ margin: 0, padding: 0, border: 0, background: "transparent" }}>
+              <strong style={{ fontSize: "var(--text-xl)", color: "var(--sumi)" }}><bdi>{item.meanings[0]}</bdi></strong>
               {item.meanings.length > 1 ? <span>{item.meanings.slice(1, 4).map((meaning, index) => <bdi key={meaning + "-" + index}>{meaning}</bdi>)}</span> : null}
             </div>
           ) : null}
         </div>
       </div>
-      <div className="dictionary-stroke-order-wrap">
+      <div className="dictionary-stroke-order-wrap" style={{ display: "grid", gap: 7 }}>
+        <h3 className="dictionary-stroke-order-heading" style={{ margin: 0, paddingInline: 2, color: "var(--mute)", fontSize: 12, fontWeight: 800, lineHeight: 1.3 }}>{t("strokeOrder", language)}</h3>
         <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
       </div>
       <div className="readings-header dictionary-readings-header"><span>{t("reading", language)}</span></div>
@@ -331,19 +342,24 @@ export function DictionaryKanjiCard({
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
 
   return (
-    <dialog ref={dialogRef} className="dialog dictionary-card-dialog" aria-labelledby="dictionary-card-title">
+    <dialog
+      ref={dialogRef}
+      className="dialog dictionary-card-dialog"
+      aria-labelledby="dictionary-card-title"
+      style={{ height: isNarrowViewport ? "min(790px, calc(100dvh - 28px))" : "min(700px, calc(100dvh - 28px))", borderRadius: isNarrowViewport ? 18 : "var(--radius-xl)" }}
+    >
       <div key={item.character} className={"dictionary-card" + (navigationDirection ? " is-navigation-" + navigationDirection : "")}
         onPointerDown={handleCardPointerDown}
         onPointerUp={handleCardPointerUp}
         onPointerCancel={handleCardPointerCancel}>
-        <header className="dictionary-card-header">
+        <header className="dictionary-card-header" style={{ gridTemplateColumns: "minmax(0, 1fr) 44px auto 44px auto", gap: isNarrowViewport ? 4 : 6, paddingBottom: 12 }}>
           <div className="dictionary-card-classification">
-            <span className="dictionary-card-jlpt badge badge-red">{item.jlpt || "—"}</span>
+            <span className="dictionary-card-jlpt badge">{item.jlpt || "—"}</span>
             {item.grade ? <span className="dictionary-card-grade">G{formatNumber(item.grade, language)}</span> : null}
           </div>
-          <button className="dictionary-card-nav dictionary-card-nav-previous" type="button" aria-label={language === "fa" ? "کانجی قبلی" : "Previous kanji"} onClick={() => navigateKanji("previous")} disabled={!hasPrevious}>‹</button>
+          <button className="dictionary-card-nav dictionary-card-nav-previous" style={{ width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: 12 }} type="button" aria-label={language === "fa" ? "کانجی قبلی" : "Previous kanji"} onClick={() => navigateKanji("previous")} disabled={!hasPrevious}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6" /></svg></button>
           <span id="dictionary-card-title" className="dictionary-card-header-character" lang="ja">{item.character}</span>
-          <button className="dictionary-card-nav dictionary-card-nav-next" type="button" aria-label={language === "fa" ? "کانجی بعدی" : "Next kanji"} onClick={() => navigateKanji("next")} disabled={!hasNext}>›</button>
+          <button className="dictionary-card-nav dictionary-card-nav-next" style={{ width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: 12 }} type="button" aria-label={language === "fa" ? "کانجی بعدی" : "Next kanji"} onClick={() => navigateKanji("next")} disabled={!hasNext}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg></button>
           <div className="dictionary-card-header-end">
             <div className="dictionary-card-mastery" role="img" aria-label={t("dictionaryMastery", language) + " " + formatNumber(mastery, language) + "%"}>
               <svg className="dictionary-mastery-ring" viewBox="0 0 44 44" aria-hidden="true">
@@ -353,11 +369,11 @@ export function DictionaryKanjiCard({
               </svg>
               <span className="sr-only">{t("dictionaryMastery", language)} {formatNumber(mastery, language)}%</span>
             </div>
-            <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
+            <button className="dialog-close" style={{ width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: 12, border: "1px solid var(--line-soft)", background: "var(--washi)" }} type="button" aria-label={t("close", language)} onClick={onClose}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
           </div>
         </header>
-        <div className="dictionary-card-navigation-hint" aria-live="polite">
-          {hasPrevious || hasNext ? (language === "fa" ? "← قبلی · سوایپ به راست: بعدی · سوایپ به چپ: قبلی · → بعدی" : "Swipe right: next · swipe left: previous") : null}
+        <div className="dictionary-card-navigation-hint" aria-live="polite" style={{ display: isNarrowViewport ? "block" : "none", minHeight: 16, marginTop: 4, fontSize: 11 }}>
+          {hasPrevious || hasNext ? (language === "fa" ? "برای کانجی بعدی به راست بکش؛ برای قبلی به چپ." : "Swipe right for next · left for previous") : null}
         </div>
         <div className="dictionary-section-nav" role="tablist" aria-label={t("dictionaryCardOptions", language)}>
           {(["overview", "structure", "writing", "vocabulary", "mnemonic"] as SectionKey[]).map(tabButton)}
