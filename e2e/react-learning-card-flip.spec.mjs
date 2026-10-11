@@ -491,7 +491,19 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(menu).toBeVisible();
   const scrim = page.locator(".header-menu-scrim");
   await expect(scrim).toBeVisible();
-  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
+  const scrimFilter = await scrim.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      standard: style.getPropertyValue("backdrop-filter"),
+      webkit: style.getPropertyValue("-webkit-backdrop-filter"),
+      supportsStandard: CSS.supports("backdrop-filter", "blur(4px)"),
+      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)")
+    };
+  });
+  console.log("header menu scrim filter:", JSON.stringify(scrimFilter));
+  expect(
+    scrimFilter.standard === "blur(4px)" || scrimFilter.webkit === "blur(4px)"
+  ).toBe(true);
   await expect(account).toBeVisible();
   await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
@@ -540,7 +552,19 @@ test("mobile menu prevents account click-through until the drawer closes", async
   await expect(menu).toBeVisible();
   const scrim = page.locator(".header-menu-scrim");
   await expect(scrim).toBeVisible();
-  await expect(scrim).toHaveCSS("backdrop-filter", "blur(4px)");
+  const scrimFilter = await scrim.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      standard: style.getPropertyValue("backdrop-filter"),
+      webkit: style.getPropertyValue("-webkit-backdrop-filter"),
+      supportsStandard: CSS.supports("backdrop-filter", "blur(4px)"),
+      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)")
+    };
+  });
+  console.log("header menu scrim filter:", JSON.stringify(scrimFilter));
+  expect(
+    scrimFilter.standard === "blur(4px)" || scrimFilter.webkit === "blur(4px)"
+  ).toBe(true);
   await expect(account).toBeVisible();
   await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
