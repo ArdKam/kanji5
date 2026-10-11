@@ -29,6 +29,10 @@ test("Reading Lab keeps a calm start state and a single-scroll focused Reader on
   const input = lab.locator(".reading-lab-input");
 
   await expect(input).toBeVisible();
+  expect(await input.evaluate(el => el.getBoundingClientRect().height)).toBeLessThanOrEqual(155);
+  const headingBottom = await lab.locator(".reading-lab-section-heading").first().evaluate(el => el.getBoundingClientRect().bottom);
+  const inputTop = await input.evaluate(el => el.getBoundingClientRect().top);
+  expect(inputTop - headingBottom).toBeLessThanOrEqual(34);
   await expect(lab.locator(".reading-lab-empty")).toBeHidden();
   await expect(lab.locator(".reading-lab-listen")).toBeHidden();
 
