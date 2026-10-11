@@ -31,6 +31,8 @@ assert.match(polish, /@media\(max-width:760px\)\s*\{\s*\.reading-lab-reader-tool
 
 // Empty state offers one clear starting path rather than repeating the same prompt.
 assert.match(polish, /\.reading-lab:not\(:has\(\.reading-lab-reader\)\) \.reading-lab-input\s*\{[^}]*height:132px;[^}]*min-height:132px;/s);
+assert.match(polish, /\.reading-lab\s*\{align-content:start;\}/);
+assert.match(polish, /\.reading-lab-section\s*\{align-content:start;\}/);
 assert.match(polish, /\.reading-lab:not\(:has\(\.reading-lab-reader\)\) > \.reading-lab-empty\s*\{\s*display:none;\s*\}/);
 assert.match(polish, /\.reading-lab:not\(:has\(\.reading-lab-reader\)\) > \.reading-lab-listen\s*\{\s*display:none;\s*\}/);
 assert.match(polish, /\.reading-lab \.reading-lab-step\s*\{\s*display:none;\s*\}/);
