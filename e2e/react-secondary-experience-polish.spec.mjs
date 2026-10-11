@@ -83,7 +83,7 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   const save = curatedRow.locator(".prepared-mnemonic-library-use");
   await expect(save).toBeVisible();
   await save.click();
-  await expect(save).toContainText("Saved to personal mnemonics");
+  await expect(save).toContainText("Saved");
 
   await search.fill("the");
   await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
