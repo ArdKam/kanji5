@@ -33,6 +33,23 @@ function renderComponent(component: VisualStructureNode, path: string, language:
   const partLabel = component.part
     ? (language === "fa" ? "قطعهٔ " : "Fragment ") + component.part
     : "";
+  const radicalRoleLabel = component.radicalRole
+    ? (language === "fa" ? "نقش رادیکال در KanjiVG: " : "KanjiVG radical role: ") + component.radicalRole
+    : "";
+  const phoneticRoleLabel = component.phoneticRole
+    ? (language === "fa" ? "نقش آوایی در KanjiVG: " : "KanjiVG phonetic role: ") + component.phoneticRole
+    : "";
+  const sourcePartDetailsLabel = component.sourcePartDetails?.length
+    ? (language === "fa" ? "فرادادهٔ قطعه‌های منبع: " : "Source-fragment metadata: ") + component.sourcePartDetails.map(detail => {
+        const sourcePosition = detail.position ? POSITION_LABELS[detail.position]?.[language] : "";
+        return [
+          (language === "fa" ? "قطعهٔ " : "part ") + detail.part,
+          sourcePosition,
+          detail.radicalRole ? (language === "fa" ? "رادیکال: " : "radical: ") + detail.radicalRole : "",
+          detail.phoneticRole ? (language === "fa" ? "آوایی: " : "phonetic: ") + detail.phoneticRole : "",
+        ].filter(Boolean).join(" · ");
+      }).join(" / ")
+    : "";
   const childrenLabel = language === "fa" ? "اجزای این جزء" : "Subcomponents";
   const classes = ["component-breakdown-part"];
   if (component.variant) classes.push("is-variant");
@@ -46,6 +63,10 @@ function renderComponent(component: VisualStructureNode, path: string, language:
         {originalLabel ? <span className="component-breakdown-label component-breakdown-partial">{originalLabel}</span> : null}
         {partLabel ? <span className="component-breakdown-label component-breakdown-partial">{partLabel}</span> : null}
         {position ? <span className="component-breakdown-label component-breakdown-position">{position}</span> : null}
+        {radicalRoleLabel ? <span className="component-breakdown-label component-breakdown-metadata">{radicalRoleLabel}</span> : null}
+        {phoneticRoleLabel ? <span className="component-breakdown-label component-breakdown-metadata">{phoneticRoleLabel}</span> : null}
+        {component.sourceParts?.length ? <span className="component-breakdown-label component-breakdown-metadata">{(language === "fa" ? "قطعه‌های منبع: " : "Source parts: ") + component.sourceParts.join(" · ")}</span> : null}
+        {sourcePartDetailsLabel ? <span className="component-breakdown-label component-breakdown-metadata">{sourcePartDetailsLabel}</span> : null}
         {component.components.length ? (
           <span className="component-breakdown-subparts" role="list" aria-label={childrenLabel}>
             {component.components.map((child, index) => renderComponent(child, path + "." + index, language))}

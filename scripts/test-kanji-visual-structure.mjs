@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const readJSON = async path => JSON.parse(await readFile(new URL("../" + path, import.meta.url), "utf8"));
 const catalog = await readJSON("kanji-data.json");
 const visual = await readJSON("kanji-visual-structure.json");
+const componentRenderer = await readFile(new URL("../frontend/src/app/ComponentBreakdown.tsx", import.meta.url), "utf8");
 
 assert.equal(visual.schema, "kanji-visual-structure/v1");
 assert.equal(visual.version, 1);
@@ -15,6 +16,10 @@ assert.equal(visual.source?.name, "KanjiVG");
 assert.equal(visual.source?.commit, "70a0b7ae0c18ceb5cb358274b029cce0234a43bc");
 assert.equal(visual.source?.license, "CC BY-SA 3.0");
 assert.deepEqual(visual.missing, []);
+
+for (const field of ["radicalRole", "phoneticRole", "sourceParts", "sourcePartDetails"]) {
+  assert.ok(componentRenderer.includes("component." + field), `The recursive structure renderer must preserve ${field} metadata`);
+}
 
 const characters = (catalog?.kanji || []).map(entry => String(entry?.character || ""));
 assert.equal(characters.length, 2136);

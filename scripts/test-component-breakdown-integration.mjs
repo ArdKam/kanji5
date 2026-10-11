@@ -7,10 +7,19 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(app.includes('import { ComponentBreakdown } from "./ComponentBreakdown";'), "Learning card must import ComponentBreakdown");
+assert(app.includes('import { KanjiStructurePreview } from "./KanjiStructurePreview";'), "Learning card must use the compact visual-structure preview");
 assert(app.includes("getVisualStructureInfo(card.character)"), "Learning card must request the canonical visual structure");
 assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typed visual structure contract");
-assert(app.includes("<ComponentBreakdown info={visualStructureInfo}"), "Learning card must render the visual structure rather than TopoKanji learning dependencies");
+assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
+assert(app.includes("enabled={revealed && backPage === 0}"), "Card-specific presentation styles should be deferred until the learning back face is revealed");
+const structurePreview = await readFile(new URL("../frontend/src/app/KanjiStructurePreview.tsx", import.meta.url), "utf8");
+assert(/No finer components recorded/.test(structurePreview), "Atomic preview must use a concise English empty state");
+assert(/جزء دیداری ریزتری ثبت نشده/.test(structurePreview), "Atomic preview must use a concise Persian empty state");
+assert(/className="kanji-structure-preview-empty"/.test(structurePreview), "Atomic preview must use its compact empty-state style");
+assert(!/kanji-structure-preview-atomic.*character/.test(structurePreview), "Preview must not repeat the target kanji as a fake component");
+const structureDialog = await readFile(new URL("../frontend/src/app/KanjiStructureDialog.tsx", import.meta.url), "utf8");
+assert(structureDialog.includes("<ComponentBreakdown"), "Full visual structure must remain available in the detail dialog");
+assert(structureDialog.includes("<TraditionalRadical"), "Traditional radical classification must remain distinct from visual components");
 assert(app.includes("setVisualStructureInfo(null)"), "Visual structure must be cleared when the card changes or is empty");
 assert(app.includes('if(!revealed||!card.character)'), "Structure requests must remain gated until the learning card is revealed");
 assert(dictionary.includes("getVisualStructureInfo(item.character)"), "Dictionary must request the same visual structure source");
