@@ -5,11 +5,7 @@
  */
 
 /* Once text is loaded, make the reading surface the primary destination. */
-.reading-lab:has(.reading-lab-reader) > .reading-lab-source{order:1;padding:12px 0 14px;gap:9px;}
-.reading-lab:has(.reading-lab-reader) > .reading-lab-reader{order:2;}
-.reading-lab:has(.reading-lab-reader) > .reading-lab-analysis{order:3;}
-.reading-lab:has(.reading-lab-reader) > .reading-lab-attention{order:4;}
-.reading-lab:has(.reading-lab-reader) > .reading-lab-listen{order:5;}
+.reading-lab:has(.reading-lab-reader) .reading-lab-source{padding:12px 0 14px;gap:9px;}
 
 .reading-lab:has(.reading-lab-reader) .reading-lab-step{display:none;}
 .reading-lab:has(.reading-lab-reader) .reading-lab-source .reading-lab-section-heading>div>p:last-child{display:none;}
