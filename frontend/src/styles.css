@@ -3454,6 +3454,12 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
   font-size:var(--text-xs);
   line-height:1.5;
 }
+.prepared-mnemonic-row-success{
+  color:var(--matcha);
+  font-size:var(--text-xs);
+  line-height:1.5;
+  font-weight:750;
+}
 .prepared-mnemonic-components{
   display:flex;
   align-items:center;
