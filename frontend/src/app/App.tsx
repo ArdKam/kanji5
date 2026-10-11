@@ -751,12 +751,9 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
         <span className="active-recall-divider" aria-hidden="true">·</span>
         <span className="active-recall-task-modality">{taskModalityLabel}</span>
       </div>
-      <div className="active-recall-session-actions">
-        <span className="active-recall-session-dot" aria-hidden="true"/>
-        <button className="active-recall-exit" type="button" disabled={busy} onClick={onExit} aria-label={t("exitPractice")} title={t("exitPractice")}>
-          <UiIcon name="close" size={15}/><span>{t("exitPractice")}</span>
-        </button>
-      </div>
+      <button className="button secondary active-recall-exit" type="button" disabled={busy} onClick={onExit} aria-label={t("exitPractice")} title={t("exitPractice")}>
+        <UiIcon name="close" size={15}/><span>{t("exitPractice")}</span>
+      </button>
     </div>
 
     {!ex.mode?<div className="active-recall-empty">{t("exerciseReady")}</div>:<>
