@@ -15,6 +15,14 @@ assert.ok(styles.includes(".stats-hero"),"stats hero hierarchy missing");
 assert.ok(styles.includes(".settings-save-region"),"settings sticky action region missing");
 assert.ok(styles.includes(".reading-lab-analysis"),"reading analysis hierarchy missing");
 assert.ok(styles.includes(".prepared-mnemonic-library-row"),"mnemonic library row polish missing");
+assert.ok(styles.includes("/* Prepared Mnemonics Library — consolidated premium surface. */"),"mnemonic library must have one consolidated style block");
+assert.ok(!styles.includes("Prepared Mnemonics Library v2:")&&!styles.includes("Prepared Mnemonics Library v3:"),"superseded mnemonic CSS generations remain");
+assert.ok(!styles.includes(".prepared-mnemonic-library \n.prepared-mnemonic-library-row{"),"legacy malformed mnemonic selector remains");
+assert.ok(!dictionaryCss.includes(".prepared-mnemonic-library{\n  margin:0 0 14px;"),"duplicate mnemonic-library layout styles remain in dictionary CSS");
+assert.ok(mnemonics.includes("preparedCoreFailed"),"lazy mnemonic-library import needs a recoverable error state");
+assert.ok(mnemonics.includes("generatedModeNote"),"generated mnemonic provenance should be explained once per mode");
+assert.ok(!mnemonics.includes("prepared-mnemonic-howto"),"repeated three-step helper should not return to every session");
+
 
 assert.ok(dictionaryCss.includes(".grammar-progress-track"),"grammar progress track missing");
 assert.ok(dictionaryCss.includes(".grammar-feedback.incorrect"),"grammar incorrect feedback state missing");
