@@ -447,8 +447,9 @@ function PreparedMnemonicLibrary({
                         void apply(entry.character, entry.suggestion, key);
                       }}
                     >
-                      {isBusy ? copy.saving : isApplied ? copy.saved : hasPersonalMnemonic ? copy.edit : copy.save}
+                      {isBusy ? copy.saving : hasPersonalMnemonic ? copy.edit : isApplied ? copy.saved : copy.save}
                     </button>
+                    {isApplied && !editingKey ? <span className="prepared-mnemonic-row-success" role="status">{copy.saved}</span> : null}
                     {hasError && editingKey !== key ? <span className="prepared-mnemonic-row-error" role="alert">{errorMessage}</span> : null}
                   </>
                 ) : (
