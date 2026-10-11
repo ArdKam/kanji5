@@ -99,6 +99,7 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
 test("Prepared Mnemonics supports grade and JLPT filters plus inline create/edit", async ({ page }) => {
   await clean(page, "en");
   const dialog = await openMenuItem(page, "Prepared mnemonics");
+  await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
   const grade = dialog.locator(".prepared-mnemonic-filter-select select").nth(0);
   const jlpt = dialog.locator(".prepared-mnemonic-filter-select select").nth(1);
 
