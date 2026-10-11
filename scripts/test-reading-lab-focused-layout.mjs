@@ -29,6 +29,12 @@ assert.match(polish, /\.reading-lab-reader-text\s*\{[^}]*border:0;[^}]*box-shado
 assert.match(polish, /grid-template-areas:"focus focus" "position controls"/);
 assert.match(polish, /@media\(max-width:760px\)\s*\{\s*\.reading-lab-reader-toolbar\s*\{[^}]*grid-template-areas:"focus" "position" "controls"/s);
 
+// Empty state offers one clear starting path rather than repeating the same prompt.
+assert.match(polish, /\.reading-lab:not\(:has\(\.reading-lab-reader\)\) \.reading-lab-input\s*\{[^}]*height:132px;[^}]*min-height:132px;/s);
+assert.match(polish, /\.reading-lab:not\(:has\(\.reading-lab-reader\)\) > \.reading-lab-empty\s*\{\s*display:none;\s*\}/);
+assert.match(polish, /\.reading-lab:not\(:has\(\.reading-lab-reader\)\) > \.reading-lab-listen\s*\{\s*display:none;\s*\}/);
+assert.match(polish, /\.reading-lab \.reading-lab-step\s*\{\s*display:none;\s*\}/);
+
 // Guard against visual-only changes accidentally deleting core Reading Lab behavior.
 for (const contract of ["READING_LAB_STORAGE_KEY", "parseSubtitleCues", "syncReady", "speakCurrentSentence", "findLongestVocabularyMatch"]) {
   assert.ok(reading.includes(contract), `Reading Lab behavior contract missing: ${contract}`);
