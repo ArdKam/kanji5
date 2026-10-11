@@ -34,8 +34,8 @@ assert.ok(css.includes('grid-template-areas:"focus" "position" "controls"'), "Mo
 assert.match(focus, /\.reading-lab-focus-controls\{[^}]*grid-area:focus;gap:6px;/);
 assert.match(focus, /\.reading-lab-focus-button\{min-height:32px;/);
 assert.ok(!css.includes("max-height:42dvh"), "Sentence list must not reintroduce nested scrolling on mobile");
-assert.match(styles, /\\.dialog\\.secondary-page-dialog\\.reading-lab-dialog:not\\(:has\\(\\.reading-lab-reader\\)\\)\\{height:auto;min-height:0;max-height:min\\(520px,calc\\(100dvh - 32px\\)\\);\\}/);
-assert.match(styles, /@media\\(max-width:760px\\)\\{\\.dialog\\.secondary-page-dialog\\.reading-lab-dialog:not\\(:has\\(\\.reading-lab-reader\\)\\)\\{height:auto!important;min-height:0!important;max-height:min\\(520px,calc\\(100dvh - 32px\\)\\)!important;\\}\\}/);
+assert.ok(styles.includes(".dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto;min-height:0;max-height:min(520px,calc(100dvh - 32px));}"), "Empty dialog should use intrinsic height on desktop");
+assert.ok(styles.includes("@media(max-width:760px){.dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto!important;min-height:0!important;max-height:min(520px,calc(100dvh - 32px))!important;}}"), "Empty dialog should override the mobile minimum height");
 
 // Avoid duplicate helper copy, step labels, or disabled audio controls in the empty state.
 assert.ok(reading.includes('!value.trim() ? <p>{t("readingLabSourceHint", language)}</p> : null'), "Helper copy should only appear when input is empty");
