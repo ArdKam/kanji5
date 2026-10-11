@@ -66,6 +66,7 @@ const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
 const pct=(v:number|undefined)=>Math.round(Math.max(0,Math.min(1,Number(v)||0))*100);
 const toHiragana=(value:string)=>Array.from(value).map(ch=>{const code=ch.charCodeAt(0);return code>=0x30a1&&code<=0x30f6?String.fromCharCode(code-0x60):ch}).join("");
 const skillLabel=(key:string)=>({meaning:t("meaning"),reading:t("reading"),production:t("production"),vocabulary:t("vocabulary"),context:t("context")} as Record<string,string>)[key]??text(key);
+const preparedMnemonicSourceLabel=(source:PreparedMnemonic["source"])=>source==="curated"?t("preparedMnemonicCurated"):(getLanguage()==="fa"?"یادسپار تولیدشده":"Generated mnemonic");
 const modalityLabel=(modality:string,stage:string)=>{
   if(stage==="introduction")return t("contentExposureModality");
   if(modality==="revealed_self_report")return t("revealedSelfReportModality");
@@ -448,7 +449,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         mnemonicHintPlan.preparedMode==="expanded"?
                           <div className="mnemonic-prepared" data-mnemonic-source={preparedMnemonic.source}>
                             <div className="mnemonic-prepared-copy">
-                              <strong>{preparedMnemonic.source==="curated"?t("preparedMnemonicCurated"):t("preparedMnemonicScaffold")}</strong>
+                              <strong>{preparedMnemonicSourceLabel(preparedMnemonic.source)}</strong>
                               <p>{getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en}</p>
                             </div>
                             {personalMnemonic===(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en)
@@ -470,7 +471,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                           <details className="mnemonic-prepared mnemonic-prepared-collapsed" data-mnemonic-source={preparedMnemonic.source}>
                             <summary className="mnemonic-prepared-summary">
                               <strong>{t("memoryAid")}</strong>
-                              <span>{preparedMnemonic.source==="curated"?t("preparedMnemonicCurated"):t("preparedMnemonicScaffold")}</span>
+                              <span>{preparedMnemonicSourceLabel(preparedMnemonic.source)}</span>
                             </summary>
                             <div className="mnemonic-prepared-details">
                               <p>{getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en}</p>

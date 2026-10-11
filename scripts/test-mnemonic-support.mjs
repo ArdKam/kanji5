@@ -204,8 +204,14 @@ assert.match(support, /wordStartsWithCharacter/);
 
 assert.match(app, /data-mnemonic-source/);
 assert.match(app, /preparedMnemonicCurated/);
-assert.match(app, /preparedMnemonicScaffold/);
-assert.match(app, /preparedMnemonic\.source==="curated"/);
+const mnemonicTypes = fs.readFileSync("frontend/src/app/mnemonic-library.ts", "utf8");
+assert.match(mnemonicTypes, /source: "curated" \| "generated"/);
+assert.match(app, /preparedMnemonicSourceLabel\(preparedMnemonic\.source\)/);
+assert.match(app, /Generated mnemonic/);
+assert.match(app, /یادسپار تولیدشده/);
+assert.doesNotMatch(app, /preparedMnemonic\.source==="curated"\?t\("preparedMnemonicCurated"\):t\("preparedMnemonicScaffold"\)/,
+  "Generated fallbacks must not be mislabeled as scaffolds");
+assert.match(app, /preparedMnemonic\.source==="curated"/, "Use-prepared action should remain reserved for curated mnemonics");
 assert.match(app, /makeMnemonicYourOwn/);
 assert.match(app, /setMnemonicEditing\(true\)/);
 assert.match(app, /preparedMode!=="hidden"/);
