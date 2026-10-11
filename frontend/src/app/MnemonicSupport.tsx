@@ -18,7 +18,7 @@ export function MnemonicSupportPanel({ support, language, character, isNew = fal
   const handleToggle = (event: SyntheticEvent<HTMLDetailsElement>) => setExpanded(event.currentTarget.open);
 
   return (
-    <details className={"mnemonic-support mnemonic-support-" + presentationMode} data-hint-stage={stage} data-hint-focus={hintFocus} open={expanded} onToggle={handleToggle} aria-label={t("mnemonicBridges")}>
+    <details className={"mnemonic-support mnemonic-support-" + presentationMode} data-hint-stage={stage} data-hint-focus={hintFocus} open={expanded} onToggle={handleToggle} >
       <summary className="mnemonic-support-header">
         <strong>{t("mnemonicBridges")}</strong>
         <span>{t("mnemonicBridgesHint")}</span>
@@ -39,7 +39,17 @@ export function MnemonicSupportPanel({ support, language, character, isNew = fal
           <div className="mnemonic-support-item-label">{t("readingMnemonic")}</div>
           <div className="mnemonic-support-reading-row">
             <strong className="mnemonic-support-reading" lang="ja">{support.readingMnemonic.reading}</strong>
-            {support.readingMnemonic.keywordEn ? <span className="mnemonic-support-keyword" title={support.readingMnemonic.keywordFa}>{support.readingMnemonic.keywordEn}</span> : null}
+            {support.readingMnemonic.keywordEn || support.readingMnemonic.keywordFa ? (
+              <span
+                className="mnemonic-support-keyword"
+                lang={language === "fa" && support.readingMnemonic.keywordFa ? "fa" : "en"}
+                dir="auto"
+              >
+                {language === "fa"
+                  ? (support.readingMnemonic.keywordFa || support.readingMnemonic.keywordEn)
+                  : (support.readingMnemonic.keywordEn || support.readingMnemonic.keywordFa)}
+              </span>
+            ) : null}
             {support.readingMnemonic.word ? <span className="mnemonic-support-arrow" aria-hidden="true">↔</span> : null}
             {support.readingMnemonic.word ? <strong className="mnemonic-support-word" lang="ja">{support.readingMnemonic.word}</strong> : null}
           </div>
