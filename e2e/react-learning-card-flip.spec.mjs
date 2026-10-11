@@ -527,8 +527,12 @@ test("structured header menu keeps account inactive until the menu closes and ex
   const scrim = page.locator(".header-menu-scrim");
   await expect(menu).toBeVisible();
   await expect(scrim).toBeVisible();
-  const scrimBlur = await scrim.evaluate(element => getComputedStyle(element, "::before").backdropFilter);
-  expect(scrimBlur).toBe("blur(4px)");
+  await expect(page.locator(".header.menu-open .header-actions")).toHaveCSS("z-index", "1000");
+  await expect(page.locator(".header.menu-open .header-brand")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open .header-menu-trigger")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open .account-button")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open ~ .experience-nav")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open ~ .content")).toHaveCSS("filter", "blur(3px)");
   await expect(account).toBeVisible();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
@@ -539,6 +543,13 @@ test("structured header menu keeps account inactive until the menu closes and ex
     return document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)?.classList.contains("header-menu-scrim") === true;
   });
   expect(desktopAccountCovered).toBe(true);
+  const desktopPageCovered = await page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>(".content");
+    if (!content) return false;
+    const bounds = content.getBoundingClientRect();
+    return document.elementFromPoint(innerWidth / 2, bounds.y + Math.min(bounds.height / 2, 200))?.classList.contains("header-menu-scrim") === true;
+  });
+  expect(desktopPageCovered).toBe(true);
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Reading lab", exact: true })).toBeVisible();
@@ -574,43 +585,12 @@ test("mobile menu prevents account click-through until the drawer closes", async
   const scrim = page.locator(".header-menu-scrim");
   await expect(menu).toBeVisible();
   await expect(scrim).toBeVisible();
-  const scrimDiagnostics = await scrim.evaluate(element => {
-    const parent = getComputedStyle(element);
-    const pseudo = getComputedStyle(element, "::before");
-    const matchingRules = [];
-    const visit = (rules, conditions = []) => {
-      for (const rule of Array.from(rules)) {
-        if (rule.type === 4 && rule.conditionText && !matchMedia(rule.conditionText).matches) continue;
-        if (rule.type === 12 && rule.conditionText && !CSS.supports(rule.conditionText)) continue;
-        if (rule.cssRules) {
-          visit(rule.cssRules, rule.conditionText ? [...conditions, rule.conditionText] : conditions);
-          continue;
-        }
-        if (!rule.style) continue;
-        const selector = rule.selectorText || "";
-        const selectors = selector.split(",").map(value => value.trim().replace(/::before|::after/g, ""));
-        const matches = selectors.some(value => { try { return element.matches(value); } catch { return false; } });
-        const declarations = rule.style.cssText || "";
-        if (selector.includes("header-menu-scrim") || matches && /(backdrop-filter|content:|filter:)/.test(declarations)) {
-          matchingRules.push({selector, declarations, conditions});
-        }
-      }
-    };
-    for (const sheet of Array.from(document.styleSheets)) {
-      try { visit(sheet.cssRules, [sheet.href || "inline"]); }
-      catch (error) { matchingRules.push({sheet: sheet.href || "inline", error: String(error)}); }
-    }
-    return {
-      viewport: {width: innerWidth, height: innerHeight, mobileMedia: matchMedia("(max-width: 760px)").matches},
-      stylesheetCount: document.styleSheets.length,
-      parent: {background: parent.backgroundColor, backdropFilter: parent.backdropFilter, position: parent.position, zIndex: parent.zIndex},
-      pseudo: {content: pseudo.content, background: pseudo.backgroundColor, backdropFilter: pseudo.backdropFilter, webkitBackdropFilter: pseudo.webkitBackdropFilter, display: pseudo.display, position: pseudo.position},
-      matchingRules
-    };
-  });
-  console.log("HEADER_MENU_SCRIM_DIAGNOSTIC " + JSON.stringify(scrimDiagnostics));
-  const scrimBlur = await scrim.evaluate(element => getComputedStyle(element, "::before").backdropFilter);
-  expect(scrimBlur).toBe("blur(4px)");
+  await expect(page.locator(".header.menu-open .header-actions")).toHaveCSS("z-index", "1000");
+  await expect(page.locator(".header.menu-open .header-brand")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open .header-menu-trigger")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open .account-button")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open ~ .experience-nav")).toHaveCSS("filter", "blur(3px)");
+  await expect(page.locator(".header.menu-open ~ .content")).toHaveCSS("filter", "blur(3px)");
   await expect(account).toBeVisible();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
@@ -621,6 +601,14 @@ test("mobile menu prevents account click-through until the drawer closes", async
     return document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)?.classList.contains("header-menu-scrim") === true;
   });
   expect(mobileAccountCovered).toBe(true);
+  const mobilePageCovered = await page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>(".content");
+    if (!content) return false;
+    const bounds = content.getBoundingClientRect();
+    const x = innerWidth - 4; // Outside the RTL drawer while still over the page.
+    return document.elementFromPoint(x, bounds.y + Math.min(bounds.height / 2, 220))?.classList.contains("header-menu-scrim") === true;
+  });
+  expect(mobilePageCovered).toBe(true);
 
   // Click the account button's screen position. The scrim must receive the pointer,
   // close the menu, and never let the account dialog open through it.
