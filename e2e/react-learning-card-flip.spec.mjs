@@ -489,7 +489,8 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await page.getByRole("button", { name: "More", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
-  await expect(account).toBeHidden();
+  await expect(account).toBeVisible();
+  await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
@@ -501,7 +502,8 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await menu.getByRole("button", { name: "فارسی", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(account).toBeHidden();
+  await expect(account).toBeVisible();
+  await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
 
   await page.keyboard.press("Escape");
@@ -523,12 +525,12 @@ test("mobile menu prevents account click-through until the drawer closes", async
   await page.getByRole("button", { name: "بیشتر", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
-  await expect(account).toBeHidden();
-  await expect(account).toHaveCSS("visibility", "hidden");
+  await expect(account).toBeVisible();
+  await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
 
-  // Click the account button's former screen position. The hidden control must not
-  // receive this pointer event or open its dialog through the menu overlay.
+  // Click the account button's screen position. It stays visible, but the open-menu
+  // state must prevent click-through and must not open the account dialog.
   await page.mouse.click(
     accountBounds.x + accountBounds.width / 2,
     accountBounds.y + accountBounds.height / 2
