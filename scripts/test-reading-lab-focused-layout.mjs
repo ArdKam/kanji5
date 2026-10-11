@@ -5,10 +5,22 @@ const polish = fs.readFileSync("frontend/src/app/reading-lab-polish.css", "utf8"
 const dialog = fs.readFileSync("frontend/src/app/ReadingLabDialog.tsx", "utf8");
 const reading = fs.readFileSync("frontend/src/app/ReadingLab.tsx", "utf8");
 
-// The scoped polish layer must load after the Reader's child-component styles.
+// The scoped polish layer loads after the Reader's child-component styles.
 assert.ok(dialog.includes('import "./reading-lab-polish.css"'), "Reading Lab polish stylesheet must be imported by its owning dialog");
-assert.match(polish, /\.reading-lab:has\(\.reading-lab-reader\) > \.reading-lab-reader\s*\{\s*order:2;/);
-assert.match(polish, /\.reading-lab:has\(\.reading-lab-reader\) > \.reading-lab-analysis\s*\{\s*order:3;/);
+
+// Visual order and DOM order must match so keyboard focus follows the visible workflow.
+const order = [
+  reading.indexOf('reading-lab-source"'),
+  reading.indexOf('className="reading-lab-reader"'),
+  reading.indexOf('className="reading-lab-analysis"'),
+  reading.indexOf('className="reading-lab-attention"'),
+  reading.indexOf('className="reading-lab-section reading-lab-listen"'),
+];
+assert.ok(order.every((position) => position >= 0), "Reading Lab workflow section missing");
+assert.ok(order.every((position, index) => index === 0 || position > order[index - 1]), "Reading Lab DOM order must match the focused-reading workflow");
+assert.ok(!polish.includes("> .reading-lab-reader{order:"), "Avoid CSS reordering that can desynchronize keyboard focus");
+
+// Input becomes compact after content is loaded.
 assert.match(polish, /\.reading-lab:has\(\.reading-lab-reader\) \.reading-lab-input\s*\{[^}]*height:108px;[^}]*min-height:108px;/s);
 
 // The sentence list must use the Reading Lab's outer scroll surface rather than nested scrolling.
