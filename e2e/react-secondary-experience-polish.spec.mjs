@@ -83,7 +83,7 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   const save = curatedRow.locator(".prepared-mnemonic-library-use");
   await expect(save).toBeVisible();
   await save.click();
-  await expect(curatedRow.locator(".prepared-mnemonic-row-success")).toContainText("Saved");
+  await expect(curatedRow.locator(".prepared-mnemonic-status")).toContainText("Saved");
   await expect(save).toContainText("Edit personal mnemonic");
 
   await search.fill("カ");
@@ -128,7 +128,7 @@ test("Prepared Mnemonics supports grade and JLPT filters plus inline create/edit
   await editor.fill("A personal scene that helps me remember this kanji.");
   await row.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(editor).toHaveCount(0);
-  await expect(row.locator(".prepared-mnemonic-row-success")).toContainText("Saved");
+  await expect(row.locator(".prepared-mnemonic-status")).toContainText("Saved");
   await expect(row.getByRole("button", { name: "Edit personal mnemonic", exact: true })).toBeVisible();
 
   await row.getByRole("button", { name: "Edit personal mnemonic", exact: true }).click();
