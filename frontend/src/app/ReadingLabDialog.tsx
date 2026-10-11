@@ -5,7 +5,6 @@ import { ReadingLab, type ReadingWordSelection } from "./ReadingLab";
 import { ReadingLabWordCard } from "./ReadingLabWordCard";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 import { usePageDialog } from "./usePageDialog";
-import "./reading-lab-polish.css";
 
 export function ReadingLabDialog({ open, language, onClose }: {
   open: boolean;
