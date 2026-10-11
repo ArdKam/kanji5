@@ -18,8 +18,9 @@ for(const token of [
 assert.match(css,/\.header\.menu-open \.account-button\{visibility:visible!important;pointer-events:none!important;z-index:5!important;\}/, "account button must remain visible, inactive, and below the open-menu scrim");
 assert.doesNotMatch(css,/\.header\.menu-open \.account-button\{[^}]*visibility:\s*hidden/i, "the menu-open state must not hide the account button");
 assert.match(css,/\.header-actions \.header-tools\{inset-inline-start:0;inset-inline-end:0;width:100%;height:44px;min-width:100%;min-height:44px;z-index:101;\}/, "menu stacking context must span both header controls");
-assert.match(css,/\.header-menu-scrim\{[^}]*position:fixed[^}]*z-index:110[^}]*backdrop-filter:blur\(4px\)/, "menu scrim must blur and intercept the whole page on desktop and mobile");
-assert.match(css,/\.header\.menu-open \.header-tools \.header-menu-scrim\{backdrop-filter:blur\(4px\)!important;-webkit-backdrop-filter:blur\(4px\)!important;\}/, "active header scrim blur must win over generic button or responsive overrides");
+assert.match(css,/\.header-menu-scrim\{[^}]*position:fixed[^}]*z-index:110[^}]*background:transparent!important/, "the scrim button must be a transparent full-page hit target");
+assert.match(css,/\.header-menu-scrim::before\{[^}]*background:rgba\(16,24,40,\.30\)[^}]*backdrop-filter:blur\(4px\)!important[^}]*-webkit-backdrop-filter:blur\(4px\)!important/, "the dedicated scrim surface must dim and blur the page");
+assert.match(css,/\.header\.menu-open \.header-tools \.header-menu-scrim::before\{backdrop-filter:blur\(4px\)!important;-webkit-backdrop-filter:blur\(4px\)!important;\}/, "active scrim overlay must retain blur in the open menu state");
 assert.doesNotMatch(css,/\.header-menu-scrim\{display:none;\}/, "the page scrim must not be disabled on desktop");
 assert.ok(app.includes('</aside></>:null}<AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div></div>'), "AccountButton must share the menu stacking context so the scrim can cover it");
 assert.ok(!app.includes('</aside></>:null}</div><AccountButton language={language}'), "AccountButton must not be a higher-layer sibling outside the menu stacking context");
