@@ -39,6 +39,9 @@ export function KanjiStructurePreview({
   const actionAriaLabel = language === "fa"
     ? "مشاهدهٔ ساختار کامل کانجی " + character
     : "View full structure for " + character;
+  const emptyStateLabel = info?.available
+    ? (language === "fa" ? "جزء دیداری ریزتری ثبت نشده" : "No finer components recorded")
+    : (language === "fa" ? "ساختار دیداری در دسترس نیست" : "Visual structure unavailable");
 
   return (
     <section className="kanji-structure-preview" aria-label={previewLabel} aria-busy={!ready}>
@@ -55,7 +58,7 @@ export function KanjiStructurePreview({
             {remaining ? <span className="kanji-structure-preview-more">+{remaining}</span> : null}
           </>
         ) : (
-          <span className="kanji-structure-preview-atomic" lang="ja">{info?.available ? character : "…"}</span>
+          <span className="kanji-structure-preview-empty">{emptyStateLabel}</span>
         )}
       </div>
       {ready ? (
