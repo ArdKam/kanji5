@@ -3587,3 +3587,7 @@ html[dir="rtl"] .stats-header{padding-right:0;padding-left:48px;}
   .dialog[open],
   .dialog[open]::backdrop{animation:none!important;}
 }
+
+
+/* A blank Reading Lab is a compact entry surface on mobile too. */
+@media(max-width:760px){.dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto!important;min-height:0!important;max-height:min(520px,calc(100dvh - 32px))!important;}}
