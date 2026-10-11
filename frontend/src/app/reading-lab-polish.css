@@ -4,6 +4,13 @@
  * win without changing shared Dictionary styling or component behavior.
  */
 
+
+/* Calm start state: one clear invitation, no duplicate empty card or disabled tools. */
+.reading-lab .reading-lab-step{display:none;}
+.reading-lab:not(:has(.reading-lab-reader)) .reading-lab-input{height:132px;min-height:132px;padding:12px 15px 18px;}
+.reading-lab:not(:has(.reading-lab-reader)) > .reading-lab-empty{display:none;}
+.reading-lab:not(:has(.reading-lab-reader)) > .reading-lab-listen{display:none;}
+
 /* Once text is loaded, make the reading surface the primary destination. */
 .reading-lab:has(.reading-lab-reader) .reading-lab-source{padding:12px 0 14px;gap:9px;}
 
