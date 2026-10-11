@@ -548,10 +548,10 @@ test("structured header menu keeps account inactive until the menu closes and ex
     if (!account || !scrim) return {missing: true};
     const rect = account.getBoundingClientRect();
     const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
-    const describe = (element: Element | null) => {
+    const describe = (element) => {
       if (!element) return null;
       const style = getComputedStyle(element), box = element.getBoundingClientRect();
-      return {tag: element.tagName, className: (element as HTMLElement).className, id: (element as HTMLElement).id, box: {x: box.x, y: box.y, width: box.width, height: box.height}, position: style.position, zIndex: style.zIndex, pointerEvents: style.pointerEvents, filter: style.filter, parent: (element as HTMLElement).parentElement?.className};
+      return {tag: element.tagName, className: element.className, id: element.id, box: {x: box.x, y: box.y, width: box.width, height: box.height}, position: style.position, zIndex: style.zIndex, pointerEvents: style.pointerEvents, filter: style.filter, parent: element.parentElement?.className};
     };
     return {viewport:{width:innerWidth,height:innerHeight},point:{x,y},account:describe(account),scrim:describe(scrim),hit:describe(document.elementFromPoint(x,y)),stack:document.elementsFromPoint(x,y).slice(0,10).map(describe),header:describe(document.querySelector(".header")),actions:describe(document.querySelector(".header-actions")),tools:describe(document.querySelector(".header-tools"))};
   });
@@ -620,10 +620,10 @@ test("mobile menu prevents account click-through until the drawer closes", async
     if (!account || !scrim) return {missing: true};
     const rect = account.getBoundingClientRect();
     const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
-    const describe = (element: Element | null) => {
+    const describe = (element) => {
       if (!element) return null;
       const style = getComputedStyle(element), box = element.getBoundingClientRect();
-      return {tag: element.tagName, className: (element as HTMLElement).className, id: (element as HTMLElement).id, box: {x: box.x, y: box.y, width: box.width, height: box.height}, position: style.position, zIndex: style.zIndex, pointerEvents: style.pointerEvents, filter: style.filter, parent: (element as HTMLElement).parentElement?.className};
+      return {tag: element.tagName, className: element.className, id: element.id, box: {x: box.x, y: box.y, width: box.width, height: box.height}, position: style.position, zIndex: style.zIndex, pointerEvents: style.pointerEvents, filter: style.filter, parent: element.parentElement?.className};
     };
     return {viewport:{width:innerWidth,height:innerHeight},point:{x,y},account:describe(account),scrim:describe(scrim),hit:describe(document.elementFromPoint(x,y)),stack:document.elementsFromPoint(x,y).slice(0,10).map(describe),header:describe(document.querySelector(".header")),actions:describe(document.querySelector(".header-actions")),tools:describe(document.querySelector(".header-tools"))};
   });
