@@ -664,6 +664,7 @@ test('Reading Lab starts compactly and keeps the Reader in a single-scroll flow 
   await menu.getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
   await expect(dialog).toBeVisible({timeout:10000});
+  expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
   await page.setViewportSize({width:390,height:844});
   expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
   const lab=dialog.locator('.reading-lab');
