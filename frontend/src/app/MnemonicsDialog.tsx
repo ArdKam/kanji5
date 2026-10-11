@@ -449,7 +449,6 @@ function PreparedMnemonicLibrary({
                     >
                       {isBusy ? copy.saving : hasPersonalMnemonic ? copy.edit : isApplied ? copy.saved : copy.save}
                     </button>
-                    {isApplied && !editingKey ? <span className="prepared-mnemonic-row-success" role="status">{copy.saved}</span> : null}
                     {hasError && editingKey !== key ? <span className="prepared-mnemonic-row-error" role="alert">{errorMessage}</span> : null}
                   </>
                 ) : (
@@ -466,6 +465,7 @@ function PreparedMnemonicLibrary({
                     {hasPersonalMnemonic ? copy.edit : copy.build}
                   </button>
                 )}
+                {isApplied && !editingKey ? <span className="prepared-mnemonic-row-success" role="status">{copy.saved}</span> : null}
               </div>
             </article>
           );
