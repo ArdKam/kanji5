@@ -435,7 +435,7 @@ function PreparedMnemonicLibrary({
                     <button
                       className="button secondary prepared-mnemonic-library-use"
                       type="button"
-                      disabled={busyKey !== "" || isApplied}
+                      disabled={busyKey !== ""}
                       onClick={() => {
                         if (hasPersonalMnemonic) {
                           setDrafts(current => ({ ...current, [entry.character]: localPersonalMnemonics[entry.character] ?? "" }));
