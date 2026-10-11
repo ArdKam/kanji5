@@ -586,7 +586,7 @@ function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
   return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
 }
-function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string,meta?:{hintUsed?:boolean})=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>}){
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry,onExit}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string,meta?:{hintUsed?:boolean})=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>;onExit:()=>void}){
   const ex=snapshot.exercise??{},
     [answer,setAnswer]=useState(""),
     [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
@@ -751,7 +751,9 @@ function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry
         <span className="active-recall-divider" aria-hidden="true">·</span>
         <span className="active-recall-task-modality">{taskModalityLabel}</span>
       </div>
-      <span className="active-recall-session-dot" aria-hidden="true"/>
+      <button className="button secondary" type="button" disabled={busy} onClick={onExit} aria-label={t("exitPractice")} title={t("exitPractice")}>
+        <UiIcon name="close" size={15}/><span>{t("exitPractice")}</span>
+      </button>
     </div>
 
     {!ex.mode?<div className="active-recall-empty">{t("exerciseReady")}</div>:<>
@@ -1095,7 +1097,7 @@ function App(){
               {showExercise ? (
   practiceMode==="exercise" && snapshot?.exercise?.mode ? (
     <>
-      <Exercise snapshot={snapshot} busy={busy} onSubmit={(v,meta)=>action(()=>submitExercise(v,meta),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)}/>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={(v,meta)=>action(()=>submitExercise(v,meta),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)} onExit={()=>setPracticeMode("home")}/>
       {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
     </>
   ) : (
