@@ -89,7 +89,7 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await search.fill("カ");
   await dialog.locator(".prepared-mnemonic-mode-tab").nth(1).click();
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").nth(1)).toHaveAttribute("aria-pressed", "true");
-  await expect(search).toHaveValue("the");
+  await expect(search).toHaveValue("カ");
   await expect(dialog.locator(".prepared-mnemonic-mode-note")).toBeVisible();
   await expect(dialog.locator(".prepared-mnemonic-mode-note")).toHaveCount(1);
   await expect(dialog.locator(".prepared-mnemonic-library-scaffold-title")).toHaveCount(0);
