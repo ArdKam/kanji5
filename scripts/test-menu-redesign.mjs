@@ -15,12 +15,16 @@ for(const token of [
   "headerMenuPopoverIn"
 ]) assert.ok(css.includes(token),`menu redesign contract missing: ${token}`);
 
-assert.match(css,/\.header\.menu-open \.account-button\{visibility:visible!important;pointer-events:none!important;\}/, "account button must remain visible but non-interactive while the menu is open");
+assert.match(css,/\.header\.menu-open \.account-button\{visibility:visible!important;pointer-events:none!important;z-index:5!important;\}/, "account button must remain visible, inactive, and below the open-menu scrim");
 assert.doesNotMatch(css,/\.header\.menu-open \.account-button\{[^}]*visibility:\s*hidden/i, "the menu-open state must not hide the account button");
+assert.match(css,/\.header-actions \.header-tools\{inset-inline-start:0;inset-inline-end:0;width:100%;height:44px;min-width:100%;min-height:44px;z-index:101;\}/, "menu stacking context must span both header controls");
+assert.match(css,/\.header-menu-scrim\{[^}]*position:fixed[^}]*z-index:110[^}]*backdrop-filter:blur\(4px\)/, "menu scrim must blur and intercept the whole page on desktop and mobile");
+assert.doesNotMatch(css,/\.header-menu-scrim\{display:none;\}/, "the page scrim must not be disabled on desktop");
+assert.ok(app.includes('</aside></>:null}<AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div></div>'), "AccountButton must share the menu stacking context so the scrim can cover it");
+assert.ok(!app.includes('</aside></>:null}</div><AccountButton language={language}'), "AccountButton must not be a higher-layer sibling outside the menu stacking context");
 
 assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:absolute!important;[\s\S]*?max-height:min\(640px/);
 assert.match(css,/@media\(max-width:760px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:fixed!important;[\s\S]*?inset-inline-start:0!important;[\s\S]*?inset-inline-end:auto!important;/);
-assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-menu-scrim\{display:none;\}/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.header-tools-menu\{animation:none!important;\}/);
 
 for(const label of [
