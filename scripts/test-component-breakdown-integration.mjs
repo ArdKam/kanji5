@@ -27,4 +27,8 @@ assert(dictionary.includes("<ComponentBreakdown"), "Dictionary must render the s
 assert(dictionary.includes("components={componentInfo.components}"), "Legacy learning dependencies must remain separate for the optional learning path");
 assert(engine.includes("getVisualStructureInfo: (character: string) => Promise<VisualStructureInfo>"), "Typed engine boundary must expose visual structure access");
 
+assert(app.includes('import "./learning-card-enhancements.css";'), "Learning-card enhancement CSS must be part of the statically loaded presentation bundle");
+assert(!structurePreview.includes('learning-card-enhancements.css?inline'), "Structure preview must not import enhancement CSS lazily on first reveal");
+assert(!structurePreview.includes('data-rinemi-learning-card-styles'), "Structure preview must not inject a style element during the reveal transition");
+
 console.log("Kanji visual-structure integration contract passed for the Learning Card and Dictionary.");
