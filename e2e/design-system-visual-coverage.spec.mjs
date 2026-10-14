@@ -513,6 +513,10 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
 
   const assertTheme = async (expectedTheme, expectedCanvas) => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", expectedTheme);
+    await expect.poll(
+      async () => (await inspectTokens()).canvas,
+      { message: `Document canvas should follow the ${expectedTheme} theme`, timeout: 3000 },
+    ).toBe(expectedCanvas);
     const snapshot = await inspectTokens();
     for (const [name, value] of Object.entries({
       canvasToken: snapshot.canvasToken,
