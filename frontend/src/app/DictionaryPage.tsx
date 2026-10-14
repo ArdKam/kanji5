@@ -441,7 +441,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           <div className="dictionary-topic-dialog-header">
             <div className="dictionary-topic-dialog-heading">
               <h3 id="dictionary-topic-dialog-title">{t("dictionaryTopicPickerTitle", language)}</h3>
-              <p id="dictionary-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
+              <p id="dictionary-topic-coverage-note">{t("dictionaryTopicCoverageNote", language)}</p>
             </div>
             <button
               className="dictionary-topic-dialog-close"
