@@ -2223,3 +2223,15 @@
   .dictionary-topic-dialog{scroll-behavior:auto;}
   .dictionary-topic-browser-list{scroll-behavior:auto;}
 }
+
+/* Keep the modal clear of the fixed mobile navigation and safe-area inset. */
+@media(max-width:720px){
+  .dictionary-topic-dialog{
+    inset:12px 10px calc(76px + env(safe-area-inset-bottom, 0px));
+    width:auto;
+    height:auto;
+    max-width:none;
+    max-height:none;
+    margin:0;
+  }
+}
