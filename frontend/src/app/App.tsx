@@ -1,6 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { KanjiStructurePreview } from "./KanjiStructurePreview";
-import "./learning-card-enhancements.css";
 import { useModalDialog } from "./useModalDialog";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
@@ -81,6 +80,25 @@ const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==
 
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
 function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
+let learningCardStylesPromise: Promise<void> | null = null;
+function ensureLearningCardStyles(): Promise<void> {
+  if (document.querySelector("style[data-rinemi-learning-card-styles]")) return Promise.resolve();
+  if (!learningCardStylesPromise) {
+    learningCardStylesPromise = import("./learning-card-enhancements.css?inline").then(({ default: cssText }) => {
+      if (document.querySelector("style[data-rinemi-learning-card-styles]")) return;
+      const style = document.createElement("style");
+      style.dataset.rinemiLearningCardStyles = "true";
+      style.textContent = cssText;
+      document.head.append(style);
+    }).catch((error: unknown) => {
+      learningCardStylesPromise = null;
+      console.error("Learning-card presentation styles could not be loaded.", error);
+      throw error;
+    });
+  }
+  return learningCardStylesPromise;
+}
+
 
 const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
@@ -88,6 +106,9 @@ const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["
 
 function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
+  const [revealPreparing,setRevealPreparing]=useState(false);
+  const [revealStyleError,setRevealStyleError]=useState(false);
+  const revealPreparingRef=useRef(false);
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
   const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
@@ -119,14 +140,29 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
-  const handleReveal=useCallback(()=>{
-    const active=document.activeElement;
-    if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
-      active.blur();
+  const handleReveal=useCallback(async()=>{
+    if(revealed||revealPreparingRef.current)return;
+    revealPreparingRef.current=true;
+    setRevealPreparing(true);
+    setRevealStyleError(false);
+    try{
+      // Apply the non-critical card stylesheet while the front face is still visible.
+      // The rotation starts only after the CSS module is ready, keeping layout work
+      // outside the 3D transition without adding the entire stylesheet to initial CSS.
+      await ensureLearningCardStyles();
+      const active=document.activeElement;
+      if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
+        active.blur();
+      }
+      shouldFocusBackRef.current=true;
+      onReveal();
+    }catch(_){
+      setRevealStyleError(true);
+    }finally{
+      revealPreparingRef.current=false;
+      setRevealPreparing(false);
     }
-    shouldFocusBackRef.current=true;
-    onReveal();
-  },[onReveal]);
+  },[onReveal,revealed]);
   useEffect(()=>{
     if(!revealed||!shouldFocusBackRef.current)return;
     shouldFocusBackRef.current=false;
@@ -393,7 +429,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed||revealPreparing||Boolean(busy)} aria-busy={revealPreparing}>{revealPreparing?(getLanguage()==="fa"?"در حال آماده‌سازی کارت…":"Preparing card…"):learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        {revealStyleError?<p className="learning-flip-style-error" role="alert">{getLanguage()==="fa"?"آماده‌سازی کارت ناموفق بود؛ دوباره تلاش کن.":"Could not prepare the card. Please try again."}</p>:null}
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
