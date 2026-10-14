@@ -673,7 +673,7 @@
   .dictionary-topic-dialog-content{gap:10px;max-height:calc(100dvh - 24px);padding:14px;}
   .dictionary-topic-groups{max-height:min(38dvh,320px);}
 }
-@media(max-width:400px){
+@media(max-width:460px){
   .dictionary-advanced-filters:not([open]){flex:0 0 100%;order:1;}
   .dictionary-advanced-filter-trigger{width:max-content;max-width:100%;gap:7px;padding-inline:9px!important;}
   .dictionary-filter-row{row-gap:6px;}
