@@ -109,3 +109,19 @@ The regression test checks every membership added in this round, while retaining
 ## Verification
 
 `scripts/test-kanji-topic-taxonomy.mjs` checks taxonomy version, stable unique IDs, bilingual labels, representative membership, duplicate-free topic entries, single-character entries, and membership against the pinned catalog. React browser regression coverage verifies selection from the expanded category set, composition with search and JLPT, active-filter counting/reset behavior, and English LTR plus Persian RTL.
+
+## Dictionary topic picker browsing groups
+
+The Dictionary picker organizes the existing topics into five **display-only** browse groups:
+
+| Group (English) | Group (فارسی) | Existing topic IDs |
+|---|---|---|
+| Everyday life | زندگی روزمره | `numbers`, `body`, `time`, `family`, `food`, `health` |
+| Nature | طبیعت | `nature`, `weather`, `animals`, `plants` |
+| Places & movement | مکان و جابه‌جایی | `places`, `directions`, `transport` |
+| Society & work | جامعه و کار | `people`, `school`, `work`, `government`, `communication`, `money`, `industry`, `culture` |
+| Ideas & qualities | اندیشه و ویژگی‌ها | `actions`, `emotions`, `qualities` |
+
+Every v4 topic remains individually selectable. The groups are headings for browsing, not extra filters; they do not add, rename, merge, or infer taxonomy entries and never alter topic IDs or curated membership. The selector displays every group and its topics before a search is entered. Searching narrows the visible list using the active interface language, and “All topics” remains available regardless of the search query.
+
+The picker repeats the partial-coverage caveat at the point where it is useful: topic results are based on reviewed memberships, while untagged kanji remain accessible through “All topics” and normal Dictionary search. No topic or group counts are shown in the interface.
