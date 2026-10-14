@@ -423,6 +423,93 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         </div>
       </div>
 
+      <dialog
+        id="dictionary-topic-dialog"
+        ref={topicDialogRef}
+        className="dictionary-topic-dialog"
+        aria-labelledby="dictionary-topic-dialog-title"
+        onCancel={() => setTopicSelectorOpen(false)}
+        onClose={() => {
+          setTopicSelectorOpen(false);
+          setTopicSearchQuery("");
+          topicTriggerRef.current?.focus();
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setTopicSelectorOpen(false);
+        }}
+      >
+        <div className="dictionary-topic-dialog-content">
+          <header className="dictionary-topic-dialog-header">
+            <div className="dictionary-topic-dialog-heading">
+              <h3 id="dictionary-topic-dialog-title">{t("dictionaryTopicSelectorTitle", language)}</h3>
+              <p className="dictionary-topic-coverage-note">{t("dictionaryTopicCoverageNote", language)}</p>
+            </div>
+            <button className="dictionary-topic-dialog-close" type="button" aria-label={t("close", language)} onClick={() => setTopicSelectorOpen(false)}>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg>
+            </button>
+          </header>
+          <div className="dictionary-topic-search">
+            <label htmlFor="dictionary-topic-search">{t("dictionaryTopicSearch", language)}</label>
+            <div className="dictionary-topic-search-control">
+              <input
+                id="dictionary-topic-search"
+                ref={topicSearchRef}
+                type="search"
+                value={topicSearchQuery}
+                onChange={(event) => setTopicSearchQuery(event.target.value)}
+                placeholder={t("dictionaryTopicSearchPlaceholder", language)}
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {topicSearchQuery ? (
+                <button className="dictionary-topic-search-clear" type="button" aria-label={t("dictionaryTopicClearSearch", language)} onClick={() => { setTopicSearchQuery(""); topicSearchRef.current?.focus(); }}>
+                  <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg>
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <button
+            className={"dictionary-topic-choice dictionary-topic-all" + (topic === "all" ? " is-selected" : "")}
+            type="button"
+            data-topic-id="all"
+            aria-pressed={topic === "all"}
+            onClick={() => { setTopic("all"); setTopicSearchQuery(""); setTopicSelectorOpen(false); }}
+          >
+            <span>{t("dictionaryAllTopics", language)}</span>
+            {topic === "all" ? <span className="dictionary-topic-choice-check" aria-hidden="true">✓</span> : null}
+          </button>
+          <div className="dictionary-topic-groups">
+            {TOPIC_GROUPS.map((group) => {
+              const entries = group.topicIds
+                .map((id) => KANJI_TOPICS.find((entry) => entry.id === id))
+                .filter((entry): entry is DictionaryTopic => Boolean(entry && matchingTopicIds.has(entry.id)));
+              if (!entries.length) return null;
+              return (
+                <section className="dictionary-topic-group" key={group.id} aria-labelledby={"dictionary-topic-heading-" + group.id}>
+                  <h4 id={"dictionary-topic-heading-" + group.id}>{t(group.label, language)}</h4>
+                  <div className="dictionary-topic-choice-grid" role="group" aria-label={t(group.label, language)}>
+                    {entries.map((entry) => (
+                      <button
+                        key={entry.id}
+                        className={"dictionary-topic-choice" + (topic === entry.id ? " is-selected" : "")}
+                        type="button"
+                        data-topic-id={entry.id}
+                        aria-pressed={topic === entry.id}
+                        onClick={() => { setTopic(entry.id); setTopicSearchQuery(""); setTopicSelectorOpen(false); }}
+                      >
+                        <span>{entry.label[language]}</span>
+                        {topic === entry.id ? <span className="dictionary-topic-choice-check" aria-hidden="true">✓</span> : null}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+            {!matchingTopicIds.size ? <p className="dictionary-topic-no-results" role="status">{t("dictionaryTopicNoResults", language)}</p> : null}
+          </div>
+        </div>
+      </dialog>
+
       {hasActiveDictionaryFilters ? (
         <div
           className="dictionary-active-filters"
