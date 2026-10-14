@@ -162,13 +162,13 @@
   align-items:center;
   gap:8px;
   min-width:0;
-  flex-wrap:nowrap;
+  flex-wrap:wrap;
 }
 .dictionary-level-filter{
   display:flex;
   align-items:center;
   gap:5px;
-  flex:1 1 auto;
+  flex:1 1 0%;
   min-width:0;
   overflow-x:auto;
   overscroll-behavior-x:contain;
