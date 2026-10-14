@@ -50,6 +50,13 @@ async function createCapture(page, testInfo) {
       const card = document.querySelector(".learning-card");
       const activeBackPage = card?.querySelector(".learning-back-page.active");
       const dictionaryContent = document.querySelector(".dictionary-card-content");
+      const dictionaryControls = document.querySelector(".dictionary-controls");
+      const firstKanjiTile = document.querySelector(".kanji-catalog-tile");
+      const controlsRect = dictionaryControls?.getBoundingClientRect();
+      const firstKanjiRect = firstKanjiTile?.getBoundingClientRect();
+      const activeFilterLabels = [...document.querySelectorAll(".dictionary-filter-chip")]
+        .map(element => element.textContent?.trim() || "")
+        .filter(Boolean);
       return {
         title: document.title,
         language: document.documentElement.lang,
@@ -63,6 +70,16 @@ async function createCapture(page, testInfo) {
         learningCardRevealed: Boolean(card?.classList.contains("is-revealed")),
         activeLearningPage: activeBackPage?.getAttribute("aria-label") || null,
         activeDictionarySection: dictionaryContent?.getAttribute("data-active-section") || null,
+        dictionary: dictionaryControls ? {
+          query: document.querySelector(".dictionary-page-search input")?.value || "",
+          activeFilters: activeFilterLabels,
+          advancedFiltersOpen: Boolean(document.querySelector(".dictionary-advanced-filters")?.hasAttribute("open")),
+          topicSelectorOpen: Boolean(document.querySelector(".dictionary-topic-dialog")?.matches(":modal")),
+          activeView: document.querySelector(".dictionary-view-button[aria-pressed='true']")?.textContent?.trim() || null,
+          sortValue: document.querySelector(".dictionary-sort select")?.value || null,
+          controlRegion: controlsRect ? { x: Math.round(controlsRect.x), y: Math.round(controlsRect.y), width: Math.round(controlsRect.width), height: Math.round(controlsRect.height) } : null,
+          distanceToFirstKanji: controlsRect && firstKanjiRect ? Math.round(firstKanjiRect.top - controlsRect.bottom) : null,
+        } : null,
       };
     });
     report.screenshots.push({
