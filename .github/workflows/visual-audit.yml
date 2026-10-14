@@ -8,6 +8,8 @@ on:
       - ".github/workflows/visual-audit.yml"
       - "frontend/**"
       - "e2e/visual-audit.spec.mjs"
+      - "e2e/design-system-visual-coverage.spec.mjs"
+      - "e2e/README.md"
       - "playwright.config.mjs"
       - "playwright.compat.config.mjs"
       - "index.html"
@@ -68,7 +70,7 @@ jobs:
           CI: "true"
           AUDIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
-        run: npx playwright test e2e/visual-audit.spec.mjs --timeout=30000 --retries=0 --reporter=line
+        run: npx playwright test e2e/visual-audit.spec.mjs e2e/design-system-visual-coverage.spec.mjs --timeout=30000 --retries=0 --reporter=line
 
       - name: Publish the screenshots and machine-readable audit report
         id: visual-evidence
@@ -76,7 +78,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: visual-audit-${{ github.run_number }}-${{ github.run_attempt }}
-          path: test-results/visual-audit/
+          path: |
+            test-results/visual-audit/
+            test-results/design-system-visual-coverage/
           if-no-files-found: warn
           retention-days: 14
 
@@ -88,7 +92,7 @@ jobs:
           {
             echo "## Automated UI visual audit"
             echo
-            echo "Screens cover onboarding, Learning, Active Recall, Dictionary, dictionary detail, Settings, Statistics, Reading Lab, and Account; desktop and mobile captures are included where applicable."
+            echo "Evidence includes the broad product audit plus focused Design System captures for onboarding states, Learning card faces/pages, themes, breakpoints, Dictionary filters and detail tabs, including empty results and RTL/LTR states where covered."
             echo
             if [ -n "${ARTIFACT_URL:-}" ]; then
               echo "[Download screenshots and report]($ARTIFACT_URL)"
@@ -116,5 +120,33 @@ jobs:
               ' >> "$GITHUB_STEP_SUMMARY"
             else
               echo "No JSON report was produced; inspect the test failure output above." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if [ -d test-results/design-system-visual-coverage ]; then
+              node --input-type=module -e '
+                import fs from "node:fs";
+                import path from "node:path";
+                const root = "test-results/design-system-visual-coverage";
+                const dirs = fs.readdirSync(root, { withFileTypes: true }).filter(entry => entry.isDirectory());
+                const reports = dirs.map(dir => {
+                  const file = path.join(root, dir.name, "report.json");
+                  if (!fs.existsSync(file)) return null;
+                  return { name: dir.name, report: JSON.parse(fs.readFileSync(file, "utf8")) };
+                }).filter(Boolean);
+                const screens = reports.flatMap(entry => entry.report.screenshots || []);
+                console.log("- Design System scenario reports: " + reports.length);
+                console.log("- Design System screenshots: " + screens.length);
+                console.log("- Design System screens with horizontal overflow: " + screens.filter(screen => screen.horizontalOverflow).length);
+                console.log("- Design System uncaught page errors: " + reports.reduce((sum, entry) => sum + (entry.report.pageErrors || []).length, 0));
+                console.log("");
+                console.log("### Design System capture details");
+                console.log("| Scenario | Screenshots | Horizontal overflow | Page errors |");
+                console.log("|---|---:|---:|---:|");
+                for (const entry of reports) {
+                  const states = entry.report.screenshots || [];
+                  console.log("| " + entry.name + " | " + states.length + " | " + states.filter(screen => screen.horizontalOverflow).length + " | " + (entry.report.pageErrors || []).length + " |");
+                }
+              ' >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No Design System coverage reports were produced." >> "$GITHUB_STEP_SUMMARY"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
