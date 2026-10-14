@@ -39,10 +39,28 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
 }
 
 async function drawReference(page,canvas,strokes){
-  // Keep the canvas visible at the start of each stroke. Feedback can expand
-  // the dialog while drawing, so each pointer coordinate must use the latest
-  // viewport rectangle rather than a box cached for an entire stroke.
-  for(const stroke of strokes){
+  // Keep the canvas visible at the start of each stroke. The dialog can resize
+  // after feedback, so resolve the live canvas rectangle for every input point.
+  await canvas.evaluate(element => {
+    const browserWindow = window;
+    browserWindow.__handwritingPointerTrace = [];
+    for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel", "lostpointercapture"]) {
+      document.addEventListener(type, event => {
+        const pointer = event;
+        browserWindow.__handwritingPointerTrace.push({
+          type,
+          target: pointer.target instanceof Element ? pointer.target.tagName.toLowerCase() + "." + String(pointer.target.className || "").replace(/\\s+/g, ".") : "unknown",
+          onCanvas: element === pointer.target || element.contains(pointer.target),
+          pointerId: pointer.pointerId,
+          pointerType: pointer.pointerType,
+          buttons: pointer.buttons,
+          time: Math.round(performance.now())
+        });
+      }, true);
+    }
+  });
+  for(let strokeIndex=0;strokeIndex<strokes.length;strokeIndex+=1){
+    const stroke=strokes[strokeIndex];
     await canvas.scrollIntoViewIfNeeded();
     const toClient=async p=>{
       const box=await canvas.boundingBox();
@@ -59,6 +77,14 @@ async function drawReference(page,canvas,strokes){
       await page.mouse.move(point.x,point.y);
     }
     await page.mouse.up();
+    const state=await canvas.evaluate(element=>({
+      strokeCount:element.closest(".handwriting-practice")?.getAttribute("data-stroke-count"),
+      gradeDisabled:element.closest(".handwriting-practice")?.querySelector(".handwriting-actions .primary")?.hasAttribute("disabled"),
+      recentEvents:(window.__handwritingPointerTrace||[]).slice(-6)
+    }));
+    if(Number(state.strokeCount)!==strokeIndex+1){
+      throw new Error(`Real mouse stroke ${strokeIndex+1} was not committed. DOM state: ${JSON.stringify(state)}`);
+    }
   }
 }
 
