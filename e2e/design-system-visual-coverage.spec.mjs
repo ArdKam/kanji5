@@ -1,0 +1,336 @@
+import { test, expect } from "@playwright/test";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+const outputRoot = path.resolve("test-results/design-system-visual-coverage");
+
+function safeName(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 90);
+}
+
+async function createCapture(page, testInfo) {
+  const folder = path.join(outputRoot, safeName(testInfo.title));
+  await fs.mkdir(folder, { recursive: true });
+  const report = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    commit: process.env.AUDIT_COMMIT_SHA || null,
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:4173",
+    screenshots: [],
+    pageErrors: [],
+  };
+
+  page.on("pageerror", error => report.pageErrors.push(error?.stack || String(error)));
+
+  const persist = async () => {
+    await fs.writeFile(path.join(folder, "report.json"), JSON.stringify(report, null, 2) + "\n");
+  };
+
+  const capture = async (name) => {
+    await page.evaluate(async () => { await document.fonts.ready; });
+    const file = path.join(folder, safeName(name) + ".png");
+    await page.screenshot({
+      path: file,
+      fullPage: false,
+      animations: "disabled",
+      caret: "hide",
+    });
+    const state = await page.evaluate(() => {
+      const visible = (element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return style.display !== "none" && style.visibility !== "hidden" &&
+          Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
+      };
+      const dialog = [...document.querySelectorAll('[role="dialog"], dialog')]
+        .filter(visible)
+        .map(element => (element.getAttribute("aria-label") ||
+          element.querySelector("h1,h2,h3")?.textContent ||
+          element.className || element.tagName).toString().trim());
+      const card = document.querySelector(".learning-card");
+      const activeBackPage = card?.querySelector(".learning-back-page.active");
+      const dictionaryContent = document.querySelector(".dictionary-card-content");
+      return {
+        title: document.title,
+        language: document.documentElement.lang,
+        direction: document.documentElement.dir,
+        theme: document.documentElement.dataset.theme || null,
+        viewport: { width: innerWidth, height: innerHeight },
+        document: { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight },
+        horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+        bodyBackground: getComputedStyle(document.body).backgroundColor,
+        visibleDialogs: dialog,
+        learningCardRevealed: Boolean(card?.classList.contains("is-revealed")),
+        activeLearningPage: activeBackPage?.getAttribute("aria-label") || null,
+        activeDictionarySection: dictionaryContent?.getAttribute("data-active-section") || null,
+      };
+    });
+    report.screenshots.push({
+      name,
+      file: path.relative(process.cwd(), file),
+      ...state,
+    });
+    await persist();
+  };
+
+  return { capture, report, persist };
+}
+
+async function startApp(page, { language = "en", theme = "light" } = {}) {
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await page.emulateMedia({ colorScheme: theme === "system" ? "dark" : theme, reducedMotion: "reduce" });
+  await page.addInitScript(({ language: initialLanguage, theme: initialTheme }) => {
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem("kanji5-ui-language", initialLanguage);
+    localStorage.setItem("kanji5-theme", initialTheme);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  }, { language, theme });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+}
+
+test("visual coverage: onboarding steps, selected states, RTL-sized layouts and system theme", async ({ page }, testInfo) => {
+  test.setTimeout(180000);
+  const audit = await createCapture(page, testInfo);
+  try {
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+    await page.addInitScript(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem("kanji5-ui-language", "en");
+      localStorage.setItem("kanji5-theme", "system");
+    });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const onboarding = page.locator('[data-testid="onboarding-flow"]');
+    await expect(onboarding).toBeVisible({ timeout: 30000 });
+
+    await audit.capture("onboarding-welcome-system-dark-desktop");
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.waitForTimeout(80);
+    await audit.capture("onboarding-welcome-system-light-desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("onboarding-welcome-mobile");
+    await page.setViewportSize({ width: 320, height: 740 });
+    await audit.capture("onboarding-welcome-320px");
+    await page.setViewportSize({ width: 1440, height: 960 });
+
+    await onboarding.getByRole("button", { name: /Let's begin/ }).click();
+    await expect(onboarding.getByRole("heading", { name: "How you learn each kanji" })).toBeVisible();
+    await audit.capture("onboarding-learning-loop-desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("onboarding-learning-loop-mobile");
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
+    await audit.capture("onboarding-starting-point-unselected");
+
+    await onboarding.locator(".kanji5-onboarding-choice").nth(0).click();
+    await audit.capture("onboarding-starting-point-beginner-selected");
+    await onboarding.locator(".kanji5-onboarding-choice").nth(2).click();
+    await audit.capture("onboarding-starting-point-placement-selected");
+    await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 20", { timeout: 20000 });
+    await expect(onboarding.locator(".kanji5-onboarding-option").first()).toBeVisible();
+    await audit.capture("onboarding-placement-question-desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("onboarding-placement-question-mobile");
+    await page.setViewportSize({ width: 320, height: 740 });
+    await audit.capture("onboarding-placement-question-320px");
+    await page.setViewportSize({ width: 1440, height: 960 });
+
+    for (let index = 0; index < 20; index += 1) {
+      await onboarding.locator(".kanji5-onboarding-option").first().click();
+      if (index < 19) {
+        await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText(
+          "Question " + (index + 2) + " / 20",
+          { timeout: 10000 },
+        );
+      }
+    }
+    await expect(onboarding.getByRole("heading", { name: "Here is a suggested starting point" })).toBeVisible({ timeout: 15000 });
+    await audit.capture("onboarding-placement-result-desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("onboarding-placement-result-mobile");
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
+    await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
+    await audit.capture("onboarding-daily-rhythm");
+    await onboarding.getByRole("button", { name: /^10 new kanji$/ }).click();
+    await audit.capture("onboarding-daily-rhythm-selected");
+    await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(onboarding.getByRole("heading", { name: "An account is optional" })).toBeVisible();
+    await audit.capture("onboarding-guest-first-account-step-desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("onboarding-guest-first-account-step-mobile");
+    await page.setViewportSize({ width: 320, height: 740 });
+    await audit.capture("onboarding-guest-first-account-step-320px");
+  } finally {
+    await audit.persist();
+  }
+  expect(audit.report.pageErrors, "Uncaught browser errors during onboarding visual coverage").toEqual([]);
+});
+
+test("visual coverage: learning-card faces, inner pages, rating feedback, themes and breakpoints", async ({ page }, testInfo) => {
+  test.setTimeout(180000);
+  const audit = await createCapture(page, testInfo);
+  try {
+    await startApp(page, { language: "en", theme: "light" });
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 15000 });
+    await audit.capture("learning-front-desktop-light");
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await audit.capture("learning-front-tablet-light");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("learning-front-mobile-light");
+    await page.setViewportSize({ width: 320, height: 740 });
+    await audit.capture("learning-front-320px-light");
+    await page.setViewportSize({ width: 1440, height: 960 });
+
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const menu = page.locator("#header-tools-menu");
+    await expect(menu).toBeVisible();
+    await audit.capture("learning-header-menu-open-light");
+    await menu.getByRole("button", { name: "Dark", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await audit.capture("learning-header-menu-open-dark");
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+
+    await audit.capture("learning-front-desktop-dark");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("learning-front-mobile-dark");
+    await page.setViewportSize({ width: 320, height: 740 });
+    await audit.capture("learning-front-320px-dark");
+    await page.setViewportSize({ width: 1440, height: 960 });
+
+    const revealButton = page.getByRole("button", {
+      name: /(Reveal meaning & readings|Show (answer|kanji information)|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها))/,
+    });
+    await expect(revealButton).toBeVisible();
+    await revealButton.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await audit.capture("learning-back-meaning-structure-desktop-dark");
+    const shortcuts = card.locator(".learning-back-page-shortcut");
+    await expect(shortcuts).toHaveCount(4);
+    const sectionNames = [
+      "meaning-structure",
+      "vocabulary-examples",
+      "personal-mnemonic",
+      "stroke-order",
+    ];
+    for (let index = 0; index < sectionNames.length; index += 1) {
+      if (index > 0) {
+        await shortcuts.nth(index).click();
+        await expect(card.locator(".learning-back-page").nth(index)).toHaveClass(/active/);
+      }
+      await audit.capture("learning-back-" + sectionNames[index] + "-desktop-dark");
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (let index = 0; index < sectionNames.length; index += 1) {
+      await shortcuts.nth(index).click();
+      await expect(card.locator(".learning-back-page").nth(index)).toHaveClass(/active/);
+      await audit.capture("learning-back-" + sectionNames[index] + "-mobile-dark");
+    }
+    await page.setViewportSize({ width: 320, height: 740 });
+    await shortcuts.nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await audit.capture("learning-back-meaning-structure-320px-dark");
+
+    const rating = card.locator(".rating-grid button").nth(2);
+    await expect(rating).toBeVisible();
+    await rating.click();
+    const feedback = page.locator(".session-feedback");
+    await expect(feedback).toBeVisible({ timeout: 10000 });
+    await audit.capture("learning-rating-feedback-mobile-dark");
+  } finally {
+    await audit.persist();
+  }
+  expect(audit.report.pageErrors, "Uncaught browser errors during learning visual coverage").toEqual([]);
+});
+
+test("visual coverage: dictionary filters, empty results, detail tabs, dark mode and narrow layouts", async ({ page }, testInfo) => {
+  test.setTimeout(180000);
+  const audit = await createCapture(page, testInfo);
+  try {
+    await startApp(page, { language: "en", theme: "light" });
+    const nav = page.locator(".experience-nav .experience-tab");
+    await expect(nav).toHaveCount(3);
+    await nav.nth(2).click();
+    await expect(page.locator(".dictionary-page")).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(".kanji-catalog-tile").first()).toBeVisible({ timeout: 15000 });
+    await audit.capture("dictionary-catalog-desktop-light");
+
+    const advancedFilters = page.locator("details.dictionary-advanced-filters");
+    if (await advancedFilters.count()) {
+      await advancedFilters.locator("summary").click();
+      await expect(advancedFilters).toHaveAttribute("open", "");
+      await audit.capture("dictionary-advanced-filters-expanded-desktop-light");
+      await advancedFilters.locator("summary").click();
+      await expect(advancedFilters).not.toHaveAttribute("open", "");
+    }
+
+    const search = page.locator(".dictionary-page-search input");
+    await search.fill("rinemi-no-matching-kanji-987654");
+    await expect(page.locator(".kanji-catalog-tile")).toHaveCount(0, { timeout: 10000 });
+    await audit.capture("dictionary-empty-search-results-desktop-light");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("dictionary-empty-search-results-mobile-light");
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await search.fill("学");
+    await expect(page.locator(".kanji-catalog-tile").first()).toBeVisible({ timeout: 10000 });
+    await page.locator(".kanji-catalog-tile").first().click();
+    const dialog = page.locator(".dictionary-card-dialog:visible");
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    await audit.capture("dictionary-detail-overview-desktop-light");
+
+    const sections = ["structure", "writing", "vocabulary", "mnemonic"];
+    for (const section of sections) {
+      const tab = dialog.locator("#dictionary-section-tab-" + section);
+      await expect(tab).toBeVisible();
+      await tab.click();
+      await expect(dialog.locator(".dictionary-card-content")).toHaveAttribute("data-active-section", section);
+      await page.waitForTimeout(120);
+      await audit.capture("dictionary-detail-" + section + "-desktop-light");
+    }
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("dictionary-detail-mnemonic-mobile-light");
+    for (const section of ["overview", ...sections]) {
+      const tab = dialog.locator("#dictionary-section-tab-" + section);
+      await tab.click();
+      await expect(dialog.locator(".dictionary-card-content")).toHaveAttribute("data-active-section", section);
+      await page.waitForTimeout(100);
+      await audit.capture("dictionary-detail-" + section + "-mobile-light");
+    }
+    await page.setViewportSize({ width: 320, height: 740 });
+    await dialog.locator("#dictionary-section-tab-overview").click();
+    await expect(dialog.locator(".dictionary-card-content")).toHaveAttribute("data-active-section", "overview");
+    await audit.capture("dictionary-detail-overview-320px-light");
+
+    await dialog.locator(".dialog-close").click();
+    await expect(dialog).toBeHidden();
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const menu = page.locator("#header-tools-menu");
+    await expect(menu).toBeVisible();
+    await menu.getByRole("button", { name: "Dark", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await audit.capture("dictionary-catalog-desktop-dark");
+
+    await page.locator(".kanji-catalog-tile").first().click();
+    const darkDialog = page.locator(".dictionary-card-dialog:visible");
+    await expect(darkDialog).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("dictionary-detail-overview-mobile-dark");
+    await darkDialog.locator("#dictionary-section-tab-structure").click();
+    await expect(darkDialog.locator(".dictionary-card-content")).toHaveAttribute("data-active-section", "structure");
+    await audit.capture("dictionary-detail-structure-mobile-dark");
+  } finally {
+    await audit.persist();
+  }
+  expect(audit.report.pageErrors, "Uncaught browser errors during dictionary visual coverage").toEqual([]);
+});
