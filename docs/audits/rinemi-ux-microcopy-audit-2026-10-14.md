@@ -49,7 +49,7 @@
 | Stroke order — `StrokeOrderViewer.tsx` | Playback instruction beneath a “Stroke order” heading | **A / P0** | Removed the obvious helper while preserving loading/unavailable states, playback controls, and KanjiVG attribution. |
 | Topic-learning dialog — `TopicLearningDialog.tsx` | Same topic-selection explanation in header and footer | **A / P0** | Removed both duplicates; the title, search, topic counts, focus controls, and empty-match state remain. |
 | Onboarding — `OnboardingFlow.tsx` | Intro paragraph repeating the learning/retrieval/review bullets | **A / P0** | Removed only the duplicate paragraph; kept the three distinct stages, starting-point limits, new-kanji/day meaning, and optional-account copy. |
-| Unused translation copy | `recommendedLearningHint` and other keys without a remaining consumer | **A / P0** | Removed only after checking source and search results for consumers; paired Fa/En values and key type entries were removed together. |
+| Unused translation copy | `recommendedLearningHint`, `readingLabHint`, and other keys without a remaining consumer | **A / P0** | Removed only after checking source and search results for consumers; paired Fa/En values and key type entries were removed together. |
 | Grammar, backup and empty/error states | Educational examples, import/restore scope, failure/loading/no-result status | **D / P2** | Preserved where text changes the next action, explains evidence/data scope, or prevents an unsafe interpretation. |
 
 ## Translation and accessibility rules applied

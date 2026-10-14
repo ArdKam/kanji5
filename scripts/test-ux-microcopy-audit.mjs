@@ -31,7 +31,7 @@ const removedTranslationKeys = [
   "reviewSchedulingHint", "targetRetentionHelper", "practiceSkillProductionHint",
   "practiceSkillVocabularyHint", "practiceSkillContextHint", "dataBackupHint", "dictionaryHint",
   "dictionaryVocabularyHint", "preparedMnemonicsHint", "preparedMnemonicLibraryHint",
-  "mnemonicBridgesHint", "readingLabSourceHint", "setNewPasswordHint", "passwordHint",
+  "mnemonicBridgesHint", "readingLabSourceHint", "readingLabHint", "setNewPasswordHint", "passwordHint",
   "strokeOrderHint", "onboardingLoopBody"
 ];
 for (const key of removedTranslationKeys) assert.ok(!i18n.includes(`"${key}"`), `obsolete translation key remains: ${key}`);
