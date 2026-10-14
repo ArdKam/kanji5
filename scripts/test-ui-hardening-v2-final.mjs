@@ -74,11 +74,11 @@ for(const file of cssSources){
   assert.equal(bad.length,0,`8px/9px font-size remains in ${file}: ${bad.map(m=>m[1]).join(", ")}`);
 }
 
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-view-button[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
+assert.match(dictionaryCss,/\.dictionary-view-button[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
 assert.match(dictionaryCss,/\.dictionary-card\.is-navigation-next\{animation:dictionary-card-next-in var\(--ds-motion-tab\)/);
 assert.match(dictionaryCss,/\.dictionary-card\.is-navigation-previous\{animation:dictionary-card-previous-in var\(--ds-motion-tab\)/);
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-next-in/);
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-previous-in/);
+assert.match(dictionaryCss,/@keyframes dictionary-card-next-in/);
+assert.match(dictionaryCss,/@keyframes dictionary-card-previous-in/);
 
 assert.match(dictionaryCss,/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--ds-motion-interaction\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--ds-motion-hover\) ease/);
