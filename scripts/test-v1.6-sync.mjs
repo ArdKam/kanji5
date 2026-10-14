@@ -49,4 +49,13 @@ assert.deepEqual(
   'Content evidence records must merge independently by content ID'
 );
 assert.equal(componentMerge.components.v19ContentEvidence.a.practiceCount, 3, 'The newest content evidence record must win');
+
+const legacyComponentConflict = mergeV16SyncData(
+  { sessionHistory: [], components: { legacyConflict: { value: 'local' } } },
+  { sessionHistory: [], components: { legacyConflict: { value: 'remote' } } }
+);
+assert.equal(legacyComponentConflict.components.legacyConflict.value, 'local');
+assert.ok(legacyComponentConflict.componentUpdatedAtByKey.legacyConflict, 'A legacy component conflict must gain a clock to ensure convergence');
+assert.deepEqual(mergeV16SyncData(legacyComponentConflict, legacyComponentConflict), legacyComponentConflict, 'A resolved legacy component conflict must remain idempotent');
+
 console.log('v1.6 sync idempotency and component clock regressions: OK');
