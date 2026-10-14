@@ -95,6 +95,7 @@ const legacyLocalCustom = mergeState(
   fixtureNow
 );
 assert.equal(legacyLocalCustom.settings.dailyNew, 10, 'Legacy conflicting non-default local settings should be preserved when clocks do not exist');
+assert.ok(legacyLocalCustom.settingsUpdatedAtByKey.dailyNew, 'Resolved legacy setting conflicts must gain a clock to ensure cross-device convergence');
 const freshLocal = mergeState(
   { ...local, settings: { dailyNew: 5, retention: .9 } },
   { ...remote, settings: { dailyNew: 8, retention: .85 } },
