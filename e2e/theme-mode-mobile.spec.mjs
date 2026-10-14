@@ -68,6 +68,46 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(isDarkSurface).toBe(true);
 
+  // A primary action must stay readable when global dark-mode button rules apply.
+  const card = page.locator("#root .learning-card");
+  const primary = card.locator(".learning-card-front .button.primary").first();
+  await expect(primary).toBeVisible();
+  const contrastRatio = async (locator) => locator.evaluate((element) => {
+    const rgb = (value) => (value.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+    const luminance = (value) => rgb(value).map(channel => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    }).reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const foreground = getComputedStyle(element).color;
+    const background = getComputedStyle(element).backgroundColor;
+    const pair = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+    return {
+      ratio: (pair[0] + 0.05) / (pair[1] + 0.05),
+      borderWidth: parseFloat(getComputedStyle(element).borderTopWidth),
+      foreground,
+      background,
+    };
+  });
+  expect((await contrastRatio(primary)).ratio).toBeGreaterThanOrEqual(4.5);
+  await primary.click();
+  await expect(card).toHaveClass(/is-revealed/);
+  const ratings = card.locator(".learning-back-footer .rating-grid .rating");
+  await expect(ratings).toHaveCount(4);
+  for (const rating of await ratings.all()) {
+    const metrics = await contrastRatio(rating);
+    expect(metrics.ratio, JSON.stringify(metrics)).toBeGreaterThanOrEqual(4.5);
+    expect(metrics.borderWidth, JSON.stringify(metrics)).toBeLessThanOrEqual(1.5);
+  }
+
+  await chooseTheme("Light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect.poll(isDarkSurface).toBe(false);
+  for (const rating of await ratings.all()) {
+    const metrics = await contrastRatio(rating);
+    expect(metrics.ratio, JSON.stringify(metrics)).toBeGreaterThanOrEqual(4.5);
+    expect(metrics.borderWidth, JSON.stringify(metrics)).toBeLessThanOrEqual(1.5);
+  }
+
   await chooseTheme("System");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
   await expect.poll(isDarkSurface).toBe(true);
