@@ -1117,7 +1117,6 @@ function App(){
       hasPracticeHistory={snapshotHydrated ? (
         Number(snapshot?.stats?.studiedCount ?? 0) > 0 ||
         Number(snapshot?.stats?.totalReviews ?? 0) > 0 ||
-        Number(snapshot?.stats?.outcomes?.length ?? 0) > 0 ||
         Number(snapshot?.stats?.masteryDistribution?.learning ?? 0) > 0 ||
         Number(snapshot?.stats?.masteryDistribution?.attention ?? 0) > 0 ||
         Number(snapshot?.stats?.masteryDistribution?.stable ?? 0) > 0 ||
