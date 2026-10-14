@@ -16,6 +16,10 @@ The pinned `kanji-data.json` dataset contains 2,136 kanji with glosses, readings
 
 The taxonomy provides **24 topics**, **1,156 topic assignments**, and **849 unique tagged kanji** (39.7% of the catalog). A character may belong to multiple relevant topics. Coverage is still partial by design: a missing topic assignment does not mean a kanji is irrelevant, and untagged kanji remain searchable and visible when “All topics” is selected.
 
+## Dictionary topic selector display groups
+
+The Dictionary selector arranges the same 24 authoritative topic IDs into four presentation-only groups to improve browsing: Daily life (`numbers`, `time`, `family`, `people`, `food`, `actions`, `qualities`, `emotions`); Nature & health (`nature`, `weather`, `animals`, `plants`, `body`, `health`); Learning & expression (`school`, `communication`, `culture`); Society, places & work (`places`, `directions`, `transport`, `work`, `money`, `government`, `industry`). These headings are not taxonomy tags, do not create or remove character memberships, and must cover each topic ID exactly once. The selector's short coverage note also makes clear that untagged kanji remain available from All topics and general Dictionary search.
+
 The first-edition taxonomy contained 16 topics, 495 assignments, and 422 unique characters. Version 2 added eight topic families and widened membership in several existing families. Version 3 removed 13 overbroad assignments, reducing unique coverage from 741 to 737 characters. Version 4 adds 144 curated memberships across 112 previously untagged kanji, raising unique coverage to 849 while retaining intentional partial coverage.
 
 The authoritative entries, bilingual labels, and exact character membership live in `frontend/src/app/kanji-topics.json`. They are bundled with the React app, so filtering needs no network request and works offline.
