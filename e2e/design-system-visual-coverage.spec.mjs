@@ -516,6 +516,18 @@ test("visual coverage: responsive Dictionary control bar and browseable topics",
         await page.setViewportSize(viewport);
         await assertNoHorizontalOverflow();
         await expect(page.locator(".dictionary-topic-trigger")).toBeAttached();
+        const jlptLayout = await page.locator(".dictionary-level-filter").evaluate(element => {
+          const container = element.getBoundingClientRect();
+          const buttons = [...element.querySelectorAll("button")].map(button => button.getBoundingClientRect());
+          return {
+            oneRow: buttons.length === 6 && buttons.every(button => Math.abs(button.y - buttons[0].y) < 1),
+            allVisible: buttons.length === 6 && buttons.every(button => button.left >= container.left - 1 && button.right <= container.right + 1),
+            touchTargets: buttons.every(button => button.height >= 44 && button.width >= 44),
+          };
+        });
+        expect(jlptLayout.oneRow, "JLPT filters should remain on one row at " + viewport.width + "px").toBe(true);
+        expect(jlptLayout.allVisible, "Every JLPT choice should be visible at " + viewport.width + "px").toBe(true);
+        expect(jlptLayout.touchTargets, "JLPT options need touch-safe target sizes").toBe(true);
         if (combination.theme === "light") {
           await audit.capture(captureName("dictionary-default", combination.language, viewport.width, combination.theme));
         }
