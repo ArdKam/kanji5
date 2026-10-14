@@ -32,10 +32,10 @@ assert.ok(themeBootstrap.includes("style.textContent=darkRules+'@media(prefers-c
 assert.equal(themeBootstrap.includes(':root:is([data-theme="dark"],[data-theme="system"])'), false, "System onboarding selectors must not darken System-Light mode");
 
 // Surfaces use resolved palette tokens instead of hard-coded light backgrounds.
-assert.ok(styles.includes(".progress{height:9px;border-radius:var(--radius-xl);background:var(--progress-track);overflow:hidden}"));
-assert.ok(styles.includes(".reading{min-height:96px;padding:14px;border:1px solid var(--line-soft);border-radius:var(--radius-lg);background:var(--surface-soft);"));
+assert.ok(styles.includes(".progress{height:9px;border-radius:var(--ds-radius-xl);background:var(--progress-track);overflow:hidden}"));
+assert.ok(styles.includes(".reading{min-height:96px;padding:14px;border:1px solid var(--line-soft);border-radius:var(--ds-radius-lg);background:var(--surface-soft);"));
 assert.ok(styles.includes(".reason{margin:7px 0 0;padding:8px 10px;border:1px solid var(--line-soft);border-radius:14px;background:var(--surface-soft);"));
-assert.ok(styles.includes(".insights{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-panel)}"));
+assert.ok(styles.includes(".insights{overflow:hidden;border:1px solid var(--line);border-radius:var(--ds-radius-lg);background:var(--surface-panel)}"));
 assert.ok(styles.includes(':root[data-theme="dark"]{color-scheme:dark;--washi:#171614;'));
 assert.ok(styles.includes("--progress-track:#35312c;"));
 assert.ok(styles.includes("background:radial-gradient(circle at 8% 6%,rgba(184,74,56,.05),transparent 24rem),var(--washi);color:var(--sumi)"));

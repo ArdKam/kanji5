@@ -71,14 +71,24 @@ for(const file of cssSources){
   assert.equal(bad.length,0,`8px/9px font-size remains in ${file}: ${bad.map(m=>m[1]).join(", ")}`);
 }
 
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-view-button[\s\S]*?transition:background var\(--motion-interaction\) ease/);
+assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-view-button[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-card\.is-navigation-next\{animation:dictionary-card-next-in var\(--motion-tab\)/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-card\.is-navigation-previous\{animation:dictionary-card-previous-in var\(--motion-tab\)/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-next-in/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-previous-in/);
 
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--motion-interaction\) ease/);
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--motion-hover\) ease/);
+assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--ds-motion-hover\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/reading-lab-playback.css","utf8"),/\.reading-lab-sentence-repeat[\s\S]*?transition:background var\(--motion-interaction\) ease/);
+
+
+const migratedTokenCssFiles=["frontend/src/app/StatsAdvanced.css","frontend/src/app/component-breakdown.css","frontend/src/app/dictionary.css","frontend/src/app/exercise-layout.css","frontend/src/app/handwriting-layout.css","frontend/src/app/handwriting-practice.css","frontend/src/app/learning-card-enhancements.css","frontend/src/app/learning-surface.css","frontend/src/app/mnemonic-support.css","frontend/src/app/practice-home.css","frontend/src/app/reading-lab-focus.css","frontend/src/app/reading-lab-playback.css","frontend/src/app/topic-learning.css","frontend/src/app/traditional-radical.css","frontend/src/experience-nav.css","frontend/src/styles.css"];
+const migratedLegacyTokenNames=["text-xs","text-sm","text-base","text-md","text-lg","text-xl","text-2xl","text-heading","text-title","text-display-sm","text-display-lg","text-display-md","text-display-xl","text-display-kanji","text-stimulus-kanji","text-display-compact","text-display-wide","text-display-tall","space-1","space-2","space-3","space-4","space-5","space-6","space-7","space-8","space-9","space-10","space-11","space-12","radius-sm","radius-md","radius-lg","radius-xl","radius-full","motion-instant","motion-fast","motion-normal","motion-slow","motion-hover","motion-flip","motion-feedback","motion-interaction","motion-tab","motion-pager","motion-feedback-in","motion-stroke","motion-progress","motion-menu","motion-scrim","motion-popover","motion-dialog-open","z-base","z-content","z-nav","z-overlay","z-modal","nav-bar-height"];
+for(const file of migratedTokenCssFiles){
+  const source=fs.readFileSync(file,"utf8");
+  for(const token of migratedLegacyTokenNames){
+    assert.ok(!source.includes(`var(--${token})`) && !source.includes(`var(--${token},`), `legacy type/space/radius/motion/layer token is still consumed: ${token} in ${file}`);
+  }
+}
 
 console.log("Kanji5 UI hardening final design/motion/dark-mode contract passed.");

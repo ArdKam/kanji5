@@ -108,6 +108,14 @@ The existing type scale maps to `--ds-type-caption` (11px), `--ds-type-small` (1
 
 CSS custom properties cannot yet be used directly in media-query conditions across the supported browser baseline; the layout tokens document the agreed breakpoint values while media queries remain literal. Prefer logical properties (`padding-inline`, `margin-inline-start`, `inset-inline-end`) in reusable rules. Use page-specific exceptions when a fixed dimension is required for a real visual task, not because it is faster than responsive design.
 
+### Product stylesheet adoption pass
+
+The October 14 migration moves **780 live CSS token references across 12 consumer stylesheets** from legacy type, spacing, radius, motion, layering, and navigation-size names to their `--ds-*` semantic roles. The compatibility aliases remain defined in `styles.css` for existing and future older consumers; migrated rules now depend directly on canonical roles. Added semantic roles cover fluid display scales and screen-specific motion timings alongside the core scales.
+
+The early startup shell stylesheet intentionally remains outside this pass because it paints before the React stylesheet bundle is loaded. Theme-color aliases and page-specific color declarations are also retained for now; they need a separate contrast-aware migration rather than a blind string replacement. Dark/system/forced-contrast contracts remain mandatory.
+
+Migrated consumer stylesheets: `frontend/src/styles.css`, `frontend/src/app/dictionary.css`, `frontend/src/experience-nav.css`, `frontend/src/app/component-breakdown.css`, `frontend/src/app/handwriting-practice.css`, `frontend/src/app/learning-card-enhancements.css`, `frontend/src/app/learning-surface.css`, `frontend/src/app/mnemonic-support.css`, `frontend/src/app/practice-home.css`, `frontend/src/app/reading-lab-playback.css`, `frontend/src/app/topic-learning.css`, `frontend/src/app/traditional-radical.css`.
+
 ## Component contracts
 
 The current implementation uses the existing CSS-class component API; it does not add a second React component library.
