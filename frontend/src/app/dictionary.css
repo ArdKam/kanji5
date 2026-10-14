@@ -2203,8 +2203,8 @@
 @media(max-width:720px){
   .dictionary-page-header{gap:8px;margin-bottom:8px;}
   .dictionary-page-header h2{font-size:var(--text-lg);}
-  .dictionary-filter-row{display:flex;flex-wrap:wrap;align-items:center;}
-  .dictionary-filter-row .dictionary-level-filter{display:flex;width:100%;min-width:0;overflow-x:auto;grid-template-columns:none;}
+  .dictionary-filter-row:not(.dictionary-advanced-filter-controls){display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;}
+  .dictionary-filter-row:not(.dictionary-advanced-filter-controls) .dictionary-level-filter{display:flex;width:100%;min-width:0;overflow-x:auto;grid-template-columns:none;}
   .dictionary-advanced-filters{flex:0 0 auto;max-width:100%;}
   .dictionary-advanced-filters[open]{flex:1 1 100%;}
   .dictionary-advanced-filter-controls{grid-template-columns:minmax(0,1fr);padding:10px;gap:10px;}
