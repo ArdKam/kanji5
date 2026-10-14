@@ -2097,3 +2097,10 @@
 .kanji-catalog-grid.is-detailed .kanji-catalog-row{justify-content:stretch;gap:8px;}
 .kanji-catalog-cell{min-width:0;}
 .kanji-catalog-grid.is-detailed .kanji-catalog-tile.is-detailed{width:100%;}
+
+/* Keep the mobile filter controls inside the viewport even when text metrics change. */
+@media(max-width:720px){
+  .dictionary-controls,.dictionary-filter-row,.dictionary-filter-row>.dictionary-level-filter,.dictionary-filter-row>details.dictionary-advanced-filters{width:100%;max-width:100%;min-width:0;box-sizing:border-box;}
+  .dictionary-filter-row>.dictionary-level-filter{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .dictionary-filter-row>details.dictionary-advanced-filters>.dictionary-advanced-filter-trigger{width:100%;max-width:100%;min-width:0;box-sizing:border-box;}
+}

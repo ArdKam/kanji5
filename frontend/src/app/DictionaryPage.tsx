@@ -577,7 +577,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                         }}
                         onClick={() => setSelected(item)}
                       >
-                        <span className="kanji-catalog-fill" style={{height:"2px",opacity:0.95,backgroundColor:masteryColor}} />
+                        <span className="kanji-catalog-fill" style={{ height: "2px", opacity: 0.95, backgroundColor: masteryColor }} />
                         <span className="kanji-catalog-character" lang="ja">{item.character}</span>
                         {viewMode === "detailed" ? (
                           <span className="kanji-catalog-details">
