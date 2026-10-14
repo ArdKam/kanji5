@@ -1117,10 +1117,13 @@ function App(){
       hasPracticeHistory={snapshotHydrated ? (
         Number(snapshot?.stats?.studiedCount ?? 0) > 0 ||
         Number(snapshot?.stats?.totalReviews ?? 0) > 0 ||
+        Number(snapshot?.stats?.outcomes?.length ?? 0) > 0 ||
         Number(snapshot?.stats?.masteryDistribution?.learning ?? 0) > 0 ||
         Number(snapshot?.stats?.masteryDistribution?.attention ?? 0) > 0 ||
         Number(snapshot?.stats?.masteryDistribution?.stable ?? 0) > 0 ||
-        Number(snapshot?.stats?.masteryDistribution?.mastered ?? 0) > 0
+        Number(snapshot?.stats?.masteryDistribution?.mastered ?? 0) > 0 ||
+        Number(snapshot?.session?.completionFraction ?? 0) > 0 ||
+        Number(snapshot?.session?.remainingTotal ?? 0) < Number(snapshot?.session?.plannedTotal ?? 0)
       ) : null}
       onGoToLearning={()=>changeExperience("review")}
       onStartActiveRecall={async()=>{
