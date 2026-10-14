@@ -1,4 +1,4 @@
-import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
+import { mergeSyncPayload, stablePayload, hashPayload, payloadsEqual } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
 
 const storage=window.__KANJI5_STORAGE__||localStorage;
@@ -11,6 +11,7 @@ const REVIEWS_STORAGE_KEY=K.reviews;
 const REVIEW_SUMMARY_KEY=K.reviewSummary;
 const KNOWLEDGE_KEY=K.knowledge;
 const COMPONENT_KEY=K.components;
+const COMPONENT_SYNC_META_KEY=K.componentSyncMeta;
 const SESSION_HISTORY_KEY=K.sessionHistory;
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
@@ -65,13 +66,31 @@ function mapUser(value) {
 
 function localPayload() {
   const persisted = safeJSON(storage.getItem(STORAGE_KEY), null);
+  const syncMeta = safeJSON(storage.getItem(SYNC_META_KEY), {});
   const cards = safeJSON(storage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});
   const reviews = safeJSON(storage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);
   const reviewSummary = safeJSON(storage.getItem(REVIEW_SUMMARY_KEY), persisted?.reviewSummary || null);
   const components = safeJSON(storage.getItem(COMPONENT_KEY), {});
   const history = safeJSON(storage.getItem(SESSION_HISTORY_KEY), []);
+  const statePayload = persisted ? { ...persisted, cards, reviews, reviewSummary, queue: [], current: null, revealed: false, examples: {} } : null;
+  // A legacy caller may have persisted a setting without the new per-key clock.
+  // Compare against this account's last successful sync to detect such local edits.
+  if (statePayload && syncMeta?.userId === user?.id && syncMeta?.lastSyncedSettings && typeof syncMeta.lastSyncedSettings === 'object') {
+    const clocks = { ...(statePayload.settingsUpdatedAtByKey || {}) };
+    let changed = false;
+    for (const key of new Set([...Object.keys(statePayload.settings || {}), ...Object.keys(syncMeta.lastSyncedSettings)])) {
+      if (JSON.stringify(statePayload.settings?.[key]) !== JSON.stringify(syncMeta.lastSyncedSettings[key]) && !clocks[key]) {
+        clocks[key] = new Date().toISOString();
+        changed = true;
+      }
+    }
+    if (changed) {
+      statePayload.settingsUpdatedAtByKey = clocks;
+      storage.setItem(STORAGE_KEY, JSON.stringify({ ...persisted, settingsUpdatedAtByKey: clocks }));
+    }
+  }
   return {
-    state: persisted ? { ...persisted, cards, reviews, reviewSummary, queue: [], current: null, revealed: false, examples: {} } : null,
+    state: statePayload,
     knowledge: safeJSON(storage.getItem(KNOWLEDGE_KEY), {}),
     deckVersion: storage.getItem('kanji5-deck-version') || null,
     educationSchemaVersion: 2,
@@ -79,6 +98,7 @@ function localPayload() {
     v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
     sessionHistory: Array.isArray(history) ? history : [],
     components: components && typeof components === 'object' ? components : {},
+    componentUpdatedAtByKey: safeJSON(storage.getItem(COMPONENT_SYNC_META_KEY), {}),
     skillProfile: components?.v16SkillProfile && typeof components.v16SkillProfile === 'object' ? components.v16SkillProfile : null
   };
 }
@@ -116,6 +136,7 @@ function writeLocal(payload, remoteUpdatedAt = null) {
     const s = payload.state;
     storage.setItem(STORAGE_KEY, JSON.stringify({
       settings: s.settings,
+      settingsUpdatedAtByKey: s.settingsUpdatedAtByKey || {},
       today: s.today,
       todayNew: s.todayNew,
       todayReviewCount: s.todayReviewCount,
@@ -129,20 +150,21 @@ function writeLocal(payload, remoteUpdatedAt = null) {
   storage.setItem(KNOWLEDGE_KEY, JSON.stringify(payload?.knowledge || {}));
   if (payload?.deckVersion) storage.setItem('kanji5-deck-version', payload.deckVersion);
   const v16 = mergeV16SyncData(payload, payload);
-  const currentComponents = safeJSON(storage.getItem(COMPONENT_KEY), {}) || {};
   storage.setItem(SESSION_HISTORY_KEY, JSON.stringify(v16.sessionHistory || payload?.sessionHistory || []));
   storage.setItem(COMPONENT_KEY, JSON.stringify({
-    ...currentComponents,
     ...(v16.components || payload?.components || {}),
     ...(v16.skillProfile || payload?.skillProfile ? { v16SkillProfile: v16.skillProfile || payload.skillProfile } : {})
   }));
+  storage.setItem(COMPONENT_SYNC_META_KEY, JSON.stringify(v16.componentUpdatedAtByKey || payload?.componentUpdatedAtByKey || {}));
   storage.setItem(SYNC_META_KEY, JSON.stringify({
     educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
     syncSchemaVersion: Number(payload?.syncSchemaVersion) || 1,
     v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || V16_SYNC_SCHEMA_VERSION,
     syncedAt: new Date().toISOString(),
     remoteUpdatedAt: remoteUpdatedAt || null,
-    payloadHash: hashPayload(payload)
+    payloadHash: hashPayload(payload),
+    userId: user?.id || null,
+    lastSyncedSettings: payload?.state?.settings || {}
   }));
 }
 
@@ -154,6 +176,7 @@ function mergedPayload(local, remote) {
     v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
     sessionHistory: v16.sessionHistory || base.sessionHistory || [],
     components: v16.components || base.components || {},
+    componentUpdatedAtByKey: v16.componentUpdatedAtByKey || base.componentUpdatedAtByKey || {},
     skillProfile: v16.skillProfile || base.skillProfile || null
   };
 }
@@ -279,24 +302,23 @@ async function syncOnce() {
   }
 
   const merged = assertSyncPayloadWithinLimit(mergedPayload(local, remoteRow.payload));
-  const localHash = hashPayload(local);
-  const mergedHash = hashPayload(merged);
   const remotePayload = assertSyncPayloadWithinLimit(remoteRow.payload);
-  const remoteHash = hashPayload(remotePayload);
 
-  if (mergedHash === localHash && mergedHash === remoteHash) {
+  if (payloadsEqual(merged, local) && payloadsEqual(merged, remotePayload)) {
     storage.setItem(SYNC_META_KEY, JSON.stringify({
       educationSchemaVersion: 2,
       syncSchemaVersion: 1,
       v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
       syncedAt: new Date().toISOString(),
       remoteUpdatedAt: remoteRow.updatedAt,
-      payloadHash: mergedHash
+      payloadHash: hashPayload(merged),
+      userId: user?.id || null,
+      lastSyncedSettings: merged?.state?.settings || {}
     }));
     setSyncStatus('synced');
     return { retry: false };
   }
-  if (mergedHash === remoteHash) {
+  if (payloadsEqual(merged, remotePayload)) {
     writeLocal(merged, remoteRow.updatedAt);
     setSyncStatus('synced');
     await refreshPresentationAfterSync();
@@ -307,7 +329,7 @@ async function syncOnce() {
   if (result.conflict) return { retry: true };
   writeLocal(merged, result.updatedAt);
   setSyncStatus('synced');
-  if (mergedHash !== localHash) await refreshPresentationAfterSync();
+  if (!payloadsEqual(merged, local)) await refreshPresentationAfterSync();
   return { retry: false };
 }
 
