@@ -467,7 +467,7 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
     ];
 
     const luminance = (color) => {
-      const channels = (color.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+      const channels = (color.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
       if (channels.length !== 3) return Number.NaN;
       const linear = channels.map(channel => {
         const normalized = channel / 255;
