@@ -11,7 +11,16 @@ const validProfile = profile => Boolean(
   profile.skills && typeof profile.skills === 'object'
 );
 const timestamp = value => String(value || '');
-const jsonEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function canonicalValue(value) {
+  if (value instanceof Date) return value.toJSON();
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonicalValue(value[key])]));
+  }
+  return value;
+}
+const stableJson = value => JSON.stringify(canonicalValue(value));
+const jsonEqual = (a, b) => stableJson(a) === stableJson(b);
 
 export function sanitizeSessionHistory(history, limit = COMPLETED_LIMIT) {
   const map = new Map();
@@ -32,7 +41,9 @@ export function mergeSessionHistory(local, remote, limit = COMPLETED_LIMIT) {
 }
 
 function newer(local, remote) {
-  return timestamp(local?.updatedAt) >= timestamp(remote?.updatedAt) ? local : remote;
+  const a = timestamp(local?.updatedAt), b = timestamp(remote?.updatedAt);
+  if (a !== b) return a > b ? local : remote;
+  return stableJson(local) >= stableJson(remote) ? local : remote;
 }
 
 export function mergeSkillProfile(local, remote) {
@@ -179,19 +190,22 @@ function mergeComponents(local = {}, remote = {}, localClocks = {}, remoteClocks
     }
     if (hasLocal && hasRemote) {
       if (jsonEqual(a, b)) out[key] = clone(a);
-      else if (localAt && remoteAt) out[key] = clone(localAt >= remoteAt ? a : b);
+      else if (localAt && remoteAt) out[key] = clone(localAt !== remoteAt ? (localAt > remoteAt ? a : b) : (stableJson(a) >= stableJson(b) ? a : b));
       else if (localAt) out[key] = clone(a);
       else if (remoteAt) out[key] = clone(b);
       else if (timestamp(a?.updatedAt) || timestamp(b?.updatedAt)) out[key] = clone(newer(a, b));
-      else out[key] = clone(a); // Legacy collisions prefer local instead of blindly overwriting it.
+      else {
+        out[key] = clone(a); // Legacy conflicts choose local once, then persist a clock to converge.
+        clockMap[key] = new Date().toISOString();
+      }
       continue;
     }
     if (hasLocal) {
-      if (!(remoteAt && (!localAt || remoteAt > localAt))) out[key] = clone(a);
+      if (!(remoteAt && (!localAt || remoteAt >= localAt))) out[key] = clone(a);
       continue;
     }
     if (hasRemote) {
-      if (!(localAt && (!remoteAt || localAt > remoteAt))) out[key] = clone(b);
+      if (!(localAt && (!remoteAt || localAt >= remoteAt))) out[key] = clone(b);
     }
   }
   return { components: out, componentUpdatedAtByKey: clockMap };
