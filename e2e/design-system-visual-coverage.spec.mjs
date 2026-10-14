@@ -536,6 +536,7 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
         await topicTrigger.click();
         const dialog = page.locator(".dictionary-topic-dialog");
         await expect(dialog).toBeVisible();
+        await expect(dialog.locator('[data-topic-id="all"]')).toHaveAttribute("aria-pressed", "true");
         await expect(dialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(24);
         await audit.capture("dictionary-topic-picker-" + variant.prefix + "-" + width);
         await page.keyboard.press("Escape");
