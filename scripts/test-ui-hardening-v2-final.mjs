@@ -7,7 +7,7 @@ const index=fs.readFileSync("index.html","utf8");
 const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
 
 for(const token of [
-  "--text-xs:11px","--text-sm:13px","--text-base:15px","--text-md:17px",
+  "--text-xs:12px","--text-sm:13px","--text-base:15px","--text-md:17px",
   "--text-lg:19px","--text-xl:22px","--text-2xl:28px",
   "--text-display-sm:clamp(25px,4vw,34px)",
   "--text-display-lg:clamp(78px,14vw,150px)",

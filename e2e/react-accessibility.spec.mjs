@@ -79,6 +79,47 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   await expect(page.locator('#exercise')).toHaveAttribute('tabindex','-1');
 });
 
+test('a new guest gets a useful empty state instead of a failing first practice action',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
+  await expect(page.locator('.practice-home')).toBeVisible({timeout:10000});
+  await page.locator('.practice-start-button').click();
+  await expect(page.getByRole('heading',{name:'فعلاً تمرینی برای اجرا در دسترس نیست'})).toBeVisible({timeout:10000});
+  await expect(page.getByRole('button',{name:'رفتن به یادگیری'})).toBeVisible();
+  await page.getByRole('button',{name:'رفتن به یادگیری'}).click();
+  await expect(page.locator('.learning-card')).toBeVisible({timeout:10000});
+});
+
+test('the dictionary grid has one tab stop and supports arrow-key navigation',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'فرهنگ کانجی'}).click();
+  const grid=page.locator('.kanji-catalog-grid');
+  await expect(grid).toBeVisible({timeout:10000});
+  const first=grid.locator('.kanji-catalog-tile').first();
+  const second=grid.locator('.kanji-catalog-tile').nth(1);
+  await expect(first).toBeVisible({timeout:10000});
+  await expect.poll(async()=>grid.locator('.kanji-catalog-tile[tabindex="0"]').count()).toBe(1);
+  await first.focus();
+  await first.press('ArrowLeft');
+  await expect(second).toBeFocused();
+  await expect.poll(async()=>grid.locator('.kanji-catalog-tile[tabindex="0"]').count()).toBe(1);
+});
+
+test('the More drawer is modal and makes the main content inert',async({page})=>{
+  await clean(page);
+  await page.locator('.header-menu-trigger').click();
+  const menu=page.locator('#header-tools-menu');
+  await expect(menu).toBeVisible();
+  await expect(menu).toHaveAttribute('aria-modal','true');
+  for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
+    await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
+    await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(false);
+  }
+});
+
 test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{
   await clean(page);
 

@@ -83,7 +83,7 @@ function Audio({value,label}:{value:string;label:string}){const unsupported=type
 
 const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
-const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
+const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;
 
 function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
@@ -91,6 +91,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const learnerReadingModel=card.learnerReadings??{};
   const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
   const secondaryMeanings=learnerMeaningModel.secondary??[];
+  const displayedMeanings=[...primaryMeanings,...secondaryMeanings];
   const referenceMeanings=learnerMeaningModel.reference??[];
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
@@ -389,7 +390,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")+(mnemonicEditing?" has-open-mnemonic":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
-        <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
+        <div className="card-topline learning-card-topline"><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
@@ -403,8 +404,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
-                    {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
-                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    {displayedMeanings.length?<div className="meanings learning-back-meaning">{displayedMeanings.join(" · ")}</div>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
@@ -524,22 +524,22 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         <div className="learning-back-footer">
           {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
             <button className={"learning-back-page-shortcut"+(backPage===0?" active":"")} type="button" aria-label={t("meaningAndStructure")} title={t("meaningAndStructure")} aria-current={backPage===0?"page":undefined} onClick={()=>jumpToBackPage(0)}>
-              <UiIcon name="learning" size={18}/>
+              <UiIcon name="learning" size={18}/><span className="learning-back-page-shortcut-label">{t("meaningAndStructure")}</span>
             </button>
             {hasExamplesPage?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>!examplesLoading&&jumpToBackPage(1)} disabled={examplesLoading}>
-              <UiIcon name="reading" size={18}/>
+              <UiIcon name="reading" size={18}/><span className="learning-back-page-shortcut-label">{t("vocabularyExamples")}</span>
             </button>:null}
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?2:1)?" active":"")} type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} aria-current={backPage===(hasExamplesPage?2:1)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
-              <UiIcon name="mnemonic" size={18}/>
+              <UiIcon name="mnemonic" size={18}/><span className="learning-back-page-shortcut-label">{t("personalMnemonic")}</span>
             </button>
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
-              <UiIcon name="writing" size={18}/>
+              <UiIcon name="writing" size={18}/><span className="learning-back-page-shortcut-label">{t("strokeOrder")}</span>
             </button>
             <span className="pager-current sr-only" aria-live="polite">
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
-          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
+          <div className="rating-grid">{ratingOptions().map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
           <dialog hidden={!referenceInfoOpen} ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
           <div className="learning-reference-dialog-head">
@@ -924,6 +924,7 @@ function LoadingLearning(){
   </section>;
 }
 function App(){
+  const [practiceUnavailable,setPracticeUnavailable]=useState(false);
   const [onboardingComplete,setOnboardingComplete]=useState(()=>isOnboardingComplete());
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
@@ -1004,7 +1005,7 @@ function App(){
     };
   },[refresh,showOnboarding]);
   const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
-  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
+  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(experience==="practice")setPracticeUnavailable(false);if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";if(code==="KANJI5_NO_EXERCISE_AVAILABLE"&&experience==="practice"){setPracticeUnavailable(true);setError("");return undefined}const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
   useEffect(()=>{
     if(!headerMenuOpen)return;
@@ -1022,10 +1023,14 @@ function App(){
     };
     document.addEventListener("keydown",onKeyDown);
     const previousOverflow=document.body.style.overflow;
+    const inertTargets=Array.from(document.querySelectorAll<HTMLElement>(".skip-link,.header-brand,.session-progress,.header-menu-trigger,.account-button,.experience-nav,#primary-content,.footer"));
+    const previousInert=inertTargets.map(element=>element.inert);
+    inertTargets.forEach(element=>{element.inert=true});
     document.body.style.overflow="hidden";
     requestAnimationFrame(()=>getFocusable()[0]?.focus());
     return()=>{
       document.removeEventListener("keydown",onKeyDown);
+      inertTargets.forEach((element,index)=>{element.inert=previousInert[index]});
       document.body.style.overflow=previousOverflow;
       requestAnimationFrame(()=>opener?.focus());
     };
@@ -1036,7 +1041,7 @@ function App(){
     <style data-learning-surface>{learningSurfaceStyles}</style>
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
     <header className={"header"+(headerMenuOpen?" menu-open":"")}><div className="header-brand"><p className="eyebrow red">{t("smartLearning")}</p><div className="header-brand-lockup"><img className="header-brand-mark" src="./icon.svg" alt="" aria-hidden="true" /><h1 dir="ltr">Rinemi</h1></div></div>
-      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-labelledby="header-tools-menu-title">
+      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-hidden="true" tabIndex={-1} aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-modal="true" aria-labelledby="header-tools-menu-title">
   <div className="header-tools-menu-header"><div className="header-tools-menu-heading"><span className="header-tools-menu-kana" lang="ja" aria-hidden="true">道具</span><span aria-hidden="true">·</span><strong id="header-tools-menu-title">{t("moreMenuTitle",language)}</strong></div><button className="header-tools-menu-close" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}><UiIcon name="close" size={19}/></button></div>
   <div className="header-tools-menu-scroll">
     <section className="header-tools-menu-section" aria-labelledby="header-tools-learning-title">
@@ -1062,7 +1067,7 @@ function App(){
   </div>
 </aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
     </header>
-    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await clearCustomStudyFilter();await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
+    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await clearCustomStudyFilter();await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><div className="app-error-actions">{showExercise ? <button className="button primary app-error-next-step" type="button" onClick={()=>{setError("");changeExperience("review")}}>{t("practiceGoLearn",language)}</button> : null}<button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></div></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
         {secondaryPage==="settings" ? <SettingsDialog
@@ -1094,7 +1099,6 @@ function App(){
         </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
               {!showExercise ? <div className="card-topline">
                 <div className="learning-session-context">
-                  <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
                   <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
                 </div>
                 <button className="button secondary learning-route-button" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
@@ -1111,6 +1115,8 @@ function App(){
     <PracticeHome
       language={language}
       busy={busy}
+      practiceUnavailable={practiceUnavailable}
+      onGoToLearning={()=>changeExperience("review")}
       onStartActiveRecall={async()=>{
         await action(async()=>{
           await startExercise();
