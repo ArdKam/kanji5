@@ -115,7 +115,6 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
       <div className="prepared-mnemonic-header">
         <div>
           <h3>{suggestion?.source === "curated" ? t("preparedMnemonics", language) : t("memoryAid", language)}</h3>
-          <p>{t("preparedMnemonicsHint", language)}</p>
         </div>
       </div>
       {suggestions.length ? (
