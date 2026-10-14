@@ -81,7 +81,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     const reveal = page.locator("#root .learning-card .button.wide");
     await expect(reveal).toBeVisible({ timeout: 10_000 });
     const revealContrast = await reveal.evaluate((element) => {
-      const rgb = (value) => value.match(/[\\d.]+/g).slice(0, 3).map(Number);
+      const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
       const luminance = (value) => value.map((channel) => {
         const normalized = channel / 255;
         return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
@@ -96,7 +96,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     const ratings = page.locator("#root .learning-card .rating-grid .rating");
     await expect(ratings).toHaveCount(4, { timeout: 10_000 });
     const palette = await ratings.evaluateAll((elements) => elements.map((element) => {
-      const rgb = (value) => value.match(/[\\d.]+/g).slice(0, 3).map(Number);
+      const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
       const luminance = (value) => value.map((channel) => {
         const normalized = channel / 255;
         return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
