@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getVisualStructureInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import type { PreparedMnemonic } from "./mnemonic-library";
@@ -13,7 +13,23 @@ const levelRank: Record<string, number> = { N5: 0, N4: 1, N3: 2, N2: 3, N1: 4 };
 const DETAILED_PAGE_SIZE = 160;
 
 type DictionaryTopic = { id: string; label: { fa: string; en: string }; characters: string };
+type DictionaryTopicGroup = { id: string; label: { fa: string; en: string }; topicIds: string[] };
 const KANJI_TOPICS = topicData.topics as DictionaryTopic[];
+
+// Display-only groups make the reviewed taxonomy browsable without changing topic IDs
+// or their curated memberships.
+const TOPIC_GROUPS: DictionaryTopicGroup[] = [
+  { id: "everyday", label: { fa: "زندگی روزمره", en: "Everyday life" }, topicIds: ["numbers", "body", "time", "family", "food", "health"] },
+  { id: "nature", label: { fa: "طبیعت", en: "Nature" }, topicIds: ["nature", "weather", "animals", "plants"] },
+  { id: "places", label: { fa: "مکان و جابه‌جایی", en: "Places & movement" }, topicIds: ["places", "directions", "transport"] },
+  { id: "society", label: { fa: "جامعه و کار", en: "Society & work" }, topicIds: ["people", "school", "work", "government", "communication", "money", "industry", "culture"] },
+  { id: "ideas", label: { fa: "اندیشه و ویژگی‌ها", en: "Ideas & qualities" }, topicIds: ["actions", "emotions", "qualities"] },
+];
+const GROUPED_TOPIC_IDS = new Set(TOPIC_GROUPS.flatMap(group => group.topicIds));
+const UNGROUPED_TOPICS = KANJI_TOPICS.filter(entry => !GROUPED_TOPIC_IDS.has(entry.id));
+const DISPLAY_TOPIC_GROUPS = UNGROUPED_TOPICS.length
+  ? [...TOPIC_GROUPS, { id: "other", label: { fa: "موضوع‌های دیگر", en: "Other topics" }, topicIds: UNGROUPED_TOPICS.map(entry => entry.id) }]
+  : TOPIC_GROUPS;
 const TOPIC_IDS_BY_CHARACTER = new Map<string, Set<string>>();
 for (const entry of KANJI_TOPICS) {
   for (const character of entry.characters.trim().split(" ").filter(Boolean)) {
@@ -37,7 +53,7 @@ function FilterChip({ label, removeLabel, onRemove }: { label: string; removeLab
   return (
     <button
       className="badge"
-      style={{ minHeight: 44, maxWidth: "100%", gap: 6, padding: "5px 10px", borderRadius: 999, background: "var(--paper)", borderColor: "var(--line)", cursor: "pointer", fontSize: 12 }}
+      className="badge dictionary-active-filter-chip"
       type="button"
       onClick={onRemove}
       aria-label={removeLabel}
@@ -167,6 +183,10 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [masteryFilter, setMasteryFilter] = useState<MasteryFilter>("all");
   const [grade, setGrade] = useState("all");
   const [topic, setTopic] = useState("all");
+  const [topicPickerOpen, setTopicPickerOpen] = useState(false);
+  const [topicSearch, setTopicSearch] = useState("");
+  const topicDialogRef = useRef<HTMLDialogElement | null>(null);
+  const topicSearchInputRef = useRef<HTMLInputElement | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("matrix");
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
@@ -174,6 +194,17 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
   const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1) + (topic === "all" ? 0 : 1);
   const activeTopic = topic === "all" ? null : KANJI_TOPICS.find(entry => entry.id === topic) ?? null;
+  const allTopicsLabel = language === "fa" ? "همهٔ موضوع‌ها" : "All topics";
+  const filteredTopicGroups = useMemo(() => {
+    const searchTerm = normalize(topicSearch);
+    return DISPLAY_TOPIC_GROUPS.map(group => ({
+      ...group,
+      topics: group.topicIds
+        .map(id => KANJI_TOPICS.find(entry => entry.id === id))
+        .filter((entry): entry is DictionaryTopic => Boolean(entry))
+        .filter(entry => !searchTerm || normalize(entry.label[language]).includes(searchTerm)),
+    })).filter(group => group.topics.length > 0);
+  }, [language, topicSearch]);
   const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim());
 
   useEffect(() => {
@@ -193,6 +224,17 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     });
     return () => { active = false; };
   }, [loadAttempt]);
+
+  useEffect(() => {
+    const dialog = topicDialogRef.current;
+    if (!dialog) return;
+    if (topicPickerOpen) {
+      if (!dialog.open) dialog.showModal();
+      topicSearchInputRef.current?.focus({ preventScroll: true });
+    } else if (dialog.open) {
+      dialog.close();
+    }
+  }, [topicPickerOpen]);
 
   useEffect(() => {
     if (!externalSelectedCharacter) return;
@@ -279,9 +321,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             ><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg></button>
           ) : null}
         </label>
-        <p className="dictionary-search-hint" aria-live="polite">
-          {query ? (language === "fa" ? "جست‌وجو در کانجی، خوانش و معنی" : "Searching character, readings and meanings") : (language === "fa" ? "کانجی، خوانش یا معنی را جست‌وجو کن." : "Search by character, reading or meaning.")}
-        </p>
       </div>
 
       <div className="dictionary-controls">
@@ -296,41 +335,53 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           <details className={"dictionary-advanced-filters" + (activeAdvancedFilterCount ? " has-active-filters" : "")}>
             <summary className="button secondary dictionary-advanced-filter-trigger">
               <span>{t("dictionaryMoreFilters", language)}</span>
-              <span className="actions">
+              <span className="dictionary-advanced-trigger-actions">
                 {activeAdvancedFilterCount > 0 ? <span className="badge dictionary-filter-count" aria-label={t("dictionaryActiveFiltersCount", language)}>{formatNumber(activeAdvancedFilterCount, language)}</span> : null}
                 <span className="dictionary-advanced-chevron" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path d="m5 7.5 5 5 5-5" /></svg></span>
               </span>
             </summary>
-            <div className="dictionary-filter-row dictionary-advanced-filter-controls">
-              <label className="dictionary-select-filter">
-                <span>{language === "fa" ? "تسلط" : "Mastery"}</span>
-                <select value={masteryFilter} onChange={(event) => setMasteryFilter(event.target.value as MasteryFilter)}>
-                  <option value="all">{language === "fa" ? "همه" : "All"}</option>
-                  <option value="unseen">{language === "fa" ? "دیده‌نشده" : "Unseen"}</option>
-                  <option value="learning">{language === "fa" ? "در حال یادگیری" : "Learning"}</option>
-                  <option value="attention">{language === "fa" ? "نیازمند توجه" : "Needs attention"}</option>
-                  <option value="mastered">{language === "fa" ? "مسلط" : "Mastered"}</option>
-                </select>
-              </label>
-              <label className="dictionary-select-filter">
-                <span>{language === "fa" ? "پایه" : "Grade"}</span>
-                <select value={grade} onChange={(event) => setGrade(event.target.value)}>
-                  <option value="all">{language === "fa" ? "همه" : "All"}</option>
-                  {Array.from({length:6},(_,index)=>String(index+1)).map(value => <option key={value} value={value}>{language === "fa" ? "پایه " + value : "Grade " + value}</option>)}
-                  <option value="secondary">{language === "fa" ? "متوسطه" : "Secondary"}</option>
-                </select>
-              </label>
-              <label className="dictionary-select-filter">
-                <span>{language === "fa" ? "موضوع" : "Topic"}</span>
-                <select aria-label={language === "fa" ? "موضوع" : "Topic"} value={topic} onChange={(event) => setTopic(event.target.value)}>
-                  <option value="all">{language === "fa" ? "همهٔ موضوع‌ها" : "All topics"}</option>
-                  {KANJI_TOPICS.map(entry => <option key={entry.id} value={entry.id}>{language === "fa" ? entry.label.fa : entry.label.en}</option>)}
-                </select>
-              </label>
+            <div className="dictionary-advanced-filter-controls">
+              <div className="dictionary-advanced-filter-grid">
+                <label className="dictionary-advanced-filter-group">
+                  <span>{language === "fa" ? "تسلط" : "Mastery"}</span>
+                  <select value={masteryFilter} onChange={(event) => setMasteryFilter(event.target.value as MasteryFilter)}>
+                    <option value="all">{language === "fa" ? "همه" : "All"}</option>
+                    <option value="unseen">{language === "fa" ? "دیده‌نشده" : "Unseen"}</option>
+                    <option value="learning">{language === "fa" ? "در حال یادگیری" : "Learning"}</option>
+                    <option value="attention">{language === "fa" ? "نیازمند توجه" : "Needs attention"}</option>
+                    <option value="mastered">{language === "fa" ? "مسلط" : "Mastered"}</option>
+                  </select>
+                </label>
+                <label className="dictionary-advanced-filter-group">
+                  <span>{language === "fa" ? "پایه" : "Grade"}</span>
+                  <select value={grade} onChange={(event) => setGrade(event.target.value)}>
+                    <option value="all">{language === "fa" ? "همه" : "All"}</option>
+                    {Array.from({length:6},(_,index)=>String(index+1)).map(value => <option key={value} value={value}>{language === "fa" ? "پایه " + formatNumber(Number(value), language) : "Grade " + formatNumber(Number(value), language)}</option>)}
+                    <option value="secondary">{language === "fa" ? "متوسطه" : "Secondary"}</option>
+                  </select>
+                </label>
+                <div className="dictionary-advanced-filter-group dictionary-topic-filter-group">
+                  <span id="dictionary-topic-label">{language === "fa" ? "موضوع" : "Topic"}</span>
+                  <button
+                    className="dictionary-topic-trigger"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded={topicPickerOpen}
+                    aria-controls="dictionary-topic-picker"
+                    aria-labelledby="dictionary-topic-label dictionary-topic-current"
+                    onClick={() => { setTopicSearch(""); setTopicPickerOpen(true); }}
+                  >
+                    <span id="dictionary-topic-current" className="dictionary-topic-current">{activeTopic ? activeTopic.label[language] : allTopicsLabel}</span>
+                    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m5 7.5 5 5 5-5" /></svg>
+                  </button>
+                </div>
+              </div>
               {activeAdvancedFilterCount > 0 ? (
-                <button className="button secondary wide" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}>
+                <div className="dictionary-advanced-filter-footer">
+                  <button className="dictionary-clear-extra-filters" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}>
                     {t("dictionaryClearExtraFilters", language)}
-                </button>
+                  </button>
+                </div>
               ) : null}
             </div>
           </details>
@@ -348,7 +399,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               <span className="dictionary-view-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>
               </span>
-              <span className="sr-only">{language === "fa" ? "شبکه" : "Matrix"}</span>
+              <span className="dictionary-view-label">{language === "fa" ? "شبکه" : "Matrix"}</span>
             </button>
             <button
               className={"dictionary-view-button" + (viewMode === "detailed" ? " active" : "")}
@@ -364,7 +415,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               <span className="dictionary-view-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false"><path d="M3 4.5h14M3 10h14M3 15.5h14" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8"/></svg>
               </span>
-              <span className="sr-only">{language === "fa" ? "جزئیات" : "Detailed"}</span>
+              <span className="dictionary-view-label">{language === "fa" ? "جزئیات" : "Detailed"}</span>
             </button>
           </div>
           <label className="dictionary-sort">
@@ -380,14 +431,76 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         </div>
       </div>
 
+      <dialog
+        ref={topicDialogRef}
+        id="dictionary-topic-picker"
+        className="dictionary-topic-dialog"
+        aria-labelledby="dictionary-topic-picker-title"
+        onClose={() => setTopicPickerOpen(false)}
+        onClick={(event) => { if (event.target === event.currentTarget) setTopicPickerOpen(false); }}
+      >
+        <div className="dictionary-topic-picker-header">
+          <div className="dictionary-topic-picker-heading">
+            <h3 id="dictionary-topic-picker-title">{language === "fa" ? "انتخاب موضوع" : "Choose a topic"}</h3>
+            <p>{language === "fa"
+              ? "موضوع‌ها بر اساس عضویت‌های بازبینی‌شده‌اند؛ کانجی‌های بدون برچسب از مسیر «همهٔ موضوع‌ها» و جست‌وجوی فرهنگ همچنان در دسترس‌اند."
+              : "Topics use reviewed Kanji memberships; untagged Kanji remain available through All topics and Dictionary search."}</p>
+          </div>
+          <button className="dictionary-topic-picker-close" type="button" aria-label={language === "fa" ? "بستن انتخاب موضوع" : "Close topic picker"} onClick={() => setTopicPickerOpen(false)}>
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg>
+          </button>
+        </div>
+        <label className="dictionary-topic-picker-search">
+          <span className="sr-only">{language === "fa" ? "جست‌وجوی موضوع‌ها" : "Search topics"}</span>
+          <input
+            ref={topicSearchInputRef}
+            type="search"
+            value={topicSearch}
+            onChange={(event) => setTopicSearch(event.target.value)}
+            placeholder={language === "fa" ? "جست‌وجوی موضوع‌ها…" : "Search topics…"}
+            aria-label={language === "fa" ? "جست‌وجوی موضوع‌ها" : "Search topics"}
+            autoComplete="off"
+            spellCheck={false}
+          />
+          {topicSearch ? <button type="button" className="dictionary-topic-search-clear" aria-label={language === "fa" ? "پاک کردن جست‌وجوی موضوع" : "Clear topic search"} onClick={() => { setTopicSearch(""); topicSearchInputRef.current?.focus(); }}>×</button> : null}
+        </label>
+        <div className="dictionary-topic-picker-list" aria-label={language === "fa" ? "فهرست موضوع‌ها" : "Topic catalogue"}>
+          <button
+            className={"dictionary-topic-option dictionary-topic-option-all" + (topic === "all" ? " is-active" : "")}
+            type="button"
+            data-topic-id="all"
+            aria-pressed={topic === "all"}
+            onClick={() => { setTopic("all"); setTopicPickerOpen(false); }}
+          >
+            <span>{allTopicsLabel}</span>
+            <span className="dictionary-topic-option-mark" aria-hidden="true">{topic === "all" ? "✓" : ""}</span>
+          </button>
+          {filteredTopicGroups.length ? filteredTopicGroups.map(group => (
+            <section className="dictionary-topic-group" key={group.id} aria-labelledby={"dictionary-topic-group-" + group.id}>
+              <h4 id={"dictionary-topic-group-" + group.id}>{group.label[language]}</h4>
+              <div className="dictionary-topic-group-options">
+                {group.topics.map(entry => (
+                  <button
+                    key={entry.id}
+                    className={"dictionary-topic-option" + (topic === entry.id ? " is-active" : "")}
+                    type="button"
+                    data-topic-id={entry.id}
+                    aria-pressed={topic === entry.id}
+                    onClick={() => { setTopic(entry.id); setTopicPickerOpen(false); }}
+                  >
+                    <span dir="auto">{entry.label[language]}</span>
+                    <span className="dictionary-topic-option-mark" aria-hidden="true">{topic === entry.id ? "✓" : ""}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )) : <p className="dictionary-topic-no-results" role="status">{language === "fa" ? "موضوعی با این عبارت پیدا نشد." : "No topics match this search."}</p>}
+        </div>
+      </dialog>
+
       {hasActiveDictionaryFilters ? (
-        <div
-          className="dictionary-active-filters"
-          aria-label={language === "fa" ? "فیلترهای فعال" : "Active filters"}
-          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "7px 10px", margin: "4px 0 13px", padding: "9px 10px", border: "1px solid var(--line-soft)", borderRadius: 13, background: "var(--washi)" }}
-        >
-          <span style={{ flex: "0 0 auto", color: "var(--mute)", fontSize: 12, fontWeight: 800 }}>{language === "fa" ? "فیلترهای فعال" : "Active filters"}</span>
-          <div className="dictionary-active-filter-chips" style={{ display: "flex", flex: "1 1 180px", flexWrap: "wrap", alignItems: "center", gap: 6, minWidth: 0 }}>
+        <div className="dictionary-active-filters" role="group" aria-label={language === "fa" ? "فیلترهای فعال" : "Active filters"}>
+          <div className="dictionary-active-filter-chips">
             {query.trim() ? (
               <FilterChip
                 label={(language === "fa" ? "جست‌وجو: " : "Search: ") + query.trim()}
@@ -428,7 +541,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           </div>
           <button
             className="dictionary-clear-all-filters"
-            style={{ flex: "0 0 auto", minHeight: 44, padding: "5px 4px", marginInlineStart: "auto", border: 0, background: "transparent", color: "var(--shu)", font: "inherit", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+            className="dictionary-clear-all-filters"
             type="button"
             onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}
           >
@@ -449,8 +562,8 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         <>
           <div
             className={"dictionary-mastery-legend" + (viewMode === "detailed" ? " is-detailed" : "")}
+            role="group"
             aria-label={language === "fa" ? "راهنمای رنگ وضعیت یادگیری" : "Learning status colour key"}
-            style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px 12px", margin: "0 0 10px", padding: "8px 1px 2px", color: "var(--mute)" }}
           >
             {([
               ["unseen", language === "fa" ? "دیده‌نشده" : "Unseen", "var(--line-interactive)"],
@@ -459,7 +572,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               ["attention", language === "fa" ? "نیازمند توجه" : "Needs attention", "var(--sakura)"],
               ["mastered", language === "fa" ? "مسلط" : "Mastered", "var(--matcha)"],
             ] as const).map(([key, label, color]) => (
-              <span key={key} className={"dictionary-mastery-key is-" + key} style={{ display: "inline-flex", flex: "0 0 auto", alignItems: "center", gap: 6, minWidth: 0, fontSize: 12, lineHeight: 1.35 }}>
+              <span key={key} className={"dictionary-mastery-key is-" + key}>
                 <i aria-hidden="true" style={{ display: "block", flex: "0 0 auto", width: 7, height: 7, borderRadius: "50%", background: color }} />
                 {label}
               </span>
