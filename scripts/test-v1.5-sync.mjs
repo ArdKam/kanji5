@@ -105,6 +105,14 @@ assert.equal(freshLocal.settings.retention, .85, 'Fresh-install defaults should 
 
 const payload = mergeSyncPayload({ state: local, knowledge: { 学: { meaning: { attempts: 1, correct: 1 } } }, deckVersion: 'v1' }, { state: remote, knowledge: { 学: { meaning: { attempts: 2, correct: 1 } } }, deckVersion: 'v1', educationSchemaVersion: 2 }, fixtureNow);
 assert.equal(payloadsEqual(payload, stablePayload(payload)), true, 'Canonical payload comparison must be stable');
+assert.equal(
+  payloadsEqual(
+    { state: { settings: { dailyNew: 5, retention: 0.9 } } },
+    { state: { settings: { retention: 0.9, dailyNew: 5 } } }
+  ),
+  true,
+  'Object key insertion order must not cause a pointless sync'
+);
 assert.equal(payloadsEqual(payload, { ...payload, deckVersion: 'different' }), false, 'Exact sync comparisons must distinguish changed payloads');
 assert.equal(payload.syncSchemaVersion, SYNC_SCHEMA_VERSION);
 assert.equal(payload.deckVersion, 'v1');
