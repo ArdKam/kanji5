@@ -450,3 +450,101 @@ test("visual coverage: dictionary filters, empty results, detail tabs, dark mode
   }
   expect(audit.report.pageErrors, "Uncaught browser errors during dictionary visual coverage").toEqual([]);
 });
+
+
+test("visual coverage: semantic theme tokens and accessible review outcomes", async ({ page }) => {
+  await startApp(page, { language: "en", theme: "light" });
+
+  const inspectTokens = async () => page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const read = (name: string) => root.getPropertyValue(name).trim();
+    const roles = [
+      ["review-again", "--ds-review-again-text", "--ds-review-again-bg"],
+      ["review-hard", "--ds-review-hard-text", "--ds-review-hard-bg"],
+      ["review-good", "--ds-review-good-text", "--ds-review-good-bg"],
+      ["review-easy", "--ds-review-easy-text", "--ds-review-easy-bg"],
+      ["primary-action", "--ds-color-action-primary-text", "--ds-color-action-primary"],
+    ] as const;
+
+    const luminance = (color: string) => {
+      const channels = (color.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+      if (channels.length !== 3) return Number.NaN;
+      const linear = channels.map(channel => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045
+          ? normalized / 12.92
+          : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+    };
+
+    const contrast = (foreground: string, background: string) => {
+      const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+      return (values[0] + 0.05) / (values[1] + 0.05);
+    };
+
+    const contrasts = roles.map(([name, foregroundToken, backgroundToken]) => {
+      const probe = document.createElement("span");
+      probe.textContent = "R";
+      probe.style.color = `var(${foregroundToken})`;
+      probe.style.backgroundColor = `var(${backgroundToken})`;
+      probe.style.position = "absolute";
+      probe.style.visibility = "hidden";
+      document.body.append(probe);
+      const computed = getComputedStyle(probe);
+      const ratio = contrast(computed.color, computed.backgroundColor);
+      probe.remove();
+      return { name, ratio };
+    });
+
+    return {
+      theme: document.documentElement.dataset.theme,
+      canvas: getComputedStyle(document.documentElement).backgroundColor,
+      canvasToken: read("--ds-color-canvas"),
+      legacyCanvasToken: read("--washi"),
+      primaryAction: read("--ds-color-action-primary"),
+      focusRing: read("--ds-focus-ring"),
+      bodyFont: read("--ds-font-latin"),
+      persianFont: read("--ds-font-persian"),
+      japaneseFont: read("--ds-font-japanese"),
+      contrasts,
+    };
+  });
+
+  const assertTheme = async (expectedTheme: string, expectedCanvas: string) => {
+    await expect(page.locator("html")).toHaveAttribute("data-theme", expectedTheme);
+    const snapshot = await inspectTokens();
+    for (const [name, value] of Object.entries({
+      canvasToken: snapshot.canvasToken,
+      legacyCanvasToken: snapshot.legacyCanvasToken,
+      primaryAction: snapshot.primaryAction,
+      focusRing: snapshot.focusRing,
+      bodyFont: snapshot.bodyFont,
+      persianFont: snapshot.persianFont,
+      japaneseFont: snapshot.japaneseFont,
+    })) {
+      expect(value, `Missing semantic token: ${name}`).not.toBe("");
+    }
+    expect(snapshot.canvas, `Unexpected canvas color in ${expectedTheme} theme`).toBe(expectedCanvas);
+    for (const result of snapshot.contrasts) {
+      expect(result.ratio, `${result.name} must meet WCAG AA text contrast in ${expectedTheme}; got ${result.ratio}`).toBeGreaterThanOrEqual(4.5);
+    }
+  };
+
+  await assertTheme("light", "rgb(247, 244, 238)");
+
+  const menu = page.locator("#header-tools-menu");
+  await page.getByRole("button", { name: "More", exact: true }).click();
+  await expect(menu).toBeVisible();
+  await menu.getByRole("button", { name: "Dark", exact: true }).click();
+  await assertTheme("dark", "rgb(23, 22, 20)");
+
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  await menu.getByRole("button", { name: "System", exact: true }).click();
+  await assertTheme("system", "rgb(23, 22, 20)");
+
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+  await assertTheme("system", "rgb(247, 244, 238)");
+
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--ds-target-min").trim())).toBe("44px");
+});
