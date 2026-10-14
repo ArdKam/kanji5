@@ -1,17 +1,28 @@
 /* Learning-card-only polish: keep navigation and grading visually distinct. */
 .kanji-structure-preview {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "label action" "glyphs action";
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  column-gap: 10px;
+  row-gap: 3px;
   min-width: 0;
-  min-height: 48px;
+  min-height: 56px;
   padding: 6px 8px;
   border: 1px solid var(--line-soft, var(--line));
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--washi) 56%, var(--paper));
 }
+.kanji-structure-preview-label {
+  grid-area: label;
+  min-width: 0;
+  color: var(--mute);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.2;
+}
 .kanji-structure-preview-glyphs {
+  grid-area: glyphs;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -60,36 +71,43 @@
 }
 .kanji-structure-preview-action,
 .kanji-structure-preview-action-placeholder {
+  grid-area: action;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   flex: 0 0 auto;
-  padding: 7px 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  min-width: 0;
+  min-height: 44px;
+  max-width: 160px;
+  padding: 4px 0 4px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--ink);
   font: inherit;
   font-size: var(--text-xs);
-  font-weight: 750;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: start;
+  white-space: normal;
 }
 .kanji-structure-preview-action:hover {
-  background: var(--paper);
-  border-color: var(--line-interactive);
+  background: color-mix(in srgb, var(--line) 24%, transparent);
 }
 .kanji-structure-preview-action:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--ai) 36%, transparent);
   outline-offset: 2px;
 }
-.kanji-structure-preview-arrow { color: var(--mute); font-size: 15px; }
+.kanji-structure-preview-arrow { flex: 0 0 auto; color: var(--mute); font-size: 14px; }
 .kanji-structure-preview-skeleton {
   width: 108px;
   height: 28px;
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--line) 48%, var(--paper));
 }
-.kanji-structure-preview-action-placeholder { width: 116px; border-color: transparent; }
+.kanji-structure-preview-action-placeholder { width: 124px; padding: 0; color: transparent; }
 .learning-back-identity-visual { min-width: 0; }
 .learning-card-back .learning-back-page:first-child .learning-back-scroll {
   overflow-y: hidden;
@@ -311,7 +329,10 @@
   .learning-card-back .learning-back-page:first-child .reading > strong,
   .learning-card-back .learning-back-page:first-child .reading > .audio-button { grid-column: 1; grid-row: auto; }
   .learning-card-back .learning-back-page:first-child .reading > .audio-button { display: none; }
-  .learning-card-back .learning-back-page:first-child .kanji-structure-preview { min-height: 40px; padding: 3px 5px; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview { min-height: 0; padding: 3px 5px; column-gap: 5px; row-gap: 2px; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview-label { font-size: 10px; line-height: 1.05; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview-action { gap: 3px; max-width: 136px; font-size: 10px; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview-action-placeholder { width: 108px; min-height: 44px; }
   .kanji-structure-preview-glyph { min-width: 28px; min-height: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -381,10 +402,35 @@
   flex-wrap: wrap;
 }
 
-.learning-reference-trigger {
+.learning-card .learning-card-back .learning-reference-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 44px;
   min-height: 44px;
-  display: grid;
-  place-items: center;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--mute);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 650;
+  line-height: 1.4;
+  text-align: start;
+  cursor: pointer;
+}
+.learning-card .learning-card-back .learning-reference-trigger:hover,
+.learning-card .learning-card-back .learning-reference-trigger.active {
+  background: color-mix(in srgb, var(--line) 25%, transparent);
+  color: var(--ink);
+}
+.learning-card .learning-card-back .learning-reference-trigger:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ai) 36%, transparent);
+  outline-offset: 2px;
 }
 
 
