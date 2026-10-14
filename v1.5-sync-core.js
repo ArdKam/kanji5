@@ -144,7 +144,7 @@ const LEGACY_DEFAULT_SETTINGS = Object.freeze({
 const owns = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
 const sameValue = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-function mergeSettings(local, remote) {
+function mergeSettings(local, remote, now = new Date()) {
   const a = local?.settings && typeof local.settings === 'object' ? local.settings : {};
   const b = remote?.settings && typeof remote.settings === 'object' ? remote.settings : {};
   const at = local?.settingsUpdatedAtByKey && typeof local.settingsUpdatedAtByKey === 'object' ? local.settingsUpdatedAtByKey : {};
@@ -156,7 +156,7 @@ function mergeSettings(local, remote) {
     let useLocal;
     if (!hasLocal) useLocal = false;
     else if (!hasRemote) useLocal = true;
-    else if (localAt && remoteAt) useLocal = localAt >= remoteAt;
+    else if (localAt && remoteAt) useLocal = localAt > remoteAt || (localAt === remoteAt && JSON.stringify(canonicalize(a[key])) >= JSON.stringify(canonicalize(b[key])));
     else if (localAt) useLocal = true;
     else if (remoteAt) useLocal = false;
     else {
@@ -168,7 +168,10 @@ function mergeSettings(local, remote) {
     }
     const chosen = useLocal ? a : b;
     if (owns(chosen, key)) settings[key] = clone(chosen[key]);
-    const stamp = [localAt, remoteAt].sort().at(-1) || '';
+    const conflictStamp = !localAt && !remoteAt && hasLocal && hasRemote && !sameValue(a[key], b[key])
+      ? (now instanceof Date ? now : new Date(now)).toISOString()
+      : '';
+    const stamp = [localAt, remoteAt].sort().at(-1) || conflictStamp;
     if (stamp) updatedAtByKey[key] = stamp;
   }
   return { settings, settingsUpdatedAtByKey: updatedAtByKey };
@@ -178,7 +181,7 @@ export function mergeState(local, remote, now = new Date()) {
   if (!local) return remote ? clone(remote) : null;
   if (!remote) return clone(local);
   const merged = { ...clone(local), ...clone(remote) };
-  const settingsMerge = mergeSettings(local, remote);
+  const settingsMerge = mergeSettings(local, remote, now);
   merged.settings = settingsMerge.settings;
   merged.settingsUpdatedAtByKey = settingsMerge.settingsUpdatedAtByKey;
   const ids = new Set([...Object.keys(local.cards || {}), ...Object.keys(remote.cards || {})]);
