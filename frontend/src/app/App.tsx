@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { KanjiStructurePreview } from "./KanjiStructurePreview";
+import "./learning-card-enhancements.css";
 import { useModalDialog } from "./useModalDialog";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
