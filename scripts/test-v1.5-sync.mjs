@@ -114,6 +114,16 @@ assert.equal(
   'Object key insertion order must not cause a pointless sync'
 );
 assert.equal(payloadsEqual(payload, { ...payload, deckVersion: 'different' }), false, 'Exact sync comparisons must distinguish changed payloads');
+
+const identicalLegacyStats = { attempts: 4, correct: 2, lastAt: '2026-10-10T10:00:00Z' };
+const identicalLegacyKnowledge = mergeSyncPayload(
+  { state: local, knowledge: { 学: { reading: identicalLegacyStats } }, deckVersion: 'v1' },
+  { state: remote, knowledge: { 学: { reading: identicalLegacyStats } }, deckVersion: 'v1' },
+  fixtureNow
+);
+assert.equal(identicalLegacyKnowledge.knowledge.学.reading.attempts, 4, 'Identical legacy knowledge on both sides must not be double-counted');
+assert.equal(identicalLegacyKnowledge.knowledge.学.reading.correct, 2, 'Identical legacy knowledge must preserve correct counts');
+
 assert.equal(payload.syncSchemaVersion, SYNC_SCHEMA_VERSION);
 assert.equal(payload.deckVersion, 'v1');
 assert.equal(payload.state.todayNew, 4);
