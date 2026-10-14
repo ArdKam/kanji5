@@ -60,3 +60,14 @@ jobs:
         run: npx playwright test --timeout=45000 --retries=0 e2e/handwriting-vector-integration.spec.mjs
       - name: Run handwriting legacy benchmark
         run: npx playwright test --timeout=30000 --retries=0 e2e/handwriting-legacy-benchmark.spec.mjs
+
+      - name: Upload handwriting failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: handwriting-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
