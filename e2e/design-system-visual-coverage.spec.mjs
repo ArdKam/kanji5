@@ -457,16 +457,16 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
 
   const inspectTokens = async () => page.evaluate(() => {
     const root = getComputedStyle(document.documentElement);
-    const read = (name: string) => root.getPropertyValue(name).trim();
+    const read = (name) => root.getPropertyValue(name).trim();
     const roles = [
       ["review-again", "--ds-review-again-text", "--ds-review-again-bg"],
       ["review-hard", "--ds-review-hard-text", "--ds-review-hard-bg"],
       ["review-good", "--ds-review-good-text", "--ds-review-good-bg"],
       ["review-easy", "--ds-review-easy-text", "--ds-review-easy-bg"],
       ["primary-action", "--ds-color-action-primary-text", "--ds-color-action-primary"],
-    ] as const;
+    ];
 
-    const luminance = (color: string) => {
+    const luminance = (color) => {
       const channels = (color.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
       if (channels.length !== 3) return Number.NaN;
       const linear = channels.map(channel => {
@@ -478,7 +478,7 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
       return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
     };
 
-    const contrast = (foreground: string, background: string) => {
+    const contrast = (foreground, background) => {
       const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
       return (values[0] + 0.05) / (values[1] + 0.05);
     };
@@ -511,7 +511,7 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
     };
   });
 
-  const assertTheme = async (expectedTheme: string, expectedCanvas: string) => {
+  const assertTheme = async (expectedTheme, expectedCanvas) => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", expectedTheme);
     const snapshot = await inspectTokens();
     for (const [name, value] of Object.entries({
