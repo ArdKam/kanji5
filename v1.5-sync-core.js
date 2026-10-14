@@ -121,10 +121,21 @@ export function hashPayload(payload) {
   return (hash >>> 0).toString(16);
 }
 
+// Canonicalize object keys recursively so property insertion order does not cause
+// needless uploads. Arrays keep their order and Dates retain their JSON semantics.
+function canonicalize(value) {
+  if (value instanceof Date) return value.toJSON();
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonicalize(value[key])]));
+  }
+  return value;
+}
+
 // Exact canonical comparison is used for sync decisions. The 32-bit hash remains
 // useful as metadata, but must never be able to suppress a required upload.
 export function payloadsEqual(a, b) {
-  return JSON.stringify(stablePayload(a || {})) === JSON.stringify(stablePayload(b || {}));
+  return JSON.stringify(canonicalize(stablePayload(a || {}))) === JSON.stringify(canonicalize(stablePayload(b || {})));
 }
 
 const LEGACY_DEFAULT_SETTINGS = Object.freeze({
