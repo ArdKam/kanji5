@@ -924,6 +924,7 @@ function LoadingLearning(){
   </section>;
 }
 function App(){
+  const [practiceUnavailable,setPracticeUnavailable]=useState(false);
   const [onboardingComplete,setOnboardingComplete]=useState(()=>isOnboardingComplete());
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
@@ -1004,7 +1005,7 @@ function App(){
     };
   },[refresh,showOnboarding]);
   const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
-  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
+  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(experience==="practice")setPracticeUnavailable(false);if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";if(code==="KANJI5_NO_EXERCISE_AVAILABLE"&&experience==="practice"){setPracticeUnavailable(true);setError("");return undefined}const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
   useEffect(()=>{
     if(!headerMenuOpen)return;
@@ -1114,16 +1115,7 @@ function App(){
     <PracticeHome
       language={language}
       busy={busy}
-      hasPracticeHistory={snapshotHydrated ? (
-        Number(snapshot?.stats?.studiedCount ?? 0) > 0 ||
-        Number(snapshot?.stats?.totalReviews ?? 0) > 0 ||
-        Number(snapshot?.stats?.masteryDistribution?.learning ?? 0) > 0 ||
-        Number(snapshot?.stats?.masteryDistribution?.attention ?? 0) > 0 ||
-        Number(snapshot?.stats?.masteryDistribution?.stable ?? 0) > 0 ||
-        Number(snapshot?.stats?.masteryDistribution?.mastered ?? 0) > 0 ||
-        Number(snapshot?.session?.completionFraction ?? 0) > 0 ||
-        Number(snapshot?.session?.remainingTotal ?? 0) < Number(snapshot?.session?.plannedTotal ?? 0)
-      ) : null}
+      practiceUnavailable={practiceUnavailable}
       onGoToLearning={()=>changeExperience("review")}
       onStartActiveRecall={async()=>{
         await action(async()=>{

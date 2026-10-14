@@ -83,7 +83,8 @@ test('a new guest gets a useful empty state instead of a failing first practice 
   await clean(page);
   await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('.practice-home')).toBeVisible({timeout:10000});
-  await expect(page.getByRole('heading',{name:'هنوز کانجی‌ای برای تمرین نداری'})).toBeVisible({timeout:10000});
+  await page.locator('.practice-start-button').click();
+  await expect(page.getByRole('heading',{name:'فعلاً تمرینی برای اجرا در دسترس نیست'})).toBeVisible({timeout:10000});
   await expect(page.getByRole('button',{name:'رفتن به یادگیری'})).toBeVisible();
   await page.getByRole('button',{name:'رفتن به یادگیری'}).click();
   await expect(page.locator('.learning-card')).toBeVisible({timeout:10000});
