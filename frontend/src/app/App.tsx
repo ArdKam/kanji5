@@ -1092,7 +1092,7 @@ function App(){
           onClose={closeSecondaryPage}
         /> : null}
         </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
-              {!showExercise ? <div className="card-topline">
+              {!showExercise ? <div className="card-topline learning-session-toolbar">
                 <div className="learning-session-context">
                   <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
                   <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
