@@ -152,9 +152,12 @@ test('custom study starts a filtered JLPT/new-card session',async({page})=>{
 
 test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji card',async({page})=>{
   await clean(page);
+  const catalogCssPresentBeforeOpen=await page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/dictionary-catalog.*\.css/.test(entry.name)));
+  expect(catalogCssPresentBeforeOpen).toBe(false);
   await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/dictionary-catalog.*\.css/.test(entry.name)))).toBe(true);
   await expect(pageRoot.locator('.mastery-map-summary')).toHaveCount(0);
   await expect(pageRoot.locator('.kanji-catalog-tile').first()).toHaveAttribute('data-mastery-state');
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136,{timeout:10000});

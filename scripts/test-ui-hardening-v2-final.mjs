@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const css=fs.readFileSync("frontend/src/styles.css","utf8");
+const mainSource=fs.readFileSync("frontend/src/main.tsx","utf8");
+const appSource=fs.readFileSync("frontend/src/app/App.tsx","utf8");
 const designSystem=fs.readFileSync("frontend/src/design-system.css","utf8");
-const dictionaryCss=fs.readFileSync("frontend/src/app/dictionary.css","utf8");
+const dictionaryCss=fs.readFileSync("frontend/src/app/dictionary.css","frontend/src/app/dictionary-catalog.css","utf8");
 const index=fs.readFileSync("index.html","utf8");
 const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
 
@@ -91,4 +93,7 @@ for(const file of migratedTokenCssFiles){
   }
 }
 
+assert.doesNotMatch(mainSource,/import\s+["']\.\/app\/dictionary-catalog\.css["']/,"Dictionary catalog styles must not enter the startup bundle");
+assert.match(appSource,/import\(["']\.\/dictionary-catalog\.css["']\)/,"Dictionary catalog CSS must be loaded on demand");
+assert.match(appSource,/dictionaryCatalogStylesReady/,"Dictionary screen must wait until its CSS chunk is ready");
 console.log("Kanji5 UI hardening final design/motion/dark-mode contract passed.");
