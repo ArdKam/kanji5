@@ -2235,3 +2235,10 @@
     margin:0;
   }
 }
+
+/* Keep one accessible clear affordance inside the topic search field. */
+.dictionary-topic-search-input::-webkit-search-cancel-button,
+.dictionary-topic-search-input::-webkit-search-decoration{
+  -webkit-appearance:none;
+  appearance:none;
+}
