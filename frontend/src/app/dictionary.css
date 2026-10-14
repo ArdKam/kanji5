@@ -630,8 +630,13 @@
   overflow:auto;
   overscroll-behavior:contain;
   scrollbar-gutter:stable;
-  padding:2px 2px 5px 0;
+  scrollbar-width:thin;
+  scrollbar-color:var(--ds-color-border-interactive,var(--line-interactive)) transparent;
+  padding:2px 4px 5px 2px;
 }
+.dictionary-topic-groups::-webkit-scrollbar{width:4px;}
+.dictionary-topic-groups::-webkit-scrollbar-track{background:transparent;}
+.dictionary-topic-groups::-webkit-scrollbar-thumb{background:var(--ds-color-border-subtle,var(--line-soft));border-radius:999px;}
 .dictionary-topic-group{display:grid;gap:7px;min-width:0;}
 .dictionary-topic-group h4{
   margin:0;
