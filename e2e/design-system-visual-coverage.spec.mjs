@@ -596,6 +596,12 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
     await expect(topicTrigger).toBeFocused();
     await expect(page.locator(".dictionary-active-filters")).toContainText("Plants & trees");
     await audit.capture("dictionary-topic-selected-en-light-1440");
+    await topicTrigger.click();
+    await expect(dialog.locator('[data-topic-id="plants"]')).toHaveAttribute("aria-pressed", "true");
+    await audit.capture("dictionary-topic-picker-en-light-selected-state");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(topicTrigger).toBeFocused();
 
     const search = page.locator(".dictionary-page-search input");
     await search.fill("学");
@@ -611,6 +617,27 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
     await expect(advanced.locator(".dictionary-filter-count")).toHaveText("3");
     await expect(page.locator(".dictionary-count")).toContainText("/");
     await audit.capture("dictionary-intersection-en-light-1440");
+
+    // All topics clears only topic state; query, JLPT, grade and mastery remain.
+    await topicTrigger.click();
+    await expect(dialog.locator('[data-topic-id="plants"]')).toHaveAttribute("aria-pressed", "true");
+    await dialog.locator('[data-topic-id="all"]').click();
+    await expect(dialog).toBeHidden();
+    await expect(topicTrigger).toContainText("All topics");
+    await expect(topicTrigger).toBeFocused();
+    await expect(search).toHaveValue("学");
+    await expect(page.locator(".dictionary-filter-button.active")).toHaveText("N5");
+    await expect(advancedSelects.nth(0)).toHaveValue("learning");
+    await expect(advancedSelects.nth(1)).toHaveValue("1");
+    await expect(advanced.locator(".dictionary-filter-count")).toHaveText("2");
+    await audit.capture("dictionary-all-topics-preserves-other-filters");
+
+    // Re-select the topic, then test independent active-chip removal separately.
+    await topicTrigger.click();
+    await dialog.locator('[data-topic-id="plants"]').click();
+    await expect(topicTrigger).toContainText("Plants & trees");
+    await expect(advanced.locator(".dictionary-filter-count")).toHaveText("3");
+    await audit.capture("dictionary-topic-reselected-with-other-filters");
 
     // Removing a single active topic chip preserves all the other filters.
     await page.locator(".dictionary-active-filters .badge").filter({ hasText: "Plants & trees" }).click();
@@ -633,6 +660,8 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
     await expect(search).toHaveValue("");
     await expect(page.locator(".dictionary-filter-button.active")).toHaveText("All");
     await expect(page.locator(".dictionary-active-filters")).toHaveCount(0);
+    await advanced.locator("summary").click();
+    await expect(advanced).not.toHaveAttribute("open", "");
 
     const sort = page.locator(".dictionary-sort select");
     for (const value of ["level-asc", "level-desc", "mastery-desc", "mastery-asc", "order"]) {
