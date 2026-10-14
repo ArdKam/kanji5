@@ -296,7 +296,7 @@ test('account copy makes sync benefit and guest path explicit', async ({ page })
   await page.locator('.account-button:visible').click();
   const auth = page.locator('.account-auth-surface');
   await expect(auth).toBeVisible();
-  await expect(auth).toContainText('sync your progress across devices');
+  await expect(auth).toContainText('Sign in to sync progress across devices');
   await expect(auth).toContainText('keep learning without an account on this device');
 });
 
