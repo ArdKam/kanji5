@@ -64,11 +64,7 @@ async function apiCacheFirst(req){
     }catch(_){
       if(hit)return hit;
       const isWordsApi=req.url.startsWith(`${API_ORIGIN}/v1/words/`);
-      if(isWordsApi)return new Response('[]',{status:200,headers:{
-        'Content-Type':'application/json; charset=utf-8',
-        'Cache-Control':'no-store',
-        'X-Kanji5-Offline-Fallback':'1'
-      }});
+      if(isWordsApi)return new Response('[]',{status:200,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'}});
       return new Response('Offline: resource unavailable',{status:503,headers:{
         'Content-Type':'text/plain; charset=utf-8',
         'Cache-Control':'no-store',
