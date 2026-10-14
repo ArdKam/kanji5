@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [page, card] = await Promise.all([
+const [page, card, i18n] = await Promise.all([
   readFile(new URL("../frontend/src/app/DictionaryPage.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/DictionaryKanjiCard.tsx", import.meta.url), "utf8"),
+  readFile(new URL("../frontend/src/app/i18n.ts", import.meta.url), "utf8"),
 ]);
 
 assert.doesNotMatch(page, /dictionary-polish\.css/, "Dictionary styling must not add a separate CSS bundle");
@@ -17,8 +18,8 @@ assert.match(page, /aria-pressed={topic === entry.id}/, "The selected topic must
 assert.match(page, /onCancel=\{\(event\) => \{ event\.preventDefault\(\); closeTopicPicker\(\); \}\}/, "Escape must dismiss the topic picker predictably");
 assert.match(page, /topicPickerTriggerRef\.current\?\.focus\(\)/, "Closing the topic picker must restore trigger focus");
 assert.match(page, /t\("dictionaryTopicCoverageNote", language\)/, "Taxonomy coverage caveat belongs inside the topic picker");
-assert.match(page, /dictionaryTopicCoverageNote:"Topics use reviewed labels; unlabelled kanji remain available under All topics and in general dictionary search\./, "English topic coverage copy must explain All topics and general search");
-assert.match(page, /dictionaryTopicCoverageNote:"موضوع‌ها بر پایهٔ برچسب‌گذاری بازبینی‌شده‌اند/, "Persian topic coverage copy must explain reviewed labels and general search");
+assert.match(i18n, /dictionaryTopicCoverageNote:"Topics use reviewed labels; unlabelled kanji remain available under All topics and in general dictionary search\./, "English topic coverage copy must explain All topics and general search");
+assert.match(i18n, /dictionaryTopicCoverageNote:"موضوع‌ها بر پایهٔ برچسب‌گذاری بازبینی‌شده‌اند/, "Persian topic coverage copy must explain reviewed labels and general search");
 assert.doesNotMatch(page, /dictionary-search-hint/, "Remove the repetitive permanent subtitle beneath dictionary search");
 assert.doesNotMatch(page, /<select aria-label=\{language === "fa" \? "موضوع" : "Topic"\} value=\{topic\}/, "Topic selection must not fall back to a plain select");
 assert.match(page, /className="dictionary-view-label"/, "Both view modes must have visible names");
