@@ -365,8 +365,8 @@ test('Dictionary card tabs fit narrow mobile widths without horizontal overflow'
 test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible({timeout:10000});
   const textValue='一番目の文です。二番目の文も続きます。';
@@ -377,8 +377,8 @@ test('Reading Lab restores the last reading session after closing and reopening'
   await dialog.locator('.dialog-close').click();
   await expect(dialog).toBeHidden();
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const reopened=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const reopened=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const restored=reopened.locator('.reading-lab');
   await expect(restored).toBeVisible();
   await expect(restored.locator('textarea')).toHaveValue(textValue);
@@ -390,8 +390,8 @@ test('Reading Lab restores the last reading session after closing and reopening'
 test('Reading Lab focuses the next unfamiliar kanji without changing the reading session',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible({timeout:10000});
   const textValue='今日は学生です。明日は先生です。';
@@ -422,8 +422,8 @@ test('Reading Lab focuses the next unfamiliar kanji without changing the reading
 test('Reading Lab exposes occurrence-weighted coverage and bounded hardest-sentence focus',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
   await lab.locator('textarea').fill('今日は学生です。明日は先生です。');
   const analysisStats=lab.locator('.reading-lab-analysis-stats > div');
@@ -453,8 +453,8 @@ test('Reading Lab resolves a contextual vocabulary word before falling back to k
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{variants:[{written:'今日',pronounced:'きょう'}],meanings:[{glosses:['today']}]}])});
   });
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
   await lab.locator('textarea').fill('今日は学生です。');
   await lab.locator('.reading-lab-reader-kanji').filter({hasText:'日'}).first().click();
@@ -472,8 +472,8 @@ test('Reading Lab resolves a contextual vocabulary word before falling back to k
 test('Reading Lab preserves SRT cue timing and follows audio time',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
   await lab.locator('.reading-lab-action-primary input[type=file]').setInputFiles({
     name:'lesson.srt',mimeType:'text/plain',
@@ -496,8 +496,8 @@ test('Reading Lab preserves SRT cue timing and follows audio time',async({page})
 test('Reading Lab provides controllable Japanese text playback',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   await expect(dialog).toBeVisible({timeout:10000});
   const lab=dialog.locator('.reading-lab');
   await expect(lab).toBeVisible();
@@ -602,8 +602,8 @@ test('Reading Lab persists sentence notes, reuses exact translation matches, and
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:[{text:sentence,translations:[[{text:'Today I am a student.'}]]}]})});
   });
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
   await lab.locator('textarea').fill(sentence);
   const sentenceRow=lab.locator('.reading-lab-reader-sentence').first();
@@ -623,8 +623,8 @@ test('Reading Lab persists sentence notes, reuses exact translation matches, and
   await dialog.getByRole('button',{name:'بستن',exact:true}).click();
   await expect(dialog).toBeHidden();
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
-  await page.locator('#header-tools-menu').getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const reopened=page.getByRole('dialog',{name:'آزمایشگاه خواندن'}).locator('.reading-lab').locator('.reading-lab-reader-sentence').first();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
+  const reopened=page.getByRole('dialog',{name:'خواندن متن ژاپنی'}).locator('.reading-lab').locator('.reading-lab-reader-sentence').first();
   await expect(reopened.locator('.reading-lab-sentence-translation')).toContainText('Today I am a student.');
   await expect(reopened.locator('.reading-lab-sentence-annotation')).toContainText('یادداشت: 学生 در اینجا یعنی دانش‌آموز.');
 });
