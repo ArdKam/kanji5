@@ -1114,7 +1114,14 @@ function App(){
     <PracticeHome
       language={language}
       busy={busy}
-      hasPracticeHistory={snapshotHydrated ? Number(snapshot?.stats?.studiedCount ?? 0) > 0 : null}
+      hasPracticeHistory={snapshotHydrated ? (
+        Number(snapshot?.stats?.studiedCount ?? 0) > 0 ||
+        Number(snapshot?.stats?.totalReviews ?? 0) > 0 ||
+        Number(snapshot?.stats?.masteryDistribution?.learning ?? 0) > 0 ||
+        Number(snapshot?.stats?.masteryDistribution?.attention ?? 0) > 0 ||
+        Number(snapshot?.stats?.masteryDistribution?.stable ?? 0) > 0 ||
+        Number(snapshot?.stats?.masteryDistribution?.mastered ?? 0) > 0
+      ) : null}
       onGoToLearning={()=>changeExperience("review")}
       onStartActiveRecall={async()=>{
         await action(async()=>{
