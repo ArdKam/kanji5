@@ -244,9 +244,19 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
         const rect = element.getBoundingClientRect();
         return rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth + 1;
       });
-      return { levelDisplay: level ? getComputedStyle(level).display : '', inViewport: bounds.length === 2 && bounds.every(Boolean) };
+      const buttons = [...(level?.querySelectorAll('button') || [])].map(element => element.getBoundingClientRect());
+      return {
+        levelDisplay: level ? getComputedStyle(level).display : '',
+        levelOverflowX: level ? getComputedStyle(level).overflowX : '',
+        horizontallyScrollable: Boolean(level && level.scrollWidth > level.clientWidth + 1),
+        buttonsStayOnOneRow: buttons.length === 6 && buttons.every(rect => Math.abs(rect.y - buttons[0].y) < 1),
+        inViewport: bounds.length === 2 && bounds.every(Boolean),
+      };
     });
-    expect(filterLayout.levelDisplay).toBe('grid');
+    expect(filterLayout.levelDisplay).toBe('flex');
+    expect(filterLayout.levelOverflowX).toBe('auto');
+    expect(filterLayout.horizontallyScrollable).toBe(true);
+    expect(filterLayout.buttonsStayOnOneRow).toBe(true);
     expect(filterLayout.inViewport).toBe(true);
     await captureScrolled('10-dictionary-mobile-mid-catalog', { scope: 'page', ratio: 0.5 });
 
