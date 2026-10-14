@@ -21,7 +21,6 @@ export function MnemonicSupportPanel({ support, language, character, isNew = fal
     <details className={"mnemonic-support mnemonic-support-" + presentationMode} data-hint-stage={stage} data-hint-focus={hintFocus} open={expanded} onToggle={handleToggle} >
       <summary className="mnemonic-support-header">
         <strong>{t("mnemonicBridges")}</strong>
-        <span>{t("mnemonicBridgesHint")}</span>
       </summary>
 
       <div className="mnemonic-support-content">

@@ -57,7 +57,6 @@ export function ReadingLabWordCard({
             </div>
           </section>
         ) : null}
-        <p className="reading-word-card-hint">{t("readingLabWordLookupHint", language)}</p>
       </article>
     </dialog>
   );

@@ -27,7 +27,6 @@ function ActivitySection({ snapshot, language }: { snapshot: Snapshot; language:
     <section className="stats-section stats-activity stats-activity-section" aria-labelledby="stats-activity-title">
       <div className="stats-section-heading">
         <div>
-          <p className="eyebrow">{language === "fa" ? "فعالیت" : "Activity"}</p>
           <h3 id="stats-activity-title">{t("sevenDayActivity", language)}</h3>
         </div>
         <div className="stats-section-summary"><strong>{formatNumber(total, language)}</strong><span>{language === "fa" ? "مرور ثبت‌شده" : "reviews"}</span></div>
@@ -84,7 +83,7 @@ function MasterySection({ snapshot, language }: { snapshot: Snapshot; language: 
   return (
     <section className="stats-section" aria-labelledby="stats-mastery-title">
       <div className="stats-section-heading">
-        <div><p className="eyebrow">{language === "fa" ? "تسلط" : "Mastery"}</p><h3 id="stats-mastery-title">{language === "fa" ? "توزیع وضعیت کانجی‌ها" : "Kanji mastery"}</h3></div>
+        <div><h3 id="stats-mastery-title">{language === "fa" ? "توزیع وضعیت کانجی‌ها" : "Kanji mastery"}</h3></div>
         <div className="stats-section-summary"><strong>{hasStudiedData ? formatNumber(Math.round((Number(distribution.average) || 0) * 100), language) + "%" : "—"}</strong><span>{hasStudiedData ? (language === "fa" ? "تسلط کانجی‌های مطالعه‌شده" : "studied mastery") : (language === "fa" ? "پس از اولین جلسه نمایش داده می‌شود" : "Available after your first study session")}</span></div>
       </div>
       {hasData ? (
@@ -113,7 +112,7 @@ function SkillsSection({ snapshot, language }: { snapshot: Snapshot; language: L
 
   return (
     <section className="stats-section" aria-labelledby="stats-skills-title">
-      <div className="stats-section-heading"><div><p className="eyebrow">{language === "fa" ? "مهارت‌ها" : "Skills"}</p><h3 id="stats-skills-title">{language === "fa" ? "پروفایل یادگیری" : "Learning profile"}</h3></div></div>
+      <div className="stats-section-heading"><div><h3 id="stats-skills-title">{language === "fa" ? "پروفایل یادگیری" : "Learning profile"}</h3></div></div>
       <div className="stats-skills-list">
         {skillKeys.map(key => {
           const skill = snapshot.learner?.attributes?.[key] ?? {};
@@ -129,7 +128,7 @@ function SkillsSection({ snapshot, language }: { snapshot: Snapshot; language: L
           </div>;
         })}
       </div>
-      <p className="stats-footnote">{language === "fa" ? "درصد اینجا دقت پاسخ‌هاست؛ جزئیات اطمینان مدل و تعداد تلاش‌ها را در آمار پیشرفته ببین." : "This percentage is response accuracy; advanced stats show model confidence and attempt evidence."}</p>
+      <p className="stats-footnote">{language === "fa" ? "این درصد دقت پاسخ‌هاست؛ آمار پیشرفته اطمینان مدل و تعداد تلاش‌ها را نشان می‌دهد." : "This is observed answer accuracy; advanced stats show model confidence and attempt counts."}</p>
     </section>
   );
 }
@@ -143,7 +142,7 @@ function AttentionSection({ catalog, language, onStudyWeak }: { catalog: KanjiCa
   return (
     <section className="stats-section stats-attention" aria-labelledby="stats-attention-title">
       <div className="stats-section-heading">
-        <div><p className="eyebrow">{language === "fa" ? "تمرکز بعدی" : "Next focus"}</p><h3 id="stats-attention-title">{t("masteryNeedsAttention", language)}</h3></div>
+        <div><h3 id="stats-attention-title">{t("masteryNeedsAttention", language)}</h3></div>
         {items.length > 0 && onStudyWeak ? <button className="button secondary stats-attention-action" type="button" onClick={onStudyWeak}>{language === "fa" ? "تمرین این‌ها" : "Practice these"}</button> : null}
       </div>
       {items.length ? (
@@ -201,8 +200,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
     <section className="stats-section stats-advanced" aria-labelledby="stats-advanced-title">
       <div className="stats-section-heading">
         <div>
-          <p className="eyebrow">{language === "fa" ? "جزئیات پیشرفت" : "Progress details"}</p>
-          <h3 id="stats-advanced-title">{language === "fa" ? "عملکرد دقیق‌تر" : "A closer look"}</h3>
+          <h3 id="stats-advanced-title">{language === "fa" ? "جزئیات عملکرد" : "Performance details"}</h3>
         </div>
       </div>
 
@@ -275,7 +273,7 @@ function AdvancedStatsSection({ snapshot, language }: { snapshot: Snapshot; lang
         </div>
       ) : null}
 
-      <p className="stats-footnote">{language === "fa" ? "دقت، عملکرد مشاهده‌شده است؛ اطمینان مدل فقط قدرت شواهد را نشان می‌دهد. مقایسهٔ adaptive و baseline فقط پس از رسیدن به آستانهٔ شواهد نمایش داده می‌شود." : "Accuracy is observed performance; model confidence reflects evidence strength. Adaptive vs baseline comparisons are interpreted only after the evidence threshold is met."}</p>
+      <p className="stats-footnote">{language === "fa" ? "دقت، عملکرد مشاهده‌شده است؛ اطمینان مدل قدرت شواهد را نشان می‌دهد. مقایسهٔ adaptive و baseline فقط با شواهد کافی نمایش داده می‌شود." : "Accuracy is observed performance; model confidence reflects evidence strength. Adaptive vs baseline is shown only when evidence is sufficient."}</p>
     </section>
   );
 }
@@ -338,9 +336,7 @@ export function StatsDialog({ open, snapshot, language, onClose, onStudyWeak }: 
     <dialog ref={dialogRef} className="dialog secondary-page-dialog stats-dialog stats-dashboard" aria-labelledby="stats-title" aria-busy={statsLoading}>
       <button className="dialog-close" type="button" aria-label={t("close", language)} onClick={onClose}>×</button>
       <header className="stats-header">
-        <p className="eyebrow">{language === "fa" ? "پیشرفت" : "Progress"}</p>
         <h2 id="stats-title">{language === "fa" ? "مسیر یادگیری تو" : "Your learning progress"}</h2>
-        <p>{language === "fa" ? "ببین چه مقدار پیش رفته‌ای، چه مهارت‌هایی در حال رشدند و روی چه کانجی‌هایی بهتر است دوباره تمرکز کنی." : "See what you have learned, which skills are growing, and which kanji deserve another look."}</p>
       </header>
 
       <section className="stats-overview" aria-label={language === "fa" ? "نمای کلی پیشرفت" : "Progress overview"}>

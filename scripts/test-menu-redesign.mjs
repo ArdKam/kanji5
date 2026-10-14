@@ -24,9 +24,13 @@ assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-menu-scrim\{display:
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.header-tools-menu\{animation:none!important;\}/);
 
 for(const label of [
-  "menuLearningTools","menuProgress","menuPreferences","menuGrammarHint","menuReadingHint",
-  "menuMnemonicHint","menuStatsHint","menuSettingsHint","appearance","themeLight","themeDark","themeSystem"
+  "menuLearningTools","menuProgress","menuPreferences","appearance","themeLight","themeDark","themeSystem"
 ]) assert.ok(i18n.includes(`| "${label}"`),`missing translation key: ${label}`);
+
+for(const label of ["menuGrammarHint","menuReadingHint","menuMnemonicHint","menuStatsHint","menuSettingsHint"]) {
+  assert.ok(!i18n.includes(`"${label}"`),`redundant menu hint translation remains: ${label}`);
+  assert.ok(!app.includes(`t("${label}"`),`redundant menu hint is still rendered: ${label}`);
+}
 
 for(const marker of [
   'aria-label={t("grammarGuide",language)}',

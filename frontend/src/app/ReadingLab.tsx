@@ -659,7 +659,6 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
               </div>
               {showRestoreNotice ? <span className="reading-lab-session-status" role="status">{t("readingLabSessionRestored", language)}</span> : null}
             </div>
-            <p>{t("readingLabSourceHint", language)}</p>
           </div>
           <span className="reading-lab-step" aria-hidden="true">01</span>
         </div>
