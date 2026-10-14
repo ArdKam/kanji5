@@ -4,15 +4,29 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const [taxonomy, dataset] = await Promise.all([
+const [taxonomy, dataset, dictionaryPage] = await Promise.all([
   fs.readFile(path.join(root, "frontend/src/app/kanji-topics.json"), "utf8").then(value => JSON.parse(value)),
   fs.readFile(path.join(root, "kanji-data.json"), "utf8").then(value => JSON.parse(value)),
+  fs.readFile(path.join(root, "frontend/src/app/DictionaryPage.tsx"), "utf8"),
 ]);
 
 assert.equal(taxonomy.version, 4, "Topic taxonomy version must be explicit");
 assert.equal(dataset.count, 2136, "Expected the pinned catalog size");
 assert.equal(dataset.kanji.length, dataset.count, "Dataset count must match its items");
 assert.ok(Array.isArray(taxonomy.topics) && taxonomy.topics.length >= 20, "Expected a useful curated topic set");
+
+// Dictionary browsing groups must cover the existing taxonomy exactly once,
+// without changing the source taxonomy or introducing extra selectable topics.
+const groupBlock = dictionaryPage.match(/const TOPIC_GROUPS: DictionaryTopicGroup\\[\\] = \\[([\\s\\S]*?)\\n\\];/);
+assert.ok(groupBlock, "Dictionary must define explicit display-only topic groups");
+const groupedIds = [...groupBlock[1].matchAll(/topicIds:\\s*\\[([^\\]]*)\\]/g)]
+  .flatMap((match) => [...match[1].matchAll(/"([a-z-]+)"/g)].map((entry) => entry[1]));
+assert.equal(groupedIds.length, taxonomy.topics.length, "Each existing topic must appear in one browse group");
+assert.equal(new Set(groupedIds).size, groupedIds.length, "Browse groups must not duplicate a topic");
+assert.deepEqual([...groupedIds].sort(), taxonomy.topics.map(topic => topic.id).sort(), "Browse groups must cover all curated topic IDs exactly");
+assert.match(dictionaryPage, /data-topic-id=\{entry\\.id\}/, "Topic picker choices must retain stable source IDs");
+assert.match(dictionaryPage, /setTopic\\(entry\\.id\\)/, "Selecting a browsed topic must use the existing single-topic filter state");
+assert.match(dictionaryPage, /topic: allTopicsLabel/, "The current all-topic selection must have a localized label");
 
 const catalogCharacters = new Set(dataset.kanji.map(item => item.character));
 const ids = taxonomy.topics.map(topic => topic.id);
