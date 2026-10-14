@@ -28,6 +28,8 @@ assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|
 
 // Primary actions and active settings controls must retain their semantic background under dark-mode overrides.
 assert.ok(styles.includes(".button.primary{--dark-button-background:var(--ai);background:var(--ai);border-color:var(--ai);color:var(--paper)}"));
+assert.ok(styles.includes("button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}"));
+assert.equal(styles.includes("outline:3px solid rgba(38,64,107,.32)"), false, "Low-opacity fixed blue must not mask keyboard focus in dark mode");
 assert.ok(styles.includes(".settings-language-button.active{--dark-button-background:var(--sumi);background:var(--sumi);border-color:var(--sumi);color:var(--paper)}"));
 for (const theme of ["system", "dark"]) {
   assert.ok(styles.includes(`:root[data-theme="${theme}"] :is(.badge,.audio-button,.button,.pager-button,.settings-language-button){background:var(--dark-button-background,#35312c);}`));
@@ -89,6 +91,8 @@ assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCA
 assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
 assert.ok(contrast("#23211e", "#8da9d9") >= 4.5, "Dark-mode primary action label must remain readable");
 assert.ok(contrast("#23211e", "#f4efe3") >= 4.5, "Dark-mode selected settings label must remain readable");
+assert.ok(contrast("#505f83", "#fdfbf7") >= 3, "Light-theme keyboard focus outline must be distinguishable");
+assert.ok(contrast("#8da9d9", "#171614") >= 3, "Dark-theme keyboard focus outline must be distinguishable");
 for (const [label, foreground, background] of [
   ["light Again", "#7d4840", "#f7efed"],
   ["light Hard", "#776643", "#f7f2e5"],
