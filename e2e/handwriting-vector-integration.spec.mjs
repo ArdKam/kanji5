@@ -49,7 +49,7 @@ async function drawReference(page,canvas,strokes){
         const pointer = event;
         browserWindow.__handwritingPointerTrace.push({
           type,
-          target: pointer.target instanceof Element ? pointer.target.tagName.toLowerCase() + "." + String(pointer.target.className || "").replace(/\\s+/g, ".") : "unknown",
+          target: pointer.target instanceof Element ? pointer.target.tagName.toLowerCase() + "." + String(pointer.target.className || "").replace(/\s+/g, ".") : "unknown",
           onCanvas: element === pointer.target || element.contains(pointer.target),
           pointerId: pointer.pointerId,
           pointerType: pointer.pointerType,
