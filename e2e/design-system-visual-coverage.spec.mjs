@@ -526,7 +526,7 @@ test("visual coverage: responsive Dictionary control bar and browseable topics",
         if (!viewport) throw new Error("Missing planned viewport " + width);
         await page.setViewportSize(viewport);
         const advanced = page.locator("details.dictionary-advanced-filters");
-        if (!(await advanced.getAttribute("open"))) await advanced.locator("summary").click();
+        if (await advanced.getAttribute("open") === null) await advanced.locator("summary").click();
         await expect(advanced).toHaveAttribute("open", "");
         await expect(page.locator(".dictionary-advanced-group")).toHaveCount(3);
         await assertNoHorizontalOverflow();
@@ -609,7 +609,7 @@ test("visual coverage: responsive Dictionary control bar and browseable topics",
     await query.fill("学");
     await page.getByRole("button", { name: "N5", exact: true }).click();
     const advanced = page.locator("details.dictionary-advanced-filters");
-    if (!(await advanced.getAttribute("open"))) await advanced.locator("summary").click();
+    if (await advanced.getAttribute("open") === null) await advanced.locator("summary").click();
     await advanced.locator("#dictionary-mastery-filter").selectOption("unseen");
     await advanced.locator("#dictionary-grade-filter").selectOption("1");
     await page.locator("#dictionary-topic-trigger").click();
@@ -636,8 +636,10 @@ test("visual coverage: responsive Dictionary control bar and browseable topics",
     }
     await page.getByRole("button", { name: "Detailed view", exact: true }).click();
     await expect(page.getByRole("button", { name: "Detailed view", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "Detailed view", exact: true })).toContainText("Detailed");
     await page.getByRole("button", { name: "Matrix view", exact: true }).click();
     await expect(page.getByRole("button", { name: "Matrix view", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "Matrix view", exact: true })).toContainText("Matrix");
     await page.getByRole("button", { name: "Clear all", exact: true }).click();
     await expect(query).toHaveValue("");
     await expect(page.getByRole("button", { name: "All", exact: true })).toHaveAttribute("aria-pressed", "true");
