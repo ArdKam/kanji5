@@ -5,6 +5,7 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
 const dictionary = await read("frontend/src/app/dictionary.css");
+const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
 
 const darkStart = styles.indexOf("@media(prefers-color-scheme:dark){");
