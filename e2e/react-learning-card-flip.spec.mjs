@@ -225,7 +225,7 @@ test("reference meanings and readings open in a keyboard-accessible modal", asyn
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
-    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings");
+    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings");
 
     await trigger.click();
     const dialog = page.locator("#learning-reference-info");
@@ -488,8 +488,14 @@ test("learning-card structure is a compact preview with full details in a modal"
     const nav = card.locator(".learning-back-page-nav .learning-back-page-shortcut");
     await expect(nav).toHaveCount(4);
     const previewPage = card.locator(".learning-back-page.active");
+    const previewLabel = previewPage.locator(".kanji-structure-preview-label");
     const preview = previewPage.locator(".kanji-structure-preview-action");
+    await expect(previewLabel).toHaveText("Visual components");
+    await expect(preview).toHaveText("View full structure↗");
     await expect(preview).toBeVisible({ timeout: 10000 });
+    await expect(preview).toHaveCSS("border-width", "0px");
+    const target = await preview.boundingBox();
+    expect(target?.height ?? 0).toBeGreaterThanOrEqual(44);
     const metrics = await previewPage.evaluate(pageEl => {
       const scroll = pageEl.querySelector(".learning-back-scroll");
       const overview = pageEl.querySelector(".learning-back-overview");
