@@ -77,24 +77,24 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await expect.poll(isDarkSurface).toBe(false);
   expect(await background(nav)).not.toContain("35, 33, 30");
 
-  const assertDarkButtonContrast = async () => {
-    const reveal = page.locator("#root .learning-card .button.wide");
-    await expect(reveal).toBeVisible({ timeout: 10_000 });
-    const revealContrast = await reveal.evaluate((element) => {
-      const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
-      const luminance = (value) => value.map((channel) => {
-        const normalized = channel / 255;
-        return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-      }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
-      const style = getComputedStyle(element);
-      const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
-      return (pair[0] + 0.05) / (pair[1] + 0.05);
-    });
-    expect(revealContrast, "Neutral button label must retain WCAG AA contrast in Dark mode").toBeGreaterThanOrEqual(4.5);
+  const reveal = page.locator("#root .learning-card .button.wide");
+  await expect(reveal).toBeVisible({ timeout: 10_000 });
+  const revealContrast = await reveal.evaluate((element) => {
+    const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
+    const luminance = (value) => value.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const style = getComputedStyle(element);
+    const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+    return (pair[0] + 0.05) / (pair[1] + 0.05);
+  });
+  expect(revealContrast, "Neutral button label must retain WCAG AA contrast in Dark mode").toBeGreaterThanOrEqual(4.5);
 
-    await reveal.click();
-    const ratings = page.locator("#root .learning-card .rating-grid .rating");
-    await expect(ratings).toHaveCount(4, { timeout: 10_000 });
+  await reveal.click();
+  const ratings = page.locator("#root .learning-card .rating-grid .rating");
+  await expect(ratings).toHaveCount(4, { timeout: 10_000 });
+  const assertRatingPalette = async () => {
     const palette = await ratings.evaluateAll((elements) => elements.map((element) => {
       const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
       const luminance = (value) => value.map((channel) => {
@@ -116,8 +116,8 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
 
   await page.emulateMedia({ colorScheme: "dark" });
   await expect.poll(isDarkSurface).toBe(true);
-  await assertDarkButtonContrast(); // System + OS Dark
+  await assertRatingPalette(); // System + OS Dark
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await assertDarkButtonContrast(); // Manually selected Dark
+  await assertRatingPalette(); // Manually selected Dark
 });
