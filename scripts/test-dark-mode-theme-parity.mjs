@@ -69,6 +69,11 @@ assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG
 
 
 assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
+const manualDarkStart = styles.indexOf(':root[data-theme="dark"]{');
+const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDarkStart);
+const manualDark = styles.slice(manualDarkStart, manualLightStart);
+assert.ok(manualDark.includes("--color-surface-elevated:#2b2824"), "Manual Dark must define its own elevated surface token");
+assert.ok(manualDark.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Manual Dark must define its own loading tokens");
 assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:#171614;}"), "Dark primary buttons need a readable explicit foreground");
 assert.ok(styles.includes(".button:not(.primary),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text");
 assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
