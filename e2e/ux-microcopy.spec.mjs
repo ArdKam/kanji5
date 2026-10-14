@@ -144,8 +144,9 @@ test("Persian microcopy remains readable and accessible in RTL layouts", async (
     dialog = await openMenuItemAt(4);
     await expect(dialog.locator("#settings-title")).toBeVisible();
     for (const id of ["settings-learning-heading", "settings-scheduling-heading", "settings-data-heading", "settings-support-heading"]) {
-      await expect(dialog.locator("#" + id)).toBeVisible();
-      await expect(dialog.locator("#" + id).locator("xpath=..")).toHaveAttribute("aria-labelledby", id);
+      const section = dialog.locator("section[aria-labelledby='" + id + "']");
+      await expect(section).toBeVisible();
+      await expect(section.locator("#" + id)).toBeVisible();
     }
     await assertNoHorizontalOverflow();
     await dialog.locator(".dialog-close").click();
