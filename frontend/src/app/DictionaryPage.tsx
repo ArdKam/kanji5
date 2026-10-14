@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { getVisualStructureInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import type { PreparedMnemonic } from "./mnemonic-library";
@@ -14,6 +14,14 @@ const DETAILED_PAGE_SIZE = 160;
 
 type DictionaryTopic = { id: string; label: { fa: string; en: string }; characters: string };
 const KANJI_TOPICS = topicData.topics as DictionaryTopic[];
+
+// UI-only groupings; topic IDs and character memberships remain owned by kanji-topics.json.
+const TOPIC_GROUPS = [
+  { id: "daily", label: "dictionaryTopicGroupDaily", topicIds: ["numbers", "time", "family", "people", "food", "actions", "qualities", "emotions"] },
+  { id: "nature", label: "dictionaryTopicGroupNature", topicIds: ["nature", "weather", "animals", "plants", "body", "health"] },
+  { id: "learning", label: "dictionaryTopicGroupLearning", topicIds: ["school", "communication", "culture"] },
+  { id: "society", label: "dictionaryTopicGroupSociety", topicIds: ["places", "directions", "transport", "work", "money", "government", "industry"] },
+] as const;
 const TOPIC_IDS_BY_CHARACTER = new Map<string, Set<string>>();
 for (const entry of KANJI_TOPICS) {
   for (const character of entry.characters.trim().split(" ").filter(Boolean)) {
@@ -167,6 +175,11 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [masteryFilter, setMasteryFilter] = useState<MasteryFilter>("all");
   const [grade, setGrade] = useState("all");
   const [topic, setTopic] = useState("all");
+  const [topicSearchQuery, setTopicSearchQuery] = useState("");
+  const [topicSelectorOpen, setTopicSelectorOpen] = useState(false);
+  const topicTriggerRef = useRef<HTMLButtonElement>(null);
+  const topicDialogRef = useRef<HTMLDialogElement>(null);
+  const topicSearchRef = useRef<HTMLInputElement>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("matrix");
   const [sort, setSort] = useState<SortMode>("level-asc");
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
@@ -175,6 +188,12 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1) + (topic === "all" ? 0 : 1);
   const activeTopic = topic === "all" ? null : KANJI_TOPICS.find(entry => entry.id === topic) ?? null;
   const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim());
+  const matchingTopicIds = useMemo(() => {
+    const search = normalize(topicSearchQuery);
+    return new Set(KANJI_TOPICS
+      .filter(entry => !search || normalize(entry.label[language]).includes(search))
+      .map(entry => entry.id));
+  }, [language, topicSearchQuery]);
 
   useEffect(() => {
     let active = true;
@@ -242,11 +261,21 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     setDetailedVisibleCount(DETAILED_PAGE_SIZE);
   }, [query, level, masteryFilter, grade, sort, topic]);
 
+  useEffect(() => {
+    const dialog = topicDialogRef.current;
+    if (!dialog) return;
+    if (topicSelectorOpen && !dialog.open) {
+      dialog.showModal();
+      topicSearchRef.current?.focus();
+    } else if (!topicSelectorOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [topicSelectorOpen]);
+
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
       <div className="dictionary-page-header">
         <div>
-          <p className="eyebrow red">{t("dictionary", language)}</p>
           <h2 id="dictionary-page-title">{t("dictionaryTitle", language)}</h2>
         </div>
         <span className="dictionary-count">{formatNumber(visible.length, language)} / {formatNumber(catalog.length, language)}</span>
@@ -279,9 +308,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             ><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg></button>
           ) : null}
         </label>
-        <p className="dictionary-search-hint" aria-live="polite">
-          {query ? (language === "fa" ? "جست‌وجو در کانجی، خوانش و معنی" : "Searching character, readings and meanings") : (language === "fa" ? "کانجی، خوانش یا معنی را جست‌وجو کن." : "Search by character, reading or meaning.")}
-        </p>
       </div>
 
       <div className="dictionary-controls">
@@ -348,7 +374,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               <span className="dictionary-view-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>
               </span>
-              <span className="sr-only">{language === "fa" ? "شبکه" : "Matrix"}</span>
+              <span>{language === "fa" ? "شبکه" : "Matrix"}</span>
             </button>
             <button
               className={"dictionary-view-button" + (viewMode === "detailed" ? " active" : "")}
@@ -364,7 +390,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               <span className="dictionary-view-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false"><path d="M3 4.5h14M3 10h14M3 15.5h14" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8"/></svg>
               </span>
-              <span className="sr-only">{language === "fa" ? "جزئیات" : "Detailed"}</span>
+              <span>{language === "fa" ? "جزئیات" : "Detailed"}</span>
             </button>
           </div>
           <label className="dictionary-sort">
