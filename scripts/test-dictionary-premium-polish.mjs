@@ -10,6 +10,16 @@ assert.doesNotMatch(page, /dictionary-polish\.css/, "Dictionary styling must not
 assert.match(page, /dictionary-active-filters/, "Filtered and searched states need a visible summary");
 assert.match(page, /dictionary-clear-all-filters/, "The user needs a one-action filter reset");
 assert.match(page, /dictionary-mastery-legend/, "Kanji mastery colors need an explicit legend");
+assert.match(page, /TOPIC_GROUPS/, "The topic browser must use an explicit display grouping without changing memberships");
+assert.match(page, /className="dictionary-topic-dialog"/, "Dictionary topics need a dedicated browseable selector");
+assert.match(page, /data-topic-id={entry.id}/, "Every reviewed taxonomy ID must remain selectable");
+assert.match(page, /aria-pressed={topic === entry.id}/, "The selected topic must be exposed to assistive technology");
+assert.match(page, /onCancel=\{\(event\) => \{ event\.preventDefault\(\); closeTopicPicker\(\); \}\}/, "Escape must dismiss the topic picker predictably");
+assert.match(page, /topicPickerTriggerRef\.current\?\.focus\(\)/, "Closing the topic picker must restore trigger focus");
+assert.match(page, /t\("practiceTopicCoverageNote", language\)/, "Taxonomy coverage caveat belongs inside the topic picker");
+assert.doesNotMatch(page, /dictionary-search-hint/, "Remove the repetitive permanent subtitle beneath dictionary search");
+assert.doesNotMatch(page, /<select aria-label=\{language === "fa" \? "موضوع" : "Topic"\} value=\{topic\}/, "Topic selection must not fall back to a plain select");
+assert.match(page, /className="dictionary-view-label"/, "Both view modes must have visible names");
 assert.match(page, /"var\(--matcha\)"/, "Mastered state needs a consistent semantic color");
 assert.match(page, /"var\(--sakura\)"/, "Needs-attention state needs a distinct semantic color");
 assert.match(page, /height: "2px"/, "Mastery should use a restrained indicator rather than filling whole tiles");
@@ -26,4 +36,4 @@ assert.match(card, /dictionary-overview-meaning" dir="auto" style=\{\{ margin: 0
 assert.match(card, /style=\{\{ minHeight: 44/, "Card tabs must retain touch-safe height");
 assert.match(card, /matchMedia\("\(max-width: 640px\)"\)/, "Card layout must adapt to narrow viewports");
 
-console.log("Dictionary premium polish contract passed.");
+console.log("Dictionary premium polish and control-bar contracts passed.");
