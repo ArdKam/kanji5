@@ -163,8 +163,7 @@ export function TopicLearningDialog({
               <UiIcon name="next" size={17} />
             </button>
           </section>
-        ) : (
-        )}
+        ) : null}
       </div>
     </dialog>
   );
