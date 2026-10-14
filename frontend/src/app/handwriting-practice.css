@@ -26,7 +26,7 @@
   color:var(--ink);
 }
 .handwriting-practice .handwriting-hint-segment:focus-visible{
-  outline:2px solid color-mix(in srgb,var(--shu) 45%,transparent);
+  outline:2px solid var(--shu);
   outline-offset:1px;
 }
 .handwriting-grade-seal{

@@ -42,8 +42,10 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-panel-shell{display:flex;align-items:center;min-width:0}.kanji5-onboarding-step-wrap{min-width:0;transition:transform var(--motion-onboarding-step,220ms) cubic-bezier(.22,.75,.2,1)}
 .kanji5-onboarding-panel{width:min(680px,100%);text-align:start;animation:onbEnterForward var(--motion-onboarding,380ms) cubic-bezier(.22,.75,.2,1) both}.kanji5-onboarding-stage.is-back .kanji5-onboarding-panel{animation-name:onbEnterBack}
 @keyframes onbEnterForward{from{opacity:0;transform:translate3d(-22px,8px,0)}to{opacity:1;transform:none}}@keyframes onbEnterBack{from{opacity:0;transform:translate3d(22px,8px,0)}to{opacity:1;transform:none}}
-.kanji5-onboarding-eyebrow{margin:0 0 13px;color:var(--shu);font-size:11px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.kanji5-onboarding-eyebrow{margin:0 0 13px;color:var(--shu);font-size:12px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
 .kanji5-onboarding-panel h1{margin:0;max-width:17ch;font-size:clamp(34px,4.4vw,58px);line-height:1.05;letter-spacing:-.025em}
+html[lang="fa"] .kanji5-onboarding-eyebrow,html[lang="fa"] .kanji5-onboarding-panel h1{letter-spacing:normal}
+html[lang="fa"] .kanji5-onboarding-eyebrow{text-transform:none}
 .kanji5-onboarding-body{max-width:58ch;margin:19px 0 0;color:var(--mute);font-size:16px;line-height:1.85}
 .kanji5-onboarding-hero-mark,.kanji5-onboarding-stimulus{display:grid;place-items:center;border:1px solid var(--line);background:var(--washi);box-shadow:0 18px 44px rgba(41,43,45,.08)}
 .kanji5-onboarding-hero-mark{width:104px;height:104px;margin:28px 0;border-radius:28px;font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:62px}
@@ -489,7 +491,7 @@ export function OnboardingFlow({
             <div className="kanji5-onboarding-range">
               {[5, 10, 15].map(value => (
                 <button key={value} className={"kanji5-onboarding-range-option" + (draft.dailyNew === value ? " is-selected" : "")} type="button" aria-pressed={draft.dailyNew === value} disabled={busy || completing} onClick={() => setDailyNew(value)}>
-                  <strong>{value}</strong>
+                  <strong>{formatNumber(value, language)}</strong>
                   <span>{t("onboardingDailyNew", language)}</span>
                 </button>
               ))}
