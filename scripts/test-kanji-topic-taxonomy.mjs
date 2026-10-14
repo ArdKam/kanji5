@@ -17,16 +17,16 @@ assert.ok(Array.isArray(taxonomy.topics) && taxonomy.topics.length >= 20, "Expec
 
 // Dictionary browsing groups must cover the existing taxonomy exactly once,
 // without changing the source taxonomy or introducing extra selectable topics.
-const groupBlock = dictionaryPage.match(/const TOPIC_GROUPS: DictionaryTopicGroup\\[\\] = \\[([\\s\\S]*?)\\n\\];/);
+const groupBlock = dictionaryPage.match(/const TOPIC_GROUPS: DictionaryTopicGroup\[\] = \[([\s\S]*?)\n\];/);
 assert.ok(groupBlock, "Dictionary must define explicit display-only topic groups");
-const groupedIds = [...groupBlock[1].matchAll(/topicIds:\\s*\\[([^\\]]*)\\]/g)]
+const groupedIds = [...groupBlock[1].matchAll(/topicIds:\s*\[([^\]]*)\]/g)]
   .flatMap((match) => [...match[1].matchAll(/"([a-z-]+)"/g)].map((entry) => entry[1]));
 assert.equal(groupedIds.length, taxonomy.topics.length, "Each existing topic must appear in one browse group");
 assert.equal(new Set(groupedIds).size, groupedIds.length, "Browse groups must not duplicate a topic");
 assert.deepEqual([...groupedIds].sort(), taxonomy.topics.map(topic => topic.id).sort(), "Browse groups must cover all curated topic IDs exactly");
-assert.match(dictionaryPage, /data-topic-id=\{entry\\.id\}/, "Topic picker choices must retain stable source IDs");
-assert.match(dictionaryPage, /setTopic\\(entry\\.id\\)/, "Selecting a browsed topic must use the existing single-topic filter state");
-assert.match(dictionaryPage, /topic: allTopicsLabel/, "The current all-topic selection must have a localized label");
+assert.match(dictionaryPage, /data-topic-id=\{entry\.id\}/, "Topic picker choices must retain stable source IDs");
+assert.match(dictionaryPage, /setTopic\(entry\.id\)/, "Selecting a browsed topic must use the existing single-topic filter state");
+assert.match(dictionaryPage, /allTopicsLabel = language/, "The current all-topic selection must have a localized label");
 
 const catalogCharacters = new Set(dataset.kanji.map(item => item.character));
 const ids = taxonomy.topics.map(topic => topic.id);
