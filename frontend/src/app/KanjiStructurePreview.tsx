@@ -6,21 +6,19 @@ export function KanjiStructurePreview({
   info,
   ready,
   language,
-  enabled,
   onOpen,
 }: {
   character: string;
   info: VisualStructureInfo | null;
   ready: boolean;
   language: Language;
-  enabled: boolean;
   onOpen: () => void;
 }) {
   const components = info?.available ? info.components : [];
   const visibleComponents = components.slice(0, 4);
   const remaining = Math.max(0, components.length - visibleComponents.length);
   const previewLabel = language === "fa" ? "اجزای دیداری" : "Visual components";
-  const actionLabel = language === "fa" ? "جزئیات ساختار" : "Structure details";
+  const actionLabel = language === "fa" ? "مشاهدهٔ ساختار کامل" : "View full structure";
   const actionAriaLabel = language === "fa"
     ? "مشاهدهٔ ساختار کامل کانجی " + character
     : "View full structure for " + character;
@@ -30,6 +28,7 @@ export function KanjiStructurePreview({
 
   return (
     <section className="kanji-structure-preview" aria-label={previewLabel} aria-busy={!ready}>
+      <span className="kanji-structure-preview-label">{previewLabel}</span>
       <div className="kanji-structure-preview-glyphs" aria-hidden="true">
         {!ready ? (
           <span className="kanji-structure-preview-skeleton" />
