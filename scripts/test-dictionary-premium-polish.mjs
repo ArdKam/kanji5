@@ -16,7 +16,9 @@ assert.match(page, /data-topic-id={entry.id}/, "Every reviewed taxonomy ID must 
 assert.match(page, /aria-pressed={topic === entry.id}/, "The selected topic must be exposed to assistive technology");
 assert.match(page, /onCancel=\{\(event\) => \{ event\.preventDefault\(\); closeTopicPicker\(\); \}\}/, "Escape must dismiss the topic picker predictably");
 assert.match(page, /topicPickerTriggerRef\.current\?\.focus\(\)/, "Closing the topic picker must restore trigger focus");
-assert.match(page, /t\("practiceTopicCoverageNote", language\)/, "Taxonomy coverage caveat belongs inside the topic picker");
+assert.match(page, /t\("dictionaryTopicCoverageNote", language\)/, "Taxonomy coverage caveat belongs inside the topic picker");
+assert.match(page, /dictionaryTopicCoverageNote:"Topics use reviewed labels; unlabelled kanji remain available under All topics and in general dictionary search\./, "English topic coverage copy must explain All topics and general search");
+assert.match(page, /dictionaryTopicCoverageNote:"موضوع‌ها بر پایهٔ برچسب‌گذاری بازبینی‌شده‌اند/, "Persian topic coverage copy must explain reviewed labels and general search");
 assert.doesNotMatch(page, /dictionary-search-hint/, "Remove the repetitive permanent subtitle beneath dictionary search");
 assert.doesNotMatch(page, /<select aria-label=\{language === "fa" \? "موضوع" : "Topic"\} value=\{topic\}/, "Topic selection must not fall back to a plain select");
 assert.match(page, /className="dictionary-view-label"/, "Both view modes must have visible names");
