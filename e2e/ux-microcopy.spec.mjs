@@ -90,7 +90,8 @@ test("Persian microcopy remains readable and accessible in RTL layouts", async (
   await menu.getByRole("button", { name: "فارسی", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "fa");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+  await menu.getByRole("button", { name: "بستن منو", exact: true }).click();
+  await expect(menu).toHaveCount(0);
 
   const assertNoHorizontalOverflow = async () => {
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
