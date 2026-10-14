@@ -7,18 +7,25 @@ export default defineConfig({
   build: {
     outDir: "../react-dist",
     emptyOutDir: true,
-    cssCodeSplit: false,
+    cssCodeSplit: true,
     manifest: true,
     sourcemap: false,
     rollupOptions: {
       output: {
         entryFileNames: "kanji5-react.js",
-        assetFileNames: (assetInfo) =>
-          assetInfo.name?.endsWith(".css")
-            ? "kanji5-react.css"
-            : assetInfo.name?.includes("NotoSerifJP-Regular.subset")
-              ? "assets/[name][extname]"
-              : "assets/[name]-[hash][extname]",
+        assetFileNames: (assetInfo) => {
+          const sourceNames = [
+            assetInfo.name ?? "",
+            ...(assetInfo.names ?? []),
+            ...(assetInfo.originalFileNames ?? []),
+          ];
+          if (sourceNames.some((name) => name.includes("dictionary-catalog"))) {
+            return "dictionary-catalog.css";
+          }
+          if (assetInfo.name?.endsWith(".css")) return "kanji5-react.css";
+          if (assetInfo.name?.includes("NotoSerifJP-Regular.subset")) return "assets/[name][extname]";
+          return "assets/[name]-[hash][extname]";
+        },
       },
     },
   },

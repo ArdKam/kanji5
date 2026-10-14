@@ -3,6 +3,14 @@ import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 
 const css=fs.readFileSync("react-dist/kanji5-react.css","utf8");
+const dictionaryCatalogCssPath="react-dist/dictionary-catalog.css";
+if(!fs.existsSync(dictionaryCatalogCssPath)) throw new Error("SHIPPED_DICTIONARY_CATALOG_CSS_CHUNK_MISSING");
+const dictionaryCatalogCss=fs.readFileSync(dictionaryCatalogCssPath,"utf8");
+if(!dictionaryCatalogCss.includes(".dictionary-page") || !dictionaryCatalogCss.includes(".kanji-catalog-grid")) throw new Error("SHIPPED_DICTIONARY_CATALOG_CSS_CHUNK_INCOMPLETE");
+if(css.includes(".dictionary-page{") || css.includes(".kanji-catalog-grid{")) throw new Error("DICTIONARY_CATALOG_STYLES_STILL_IN_STARTUP_CSS_BUNDLE");
+const viteManifest=JSON.parse(fs.readFileSync("react-dist/.vite/manifest.json","utf8"));
+if(!Object.values(viteManifest).some(entry=>entry.file==="dictionary-catalog.css" || (entry.css||[]).includes("dictionary-catalog.css"))) throw new Error("DICTIONARY_CATALOG_CSS_MISSING_FROM_VITE_MANIFEST");
+
 const entry=fs.readFileSync("react-entry.js","utf8");
 if(!/\.experience-nav\{[^}]*position:fixed/.test(css)){
   throw new Error("SHIPPED_REACT_CSS_MISSING_BOTTOM_EXPERIENCE_NAV");

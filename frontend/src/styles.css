@@ -7,17 +7,17 @@
   --text-lg:var(--ds-type-subtitle);
   --text-xl:var(--ds-type-heading-sm);
   --text-2xl:var(--ds-type-heading-md);
-  --text-heading:25px;
+  --text-heading:var(--ds-type-heading);
   --text-title:var(--ds-type-heading-lg);
-  --text-display-md:44px;
-  --text-display-xl:80px;
-  --text-display-sm:clamp(25px, 4vw, 34px);
-  --text-display-lg:clamp(78px, 14vw, 150px);
-  --text-display-kanji:clamp(90px, 18vw, 150px);
-  --text-stimulus-kanji:clamp(78px, 14vw, 110px);
-  --text-display-compact:clamp(38px, 7vw, 62px);
-  --text-display-wide:clamp(64px, 16vw, 92px);
-  --text-display-tall:clamp(72px, 14vw, 108px);
+  --text-display-md:var(--ds-type-display-md);
+  --text-display-xl:var(--ds-type-display-xl);
+  --text-display-sm:var(--ds-type-display-sm);
+  --text-display-lg:var(--ds-type-display-lg);
+  --text-display-kanji:var(--ds-type-display-kanji);
+  --text-stimulus-kanji:var(--ds-type-stimulus-kanji);
+  --text-display-compact:var(--ds-type-display-compact);
+  --text-display-wide:var(--ds-type-display-wide);
+  --text-display-tall:var(--ds-type-display-tall);
 
   --space-1:var(--ds-space-1);
   --space-2:var(--ds-space-2);
