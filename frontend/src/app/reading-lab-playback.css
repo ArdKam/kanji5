@@ -3,8 +3,8 @@
 .reading-lab-sentence-autoplay{
   min-height:36px;
   padding:5px 9px;
-  font-size:var(--text-xs);
-  transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease,box-shadow var(--motion-interaction) ease;
+  font-size:var(--ds-type-caption);
+  transition:background var(--ds-motion-interaction) ease,border-color var(--ds-motion-interaction) ease,color var(--ds-motion-interaction) ease,box-shadow var(--ds-motion-interaction) ease;
 }
 .reading-lab-sentence-autoplay.is-active{
   border-color:color-mix(in srgb,var(--shu) 34%,var(--line));
