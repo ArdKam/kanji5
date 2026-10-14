@@ -78,3 +78,78 @@ test("microcopy cleanup is reflected in rendered UI at mobile and desktop breakp
     await settings.locator(".dialog-close").click();
   }
 });
+
+test("Persian microcopy remains readable and accessible in RTL layouts", async ({ page }) => {
+  test.setTimeout(90000);
+  await clean(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  await page.getByRole("button", { name: "More", exact: true }).click();
+  const menu = page.locator("#header-tools-menu");
+  await expect(menu).toHaveClass(/open/);
+  await menu.getByRole("button", { name: "فارسی", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "fa");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+
+  const assertNoHorizontalOverflow = async () => {
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(overflow).toBe(false);
+  };
+  const openMenuItemAt = async (index) => {
+    await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+    const toolsMenu = page.locator("#header-tools-menu");
+    await expect(toolsMenu).toHaveClass(/open/);
+    const item = toolsMenu.locator(".menu-nav-item").nth(index);
+    await expect(item).toBeVisible();
+    await item.click();
+    const dialog = page.getByRole("dialog").last();
+    await expect(dialog).toBeVisible();
+    return dialog;
+  };
+
+  for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+
+    await page.locator(".experience-tab").nth(1).click();
+    await expect(page.locator("#root .practice-home")).toBeVisible();
+    await assertNoHorizontalOverflow();
+
+    await page.locator(".experience-tab").nth(2).click();
+    const dictionaryInput = page.locator(".dictionary-page-search input");
+    await expect(dictionaryInput).toBeVisible();
+    await expect(dictionaryInput).toHaveAttribute("placeholder", /.+/);
+    await expect(page.locator(".dictionary-search-hint")).toHaveCount(0);
+    await assertNoHorizontalOverflow();
+
+    await page.getByRole("button", { name: "بیشتر", exact: true }).click();
+    const toolsMenu = page.locator("#header-tools-menu");
+    await expect(toolsMenu.locator(".menu-nav-copy small")).toHaveCount(0);
+    await expect(toolsMenu.locator(".menu-nav-item").nth(1)).toHaveAttribute("aria-label", "خواندن متن ژاپنی");
+    await toolsMenu.locator(".menu-nav-item").nth(1).click();
+    let dialog = page.getByRole("dialog").last();
+    await expect(dialog.locator(".reading-lab")).toBeVisible();
+    await expect(dialog.locator("h2")).toBeVisible();
+    await assertNoHorizontalOverflow();
+    await dialog.locator(".dialog-close").click();
+    await expect(dialog).toBeHidden();
+
+    dialog = await openMenuItemAt(3);
+    await expect(dialog.locator(".stats-header h2")).toBeVisible();
+    await assertNoHorizontalOverflow();
+    await dialog.locator(".dialog-close").click();
+    await expect(dialog).toBeHidden();
+
+    dialog = await openMenuItemAt(4);
+    await expect(dialog.locator("#settings-title")).toBeVisible();
+    for (const id of ["settings-learning-heading", "settings-scheduling-heading", "settings-data-heading", "settings-support-heading"]) {
+      await expect(dialog.locator("#" + id)).toBeVisible();
+      await expect(dialog.locator("#" + id).locator("xpath=..")).toHaveAttribute("aria-labelledby", id);
+    }
+    await assertNoHorizontalOverflow();
+    await dialog.locator(".dialog-close").click();
+    await expect(dialog).toBeHidden();
+  }
+});
+
