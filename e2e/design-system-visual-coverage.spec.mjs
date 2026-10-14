@@ -450,3 +450,235 @@ test("visual coverage: dictionary filters, empty results, detail tabs, dark mode
   }
   expect(audit.report.pageErrors, "Uncaught browser errors during dictionary visual coverage").toEqual([]);
 });
+
+test("visual coverage: Dictionary control bar topic browsing across breakpoints, locales and themes", async ({ page }, testInfo) => {
+  test.setTimeout(240000);
+  const audit = await createCapture(page, testInfo);
+  const topics = JSON.parse(await fs.readFile(path.resolve("frontend/src/app/kanji-topics.json"), "utf8"));
+  const viewports = [
+    { width: 320, height: 740 },
+    { width: 360, height: 780 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+    { width: 768, height: 1024 },
+    { width: 1024, height: 900 },
+    { width: 1280, height: 900 },
+    { width: 1440, height: 960 },
+  ];
+  const variants = [
+    { language: "en", theme: "light", prefix: "en-light", widths: viewports },
+    { language: "en", theme: "dark", prefix: "en-dark", widths: viewports },
+    { language: "fa", theme: "light", prefix: "fa-light", widths: viewports },
+    { language: "fa", theme: "dark", prefix: "fa-dark", widths: viewports },
+    { language: "en", theme: "system", prefix: "en-system", widths: [viewports[0], viewports[7]] },
+  ];
+
+  const openDictionary = async (language, theme) => {
+    await startApp(page, { language, theme });
+    const nav = page.locator(".experience-nav .experience-tab");
+    await expect(nav).toHaveCount(3);
+    await nav.nth(2).click();
+    await expect(page.locator(".dictionary-page")).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(".dictionary-controls")).toBeVisible();
+  };
+
+  try {
+    for (const variant of variants) {
+      await openDictionary(variant.language, variant.theme);
+      for (const viewport of variant.widths) {
+        await page.setViewportSize(viewport);
+        await expect(page.locator(".dictionary-controls")).toBeVisible();
+        const dimensions = await page.evaluate(() => ({
+          viewport: innerWidth,
+          documentWidth: document.documentElement.scrollWidth,
+          controlWidth: Math.round(document.querySelector(".dictionary-controls")?.getBoundingClientRect().width ?? 0),
+        }));
+        expect(dimensions.documentWidth, variant.prefix + " horizontal overflow at " + viewport.width + "px").toBeLessThanOrEqual(viewport.width + 1);
+        expect(dimensions.controlWidth, variant.prefix + " controls should fill their content area").toBeGreaterThan(0);
+        await audit.capture("dictionary-controlbar-" + variant.prefix + "-" + viewport.width);
+      }
+
+      for (const width of [320, 390, 1440]) {
+        await page.setViewportSize(width === 1440 ? { width, height: 960 } : { width, height: width === 320 ? 740 : 844 });
+        const advanced = page.locator("details.dictionary-advanced-filters");
+        if (!(await advanced.evaluate(element => element.open))) await advanced.locator("summary").click();
+        await expect(advanced).toHaveAttribute("open", "");
+        await audit.capture("dictionary-advanced-open-" + variant.prefix + "-" + width);
+        const topicTrigger = page.locator(".dictionary-topic-filter-trigger");
+        await topicTrigger.click();
+        const dialog = page.locator(".dictionary-topic-dialog");
+        await expect(dialog).toBeVisible();
+        await expect(dialog.locator('[data-topic-id="all"]')).toHaveAttribute("aria-pressed", "true");
+        await expect(dialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(24);
+        await audit.capture("dictionary-topic-picker-" + variant.prefix + "-" + width);
+        await page.keyboard.press("Escape");
+        await expect(dialog).toBeHidden();
+        await expect(topicTrigger).toBeFocused();
+        await advanced.locator("summary").click();
+        await expect(advanced).not.toHaveAttribute("open", "");
+      }
+    }
+
+    // English interaction: browse every topic without typing, verify filtering, and keep
+    // the existing Dictionary query/JLPT/grade/mastery intersection authoritative.
+    await openDictionary("en", "light");
+    await page.setViewportSize({ width: 320, height: 740 });
+    const advanced = page.locator("details.dictionary-advanced-filters");
+    await advanced.locator("summary").click();
+    await expect(advanced).toHaveAttribute("open", "");
+    const topicTrigger = page.locator(".dictionary-topic-filter-trigger");
+    await topicTrigger.click();
+    const dialog = page.locator(".dictionary-topic-dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(topics.topics.length);
+    await expect(dialog.locator('[data-topic-id="all"]')).toBeVisible();
+    const browseList = dialog.locator(".dictionary-topic-browser-list");
+    const scrollMetrics = await browseList.evaluate(element => ({ scrollHeight: element.scrollHeight, clientHeight: element.clientHeight }));
+    expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+    for (const topic of topics.topics) {
+      const option = dialog.locator('[data-topic-id="' + topic.id + '"]');
+      await option.scrollIntoViewIfNeeded();
+      await expect(option, "Browseable topic " + topic.id).toBeVisible();
+    }
+    await dialog.locator(".dictionary-topic-browser-list").evaluate(element => { element.scrollTop = 0; });
+    await audit.capture("dictionary-topic-picker-en-light-full-browse-320");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("dictionary-topic-picker-en-light-full-browse-390");
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await audit.capture("dictionary-topic-picker-en-light-full-browse-1440");
+
+    const topicSearch = dialog.locator(".dictionary-topic-search-input");
+    await topicSearch.fill("plants");
+    await expect(dialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(1);
+    await expect(dialog.locator('[data-topic-id="plants"]')).toHaveAttribute("aria-pressed", "false");
+    await audit.capture("dictionary-topic-picker-en-light-query");
+    await topicSearch.fill("not-a-real-topic-987654");
+    await expect(dialog.getByRole("status")).toContainText("No topics match this search.");
+    await audit.capture("dictionary-topic-picker-en-light-empty-query");
+    await topicSearch.fill("");
+    await expect(dialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(24);
+    await expect(dialog.locator('[data-topic-id="all"]')).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(topicTrigger).toBeFocused();
+
+    await topicTrigger.click();
+    await dialog.locator('[data-topic-id="plants"]').click();
+    await expect(dialog).toBeHidden();
+    await expect(topicTrigger).toContainText("Plants & trees");
+    await expect(topicTrigger).toBeFocused();
+    await expect(page.locator(".dictionary-active-filters")).toContainText("Plants & trees");
+    await audit.capture("dictionary-topic-selected-en-light-1440");
+    await topicTrigger.click();
+    await expect(dialog.locator('[data-topic-id="plants"]')).toHaveAttribute("aria-pressed", "true");
+    await audit.capture("dictionary-topic-picker-en-light-selected-state");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(topicTrigger).toBeFocused();
+
+    const search = page.locator(".dictionary-page-search input");
+    await search.fill("学");
+    const levelButtons = page.locator(".dictionary-level-filter .dictionary-filter-button");
+    for (const level of ["All", "N5", "N4", "N3", "N2", "N1"]) {
+      await levelButtons.filter({ hasText: new RegExp("^" + level + "$") }).click();
+      await expect(page.locator(".dictionary-filter-button.active")).toHaveText(level);
+    }
+    await levelButtons.filter({ hasText: /^N5$/ }).click();
+    const advancedSelects = advanced.locator(".dictionary-select-filter select");
+    await advancedSelects.nth(0).selectOption("learning");
+    await advancedSelects.nth(1).selectOption("1");
+    await expect(advanced.locator(".dictionary-filter-count")).toHaveText("3");
+    await expect(page.locator(".dictionary-count")).toContainText("/");
+    await audit.capture("dictionary-intersection-en-light-1440");
+
+    // All topics clears only topic state; query, JLPT, grade and mastery remain.
+    await topicTrigger.click();
+    await expect(dialog.locator('[data-topic-id="plants"]')).toHaveAttribute("aria-pressed", "true");
+    await dialog.locator('[data-topic-id="all"]').click();
+    await expect(dialog).toBeHidden();
+    await expect(topicTrigger).toContainText("All topics");
+    await expect(topicTrigger).toBeFocused();
+    await expect(search).toHaveValue("学");
+    await expect(page.locator(".dictionary-filter-button.active")).toHaveText("N5");
+    await expect(advancedSelects.nth(0)).toHaveValue("learning");
+    await expect(advancedSelects.nth(1)).toHaveValue("1");
+    await expect(advanced.locator(".dictionary-filter-count")).toHaveText("2");
+    await audit.capture("dictionary-all-topics-preserves-other-filters");
+
+    // Re-select the topic, then test independent active-chip removal separately.
+    await topicTrigger.click();
+    await dialog.locator('[data-topic-id="plants"]').click();
+    await expect(topicTrigger).toContainText("Plants & trees");
+    await expect(advanced.locator(".dictionary-filter-count")).toHaveText("3");
+    await audit.capture("dictionary-topic-reselected-with-other-filters");
+
+    // Removing a single active topic chip preserves all the other filters.
+    await page.locator(".dictionary-active-filters .badge").filter({ hasText: "Plants & trees" }).click();
+    await expect(topicTrigger).toContainText("All topics");
+    await expect(search).toHaveValue("学");
+    await expect(page.locator(".dictionary-filter-button.active")).toHaveText("N5");
+    await expect(advancedSelects.nth(0)).toHaveValue("learning");
+    await expect(advancedSelects.nth(1)).toHaveValue("1");
+    await audit.capture("dictionary-topic-chip-removed-preserves-other-filters");
+
+    await advanced.locator("button").filter({ hasText: "Clear extra filters" }).click();
+    await expect(advancedSelects.nth(0)).toHaveValue("all");
+    await expect(advancedSelects.nth(1)).toHaveValue("all");
+    await expect(topicTrigger).toContainText("All topics");
+    await expect(search).toHaveValue("学");
+    await expect(page.locator(".dictionary-filter-button.active")).toHaveText("N5");
+    await expect(advanced.locator(".dictionary-filter-count")).toHaveCount(0);
+    await audit.capture("dictionary-clear-advanced-preserves-query-jlpt");
+    await page.locator(".dictionary-clear-all-filters").click();
+    await expect(search).toHaveValue("");
+    await expect(page.locator(".dictionary-filter-button.active")).toHaveText("All");
+    await expect(page.locator(".dictionary-active-filters")).toHaveCount(0);
+    await advanced.locator("summary").click();
+    await expect(advanced).not.toHaveAttribute("open", "");
+
+    const sort = page.locator(".dictionary-sort select");
+    for (const value of ["level-asc", "level-desc", "mastery-desc", "mastery-asc", "order"]) {
+      await sort.selectOption(value);
+      await expect(sort).toHaveValue(value);
+    }
+    const viewButtons = page.locator(".dictionary-view-toggle .dictionary-view-button");
+    await expect(viewButtons).toHaveCount(2);
+    await viewButtons.filter({ hasText: "Detailed" }).click();
+    await expect(viewButtons.filter({ hasText: "Detailed" })).toHaveAttribute("aria-pressed", "true");
+    await audit.capture("dictionary-view-detailed-en-light-1440");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("dictionary-view-detailed-en-light-390");
+    await viewButtons.filter({ hasText: "Matrix" }).click();
+    await expect(viewButtons.filter({ hasText: "Matrix" })).toHaveAttribute("aria-pressed", "true");
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await search.fill("rinemi-no-matching-kanji-987654");
+    await expect(page.locator(".kanji-catalog-tile")).toHaveCount(0);
+    await audit.capture("dictionary-empty-search-en-light");
+    await page.locator(".dictionary-search-clear").click();
+    await expect(page.locator(".kanji-catalog-tile").first()).toBeVisible();
+
+    // Persian topic search matches only the currently active UI language.
+    await openDictionary("fa", "light");
+    await page.setViewportSize({ width: 390, height: 844 });
+    const faAdvanced = page.locator("details.dictionary-advanced-filters");
+    await faAdvanced.locator("summary").click();
+    const faTrigger = page.locator(".dictionary-topic-filter-trigger");
+    await faTrigger.click();
+    const faDialog = page.locator(".dictionary-topic-dialog");
+    const faSearch = faDialog.locator(".dictionary-topic-search-input");
+    await faSearch.fill("گیاهان");
+    await expect(faDialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(1);
+    await expect(faDialog.locator('[data-topic-id="plants"]')).toContainText("گیاهان و درختان");
+    await audit.capture("dictionary-topic-picker-fa-light-query");
+    await faSearch.fill("");
+    await faDialog.locator('[data-topic-id="plants"]').click();
+    await expect(faTrigger).toContainText("گیاهان و درختان");
+    await expect(page.locator(".dictionary-active-filters")).toContainText("گیاهان و درختان");
+    await audit.capture("dictionary-topic-selected-fa-light");
+
+    // System theme is included separately from the explicit light/dark matrix above.
+    await expect(audit.report.pageErrors, "Uncaught browser errors during Dictionary control-bar coverage").toEqual([]);
+  } finally {
+    await audit.persist();
+  }
+});
