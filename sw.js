@@ -39,7 +39,7 @@ self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback,{ignoreSearch:true});if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback,{ignoreSearch:false}))||Response.error()}}
 async function staleWhileRevalidate(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback||req);const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone()).catch(()=>{});return r}).catch(()=>null);if(hit){void update;return hit}const fresh=await update;return fresh||Response.error()}
 async function cacheApiResponse(cache,req,response){if(!response||response.type==='opaque'||!response.ok)return;try{const body=await response.clone().blob();const headers=new Headers(response.headers);headers.set('X-Kanji5-Cache-Time',String(Date.now()));await cache.put(req,new Response(body,{status:response.status,statusText:response.statusText,headers}))}catch(_){}}
-async function evictApiCache(cache){const keys=await cache.keys(),now=Date.now();for(const key of keys){const hit=await cache.match(key);const stamp=Number(hit?.headers.get('X-Kanji5-Cache-Time')||0);if(stamp&&now-stamp>API_TTL_MS)await cache.delete(key)}const fresh=await cache.keys();if(fresh.length<=API_MAX_ENTRIES)return;const ranked=[];for(const key of fresh){const hit=await cache.match(key);ranked.push({key,stamp:Number(hit?.headers.get('X-Kanji5-Cache-Time')||0)})}ranked.sort((a,b)=>a.stamp-b.stamp);for(const item of ranked.slice(0,Math.max(0,ranked.length-API_MAX_ENTRIES)))await cache.delete(item.key)}
+async function evictApiCache(cache){const keys=await cache.keys();if(keys.length<=API_MAX_ENTRIES)return;const ranked=[];for(const key of keys){const hit=await cache.match(key);ranked.push({key,stamp:Number(hit?.headers.get('X-Kanji5-Cache-Time')||0)})}ranked.sort((a,b)=>a.stamp-b.stamp);for(const item of ranked.slice(0,Math.max(0,ranked.length-API_MAX_ENTRIES)))await cache.delete(item.key)}
 function isLowValueVocabularyExample(word){const value=String(word||'').trim();if(!value)return true;const chars=[...value];if(chars.length<2)return true;const numerals='一二三四五六七八九十百千万';const counters='人個本枚台冊匹杯歳回日月年時分円階';return chars.length>=2&&chars.slice(0,-1).every(ch=>numerals.includes(ch))&&counters.includes(chars[chars.length-1])}
 async function filterVocabularyResponse(req,response){if(!req.url.startsWith(`${API_ORIGIN}/v1/words/`)||!response?.ok)return response;try{const payload=await response.clone().json();if(!Array.isArray(payload))return response;let changed=false;const filtered=payload.map(entry=>{const variants=Array.isArray(entry?.variants)?entry.variants.filter(variant=>!isLowValueVocabularyExample(variant?.written)):[];if(variants.length!==(entry?.variants||[]).length)changed=true;return {...entry,variants}}).filter(entry=>entry.variants.length);if(!changed)return response;return new Response(JSON.stringify(filtered),{status:response.status,statusText:response.statusText,headers:response.headers})}catch(_){return response}}
 async function apiCacheFirst(req){
@@ -56,7 +56,7 @@ async function apiCacheFirst(req){
   const request=(async()=>{
     try{
       const raw=await fetch(req);
-      if(!raw.ok&&hit)return hit;
+      if(!raw.ok){if(hit&&raw.status>=500)return hit;return raw;}
       const response=await filterVocabularyResponse(req,raw);
       await cacheApiResponse(c,req,response);
       void evictApiCache(c);
