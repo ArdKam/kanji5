@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [page, card, taxonomy, styles, i18n] = await Promise.all([
+const [page, card, taxonomy, styles, i18n, frontendEntry] = await Promise.all([
   readFile(new URL("../frontend/src/app/DictionaryPage.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/DictionaryKanjiCard.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/kanji-topics.json", import.meta.url), "utf8").then(value => JSON.parse(value)),
   readFile(new URL("../frontend/src/app/dictionary.css", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/i18n.ts", import.meta.url), "utf8"),
+  readFile(new URL("../frontend/src/main.tsx", import.meta.url), "utf8"),
 ]);
 
 assert.doesNotMatch(page, /dictionary-polish\.css/, "Dictionary styling must not add a separate CSS bundle");
@@ -29,6 +30,8 @@ assert.match(card, /dictionary-overview-meaning" dir="auto" style=\{\{ margin: 0
 assert.match(card, /style=\{\{ minHeight: 44/, "Card tabs must retain touch-safe height");
 assert.match(card, /matchMedia\("\(max-width: 640px\)"\)/, "Card layout must adapt to narrow viewports");
 
+assert.match(page, /import\("\.\/dictionary\.css"\)/, "Dictionary styles should load on-demand with the Dictionary view");
+assert.doesNotMatch(frontendEntry, /import\s+["']\.\/app\/dictionary\.css["']/, "Dictionary CSS must not inflate the startup stylesheet");
 assert.match(page, /dictionary-topic-dialog/, "Topic selection needs a dedicated dialog");
 assert.match(page, /dictionary-topic-choice/, "Topics must be browseable without search");
 assert.match(page, /aria-haspopup="dialog"/, "Topic trigger must expose dialog semantics");
