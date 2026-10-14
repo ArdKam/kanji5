@@ -1,19 +1,9 @@
 /* Focus controls stay scoped to Reading Lab so dictionary/mobile workstreams remain isolated. */
-.reading-lab-focus-controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
-}
-.reading-lab-focus-button{
-  min-height:40px;
-  white-space:nowrap;
-}
+.reading-lab-focus-controls{display:flex;flex-wrap:wrap;align-items:center;grid-area:focus;gap:6px;}
+.reading-lab-focus-button{min-height:32px;padding:4px 10px;border-radius:999px;background:var(--paper);font-size:var(--text-xs);font-weight:700;white-space:nowrap;}
 @media(max-width:640px){
   .reading-lab-focus-controls{
     width:100%;
   }
-  .reading-lab-focus-button{
-    flex:1 1 150px;
-  }
+  .reading-lab-focus-button{flex:1 1 120px;min-width:0;white-space:normal;}
 }
