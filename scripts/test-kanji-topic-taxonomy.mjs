@@ -282,4 +282,5 @@ for (const [topicId, sample] of Object.entries(expectedTopics)) {
 assert.equal(assignmentCount, 1156, "Update the documented topic-assignment count when taxonomy coverage changes");
 assert.equal(seenCharacters.size, 849, "Update the documented unique-character coverage when taxonomy changes");
 assert.equal(taxonomy.topics.length, 24, "Update the topic audit when the topic set changes");
+assert.equal(taxonomy.topics.find(topic => topic.id === "money")?.label.fa, "پول و امور مالی", "Money & finance should remain distinct from Work & economy in Persian UI copy");
 console.log(`Validated version ${taxonomy.version}: ${taxonomy.topics.length} curated topics after two semantic QA rounds, ${assignmentCount} topic assignments, and ${seenCharacters.size}/2136 unique kanji (${(seenCharacters.size / dataset.count * 100).toFixed(1)}% coverage).`);
