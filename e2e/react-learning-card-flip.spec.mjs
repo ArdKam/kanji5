@@ -117,6 +117,88 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("learning-card flip uses preloaded styles and keeps face semantics stable", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+
+    const before = await card.evaluate((el) => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const cssLoaded = Array.from(document.styleSheets).some((sheet) => {
+        try {
+          return Array.from(sheet.cssRules).some((rule) => rule.selectorText === ".kanji-structure-preview");
+        } catch {
+          return false;
+        }
+      });
+      return {
+        cssLoaded,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        transitionDuration: flip ? getComputedStyle(flip).transitionDuration : "",
+        frontBackface: front ? getComputedStyle(front).backfaceVisibility : "",
+        backBackface: back ? getComputedStyle(back).backfaceVisibility : "",
+      };
+    });
+    expect(before.cssLoaded).toBe(true);
+    expect(before.lateStyleInjector).toBe(false);
+    expect(before.frontBackface).toBe("hidden");
+    expect(before.backBackface).toBe("hidden");
+
+    await page.evaluate(() => {
+      const target = document.querySelector(".learning-card-flip");
+      const frames = [];
+      const start = performance.now();
+      const sample = () => {
+        if (!target) return;
+        frames.push({ at: performance.now(), transform: getComputedStyle(target).transform });
+        if (performance.now() - start < 700) requestAnimationFrame(sample);
+        else window.__rinemiFlipFrames = frames;
+      };
+      window.__rinemiFlipFrames = frames;
+      requestAnimationFrame(sample);
+    });
+    const reveal = card.getByRole("button", {
+      name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/,
+    });
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(720);
+
+    const after = await card.evaluate((el) => {
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      return {
+        frontAriaHidden: front?.getAttribute("aria-hidden"),
+        frontInert: front?.inert,
+        backAriaHidden: back?.getAttribute("aria-hidden"),
+        backInert: back?.inert,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+      };
+    });
+    const frames = await page.evaluate(() => window.__rinemiFlipFrames || []);
+    expect(after.frontAriaHidden).toBe("true");
+    expect(after.frontInert).toBe(true);
+    expect(after.backAriaHidden).toBe("false");
+    expect(after.backInert).toBe(false);
+    expect(after.lateStyleInjector).toBe(false);
+    expect(new Set(frames.map((frame) => frame.transform)).size).toBeGreaterThan(2);
+  }
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });
