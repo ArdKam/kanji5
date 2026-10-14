@@ -19,7 +19,7 @@ const catalogCharacters = new Set(dataset.kanji.map(item => item.character));
 const ids = taxonomy.topics.map(topic => topic.id);
 assert.equal(new Set(ids).size, ids.length, "Topic IDs must be unique");
 
-const displayGroupsMatch = dictionaryPage.match(/const TOPIC_GROUPS = \[([\\s\\S]*?)\] as const;/);
+const displayGroupsMatch = dictionaryPage.match(/const TOPIC_GROUPS = \[([\s\S]*?)\] as const;/);
 assert.ok(displayGroupsMatch, "Dictionary topic browser needs explicit display-only groups");
 const displayTopicIds = [...displayGroupsMatch[1].matchAll(/topicIds:\s*\[([^\]]*)\]/g)]
   .flatMap(match => [...match[1].matchAll(/"([^"]+)"/g)].map(value => value[1]));
