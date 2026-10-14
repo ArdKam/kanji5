@@ -298,7 +298,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
 
       <div className="dictionary-page-search">
         <label className="dictionary-search-field">
-          <span className="sr-only">{t("dictionaryPlaceholder", language)}</span>
+          <span className="sr-only">{t("dictionarySearchLabel", language)}</span>
           <span className="dictionary-search-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false">
               <circle cx="10.8" cy="10.8" r="6.8" />
@@ -309,7 +309,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("dictionaryPlaceholder", language)}
-            aria-label={t("dictionaryPlaceholder", language)}
+            aria-label={t("dictionarySearchLabel", language)}
             dir="auto"
             autoComplete="off"
             spellCheck={false}
