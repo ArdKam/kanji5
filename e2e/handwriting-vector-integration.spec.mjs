@@ -47,13 +47,23 @@ async function drawReference(page,canvas,strokes){
     for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel", "lostpointercapture"]) {
       document.addEventListener(type, event => {
         const pointer = event;
+        const liveCanvas = document.querySelector(".handwriting-ink-canvas");
+        const rect = element.getBoundingClientRect();
+        const hit = document.elementFromPoint(pointer.clientX, pointer.clientY);
         browserWindow.__handwritingPointerTrace.push({
           type,
           target: pointer.target instanceof Element ? pointer.target.tagName.toLowerCase() + "." + String(pointer.target.className || "").replace(/\s+/g, ".") : "unknown",
           onCanvas: element === pointer.target || element.contains(pointer.target),
+          originalCanvasConnected: element.isConnected,
+          originalIsLiveCanvas: liveCanvas === element,
+          currentCanvasRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
+          hitTarget: hit instanceof Element ? hit.tagName.toLowerCase() + "." + String(hit.className || "").replace(/\s+/g, ".") : "unknown",
+          hitCanvas: hit?.classList?.contains("handwriting-ink-canvas") || false,
           pointerId: pointer.pointerId,
           pointerType: pointer.pointerType,
+          client: { x: pointer.clientX, y: pointer.clientY },
           buttons: pointer.buttons,
+          capture: element.hasPointerCapture(pointer.pointerId),
           time: Math.round(performance.now())
         });
       }, true);
@@ -80,7 +90,9 @@ async function drawReference(page,canvas,strokes){
     const state=await canvas.evaluate(element=>({
       strokeCount:element.closest(".handwriting-practice")?.getAttribute("data-stroke-count"),
       gradeDisabled:element.closest(".handwriting-practice")?.querySelector(".handwriting-actions .primary")?.hasAttribute("disabled"),
-      recentEvents:(window.__handwritingPointerTrace||[]).slice(-6)
+      initialEvents:(window.__handwritingPointerTrace||[]).slice(0,8),
+      recentEvents:(window.__handwritingPointerTrace||[]).slice(-8),
+      liveCanvasRect:(document.querySelector(".handwriting-ink-canvas"))?.getBoundingClientRect().toJSON()
     }));
     if(Number(state.strokeCount)!==strokeIndex+1){
       throw new Error(`Real mouse stroke ${strokeIndex+1} was not committed. DOM state: ${JSON.stringify(state)}`);
