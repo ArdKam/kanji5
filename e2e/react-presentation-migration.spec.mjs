@@ -171,7 +171,7 @@ test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji car
   await sort.selectOption('mastery-desc');
   await expect(sort).toHaveValue('mastery-desc');
   await pageRoot.getByRole('button',{name:'همه',exact:true}).click();
-  const search=pageRoot.getByRole('textbox',{name:'کانجی، خوانش یا معنی را جست‌وجو کن'});
+  const search=pageRoot.getByRole('textbox',{name:'جست‌وجوی فرهنگ کانجی'});
   await search.fill('学');
   const tile=pageRoot.locator('.kanji-catalog-tile').filter({hasText:'学'}).first();
   await expect(tile).toBeVisible({timeout:10000});
