@@ -5,6 +5,7 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
 const dictionary = await read("frontend/src/app/dictionary.css");
+const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
 
 const darkStart = styles.indexOf("@media(prefers-color-scheme:dark){");
@@ -65,5 +66,20 @@ function contrast(foreground, background) {
 }
 assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
 assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
+
+
+assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
+const manualDarkStart = styles.indexOf(':root[data-theme="dark"]{');
+const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDarkStart);
+const manualDark = styles.slice(manualDarkStart, manualLightStart);
+assert.ok(manualDark.includes("--color-surface-elevated:#2b2824"), "Manual Dark must define its own elevated surface token");
+assert.ok(manualDark.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Manual Dark must define its own loading tokens");
+assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:#171614;}"), "Dark primary buttons need a readable explicit foreground");
+assert.ok(styles.includes(".button:not(.primary),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text");
+assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
+assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
+assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#342321;color:#efb0a9;border-color:#9e625b;}'), "Dark Again feedback must use subdued semantic colors");
+assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: #171614; }"), "Selected focus option needs dark-readable foreground");
+assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
 
 console.log("Dark-theme parity contract passed.");
