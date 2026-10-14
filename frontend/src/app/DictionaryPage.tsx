@@ -327,35 +327,52 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 <span className="dictionary-advanced-chevron" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path d="m5 7.5 5 5 5-5" /></svg></span>
               </span>
             </summary>
-            <div className="dictionary-filter-row dictionary-advanced-filter-controls">
-              <label className="dictionary-select-filter">
-                <span>{language === "fa" ? "تسلط" : "Mastery"}</span>
-                <select value={masteryFilter} onChange={(event) => setMasteryFilter(event.target.value as MasteryFilter)}>
-                  <option value="all">{language === "fa" ? "همه" : "All"}</option>
-                  <option value="unseen">{language === "fa" ? "دیده‌نشده" : "Unseen"}</option>
-                  <option value="learning">{language === "fa" ? "در حال یادگیری" : "Learning"}</option>
-                  <option value="attention">{language === "fa" ? "نیازمند توجه" : "Needs attention"}</option>
-                  <option value="mastered">{language === "fa" ? "مسلط" : "Mastered"}</option>
-                </select>
-              </label>
-              <label className="dictionary-select-filter">
-                <span>{language === "fa" ? "پایه" : "Grade"}</span>
-                <select value={grade} onChange={(event) => setGrade(event.target.value)}>
-                  <option value="all">{language === "fa" ? "همه" : "All"}</option>
-                  {Array.from({length:6},(_,index)=>String(index+1)).map(value => <option key={value} value={value}>{language === "fa" ? "پایه " + value : "Grade " + value}</option>)}
-                  <option value="secondary">{language === "fa" ? "متوسطه" : "Secondary"}</option>
-                </select>
-              </label>
-              <label className="dictionary-select-filter">
-                <span>{language === "fa" ? "موضوع" : "Topic"}</span>
-                <select aria-label={language === "fa" ? "موضوع" : "Topic"} value={topic} onChange={(event) => setTopic(event.target.value)}>
-                  <option value="all">{language === "fa" ? "همهٔ موضوع‌ها" : "All topics"}</option>
-                  {KANJI_TOPICS.map(entry => <option key={entry.id} value={entry.id}>{language === "fa" ? entry.label.fa : entry.label.en}</option>)}
-                </select>
-              </label>
+            <div className="dictionary-advanced-filter-controls">
+              <section className="dictionary-advanced-group" aria-labelledby="dictionary-mastery-group-title">
+                <h3 id="dictionary-mastery-group-title">{t("dictionaryMasteryGroup", language)}</h3>
+                <label className="dictionary-advanced-field" htmlFor="dictionary-mastery-filter">
+                  <span>{t("dictionaryMastery", language)}</span>
+                  <select id="dictionary-mastery-filter" value={masteryFilter} onChange={(event) => setMasteryFilter(event.target.value as MasteryFilter)}>
+                    <option value="all">{language === "fa" ? "همه" : "All"}</option>
+                    <option value="unseen">{language === "fa" ? "دیده‌نشده" : "Unseen"}</option>
+                    <option value="learning">{language === "fa" ? "در حال یادگیری" : "Learning"}</option>
+                    <option value="attention">{language === "fa" ? "نیازمند توجه" : "Needs attention"}</option>
+                    <option value="mastered">{language === "fa" ? "مسلط" : "Mastered"}</option>
+                  </select>
+                </label>
+              </section>
+              <section className="dictionary-advanced-group" aria-labelledby="dictionary-grade-group-title">
+                <h3 id="dictionary-grade-group-title">{t("dictionaryGradeGroup", language)}</h3>
+                <label className="dictionary-advanced-field" htmlFor="dictionary-grade-filter">
+                  <span>{t("dictionaryGrade", language)}</span>
+                  <select id="dictionary-grade-filter" value={grade} onChange={(event) => setGrade(event.target.value)}>
+                    <option value="all">{language === "fa" ? "همه" : "All"}</option>
+                    {Array.from({length:6},(_,index)=>String(index+1)).map(value => <option key={value} value={value}>{language === "fa" ? "پایه " + value : "Grade " + value}</option>)}
+                    <option value="secondary">{language === "fa" ? "متوسطه" : "Secondary"}</option>
+                  </select>
+                </label>
+              </section>
+              <section className="dictionary-advanced-group" aria-labelledby="dictionary-topic-group-title">
+                <h3 id="dictionary-topic-group-title">{t("dictionaryTopic", language)}</h3>
+                <div className="dictionary-topic-filter-row">
+                  <button
+                    id="dictionary-topic-trigger"
+                    ref={topicTriggerRef}
+                    className="dictionary-topic-trigger"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded={topicSelectorOpen}
+                    aria-controls="dictionary-topic-dialog"
+                    onClick={() => setTopicSelectorOpen(true)}
+                  >
+                    <span className="dictionary-topic-trigger-label">{activeTopic ? activeTopic.label[language] : t("dictionaryAllTopics", language)}</span>
+                    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m5 7.5 5 5 5-5" /></svg>
+                  </button>
+                </div>
+              </section>
               {activeAdvancedFilterCount > 0 ? (
-                <button className="button secondary wide" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}>
-                    {t("dictionaryClearExtraFilters", language)}
+                <button className="button secondary dictionary-clear-extra-filters" type="button" onClick={() => { setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}>
+                  {t("dictionaryClearExtraFilters", language)}
                 </button>
               ) : null}
             </div>
