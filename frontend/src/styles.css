@@ -40,18 +40,18 @@
   --motion-fast:var(--ds-motion-fast);
   --motion-normal:var(--ds-motion-normal);
   --motion-slow:var(--ds-motion-slow);
-  --motion-interaction:160ms;
+  --motion-interaction:var(--ds-motion-interaction);
   --motion-hover:var(--ds-motion-hover);
-  --motion-tab:280ms;
-  --motion-pager:420ms;
+  --motion-tab:var(--ds-motion-tab);
+  --motion-pager:var(--ds-motion-pager);
   --motion-flip:var(--ds-motion-flip);
   --motion-feedback:var(--ds-motion-feedback);
-  --motion-feedback-in:200ms;
-  --motion-stroke:720ms;
-  --motion-progress:250ms;
-  --motion-menu:280ms;
-  --motion-scrim:200ms;
-  --motion-popover:var(--ds-motion-hover);
+  --motion-feedback-in:var(--ds-motion-feedback-in);
+  --motion-stroke:var(--ds-motion-stroke);
+  --motion-progress:var(--ds-motion-progress);
+  --motion-menu:var(--ds-motion-menu);
+  --motion-scrim:var(--ds-motion-scrim);
+  --motion-popover:var(--ds-motion-popover);
   --z-base:var(--ds-z-base);
   --z-content:var(--ds-z-content);
   --z-nav:var(--ds-z-nav);
@@ -69,7 +69,7 @@
   --color-warning:var(--ds-state-warning-text);
   --color-danger:var(--ds-state-danger-text);
   --color-focus:var(--ds-focus-ring);
-  --nav-bar-height:66px;
+  --nav-bar-height:var(--ds-layout-nav-height);
 }
 *{box-sizing:border-box}html{min-width:320px;max-width:100%;overflow-x:clip;background:var(--washi)}body{margin:0;min-width:320px;max-width:100%;min-height:100dvh;overflow-x:clip;background:radial-gradient(circle at 8% 6%,rgba(184,74,56,.05),transparent 24rem),var(--washi);color:var(--sumi)}#root{width:100%;max-width:100%;min-width:0;overflow-x:clip}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.58}button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid rgba(38,64,107,.32);outline-offset:3px}a{color:inherit}
 .app-shell{width:min(100%,880px);margin:0 auto;padding:var(--ds-space-4) var(--ds-space-5) calc(var(--ds-layout-nav-height) + max(14px,env(safe-area-inset-bottom)) + var(--ds-space-5))}.skip-link{position:fixed;top:10px;right:10px;z-index:50;transform:translateY(-180%);background:var(--sumi);color:var(--paper);padding:10px 14px;border-radius:var(--ds-radius-md)}.skip-link:focus{transform:none}.header{gap:var(--ds-space-4);padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--line)}.header h1{margin:2px 0 0;font-size:var(--ds-type-display-sm);line-height:1;letter-spacing:-.035em;font-weight:750}.eyebrow{margin:0;font-size:var(--ds-type-caption);font-weight:750;text-transform:uppercase}.red{color:var(--shu)}.subtitle{margin:8px 0 0;color:var(--mute);font-size:var(--ds-type-small)}.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:var(--ds-space-2);margin-inline-start:auto;min-width:0}.session-progress{width:min(100%,310px);display:grid;gap:6px;color:var(--mute);font-size:var(--ds-type-caption);text-align:end}.progress{height:9px;border-radius:var(--ds-radius-xl);background:var(--progress-track);overflow:hidden}.progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--shu),var(--ai));transition:width .25s ease}.header-actions .button{width:auto}.header-actions .session-progress{margin-inline-start:0}/* Bottom navigation layout is defined only in experience-nav.css. Dashboard panels follow the primary learning surface in DOM order. */
