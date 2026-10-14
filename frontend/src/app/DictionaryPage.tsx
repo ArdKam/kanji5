@@ -165,6 +165,7 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
 
 
 export function DictionaryPage({ language, externalSelectedCharacter, onExternalSelectionConsumed }: { language: Language; externalSelectedCharacter?: string | null; onExternalSelectionConsumed?: () => void }) {
+  const [dictionaryStylesReady, setDictionaryStylesReady] = useState(false);
   const [catalog, setCatalog] = useState<KanjiCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -193,6 +194,15 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       .filter(entry => !search || normalize(entry.label[language]).includes(search))
       .map(entry => entry.id));
   }, [language, topicSearchQuery]);
+
+  useEffect(() => {
+    let active = true;
+    void import("./dictionary.css").then(
+      () => { if (active) setDictionaryStylesReady(true); },
+      () => { if (active) setDictionaryStylesReady(true); },
+    );
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -270,6 +280,20 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       dialog.close();
     }
   }, [topicSelectorOpen]);
+
+  if (!dictionaryStylesReady) {
+    return (
+      <section
+        aria-labelledby="dictionary-page-title"
+        style={{ width: "100%", maxWidth: 980, margin: "0 auto", padding: "1rem", boxSizing: "border-box" }}
+      >
+        <h2 id="dictionary-page-title" style={{ margin: "0 0 1rem" }}>{t("dictionaryTitle", language)}</h2>
+        <div className="loading" role="status" style={{ minHeight: 96, display: "grid", placeItems: "center" }}>
+          {t("dictionaryLoading", language)}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
