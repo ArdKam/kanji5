@@ -15,7 +15,7 @@ for (const name of ['StatsDialog','SettingsDialog','PracticeHome','GrammarDialog
   assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
 }
 assert.match(app,/const DictionaryPageRoute = lazy\(async \(\) => \{/, 'Dictionary must load on demand instead of the critical renderer path');
-assert.match(app,/import\("\.\/dictionary\.css\?inline"\)/, 'Dictionary styles must load with the lazy Dictionary route');
+assert.match(app,/import\("\.\/dictionary-page\.css\?inline"\)/, 'Dictionary-only catalog/control styles must load with the lazy Dictionary route');
 assert.match(app,/import\("\.\/DictionaryPage"\)/, 'Dictionary component must be a dynamic import');
 
 
