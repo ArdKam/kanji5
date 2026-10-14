@@ -174,6 +174,9 @@ jobs:
       - name: Run React secondary experience polish E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-secondary-experience-polish.spec.mjs
+      - name: Run UX microcopy cleanup E2E
+        working-directory: .
+        run: npx playwright test --timeout=30000 --retries=0 e2e/ux-microcopy.spec.mjs
       - name: Run startup performance baseline
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/performance-baseline.spec.mjs

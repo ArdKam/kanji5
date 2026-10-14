@@ -363,7 +363,7 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
 
       {state.recoveryPending ? <section className="account-section account-section-emphasis">
         <div className="account-section-heading">
-          <div><h3>{t("setNewPassword", language)}</h3><p>{t("setNewPasswordHint", language)}</p></div>
+          <div><h3>{t("setNewPassword", language)}</h3></div>
         </div>
         <form className="account-profile-form" onSubmit={event => { event.preventDefault(); submitPassword(); }}>
           <PasswordField name="newPassword" label={t("newPassword", language)} value={newPassword} onChange={setNewPassword} autoComplete="new-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />
@@ -391,7 +391,7 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
 
         <section className="account-section">
           <div className="account-section-heading">
-            <div><h3>{t("security", language)}</h3><p>{t("passwordHint", language)}</p></div>
+            <div><h3>{t("security", language)}</h3></div>
           </div>
 {securityEditing ? <form className="account-profile-form" onSubmit={event => { event.preventDefault(); submitPassword(); }}>
             <PasswordField name="currentPassword" label={t("currentPassword", language)} value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" disabled={busy} placeholder={t("passwordPlaceholder", language)} showLabel={t("showPassword", language)} hideLabel={t("hidePassword", language)} />

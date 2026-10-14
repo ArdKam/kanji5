@@ -1183,7 +1183,8 @@
 }
 .handwriting-live-feedback span{font-weight:800;white-space:nowrap;}
 .handwriting-live-feedback strong{color:var(--ink);font-size:var(--text-xs);line-height:1.45;text-align:end;}
-.handwriting-help{
+.handwriting-help,
+.handwriting-evaluation-note{
   margin:0;
   color:var(--mute);
   font-size:var(--text-xs);

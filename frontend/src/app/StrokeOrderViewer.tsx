@@ -134,7 +134,6 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
       <div className="stroke-order-header">
         <div>
           <h3 id="stroke-order-title">{t("strokeOrder", language)}</h3>
-          <p>{t("strokeOrderHint", language)}</p>
         </div>
         <div className="stroke-order-header-actions">
           {!loading && !error && paths.length ? (

@@ -584,8 +584,8 @@ export function MnemonicsDialog({
           <h2 id="mnemonics-dialog-title">{t("preparedMnemonicLibrary", language)}</h2>
           <p className="secondary-surface-dialog-hint">
             {language === "fa"
-              ? "برای هر کانجی یک ارتباط به‌یادماندنی پیدا کن و فقط چیزی را نگه دار که یادآوری را برایت آسان‌تر می‌کند؛ این کتابخانه جای مرور زمان‌بندی‌شده را نمی‌گیرد."
-              : "Find a memory cue for each kanji and keep what genuinely helps you remember it; this library is separate from scheduled reviews."}
+              ? "یادافزاری را نگه دار که بازیابی را آسان‌تر می‌کند؛ این کتابخانه جای مرور زمان‌بندی‌شده را نمی‌گیرد."
+              : "Keep cues that help recall; this library does not replace scheduled reviews."}
           </p>
         </div>
         <div className="prepared-mnemonics-dialog-metrics" aria-label={language === "fa" ? "پوشش یادسپارها" : "Mnemonic coverage"}>

@@ -307,7 +307,7 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await page.setViewportSize({ width: 1440, height: 960 });
     await closeDialog(dialog);
 
-    dialog = await openMenuItem('Reading lab');
+    dialog = await openMenuItem('Japanese text reader');
     await expect(dialog.locator('.reading-lab')).toBeVisible({ timeout: 10_000 });
     await capture('16-reading-lab-desktop');
     await captureScrolled('16-reading-lab-desktop-dialog', { scope: 'dialog', ratio: 0.8 });

@@ -96,8 +96,8 @@ try {
     await dictionaryCard.waitFor({ state: 'hidden', timeout: 10000 });
 
     await page.getByRole('button', { name: 'More', exact: true }).click();
-    await page.locator('#header-tools-menu').getByRole('button', { name: 'Reading lab', exact: true }).click();
-    const readingDialog = page.getByRole('dialog', { name: 'Reading lab' });
+    await page.locator('#header-tools-menu').getByRole('button', { name: 'Japanese text reader', exact: true }).click();
+    const readingDialog = page.getByRole('dialog', { name: 'Japanese text reader' });
     const readingLab = readingDialog.locator('.reading-lab');
     await readingLab.waitFor({ state: 'visible', timeout: 10000 });
     const readingText = '今日は学生です。明日は先生です。';
@@ -106,8 +106,8 @@ try {
     await readingDialog.getByRole('button', { name: 'Close', exact: true }).click();
     await readingDialog.waitFor({ state: 'hidden', timeout: 10000 });
     await page.getByRole('button', { name: 'More', exact: true }).click();
-    await page.locator('#header-tools-menu').getByRole('button', { name: 'Reading lab', exact: true }).click();
-    const reopenedReadingDialog = page.getByRole('dialog', { name: 'Reading lab' });
+    await page.locator('#header-tools-menu').getByRole('button', { name: 'Japanese text reader', exact: true }).click();
+    const reopenedReadingDialog = page.getByRole('dialog', { name: 'Japanese text reader' });
     const reopenedReadingLab = reopenedReadingDialog.locator('.reading-lab');
     await reopenedReadingLab.waitFor({ state: 'visible', timeout: 10000 });
     await expect(reopenedReadingLab.locator('textarea')).toHaveValue(readingText);

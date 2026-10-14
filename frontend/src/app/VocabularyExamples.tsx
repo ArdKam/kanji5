@@ -51,7 +51,6 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
       <div className="dictionary-vocabulary-header">
         <div>
           <h3>{t("dictionaryVocabulary", language)}</h3>
-          <p>{t("dictionaryVocabularyHint", language)}</p>
         </div>
       </div>
       {loading ? <div className="dictionary-vocabulary-status" role="status">{t("dictionarySearching", language)}</div> : null}

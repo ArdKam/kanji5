@@ -84,7 +84,6 @@ export function KanjiStructureDialog({
           <ComponentBreakdown
             info={info}
             title={t("kanjiStructure", language)}
-            note={t("visualComponents", language)}
             ariaLabel={t("visualKanjiStructure", language)}
           />
         ) : (

@@ -131,7 +131,10 @@ export function DictionaryKanjiCard({
 
   const handleCardPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
-    if (event.button !== 0 || !event.isPrimary || target.closest("button, input, textarea, select, a")) {
+    if (event.button !== 0 || !event.isPrimary || target.closest("button, input, textarea, select, a, canvas, [data-pointer-gesture-stop]")) {
+      // Inner canvases own their pointer stream (including capture) for drawing.
+      // Capturing the same pointer on the card would retarget subsequent events
+      // to this parent and prevent the canvas from committing the stroke.
       pointerStartRef.current = null;
       return;
     }
