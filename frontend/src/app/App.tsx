@@ -19,7 +19,7 @@ import { getTopicLabel } from "./topic-taxonomy";
 const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
 const DictionaryPageRoute = lazy(async () => {
   const [{ default: dictionaryStyles }, pageModule] = await Promise.all([
-    import("./dictionary.css?inline"),
+    import("./dictionary-page.css?inline"),
     import("./DictionaryPage"),
   ]);
   const Page = pageModule.DictionaryPage;
