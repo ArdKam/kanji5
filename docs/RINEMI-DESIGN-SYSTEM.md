@@ -75,10 +75,10 @@ Learning review uses distinct Again, Hard, Good, and Easy roles:
 
 | Outcome | Light foreground / background | Dark foreground / background |
 |---|---|---|
-| Again | `#8E3026` / `#F8ECE8` | `#FF9B91` / `#3A2422` |
-| Hard | `#76510A` / `#FAF0D9` | `#E9C46A` / `#382F1E` |
-| Good | `#43582B` / `#EDF2E7` | `#B9D49A` / `#283126` |
-| Easy | `#314B6F` / `#ECF1F8` | `#A9C1ED` / `#263142` |
+| Again | `#8E3026` / `#F8ECE8` | `#FF9B91` / `#332724` |
+| Hard | `#76510A` / `#FAF0D9` | `#E9C46A` / `#332F27` |
+| Good | `#43582B` / `#EDF2E7` | `#B9D49A` / `#283128` |
+| Easy | `#314B6F` / `#ECF1F8` | `#A9C1ED` / `#27303B` |
 
 The automated visual coverage suite calculates text contrast for each outcome and primary actions in light, dark, and system modes. Color is reinforced by the visible outcome label, not used as the only signal.
 
