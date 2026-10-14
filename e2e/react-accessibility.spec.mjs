@@ -110,9 +110,13 @@ test('the More drawer is modal and makes the main content inert',async({page})=>
   const menu=page.locator('#header-tools-menu');
   await expect(menu).toBeVisible();
   await expect(menu).toHaveAttribute('aria-modal','true');
-  await expect.poll(()=>page.locator('#primary-content').evaluate(node=>node.inert)).toBe(true);
+  for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
+    await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(true);
+  }
   await page.keyboard.press('Escape');
-  await expect.poll(()=>page.locator('#primary-content').evaluate(node=>node.inert)).toBe(false);
+  for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
+    await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(false);
+  }
 });
 
 test('dictionary card uses stable tabs with one active content viewport', async ({page})=>{

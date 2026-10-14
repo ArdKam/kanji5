@@ -1,5 +1,7 @@
 .dictionary-page{
   width:100%;
+  min-width:0;
+  box-sizing:border-box;
   max-width:980px;
   margin:0 auto;
   padding-bottom:1rem;
@@ -2091,9 +2093,9 @@
 
 
 /* Keyboard grid: preserve the visual matrix while grouping tiles into real rows/cells. */
-.kanji-catalog-grid{display:flex;flex-direction:column;gap:7px;}
+.kanji-catalog-grid{display:flex;flex-direction:column;gap:7px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:clip;}
 .kanji-catalog-grid.is-detailed{display:flex;flex-direction:column;gap:8px;}
-.kanji-catalog-row{display:grid;width:100%;justify-content:center;gap:7px;}
+.kanji-catalog-row{display:grid;width:100%;max-width:100%;min-width:0;box-sizing:border-box;justify-content:center;gap:7px;}
 .kanji-catalog-grid.is-detailed .kanji-catalog-row{justify-content:stretch;gap:8px;}
 .kanji-catalog-cell{min-width:0;}
 .kanji-catalog-grid.is-detailed .kanji-catalog-tile.is-detailed{width:100%;}

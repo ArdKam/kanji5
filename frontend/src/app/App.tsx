@@ -1022,14 +1022,14 @@ function App(){
     };
     document.addEventListener("keydown",onKeyDown);
     const previousOverflow=document.body.style.overflow;
-    const main=document.getElementById("primary-content");
-    const previousMainInert=main?.inert ?? false;
-    if(main)main.inert=true;
+    const inertTargets=Array.from(document.querySelectorAll<HTMLElement>(".skip-link,.header-brand,.session-progress,.header-menu-trigger,.account-button,.experience-nav,#primary-content,.footer"));
+    const previousInert=inertTargets.map(element=>element.inert);
+    inertTargets.forEach(element=>{element.inert=true});
     document.body.style.overflow="hidden";
     requestAnimationFrame(()=>getFocusable()[0]?.focus());
     return()=>{
       document.removeEventListener("keydown",onKeyDown);
-      if(main)main.inert=previousMainInert;
+      inertTargets.forEach((element,index)=>{element.inert=previousInert[index]});
       document.body.style.overflow=previousOverflow;
       requestAnimationFrame(()=>opener?.focus());
     };
@@ -1040,7 +1040,7 @@ function App(){
     <style data-learning-surface>{learningSurfaceStyles}</style>
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
     <header className={"header"+(headerMenuOpen?" menu-open":"")}><div className="header-brand"><p className="eyebrow red">{t("smartLearning")}</p><div className="header-brand-lockup"><img className="header-brand-mark" src="./icon.svg" alt="" aria-hidden="true" /><h1 dir="ltr">Rinemi</h1></div></div>
-      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-modal="true" aria-labelledby="header-tools-menu-title">
+      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-hidden="true" tabIndex={-1} aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-modal="true" aria-labelledby="header-tools-menu-title">
   <div className="header-tools-menu-header"><div className="header-tools-menu-heading"><span className="header-tools-menu-kana" lang="ja" aria-hidden="true">道具</span><span aria-hidden="true">·</span><strong id="header-tools-menu-title">{t("moreMenuTitle",language)}</strong></div><button className="header-tools-menu-close" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}><UiIcon name="close" size={19}/></button></div>
   <div className="header-tools-menu-scroll">
     <section className="header-tools-menu-section" aria-labelledby="header-tools-learning-title">
