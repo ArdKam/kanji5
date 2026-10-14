@@ -67,7 +67,8 @@ async function createCapture(page, testInfo) {
     });
     report.screenshots.push({
       name,
-      file: path.relative(process.cwd(), file),
+      // This maps directly to the directory layout in the uploaded CI artifact.
+      file: path.join("design-system-visual-coverage", path.relative(outputRoot, file)),
       ...state,
     });
     await persist();
@@ -286,7 +287,6 @@ test("visual coverage: learning-card faces, inner pages, rating feedback, themes
     await expect(revealButton).toBeVisible();
     await revealButton.click();
     await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-    await audit.capture("learning-back-meaning-structure-desktop-dark");
     const shortcuts = card.locator(".learning-back-page-shortcut");
     await expect(shortcuts).toHaveCount(4);
     const sectionNames = [
@@ -391,7 +391,6 @@ test("visual coverage: dictionary filters, empty results, detail tabs, dark mode
     }
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await audit.capture("dictionary-detail-mnemonic-mobile-light");
     for (const section of ["overview", ...sections]) {
       const tab = dialog.locator("#dictionary-section-tab-" + section);
       await tab.click();
