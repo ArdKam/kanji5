@@ -2088,3 +2088,16 @@
 .reading-word-kanji small{color:var(--mute);font-size:10px;font-weight:850;}
 .reading-word-card-hint{margin:0;color:var(--mute);font-size:10px;line-height:1.55;}
 @media(max-width:520px){.reading-lab-heading-line{align-items:flex-start;flex-direction:column;}.reading-word-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);}.reading-word-card{padding:18px;}}
+
+
+/* Dark-mode accessibility: the custom dictionary close control must not keep its light-theme dark ink. */
+:root[data-theme="dark"] .dictionary-card-dialog .dialog-close,
+:root[data-theme="dark"] .dictionary-card-dialog .dialog-close:hover {
+  color: var(--sumi);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] .dictionary-card-dialog .dialog-close,
+  :root[data-theme="system"] .dictionary-card-dialog .dialog-close:hover {
+    color: var(--sumi);
+  }
+}
