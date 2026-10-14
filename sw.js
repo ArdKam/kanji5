@@ -42,9 +42,57 @@ async function cacheApiResponse(cache,req,response){if(!response||response.type=
 async function evictApiCache(cache){const keys=await cache.keys(),now=Date.now();for(const key of keys){const hit=await cache.match(key);const stamp=Number(hit?.headers.get('X-Kanji5-Cache-Time')||0);if(stamp&&now-stamp>API_TTL_MS)await cache.delete(key)}const fresh=await cache.keys();if(fresh.length<=API_MAX_ENTRIES)return;const ranked=[];for(const key of fresh){const hit=await cache.match(key);ranked.push({key,stamp:Number(hit?.headers.get('X-Kanji5-Cache-Time')||0)})}ranked.sort((a,b)=>a.stamp-b.stamp);for(const item of ranked.slice(0,Math.max(0,ranked.length-API_MAX_ENTRIES)))await cache.delete(item.key)}
 function isLowValueVocabularyExample(word){const value=String(word||'').trim();if(!value)return true;const chars=[...value];if(chars.length<2)return true;const numerals='一二三四五六七八九十百千万';const counters='人個本枚台冊匹杯歳回日月年時分円階';return chars.length>=2&&chars.slice(0,-1).every(ch=>numerals.includes(ch))&&counters.includes(chars[chars.length-1])}
 async function filterVocabularyResponse(req,response){if(!req.url.startsWith(`${API_ORIGIN}/v1/words/`)||!response?.ok)return response;try{const payload=await response.clone().json();if(!Array.isArray(payload))return response;let changed=false;const filtered=payload.map(entry=>{const variants=Array.isArray(entry?.variants)?entry.variants.filter(variant=>!isLowValueVocabularyExample(variant?.written)):[];if(variants.length!==(entry?.variants||[]).length)changed=true;return {...entry,variants}}).filter(entry=>entry.variants.length);if(!changed)return response;return new Response(JSON.stringify(filtered),{status:response.status,statusText:response.statusText,headers:response.headers})}catch(_){return response}}
-async function apiCacheFirst(req){const c=await caches.open(API_CACHE);const hit=await c.match(req);if(hit){const stamp=Number(hit.headers.get('X-Kanji5-Cache-Time')||0);if(stamp&&Date.now()-stamp<=API_TTL_MS){void evictApiCache(c);return hit}if(stamp)await c.delete(req)}
-const key=req.url,pending=API_INFLIGHT.get(key);if(pending)return(await pending).clone();const request=(async()=>{try{const raw=await fetch(req);const response=await filterVocabularyResponse(req,raw);await cacheApiResponse(c,req,response);void evictApiCache(c);return response}catch(_){const fallback=await c.match(req);if(fallback)return fallback;return new Response('[]',{status:200,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'}})}})();API_INFLIGHT.set(key,request);try{return(await request).clone()}finally{if(API_INFLIGHT.get(key)===request)API_INFLIGHT.delete(key)}}
+async function apiCacheFirst(req){
+  const c=await caches.open(API_CACHE);
+  // Keep stale entries until the network request succeeds. An expired response
+  // is still better than losing offline access when the network is unavailable.
+  const hit=await c.match(req);
+  if(hit){
+    const stamp=Number(hit.headers.get('X-Kanji5-Cache-Time')||0);
+    if(stamp&&Date.now()-stamp<=API_TTL_MS){void evictApiCache(c);return hit}
+  }
+  const key=req.url,pending=API_INFLIGHT.get(key);
+  if(pending)return(await pending).clone();
+  const request=(async()=>{
+    try{
+      const raw=await fetch(req);
+      if(!raw.ok&&hit)return hit;
+      const response=await filterVocabularyResponse(req,raw);
+      await cacheApiResponse(c,req,response);
+      void evictApiCache(c);
+      return response;
+    }catch(_){
+      if(hit)return hit;
+      const isWordsApi=req.url.startsWith(`${API_ORIGIN}/v1/words/`);
+      if(isWordsApi)return new Response('[]',{status:200,headers:{
+        'Content-Type':'application/json; charset=utf-8',
+        'Cache-Control':'no-store',
+        'X-Kanji5-Offline-Fallback':'1'
+      }});
+      return new Response('Offline: resource unavailable',{status:503,headers:{
+        'Content-Type':'text/plain; charset=utf-8',
+        'Cache-Control':'no-store',
+        'X-Kanji5-Offline-Fallback':'1'
+      }});
+    }
+  })();
+  API_INFLIGHT.set(key,request);
+  try{return(await request).clone()}finally{if(API_INFLIGHT.get(key)===request)API_INFLIGHT.delete(key)}
+}
 async function dynamicSameOrigin(req){try{return await fetch(req)}catch(_){return Response.error()}}
-async function networkFirst(req,name,fallback){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(req,{ignoreSearch:false}))||(fallback?await c.match(fallback,{ignoreSearch:false}):Response.error())}}
+async function networkFirst(req,name,fallback,timeoutMs=3500){
+  const c=await caches.open(name);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const r=await fetch(req,{signal:controller.signal});
+    if(r.ok)await c.put(req,r.clone());
+    return r;
+  }catch(_){
+    const cached=await c.match(req,{ignoreSearch:false});
+    const fallbackUrl=fallback?new URL(fallback,self.location.href).href:null;
+    return cached||(fallbackUrl?await c.match(fallbackUrl,{ignoreSearch:true}):null)||Response.error();
+  }finally{clearTimeout(timer)}
+}
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}if(u.origin===self.location.origin&&(u.href===DATA_URL||u.pathname.endsWith('/kanji-components.json')||u.pathname.endsWith('/kanji-radicals.json')||u.pathname.endsWith('/kanji-radical-map.json')||u.pathname.endsWith('/kanji-visual-structure.json'))){e.respondWith(cacheFirst(r,DATA_CACHE));return}if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}
 if(u.origin===KANJIVG_ORIGIN&&u.pathname.startsWith(KANJIVG_PATH)&&u.pathname.toLowerCase().endsWith('.svg')){e.respondWith(apiCacheFirst(r));return}if(u.origin===self.location.origin){e.respondWith(cacheFirst(r,CACHE));return}e.respondWith(dynamicSameOrigin(r))});
