@@ -4,9 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const [taxonomy, dataset] = await Promise.all([
+const [taxonomy, dataset, dictionaryPage] = await Promise.all([
   fs.readFile(path.join(root, "frontend/src/app/kanji-topics.json"), "utf8").then(value => JSON.parse(value)),
   fs.readFile(path.join(root, "kanji-data.json"), "utf8").then(value => JSON.parse(value)),
+  fs.readFile(path.join(root, "frontend/src/app/DictionaryPage.tsx"), "utf8"),
 ]);
 
 assert.equal(taxonomy.version, 4, "Topic taxonomy version must be explicit");
@@ -17,6 +18,17 @@ assert.ok(Array.isArray(taxonomy.topics) && taxonomy.topics.length >= 20, "Expec
 const catalogCharacters = new Set(dataset.kanji.map(item => item.character));
 const ids = taxonomy.topics.map(topic => topic.id);
 assert.equal(new Set(ids).size, ids.length, "Topic IDs must be unique");
+
+const displayGroupsMatch = dictionaryPage.match(/const TOPIC_GROUPS = \[([\\s\\S]*?)\] as const;/);
+assert.ok(displayGroupsMatch, "Dictionary topic browser needs explicit display-only groups");
+const displayTopicIds = [...displayGroupsMatch[1].matchAll(/topicIds:\s*\[([^\]]*)\]/g)]
+  .flatMap(match => [...match[1].matchAll(/"([^"]+)"/g)].map(value => value[1]));
+assert.equal(new Set(displayTopicIds).size, displayTopicIds.length, "Each topic ID must appear in one display group only");
+assert.deepEqual(
+  [...displayTopicIds].sort(),
+  [...ids].sort(),
+  "Display groups must cover every authoritative topic ID exactly once without altering taxonomy membership",
+);
 
 const expectedTopics = {
   numbers: "一",
