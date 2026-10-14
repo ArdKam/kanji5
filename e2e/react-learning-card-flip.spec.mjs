@@ -117,7 +117,7 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
-test("learning-card flip uses preloaded styles and keeps face semantics stable", async ({ page }) => {
+test("learning-card flip prepares enhancement styles before the first transition", async ({ page }) => {
   await routeExamples(page, 2);
   await page.addInitScript(() => {
     localStorage.setItem("kanji5-ui-language", "en");
@@ -153,10 +153,33 @@ test("learning-card flip uses preloaded styles and keeps face semantics stable",
         backBackface: back ? getComputedStyle(back).backfaceVisibility : "",
       };
     });
-    expect(before.cssLoaded).toBe(true);
+    expect(before.cssLoaded).toBe(false);
     expect(before.lateStyleInjector).toBe(false);
     expect(before.frontBackface).toBe("hidden");
     expect(before.backBackface).toBe("hidden");
+
+    await page.evaluate(() => {
+      const card = document.querySelector(".learning-card");
+      if (!card) throw new Error("Learning card unavailable for transition observation");
+      const events = [];
+      const styleObserver = new MutationObserver((records) => {
+        for (const record of records) {
+          for (const node of Array.from(record.addedNodes)) {
+            if (node instanceof HTMLStyleElement && node.matches("style[data-rinemi-learning-card-styles]")) {
+              events.push({ type: "styles-ready", at: performance.now() });
+            }
+          }
+        }
+      });
+      styleObserver.observe(document.head, { childList: true });
+      const cardObserver = new MutationObserver(() => {
+        if (card.classList.contains("is-revealed") && !events.some((event) => event.type === "revealed")) {
+          events.push({ type: "revealed", at: performance.now() });
+        }
+      });
+      cardObserver.observe(card, { attributes: true, attributeFilter: ["class"] });
+      window.__rinemiFlipSetupEvents = events;
+    });
 
     await page.evaluate(() => {
       const target = document.querySelector(".learning-card-flip");
@@ -165,7 +188,7 @@ test("learning-card flip uses preloaded styles and keeps face semantics stable",
       const sample = () => {
         if (!target) return;
         frames.push({ at: performance.now(), transform: getComputedStyle(target).transform });
-        if (performance.now() - start < 700) requestAnimationFrame(sample);
+        if (performance.now() - start < 1500) requestAnimationFrame(sample);
         else window.__rinemiFlipFrames = frames;
       };
       window.__rinemiFlipFrames = frames;
@@ -176,7 +199,7 @@ test("learning-card flip uses preloaded styles and keeps face semantics stable",
     });
     await reveal.click();
     await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
-    await page.waitForTimeout(720);
+    await page.waitForTimeout(1520);
 
     const after = await card.evaluate((el) => {
       const front = el.querySelector(".learning-card-front");
@@ -190,11 +213,16 @@ test("learning-card flip uses preloaded styles and keeps face semantics stable",
       };
     });
     const frames = await page.evaluate(() => window.__rinemiFlipFrames || []);
+    const setupEvents = await page.evaluate(() => window.__rinemiFlipSetupEvents || []);
+    const styleReadyIndex = setupEvents.findIndex((event) => event.type === "styles-ready");
+    const revealedIndex = setupEvents.findIndex((event) => event.type === "revealed");
+    expect(styleReadyIndex).toBeGreaterThanOrEqual(0);
+    expect(revealedIndex).toBeGreaterThan(styleReadyIndex);
     expect(after.frontAriaHidden).toBe("true");
     expect(after.frontInert).toBe(true);
     expect(after.backAriaHidden).toBe("false");
     expect(after.backInert).toBe(false);
-    expect(after.lateStyleInjector).toBe(false);
+    expect(after.lateStyleInjector).toBe(true);
     expect(new Set(frames.map((frame) => frame.transform)).size).toBeGreaterThan(2);
   }
 });
