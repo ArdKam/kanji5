@@ -330,26 +330,26 @@
   accent-color: var(--ds-color-action-primary);
 }
 
-:where(button, a[href], input, select, textarea, summary, [role="button"], [role="tab"], [role="menuitem"], [tabindex]:not([tabindex="-1"])):focus-visible {
+button:focus-visible, a[href]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [role="button"]:focus-visible, [role="tab"]:focus-visible, [role="menuitem"]:focus-visible, [tabindex]:focus-visible {
   outline: 3px solid var(--ds-focus-ring);
   outline-offset: var(--ds-focus-offset);
 }
 
-:where(:disabled, [aria-disabled="true"]) {
+:disabled, [aria-disabled="true"] {
   cursor: not-allowed;
 }
 
 /* The default-action contract: a filled indigo action; its foreground changes with the theme. */
-.app-shell .button.primary {
+:root .app-shell .button.primary {
   background: var(--ds-color-action-primary);
   border-color: var(--ds-color-action-primary);
   color: var(--ds-color-action-primary-text);
 }
-.app-shell .button.primary:hover:not(:disabled) {
+:root .app-shell .button.primary:hover:not(:disabled) {
   background: var(--ds-color-action-primary-hover);
   border-color: var(--ds-color-action-primary-hover);
 }
-.app-shell .button.primary:active:not(:disabled) {
+:root .app-shell .button.primary:active:not(:disabled) {
   background: var(--ds-color-action-primary-pressed);
   border-color: var(--ds-color-action-primary-pressed);
 }
