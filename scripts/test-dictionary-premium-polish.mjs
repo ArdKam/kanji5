@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [page, card, i18n] = await Promise.all([
+const [page, card, i18n, app, main] = await Promise.all([
   readFile(new URL("../frontend/src/app/DictionaryPage.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/DictionaryKanjiCard.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/i18n.ts", import.meta.url), "utf8"),
+  readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8"),
+  readFile(new URL("../frontend/src/main.tsx", import.meta.url), "utf8"),
 ]);
 
 assert.doesNotMatch(page, /dictionary-polish\.css/, "Dictionary styling must not add a separate CSS bundle");
@@ -12,7 +14,9 @@ assert.match(page, /dictionary-active-filters/, "Filtered and searched states ne
 assert.match(page, /dictionary-clear-all-filters/, "The user needs a one-action filter reset");
 assert.match(page, /dictionary-mastery-legend/, "Kanji mastery colors need an explicit legend");
 assert.match(page, /TOPIC_GROUPS/, "The topic browser must use an explicit display grouping without changing memberships");
-assert.match(page, /className="dictionary-topic-dialog"/, "Dictionary topics need a dedicated browseable selector");
+assert.match(page, /className="[^"]*dictionary-topic-dialog"/, "Dictionary topics need a dedicated browseable selector");
+assert.match(app, /import\("\.\/dictionary\.css\?inline"\)/, "Dictionary styles should load with the route instead of the startup CSS bundle");
+assert.doesNotMatch(main, /import "\.\/app\/dictionary\.css"/, "The Dictionary stylesheet must not be eagerly loaded with the whole application");
 assert.match(page, /data-topic-id={entry.id}/, "Every reviewed taxonomy ID must remain selectable");
 assert.match(page, /aria-pressed={topic === entry.id}/, "The selected topic must be exposed to assistive technology");
 assert.match(page, /onCancel=\{\(event\) => \{ event\.preventDefault\(\); closeTopicPicker\(\); \}\}/, "Escape must dismiss the topic picker predictably");
