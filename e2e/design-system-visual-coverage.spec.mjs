@@ -597,6 +597,13 @@ test("visual coverage: responsive Dictionary control bar and browseable topics",
           await expect(trigger).toContainText(combination.language === "fa" ? "همهٔ موضوع‌ها" : "All topics");
           await expect(page.locator(".dictionary-active-filter-chips .dictionary-filter-chip")).toHaveCount(0);
           await expect(trigger).toBeFocused();
+        } else {
+          await selector.getByRole("button", {
+            name: combination.language === "fa" ? "بستن" : "Close",
+            exact: true,
+          }).click();
+          await expect(selector).toBeHidden();
+          await expect(trigger).toBeFocused();
         }
         await assertNoHorizontalOverflow();
       }
