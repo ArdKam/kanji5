@@ -80,6 +80,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   // Switch back to System + OS Dark before measuring dark-mode contrast.
   await page.emulateMedia({ colorScheme: "dark" });
   await expect.poll(isDarkSurface).toBe(true);
+  const menuClose = page.locator(".header-tools-menu-close");
+  await expect(menuClose).toBeVisible();
+  await menuClose.click();
+  await expect(page.locator("#header-tools-menu")).toHaveCount(0);
 
   const reveal = page.locator("#root .learning-card .button.wide");
   await expect(reveal).toBeVisible({ timeout: 10_000 });
