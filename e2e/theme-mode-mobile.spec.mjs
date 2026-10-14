@@ -73,7 +73,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const primary = card.locator(".learning-card-front .button.primary").first();
   await expect(primary).toBeVisible();
   const contrastRatio = async (locator) => locator.evaluate((element) => {
-    const rgb = (value) => (value.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+    const rgb = (value) => (value.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
     const luminance = (value) => rgb(value).map(channel => {
       const normalized = channel / 255;
       return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
