@@ -30,7 +30,7 @@ The production path remains:
 
 React remains a presentation layer. FSRS, the v1.9 learner model, adaptive planning, grading, recovery, persistence, and offline synchronization are unchanged by this stylesheet.
 
-`design-system.css` loads after the current shared and page styles in `main.tsx`. The `--ds-*` variables are the semantic source of truth for new and migrated presentation. Existing names such as `--washi`, `--paper`, `--sumi`, `--mute`, `--ai`, `--line`, `--space-*`, and `--radius-*` are temporary compatibility aliases to keep older CSS working during incremental migration. Do not add new UI dependencies or new legacy aliases.
+`design-system.css` loads after the shared and page styles in `main.tsx`. The `--ds-*` variables are the semantic source of truth for new and migrated presentation. Existing names (`--washi`, `--paper`, `--sumi`, `--mute`, `--ai`, `--line`, `--space-*`, `--radius-*`, and related legacy tokens) are declared once in `styles.css` and reference those semantic roles. This keeps older consumers theme-aware without maintaining a second duplicate alias block. Do not add new UI dependencies or new legacy aliases.
 
 Some historical declarations and page-specific overrides remain in `styles.css` and screen stylesheets. They have not been mass-deleted: remove them only after the consumers are migrated and visual/contract tests cover the resulting behavior. If a legacy rule conflicts with a semantic token, fix the conflict in the owning component rather than stacking another unrelated override.
 
@@ -169,3 +169,8 @@ The existing screenshot harness is kept intact. `npm run e2e:visual` and `npm ru
 **Good:** one strong primary action; semantic tokens; one surface when one group is enough; concise helper copy; predictable RTL/LTR alignment; outcome labels plus color; motion that can be disabled.
 
 **Avoid:** hard-coded colors in new components; using brand pink/indigo as generic success/error; nested cards for every section; tiny muted subtitles that compete with the task; physical left/right rules in reusable components; deleting a legacy selector before checking its consumers; changing learning or onboarding semantics for visual uniformity.
+
+
+## Latest visual evidence
+
+The foundation branch capture report generated on 2026-10-14 at commit `3ced6f41ac39aef9c48dd609b32cc15e5088b5a2` contains 44 primary screenshots. Its machine-readable report records zero page errors, zero console errors, zero failed requests, zero failed responses, and no horizontal overflow in captured screens. Two onboarding bottom-scroll captures were skipped because those views had no meaningful scroll range. This confirms capture and runtime stability for these states, not visual perfection or full WCAG conformance; reviewers must still inspect the rendered images and perform manual accessibility checks.

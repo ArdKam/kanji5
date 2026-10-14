@@ -1,7 +1,7 @@
 /* Active Recall exercise shell ownership: layout and viewport behavior live in React CSS, not index.html. */
 .content > .exercise-card{
-  width:100%;
-  max-width:none;
+  
+  
   margin-inline:0;
   min-width:0;
   min-height:0;
@@ -14,22 +14,22 @@
   scrollbar-gutter:stable;
 }
 .content > .exercise-card > .stimulus{
-  width:100%;
-  max-width:none;
-  min-height:100px;
-  padding:14px 16px;
-  border-radius:var(--radius-lg);
-  margin-inline:0;
+  
+  
+  
+  
+  
+  
 }
 @media(max-width:760px){
   .content > .exercise-card{
-    width:100%;
-    max-width:none;
+    
+    
     max-height:calc(100dvh - 145px);
   }
   .content > .exercise-card > .stimulus{
-    width:100%;
-    max-width:none;
-    min-height:100px;
+    
+    
+    
   }
 }

@@ -463,6 +463,10 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
       ["review-hard", "--ds-review-hard-text", "--ds-review-hard-bg"],
       ["review-good", "--ds-review-good-text", "--ds-review-good-bg"],
       ["review-easy", "--ds-review-easy-text", "--ds-review-easy-bg"],
+      ["state-success", "--ds-state-success-text", "--ds-state-success-bg"],
+      ["state-warning", "--ds-state-warning-text", "--ds-state-warning-bg"],
+      ["state-danger", "--ds-state-danger-text", "--ds-state-danger-bg"],
+      ["state-info", "--ds-state-info-text", "--ds-state-info-bg"],
       ["primary-action", "--ds-color-action-primary-text", "--ds-color-action-primary"],
     ];
 
@@ -530,6 +534,7 @@ test("visual coverage: semantic theme tokens and accessible review outcomes", as
       expect(value, `Missing semantic token: ${name}`).not.toBe("");
     }
     expect(snapshot.canvas, `Unexpected canvas color in ${expectedTheme} theme`).toBe(expectedCanvas);
+    expect(snapshot.legacyCanvasToken, `Legacy canvas alias must resolve to the semantic token in ${expectedTheme} theme`).toBe(snapshot.canvasToken);
     for (const result of snapshot.contrasts) {
       expect(result.ratio, `${result.name} must meet WCAG AA text contrast in ${expectedTheme}; got ${result.ratio}`).toBeGreaterThanOrEqual(4.5);
     }
