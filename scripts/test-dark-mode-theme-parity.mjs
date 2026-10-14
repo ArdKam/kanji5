@@ -6,6 +6,8 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
 const dictionary = await read("frontend/src/app/dictionary.css");
 const themeBootstrap = await read("theme-bootstrap.js");
+const learningSurface = await read("frontend/src/app/learning-surface.css");
+const app = await read("frontend/src/app/App.tsx");
 
 const darkStart = styles.indexOf("@media(prefers-color-scheme:dark){");
 const contrastStart = styles.indexOf("@media(prefers-contrast:more){", darkStart);
@@ -23,6 +25,28 @@ for (const selector of [
 }
 assert.ok(systemDark.includes("--surface-soft:#292724;--surface-panel:rgba(35,33,30,.78);--progress-track:#35312c"));
 assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|audio-button|button|pager-button|settings-language-button|progress|stimulus|example-row|reason|insights|header-tools-menu|rating-again|rating-hard|rating-good|rating-easy)(?:[,{])/.test(systemDark), false, "Unscoped dark overrides could leak into manual Light mode");
+
+// Primary actions and active settings controls must retain their semantic background under dark-mode overrides.
+assert.ok(styles.includes(".button.primary{--dark-button-background:var(--ai);background:var(--ai);border-color:var(--ai);color:var(--paper)}"));
+assert.ok(styles.includes("button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}"));
+assert.equal(styles.includes("outline:3px solid rgba(38,64,107,.32)"), false, "Low-opacity fixed blue must not mask keyboard focus in dark mode");
+assert.ok(styles.includes(".settings-language-button.active{--dark-button-background:var(--sumi);background:var(--sumi);border-color:var(--sumi);color:var(--paper)}"));
+for (const theme of ["system", "dark"]) {
+  assert.ok(styles.includes(`:root[data-theme="${theme}"] :is(.badge,.audio-button,.button,.pager-button,.settings-language-button){background:var(--dark-button-background,#35312c);}`));
+}
+
+// The responsive toolbar styles must target the actual learning-session DOM wrapper.
+assert.ok(app.includes('className="card-topline learning-session-toolbar"'));
+assert.ok(learningSurface.includes(".learning-session-toolbar{display:flex;align-items:center;justify-content:space-between;"));
+assert.ok(learningSurface.includes("@media(max-width:760px){.app-shell .content>.learning-card{"));
+assert.ok(learningSurface.includes(".learning-card-back .rating-again{color:color-mix(in srgb,var(--color-danger) 75%,var(--sumi));"));
+
+// Rating controls use quieter tones and thin outlines in the common theme.
+assert.ok(styles.includes(".rating-again{border:1px solid #c9a29c;background:#f7efed;color:#7d4840;}"));
+assert.ok(styles.includes(".rating-hard{border:1px solid #c8b58a;background:#f7f2e5;color:#776643;}"));
+assert.ok(styles.includes(".rating-good{border:1px solid #a9b9a0;background:#f0f3ed;color:#51634a;}"));
+assert.ok(styles.includes(".rating-easy{border:1px solid #aab6c9;background:#eef1f5;color:#485b78;}"));
+assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#342927;color:#dfb5af;border-color:#72524c;}'));
 
 // System onboarding overrides are cloned from manual Dark, but only under the OS dark query.
 assert.ok(themeBootstrap.includes('const systemRules=darkRules.replaceAll(\':root[data-theme="dark"]\', \':root[data-theme="system"]\');'));
@@ -65,5 +89,21 @@ function contrast(foreground, background) {
 }
 assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
 assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
+assert.ok(contrast("#23211e", "#8da9d9") >= 4.5, "Dark-mode primary action label must remain readable");
+assert.ok(contrast("#23211e", "#f4efe3") >= 4.5, "Dark-mode selected settings label must remain readable");
+assert.ok(contrast("#505f83", "#fdfbf7") >= 3, "Light-theme keyboard focus outline must be distinguishable");
+assert.ok(contrast("#8da9d9", "#171614") >= 3, "Dark-theme keyboard focus outline must be distinguishable");
+for (const [label, foreground, background] of [
+  ["light Again", "#7d4840", "#f7efed"],
+  ["light Hard", "#776643", "#f7f2e5"],
+  ["light Good", "#51634a", "#f0f3ed"],
+  ["light Easy", "#485b78", "#eef1f5"],
+  ["dark Again", "#dfb5af", "#342927"],
+  ["dark Hard", "#ddc998", "#332f26"],
+  ["dark Good", "#c0cbb2", "#293027"],
+  ["dark Easy", "#c0cce0", "#282e37"],
+]) {
+  assert.ok(contrast(foreground, background) >= 4.5, `${label} rating label must meet WCAG AA contrast`);
+}
 
 console.log("Dark-theme parity contract passed.");
