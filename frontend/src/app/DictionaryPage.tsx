@@ -365,7 +365,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 <span className="dictionary-topic-filter-label">{t("dictionaryTopicLabel", language)}</span>
                 <button
                   ref={topicPickerTriggerRef}
-                  className="dictionary-topic-filter-trigger"
+                  className="button secondary dictionary-topic-filter-trigger"
                   type="button"
                   aria-label={t("dictionaryTopicLabel", language) + ": " + (activeTopic ? activeTopic.label[language] : t("dictionaryTopicAll", language))}
                   aria-haspopup="dialog"
@@ -432,7 +432,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       {topicPickerOpen ? (
         <dialog
           ref={topicPickerRef}
-          className="dictionary-topic-dialog"
+          className="dialog dictionary-topic-dialog"
           aria-labelledby="dictionary-topic-dialog-title"
           aria-describedby="dictionary-topic-coverage-note"
           onCancel={(event) => { event.preventDefault(); closeTopicPicker(); }}
@@ -444,7 +444,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               <p id="dictionary-topic-coverage-note">{t("dictionaryTopicCoverageNote", language)}</p>
             </div>
             <button
-              className="dictionary-topic-dialog-close"
+              className="button secondary dictionary-topic-dialog-close"
               type="button"
               aria-label={t("dictionaryTopicClose", language)}
               onClick={closeTopicPicker}
@@ -467,7 +467,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             />
             {topicQuery ? (
               <button
-                className="dictionary-topic-search-clear"
+                className="button secondary dictionary-topic-search-clear"
                 type="button"
                 aria-label={t("dictionaryTopicClearSearch", language)}
                 onClick={() => { setTopicQuery(""); topicPickerSearchRef.current?.focus(); }}
@@ -478,7 +478,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           </div>
 
           <button
-            className={"dictionary-topic-option dictionary-topic-option-all" + (topic === "all" ? " is-selected" : "")}
+            className={"button secondary dictionary-topic-option dictionary-topic-option-all" + (topic === "all" ? " is-selected" : "")}
             type="button"
             data-topic-id="all"
             aria-pressed={topic === "all"}
@@ -493,7 +493,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                   {group.topics.map(entry => (
                     <button
                       key={entry.id}
-                      className={"dictionary-topic-option" + (topic === entry.id ? " is-selected" : "")}
+                      className={"button secondary dictionary-topic-option" + (topic === entry.id ? " is-selected" : "")}
                       type="button"
                       data-topic-id={entry.id}
                       aria-pressed={topic === entry.id}
