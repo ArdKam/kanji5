@@ -39,10 +39,13 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
 }
 
 async function drawReference(page,canvas,strokes){
-  const box=await canvas.boundingBox();
-  if(!box)throw new Error("handwriting canvas has no bounding box");
-  const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
   for(const stroke of strokes){
+    // The dialog can scroll between strokes; recompute the canvas viewport rect
+    // for each path so pointer coordinates stay aligned with the live canvas.
+    await canvas.scrollIntoViewIfNeeded();
+    const box=await canvas.boundingBox();
+    if(!box)throw new Error("handwriting canvas has no bounding box");
+    const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
     const first=toClient(stroke[0]);
     if(!Number.isFinite(first.x)||!Number.isFinite(first.y))throw new Error(`Invalid first point: ${JSON.stringify(stroke[0])}`);
     await page.mouse.move(first.x,first.y);
