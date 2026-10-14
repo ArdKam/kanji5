@@ -32,7 +32,7 @@ const removedTranslationKeys = [
   "practiceSkillVocabularyHint", "practiceSkillContextHint", "dataBackupHint", "dictionaryHint",
   "dictionaryVocabularyHint", "preparedMnemonicsHint", "preparedMnemonicLibraryHint",
   "mnemonicBridgesHint", "readingLabSourceHint", "setNewPasswordHint", "passwordHint",
-  "strokeOrderHint", "handwritingHint", "onboardingLoopBody"
+  "strokeOrderHint", "onboardingLoopBody"
 ];
 for (const key of removedTranslationKeys) assert.ok(!i18n.includes(`"${key}"`), `obsolete translation key remains: ${key}`);
 assert.ok(!learningCopy.includes("recommendedLearningHint") && !learningCopy.includes("topicLearningIntro"), "unused/duplicate learning-copy keys should be removed");
@@ -82,8 +82,10 @@ assert.ok(mnemonics.includes("copy.replaceHint") && mnemonics.includes("hasPerso
 assert.ok(dataBackup.includes("backupRestoreConfirmHint") && dataBackup.includes("candidate.summary"), "restore confirmation must preserve scope and impact details");
 assert.ok(mnemonicBackup.includes("contentBackupHint"), "personal-mnemonic backup must continue to identify its portable scope");
 
-assert.ok(!handwriting.includes('t("handwritingHint"'), "collapsed handwriting header should not repeat canvas guidance");
-assert.ok(handwriting.includes('t("handwritingPracticeHelp"') && handwriting.includes("aria-describedby"), "expanded canvas must retain touch/mouse/pen instructions and accessible description");
+const handwritingHeaderStart = handwriting.indexOf('className="handwriting-header"');
+const handwritingHeaderEnd = handwriting.indexOf("</button>", handwritingHeaderStart);
+assert.ok(handwritingHeaderStart >= 0 && handwritingHeaderEnd > handwritingHeaderStart && !handwriting.slice(handwritingHeaderStart, handwritingHeaderEnd).includes('t("handwritingHint"'), "grading criteria must not clutter the collapsed handwriting header");
+assert.ok(handwriting.includes('t("handwritingPracticeHelp"') && handwriting.includes('t("handwritingHint"') && handwriting.includes("handwriting-evaluation-") && handwriting.includes("aria-describedby"), "expanded canvas must retain usage instructions and grading criteria in its accessible description");
 assert.ok(!strokeOrder.includes('t("strokeOrderHint"'), "stroke-order heading should not repeat obvious playback instructions");
 assert.ok(strokeOrder.includes('t("strokeOrderLoading"') && strokeOrder.includes("KanjiVG · CC BY-SA 3.0"), "stroke loading and source attribution must remain");
 assert.ok(!structure.includes('note={t("visualComponents"'), "structure dialog should not repeat the source label");
@@ -93,7 +95,7 @@ assert.ok(!topicDialog.includes('learningCopy("topicLearningIntro"'), "topic dia
 assert.ok(topicDialog.includes('learningCopy("topicSearch"') && topicDialog.includes('learningCopy("topicNoMatches"'), "topic search and its empty state must remain");
 assert.ok(!onboarding.includes('t("onboardingLoopBody"') && onboarding.includes('t("onboardingLearnHint"') && onboarding.includes('t("onboardingRecallHint"') && onboarding.includes('t("onboardingReviewHint"'), "onboarding should keep the distinct learning/retrieval/review steps without a duplicate intro");
 
-for (const key of ["practiceRecommendedHint", "practiceAdvancedHint", "customStudyHint", "practiceTopicCoverageNote", "readingLabImportHint", "readingLabSyncHint", "readingReaderHint", "accountIntro", "guestModeHint", "accountSyncHint", "placementDiagnosticHint"]) {
+for (const key of ["practiceRecommendedHint", "practiceAdvancedHint", "customStudyHint", "practiceTopicCoverageNote", "readingLabImportHint", "readingLabSyncHint", "readingReaderHint", "accountIntro", "guestModeHint", "accountSyncHint", "placementDiagnosticHint", "handwritingHint"]) {
   const occurrences = [...i18n.matchAll(new RegExp(`\\b${key}\\s*:`, "g"))].length;
   assert.equal(occurrences, 2, `translation must have one Fa and one English value: ${key}`);
 }
