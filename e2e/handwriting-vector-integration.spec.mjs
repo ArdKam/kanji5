@@ -39,36 +39,8 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
 }
 
 async function drawReference(page,canvas,strokes){
-  // Keep the canvas visible at the start of each stroke. The dialog can resize
-  // after feedback, so resolve the live canvas rectangle for every input point.
-  await canvas.evaluate(element => {
-    const browserWindow = window;
-    browserWindow.__handwritingPointerTrace = [];
-    for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel", "lostpointercapture"]) {
-      document.addEventListener(type, event => {
-        const pointer = event;
-        const liveCanvas = document.querySelector(".handwriting-ink-canvas");
-        const rect = element.getBoundingClientRect();
-        const hit = document.elementFromPoint(pointer.clientX, pointer.clientY);
-        browserWindow.__handwritingPointerTrace.push({
-          type,
-          target: pointer.target instanceof Element ? pointer.target.tagName.toLowerCase() + "." + String(pointer.target.className || "").replace(/\s+/g, ".") : "unknown",
-          onCanvas: element === pointer.target || element.contains(pointer.target),
-          originalCanvasConnected: element.isConnected,
-          originalIsLiveCanvas: liveCanvas === element,
-          currentCanvasRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
-          hitTarget: hit instanceof Element ? hit.tagName.toLowerCase() + "." + String(hit.className || "").replace(/\s+/g, ".") : "unknown",
-          hitCanvas: hit?.classList?.contains("handwriting-ink-canvas") || false,
-          pointerId: pointer.pointerId,
-          pointerType: pointer.pointerType,
-          client: { x: pointer.clientX, y: pointer.clientY },
-          buttons: pointer.buttons,
-          capture: element.hasPointerCapture(pointer.pointerId),
-          time: Math.round(performance.now())
-        });
-      }, true);
-    }
-  });
+  // The card can scroll between strokes; resolve the live viewport rectangle
+  // for every point, and verify every real mouse stroke reaches component state.
   for(let strokeIndex=0;strokeIndex<strokes.length;strokeIndex+=1){
     const stroke=strokes[strokeIndex];
     await canvas.scrollIntoViewIfNeeded();
@@ -87,16 +59,7 @@ async function drawReference(page,canvas,strokes){
       await page.mouse.move(point.x,point.y);
     }
     await page.mouse.up();
-    const state=await canvas.evaluate(element=>({
-      strokeCount:element.closest(".handwriting-practice")?.getAttribute("data-stroke-count"),
-      gradeDisabled:element.closest(".handwriting-practice")?.querySelector(".handwriting-actions .primary")?.hasAttribute("disabled"),
-      initialEvents:(window.__handwritingPointerTrace||[]).slice(0,8),
-      recentEvents:(window.__handwritingPointerTrace||[]).slice(-8),
-      liveCanvasRect:(document.querySelector(".handwriting-ink-canvas"))?.getBoundingClientRect().toJSON()
-    }));
-    if(Number(state.strokeCount)!==strokeIndex+1){
-      throw new Error(`Real mouse stroke ${strokeIndex+1} was not committed. DOM state: ${JSON.stringify(state)}`);
-    }
+    await expect(canvas.locator("xpath=ancestor::section[contains(@class,'handwriting-practice')]")).toHaveAttribute("data-stroke-count",String(strokeIndex+1));
   }
 }
 
