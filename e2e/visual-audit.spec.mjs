@@ -244,9 +244,19 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
         const rect = element.getBoundingClientRect();
         return rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth + 1;
       });
-      return { levelDisplay: level ? getComputedStyle(level).display : '', inViewport: bounds.length === 2 && bounds.every(Boolean) };
+      const levelStyle = level ? getComputedStyle(level) : null;
+      return {
+        levelDisplay: levelStyle?.display ?? '',
+        levelWrap: levelStyle?.flexWrap ?? '',
+        levelOverflowX: levelStyle?.overflowX ?? '',
+        inViewport: bounds.length === 2 && bounds.every(Boolean),
+      };
     });
-    expect(filterLayout.levelDisplay).toBe('grid');
+    // The mobile control bar deliberately uses one horizontally browseable JLPT row,
+    // not a wrapping grid that pushes filters into multiple tall rows.
+    expect(filterLayout.levelDisplay).toBe('flex');
+    expect(filterLayout.levelWrap).toBe('nowrap');
+    expect(['auto', 'scroll']).toContain(filterLayout.levelOverflowX);
     expect(filterLayout.inViewport).toBe(true);
     await captureScrolled('10-dictionary-mobile-mid-catalog', { scope: 'page', ratio: 0.5 });
 
