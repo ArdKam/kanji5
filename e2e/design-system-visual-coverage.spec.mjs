@@ -172,6 +172,48 @@ test("visual coverage: onboarding steps, selected states, RTL-sized layouts and 
   expect(audit.report.pageErrors, "Uncaught browser errors during onboarding visual coverage").toEqual([]);
 });
 
+test("visual coverage: learning-card back pages in light theme", async ({ page }, testInfo) => {
+  test.setTimeout(120000);
+  const audit = await createCapture(page, testInfo);
+  try {
+    await startApp(page, { language: "en", theme: "light" });
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 15000 });
+    const revealButton = page.getByRole("button", {
+      name: /(Reveal meaning & readings|Show (answer|kanji information)|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها))/,
+    });
+    await expect(revealButton).toBeVisible();
+    await revealButton.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    const shortcuts = card.locator(".learning-back-page-shortcut");
+    await expect(shortcuts).toHaveCount(4);
+    const sectionNames = ["meaning-structure", "vocabulary-examples", "personal-mnemonic", "stroke-order"];
+
+    for (let index = 0; index < sectionNames.length; index += 1) {
+      if (index > 0) {
+        await shortcuts.nth(index).click();
+        await expect(card.locator(".learning-back-page").nth(index)).toHaveClass(/active/);
+      }
+      await audit.capture("learning-back-" + sectionNames[index] + "-desktop-light");
+    }
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (let index = 0; index < sectionNames.length; index += 1) {
+      await shortcuts.nth(index).click();
+      await expect(card.locator(".learning-back-page").nth(index)).toHaveClass(/active/);
+      await audit.capture("learning-back-" + sectionNames[index] + "-mobile-light");
+    }
+
+    await page.setViewportSize({ width: 320, height: 740 });
+    await shortcuts.nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await audit.capture("learning-back-meaning-structure-320px-light");
+  } finally {
+    await audit.persist();
+  }
+  expect(audit.report.pageErrors, "Uncaught browser errors during light learning-card visual coverage").toEqual([]);
+});
+
 test("visual coverage: learning-card faces, inner pages, rating feedback, themes and breakpoints", async ({ page }, testInfo) => {
   test.setTimeout(180000);
   const audit = await createCapture(page, testInfo);
