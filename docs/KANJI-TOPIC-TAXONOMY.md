@@ -43,7 +43,7 @@ The authoritative entries, bilingual labels, and exact character membership live
 | `qualities` | Qualities & comparison | ویژگی‌ها و مقایسه |
 | `government` | Government & law | حکومت و قانون |
 | `communication` | Communication & media | ارتباط و رسانه |
-| `money` | Money & finance | پول و اقتصاد |
+| `money` | Money & finance | پول و امور مالی |
 | `transport` | Transport & travel | حمل‌ونقل و سفر |
 | `health` | Health & medicine | سلامت و پزشکی |
 | `industry` | Technology & industry | فناوری و صنعت |
