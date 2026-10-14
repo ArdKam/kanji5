@@ -44,13 +44,12 @@ const MASTERY_FILTER_LABELS: Record<MasteryFilter, { fa: string; en: string }> =
 function FilterChip({ label, removeLabel, onRemove }: { label: string; removeLabel: string; onRemove: () => void }) {
   return (
     <button
-      className="badge"
-      style={{ minHeight: 44, maxWidth: "100%", gap: 6, padding: "5px 10px", borderRadius: 999, background: "var(--paper)", borderColor: "var(--line)", cursor: "pointer", fontSize: 12 }}
+      className="badge dictionary-filter-chip"
       type="button"
       onClick={onRemove}
       aria-label={removeLabel}
     >
-      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+      <span className="dictionary-filter-chip-label">{label}</span>
       <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">
         <path d="m4 4 8 8M12 4 4 12" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       </svg>
@@ -514,10 +513,10 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         <div
           className="dictionary-active-filters"
           aria-label={language === "fa" ? "فیلترهای فعال" : "Active filters"}
-          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "7px 10px", margin: "4px 0 13px", padding: "9px 10px", border: "1px solid var(--line-soft)", borderRadius: 13, background: "var(--washi)" }}
+
         >
-          <span style={{ flex: "0 0 auto", color: "var(--mute)", fontSize: 12, fontWeight: 800 }}>{language === "fa" ? "فیلترهای فعال" : "Active filters"}</span>
-          <div className="dictionary-active-filter-chips" style={{ display: "flex", flex: "1 1 180px", flexWrap: "wrap", alignItems: "center", gap: 6, minWidth: 0 }}>
+          <span className="dictionary-active-filters-label">{language === "fa" ? "فیلترهای فعال" : "Active filters"}</span>
+          <div className="dictionary-active-filter-chips">
             {query.trim() ? (
               <FilterChip
                 label={(language === "fa" ? "جست‌وجو: " : "Search: ") + query.trim()}
@@ -558,7 +557,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           </div>
           <button
             className="dictionary-clear-all-filters"
-            style={{ flex: "0 0 auto", minHeight: 44, padding: "5px 4px", marginInlineStart: "auto", border: 0, background: "transparent", color: "var(--shu)", font: "inherit", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
             type="button"
             onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}
           >
