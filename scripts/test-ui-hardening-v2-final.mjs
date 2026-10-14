@@ -34,7 +34,11 @@ assert.match(css,/--text-display-lg:clamp\(78px,\s*14vw,\s*150px\)/);
 assert.ok(css.includes("--nav-bar-height:66px"),"navigation bar height contract missing");
 
 assert.match(css,/\.button:active:not\(:disabled\)[\s\S]*?transform:scale\(\.97\)/);
-for(const token of ['--motion-interaction:160ms;','--motion-hover:180ms;','--motion-tab:280ms;','--motion-pager:420ms;','--motion-flip:480ms;']) assert.ok(css.includes(token),`missing motion timing token: ${token}`);
+for(const token of ['--motion-interaction:160ms;','--motion-tab:280ms;','--motion-pager:420ms;']) assert.ok(css.includes(token),`missing legacy motion timing token: ${token}`);
+for(const [legacy,semantic] of [['--motion-hover','--ds-motion-hover'],['--motion-flip','--ds-motion-flip']]) {
+  assert.ok(css.includes(`${legacy}:var(${semantic});`),`missing semantic motion alias: ${legacy}`);
+}
+for(const token of ['--ds-motion-hover: 180ms;','--ds-motion-flip: 480ms;']) assert.ok(designSystem.includes(token),`missing semantic motion timing token: ${token}`);
 assert.match(css,/\.experience-tab-indicator[\s\S]*?transition:transform \.28s cubic-bezier\(\.2,\.7,\.2,1\)/);
 assert.match(css,/@keyframes kanji5-dialog-in/);
 assert.match(css,/dialog\[open\][\s\S]*?animation:kanji5-dialog-in/);
