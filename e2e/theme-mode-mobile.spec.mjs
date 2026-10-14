@@ -76,4 +76,54 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await page.emulateMedia({ colorScheme: "light" });
   await expect.poll(isDarkSurface).toBe(false);
   expect(await background(nav)).not.toContain("35, 33, 30");
+
+  // Switch back to System + OS Dark before measuring dark-mode contrast.
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect.poll(isDarkSurface).toBe(true);
+  const menuClose = page.locator(".header-tools-menu-close");
+  await expect(menuClose).toBeVisible();
+  await menuClose.click();
+  await expect(page.locator("#header-tools-menu")).toHaveCount(0);
+
+  const reveal = page.locator("#root .learning-card .button.wide");
+  await expect(reveal).toBeVisible({ timeout: 10_000 });
+  const revealContrast = await reveal.evaluate((element) => {
+    const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
+    const luminance = (value) => value.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const style = getComputedStyle(element);
+    const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+    return (pair[0] + 0.05) / (pair[1] + 0.05);
+  });
+  expect(revealContrast, "Neutral button label must retain WCAG AA contrast in Dark mode").toBeGreaterThanOrEqual(4.5);
+
+  await reveal.click();
+  const ratings = page.locator("#root .learning-card .rating-grid .rating");
+  await expect(ratings).toHaveCount(4, { timeout: 10_000 });
+  const assertRatingPalette = async () => {
+    const palette = await ratings.evaluateAll((elements) => elements.map((element) => {
+      const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
+      const luminance = (value) => value.map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+      }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+      const style = getComputedStyle(element);
+      const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+      return { background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
+    }));
+    expect(palette.map((item) => item.background), "Feedback ratings must preserve distinct Easy/Good/Hard/Again colors").toEqual([
+      "rgb(39, 48, 59)",
+      "rgb(40, 49, 40)",
+      "rgb(51, 47, 39)",
+      "rgb(51, 39, 36)",
+    ]);
+    expect(palette.every((item) => item.contrast >= 4.5), "Every feedback rating label must meet WCAG AA contrast").toBe(true);
+  };
+
+  await assertRatingPalette(); // System + OS Dark
+  await chooseTheme("Dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await assertRatingPalette(); // Manually selected Dark
 });

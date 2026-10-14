@@ -40,7 +40,7 @@
 .topic-learning-selected small { color: var(--mute); font-size: var(--text-xs); }
 .topic-learning-focus { display: flex; flex-wrap: wrap; gap: 7px; }
 .topic-learning-focus-option { min-height: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--paper); color: var(--ink); font-size: var(--text-sm); font-weight: 700; }
-.topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: #171614; }
+.topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: var(--paper); }
 :root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }
 @media (prefers-color-scheme: dark) { :root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; } }
 .topic-learning-message { margin: 0; padding: 10px 12px; border-inline-start: 3px solid var(--shu); background: color-mix(in srgb, var(--shu) 7%, var(--paper)); color: var(--ink); font-size: var(--text-sm); line-height: 1.6; }
