@@ -94,6 +94,16 @@
   --ds-type-heading-sm: 22px;
   --ds-type-heading-md: 28px;
   --ds-type-heading-lg: 34px;
+  --ds-type-heading: 25px;
+  --ds-type-display-md: 44px;
+  --ds-type-display-xl: 80px;
+  --ds-type-display-sm: clamp(25px, 4vw, 34px);
+  --ds-type-display-lg: clamp(78px, 14vw, 150px);
+  --ds-type-display-kanji: clamp(90px, 18vw, 150px);
+  --ds-type-stimulus-kanji: clamp(78px, 14vw, 110px);
+  --ds-type-display-compact: clamp(38px, 7vw, 62px);
+  --ds-type-display-wide: clamp(64px, 16vw, 92px);
+  --ds-type-display-tall: clamp(72px, 14vw, 108px);
 
   /* Consistent scales. Existing screen-specific layout values remain intentional exceptions. */
   --ds-space-1: 4px;
@@ -121,12 +131,23 @@
   --ds-motion-flip: 480ms;
   --ds-motion-feedback: 480ms;
   --ds-motion-ease-standard: cubic-bezier(.2, .7, .2, 1);
+  --ds-motion-interaction: 160ms;
+  --ds-motion-tab: 280ms;
+  --ds-motion-pager: 420ms;
+  --ds-motion-feedback-in: 200ms;
+  --ds-motion-stroke: 720ms;
+  --ds-motion-progress: 250ms;
+  --ds-motion-menu: 280ms;
+  --ds-motion-scrim: 200ms;
+  --ds-motion-dialog-open: 240ms;
+  --ds-motion-popover: var(--ds-motion-hover);
   --ds-z-base: 0;
   --ds-z-content: 1;
   --ds-z-nav: 40;
   --ds-z-overlay: 100;
   --ds-z-modal: 200;
   --ds-layout-content-max: 880px;
+  --ds-layout-nav-height: 66px;
   --ds-layout-dialog-max: 780px;
   --ds-breakpoint-tablet: 760px;
   --ds-breakpoint-narrow: 380px;
