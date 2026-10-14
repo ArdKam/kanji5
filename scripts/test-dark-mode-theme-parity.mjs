@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
+const designSystem = await read("frontend/src/design-system.css");
 const dictionary = await read("frontend/src/app/dictionary.css");
 const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
@@ -43,8 +44,9 @@ assert.equal(styles.includes("@media(prefers-color-scheme:dark){#kanji5-account-
 assert.ok(styles.includes(':root[data-theme="system"] #kanji5-account-launcher'));
 
 // Theme-aware semantic colors are used for error text and destructive indicators.
-assert.ok(styles.includes("--color-danger:#a23a2a"));
-assert.ok(styles.includes("--color-danger:#ff9b91"));
+assert.ok(styles.includes("--color-danger:var(--ds-state-danger-text);"), "Legacy danger token must resolve through the semantic state role");
+assert.ok(designSystem.includes("--ds-state-danger-text: #8E3026;"), "Light theme must define its semantic danger foreground");
+assert.ok(designSystem.includes("--ds-state-danger-text: #FF9B91;"), "Dark theme must define its semantic danger foreground");
 assert.ok(styles.includes(".account-error{margin:12px 0 0;color:var(--color-danger)"));
 assert.ok(styles.includes(".sync-error{color:var(--color-danger)"));
 assert.ok(styles.includes(".account-sync-badge.sync-error{color:var(--color-danger)"));
@@ -67,8 +69,8 @@ function contrast(foreground, background) {
   const pair = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
   return (pair[0] + 0.05) / (pair[1] + 0.05);
 }
-assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
-assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
+assert.ok(contrast("#8E3026", "#FDFBF7") >= 4.5, "Light semantic error text must meet WCAG AA contrast");
+assert.ok(contrast("#FF9B91", "#23211E") >= 4.5, "Dark semantic error text must meet WCAG AA contrast");
 
 
 assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
