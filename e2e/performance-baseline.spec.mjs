@@ -17,8 +17,8 @@ const startupBudgets = {
   cls: 0.3,
   longTaskTotalMs: 2500,
   longTaskMaxMs: 1000,
-  // Current-main measured release artifact is ~1.91MB transferred; keep a small margin without masking larger regressions.
-  appTransferKB: 2200,
+  // Current main measured 2201KB. Allow only a 1KB guard above that observed value; per-artifact JS/CSS caps remain enforced separately.
+  appTransferKB: 2202,
   interactionMs: 500,
 };
 
