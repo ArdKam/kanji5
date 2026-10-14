@@ -52,7 +52,6 @@ const MASTERY_FILTER_LABELS: Record<MasteryFilter, { fa: string; en: string }> =
 function FilterChip({ label, removeLabel, onRemove }: { label: string; removeLabel: string; onRemove: () => void }) {
   return (
     <button
-      className="badge"
       className="badge dictionary-active-filter-chip"
       type="button"
       onClick={onRemove}
@@ -540,7 +539,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             ) : null}
           </div>
           <button
-            className="dictionary-clear-all-filters"
             className="dictionary-clear-all-filters"
             type="button"
             onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}
