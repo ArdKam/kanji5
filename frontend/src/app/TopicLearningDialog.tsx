@@ -95,7 +95,6 @@ export function TopicLearningDialog({
           <div>
             <p className="eyebrow red">{learningCopy("learnByTopic", language)}</p>
             <h2 id="topic-learning-title">{learningCopy("topicLearningTitle", language)}</h2>
-            <p>{learningCopy("topicLearningIntro", language)}</p>
           </div>
           <button className="topic-learning-close" type="button" aria-label={t("close", language)} onClick={onClose}>
             <UiIcon name="close" size={19} />
@@ -164,9 +163,7 @@ export function TopicLearningDialog({
               <UiIcon name="next" size={17} />
             </button>
           </section>
-        ) : (
-          <p className="topic-learning-footer-note">{learningCopy("topicLearningIntro", language)}</p>
-        )}
+        ) : null}
       </div>
     </dialog>
   );

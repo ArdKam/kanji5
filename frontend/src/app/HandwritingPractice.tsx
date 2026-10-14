@@ -354,7 +354,6 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
       >
         <span className="handwriting-header-copy">
           <h3>{t("handwritingPractice",language)}</h3>
-          <p>{t("handwritingHint",language)}</p>
         </span>
         <span className="handwriting-header-end">
           <span className="handwriting-stroke-count">{formatNumber(paths.length,language)} {t("strokesLabel",language)}</span>
@@ -403,6 +402,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                 })}
               </div>
               <p id={"handwriting-help-"+normalized} className="handwriting-help">{t("handwritingPracticeHelp",language)}</p>
+              <p id={"handwriting-evaluation-"+normalized} className="handwriting-evaluation-note">{t("handwritingHint",language)}</p>
               <div className={"handwriting-live-feedback-slot"+(liveFeedback?" is-active":"")} aria-hidden={!liveFeedback}>
                 {liveFeedback?(
                   <div className="handwriting-live-feedback" role="status" aria-live="polite" data-feedback-code={liveFeedback.grade.feedbackCode}>
@@ -421,7 +421,7 @@ export function HandwritingPractice({ character, language, learningSignal, onGra
                   ref={inkCanvasRef}
                   className="handwriting-canvas handwriting-ink-canvas"
                   aria-label={t("handwritingPractice",language)}
-                  aria-describedby={"handwriting-help-"+normalized}
+                  aria-describedby={"handwriting-help-"+normalized+" handwriting-evaluation-"+normalized}
                   onPointerDown={beginStroke}
                   onPointerMove={moveStroke}
                   onPointerUp={finishStroke}

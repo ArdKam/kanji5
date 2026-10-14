@@ -108,7 +108,6 @@ function PreparedMnemonicPanel({ item, language, draft, onDraftChange }: { item:
       <div className="prepared-mnemonic-header">
         <div>
           <h3>{suggestion?.source === "curated" ? t("preparedMnemonics", language) : t("memoryAid", language)}</h3>
-          <p>{t("preparedMnemonicsHint", language)}</p>
         </div>
       </div>
       {suggestions.length ? (
@@ -265,7 +264,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("dictionaryPlaceholder", language)}
-            aria-label={t("dictionaryPlaceholder", language)}
             dir="auto"
             autoComplete="off"
             spellCheck={false}
@@ -279,9 +277,6 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             ><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg></button>
           ) : null}
         </label>
-        <p className="dictionary-search-hint" aria-live="polite">
-          {query ? (language === "fa" ? "جست‌وجو در کانجی، خوانش و معنی" : "Searching character, readings and meanings") : (language === "fa" ? "کانجی، خوانش یا معنی را جست‌وجو کن." : "Search by character, reading or meaning.")}
-        </p>
       </div>
 
       <div className="dictionary-controls">

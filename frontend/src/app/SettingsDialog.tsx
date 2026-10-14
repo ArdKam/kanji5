@@ -6,7 +6,7 @@ import type { Settings, Snapshot } from "./engine";
 
 type NumberSettingProps = {
   label: string;
-  description: string;
+  description?: string;
   value: number;
   min: number;
   max: number;
@@ -18,7 +18,7 @@ function NumberSetting({ label, description, value, min, max, onChange }: Number
     <div className="setting-control-row">
       <div className="setting-copy">
         <span className="setting-label">{label}</span>
-        <span className="setting-description">{description}</span>
+        {description ? <span className="setting-description">{description}</span> : null}
       </div>
       <input
         className="setting-number-input"
@@ -36,7 +36,7 @@ function NumberSetting({ label, description, value, min, max, onChange }: Number
 
 function ToggleSetting({ label, description, checked, onChange }: {
   label: string;
-  description: string;
+  description?: string;
   checked: boolean;
   onChange: (value: boolean) => void;
 }) {
@@ -44,7 +44,7 @@ function ToggleSetting({ label, description, checked, onChange }: {
     <label className="setting-control-row setting-toggle-row">
       <span className="setting-copy">
         <span className="setting-label">{label}</span>
-        <span className="setting-description">{description}</span>
+        {description ? <span className="setting-description">{description}</span> : null}
       </span>
       <span className={"setting-toggle-visual " + (checked ? "is-on" : "")} aria-hidden="true">
         <span />
@@ -83,7 +83,6 @@ function RetentionSetting({ language, value, onChange }: { language: Language; v
         onChange={event => onChange(Number(event.target.value) / 100)}
       />
       <div className="setting-range-scale" aria-hidden="true"><span>80%</span><span>98%</span></div>
-      <p className="setting-range-helper">{t("targetRetentionHelper", language)}</p>
     </div>
   );
 }
@@ -237,21 +236,18 @@ export function SettingsDialog({
       <header className="settings-page-header">
         <p className="eyebrow red">{t("settings", language)}</p>
         <h2 id="settings-title">{t("settingsTitle", language)}</h2>
-        <p>{t("settingsIntro", language)}</p>
       </header>
 
       <form id="settings-form" className="settings-form" onSubmit={event => { event.preventDefault(); void handleSave(); }}>
         <div className="settings-form-scroll">
-        <section className="settings-section settings-learning-section">
+        <section className="settings-section settings-learning-section" aria-labelledby="settings-learning-heading">
           <div className="settings-section-heading">
-            <p className="eyebrow">{language === "fa" ? "یادگیری" : "Learning"}</p>
-            <p>{t("learningSettingsHint", language)}</p>
+            <h3 className="eyebrow" id="settings-learning-heading">{language === "fa" ? "یادگیری" : "Learning"}</h3>
           </div>
 
           <div className="settings-controls">
             <NumberSetting
               label={t("newKanjiPerDay", language)}
-              description={language === "fa" ? "تعداد کانجی‌های جدیدی که هر روز وارد برنامهٔ مطالعه می‌شوند." : "How many new kanji enter your daily study plan."}
               value={draft.dailyNew}
               min={1}
               max={30}
@@ -259,7 +255,6 @@ export function SettingsDialog({
             />
             <NumberSetting
               label={t("dailyReviewGoal", language)}
-              description={language === "fa" ? "هدف روزانهٔ مرور برای پیگیری ریتم مطالعه." : "Your target number of reviews for each day."}
               value={draft.dailyGoal}
               min={1}
               max={500}
@@ -267,29 +262,25 @@ export function SettingsDialog({
             />
             <ToggleSetting
               label={t("productionKanji", language)}
-              description={t("practiceSkillProductionHint", language)}
               checked={draft.production}
               onChange={value => setDraft(current => ({ ...current, production: value }))}
             />
             <ToggleSetting
               label={t("completeVocabulary", language)}
-              description={t("practiceSkillVocabularyHint", language)}
               checked={draft.vocabulary}
               onChange={value => setDraft(current => ({ ...current, vocabulary: value }))}
             />
             <ToggleSetting
               label={t("contextRecall", language)}
-              description={t("practiceSkillContextHint", language)}
               checked={draft.context}
               onChange={value => setDraft(current => ({ ...current, context: value }))}
             />
           </div>
         </section>
 
-        <section className="settings-section settings-scheduling-section">
+        <section className="settings-section settings-scheduling-section" aria-labelledby="settings-scheduling-heading">
           <div className="settings-section-heading">
-            <p className="eyebrow">{language === "fa" ? "زمان‌بندی مرور" : "Review scheduling"}</p>
-            <p>{t("reviewSchedulingHint", language)}</p>
+            <h3 className="eyebrow" id="settings-scheduling-heading">{language === "fa" ? "زمان‌بندی مرور" : "Review scheduling"}</h3>
           </div>
 
           <div className="settings-controls">
@@ -305,19 +296,17 @@ export function SettingsDialog({
           </div>
         </section>
 
-        <section className="settings-section settings-data-section">
+        <section className="settings-section settings-data-section" aria-labelledby="settings-data-heading">
           <div className="settings-section-heading">
-            <p className="eyebrow">{language === "fa" ? "داده و پشتیبان" : "Data & backup"}</p>
-            <p>{t("dataBackupHint", language)}</p>
+            <h3 className="eyebrow" id="settings-data-heading">{language === "fa" ? "داده و پشتیبان" : "Data & backup"}</h3>
           </div>
           <DataBackup language={language} />
         </section>
 
 
-        <section className="settings-section settings-support-section" aria-labelledby="settings-support-title">
+        <section className="settings-section settings-support-section" aria-labelledby="settings-support-heading">
           <div className="settings-section-heading">
-            <p className="eyebrow">{language === "fa" ? "راهنما و پشتیبانی" : "Help & support"}</p>
-            <p id="settings-support-title">{language === "fa" ? "راهنمای استفاده، حریم خصوصی و مسیر گزارش مشکل را از اینجا پیدا کن." : "Find the product guide, privacy information, and the public feedback path here."}</p>
+            <h3 className="eyebrow" id="settings-support-heading">{language === "fa" ? "راهنما و پشتیبانی" : "Help & support"}</h3>
           </div>
           <div className="actions settings-support-links">
             <a className="button secondary" href="./docs/PUBLIC-PRODUCT.md" target="_blank" rel="noreferrer">{language === "fa" ? "راهنمای Rinemi" : "How Rinemi works"}</a>

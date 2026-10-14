@@ -296,8 +296,8 @@ test('account copy makes sync benefit and guest path explicit', async ({ page })
   await page.locator('.account-button:visible').click();
   const auth = page.locator('.account-auth-surface');
   await expect(auth).toBeVisible();
-  await expect(auth).toContainText('sync your progress across devices');
-  await expect(auth).toContainText('keep learning without an account on this device');
+  await expect(auth).toContainText(/sync progress across devices/i);
+  await expect(auth).toContainText(/keep learning on this device without an account/i);
 });
 
 test('persisted learner state survives a fresh browser context', async ({ page }) => {

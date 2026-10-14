@@ -127,7 +127,6 @@ export function PracticeHome({
     <section className="practice-home" aria-labelledby="practice-home-title">
       <header className="practice-home-header">
         <h2 id="practice-home-title">{t("practiceTitle", language)}</h2>
-        <p className="subtitle">{t("practiceIntro", language)}</p>
       </header>
 
       <section className="surface card practice-home-hero" aria-labelledby="practice-recommended-title">
@@ -146,7 +145,6 @@ export function PracticeHome({
         <div className="practice-section-heading">
           <div>
             <h3 id="practice-topics-title">{t("practiceTopicsTitle", language)}</h3>
-            <p className="subtitle">{t("practiceTopicsHint", language)}</p>
           </div>
         </div>
 
@@ -172,8 +170,8 @@ export function PracticeHome({
                 <span className="practice-all-topics-count">{formatNumber(otherTopics.length, language)}</span>
               </summary>
               <div className="practice-topic-grid practice-topic-grid-secondary">{otherTopics.map(renderTopicCard)}</div>
+              <p className="subtitle practice-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
             </details>
-            <p className="subtitle practice-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
           </>
         ) : null}
 
@@ -182,8 +180,7 @@ export function PracticeHome({
             <div className="practice-topic-selected-copy">
               <p className="eyebrow red practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
               <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
-              <p className="subtitle">{t("practiceTopicSelectedHint", language)}</p>
-            </div>
+              </div>
             <button className="button primary practice-topic-start" type="button" disabled={busy || topicBusy || selectedTopic.count === 0} onClick={() => void startTopicStudy()}>
               {topicBusy ? t("practiceTopicStarting", language) : t("practiceTopicStart", language)}
             </button>

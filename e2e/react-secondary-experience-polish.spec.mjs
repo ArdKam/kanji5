@@ -204,7 +204,7 @@ test("Prepared Mnemonics shows a retry state when the catalog fails to load", as
 test("Secondary desktop surfaces preserve centered modal geometry after the polish pass", async ({ page }) => {
   await clean(page, "en");
   await page.setViewportSize({ width: 1280, height: 720 });
-  for (const name of ["Grammar guide", "Reading lab", "Prepared mnemonics", "Stats", "Settings"]) {
+  for (const name of ["Grammar guide", "Japanese text reader", "Prepared mnemonics", "Stats", "Settings"]) {
     const dialog = await openMenuItem(page, name);
     await expect(dialog).toBeVisible({ timeout: 10000 });
     const metrics = await dialog.evaluate((el) => {
@@ -341,7 +341,7 @@ test("Placement has one discoverable home in Practice", async ({ page }) => {
 test("Reading Lab analysis metrics keep an even grid across desktop and mobile", async ({ page }) => {
   await clean(page, "en");
   await page.setViewportSize({ width: 1280, height: 800 });
-  const dialog = await openMenuItem(page, "Reading lab");
+  const dialog = await openMenuItem(page, "Japanese text reader");
   await dialog.locator(".reading-lab-input").fill("私は学生です。今日、学校へ行きます。");
   const metrics = dialog.locator(".reading-lab-analysis-stats");
   await expect(metrics).toBeVisible({ timeout: 10000 });

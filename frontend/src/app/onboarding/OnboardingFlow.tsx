@@ -366,7 +366,6 @@ export function OnboardingFlow({
           <section className="kanji5-onboarding-panel">
             <p className="kanji5-onboarding-eyebrow">{t("onboardingLoopEyebrow", language)}</p>
             <h1>{t("onboardingLoopTitle", language)}</h1>
-            <p className="kanji5-onboarding-body">{t("onboardingLoopBody", language)}</p>
             <ol className="kanji5-onboarding-body" aria-label={t("learningLoop", language)}>
               <li><strong>{t("onboardingLearn", language)}:</strong> {t("onboardingLearnHint", language)}</li>
               <li><strong>{t("onboardingRecall", language)}:</strong> {t("onboardingRecallHint", language)}</li>

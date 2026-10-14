@@ -39,20 +39,27 @@ async function openSchoolHandwriting(page,{waitForCanvas=true,beforeTabClick=nul
 }
 
 async function drawReference(page,canvas,strokes){
-  const box=await canvas.boundingBox();
-  if(!box)throw new Error("handwriting canvas has no bounding box");
-  const toClient=p=>({x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)});
-  for(const stroke of strokes){
-    const first=toClient(stroke[0]);
-    if(!Number.isFinite(first.x)||!Number.isFinite(first.y))throw new Error(`Invalid first point: ${JSON.stringify(stroke[0])}`);
+  // The card can scroll between strokes; resolve the live viewport rectangle
+  // for every point, and verify every real mouse stroke reaches component state.
+  for(let strokeIndex=0;strokeIndex<strokes.length;strokeIndex+=1){
+    const stroke=strokes[strokeIndex];
+    await canvas.scrollIntoViewIfNeeded();
+    const toClient=async p=>{
+      const box=await canvas.boundingBox();
+      if(!box)throw new Error("handwriting canvas has no bounding box");
+      const point={x:Math.round(box.x+(Number(p.x)/109)*box.width),y:Math.round(box.y+(Number(p.y)/109)*box.height)};
+      if(!Number.isFinite(point.x)||!Number.isFinite(point.y))throw new Error(`Invalid point: ${JSON.stringify(p)}`);
+      return point;
+    };
+    const first=await toClient(stroke[0]);
     await page.mouse.move(first.x,first.y);
     await page.mouse.down();
     for(let i=1;i<stroke.length;i+=1){
-      const point=toClient(stroke[i]);
-      if(!Number.isFinite(point.x)||!Number.isFinite(point.y))throw new Error(`Invalid point: ${JSON.stringify(stroke[i])}`);
+      const point=await toClient(stroke[i]);
       await page.mouse.move(point.x,point.y);
     }
     await page.mouse.up();
+    await expect(canvas.locator("xpath=ancestor::section[contains(@class,'handwriting-practice')]")).toHaveAttribute("data-stroke-count",String(strokeIndex+1));
   }
 }
 

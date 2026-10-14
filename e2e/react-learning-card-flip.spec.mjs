@@ -530,7 +530,7 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(account).toHaveCSS("pointer-events", "none");
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
-  await expect(menu.getByRole("button", { name: "Reading lab", exact: true })).toBeVisible();
+  await expect(menu.getByRole("button", { name: "Japanese text reader", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Prepared mnemonics", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Stats", exact: true })).toBeVisible();
 
@@ -585,7 +585,7 @@ test("menu sections open as centered tool dialogs on desktop", async ({ page }) 
   await page.goto("/");
   await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
 
-  for (const tool of ["Stats", "Grammar guide", "Reading lab", "Prepared mnemonics", "Settings"]) {
+  for (const tool of ["Stats", "Grammar guide", "Japanese text reader", "Prepared mnemonics", "Settings"]) {
     await page.getByRole("button", { name: "More", exact: true }).click();
     const menu = page.locator("#header-tools-menu");
     await expect(menu).toBeVisible();
@@ -630,7 +630,7 @@ test("tool dialogs remain usable within a narrow mobile viewport", async ({ page
   await page.goto("/");
   await expect(page.locator("#root .learning-card")).toBeVisible({ timeout: 10000 });
 
-  for (const tool of ["Stats", "Grammar guide", "Reading lab", "Prepared mnemonics", "Settings"]) {
+  for (const tool of ["Stats", "Grammar guide", "Japanese text reader", "Prepared mnemonics", "Settings"]) {
     await page.getByRole("button", { name: "More", exact: true }).click();
     const menu = page.locator("#header-tools-menu");
     await expect(menu).toBeVisible();
