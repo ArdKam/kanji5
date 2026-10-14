@@ -77,6 +77,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await expect.poll(isDarkSurface).toBe(false);
   expect(await background(nav)).not.toContain("35, 33, 30");
 
+  // Switch back to System + OS Dark before measuring dark-mode contrast.
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect.poll(isDarkSurface).toBe(true);
+
   const reveal = page.locator("#root .learning-card .button.wide");
   await expect(reveal).toBeVisible({ timeout: 10_000 });
   const revealContrast = await reveal.evaluate((element) => {
@@ -114,8 +118,6 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     expect(palette.every((item) => item.contrast >= 4.5), "Every feedback rating label must meet WCAG AA contrast").toBe(true);
   };
 
-  await page.emulateMedia({ colorScheme: "dark" });
-  await expect.poll(isDarkSurface).toBe(true);
   await assertRatingPalette(); // System + OS Dark
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
