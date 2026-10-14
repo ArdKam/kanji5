@@ -9,7 +9,7 @@ const p1={schemaVersion:1,updatedAt:'2026-09-01T00:00:00Z',sessions:1,skills:{re
 const p2={schemaVersion:1,updatedAt:'2026-09-02T00:00:00Z',sessions:2,skills:{reading:{attempts:3,correct:3,recentAttempts:3,recentCorrect:3,recentAccuracy:100,momentum:0.4}}};
 const p=mergeSkillProfile(p1,p2);assert.equal(p.skills.reading.attempts,5);assert.equal(p.skills.reading.correct,4);assert.equal(p.sessions,2);assert.equal(p.skills.reading.recentAttempts,3);assert.equal(p.skills.reading.recentCorrect,3);assert.equal(p.skills.reading.recentAccuracy,100);assert.equal(p.skills.reading.momentum,0.4);
 const merged=mergeV16SyncData({sessionHistory:[a],components:{x:1},skillProfile:p1},{sessionHistory:[b],components:{y:2},skillProfile:p2});
-assert.equal(merged.v16SyncSchemaVersion,1);assert.deepEqual(merged.sessionHistory.map(x=>x.sessionId),['a','b']);assert.deepEqual(merged.components,{x:1,y:2});assert.equal(merged.skillProfile.skills.reading.attempts,5);assert.equal(merged.skillProfile.skills.reading.recentAccuracy,80);assert.equal(merged.skillProfile.skills.reading.momentum,0.4);
+assert.equal(merged.v16SyncSchemaVersion,2);assert.deepEqual(merged.sessionHistory.map(x=>x.sessionId),['a','b']);assert.deepEqual(merged.components,{x:1,y:2});assert.equal(merged.skillProfile.skills.reading.attempts,5);assert.equal(merged.skillProfile.skills.reading.recentAccuracy,80);assert.equal(merged.skillProfile.skills.reading.momentum,0);
 console.log('v1.6 sync contract: OK');
 
 const identical = mergeSkillProfile(p2, p2);
