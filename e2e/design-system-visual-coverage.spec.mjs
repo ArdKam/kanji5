@@ -110,7 +110,13 @@ test("visual coverage: onboarding steps, selected states, RTL-sized layouts and 
     await page.emulateMedia({ colorScheme: "light" });
     await page.waitForTimeout(80);
     await audit.capture("onboarding-welcome-system-light-desktop");
+    await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("onboarding-welcome-persian-desktop");
     await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("onboarding-welcome-persian-mobile");
+    await onboarding.getByRole("button", { name: "EN", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
     await audit.capture("onboarding-welcome-mobile");
     await page.setViewportSize({ width: 320, height: 740 });
     await audit.capture("onboarding-welcome-320px");
@@ -130,12 +136,24 @@ test("visual coverage: onboarding steps, selected states, RTL-sized layouts and 
     await audit.capture("onboarding-starting-point-beginner-selected");
     await onboarding.locator(".kanji5-onboarding-choice").nth(2).click();
     await audit.capture("onboarding-starting-point-placement-selected");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("onboarding-starting-point-placement-selected-persian-mobile");
+    await onboarding.getByRole("button", { name: "EN", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await page.setViewportSize({ width: 1440, height: 960 });
     await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
     await expect(onboarding.locator(".kanji5-onboarding-question-meta")).toContainText("Question 1 / 20", { timeout: 20000 });
     await expect(onboarding.locator(".kanji5-onboarding-option").first()).toBeVisible();
     await audit.capture("onboarding-placement-question-desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     await audit.capture("onboarding-placement-question-mobile");
+    await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("onboarding-placement-question-persian-mobile");
+    await onboarding.getByRole("button", { name: "EN", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
     await page.setViewportSize({ width: 320, height: 740 });
     await audit.capture("onboarding-placement-question-320px");
     await page.setViewportSize({ width: 1440, height: 960 });
@@ -153,12 +171,24 @@ test("visual coverage: onboarding steps, selected states, RTL-sized layouts and 
     await audit.capture("onboarding-placement-result-desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     await audit.capture("onboarding-placement-result-mobile");
+    await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("onboarding-placement-result-persian-mobile");
+    await onboarding.getByRole("button", { name: "EN", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
     await page.setViewportSize({ width: 1440, height: 960 });
     await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
     await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
     await audit.capture("onboarding-daily-rhythm");
     await onboarding.getByRole("button", { name: /^10 new kanji$/ }).click();
     await audit.capture("onboarding-daily-rhythm-selected");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("onboarding-daily-rhythm-selected-persian-mobile");
+    await onboarding.getByRole("button", { name: "EN", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await page.setViewportSize({ width: 1440, height: 960 });
     await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
     await expect(onboarding.getByRole("heading", { name: "An account is optional" })).toBeVisible();
     await audit.capture("onboarding-guest-first-account-step-desktop");
@@ -166,6 +196,9 @@ test("visual coverage: onboarding steps, selected states, RTL-sized layouts and 
     await audit.capture("onboarding-guest-first-account-step-mobile");
     await page.setViewportSize({ width: 320, height: 740 });
     await audit.capture("onboarding-guest-first-account-step-320px");
+    await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("onboarding-guest-first-account-step-persian-320px");
   } finally {
     await audit.persist();
   }
@@ -280,12 +313,32 @@ test("visual coverage: learning-card faces, inner pages, rating feedback, themes
     await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
     await audit.capture("learning-back-meaning-structure-320px-dark");
 
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const rtlMenu = page.locator("#header-tools-menu");
+    await expect(rtlMenu).toBeVisible();
+    await rtlMenu.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("learning-header-menu-open-dark-persian");
+    await page.keyboard.press("Escape");
+    await expect(rtlMenu).toBeHidden();
+    for (let index = 0; index < sectionNames.length; index += 1) {
+      await shortcuts.nth(index).click();
+      await expect(card.locator(".learning-back-page").nth(index)).toHaveClass(/active/);
+      await audit.capture("learning-back-" + sectionNames[index] + "-mobile-dark-persian");
+    }
+    await page.setViewportSize({ width: 320, height: 740 });
+    await shortcuts.nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await audit.capture("learning-back-meaning-structure-320px-dark-persian");
+    await page.setViewportSize({ width: 390, height: 844 });
+
     const rating = card.locator(".rating-grid button").nth(2);
     await expect(rating).toBeVisible();
     await rating.click();
     const feedback = page.locator(".session-feedback");
     await expect(feedback).toBeVisible({ timeout: 10000 });
-    await audit.capture("learning-rating-feedback-mobile-dark");
+    await audit.capture("learning-rating-feedback-mobile-dark-persian");
   } finally {
     await audit.persist();
   }
@@ -371,6 +424,28 @@ test("visual coverage: dictionary filters, empty results, detail tabs, dark mode
     await darkDialog.locator("#dictionary-section-tab-structure").click();
     await expect(darkDialog.locator(".dictionary-card-content")).toHaveAttribute("data-active-section", "structure");
     await audit.capture("dictionary-detail-structure-mobile-dark");
+
+    await darkDialog.locator(".dialog-close").click();
+    await expect(darkDialog).toBeHidden();
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await page.getByRole("button", { name: "More", exact: true }).click();
+    const rtlMenu = page.locator("#header-tools-menu");
+    await expect(rtlMenu).toBeVisible();
+    await rtlMenu.getByRole("button", { name: "فارسی", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await audit.capture("dictionary-header-menu-dark-persian");
+    await page.keyboard.press("Escape");
+    await expect(rtlMenu).toBeHidden();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("dictionary-catalog-mobile-dark-persian");
+    await page.locator(".kanji-catalog-tile").first().click();
+    const rtlDialog = page.locator(".dictionary-card-dialog:visible");
+    await expect(rtlDialog).toBeVisible();
+    for (const section of ["overview", "structure", "writing", "vocabulary", "mnemonic"]) {
+      await rtlDialog.locator("#dictionary-section-tab-" + section).click();
+      await expect(rtlDialog.locator(".dictionary-card-content")).toHaveAttribute("data-active-section", section);
+      await audit.capture("dictionary-detail-" + section + "-mobile-dark-persian");
+    }
   } finally {
     await audit.persist();
   }
