@@ -2,19 +2,36 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const css=fs.readFileSync("frontend/src/styles.css","utf8");
+const designSystem=fs.readFileSync("frontend/src/design-system.css","utf8");
 const dictionaryCss=fs.readFileSync("frontend/src/app/dictionary.css","utf8");
 const index=fs.readFileSync("index.html","utf8");
 const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
 
-for(const token of [
-  "--text-xs:11px","--text-sm:13px","--text-base:15px","--text-md:17px",
-  "--text-lg:19px","--text-xl:22px","--text-2xl:28px",
-  "--text-display-sm:clamp(25px,4vw,34px)",
-  "--text-display-lg:clamp(78px,14vw,150px)",
-  "--space-1:4px","--space-8:32px",
-  "--radius-sm:10px","--radius-md:14px","--radius-lg:20px","--radius-xl:28px",
-  "--radius-full:999px","--nav-bar-height:66px"
-]) assert.ok(css.includes(token),`missing design token: ${token}`);
+const tokenAliases=[
+  ["--text-xs","--ds-type-caption"],["--text-sm","--ds-type-small"],
+  ["--text-base","--ds-type-body"],["--text-md","--ds-type-body-emphasis"],
+  ["--text-lg","--ds-type-subtitle"],["--text-xl","--ds-type-heading-sm"],
+  ["--text-2xl","--ds-type-heading-md"],
+  ["--space-1","--ds-space-1"],["--space-8","--ds-space-8"],
+  ["--radius-sm","--ds-radius-sm"],["--radius-md","--ds-radius-md"],
+  ["--radius-lg","--ds-radius-lg"],["--radius-xl","--ds-radius-xl"],
+  ["--radius-full","--ds-radius-full"]
+];
+for(const [legacy,semantic] of tokenAliases) {
+  assert.ok(css.includes(`${legacy}:var(${semantic});`),`missing semantic token alias: ${legacy} -> ${semantic}`);
+}
+const semanticTokens=[
+  "--ds-type-caption: 11px;","--ds-type-small: 13px;","--ds-type-body: 15px;",
+  "--ds-type-body-emphasis: 17px;","--ds-type-subtitle: 19px;",
+  "--ds-type-heading-sm: 22px;","--ds-type-heading-md: 28px;",
+  "--ds-space-1: 4px;","--ds-space-8: 32px;",
+  "--ds-radius-sm: 10px;","--ds-radius-md: 14px;","--ds-radius-lg: 20px;",
+  "--ds-radius-xl: 28px;","--ds-radius-full: 999px;"
+];
+for(const token of semanticTokens) assert.ok(designSystem.includes(token),`missing semantic design token: ${token}`);
+assert.match(css,/--text-display-sm:clamp\(25px,\s*4vw,\s*34px\)/);
+assert.match(css,/--text-display-lg:clamp\(78px,\s*14vw,\s*150px\)/);
+assert.ok(css.includes("--nav-bar-height:66px"),"navigation bar height contract missing");
 
 assert.match(css,/\.button:active:not\(:disabled\)[\s\S]*?transform:scale\(\.97\)/);
 for(const token of ['--motion-interaction:160ms;','--motion-hover:180ms;','--motion-tab:280ms;','--motion-pager:420ms;','--motion-flip:480ms;']) assert.ok(css.includes(token),`missing motion timing token: ${token}`);
@@ -27,9 +44,9 @@ assert.match(css,/@keyframes kanji5GoalCelebrate/);
 assert.match(css,/kanji5ExerciseCorrectGlow/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(css,/@media\(prefers-color-scheme:dark\)/);
-assert.match(css,/--washi:#171614/);
-assert.match(css,/--paper:#23211e/);
-assert.match(css,/--sumi:#f4efe3/);
+assert.ok(designSystem.includes("--ds-color-canvas: #171614;"),"Dark canvas must be defined in the semantic layer");
+assert.ok(designSystem.includes("--ds-color-surface: #23211E;"),"Dark surfaces must be defined in the semantic layer");
+assert.ok(designSystem.includes("--ds-color-text-primary: #F4EFE3;"),"Dark primary text must be defined in the semantic layer");
 assert.match(css,/html,body\{background:var\(--washi\);color:var\(--sumi\);\}/);
 
 assert.ok(index.includes("name=\"theme-color\""),"theme-color metadata missing");
