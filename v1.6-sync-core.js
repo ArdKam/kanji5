@@ -207,7 +207,9 @@ export function mergeV16SyncData(local = {}, remote = {}) {
     local.componentUpdatedAtByKey,
     remote.componentUpdatedAtByKey
   );
-  if (skillProfile) mergedComponents.components.v16SkillProfile = clone(skillProfile);
+  if (skillProfile && (Object.prototype.hasOwnProperty.call(local.components || {}, 'v16SkillProfile') || Object.prototype.hasOwnProperty.call(remote.components || {}, 'v16SkillProfile'))) {
+    mergedComponents.components.v16SkillProfile = clone(skillProfile);
+  }
   return {
     v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
     sessionHistory,
