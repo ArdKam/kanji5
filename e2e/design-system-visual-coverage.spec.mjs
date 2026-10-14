@@ -47,6 +47,21 @@ async function createCapture(page, testInfo) {
         .map(element => (element.getAttribute("aria-label") ||
           element.querySelector("h1,h2,h3")?.textContent ||
           element.className || element.tagName).toString().trim());
+      const dictionary = document.querySelector(".dictionary-page");
+      const dictionaryControls = dictionary?.querySelector(".dictionary-controls");
+      const firstKanji = dictionary?.querySelector(".kanji-catalog-tile");
+      const topicTrigger = dictionary?.querySelector(".dictionary-topic-filter-trigger");
+      const topicDialog = dictionary?.querySelector(".dictionary-topic-dialog");
+      const advancedFilters = dictionary?.querySelector("details.dictionary-advanced-filters");
+      const dictionarySearch = dictionary?.querySelector(".dictionary-page-search input");
+      const bounds = (element) => {
+        if (!element) return null;
+        const rect = element.getBoundingClientRect();
+        return { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height), bottom: Math.round(rect.bottom) };
+      };
+      const activeDictionaryFilters = [...(dictionary?.querySelectorAll(".dictionary-active-filters .badge") ?? [])]
+        .map(element => element.textContent?.trim() ?? "");
+      const activeView = dictionary?.querySelector(".dictionary-view-button[aria-pressed='true'] .dictionary-view-label")?.textContent?.trim() ?? null;
       const card = document.querySelector(".learning-card");
       const activeBackPage = card?.querySelector(".learning-back-page.active");
       const dictionaryContent = document.querySelector(".dictionary-card-content");
@@ -63,6 +78,22 @@ async function createCapture(page, testInfo) {
         learningCardRevealed: Boolean(card?.classList.contains("is-revealed")),
         activeLearningPage: activeBackPage?.getAttribute("aria-label") || null,
         activeDictionarySection: dictionaryContent?.getAttribute("data-active-section") || null,
+        dictionaryControls: dictionary ? {
+          bounds: bounds(dictionaryControls),
+          firstKanjiTop: firstKanji ? Math.round(firstKanji.getBoundingClientRect().top) : null,
+          gapToFirstKanji: dictionaryControls && firstKanji
+            ? Math.round(firstKanji.getBoundingClientRect().top - dictionaryControls.getBoundingClientRect().bottom)
+            : null,
+          query: dictionarySearch?.value ?? "",
+          activeJlpt: dictionary.querySelector(".dictionary-filter-button.active")?.textContent?.trim() ?? null,
+          activeFilters: activeDictionaryFilters,
+          advancedFiltersOpen: Boolean(advancedFilters?.open),
+          topicPickerOpen: Boolean(topicDialog?.open),
+          selectedTopic: topicTrigger?.textContent?.trim() ?? null,
+          topicQuery: dictionary.querySelector(".dictionary-topic-search-input")?.value ?? "",
+          sorting: dictionary.querySelector(".dictionary-sort select")?.value ?? null,
+          viewMode: activeView,
+        } : null,
       };
     });
     report.screenshots.push({
