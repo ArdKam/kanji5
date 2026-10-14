@@ -43,7 +43,7 @@ The authoritative entries, bilingual labels, and exact character membership live
 | `qualities` | Qualities & comparison | ویژگی‌ها و مقایسه |
 | `government` | Government & law | حکومت و قانون |
 | `communication` | Communication & media | ارتباط و رسانه |
-| `money` | Money & finance | پول و اقتصاد |
+| `money` | Money & finance | پول و امور مالی |
 | `transport` | Transport & travel | حمل‌ونقل و سفر |
 | `health` | Health & medicine | سلامت و پزشکی |
 | `industry` | Technology & industry | فناوری و صنعت |
@@ -96,6 +96,19 @@ This round reviews previously untagged entries in catalog order (the pinned data
 | Arts & culture | `和`, `神`, `写`, `色`, `形`, `景`, `調` | Japanese style/harmony, religion/deities, photography, color, form, scenery, and musical tone/tuning. |
 
 The regression test checks every membership added in this round, while retaining the exclusions from the prior semantic audit. It also checks exact assignment and unique-character counts so accidental drift is visible in CI. Categories without additions in this batch (for example, Food & drink, Animals, Human body, and Health & medicine) were left unchanged rather than filled with weak matches; they remain candidates for later reviewed batches.
+
+## Dictionary selector display groups
+
+The browseable Dictionary topic selector presents the same 24 taxonomy IDs in four **display-only** groups. This grouping is for navigation and does not change the curated membership of any topic.
+
+| Display group (EN / FA) | Included topic IDs |
+|---|---|
+| Everyday life / زندگی روزمره | `numbers`, `body`, `time`, `family`, `food`, `health` |
+| World & travel / جهان و سفر | `nature`, `places`, `directions`, `weather`, `animals`, `plants`, `transport` |
+| People & society / افراد و جامعه | `people`, `school`, `government`, `work`, `money`, `communication`, `industry` |
+| Actions & expression / کنش و بیان | `actions`, `emotions`, `qualities`, `culture` |
+
+Keep this presentation-only grouping separate from the source taxonomy. The `id` and `characters` fields in `frontend/src/app/kanji-topics.json` remain authoritative for topic identity and membership.
 
 ## Product and architecture rules
 
