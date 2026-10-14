@@ -78,7 +78,19 @@ assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var
 assert.ok(styles.includes(".button:not(.primary),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text");
 assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
 assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
-assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#342321;color:#efb0a9;border-color:#9e625b;}'), "Dark Again feedback must use subdued semantic colors");
+assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#332724;color:#e8b4ac;border-color:#8d625a;}'), "Dark Again feedback must use subdued semantic colors");
+for (const theme of ["dark", "system"]) {
+  const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);}`;
+  assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must not override semantic rating buttons`);
+  for (const [rating, background, foreground] of [
+    ["again", "#332724", "#e8b4ac"],
+    ["hard", "#332f27", "#d8c8a5"],
+    ["good", "#283128", "#bed0bd"],
+    ["easy", "#27303b", "#c1cee0"],
+  ]) {
+    assert.ok(styles.includes(`:root[data-theme="${theme}"] .rating-${rating}{background:${background};color:${foreground};`), `${theme} ${rating} rating must keep a semantic foreground/background pair`);
+  }
+}
 assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: #171614; }"), "Selected focus option needs dark-readable foreground");
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
 
