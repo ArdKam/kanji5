@@ -33,6 +33,7 @@ let state = { ...emptyState };
 let client = null;
 let user = null;
 let syncPromise = null;
+let syncRerunRequested = false;
 let pollTimer = null;
 let syncDebounce = null;
 const listeners = new Set();
@@ -132,6 +133,13 @@ function readSyncSummary() {
 }
 
 function writeLocal(payload, remoteUpdatedAt = null) {
+  const incomingPayload = payload || {};
+  // A review/settings write may happen while the network request is in flight.
+  // Merge against the latest persisted local state before applying the sync result.
+  const freshLocal = localPayload();
+  const resolvedPayload = mergedPayload(freshLocal, incomingPayload);
+  const localAdvanced = !payloadsEqual(resolvedPayload, incomingPayload);
+  payload = resolvedPayload;
   if (payload?.state) {
     const s = payload.state;
     storage.setItem(STORAGE_KEY, JSON.stringify({
@@ -166,6 +174,7 @@ function writeLocal(payload, remoteUpdatedAt = null) {
     userId: user?.id || null,
     lastSyncedSettings: payload?.state?.settings || {}
   }));
+  if (localAdvanced && user) syncRerunRequested = true;
 }
 
 function mergedPayload(local, remote) {
@@ -268,7 +277,13 @@ async function withSyncLock(task) {
   if (syncPromise) return syncPromise;
   syncPromise = (async () => {
     try { return await task(); }
-    finally { syncPromise = null; }
+    finally {
+      syncPromise = null;
+      if (syncRerunRequested) {
+        syncRerunRequested = false;
+        scheduleSync();
+      }
+    }
   })();
   return syncPromise;
 }
