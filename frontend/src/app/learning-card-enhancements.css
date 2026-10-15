@@ -433,3 +433,38 @@
     padding-inline: 7px;
   }
 }
+
+
+/* Keep the reference-reading action in the readings header to avoid adding a full extra row to the compact overview. */
+.learning-back-readings-block .readings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.readings-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.learning-back-readings-block .reading-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.learning-back-readings-block .learning-reference-trigger {
+  flex: 0 0 auto;
+  max-width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding-inline: 8px;
+  gap: 5px;
+  font-size: var(--text-xs);
+}
+@media (max-width: 380px) {
+  .readings-header-actions { gap: 3px; }
+  .learning-back-readings-block .learning-reference-trigger { padding-inline: 5px; gap: 3px; }
+}

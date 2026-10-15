@@ -120,7 +120,8 @@ function ensureLearningCardEnhancementStyles(): Promise<void> {
 
 function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>Promise<unknown>;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
-  const referenceInfoLabel=getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings";
+  const referenceInfoLabel=getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings";
+  const referenceInfoVisibleLabel=getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings";
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
   const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
@@ -458,8 +459,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                     {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
                     <div className="learning-back-readings-block">
-                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
-                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={referenceInfoLabel} title={referenceInfoLabel} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/><span>{referenceInfoLabel}</span></button>:null}
+                      <div className="readings-header"><span>{t("readings")}</span><div className="readings-header-actions"><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={referenceInfoLabel} title={referenceInfoLabel} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/><span>{referenceInfoVisibleLabel}</span></button>:null}</div></div>
+                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
                     </div>
                     <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
                       <KanjiStructurePreview
