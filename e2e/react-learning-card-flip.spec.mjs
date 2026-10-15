@@ -538,7 +538,7 @@ test("learning-card structure is a compact preview with full details in a modal"
     const previewLabel = previewPage.locator(".kanji-structure-preview-label");
     const preview = previewPage.locator(".kanji-structure-preview-action");
     await expect(previewLabel).toHaveText("Visual components");
-    await expect(preview).toHaveText("View full structure ↗");
+    await expect(preview).toHaveText("View full structure↗");
     await expect(preview).toBeVisible({ timeout: 10000 });
     await expect(preview).toHaveCSS("border-width", "0px");
     const previewBox = await preview.boundingBox();
