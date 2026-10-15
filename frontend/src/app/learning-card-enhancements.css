@@ -296,6 +296,15 @@
 .mnemonic-edit-dialog .mnemonic-editor-footer > span { display: none; }
 .mnemonic-edit-dialog .mnemonic-editor-footer .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 520px) {
+  .learning-card-back .learning-back-page:first-child .learning-back-scroll {
+    padding-top: 3px;
+    padding-bottom: 4px;
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-overview,
+  .learning-card-back .learning-back-page:first-child .learning-back-identity {
+    gap: 4px;
+  }
   .kanji-structure-dialog.dialog.secondary-page-dialog { padding: 16px 13px calc(16px + env(safe-area-inset-bottom)); }
   .kanji-structure-dialog-body .component-breakdown-visual { grid-template-columns: minmax(36px, auto) auto minmax(0, 1fr); gap: 5px; }
   .kanji-structure-dialog-body .component-breakdown-parts { gap: 5px; }
