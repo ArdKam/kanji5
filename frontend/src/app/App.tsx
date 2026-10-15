@@ -102,15 +102,22 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const revealed=Boolean(card.revealed);
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
+  const meaningRecords=Array.isArray(card.learnerMeaningRecords)?card.learnerMeaningRecords:[];
+  const reviewedLocalizedRecords=meaningRecords.filter(record=>record.language===getLanguage()&&record.reviewStatus==="verified"&&Boolean(record.text));
+  const reviewedLocalizedPrimary=reviewedLocalizedRecords.filter(record=>record.priority==="primary");
+  const useReviewedLocalizedMeanings=reviewedLocalizedPrimary.length>0;
+  const localizedMeaningsFor=(priority:"primary"|"secondary"|"reference")=>reviewedLocalizedRecords.filter(record=>record.priority===priority).map(record=>record.text??"").filter(Boolean);
+  const primaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("primary"):(learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]));
+  const secondaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("secondary"):(learnerMeaningModel.secondary??[]);
+  const referenceMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("reference"):(learnerMeaningModel.reference??[]);
+  const meaningLanguage=useReviewedLocalizedMeanings?getLanguage():"en";
+  const meaningFallbackLabel=getLanguage()==="fa"&&!useReviewedLocalizedMeanings?"ترجمهٔ فارسی بازبینی‌شده در دسترس نیست؛ معنی منبع به انگلیسی نمایش داده می‌شود.":"";
   const pronunciationReading=String(learnerReadingModel.coreOn?.find(value=>String(value).trim())??card.on?.find(value=>String(value).trim())??learnerReadingModel.coreKun?.find(value=>String(value).trim())??card.kun?.find(value=>String(value).trim())??"").trim();
   const pronunciationWord=String(card.examples?.find(example=>example?.word&&example?.reading)?.word??"").trim();
   const pronunciationTarget=pronunciationReading||pronunciationWord;
   const pronunciationLabel=pronunciationReading
     ? (getLanguage()==="fa"?"پخش خوانش «"+pronunciationReading+"» با گفتار مرورگر":"Play reading “"+pronunciationReading+"” using browser speech")
     : (getLanguage()==="fa"?"پخش تلفظ واژهٔ «"+pronunciationWord+"» با گفتار مرورگر":"Play word “"+pronunciationWord+"” using browser speech");
-  const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
-  const secondaryMeanings=learnerMeaningModel.secondary??[];
-  const referenceMeanings=learnerMeaningModel.reference??[];
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
   const [visualStructureReady,setVisualStructureReady]=useState(false);
@@ -444,8 +451,9 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
-                    {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
-                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    {meaningFallbackLabel?<p className="learning-meaning-source-note" lang="fa">{meaningFallbackLabel}</p>:null}
+                    {primaryMeanings.length?<div className="meanings learning-back-meaning" lang={meaningLanguage}>{primaryMeanings.join(" · ")}</div>:null}
+                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning" lang={meaningLanguage}>{secondaryMeanings.join(" · ")}</div>:null}
                     {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("useNormalReadingNotation"):t("showAllReadingsInHiragana")}</button></div>
@@ -588,7 +596,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
           </div>
           <div className="dialog-grid learning-reference-info-grid">
-            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
+            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong lang={meaningLanguage}>{referenceMeanings.join(" · ")}</strong></div>:null}
             {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
             {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
           </div>
