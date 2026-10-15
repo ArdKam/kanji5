@@ -181,7 +181,7 @@ test("Learning-card language metadata and pronunciation describe the actual cont
     await expect(row).not.toHaveAttribute("lang", "ja");
     await expect(row.locator(".example-main [lang='ja']")).toHaveCount(2);
     await expect(row.locator(".example-meaning")).toHaveAttribute("lang", "en");
-    await expect(row.locator(".example-source-label")).toHaveText(language === "fa" ? "مثال منبع، بازبینی‌نشده" : "Source example · not reviewed");
+    await expect(row.locator(".example-source-label")).toHaveText(language === "fa" ? "وضعیت بازبینی مشخص نیست" : "Source review status unknown");
     if (language === "fa") {
       await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveAttribute("lang", "fa");
       await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
