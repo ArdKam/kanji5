@@ -463,3 +463,12 @@
   font-size: 11px;
   overflow-wrap: anywhere;
 }
+
+
+.learning-card .reading-vocabulary-source-label {
+  color: var(--mute);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: .9;
+}
