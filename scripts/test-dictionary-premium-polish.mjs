@@ -35,7 +35,7 @@ assert.ok(page.includes("const renderedItems = useMemo("), "Keyboard grid should
 assert.ok(page.includes("const dictionaryRows = useMemo("), "Kanji tiles need explicit responsive row grouping");
 assert.match(page, /role="grid"/, "Kanji matrix needs an accessible grid role");
 assert.match(page, /role="gridcell"/, "Kanji matrix cells must expose row/column semantics");
-assert.match(page, /tabIndex={activeFocusCharacter === item.character ? 0 : -1}/, "Kanji grid must use roving tabindex");
+assert.ok(page.includes("tabIndex={activeFocusCharacter === item.character ? 0 : -1}"), "Kanji grid must use roving tabindex");
 assert.match(page, /"ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"/, "Keyboard navigation must cover arrows and Home/End");
 assert.ok(page.includes("formatNumber(Number(value), language)"), "Grade values must be localized in Persian and English");
 assert.ok(dictionaryPageCss.includes(".kanji-catalog-row{\n  display:grid;"), "Lazy Dictionary styles must render each ARIA row as a visual row");
