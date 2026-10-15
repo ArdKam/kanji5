@@ -298,7 +298,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       .filter(e=>Boolean(String(e?.word??"").trim()&&String(e?.reading??"").trim()&&String(e?.meaning??"").trim()))
       .slice(0,6)
       .map(e=>{
-        const source=String(e?.source??e?.provenance?.source??"").trim();
+        const source=String(e?.source??"").trim();
         const meaningLanguage=e?.meaningLanguage??(source==="kanjiapi.dev"||source==="jmdict"?"en":"unknown");
         return {...e,source:source||undefined,meaningLanguage,reviewStatus:e?.reviewStatus??(source?"unreviewed":"unknown")};
       });
@@ -648,7 +648,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     </div>
   </section>
 }
-function Reading({title,values,examples=[]}:{title:string;values:string[];examples?:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:"verified"|"unreviewed"|"unknown"}>}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title+" "+values[0]}/>:null}{examples.length?<div className="reading-vocabulary-examples" aria-label={title+" vocabulary examples"}>{examples.map(example=><span className="reading-vocabulary-example" key={example.word}><span lang="ja">{example.word}</span><small className="reading-vocabulary-gloss" lang={example.meaningLanguage&&example.meaningLanguage!=="unknown"?example.meaningLanguage:undefined} dir="auto">{example.meaning}</small><small className="reading-vocabulary-source-label" lang={getLanguage()}>{example.reviewStatus==="verified"?t("verifiedSourceExample"):example.reviewStatus==="unreviewed"?t("unreviewedSourceExample"):t("sourceExampleReviewUnknown")}</small></span>)}</div>:null}</div>}
+function Reading({title,values,examples=[]}:{title:string;values:string[];examples?:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:"verified"|"unreviewed"|"unknown"}>}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title+" "+values[0]}/>:null}{examples.length?<div className="reading-vocabulary-examples" aria-label={title+" vocabulary examples"}>{examples.map(example=><span className="reading-vocabulary-example" key={example.word}><span lang="ja">{example.word}</span><small className="reading-vocabulary-gloss" lang={example.meaningLanguage&&example.meaningLanguage!=="unknown"?example.meaningLanguage:undefined} dir="auto">{example.meaning}</small></span>)}</div>:null}</div>}
 function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
   if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
