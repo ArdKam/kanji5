@@ -64,7 +64,7 @@
   color:var(--mute);
   font:600 24px/1 Inter,system-ui,sans-serif;
   cursor:pointer;
-}.dictionary-search-clear:hover{background:color-mix(in srgb,var(--shu) 7%,transparent);color:var(--ink);}.dictionary-search-clear:focus-visible{outline:2px solid color-mix(in srgb,var(--shu) 45%,transparent);outline-offset:-2px;}.dictionary-controls{
+}.dictionary-search-clear:hover{background:color-mix(in srgb,var(--shu) 7%,transparent);color:var(--ink);}.dictionary-search-clear:focus-visible{outline: 3px solid var(--ds-focus-ring);outline-offset:-2px;}.dictionary-controls{
   display:grid;
   gap:10px;
   margin-bottom:12px;
@@ -148,7 +148,7 @@
   background:color-mix(in srgb,var(--paper) 55%,transparent);
   color:var(--ink);
 }.dictionary-view-button:focus-visible{
-  outline:2px solid color-mix(in srgb,var(--shu) 48%,transparent);
+  outline: 3px solid var(--ds-focus-ring);
   outline-offset:1px;
 }.dictionary-view-icon{
   display:grid;
