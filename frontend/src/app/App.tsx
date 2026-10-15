@@ -31,7 +31,7 @@ const DictionaryPageRoute = lazy(async () => {
   return { default: WithDictionaryStyles };
 });
 const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
-import { learningCopy, selectExamplesForReading } from "./learning-copy";
+import { inferMeaningLanguage, learningCopy, selectExamplesForReading } from "./learning-copy";
 import learningSurfaceStyles from "./learning-surface.css?inline";
 import { isOnboardingComplete } from "./onboarding";
 import { UiIcon } from "./UiIcon";
@@ -299,7 +299,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       .slice(0,6)
       .map(e=>{
         const source=String(e?.source??"").trim();
-        const meaningLanguage=e?.meaningLanguage??(source==="kanjiapi.dev"||source==="jmdict"?"en":"unknown");
+        const meaningLanguage=inferMeaningLanguage(e?.meaning,e?.meaningLanguage,source);
         return {...e,source:source||undefined,meaningLanguage,reviewStatus:e?.reviewStatus??(source?"unreviewed":"unknown")};
       });
     if(validExamples.length>0){
