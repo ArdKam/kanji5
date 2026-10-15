@@ -3605,3 +3605,5 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
   .dialog[open],
   .dialog[open]::backdrop{animation:none!important;}
 }
+
+.learning-reveal-error{margin:8px 0 0;color:var(--color-danger);font-size:var(--text-sm);line-height:1.5;text-align:center;}

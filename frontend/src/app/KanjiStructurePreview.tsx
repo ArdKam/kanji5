@@ -6,14 +6,12 @@ export function KanjiStructurePreview({
   info,
   ready,
   language,
-  enabled,
   onOpen,
 }: {
   character: string;
   info: VisualStructureInfo | null;
   ready: boolean;
   language: Language;
-  enabled: boolean;
   onOpen: () => void;
 }) {
   const components = info?.available ? info.components : [];

@@ -98,7 +98,27 @@ const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
 const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;
 
-function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
+let learningCardEnhancementStylesPromise: Promise<void> | null = null;
+function ensureLearningCardEnhancementStyles(): Promise<void> {
+  if (document.querySelector("style[data-rinemi-learning-card-styles]")) return Promise.resolve();
+  if (!learningCardEnhancementStylesPromise) {
+    learningCardEnhancementStylesPromise = import("./learning-card-enhancements.css?inline")
+      .then(({ default: cssText }) => {
+        if (document.querySelector("style[data-rinemi-learning-card-styles]")) return;
+        const style = document.createElement("style");
+        style.dataset.rinemiLearningCardStyles = "true";
+        style.textContent = cssText;
+        document.head.append(style);
+      })
+      .catch(error => {
+        learningCardEnhancementStylesPromise = null;
+        throw error;
+      });
+  }
+  return learningCardEnhancementStylesPromise;
+}
+
+function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>Promise<unknown>;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const referenceInfoLabel=getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings";
   const learnerMeaningModel=card.learnerMeanings??{};
@@ -109,6 +129,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
   const [visualStructureReady,setVisualStructureReady]=useState(false);
+  const [revealPending,setRevealPending]=useState(false);
+  const [revealStylesError,setRevealStylesError]=useState("");
   const [hiraganaReadings,setHiraganaReadings]=useState(false);
   const [referenceInfoOpen,setReferenceInfoOpen]=useState(false);
   const [structureDialogOpen,setStructureDialogOpen]=useState(false);
@@ -132,14 +154,30 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
-  const handleReveal=useCallback(()=>{
-    const active=document.activeElement;
-    if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
-      active.blur();
+  const revealPendingRef=useRef(false);
+  const handleReveal=useCallback(async()=>{
+    if(revealed||revealPendingRef.current)return;
+    revealPendingRef.current=true;
+    setRevealPending(true);
+    setRevealStylesError("");
+    try{
+      // Resolve the lazy card stylesheet before the engine changes the visible face.
+      await ensureLearningCardEnhancementStyles();
+      const active=document.activeElement;
+      if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
+        active.blur();
+      }
+      shouldFocusBackRef.current=true;
+      await onReveal();
+    }catch(error){
+      shouldFocusBackRef.current=false;
+      setRevealStylesError(getLanguage()==="fa"?"آماده‌سازی نمایش کارت ناموفق بود؛ دوباره تلاش کن.":"Could not prepare the card display. Please try again.");
+      console.error("Learning-card styles could not be prepared before reveal.",error);
+    }finally{
+      revealPendingRef.current=false;
+      setRevealPending(false);
     }
-    shouldFocusBackRef.current=true;
-    onReveal();
-  },[onReveal]);
+  },[onReveal,revealed]);
   useEffect(()=>{
     if(!revealed||!shouldFocusBackRef.current)return;
     shouldFocusBackRef.current=false;
@@ -406,7 +444,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        <button className="button primary wide" type="button" onClick={()=>void handleReveal()} disabled={revealed||revealPending} aria-busy={revealPending}>{revealPending?t("loading",getLanguage()):learningCopy("revealMeaningAndReadings",getLanguage())}</button>{revealStylesError?<p className="learning-reveal-error" role="alert">{revealStylesError}</p>:null}
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
@@ -429,7 +467,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         info={visualStructureInfo}
                         ready={visualStructureReady}
                         language={getLanguage()}
-                        enabled={revealed && backPage === 0}
                         onOpen={()=>setStructureDialogOpen(true)}
                       />
                     </div>
@@ -1142,7 +1179,7 @@ function App(){
     />
     
   )
-) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} topicLabel={topicStudyLabel} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot&&topicStudyLabel?<section className="surface empty-state topic-session-complete"><p className="eyebrow red">{learningCopy("topicSessionLabel",language)}</p><h2>{learningCopy("topicSessionComplete",language)}</h2><p>{learningCopy("topicSessionCompleteHint",language)}</p><button className="button primary" type="button" onClick={()=>{void action(async()=>{await startLearningExperience();await clearTransient()})}}>{learningCopy("backToRecommended",language)}</button></section>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} topicLabel={topicStudyLabel} onReveal={()=>action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot&&topicStudyLabel?<section className="surface empty-state topic-session-complete"><p className="eyebrow red">{learningCopy("topicSessionLabel",language)}</p><h2>{learningCopy("topicSessionComplete",language)}</h2><p>{learningCopy("topicSessionCompleteHint",language)}</p><button className="button primary" type="button" onClick={()=>{void action(async()=>{await startLearningExperience();await clearTransient()})}}>{learningCopy("backToRecommended",language)}</button></section>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
               {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}        {!showExercise?(snapshotHydrated&&snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
               {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}

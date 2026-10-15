@@ -536,7 +536,24 @@ test("active Learning-card shortcuts have a visible label and reference info sit
   await page.evaluate(() => localStorage.setItem("kanji5-ui-language", "en"));
   await page.reload();
   await expect(page.locator("#root .learning-card-front .button.primary.wide")).toBeVisible({ timeout: 10000 });
+  const enhancementStyle = page.locator('style[data-rinemi-learning-card-styles]');
+  await expect(enhancementStyle).toHaveCount(0);
+  await page.evaluate(() => {
+    window.__rinemiStylesReadyWhenCardRevealed = null;
+    const card = document.querySelector(".learning-card");
+    if (!card) throw new Error("Learning card not found for stylesheet timing assertion");
+    const observer = new MutationObserver(() => {
+      const back = card.querySelector(".learning-card-back");
+      if (back?.getAttribute("aria-hidden") === "false") {
+        window.__rinemiStylesReadyWhenCardRevealed = Boolean(document.querySelector('style[data-rinemi-learning-card-styles]'));
+        observer.disconnect();
+      }
+    });
+    observer.observe(card, { attributes: true, subtree: true, attributeFilter: ["aria-hidden"] });
+  });
   await page.locator("#root .learning-card-front .button.primary.wide").click();
+  await expect(enhancementStyle).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => window.__rinemiStylesReadyWhenCardRevealed)).toBe(true);
   const card = page.locator("#root .learning-card");
   const activeShortcut = card.locator(".learning-back-page-shortcut.active");
   await expect(activeShortcut).toBeVisible();
