@@ -13,6 +13,7 @@ const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
 const settings = await fs.readFile("frontend/src/app/SettingsDialog.tsx", "utf8");
 const personalMnemonicBackup = await fs.readFile("frontend/src/app/MnemonicBackup.tsx", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
+const designSystem = await fs.readFile("frontend/src/design-system.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
 const icon192 = await fs.readFile("icon-192.svg", "utf8");
 const icon512 = await fs.readFile("icon-512.svg", "utf8");
@@ -42,7 +43,8 @@ assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — پنج
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
 }
-assert.ok(styles.includes("--shu:#505F83;") && styles.includes("--sakura:#D6A1AA;"), "UI tokens must include the Rinemi indigo and sakura palette");
+assert.ok(styles.includes("--shu:var(--ds-color-legacy-shu);") && styles.includes("--sakura:var(--ds-brand-sakura);"), "Legacy palette names must remain semantic compatibility aliases");
+assert.ok(designSystem.includes("--ds-brand-indigo: #505F83;") && designSystem.includes("--ds-brand-sakura: #D6A1AA;"), "Semantic design tokens must include the Rinemi indigo and sakura palette");
 for (const [name, source] of [["icon.svg", icon], ["icon-192.svg", icon192], ["icon-512.svg", icon512]]) {
   assert.ok(source.includes("Rinemi"), name + " must carry accessible Rinemi naming");
   assert.ok(source.includes("#505F83") && source.includes("#D6A1AA") && source.includes("#F7F4EE"), name + " must match the canonical palette");
