@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const read = async path => readFile(new URL("../" + path, import.meta.url), "utf8");
 const preview = await read("frontend/src/app/KanjiStructurePreview.tsx");
 const app = await read("frontend/src/app/App.tsx");
+const dictionaryCard = await read("frontend/src/app/DictionaryKanjiCard.tsx");
 const network = await read("v1.5-network.js");
 const boundary = await read("v1.9-v2-boundary.js");
 const sw = await read("sw.js");
@@ -41,6 +42,8 @@ const getVocabulary = boundary.slice(boundary.indexOf("async function getVocabul
 assert.doesNotMatch(getVocabulary, /catch/);
 assert.match(getVocabulary, /throw new Error\('KANJI5_VOCABULARY_INVALID_RESPONSE'\)/);
 assert.match(sw, /status:503[\s\S]*X-Kanji5-Offline-Fallback/);
+assert.match(app, /<StrokeOrderViewer key=\{card\.character\}/);
+assert.match(dictionaryCard, /<StrokeOrderViewer key=\{item\.character\}/);
 assert.match(styles, /\.kanji-structure-preview-action[\s\S]*border: 0 !important/);
 assert.match(styles, /\.learning-reference-trigger[\s\S]*min-height: 44px/);
 
