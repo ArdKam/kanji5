@@ -289,7 +289,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const examplesError=examplesMatch&&examplesState.status==="error";
   const examplesLoading=Boolean(activeCharacter)&&(!examplesMatch||examplesState.status==="loading");
   const directExamplesSignature=JSON.stringify((Array.isArray(card.examples)?card.examples:[]).map(e=>[e?.word??"",e?.reading??"",e?.meaning??""]));
-  const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
+  const exampleCount=vocabularyExamples.length;
   useEffect(()=>{
     let active=true;
     const character=String(card.character??"");
@@ -314,7 +314,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     });
     return ()=>{active=false};
   },[activeCharacter,directExamplesSignature,examplesRetryKey]);
-  const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
+  const displayExamples=examplesMatch&&examplesState.status==="resolved"?examplesState.items:[];
   const visibleExamples=examplesExpanded?displayExamples:displayExamples.slice(0,4);
   const onReadingExamples=displayedOn[0]?selectExamplesForReading(activeCharacter,displayedOn[0],displayExamples,1):[];
   const kunReadingExamples=displayedKun[0]?selectExamplesForReading(activeCharacter,displayedKun[0],displayExamples,1):[];
