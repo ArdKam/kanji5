@@ -59,7 +59,7 @@ export type Snapshot = {
     learnerMeanings?: { primary?: string[]; secondary?: string[]; reference?: string[] };
     learnerMeaningRecords?: LearnerMeaningRecord[];
     learnerReadings?: { coreOn?: string[]; coreKun?: string[]; vocabularySupported?: string[]; referenceOn?: string[]; referenceKun?: string[] };
-    examples?: { word?: string; reading?: string; meaning?: string; meaningLanguage?: LearnerMeaningLanguage }[];
+    examples?: { word?: string; reading?: string; meaning?: string; meaningLanguage?: LearnerMeaningLanguage; source?: string; sourceVersion?: string | null; reviewStatus?: "verified" | "unreviewed" | "unknown" }[];
     hint?: string;
     revealLabel?: string;
   };
@@ -182,7 +182,7 @@ export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:
 export type CustomStudyFocus = "available" | "due" | "new" | "weak" | "mistakes";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number; topicId?: string; topicCharacters?: string[]; /** @deprecated Use topicCharacters. */ characterScope?: string[] };
 
-export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string; meaningLanguage?: LearnerMeaningLanguage };
+export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string; sourceVersion?: string | null; meaningLanguage?: LearnerMeaningLanguage; reviewStatus?: "verified" | "unreviewed" | "unknown"; provenance?: { source?: string; sourceVersion?: string | null; sourceId?: string | null } };
 export type RadicalInfo = { character:string; available:boolean; radicalId:number|null; radical:{id:number;glyph:string;strokeCount:number;meanings:string[];sourceForms?:string[]}|null; coverage?:{available?:number;total?:number;fraction?:number}|null; source?:{name?:string;upstreamVersion?:string;license?:string;radicalDefinitionsRevision?:number}|null; };
 export type ComponentInfo = {
   character: string;
