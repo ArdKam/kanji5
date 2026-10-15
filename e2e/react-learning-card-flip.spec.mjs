@@ -117,6 +117,31 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("a priority reading only shows a word with matching recorded pronunciation", async ({ page }) => {
+  await page.route("https://kanjiapi.dev/v1/words/**", async route => {
+    const url = new URL(route.request().url());
+    const character = decodeURIComponent(url.pathname.split("/").pop() || "");
+    const data = character === "日"
+      ? [{ variants: [{ written: "日曜日", pronounced: "にちようび" }], meanings: [{ glosses: ["Sunday"] }] }]
+      : [];
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(data) });
+  });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  await expect(card.locator(".kanji-display")).toHaveText("日");
+  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
+  await expect(card).toHaveClass(/is-revealed/);
+  const linkedExample = card.locator(".learning-back-page.active .reading-vocabulary-example");
+  await expect(linkedExample).toBeVisible({ timeout: 10000 });
+  await expect(linkedExample.locator("[lang='ja']")).toHaveText("日曜日");
+  await expect(linkedExample.locator("small[lang='en']")).toHaveText("Sunday");
+});
+
 test("Learning-card language metadata and pronunciation describe the actual content", async ({ page }) => {
   await routeExamples(page, 2);
   for (const language of ["en", "fa"]) {
