@@ -299,7 +299,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       .slice(0,6)
       .map(e=>{
         const source=String(e?.source??"").trim();
-        const meaningLanguage=inferMeaningLanguage(e?.meaning,e?.meaningLanguage,source);
+        const meaningLanguage=inferMeaningLanguage(String(e?.meaning??""),e?.meaningLanguage,source);
         return {...e,source:source||undefined,meaningLanguage,reviewStatus:e?.reviewStatus??(source?"unreviewed":"unknown")};
       });
     if(validExamples.length>0){
