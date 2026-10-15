@@ -36,6 +36,8 @@ type TranslationKey =
   | "readings"
   | "showHiragana"
   | "showKatakana"
+  | "showAllReadingsInHiragana"
+  | "useNormalReadingNotation"
   | "pageOf"
   | "actionFailed"
   | "footerTagline"
@@ -596,7 +598,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"آمار", settings:"تنظیمات", language:"زبان", persian:"فارسی", english:"English",
     learning:"یادگیری", activeRecall:"تمرین", learningPath:"مسیر یادگیری", sessionProgress:"پیشرفت جلسه",
     goToMain:"رفتن به محتوای اصلی", learningCard:"کارت یادگیری", newKanji:"جدید", learningReview:"مرور یادگیری",
-    cardBack:"پشت کارت", meaningAndStructure:"معنی و ساختار", readings:"خوانش‌ها", showHiragana:"نمایش هیراگانا", showKatakana:"نمایش کاتاکانا", pageOf:"صفحه {page} از {total}", actionFailed:"خطا در عملیات", footerTagline:"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.",
+    cardBack:"پشت کارت", meaningAndStructure:"معنی و ساختار", readings:"خوانش‌ها", showHiragana:"نمایش هیراگانا", showKatakana:"نمایش کاتاکانا", showAllReadingsInHiragana:"نمایش همهٔ خوانش‌ها به هیراگانا", useNormalReadingNotation:"استفاده از شیوهٔ معمول نمایش خوانش‌ها", pageOf:"صفحه {page} از {total}", actionFailed:"خطا در عملیات", footerTagline:"یادگیریت را کوتاه، پیوسته و هدفمند نگه دار.",
     onboardingEyebrow:"شروع ساده",
     onboardingTitle:"Rinemi را برای اولین بار می‌بینی؟",
     onboardingIntro:"هر روز چند دقیقه روی کانجی‌های کاربردی کار کن؛ درس را ببین، آن را به یاد بیاور و بعد با مرور فاصله‌دار برگرد.",
@@ -630,7 +632,7 @@ const messages: Record<Language, Record<TranslationKey, string>> = {
     stats:"Stats", settings:"Settings", language:"Language", persian:"فارسی", english:"English",
     learning:"Learning", activeRecall:"Practice", learningPath:"Learning path", sessionProgress:"Session progress",
     goToMain:"Skip to main content", learningCard:"Learning card", newKanji:"New", learningReview:"Learning review",
-    cardBack:"Card back", meaningAndStructure:"Meaning & structure", readings:"Readings", showHiragana:"Show Hiragana", showKatakana:"Show Katakana", pageOf:"Page {page} of {total}", actionFailed:"Action failed", footerTagline:"Keep your learning short, consistent, and focused.",
+    cardBack:"Card back", meaningAndStructure:"Meaning & structure", readings:"Readings", showHiragana:"Show Hiragana", showKatakana:"Show Katakana", showAllReadingsInHiragana:"Show all readings in Hiragana", useNormalReadingNotation:"Use normal reading notation", pageOf:"Page {page} of {total}", actionFailed:"Action failed", footerTagline:"Keep your learning short, consistent, and focused.",
     onboardingEyebrow:"A simple start",
     onboardingTitle:"New to Rinemi?",
     onboardingIntro:"Spend a few focused minutes each day on useful kanji: learn it, recall it, then come back for spaced review.",
