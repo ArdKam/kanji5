@@ -975,8 +975,30 @@ function App(){
     )
   );
   const showOnboarding = !onboardingComplete;
+  const [dictionaryCatalogStylesReady,setDictionaryCatalogStylesReady]=useState(false);
+  const [practiceExperienceStylesReady,setPracticeExperienceStylesReady]=useState(false);
   const experienceRef=useRef<"review"|"practice"|"dictionary">("review");
   const changeExperience=useCallback((next:"review"|"practice"|"dictionary")=>{experienceRef.current=next;setExperience(next)},[]);
+  useEffect(()=>{
+    if(experience!=="dictionary"||dictionaryCatalogStylesReady)return;
+    let mounted=true;
+    void import("./dictionary-catalog.css").then(()=>{
+      if(mounted)setDictionaryCatalogStylesReady(true);
+    }).catch(()=>{
+      if(mounted)setDictionaryCatalogStylesReady(true);
+    });
+    return ()=>{mounted=false};
+  },[experience,dictionaryCatalogStylesReady]);
+  useEffect(()=>{
+    if(experience!=="practice"||practiceExperienceStylesReady)return;
+    let mounted=true;
+    void import("./practice-experience.css").then(()=>{
+      if(mounted)setPracticeExperienceStylesReady(true);
+    }).catch(()=>{
+      if(mounted)setPracticeExperienceStylesReady(true);
+    });
+    return ()=>{mounted=false};
+  },[experience,practiceExperienceStylesReady]);
   useEffect(()=>{
     let mounted=true;
     const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d){setSnapshot(d);setSnapshotHydrated(true)}};
@@ -1091,7 +1113,7 @@ function App(){
           language={language}
           onClose={closeSecondaryPage}
         /> : null}
-        </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
+        </section> : showDictionary ? (dictionaryCatalogStylesReady ? <DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/> : <section className="surface dictionary-catalog-loading" role="status" aria-busy="true"><p>{t("loading")}</p></section>) : showExercise && !practiceExperienceStylesReady ? <section className="surface practice-experience-loading" role="status" aria-busy="true"><p>{t("loading")}</p></section> : <>
               {!showExercise ? <div className="card-topline">
                 <div className="learning-session-context">
                   <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>

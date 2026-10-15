@@ -125,9 +125,12 @@ test('empty session progress indicator is absent before a session starts',async(
 
 test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await clean(page);
+  const practiceCssPresentBeforeOpen=await page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/practice-experience.*\.css/.test(entry.name)));
+  expect(practiceCssPresentBeforeOpen).toBe(false);
   await page.getByRole('button',{name:'تمرین',exact:true}).click();
   const practiceHome=page.locator('.practice-home');
   await expect(practiceHome).toBeVisible({timeout:10000});
+  await expect.poll(async()=>page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/practice-experience.*\.css/.test(entry.name)))).toBe(true);
   const advanced=practiceHome.locator('.practice-advanced');
   await expect(advanced).toBeVisible();
   await advanced.locator('summary').click();
@@ -152,9 +155,12 @@ test('custom study starts a filtered JLPT/new-card session',async({page})=>{
 
 test('Kanji dictionary searches, filters, sorts and opens a non-rating Kanji card',async({page})=>{
   await clean(page);
+  const catalogCssPresentBeforeOpen=await page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/dictionary-catalog.*\.css/.test(entry.name)));
+  expect(catalogCssPresentBeforeOpen).toBe(false);
   await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
+  await expect.poll(async()=>page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/dictionary-catalog.*\.css/.test(entry.name)))).toBe(true);
   await expect(pageRoot.locator('.mastery-map-summary')).toHaveCount(0);
   await expect(pageRoot.locator('.kanji-catalog-tile').first()).toHaveAttribute('data-mastery-state');
   await expect(pageRoot.locator('.kanji-catalog-tile')).toHaveCount(2136,{timeout:10000});

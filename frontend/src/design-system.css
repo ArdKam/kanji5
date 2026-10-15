@@ -1,0 +1,323 @@
+/*
+ * Rinemi Design System foundation.
+ *
+ * This file is the semantic token source of truth. Legacy names remain as aliases
+ * while the existing presentation is migrated incrementally; new UI should use
+ * the --ds-* roles directly.
+ */
+:root {
+  color-scheme: light dark;
+  background: var(--ds-color-canvas);
+  color: var(--ds-color-text-primary);
+
+  /* Brand palette: identity only, not semantic feedback colors. */
+  --ds-brand-rice-paper: #F7F4EE;
+  --ds-brand-surface: #FDFBF7;
+  --ds-brand-sumi: #292B2D;
+  --ds-brand-indigo: #505F83;
+  --ds-brand-sakura: #D6A1AA;
+  --ds-brand-moss: #8C9B87;
+  --ds-brand-secondary-surface: #EEE9E0;
+  --ds-brand-border: #DED8CE;
+
+  /* Semantic surfaces. */
+  --ds-color-canvas: var(--ds-brand-rice-paper);
+  --ds-color-surface: var(--ds-brand-surface);
+  --ds-color-surface-subtle: #F1EDE6;
+  --ds-color-surface-elevated: #FFFDF8;
+  --ds-color-surface-overlay: rgba(253, 251, 247, .96);
+  --ds-color-input: #FFFDF9;
+  --ds-color-disabled: #E9E3DA;
+
+  /* Semantic text and interactive controls. */
+  --ds-color-text-primary: var(--ds-brand-sumi);
+  --ds-color-text-secondary: #53545A;
+  --ds-color-text-muted: #62676B;
+  --ds-color-text-inverse: #FDFBF7;
+  --ds-color-action-primary: var(--ds-brand-indigo);
+  --ds-color-action-primary-text: #FDFBF7;
+  --ds-color-action-primary-hover: #424F70;
+  --ds-color-action-primary-pressed: #36425F;
+  --ds-color-action-secondary-hover: #F1EDE6;
+  --ds-color-border: var(--ds-brand-border);
+  --ds-color-border-subtle: #E9E3DA;
+  --ds-color-border-strong: #ABA398;
+  --ds-color-border-interactive: #8B93A5;
+  --ds-focus-ring: #505F83;
+  --ds-focus-offset: 3px;
+  --ds-disabled-opacity: .58;
+
+  /* State roles are independent from the brand palette. */
+  --ds-state-success-text: #43582B;
+  --ds-state-success-bg: #EDF2E7;
+  --ds-state-success-border: #A9BA97;
+  --ds-state-warning-text: #76510A;
+  --ds-state-warning-bg: #FAF0D9;
+  --ds-state-warning-border: #D9C17B;
+  --ds-state-danger-text: #8E3026;
+  --ds-state-danger-bg: #F8ECE8;
+  --ds-state-danger-border: #D8A39A;
+  --ds-state-info-text: #314B6F;
+  --ds-state-info-bg: #ECF1F8;
+  --ds-state-info-border: #A6B8D3;
+
+  /* Learning review outcomes: same semantic order and readable text in both themes. */
+  --ds-review-again-text: var(--ds-state-danger-text);
+  --ds-review-again-bg: var(--ds-state-danger-bg);
+  --ds-review-again-border: var(--ds-state-danger-border);
+  --ds-review-hard-text: var(--ds-state-warning-text);
+  --ds-review-hard-bg: var(--ds-state-warning-bg);
+  --ds-review-hard-border: var(--ds-state-warning-border);
+  --ds-review-good-text: var(--ds-state-success-text);
+  --ds-review-good-bg: var(--ds-state-success-bg);
+  --ds-review-good-border: var(--ds-state-success-border);
+  --ds-review-easy-text: var(--ds-state-info-text);
+  --ds-review-easy-bg: var(--ds-state-info-bg);
+  --ds-review-easy-border: var(--ds-state-info-border);
+
+  --ds-color-progress-track: #E9E3D8;
+  --ds-color-skeleton-base: #EEE7DA;
+  --ds-color-skeleton-highlight: #F8F3E9;
+  --ds-color-skeleton-track: #E9E3D8;
+  --ds-color-skeleton-fill: #DED6C8;
+  --ds-color-legacy-shu: var(--ds-brand-indigo);
+
+  /* Typography roles. Font faces are loaded by main.tsx; Japanese display usage is selective. */
+  --ds-font-persian: "Vazirmatn", "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ds-font-latin: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ds-font-japanese: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+  --ds-type-caption: 11px;
+  --ds-type-small: 13px;
+  --ds-type-body: 15px;
+  --ds-type-body-emphasis: 17px;
+  --ds-type-subtitle: 19px;
+  --ds-type-heading-sm: 22px;
+  --ds-type-heading-md: 28px;
+  --ds-type-heading-lg: 34px;
+  --ds-type-heading: 25px;
+  --ds-type-display-md: 44px;
+  --ds-type-display-xl: 80px;
+  --ds-type-display-sm: clamp(25px, 4vw, 34px);
+  --ds-type-display-lg: clamp(78px, 14vw, 150px);
+  --ds-type-display-kanji: clamp(90px, 18vw, 150px);
+  --ds-type-stimulus-kanji: clamp(78px, 14vw, 110px);
+  --ds-type-display-compact: clamp(38px, 7vw, 62px);
+  --ds-type-display-wide: clamp(64px, 16vw, 92px);
+  --ds-type-display-tall: clamp(72px, 14vw, 108px);
+
+  /* Consistent scales. Existing screen-specific layout values remain intentional exceptions. */
+  --ds-space-1: 4px;
+  --ds-space-2: 8px;
+  --ds-space-3: 12px;
+  --ds-space-4: 16px;
+  --ds-space-5: 20px;
+  --ds-space-6: 24px;
+  --ds-space-7: 28px;
+  --ds-space-8: 32px;
+  --ds-space-9: 36px;
+  --ds-space-10: 40px;
+  --ds-space-11: 48px;
+  --ds-space-12: 64px;
+  --ds-radius-sm: 10px;
+  --ds-radius-md: 14px;
+  --ds-radius-lg: 20px;
+  --ds-radius-xl: 28px;
+  --ds-radius-full: 999px;
+  --ds-motion-instant: 0ms;
+  --ds-motion-fast: 120ms;
+  --ds-motion-normal: 200ms;
+  --ds-motion-slow: 360ms;
+  --ds-motion-hover: 180ms;
+  --ds-motion-flip: 480ms;
+  --ds-motion-feedback: 480ms;
+  --ds-motion-ease-standard: cubic-bezier(.2, .7, .2, 1);
+  --ds-motion-interaction: 160ms;
+  --ds-motion-tab: 280ms;
+  --ds-motion-pager: 420ms;
+  --ds-motion-feedback-in: 200ms;
+  --ds-motion-stroke: 720ms;
+  --ds-motion-progress: 250ms;
+  --ds-motion-menu: 280ms;
+  --ds-motion-scrim: 200ms;
+  --ds-motion-dialog-open: 240ms;
+  --ds-motion-popover: var(--ds-motion-hover);
+  --ds-z-base: 0;
+  --ds-z-content: 1;
+  --ds-z-nav: 40;
+  --ds-z-overlay: 100;
+  --ds-z-modal: 200;
+  --ds-layout-content-max: 880px;
+  --ds-layout-nav-height: 66px;
+  --ds-layout-dialog-max: 780px;
+  --ds-breakpoint-tablet: 760px;
+  --ds-breakpoint-narrow: 380px;
+  --ds-target-min: 44px;
+  --ds-target-aa-min: 24px;
+
+  /* Legacy compatibility names are declared once in styles.css and reference semantic tokens above. */
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ds-color-canvas: #171614;
+  --ds-color-surface: #23211E;
+  --ds-color-surface-subtle: #292724;
+  --ds-color-surface-elevated: #2B2824;
+  --ds-color-surface-overlay: rgba(23, 22, 20, .94);
+  --ds-color-input: #23211E;
+  --ds-color-disabled: #302D29;
+  --ds-color-text-primary: #F4EFE3;
+  --ds-color-text-secondary: #DDD5C8;
+  --ds-color-text-muted: #B8AFA2;
+  --ds-color-text-inverse: #171614;
+  --ds-color-action-primary: #8DA9D9;
+  --ds-color-action-primary-text: #171614;
+  --ds-color-action-primary-hover: #9CB5E3;
+  --ds-color-action-primary-pressed: #7A98CD;
+  --ds-color-action-secondary-hover: #302D29;
+  --ds-color-border: #746B60;
+  --ds-color-border-subtle: #4B463F;
+  --ds-color-border-strong: #A99E8D;
+  --ds-color-border-interactive: #A99E8D;
+  --ds-focus-ring: #A9C1ED;
+  --ds-state-success-text: #B9D49A;
+  --ds-state-success-bg: #283128;
+  --ds-state-success-border: #5D7650;
+  --ds-state-warning-text: #E9C46A;
+  --ds-state-warning-bg: #332F27;
+  --ds-state-warning-border: #8F7745;
+  --ds-state-danger-text: #FF9B91;
+  --ds-state-danger-bg: #332724;
+  --ds-state-danger-border: #8D4F49;
+  --ds-state-info-text: #A9C1ED;
+  --ds-state-info-bg: #27303B;
+  --ds-state-info-border: #536988;
+  --ds-color-progress-track: #35312C;
+  --ds-color-skeleton-base: #292724;
+  --ds-color-skeleton-highlight: #35312C;
+  --ds-color-skeleton-track: #35312C;
+  --ds-color-skeleton-fill: #4B463F;
+  --ds-color-legacy-shu: #E06A5F;
+  --ds-brand-moss: #A9B77C;
+}
+
+/* System remains a genuine preference: it follows the OS until the user pins a theme. */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    color-scheme: dark;
+    --ds-color-canvas: #171614;
+    --ds-color-surface: #23211E;
+    --ds-color-surface-subtle: #292724;
+    --ds-color-surface-elevated: #2B2824;
+    --ds-color-surface-overlay: rgba(23, 22, 20, .94);
+    --ds-color-input: #23211E;
+    --ds-color-disabled: #302D29;
+    --ds-color-text-primary: #F4EFE3;
+    --ds-color-text-secondary: #DDD5C8;
+    --ds-color-text-muted: #B8AFA2;
+    --ds-color-text-inverse: #171614;
+    --ds-color-action-primary: #8DA9D9;
+    --ds-color-action-primary-text: #171614;
+    --ds-color-action-primary-hover: #9CB5E3;
+    --ds-color-action-primary-pressed: #7A98CD;
+    --ds-color-action-secondary-hover: #302D29;
+    --ds-color-border: #746B60;
+    --ds-color-border-subtle: #4B463F;
+    --ds-color-border-strong: #A99E8D;
+    --ds-color-border-interactive: #A99E8D;
+    --ds-focus-ring: #A9C1ED;
+    --ds-state-success-text: #B9D49A;
+    --ds-state-success-bg: #283128;
+    --ds-state-success-border: #5D7650;
+    --ds-state-warning-text: #E9C46A;
+    --ds-state-warning-bg: #332F27;
+    --ds-state-warning-border: #8F7745;
+    --ds-state-danger-text: #FF9B91;
+    --ds-state-danger-bg: #332724;
+    --ds-state-danger-border: #8D4F49;
+    --ds-state-info-text: #A9C1ED;
+    --ds-state-info-bg: #27303B;
+    --ds-state-info-border: #536988;
+    --ds-color-progress-track: #35312C;
+    --ds-color-skeleton-base: #292724;
+    --ds-color-skeleton-highlight: #35312C;
+    --ds-color-skeleton-track: #35312C;
+    --ds-color-skeleton-fill: #4B463F;
+    --ds-color-legacy-shu: #E06A5F;
+    --ds-brand-moss: #A9B77C;
+  }
+}
+
+/* Shared presentation states. Page-level composition remains owned by each screen. */
+:where(button, input, select, textarea) {
+  font-family: var(--ui-font);
+}
+
+:where(input, select, textarea, button) {
+  accent-color: var(--ds-color-action-primary);
+}
+
+button:focus-visible, a[href]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [role="button"]:focus-visible, [role="tab"]:focus-visible, [role="menuitem"]:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid var(--ds-focus-ring);
+  outline-offset: var(--ds-focus-offset);
+}
+
+:disabled, [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* The default-action contract: a filled indigo action; its foreground changes with the theme. */
+:root .app-shell .button.primary {
+  background: var(--ds-color-action-primary);
+  border-color: var(--ds-color-action-primary);
+  color: var(--ds-color-action-primary-text);
+}
+:root .app-shell .button.primary:hover:not(:disabled) {
+  background: var(--ds-color-action-primary-hover);
+  border-color: var(--ds-color-action-primary-hover);
+}
+:root .app-shell .button.primary:active:not(:disabled) {
+  background: var(--ds-color-action-primary-pressed);
+  border-color: var(--ds-color-action-primary-pressed);
+}
+
+/* Review ratings share shape and typography, but each outcome keeps its own meaning. */
+.app-shell .learning-card-back .rating.rating-again {
+  color: var(--ds-review-again-text);
+  border: 1px solid var(--ds-review-again-border);
+  background: var(--ds-review-again-bg);
+}
+.app-shell .learning-card-back .rating.rating-hard {
+  color: var(--ds-review-hard-text);
+  border: 1px solid var(--ds-review-hard-border);
+  background: var(--ds-review-hard-bg);
+}
+.app-shell .learning-card-back .rating.rating-good {
+  color: var(--ds-review-good-text);
+  border: 1px solid var(--ds-review-good-border);
+  background: var(--ds-review-good-bg);
+}
+.app-shell .learning-card-back .rating.rating-easy {
+  color: var(--ds-review-easy-text);
+  border: 1px solid var(--ds-review-easy-border);
+  background: var(--ds-review-easy-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(button, a[href], input, select, textarea, summary, [role="button"], [role="tab"]):focus-visible {
+    outline-color: Highlight;
+  }
+}
