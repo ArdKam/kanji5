@@ -77,4 +77,9 @@ assert.match(dictionaryCard, /<StrokeOrderViewer key=\{item\.character\}/);
 assert.match(styles, /\.kanji-structure-preview-action[\s\S]*border: 0 !important/);
 assert.match(styles, /\.learning-reference-trigger[\s\S]*min-height: 44px/);
 
+assert.match(app, /reading-vocabulary-gloss/);
+assert.match(app, /unreviewedSourceExample/);
+assert.match(app, /sourceExampleReviewUnknown/);
+assert.match(i18n, /verifiedSourceExample:"Reviewed source example"/);
+assert.match(i18n, /unreviewedSourceExample:"Source example · not reviewed"/);
 console.log("Learning-card follow-up transport, presentation, language and state contracts passed.");
