@@ -148,6 +148,12 @@ test("Learning-card language metadata and pronunciation describe the actual cont
     await page.addInitScript(value => {
       localStorage.setItem("kanji5-ui-language", value);
       localStorage.setItem("kanji5-onboarding-v2", "complete");
+      if (window.speechSynthesis) {
+        Object.defineProperty(window.speechSynthesis, "getVoices", {
+          configurable: true,
+          value: () => [{ lang: "ja-JP", name: "Test Japanese voice" }],
+        });
+      }
     }, language);
     await page.goto("/");
     const card = page.locator("#root .learning-card");
@@ -193,6 +199,25 @@ test("speech controls are unavailable rather than misleading when speech synthes
   const audio = card.locator(".learning-card-front .kanji-row .audio-button");
   await expect(audio).toBeDisabled();
   await expect(audio).toHaveAttribute("aria-label", "Audio is not available in this browser");
+});
+
+test("audio is disabled with a specific explanation when no Japanese voice is available", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    if (window.speechSynthesis) {
+      Object.defineProperty(window.speechSynthesis, "getVoices", {
+        configurable: true,
+        value: () => [{ lang: "en-US", name: "Test English voice" }],
+      });
+    }
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const audio = card.locator(".learning-card-front .kanji-row .audio-button");
+  await expect(audio).toBeDisabled();
+  await expect(audio).toHaveAttribute("aria-label", "A Japanese voice is unavailable in this browser");
 });
 
 test("first Learning-card reveal has its styles ready and transitions cleanly at required viewports", async ({ page }) => {
