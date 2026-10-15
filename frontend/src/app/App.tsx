@@ -307,7 +307,11 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     void getVocabulary(character).then(result=>{
       if(!active)return;
       const items=Array.isArray(result?.items)
-        ? result.items.filter(item=>Boolean(String(item?.word??"").trim()&&String(item?.reading??"").trim()&&String(item?.meaning??"").trim())).slice(0,6)
+        ? result.items.filter(item=>Boolean(String(item?.word??"").trim()&&String(item?.reading??"").trim()&&String(item?.meaning??"").trim())).slice(0,6).map(item=>({
+            ...item,
+            meaningLanguage:item.meaningLanguage??"unknown",
+            reviewStatus:item.reviewStatus??((item.source||item.provenance?.source)?"unreviewed":"unknown")
+          }))
         : [];
       setExamplesState({character,status:"resolved",items});
     }).catch(()=>{
