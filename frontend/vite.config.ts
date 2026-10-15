@@ -22,6 +22,9 @@ export default defineConfig({
           if (sourceNames.some((name) => name.includes("dictionary-catalog"))) {
             return "assets/dictionary-catalog-[hash][extname]";
           }
+          if (sourceNames.some((name) => name.includes("practice-experience"))) {
+            return "assets/practice-experience-[hash][extname]";
+          }
           if (assetInfo.name?.endsWith(".css")) return "kanji5-react.css";
           if (assetInfo.name?.includes("NotoSerifJP-Regular.subset")) return "assets/[name][extname]";
           return "assets/[name]-[hash][extname]";

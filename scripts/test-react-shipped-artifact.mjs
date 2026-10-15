@@ -9,6 +9,13 @@ if(!dictionaryCatalogCssAsset) throw new Error("DICTIONARY_CATALOG_CSS_MISSING_F
 const dictionaryCatalogCssPath="react-dist/"+dictionaryCatalogCssAsset;
 if(!fs.existsSync(dictionaryCatalogCssPath)) throw new Error("SHIPPED_DICTIONARY_CATALOG_CSS_CHUNK_MISSING");
 const dictionaryCatalogCss=fs.readFileSync(dictionaryCatalogCssPath,"utf8");
+const practiceExperienceCssAsset=Object.values(viteManifest).flatMap(entry=>[entry.file,...(entry.css||[])]).find(asset=>typeof asset==="string" && /practice-experience.*\\.css$/.test(asset));
+if(!practiceExperienceCssAsset) throw new Error("PRACTICE_EXPERIENCE_CSS_MISSING_FROM_VITE_MANIFEST");
+const practiceExperienceCssPath="react-dist/"+practiceExperienceCssAsset;
+if(!fs.existsSync(practiceExperienceCssPath)) throw new Error("SHIPPED_PRACTICE_EXPERIENCE_CSS_CHUNK_MISSING");
+const practiceExperienceCss=fs.readFileSync(practiceExperienceCssPath,"utf8");
+if(!practiceExperienceCss.includes(".practice-home{") || !practiceExperienceCss.includes("max-height:calc(100dvh - 155px)")) throw new Error("SHIPPED_PRACTICE_EXPERIENCE_CSS_CHUNK_INCOMPLETE");
+if(css.includes(".practice-home{")) throw new Error("PRACTICE_HOME_STYLES_STILL_IN_STARTUP_CSS_BUNDLE");
 if(!dictionaryCatalogCss.includes(".dictionary-page") || !dictionaryCatalogCss.includes(".kanji-catalog-grid")) throw new Error("SHIPPED_DICTIONARY_CATALOG_CSS_CHUNK_INCOMPLETE");
 if(css.includes(".dictionary-page{") || css.includes(".kanji-catalog-grid{")) throw new Error("DICTIONARY_CATALOG_STYLES_STILL_IN_STARTUP_CSS_BUNDLE");
 
