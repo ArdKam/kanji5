@@ -26,6 +26,11 @@ assert.match(app, /t\("useNormalReadingNotation"\)/);
 assert.doesNotMatch(app, /className="example-row"[^>]*lang="ja"/);
 assert.match(app, /className="example-meaning" lang="en"/);
 assert.match(app, /examplesState\.character===activeCharacter/);
+assert.match(app, /personalMnemonicState\.character===activeCharacter/);
+assert.match(app, /preparedMnemonicState\.character===activeCharacter/);
+assert.match(app, /mnemonicDraftState\.character===activeCharacter/);
+assert.match(app, /mnemonicEditingState\.character===activeCharacter/);
+assert.match(app, /mnemonicErrorState\.character===activeCharacter/);
 assert.match(app, /setExamplesState\(\{character:activeCharacter,status:"loading",items:\[\]\}\)/);
 assert.match(app, /Play reading .+ using browser speech/);
 
