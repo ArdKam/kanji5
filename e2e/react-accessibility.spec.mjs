@@ -473,3 +473,29 @@ test("Settings destructive confirmations move focus into the confirmation and ke
   await expect(resetDialog).toBeHidden();
   await expect(reset).toBeFocused();
 });
+
+test('a new guest gets a useful empty state instead of a failing first practice action',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
+  await expect(page.locator('.practice-home')).toBeVisible({timeout:10000});
+  await page.locator('.practice-start-button').click();
+  await expect(page.getByRole('heading',{name:'فعلاً تمرینی برای اجرا در دسترس نیست'})).toBeVisible({timeout:10000});
+  await expect(page.getByRole('button',{name:'رفتن به یادگیری'})).toBeVisible();
+  await page.getByRole('button',{name:'رفتن به یادگیری'}).click();
+  await expect(page.locator('.learning-card')).toBeVisible({timeout:10000});
+});
+
+test('the More drawer is modal and makes the main content inert',async({page})=>{
+  await clean(page);
+  await page.locator('.header-menu-trigger').click();
+  const menu=page.locator('#header-tools-menu');
+  await expect(menu).toBeVisible();
+  await expect(menu).toHaveAttribute('aria-modal','true');
+  for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
+    await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
+    await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(false);
+  }
+});

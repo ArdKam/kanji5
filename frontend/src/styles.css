@@ -619,7 +619,10 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
 }
 .learning-back-page-shortcut:hover{color:var(--sumi);background:color-mix(in srgb,var(--washi) 72%,transparent);opacity:1;transform:translateY(-1px);}
 .learning-back-page-shortcut:active{transform:translateY(0);}
-.learning-back-page-shortcut:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 28%,transparent);outline-offset:1px;opacity:1;}
+.learning-back-page-shortcut-label{display:none;white-space:nowrap;font-size:12px;line-height:1.2;}
+.learning-back-page-shortcut:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:1px;opacity:1;}
+.learning-back-page-shortcut.active{flex:0 0 auto;width:auto;min-width:44px;padding-inline:12px;grid-auto-flow:column;gap:7px;}
+.learning-back-page-shortcut.active .learning-back-page-shortcut-label{display:inline;}
 .learning-back-page-shortcut.active{
   color:var(--sumi);
   opacity:1;
