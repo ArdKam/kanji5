@@ -281,6 +281,57 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
     return rows;
   }, [catalog, grade, level, masteryFilter, query, sort, topic]);
 
+  const renderedItems = useMemo(
+    () => visible.slice(0, viewMode === "detailed" ? detailedVisibleCount : visible.length),
+    [visible, viewMode, detailedVisibleCount],
+  );
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const [gridColumns, setGridColumns] = useState(7);
+  const [focusedCharacter, setFocusedCharacter] = useState<string | null>(null);
+  const activeFocusCharacter = renderedItems.some(item => item.character === focusedCharacter)
+    ? focusedCharacter
+    : renderedItems[0]?.character ?? null;
+  const dictionaryRows = useMemo(() => {
+    const rows: KanjiCatalogItem[][] = [];
+    const columns = Math.max(1, gridColumns);
+    for (let index = 0; index < renderedItems.length; index += columns) {
+      rows.push(renderedItems.slice(index, index + columns));
+    }
+    return rows;
+  }, [renderedItems, gridColumns]);
+
+  useEffect(() => {
+    if (!renderedItems.length) {
+      if (focusedCharacter !== null) setFocusedCharacter(null);
+      return;
+    }
+    if (!renderedItems.some(item => item.character === focusedCharacter)) {
+      setFocusedCharacter(renderedItems[0].character);
+    }
+  }, [renderedItems, focusedCharacter]);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const measure = () => {
+      const style = window.getComputedStyle(grid);
+      const padding = (Number.parseFloat(style.paddingInlineStart) || 0) + (Number.parseFloat(style.paddingInlineEnd) || 0);
+      const available = Math.max(0, grid.clientWidth - padding);
+      const gap = viewMode === "detailed" ? 8 : 7;
+      const cellWidth = viewMode === "detailed" ? 165 : 44;
+      const nextColumns = Math.max(1, Math.floor((available + gap) / (cellWidth + gap)));
+      setGridColumns(current => current === nextColumns ? current : nextColumns);
+    };
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(grid);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [renderedItems.length, viewMode]);
+
   useEffect(() => {
     setDetailedVisibleCount(DETAILED_PAGE_SIZE);
   }, [query, level, masteryFilter, grade, sort, topic]);
@@ -356,7 +407,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 <span>{language === "fa" ? "پایه" : "Grade"}</span>
                 <select value={grade} onChange={(event) => setGrade(event.target.value)}>
                   <option value="all">{language === "fa" ? "همه" : "All"}</option>
-                  {Array.from({length:6},(_,index)=>String(index+1)).map(value => <option key={value} value={value}>{language === "fa" ? "پایه " + value : "Grade " + value}</option>)}
+                  {Array.from({length:6},(_,index)=>String(index+1)).map(value => <option key={value} value={value}>{language === "fa" ? "پایه " + formatNumber(Number(value), language) : "Grade " + formatNumber(Number(value), language)}</option>)}
                   <option value="secondary">{language === "fa" ? "متوسطه" : "Secondary"}</option>
                 </select>
               </label>
@@ -595,41 +646,86 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
               </span>
             ))}
           </div>
-          <div className={"kanji-catalog-grid" + (viewMode === "detailed" ? " is-detailed" : "")}>
-          {visible.slice(0, viewMode === "detailed" ? detailedVisibleCount : visible.length).map((item) => {
-            const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
-            const masteryColor = item.state === "mastered" ? "var(--matcha)"
-              : item.state === "stable" ? "var(--ai)"
-              : ["weak", "recovering"].includes(item.state || "") ? "var(--sakura)"
-              : ["learning", "introduced"].includes(item.state || "") ? "var(--shu)"
-              : "var(--line-interactive)";
-            return (
-              <button
-                key={item.character}
-                className={"kanji-catalog-tile" + (viewMode === "detailed" ? " is-detailed" : "")}
-                type="button"
-                data-jlpt={item.jlpt || "unknown"}
-                data-mastery={mastery.toFixed(3)}
-                data-mastery-state={item.state || "unseen"}
-                aria-label={item.character + " — " + (item.jlpt || "unknown") + " — " + formatNumber(Math.round(mastery * 100), language) + "%"}
-                onClick={() => setSelected(item)}
+          <div
+            ref={gridRef}
+            className={"kanji-catalog-grid" + (viewMode === "detailed" ? " is-detailed" : "")}
+            role="grid"
+            aria-label={t("dictionaryTitle", language)}
+            aria-rowcount={dictionaryRows.length}
+            aria-colcount={gridColumns}
+          >
+            {dictionaryRows.map((row, rowIndex) => (
+              <div
+                className="kanji-catalog-row"
+                role="row"
+                key={row[0]?.character ?? rowIndex}
+                style={{gridTemplateColumns: "repeat(" + gridColumns + ", " + (viewMode === "detailed" ? "minmax(0, 1fr)" : "44px") + ")"}}
               >
-                <span className="kanji-catalog-fill" style={{ height: "2px", opacity: 0.95, backgroundColor: masteryColor }} />
-                <span className="kanji-catalog-character" lang="ja">{item.character}</span>
-                {viewMode === "detailed" ? (
-                  <span className="kanji-catalog-details">
-                    <span className="kanji-catalog-details-meta">
-                      {item.jlpt || "—"}{item.grade ? " · G" + formatNumber(item.grade, language) : ""}
-                    </span>
-                    <bdi className="kanji-catalog-details-readings" dir="auto" lang="ja">
-                      {[...item.on.slice(0,2), ...item.kun.slice(0,2)].slice(0,3).join(" · ")}
-                    </bdi>
-                    <bdi className="kanji-catalog-details-meaning" dir="auto">{item.meanings.slice(0,2).join(" · ")}</bdi>
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
+                {row.map((item, columnIndex) => {
+                  const mastery = Math.max(0, Math.min(1, Number(item.mastery) || 0));
+                  const masteryColor = item.state === "mastered" ? "var(--matcha)"
+                    : item.state === "stable" ? "var(--ai)"
+                    : ["weak", "recovering"].includes(item.state || "") ? "var(--sakura)"
+                    : ["learning", "introduced"].includes(item.state || "") ? "var(--shu)"
+                    : "var(--line-interactive)";
+                  return (
+                    <div
+                      className="kanji-catalog-cell"
+                      role="gridcell"
+                      key={item.character}
+                      aria-rowindex={rowIndex + 1}
+                      aria-colindex={columnIndex + 1}
+                    >
+                      <button
+                        className={"kanji-catalog-tile" + (viewMode === "detailed" ? " is-detailed" : "")}
+                        type="button"
+                        tabIndex={activeFocusCharacter === item.character ? 0 : -1}
+                        data-jlpt={item.jlpt || "unknown"}
+                        data-mastery={mastery.toFixed(3)}
+                        data-mastery-state={item.state || "unseen"}
+                        aria-label={item.character + " — " + (item.jlpt || "unknown") + " — " + formatNumber(Math.round(mastery * 100), language) + "%"}
+                        onFocus={() => setFocusedCharacter(item.character)}
+                        onKeyDown={(event) => {
+                          const key = event.key;
+                          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(key)) return;
+                          const buttons = Array.from(gridRef.current?.querySelectorAll<HTMLButtonElement>(".kanji-catalog-tile") ?? []);
+                          const currentIndex = buttons.indexOf(event.currentTarget);
+                          if (currentIndex < 0) return;
+                          const rowStart = Math.floor(currentIndex / gridColumns) * gridColumns;
+                          const rowEnd = Math.min(rowStart + gridColumns, buttons.length) - 1;
+                          let nextIndex = currentIndex;
+                          if (key === "ArrowUp") nextIndex = currentIndex - gridColumns;
+                          else if (key === "ArrowDown") nextIndex = currentIndex + gridColumns;
+                          else if (key === "ArrowLeft") nextIndex = currentIndex + (language === "fa" ? 1 : -1);
+                          else if (key === "ArrowRight") nextIndex = currentIndex + (language === "fa" ? -1 : 1);
+                          else if (key === "Home") nextIndex = event.ctrlKey ? 0 : rowStart;
+                          else if (key === "End") nextIndex = event.ctrlKey ? buttons.length - 1 : rowEnd;
+                          if ((key === "ArrowLeft" || key === "ArrowRight") && Math.floor(nextIndex / gridColumns) !== Math.floor(currentIndex / gridColumns)) return;
+                          if (nextIndex < 0 || nextIndex >= buttons.length || nextIndex === currentIndex) return;
+                          event.preventDefault();
+                          buttons[nextIndex]?.focus();
+                        }}
+                        onClick={() => setSelected(item)}
+                      >
+                        <span className="kanji-catalog-fill" style={{ height: "2px", opacity: 0.95, backgroundColor: masteryColor }} />
+                        <span className="kanji-catalog-character" lang="ja">{item.character}</span>
+                        {viewMode === "detailed" ? (
+                          <span className="kanji-catalog-details">
+                            <span className="kanji-catalog-details-meta">
+                              {item.jlpt || "—"}{item.grade ? " · G" + formatNumber(item.grade, language) : ""}
+                            </span>
+                            <bdi className="kanji-catalog-details-readings" dir="auto" lang="ja">
+                              {[...item.on.slice(0,2), ...item.kun.slice(0,2)].slice(0,3).join(" · ")}
+                            </bdi>
+                            <bdi className="kanji-catalog-details-meaning" dir="auto">{item.meanings.slice(0,2).join(" · ")}</bdi>
+                          </span>
+                        ) : null}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
           {viewMode === "detailed" && detailedVisibleCount < visible.length ? (
             <div className="dictionary-load-more">
