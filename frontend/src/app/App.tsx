@@ -59,6 +59,7 @@ import {
   saveMnemonic,
   updateSettings,
   type Rating,
+  type LearnerMeaningLanguage,
   type VisualStructureInfo,
   type Settings,
   type Snapshot,
@@ -281,7 +282,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const referenceOn=learnerReadingModel.referenceOn??[];
   const referenceKun=learnerReadingModel.referenceKun??[];
   const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
-  const [examplesState,setExamplesState]=useState<{character:string;status:"loading"|"resolved"|"error";items:Array<{word?:string;reading?:string;meaning?:string}>}>({character:"",status:"loading",items:[]});
+  const [examplesState,setExamplesState]=useState<{character:string;status:"loading"|"resolved"|"error";items:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage}>}>({character:"",status:"loading",items:[]});
   const [examplesRetryKey,setExamplesRetryKey]=useState(0);
   const [examplesExpanded,setExamplesExpanded]=useState(false);
   const examplesMatch=examplesState.character===activeCharacter;
