@@ -282,14 +282,14 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const referenceOn=learnerReadingModel.referenceOn??[];
   const referenceKun=learnerReadingModel.referenceKun??[];
   const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
-  const [examplesState,setExamplesState]=useState<{character:string;status:"loading"|"resolved"|"error";items:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage}>}>({character:"",status:"loading",items:[]});
+  const [examplesState,setExamplesState]=useState<{character:string;status:"loading"|"resolved"|"error";items:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:"verified"|"unreviewed"|"unknown"}>}>({character:"",status:"loading",items:[]});
   const [examplesRetryKey,setExamplesRetryKey]=useState(0);
   const [examplesExpanded,setExamplesExpanded]=useState(false);
   const examplesMatch=examplesState.character===activeCharacter;
   const vocabularyExamples=examplesMatch?examplesState.items:[];
   const examplesError=examplesMatch&&examplesState.status==="error";
   const examplesLoading=Boolean(activeCharacter)&&(!examplesMatch||examplesState.status==="loading");
-  const directExamplesSignature=JSON.stringify((Array.isArray(card.examples)?card.examples:[]).map(e=>[e?.word??"",e?.reading??"",e?.meaning??""]));
+  const directExamplesSignature=JSON.stringify((Array.isArray(card.examples)?card.examples:[]).map(e=>[e?.word??"",e?.reading??"",e?.meaning??"",e?.meaningLanguage??"",e?.source??"",e?.sourceVersion??"",e?.reviewStatus??""]));
   const exampleCount=vocabularyExamples.length;
   useEffect(()=>{
     let active=true;
@@ -636,7 +636,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     </div>
   </section>
 }
-function Reading({title,values,examples=[]}:{title:string;values:string[];examples?:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:"en"|"fa"|"ja"|"unknown"}>}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title+" "+values[0]}/>:null}{examples.length?<div className="reading-vocabulary-examples" aria-label={title+" vocabulary examples"}>{examples.map(example=><span className="reading-vocabulary-example" key={example.word}><span lang="ja">{example.word}</span><small lang={example.meaningLanguage&&example.meaningLanguage!=="unknown"?example.meaningLanguage:undefined} dir="auto">{example.meaning}</small></span>)}</div>:null}</div>}
+function Reading({title,values,examples=[]}:{title:string;values:string[];examples?:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:"verified"|"unreviewed"|"unknown"}>}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title+" "+values[0]}/>:null}{examples.length?<div className="reading-vocabulary-examples" aria-label={title+" vocabulary examples"}>{examples.map(example=><span className="reading-vocabulary-example" key={example.word}><span lang="ja">{example.word}</span><small className="reading-vocabulary-gloss" lang={example.meaningLanguage&&example.meaningLanguage!=="unknown"?example.meaningLanguage:undefined} dir="auto">{example.meaning}</small><small className="reading-vocabulary-source-label" lang={getLanguage()}>{example.reviewStatus==="verified"?t("verifiedSourceExample"):example.reviewStatus==="unreviewed"?t("unreviewedSourceExample"):t("sourceExampleReviewUnknown")}</small></span>)}</div>:null}</div>}
 function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
   if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
