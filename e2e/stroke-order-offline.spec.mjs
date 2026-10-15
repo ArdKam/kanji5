@@ -18,18 +18,20 @@ test("Stroke Order component shows a truthful offline error and its retry recove
   await expect(card).toBeVisible({ timeout: 20000 });
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
-  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
-  await expect(card).toHaveClass(/is-revealed/);
-
   const character = (await card.locator(".kanji-display").textContent())?.trim();
   if (!character) throw new Error("Active Kanji is missing");
   const svgUrl = kanjiVgUrl(character);
   await page.evaluate(async url => (await caches.open("kanji5-stroke-svg-v1")).delete(url), svgUrl);
   await context.setOffline(true);
-  await card.locator(".learning-back-page-shortcut").nth(3).click();
+  await page.reload();
+  const offlineCard = page.locator("#root .learning-card");
+  await expect(offlineCard).toBeVisible({ timeout: 20000 });
+  await offlineCard.getByRole("button", { name: "Reveal meaning & readings" }).click();
+  await expect(offlineCard).toHaveClass(/is-revealed/);
+  await offlineCard.locator(".learning-back-page-shortcut").nth(3).click();
   const panel = card.locator(".learning-back-page.active .stroke-order-panel");
   await expect(panel.locator(".stroke-order-error")).toBeVisible({ timeout: 10000 });
-  await expect(panel.locator(".stroke-order-error")).toContainText("not available");
+  await expect(panel.locator(".stroke-order-error")).toContainText("not available right now.");
   const retry = panel.locator(".stroke-order-error").getByRole("button", { name: "Try again" });
   await expect(retry).toBeVisible();
 
