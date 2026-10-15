@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [page, card, i18n, app, main] = await Promise.all([
+const [page, card, i18n, app, main, dictionaryPageCss] = await Promise.all([
   readFile(new URL("../frontend/src/app/DictionaryPage.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/DictionaryKanjiCard.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/i18n.ts", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8"),
   readFile(new URL("../frontend/src/main.tsx", import.meta.url), "utf8"),
+  readFile(new URL("../frontend/src/app/dictionary-page.css", import.meta.url), "utf8"),
 ]);
 
 assert.doesNotMatch(page, /dictionary-polish\.css/, "Dictionary styling must not add a separate CSS bundle");
@@ -30,6 +31,15 @@ assert.match(page, /className="dictionary-view-label"/, "Both view modes must ha
 assert.match(page, /"var\(--matcha\)"/, "Mastered state needs a consistent semantic color");
 assert.match(page, /"var\(--sakura\)"/, "Needs-attention state needs a distinct semantic color");
 assert.match(page, /height: "2px"/, "Mastery should use a restrained indicator rather than filling whole tiles");
+assert.match(page, /const renderedItems = useMemo\\(/, "Keyboard grid should use the actual currently rendered items");
+assert.match(page, /const dictionaryRows = useMemo\\(/, "Kanji tiles need explicit responsive row grouping");
+assert.match(page, /role="grid"/, "Kanji matrix needs an accessible grid role");
+assert.match(page, /role="gridcell"/, "Kanji matrix cells must expose row/column semantics");
+assert.match(page, /tabIndex={activeFocusCharacter === item.character ? 0 : -1}/, "Kanji grid must use roving tabindex");
+assert.match(page, /"ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"/, "Keyboard navigation must cover arrows and Home/End");
+assert.match(page, /formatNumber\\(Number\\(value\\), language\\)/, "Grade values must be localized in Persian and English");
+assert.match(dictionaryPageCss, /\\.kanji-catalog-row\\{[\\s\\S]*?display:grid/, "Lazy Dictionary styles must render each ARIA row as a visual row");
+assert.match(dictionaryPageCss, /\\.kanji-catalog-cell\\{min-width:0;\\}/, "Grid cells must be shrinkable at narrow viewports");
 assert.match(page, /<svg viewBox="0 0 24 24"/, "Search affordance should use vector iconography");
 assert.match(card, /if \(key === "structure"\) return "Structure";/, "Use a clear English label for the structure section");
 assert.match(card, /if \(key === "structure"\) return "ساختار";/, "Use a clear Persian label for the structure section");
