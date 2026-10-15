@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const index=await readFile("index.html","utf8");
 const css=await readFile("frontend/src/styles.css","utf8");
+const designSystemCss=await readFile("frontend/src/design-system.css","utf8");
 const jpCss=await readFile("frontend/src/noto-serif-jp.css","utf8");
 
 const packageJson=JSON.parse(await readFile("frontend/package.json","utf8"));
@@ -12,7 +13,8 @@ await access("frontend/src/assets/NotoSerifJP-Regular.subset.woff2");
 assert.doesNotMatch(index,/rel="preload" href="\.\/react-dist\/assets\/NotoSerifJP-Regular\.subset\.woff2"/,"Noto Serif JP must not use an unconditional preload; it is loaded on demand by the application stylesheet");
 assert.equal(packageJson.dependencies["@fontsource-variable/plus-jakarta-sans"],"5.3.0","Plus Jakarta Sans package must remain pinned to 5.3.0");
 assert.match(frontendEntry,/import "\.\/plus-jakarta\.css";/,"Plus Jakarta Sans stylesheet must be imported from the frontend bundle");
-assert.match(css,/--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif/,"Primary UI font token must use the local Plus Jakarta Sans variable family");
+assert.match(css,/--ui-font:var\(--ds-font-latin\)/,"Primary UI font token must reference the semantic Latin font role");
+assert.match(designSystemCss,/--ds-font-latin:\s*"Plus Jakarta Sans Variable",\s*"Plus Jakarta Sans",\s*system-ui,\s*sans-serif/,"Semantic Latin font role must use the local Plus Jakarta Sans variable family");
 assert.match(frontendEntry,/import "\.\/plus-jakarta\.css";/,"Plus Jakarta Sans stylesheet import must remain explicit");
 assert.doesNotMatch(css,/font-family:[^;]*\bInter\b/,"Inter must not remain an explicit UI font family");
 assert.ok(jpCss.includes('font-family:"Noto Serif JP";'),"Local Noto Serif JP @font-face is missing");

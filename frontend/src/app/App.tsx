@@ -537,16 +537,16 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         <div className="learning-back-footer">
           {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
             <button className={"learning-back-page-shortcut"+(backPage===0?" active":"")} type="button" aria-label={t("meaningAndStructure")} title={t("meaningAndStructure")} aria-current={backPage===0?"page":undefined} onClick={()=>jumpToBackPage(0)}>
-              <UiIcon name="learning" size={18}/>
+              <UiIcon name="learning" size={18}/><span className="learning-back-page-shortcut-label">{t("meaningAndStructure")}</span>
             </button>
             {hasExamplesPage?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>!examplesLoading&&jumpToBackPage(1)} disabled={examplesLoading}>
-              <UiIcon name="reading" size={18}/>
+              <UiIcon name="reading" size={18}/><span className="learning-back-page-shortcut-label">{t("vocabularyExamples")}</span>
             </button>:null}
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?2:1)?" active":"")} type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} aria-current={backPage===(hasExamplesPage?2:1)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
-              <UiIcon name="mnemonic" size={18}/>
+              <UiIcon name="mnemonic" size={18}/><span className="learning-back-page-shortcut-label">{t("personalMnemonic")}</span>
             </button>
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
-              <UiIcon name="writing" size={18}/>
+              <UiIcon name="writing" size={18}/><span className="learning-back-page-shortcut-label">{t("strokeOrder")}</span>
             </button>
             <span className="pager-current sr-only" aria-live="polite">
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
@@ -937,6 +937,7 @@ function LoadingLearning(){
   </section>;
 }
 function App(){
+  const [practiceUnavailable,setPracticeUnavailable]=useState(false);
   const [onboardingComplete,setOnboardingComplete]=useState(()=>isOnboardingComplete());
   const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
   const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
@@ -1017,7 +1018,7 @@ function App(){
     };
   },[refresh,showOnboarding]);
   const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
-  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
+  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");await yieldToBrowser();try{const result=await task();if(experience==="practice")setPracticeUnavailable(false);if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";if(code==="KANJI5_NO_EXERCISE_AVAILABLE"&&experience==="practice"){setPracticeUnavailable(true);setError("");return undefined}const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. یک جلسهٔ هدفمند بسازید یا بعداً دوباره تلاش کنید.":"No exercise is available right now. Build a focused study session or try again later."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. لطفاً دوباره تلاش کنید.":"The exercise took too long to start. Please try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
   const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
   useEffect(()=>{
     if(!headerMenuOpen)return;
@@ -1035,10 +1036,14 @@ function App(){
     };
     document.addEventListener("keydown",onKeyDown);
     const previousOverflow=document.body.style.overflow;
+    const inertTargets=Array.from(document.querySelectorAll<HTMLElement>(".skip-link,.header-brand,.session-progress,.header-menu-trigger,.account-button,.experience-nav,#primary-content,.footer"));
+    const previousInert=inertTargets.map(element=>element.inert);
+    inertTargets.forEach(element=>{element.inert=true});
     document.body.style.overflow="hidden";
     requestAnimationFrame(()=>getFocusable()[0]?.focus());
     return()=>{
       document.removeEventListener("keydown",onKeyDown);
+      inertTargets.forEach((element,index)=>{element.inert=previousInert[index]});
       document.body.style.overflow=previousOverflow;
       requestAnimationFrame(()=>opener?.focus());
     };
@@ -1049,7 +1054,7 @@ function App(){
     <style data-learning-surface>{learningSurfaceStyles}</style>
     <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
     <header className={"header"+(headerMenuOpen?" menu-open":"")}><div className="header-brand"><p className="eyebrow red">{t("smartLearning")}</p><div className="header-brand-lockup"><img className="header-brand-mark" src="./icon.svg" alt="" aria-hidden="true" /><h1 dir="ltr">Rinemi</h1></div></div>
-      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-labelledby="header-tools-menu-title">
+      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-hidden="true" tabIndex={-1} aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-modal="true" aria-labelledby="header-tools-menu-title">
   <div className="header-tools-menu-header"><div className="header-tools-menu-heading"><span className="header-tools-menu-kana" lang="ja" aria-hidden="true">道具</span><span aria-hidden="true">·</span><strong id="header-tools-menu-title">{t("moreMenuTitle",language)}</strong></div><button className="header-tools-menu-close" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}><UiIcon name="close" size={19}/></button></div>
   <div className="header-tools-menu-scroll">
     <section className="header-tools-menu-section" aria-labelledby="header-tools-learning-title">
@@ -1073,9 +1078,9 @@ function App(){
       <button className="menu-nav-item menu-settings-item" type="button" aria-label={t("settings",language)} disabled={busy} onClick={()=>{setSettingsOpen(true);setSecondaryPage("settings");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="settings" size={19}/></span><span className="menu-nav-copy"><strong>{t("settings",language)}</strong></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
     </section>
   </div>
-</aside></>:null}</div><AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
+</aside></>:null}<AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div></div>
     </header>
-    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await clearCustomStudyFilter();await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
+    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{setPracticeUnavailable(false);changeExperience("practice");void action(async()=>{await clearCustomStudyFilter();await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow">      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div><button className="button secondary" type="button" onClick={()=>setError("")}>{t("close",language)}</button></section> : null}
       {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
         {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
         {secondaryPage==="settings" ? <SettingsDialog
@@ -1124,6 +1129,8 @@ function App(){
     <PracticeHome
       language={language}
       busy={busy}
+      practiceUnavailable={practiceUnavailable}
+      onGoToLearning={()=>{setPracticeUnavailable(false);changeExperience("review")}}
       onStartActiveRecall={async()=>{
         await action(async()=>{
           await startExercise();

@@ -19,11 +19,15 @@ const TOPIC_GLYPHS: Record<string, string> = {
 export function PracticeHome({
   language,
   busy = false,
+  practiceUnavailable,
+  onGoToLearning,
   onStartActiveRecall,
   onStartCustomStudy,
 }: {
   language: Language;
   busy?: boolean;
+  practiceUnavailable: boolean;
+  onGoToLearning: () => void;
   onStartActiveRecall: () => Promise<void>;
   onStartCustomStudy: (filter: CustomStudyFilter) => Promise<boolean>;
 }) {
@@ -129,17 +133,31 @@ export function PracticeHome({
         <h2 id="practice-home-title">{t("practiceTitle", language)}</h2>
       </header>
 
-      <section className="surface card practice-home-hero" aria-labelledby="practice-recommended-title">
-        <div className="practice-home-hero-copy">
-          <p className="eyebrow red practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
-          <h3 id="practice-recommended-title">{t("practiceRecommendedTitle", language)}</h3>
-          <p className="subtitle">{t("practiceRecommendedHint", language)}</p>
-        </div>
-        <button className="button primary practice-start-button" type="button" disabled={busy} onClick={() => void onStartActiveRecall()}>
-          <span>{t("startExercise", language)}</span>
-          <span aria-hidden="true" className="practice-button-arrow">{language === "fa" ? "←" : "→"}</span>
-        </button>
-      </section>
+      {practiceUnavailable ? (
+        <section className="surface card practice-home-hero practice-home-empty" aria-labelledby="practice-first-study-title">
+          <div className="practice-home-hero-copy">
+            <p className="eyebrow red practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
+            <h3 id="practice-first-study-title">{t("practiceFirstStudyTitle", language)}</h3>
+            <p className="subtitle">{t("practiceFirstStudyHint", language)}</p>
+          </div>
+          <button className="button primary practice-start-button" type="button" onClick={onGoToLearning}>
+            <span>{t("practiceGoLearn", language)}</span>
+            <span aria-hidden="true" className="practice-button-arrow">{language === "fa" ? "←" : "→"}</span>
+          </button>
+        </section>
+      ) : (
+        <section className="surface card practice-home-hero" aria-labelledby="practice-recommended-title">
+          <div className="practice-home-hero-copy">
+            <p className="eyebrow red practice-home-kicker">{t("practiceRecommendedLabel", language)}</p>
+            <h3 id="practice-recommended-title">{t("practiceRecommendedTitle", language)}</h3>
+            <p className="subtitle">{t("practiceRecommendedHint", language)}</p>
+          </div>
+          <button className="button primary practice-start-button" type="button" disabled={busy} onClick={() => void onStartActiveRecall()}>
+            <span>{t("startExercise", language)}</span>
+            <span aria-hidden="true" className="practice-button-arrow">{language === "fa" ? "←" : "→"}</span>
+          </button>
+        </section>
+      )}
 
       <section className="practice-topic-section" aria-labelledby="practice-topics-title">
         <div className="practice-section-heading">

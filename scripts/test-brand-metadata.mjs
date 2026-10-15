@@ -13,6 +13,7 @@ const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
 const settings = await fs.readFile("frontend/src/app/SettingsDialog.tsx", "utf8");
 const personalMnemonicBackup = await fs.readFile("frontend/src/app/MnemonicBackup.tsx", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
+const designSystem = await fs.readFile("frontend/src/design-system.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
 const icon192 = await fs.readFile("icon-192.svg", "utf8");
 const icon512 = await fs.readFile("icon-512.svg", "utf8");
@@ -30,7 +31,7 @@ assert.ok(!personalMnemonicBackup.includes("kanji5-personal-mnemonics.json"), "p
 assert.ok(index.includes('content="Rinemi — یادگیری کانجی ژاپنی با مرور فاصله‌دار تطبیقی"'), "index.html description must match the product positioning");
 assert.ok(index.includes('<p class="kanji5-startup-name" dir="ltr">Rinemi</p>'), "startup shell must display the canonical wordmark");
 assert.ok(manifest.name === "Rinemi" && manifest.short_name === "Rinemi", "PWA name and short_name must use Rinemi");
-assert.ok(manifest.description === "Japanese kanji learning with adaptive spaced repetition", "PWA description must use the canonical product description");
+assert.ok(manifest.description === "Rinemi — یادگیری کانجی ژاپنی با مرور فاصله‌دار تطبیقی", "PWA description must match the canonical Persian product positioning.");
 assert.ok(manifest.theme_color === "#505F83" && manifest.background_color === "#F7F4EE", "PWA colors must match the Rinemi palette");
 assert.ok(manifest.display === "standalone" && manifest.start_url === "./" && manifest.scope === "./", "PWA install paths and display mode must remain stable");
 assert.ok(app.includes('<h1 dir="ltr">Rinemi</h1>') && app.includes('className="header-brand-mark" src="./icon.svg"'), "main app header must render the wordmark and brand mark");
@@ -38,11 +39,12 @@ assert.ok(onboarding.includes("<strong>Rinemi</strong>") && !onboarding.includes
 assert.ok(onboarding.includes('className="kanji5-onboarding-brand-mark" src="./icon.svg"'), "onboarding must use the canonical Rinemi mark");
 assert.ok(onboarding.includes("--paper:#F7F4EE") && onboarding.includes("--indigo:#505F83") && onboarding.includes("--shu:#505F83") && onboarding.includes("--sakura:#D6A1AA"), "onboarding palette must match the Rinemi system");
 assert.ok(!onboarding.includes("--indigo:#304f74") && !onboarding.includes("--shu:#b56d72"), "onboarding must not retain its legacy palette");
-assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — پنج کانجی در روز" : "Rinemi — Five kanji a day";'), "dynamic document title must use Rinemi in both languages");
+assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — یادگیری کانجی ژاپنی" : "Rinemi — Learn Japanese kanji";'), "dynamic document title must stay aligned with the canonical product description");
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
 }
-assert.ok(styles.includes("--shu:#505F83;") && styles.includes("--sakura:#D6A1AA;"), "UI tokens must include the Rinemi indigo and sakura palette");
+assert.ok(styles.includes("--shu:var(--ds-color-legacy-shu);") && styles.includes("--sakura:var(--ds-brand-sakura);"), "Legacy palette names must remain semantic compatibility aliases");
+assert.ok(designSystem.includes("--ds-brand-indigo: #505F83;") && designSystem.includes("--ds-brand-sakura: #D6A1AA;"), "Semantic design tokens must include the Rinemi indigo and sakura palette");
 for (const [name, source] of [["icon.svg", icon], ["icon-192.svg", icon192], ["icon-512.svg", icon512]]) {
   assert.ok(source.includes("Rinemi"), name + " must carry accessible Rinemi naming");
   assert.ok(source.includes("#505F83") && source.includes("#D6A1AA") && source.includes("#F7F4EE"), name + " must match the canonical palette");

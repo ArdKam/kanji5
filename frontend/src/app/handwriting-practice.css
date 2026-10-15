@@ -10,23 +10,23 @@
   min-width:0;
   min-height:44px;
   padding:6px 8px;
-  border:1px solid var(--line);
+  border:1px solid var(--ds-color-border);
   border-radius:10px;
-  background:var(--paper);
-  color:var(--mute);
+  background:var(--ds-color-surface);
+  color:var(--ds-color-text-muted);
   font:inherit;
-  font-size:var(--text-xs);
+  font-size:var(--ds-type-caption);
   font-weight:850;
   cursor:pointer;
 }
-.handwriting-practice .handwriting-hint-segment:hover{background:var(--washi);color:var(--ink);}
+.handwriting-practice .handwriting-hint-segment:hover{background:var(--ds-color-canvas);color:var(--ds-color-text-secondary);}
 .handwriting-practice .handwriting-hint-segment.is-active{
-  border-color:color-mix(in srgb,var(--shu) 30%,var(--line));
-  background:color-mix(in srgb,var(--shu) 8%,var(--paper));
-  color:var(--ink);
+  border-color:color-mix(in srgb,var(--ds-color-legacy-shu) 30%,var(--ds-color-border));
+  background:color-mix(in srgb,var(--ds-color-legacy-shu) 8%,var(--ds-color-surface));
+  color:var(--ds-color-text-secondary);
 }
 .handwriting-practice .handwriting-hint-segment:focus-visible{
-  outline:2px solid color-mix(in srgb,var(--shu) 45%,transparent);
+  outline: 3px solid var(--ds-focus-ring);
   outline-offset:1px;
 }
 .handwriting-grade-seal{
@@ -40,16 +40,16 @@
   place-items:center;
   width:40px;
   height:40px;
-  border:1px solid color-mix(in srgb,var(--shu) 36%,var(--line));
+  border:1px solid color-mix(in srgb,var(--ds-color-legacy-shu) 36%,var(--ds-color-border));
   border-radius:50%;
-  color:var(--shu);
+  color:var(--ds-color-legacy-shu);
   font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;
   font-size:24px;
   line-height:1;
-  background:color-mix(in srgb,var(--shu) 5%,var(--paper));
+  background:color-mix(in srgb,var(--ds-color-legacy-shu) 5%,var(--ds-color-surface));
 }
 .handwriting-grade-seal small{
-  color:var(--mute);
+  color:var(--ds-color-text-muted);
   font-size:10px;
   font-weight:800;
   line-height:1.2;

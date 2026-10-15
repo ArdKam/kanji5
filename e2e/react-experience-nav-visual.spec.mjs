@@ -253,3 +253,81 @@ test('Dictionary Kanji matrix exposes row/column semantics and directional keybo
   await page.keyboard.press('End');
   await expect(tiles.nth(Math.min(columnCount, tileCount) - 1)).toBeFocused();
 });
+
+
+test('Dictionary topic selector stays within short mobile viewports and keeps its list scrollable', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+
+  const advanced = page.locator('.dictionary-advanced-filters');
+  await advanced.locator('summary').click();
+  const trigger = advanced.getByRole('button', { name: /^Topic:/ });
+  const picker = page.locator('.dictionary-topic-dialog');
+
+  for (const viewport of [
+    { width: 320, height: 568 },
+    { width: 360, height: 640 },
+    { width: 390, height: 667 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await trigger.click();
+    await expect(picker).toBeVisible();
+
+    const geometry = await picker.evaluate((dialog) => {
+      const rect = dialog.getBoundingClientRect();
+      const navRect = document.querySelector('.experience-nav').getBoundingClientRect();
+      const searchRect = dialog.querySelector('.dictionary-topic-search-input').getBoundingClientRect();
+      const closeRect = dialog.querySelector('.dictionary-topic-dialog-close').getBoundingClientRect();
+      const allRect = dialog.querySelector('.dictionary-topic-option-all').getBoundingClientRect();
+      const list = dialog.querySelector('.dictionary-topic-browser-list');
+      const listStyle = getComputedStyle(list);
+      const inside = (item) => item.top >= -1 && item.left >= -1 &&
+        item.bottom <= window.innerHeight + 1 && item.right <= window.innerWidth + 1;
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        navTop: navRect.top,
+        searchInside: inside(searchRect),
+        closeInside: inside(closeRect),
+        allTopicsInside: inside(allRect),
+        listHeight: list.clientHeight,
+        listScrollable: ['auto', 'scroll'].includes(listStyle.overflowY) &&
+          list.clientHeight > 0 && list.scrollHeight > list.clientHeight,
+      };
+    });
+
+    expect(geometry.top, `dialog top at ${viewport.width}x${viewport.height}`).toBeGreaterThanOrEqual(0);
+    expect(geometry.bottom, `dialog bottom at ${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(geometry.navTop - 4);
+    expect(geometry.left, `dialog left at ${viewport.width}x${viewport.height}`).toBeGreaterThanOrEqual(0);
+    expect(geometry.right, `dialog right at ${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(geometry.viewportWidth);
+    expect(geometry.searchInside).toBe(true);
+    expect(geometry.closeInside).toBe(true);
+    expect(geometry.allTopicsInside).toBe(true);
+    expect(geometry.listHeight).toBeGreaterThan(0);
+    expect(geometry.listScrollable).toBe(true);
+
+    const list = picker.locator('.dictionary-topic-browser-list');
+    const lastTopic = picker.locator('.dictionary-topic-option[data-topic-id]:not([data-topic-id="all"])').last();
+    await lastTopic.scrollIntoViewIfNeeded();
+    const lastTopicInsideList = await lastTopic.evaluate((item) => {
+      const itemRect = item.getBoundingClientRect();
+      const listRect = item.closest('.dictionary-topic-browser-list').getBoundingClientRect();
+      return itemRect.top >= listRect.top - 1 && itemRect.bottom <= listRect.bottom + 1;
+    });
+    expect(lastTopicInsideList, `last topic reachable inside scrolling list at ${viewport.width}x${viewport.height}`).toBe(true);
+    await list.evaluate((node) => { node.scrollTop = 0; });
+    await page.keyboard.press('Escape');
+    await expect(picker).toBeHidden();
+  }
+});
