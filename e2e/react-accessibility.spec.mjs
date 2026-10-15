@@ -483,6 +483,8 @@ test('a new guest gets a useful empty state instead of a failing first practice 
   await expect(page.getByRole('button',{name:'رفتن به یادگیری'})).toBeVisible();
   await page.getByRole('button',{name:'رفتن به یادگیری'}).click();
   await expect(page.locator('.learning-card')).toBeVisible({timeout:10000});
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
+  await expect(page.locator('.practice-home .practice-home-hero:not(.practice-home-empty)')).toBeVisible({timeout:10000});
 });
 
 test('the More drawer is modal and makes the main content inert',async({page})=>{
