@@ -16,6 +16,16 @@ const source = buildLearnerContent({
 });
 assert.deepEqual(source.meanings.primary, ["day", "sun"]);
 assert.deepEqual(source.meanings.secondary, ["Japan"]);
+
+const referenceOnly = buildLearnerContent({
+  character: "箇",
+  meanings: ["counter for articles"],
+  meaningLanguage: "en",
+  meaningProvenance: { source: "KANJIDIC2 via jkindrix/japanese-language-data", version: "kanji-data.json:v1", entryId: "箇" },
+});
+assert.deepEqual(referenceOnly.meanings.primary, []);
+assert.deepEqual(referenceOnly.meanings.reference, ["counter for articles"]);
+assert.equal(referenceOnly.meaningRecords[0].priority, "reference");
 assert.equal(source.meaningRecords.length, 3);
 for (const record of source.meaningRecords) {
   assert.equal(record.language, "en");
