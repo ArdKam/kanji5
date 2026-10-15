@@ -1142,7 +1142,8 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:var(--washi);col
 
 
 /* Directional header menu contract: LTR opens from the left; RTL opens from the right. */
-.header.menu-open .account-button{visibility:visible!important;pointer-events:none!important;}
+.header.menu-open .account-button{visibility:visible!important;pointer-events:none!important;z-index:5!important;}
+.header.menu-open .header-actions{z-index:1000!important;}
 .header-tools-menu{
   inset-inline-start:0!important;
   inset-inline-end:auto!important;
@@ -1159,7 +1160,7 @@ html[dir="rtl"] .header-tools-menu{
   box-shadow:-24px 0 70px -42px rgba(16,24,40,.6)!important;
   animation-name:headerMenuDrawerIn!important;
 }
-.header-actions .header-tools{inset-inline-start:0;inset-inline-end:auto;width:44px;height:44px;min-width:44px;min-height:44px;}
+.header-actions .header-tools{inset-inline-start:0;inset-inline-end:0;width:100%;height:44px;min-width:100%;min-height:44px;z-index:101;}
 .header-actions .account-button{inset-inline-start:auto;inset-inline-end:0;}
 @media(min-width:761px){
   .header-actions{display:block!important;position:absolute!important;inset:0!important;}
@@ -1442,7 +1443,6 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   html[dir="rtl"] .header-tools-menu{
     animation-name:headerMenuPopoverIn!important;
   }
-  .header-menu-scrim{display:none;}
 }
 @keyframes headerMenuPopoverIn{
   from{transform:translateY(-4px) scale(.985);opacity:0}

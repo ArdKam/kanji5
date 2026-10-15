@@ -493,6 +493,11 @@ test('the More drawer is modal and makes the main content inert',async({page})=>
   const menu=page.locator('#header-tools-menu');
   await expect(menu).toBeVisible();
   await expect(menu).toHaveAttribute('aria-modal','true');
+  await page.setViewportSize({width:1280,height:900});
+  const accountPoint=await page.locator('.account-button').evaluate((node)=>{const r=node.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}});
+  const topLayer=await page.evaluate(({x,y})=>{const node=document.elementFromPoint(x,y);return {account:Boolean(node?.closest('.account-button')),scrim:Boolean(node?.closest('.header-menu-scrim')),menu:Boolean(node?.closest('#header-tools-menu'))}},accountPoint);
+  expect(topLayer.account,'account button must not sit above the open menu scrim').toBe(false);
+  expect(topLayer.scrim||topLayer.menu,'the scrim or drawer must cover the account location').toBe(true);
   for(const selector of ['.header-brand','.header-menu-trigger','.account-button','.experience-nav','#primary-content','.footer']){
     await expect.poll(()=>page.locator(selector).evaluate(node=>node.inert)).toBe(true);
   }

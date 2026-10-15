@@ -15,12 +15,15 @@ for(const token of [
   "headerMenuPopoverIn"
 ]) assert.ok(css.includes(token),`menu redesign contract missing: ${token}`);
 
-assert.match(css,/\.header\.menu-open \.account-button\{visibility:visible!important;pointer-events:none!important;\}/, "account button must remain visible but non-interactive while the menu is open");
+assert.match(css,/\.header\.menu-open \.account-button\{visibility:visible!important;pointer-events:none!important;z-index:5!important;\}/, "account button must remain visible, non-interactive, and below the scrim while the menu is open");
+assert.match(css,/\.header\.menu-open \.header-actions\{z-index:1000!important;\}/, "open-menu stack must cover page content and persistent navigation");
+assert.match(css,/\.header-actions \.header-tools\{inset-inline-start:0;inset-inline-end:0;width:100%;height:44px;min-width:100%;min-height:44px;z-index:101;\}/, "menu/scrim/account controls must share a stacking context spanning the header");
 assert.doesNotMatch(css,/\.header\.menu-open \.account-button\{[^}]*visibility:\s*hidden/i, "the menu-open state must not hide the account button");
 
 assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:absolute!important;[\s\S]*?max-height:min\(640px/);
 assert.match(css,/@media\(max-width:760px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:fixed!important;[\s\S]*?inset-inline-start:0!important;[\s\S]*?inset-inline-end:auto!important;/);
-assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-menu-scrim\{display:none;\}/);
+assert.doesNotMatch(css,/\.header-menu-scrim\{display:none;\}/, "desktop must retain the scrim so the account control stays below it");
+assert.ok(app.includes(`</aside></>:null}<AccountButton language={language} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div></div>`), "AccountButton must share the menu/scrim stacking parent");
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.header-tools-menu\{animation:none!important;\}/);
 
 for(const label of [
