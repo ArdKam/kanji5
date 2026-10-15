@@ -73,7 +73,7 @@ export function learningCopy(key: LearningCopyKey, language: Language): string {
   return COPY[language]?.[key] ?? COPY.en[key];
 }
 
-export type ReadingVocabularyExample = { word?: string; reading?: string; meaning?: string; meaningLanguage?: "en" | "fa" | "ja" | "unknown" };
+export type ReadingVocabularyExample = { word?: string; reading?: string; meaning?: string; meaningLanguage?: "en" | "fa" | "ja" | "unknown"; source?: string; sourceVersion?: string | null; reviewStatus?: "verified" | "unreviewed" | "unknown" };
 
 /**
  * Connect an example to a priority Kanji reading only when the source word starts
@@ -102,10 +102,11 @@ export function selectExamplesForReading(
     const word = String(example?.word ?? "").trim();
     const pronunciation = String(example?.reading ?? "").trim();
     const meaning = String(example?.meaning ?? "").trim();
-    if (!word || !pronunciation || !meaning || [...word].length < 2 || [...word][0] !== target) continue;
+    const source = String(example?.source ?? "").trim();
+    if (!word || !pronunciation || !meaning || !source || [...word].length < 2 || [...word][0] !== target) continue;
     if (!normalizeKana(pronunciation).startsWith(expected) || seen.has(word)) continue;
     seen.add(word);
-    matched.push({ word, reading: pronunciation, meaning, meaningLanguage: example.meaningLanguage });
+    matched.push({ word, reading: pronunciation, meaning, meaningLanguage: example.meaningLanguage, source, sourceVersion: example.sourceVersion ?? null, reviewStatus: example.reviewStatus ?? "unreviewed" });
     if (matched.length >= Math.max(1, Math.min(2, limit))) break;
   }
   return matched;
