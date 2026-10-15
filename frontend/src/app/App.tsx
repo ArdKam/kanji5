@@ -318,7 +318,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
-  const examplesLoading=!examplesResolved;
   const hasExamplesPage=true;
   const backPageCount=4;
   const [backPage,setBackPage]=useState(0);
