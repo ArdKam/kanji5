@@ -481,3 +481,8 @@
   line-height: 1.25;
   margin-top: 2px;
 }
+
+
+/* Perspective transforms can reduce a nominal 44px target by fractional pixels.
+   Leave a small physical-pixel margin so the rendered target stays >=44px. */
+.learning-card .learning-reference-trigger { min-height: 48px; }
