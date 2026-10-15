@@ -1,6 +1,6 @@
 # Rinemi Design System
 
-**Status:** Integrated foundation and first consumer migration pass; product-wide migration remains incremental and is not yet complete.  
+**Status:** Semantic foundation and an initial cross-page migration are implemented on the integration branch. CI and rendered review remain pending; the product-wide migration is not yet complete.  
 **Source of truth:** `frontend/src/design-system.css`  
 **Rendered reference:** production components plus the captured Playwright reference set in the [visual-audit workflow](../.github/workflows/visual-audit.yml).
 
@@ -114,7 +114,7 @@ This integration migrates the root legacy aliases in `styles.css` and begins ado
 
 The merged Dictionary implementation from #544 remains authoritative: `App.tsx` route-loads `dictionary-page.css?inline` and does not render the catalog until its module and stylesheet are ready. Shared `dictionary.css` remains in the global stylesheet path because Reading Lab and existing card surfaces also consume it. This integration intentionally preserves the current Vite CSS output configuration and existing static `practice-home.css` / `exercise-layout.css` imports; the Practice route stylesheet split from the earlier foundation branch is not included. The startup shell CSS continues to paint before React styles load. Dark/system/forced-contrast contracts remain mandatory.
 
-Migrated in this initial pass: `frontend/src/styles.css`, `frontend/src/app/learning-card-enhancements.css`, `frontend/src/app/learning-surface.css`, `frontend/src/app/mnemonic-support.css`, and `frontend/src/experience-nav.css`. Remaining consumer styles are intentionally staged for follow-up commits rather than copied wholesale over newer page-specific work.
+Migrated in this pass: `frontend/src/styles.css`, `frontend/src/experience-nav.css`, `frontend/src/app/component-breakdown.css`, `frontend/src/app/handwriting-practice.css`, `frontend/src/app/learning-card-enhancements.css`, `frontend/src/app/learning-surface.css`, `frontend/src/app/mnemonic-support.css`, `frontend/src/app/reading-lab-playback.css`, `frontend/src/app/topic-learning.css`, and `frontend/src/app/traditional-radical.css`. Theme-sensitive details and route-specific styles remain under incremental review; these changes do not claim a complete migration of every page or state.
 
 ## Component contracts
 
@@ -181,4 +181,4 @@ The existing screenshot harness is kept intact. `npm run e2e:visual` and `npm ru
 
 ## Latest visual evidence
 
-The latest capture report was generated on 2026-10-14 at commit `ba5069d09caf8c39c027ac200e35021e2bcb2798` and contains 42 primary viewport/scroll captures. Its machine-readable report records zero page errors, zero console errors, zero failed requests, zero failed responses, no broken images, and no horizontal overflow in captured screens. Four scroll captures were skipped because the target had no meaningful scroll range. The same run produced focused visual suites for Dictionary (25 screenshots), Learning card back pages (9), Learning card faces/themes/breakpoints (25), and onboarding/system-theme states (26), each with zero recorded page errors. This confirms capture and runtime stability for these states, not visual perfection or full WCAG conformance; manual contrast, keyboard, and screen-reader checks are still required.
+The visual capture report from 2026-10-14 at commit `ba5069d09caf8c39c027ac200e35021e2bcb2798` is **pre-integration baseline evidence** from the design-system source branch. It covers 42 primary viewport/scroll captures and focused suites for Dictionary (25 screenshots), Learning back pages (9), Learning faces/themes/breakpoints (25), and onboarding/system-theme states (26). The source report recorded no page/console errors, failed requests/responses, broken images, or horizontal overflow in the captured screens; four scroll captures had no meaningful scroll range. Those results do not verify this integration branch. The current PR's fresh CI artifacts must be reviewed before claiming its rendered appearance is verified. Neither automated captures nor contrast assertions alone establish full WCAG conformance; manual keyboard, screen-reader, and representative-device checks remain necessary.
