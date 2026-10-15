@@ -96,7 +96,7 @@ for (const theme of ["dark", "system"]) {
     assert.ok(styles.includes(`:root[data-theme="${theme}"] .rating-${rating}{background:${background};color:${foreground};`), `${theme} ${rating} rating must keep a semantic foreground/background pair`);
   }
 }
-assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: var(--paper); }"), "Selected focus option needs a high-contrast Light-mode foreground");
+assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ds-color-action-primary); background: var(--ds-color-action-primary); color: var(--ds-color-surface); }"), "Selected focus option needs a high-contrast Light-mode foreground");
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Manual Dark focus foreground must remain dark on the light indigo surface");
 assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; }'), "System Dark focus foreground must remain dark on the light indigo surface");
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");

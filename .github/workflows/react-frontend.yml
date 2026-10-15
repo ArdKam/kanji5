@@ -53,6 +53,8 @@ on:
       - "e2e/react-experience-session-isolation.spec.mjs"
       - "e2e/react-engine-boundary-gate.spec.mjs"
       - "e2e/react-experience-nav-visual.spec.mjs"
+      - "e2e/visual-audit.spec.mjs"
+      - "e2e/design-system-visual-coverage.spec.mjs"
       - "e2e/react-account-shell.spec.mjs"
       - "e2e/react-onboarding.spec.mjs"
       - "e2e/stats-dialog.spec.mjs"
@@ -159,6 +161,12 @@ jobs:
       - name: Install Chromium for React E2E
         working-directory: .
         run: npx playwright install --with-deps chromium
+      - name: Run required visual E2E suite
+        working-directory: .
+        run: npm run e2e:visual -- --retries=0
+      - name: Run visual coverage suite
+        working-directory: .
+        run: npm run e2e:visual:coverage -- --retries=0
       - name: Run dark-theme mobile parity E2E
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/theme-mode-mobile.spec.mjs
