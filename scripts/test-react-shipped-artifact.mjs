@@ -9,7 +9,7 @@ if(!dictionaryCatalogCssAsset) throw new Error("DICTIONARY_CATALOG_CSS_MISSING_F
 const dictionaryCatalogCssPath="react-dist/"+dictionaryCatalogCssAsset;
 if(!fs.existsSync(dictionaryCatalogCssPath)) throw new Error("SHIPPED_DICTIONARY_CATALOG_CSS_CHUNK_MISSING");
 const dictionaryCatalogCss=fs.readFileSync(dictionaryCatalogCssPath,"utf8");
-const practiceExperienceCssAsset=Object.values(viteManifest).flatMap(entry=>[entry.file,...(entry.css||[])]).find(asset=>typeof asset==="string" && /practice-experience.*\\.css$/.test(asset));
+const practiceExperienceCssAsset=Object.values(viteManifest).flatMap(entry=>[entry.file,...(entry.css||[])]).find(asset=>typeof asset==="string" && /practice-experience.*\.css$/.test(asset));
 if(!practiceExperienceCssAsset) throw new Error("PRACTICE_EXPERIENCE_CSS_MISSING_FROM_VITE_MANIFEST");
 const practiceExperienceCssPath="react-dist/"+practiceExperienceCssAsset;
 if(!fs.existsSync(practiceExperienceCssPath)) throw new Error("SHIPPED_PRACTICE_EXPERIENCE_CSS_CHUNK_MISSING");
