@@ -59,7 +59,28 @@ async function strokeSvgCacheFirst(req){
     return new Response('Stroke-order SVG is not available offline.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'}});
   }
 }
+async function vocabularyNetworkFirst(req){
+  const cache=await caches.open(API_CACHE);
+  try{
+    const networkRequest=new Request(req,{cache:'no-store'});
+    const raw=await fetch(networkRequest);
+    const response=await filterVocabularyResponse(req,raw);
+    await cacheApiResponse(cache,req,response);
+    void evictApiCache(cache);
+    return response;
+  }catch(_){
+    const cached=await cache.match(req);
+    if(cached){
+      const headers=new Headers(cached.headers);
+      headers.set('X-Kanji5-Offline-Fallback','1');
+      headers.set('X-Kanji5-Cached-Response','1');
+      headers.set('Cache-Control','no-store');
+      return new Response(await cached.blob(),{status:cached.status,statusText:cached.statusText,headers});
+    }
+    return new Response('[]',{status:503,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'}});
+  }
+}
 async function dynamicSameOrigin(req){try{return await fetch(req)}catch(_){return Response.error()}}
 async function networkFirst(req,name,fallback){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(req,{ignoreSearch:false}))||(fallback?await c.match(fallback,{ignoreSearch:false}):Response.error())}}
-self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}if(u.origin===self.location.origin&&(u.href===DATA_URL||u.pathname.endsWith('/kanji-components.json')||u.pathname.endsWith('/kanji-radicals.json')||u.pathname.endsWith('/kanji-radical-map.json')||u.pathname.endsWith('/kanji-visual-structure.json'))){e.respondWith(cacheFirst(r,DATA_CACHE));return}if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(apiCacheFirst(r));return}if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);if(r.mode==='navigate'){e.respondWith(networkFirst(r,CACHE,'./index.html'));return}if(u.origin===self.location.origin&&(u.href===DATA_URL||u.pathname.endsWith('/kanji-components.json')||u.pathname.endsWith('/kanji-radicals.json')||u.pathname.endsWith('/kanji-radical-map.json')||u.pathname.endsWith('/kanji-visual-structure.json'))){e.respondWith(cacheFirst(r,DATA_CACHE));return}if(u.origin===API_ORIGIN&&u.pathname.startsWith('/v1/words/')){e.respondWith(vocabularyNetworkFirst(r));return}if(u.origin===TATOEBA_ORIGIN&&u.pathname.startsWith('/v1/sentences')){e.respondWith(apiCacheFirst(r));return}
 if(u.origin===KANJIVG_ORIGIN&&u.pathname.startsWith(KANJIVG_PATH)&&u.pathname.toLowerCase().endsWith('.svg')){e.respondWith(strokeSvgCacheFirst(r));return}if(u.origin===self.location.origin){e.respondWith(cacheFirst(r,CACHE));return}e.respondWith(dynamicSameOrigin(r))});
