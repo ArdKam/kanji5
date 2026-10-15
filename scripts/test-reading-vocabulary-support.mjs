@@ -24,4 +24,6 @@ assert.match(e2e, /a priority reading only shows a word with matching recorded p
 assert.match(e2e, /日曜日/);
 assert.match(e2e, /にちようび/);
 
+assert.match(helper, /!source/);
+assert.match(helper, /reviewStatus: example\.reviewStatus \?\? "unreviewed"/);
 console.log("Conservative priority-reading/vocabulary-linkage contracts passed.");
