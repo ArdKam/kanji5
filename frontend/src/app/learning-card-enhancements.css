@@ -472,3 +472,12 @@
   line-height: 1.2;
   opacity: .9;
 }
+
+
+.learning-card .example-source-label {
+  display: block;
+  color: var(--mute);
+  font-size: 9px;
+  line-height: 1.25;
+  margin-top: 2px;
+}
