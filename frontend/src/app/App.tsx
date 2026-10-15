@@ -294,7 +294,14 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   useEffect(()=>{
     let active=true;
     const character=String(card.character??"");
-    const validExamples=(Array.isArray(card.examples)?card.examples:[]).filter(e=>Boolean(String(e?.word??"").trim()&&String(e?.reading??"").trim()&&String(e?.meaning??"").trim())).slice(0,6);
+    const validExamples=(Array.isArray(card.examples)?card.examples:[])
+      .filter(e=>Boolean(String(e?.word??"").trim()&&String(e?.reading??"").trim()&&String(e?.meaning??"").trim()))
+      .slice(0,6)
+      .map(e=>{
+        const source=String(e?.source??e?.provenance?.source??"").trim();
+        const meaningLanguage=e?.meaningLanguage??(source==="kanjiapi.dev"||source==="jmdict"?"en":"unknown");
+        return {...e,source:source||undefined,meaningLanguage,reviewStatus:e?.reviewStatus??(source?"unreviewed":"unknown")};
+      });
     if(validExamples.length>0){
       setExamplesState({character,status:"resolved",items:validExamples});
       return ()=>{active=false};
