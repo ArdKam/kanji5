@@ -1,5 +1,7 @@
 .dictionary-page{
   width:100%;
+  min-width:0;
+  box-sizing:border-box;
   max-width:980px;
   margin:0 auto;
   padding-bottom:1rem;
@@ -354,3 +356,32 @@
 }
 .kanji-catalog-cell{min-width:0;}
 .kanji-catalog-grid.is-detailed .kanji-catalog-tile.is-detailed{width:100%;}
+
+/* Keep every responsive control row inside the available page content width. */
+@media(max-width:720px){
+  .dictionary-controls,
+  .dictionary-filter-row,
+  .dictionary-display-row{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  .dictionary-filter-row>.dictionary-level-filter,
+  .dictionary-filter-row>details.dictionary-advanced-filters,
+  .dictionary-display-row>.dictionary-view-toggle,
+  .dictionary-display-row>.dictionary-sort{
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  .dictionary-display-row>.dictionary-sort{
+    flex:1 1 150px;
+  }
+  .dictionary-display-row .dictionary-sort select{
+    flex:1 1 0;
+    min-width:0;
+    width:1%;
+    max-width:100%;
+  }
+}
