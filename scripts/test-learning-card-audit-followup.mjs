@@ -11,6 +11,7 @@ const sw = await read("sw.js");
 const styles = await read("frontend/src/app/learning-card-enhancements.css");
 const learnerContent = await read("v1.9-learner-content-core.js");
 const engine = await read("frontend/src/app/engine.ts");
+const i18n = await read("frontend/src/app/i18n.ts");
 
 assert.match(preview, /import "\.\/learning-card-enhancements\.css";/);
 assert.doesNotMatch(preview, /useEffect|learning-card-enhancements\.css\?inline|data-rinemi-learning-card-styles|enabled:/);
@@ -29,7 +30,9 @@ assert.match(app, /t\("useNormalReadingNotation"\)/);
 assert.doesNotMatch(app, /className="example-row"[^>]*lang="ja"/);
 assert.match(app, /className="example-meaning" lang="en"/);
 assert.match(app, /learnerMeaningRecords/);
-assert.match(app, /ترجمهٔ فارسی بازبینی‌شده در دسترس نیست/);
+assert.match(app, /t\("reviewedPersianMeaningUnavailable"\)/);
+assert.match(i18n, /reviewedPersianMeaningUnavailable:"ترجمهٔ فارسی بازبینی‌شده در دسترس نیست/);
+assert.match(i18n, /reviewedPersianMeaningUnavailable:"No reviewed Persian translation is available/);
 assert.match(app, /meaningLanguage/);
 assert.match(learnerContent, /reviewStatus/);
 assert.match(learnerContent, /reviewedBy/);
