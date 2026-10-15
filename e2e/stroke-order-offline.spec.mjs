@@ -27,11 +27,13 @@ test("service worker keeps a used KanjiVG SVG available offline and reports an u
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
 
-  // Seed one asset as though it had been fetched during an earlier online lesson.
-  // The subsequent request still traverses the active service worker's real fetch handler.
-  await page.evaluate(({ url, svgText }) => caches.open("kanji5-stroke-svg-v1").then(cache =>
-    cache.put(url, new Response(svgText, { status: 200, headers: { "Content-Type": "image/svg+xml" } }))
-  ), { url: cachedUrl, svgText: svg });
+  // Fetch through the active service worker while online; its own cache must retain the successful response.
+  const firstOnline = await page.evaluate(async url => {
+    const response = await fetch(url);
+    return { status: response.status, text: await response.text() };
+  }, cachedUrl);
+  expect(firstOnline.status).toBe(200);
+  expect(firstOnline.text).toContain("<svg");
 
   await context.setOffline(true);
   const cached = await page.evaluate(async url => {
@@ -50,10 +52,7 @@ test("service worker keeps a used KanjiVG SVG available offline and reports an u
   expect(missing.text).toContain("not available offline");
 
   await context.setOffline(false);
-  // Restore the network, then verify the same uncached request can be retried and cached.
-  await page.evaluate(({ url, svgText }) => caches.open("kanji5-stroke-svg-v1").then(cache =>
-    cache.delete(url).then(() => cache.put(url, new Response(svgText, { status: 200, headers: { "Content-Type": "image/svg+xml" } })))
-  ), { url: uncachedUrl, svgText: svg });
+  // Restore network, retry the same never-cached request and require the actual upstream fetch to succeed.
   const recovered = await page.evaluate(async url => {
     const response = await fetch(url);
     return { status: response.status, text: await response.text() };
