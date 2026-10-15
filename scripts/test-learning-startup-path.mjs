@@ -11,9 +11,14 @@ const learner=await readFile(new URL('../v1.9-learner-model.js',import.meta.url)
 
 const mustContain=(source,value,label)=>assert.ok(source.includes(value),label);
 
-for (const name of ['DictionaryPage','StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
+for (const name of ['StatsDialog','SettingsDialog','PracticeHome','GrammarDialog','ReadingLabDialog','MnemonicsDialog','HandwritingPractice']) {
   assert.match(app,new RegExp('import \\{ '+name+' \\} from'),`Stable React bundle must retain ${name} on the renderer bundle`);
 }
+
+assert.match(app,/const DictionaryPageRoute = lazy\(async \(\) => \{/,"Dictionary page must load through a lazy renderer route");
+assert.match(app,/import\("\.\/DictionaryPage"\)/,"DictionaryPage must remain available in its async renderer chunk");
+assert.match(app,/import\("\.\/dictionary-page.css\?inline"\)/,"Dictionary-only styling must load with the lazy route");
+assert.doesNotMatch(app,/import \{ DictionaryPage \} from/,"DictionaryPage must not inflate the initial renderer bundle");
 
 
 mustContain(session,'let planPromise=null;const loadPlanApi=','Session plan import must be lazy');

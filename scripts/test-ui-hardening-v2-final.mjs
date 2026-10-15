@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const css=fs.readFileSync("frontend/src/styles.css","utf8");
 const dictionaryCss=fs.readFileSync("frontend/src/app/dictionary.css","utf8");
+const dictionaryPageCss=fs.readFileSync("frontend/src/app/dictionary-page.css","utf8");
 const index=fs.readFileSync("index.html","utf8");
 const app=fs.readFileSync("frontend/src/app/App.tsx","utf8");
 
@@ -40,6 +41,7 @@ const cssSources=[
   "frontend/src/styles.css",
   "frontend/src/app/mnemonic-support.css",
   "frontend/src/app/dictionary.css",
+  "frontend/src/app/dictionary-page.css",
   "frontend/src/app/component-breakdown.css",
   "frontend/src/app/traditional-radical.css",
   "frontend/src/experience-nav.css"
@@ -50,13 +52,13 @@ for(const file of cssSources){
   assert.equal(bad.length,0,`8px/9px font-size remains in ${file}: ${bad.map(m=>m[1]).join(", ")}`);
 }
 
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-view-button[\s\S]*?transition:background var\(--motion-interaction\) ease/);
+assert.match(dictionaryPageCss,/\.dictionary-view-button[\s\S]*?transition:background var\(--motion-interaction\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-card\.is-navigation-next\{animation:dictionary-card-next-in var\(--motion-tab\)/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-card\.is-navigation-previous\{animation:dictionary-card-previous-in var\(--motion-tab\)/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-next-in/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-previous-in/);
 
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--motion-interaction\) ease/);
+assert.match(dictionaryPageCss,/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--motion-interaction\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--motion-hover\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/reading-lab-playback.css","utf8"),/\.reading-lab-sentence-repeat[\s\S]*?transition:background var\(--motion-interaction\) ease/);
 

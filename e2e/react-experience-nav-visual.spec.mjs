@@ -168,30 +168,37 @@ test('Dictionary curated topic filters combine with other filters and work in Pe
 
   const advanced = page.locator('.dictionary-advanced-filters');
   await advanced.locator('summary').click();
-  const topic = advanced.getByLabel('Topic');
-  await topic.selectOption('nature');
+  const topic = advanced.getByRole('button', { name: /^Topic:/ });
+  const chooseTopic = async (id) => {
+    await topic.click();
+    const picker = page.locator('.dictionary-topic-dialog');
+    await expect(picker).toBeVisible();
+    await picker.locator('[data-topic-id="' + id + '"]').click();
+    await expect(picker).toBeHidden();
+  };
+  await chooseTopic('nature');
   await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="食 —"]')).toHaveCount(0);
   await expect(advanced.locator('.dictionary-filter-count')).toHaveText('1');
 
-  await topic.selectOption('government');
+  await chooseTopic('government');
   await expect(page.locator('.kanji-catalog-tile[aria-label^="政 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="食 —"]')).toHaveCount(0);
-  await topic.selectOption('qualities');
+  await chooseTopic('qualities');
   await expect(page.locator('.kanji-catalog-tile[aria-label^="大 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="政 —"]')).toHaveCount(0);
 
-  await topic.selectOption('numbers');
+  await chooseTopic('numbers');
   await expect(page.locator('.kanji-catalog-tile[aria-label^="一 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(0);
   await page.locator('.dictionary-page-search input').fill('山');
   await expect(page.locator('.kanji-catalog-tile')).toHaveCount(0);
-  await topic.selectOption('nature');
+  await chooseTopic('nature');
   await page.locator('.dictionary-level-filter').getByRole('button', { name: 'N5', exact: true }).click();
   await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(1);
 
   await advanced.getByRole('button', { name: 'Clear extra filters', exact: true }).click();
-  await expect(topic).toHaveValue('all');
+  await expect(topic).toContainText('All topics');
   await expect(advanced.locator('.dictionary-filter-count')).toHaveCount(0);
   await expect(page.locator('.dictionary-page-search input')).toHaveValue('山');
   await expect(page.locator('.dictionary-level-filter').getByRole('button', { name: 'N5', exact: true })).toHaveAttribute('aria-pressed', 'true');
@@ -205,8 +212,44 @@ test('Dictionary curated topic filters combine with other filters and work in Pe
   await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
   const persianAdvanced = page.locator('.dictionary-advanced-filters');
   await persianAdvanced.locator('summary').click();
-  const persianTopic = persianAdvanced.getByLabel('موضوع');
-  await persianTopic.selectOption('body');
+  const persianTopic = persianAdvanced.getByRole('button', { name: /^موضوع:/ });
+  await persianTopic.click();
+  const persianPicker = page.locator('.dictionary-topic-dialog');
+  await expect(persianPicker).toBeVisible();
+  await persianPicker.locator('[data-topic-id="body"]').click();
+  await expect(persianPicker).toBeHidden();
   await expect(page.locator('.kanji-catalog-tile[aria-label^="手 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(0);
+});
+
+test('Dictionary Kanji matrix exposes row/column semantics and directional keyboard navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+
+  const grid = page.locator('.kanji-catalog-grid[role="grid"]');
+  await expect(grid).toBeVisible();
+  await expect(grid.locator('[role="row"]').first()).toBeVisible();
+  await expect(grid.locator('[role="gridcell"]').first()).toBeVisible();
+
+  const tiles = grid.locator('.kanji-catalog-tile');
+  await expect(tiles.first()).toHaveAttribute('tabindex', '0');
+  const first = await tiles.first().getAttribute('aria-label');
+  await tiles.first().focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tiles.nth(1)).toBeFocused();
+  await expect(tiles.nth(1)).toHaveAttribute('tabindex', '0');
+  await page.keyboard.press('ArrowLeft');
+  await expect(tiles.first()).toBeFocused();
+  await expect(tiles.first()).toHaveAttribute('tabindex', '0');
+
+  const tileCount = await tiles.count();
+  const columnCount = Number(await grid.getAttribute('aria-colcount'));
+  await page.keyboard.press('End');
+  await expect(tiles.nth(Math.min(columnCount, tileCount) - 1)).toBeFocused();
 });

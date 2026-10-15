@@ -1,11 +1,10 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ComponentProps, type PointerEvent } from "react";
 import { KanjiStructurePreview } from "./KanjiStructurePreview";
 import { useModalDialog } from "./useModalDialog";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { StrokeOrderViewer } from "./StrokeOrderViewer";
-import { DictionaryPage } from "./DictionaryPage";
 import { StatsDialog } from "./StatsDialog";
 import { SettingsDialog } from "./SettingsDialog";
 import { PracticeHome } from "./PracticeHome";
@@ -17,6 +16,20 @@ import { AccountButton, AccountDialog } from "./AccountDialog";
 import { OnboardingEntry } from "./OnboardingEntry";
 import { getTopicLabel } from "./topic-taxonomy";
 const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
+const DictionaryPageRoute = lazy(async () => {
+  const [{ default: dictionaryStyles }, pageModule] = await Promise.all([
+    import("./dictionary-page.css?inline"),
+    import("./DictionaryPage"),
+  ]);
+  const Page = pageModule.DictionaryPage;
+  const WithDictionaryStyles = (props: ComponentProps<typeof Page>) => (
+    <>
+      <style data-dictionary-page-styles>{dictionaryStyles}</style>
+      <Page {...props} />
+    </>
+  );
+  return { default: WithDictionaryStyles };
+});
 const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
 import { learningCopy } from "./learning-copy";
 import learningSurfaceStyles from "./learning-surface.css?inline";
@@ -1091,7 +1104,7 @@ function App(){
           language={language}
           onClose={closeSecondaryPage}
         /> : null}
-        </section> : showDictionary?<DictionaryPage language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/>:<>
+        </section> : showDictionary?<Suspense fallback={<section className="surface loading" role="status" aria-live="polite">{t("loading",language)}</section>}><DictionaryPageRoute language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
               {!showExercise ? <div className="card-topline">
                 <div className="learning-session-context">
                   <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
