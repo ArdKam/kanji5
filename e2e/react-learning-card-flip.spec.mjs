@@ -139,7 +139,7 @@ test("a priority reading only shows a word with matching recorded pronunciation"
   const linkedExample = card.locator(".learning-back-page.active .reading-vocabulary-example");
   await expect(linkedExample).toBeVisible({ timeout: 10000 });
   await expect(linkedExample.locator("[lang='ja']")).toHaveText("日曜日");
-  await expect(linkedExample.locator("small[lang='en']")).toHaveText("Sunday");
+  await expect(linkedExample.locator(".reading-vocabulary-gloss[lang='en']")).toHaveText("Sunday");
 });
 
 test("Learning-card language metadata and pronunciation describe the actual content", async ({ page }) => {
