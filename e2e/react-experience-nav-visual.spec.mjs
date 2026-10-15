@@ -248,6 +248,8 @@ test('Dictionary Kanji matrix exposes row/column semantics and directional keybo
   await expect(tiles.first()).toBeFocused();
   await expect(tiles.first()).toHaveAttribute('tabindex', '0');
 
+  const tileCount = await tiles.count();
+  const columnCount = Number(await grid.getAttribute('aria-colcount'));
   await page.keyboard.press('End');
-  await expect(tiles.nth(tiles.count() - 1)).toBeFocused();
+  await expect(tiles.nth(Math.min(columnCount, tileCount) - 1)).toBeFocused();
 });
