@@ -1,3 +1,17 @@
+export type LearnerMeaningLanguage = "en" | "fa" | "ja" | "unknown";
+export type LearnerMeaningPriority = "primary" | "secondary" | "reference";
+export type LearnerMeaningReviewStatus = "verified" | "unreviewed" | "rejected" | "unavailable";
+export type LearnerMeaningRecord = {
+  text: string | null;
+  language: LearnerMeaningLanguage;
+  priority: LearnerMeaningPriority;
+  provenance: { source: string; version: string | null; entryId: string | null; url: string | null };
+  reviewStatus: LearnerMeaningReviewStatus;
+  reviewNotes: string;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+};
+
 export type Rating = "Again" | "Hard" | "Good" | "Easy";
 export type HandwritingSkill = {version?:string;attempts?:number;correct?:number;accuracy?:number;score?:number;averageScore?:number;recentAverageScore?:number;confidence?:number;consistency?:number;state?:string;momentum?:number;errorStreak?:number;successStreak?:number;lastScore?:number;lastOutcome?:string|null;feedbackCode?:string|null;feedbackStroke?:number|null;weakestMetric?:string|null;metrics?:{shape?:number|null;endpoints?:number|null;length?:number|null;direction?:number|null;curvature?:number|null;placement?:number|null}};
 export type HandwritingGradeLike = {overallSimilarity?:number;feedbackCode?:string;feedbackStroke?:number|null;perStroke?:Array<Record<string,unknown>>};
@@ -43,6 +57,7 @@ export type Snapshot = {
     kun?: string[];
     sourceMeanings?: string[];
     learnerMeanings?: { primary?: string[]; secondary?: string[]; reference?: string[] };
+    learnerMeaningRecords?: LearnerMeaningRecord[];
     learnerReadings?: { coreOn?: string[]; coreKun?: string[]; vocabularySupported?: string[]; referenceOn?: string[]; referenceKun?: string[] };
     examples?: { word?: string; reading?: string; meaning?: string }[];
     hint?: string;
