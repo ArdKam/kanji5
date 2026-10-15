@@ -167,7 +167,7 @@ test("speech controls are unavailable rather than misleading when speech synthes
   await expect(card).toBeVisible({ timeout: 20000 });
   const audio = card.locator(".learning-card-front .kanji-row .audio-button");
   await expect(audio).toBeDisabled();
-  await expect(audio).toHaveAttribute("aria-label", "Audio unavailable in this browser");
+  await expect(audio).toHaveAttribute("aria-label", "Audio is not available in this browser");
 });
 
 test("first Learning-card reveal has its styles ready and transitions cleanly at required viewports", async ({ page }) => {
