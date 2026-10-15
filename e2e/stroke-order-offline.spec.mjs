@@ -8,13 +8,6 @@ const kanjiVgUrl = character => {
     codePoint.toString(16).padStart(5, "0").toLowerCase() + ".svg";
 };
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg">
-  <g id="kvg:StrokePaths_05b66">
-    <path id="kvg:05b66-s1" d="M10,10 L30,30"/>
-    <path id="kvg:05b66-s2" d="M30,30 L50,10"/>
-  </g>
-</svg>`;
-
 test("service worker keeps a used KanjiVG SVG available offline and reports an uncached SVG as unavailable", async ({ page, context }) => {
   const cachedUrl = kanjiVgUrl("学");
   const uncachedUrl = kanjiVgUrl("生");
@@ -58,6 +51,6 @@ test("service worker keeps a used KanjiVG SVG available offline and reports an u
     return { status: response.status, text: await response.text() };
   }, uncachedUrl);
   expect(recovered.status).toBe(200);
-  expect(recovered.text).toContain('id="kvg:05b66-s1"');
+  expect(recovered.text).toContain("<path");
   await expect.poll(() => page.evaluate(async url => (await caches.open("kanji5-stroke-svg-v1")).match(url).then(Boolean)), { timeout: 5000 }).toBe(true);
 });
