@@ -124,9 +124,11 @@ export function inferMeaningLanguage(
   if (declared === "en" || declared === "fa" || declared === "ja") return declared;
   const text = String(value ?? "").trim();
   if (!text) return "unknown";
-  if (/[\u3040-\u30ff\u3400-\u9fff]/.test(text)) return "ja";
-  if (/[\u067e\u0686\u0698\u06af\u06a9\u06cc]/.test(text)) return "fa";
-  if (/^[\x00-\x7f]*[A-Za-z][\x00-\x7f]*$/.test(text)) return "en";
   if (source === "kanjiapi.dev" || source === "jmdict") return "en";
+  if (/[\u067e\u0686\u0698\u06af\u06a9\u06cc]/.test(text)) return "fa";
+  const japaneseCount = (text.match(/[\u3040-\u30ff\u3400-\u9fff]/g) || []).length;
+  const letterCount = (text.match(/[A-Za-z\u3040-\u30ff\u3400-\u9fff]/g) || []).length;
+  if (japaneseCount > 0 && japaneseCount >= letterCount * 0.5) return "ja";
+  if (/^[\x00-\x7f]*[A-Za-z][\x00-\x7f]*$/.test(text)) return "en";
   return "unknown";
 }
