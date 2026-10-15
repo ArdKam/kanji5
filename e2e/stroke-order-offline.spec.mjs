@@ -28,7 +28,31 @@ test("service worker keeps a used KanjiVG SVG available offline and reports an u
   expect(firstOnline.status).toBe(200);
   expect(firstOnline.text).toContain("<svg");
 
+  const cachedVocabularyUrl = "https://kanjiapi.dev/v1/words/学";
+  const uncachedVocabularyUrl = "https://kanjiapi.dev/v1/words/語";
+  await page.evaluate(url => caches.open("kanji5-api-v15").then(cache =>
+    cache.put(url, new Response(JSON.stringify([{ variants: [{ written: "学校", pronounced: "がっこう" }], meanings: [{ glosses: ["school"] }] }]), {
+      status: 200,
+      headers: { "Content-Type": "application/json", "X-Kanji5-Cache-Time": String(Date.now()) },
+    }))
+  ), cachedVocabularyUrl);
+
   await context.setOffline(true);
+  const cachedVocabulary = await page.evaluate(async url => {
+    const response = await fetch(url);
+    return { status: response.status, offlineFallback: response.headers.get("X-Kanji5-Offline-Fallback"), json: await response.json() };
+  }, cachedVocabularyUrl);
+  expect(cachedVocabulary.status).toBe(200);
+  expect(cachedVocabulary.offlineFallback).toBe("1");
+  expect(cachedVocabulary.json[0].variants[0].written).toBe("学校");
+
+  const missingVocabulary = await page.evaluate(async url => {
+    const response = await fetch(url);
+    return { status: response.status, offlineFallback: response.headers.get("X-Kanji5-Offline-Fallback"), json: await response.json() };
+  }, uncachedVocabularyUrl);
+  expect(missingVocabulary.status).toBe(503);
+  expect(missingVocabulary.offlineFallback).toBe("1");
+
   const cached = await page.evaluate(async url => {
     const response = await fetch(url);
     return { status: response.status, text: await response.text() };
