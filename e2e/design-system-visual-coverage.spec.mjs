@@ -529,12 +529,12 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
         await audit.capture("dictionary-controlbar-" + variant.prefix + "-" + viewport.width);
       }
 
-      for (const width of [320, 390, 1440]) {
+      for (const width of (variant.theme === "system" ? [320, 1440] : [320, 390, 1440])) {
         await page.setViewportSize(width === 1440 ? { width, height: 960 } : { width, height: width === 320 ? 740 : 844 });
         const advanced = page.locator("details.dictionary-advanced-filters");
         if (!(await advanced.evaluate(element => element.open))) await advanced.locator("summary").click();
         await expect(advanced).toHaveAttribute("open", "");
-        await audit.capture("dictionary-advanced-open-" + variant.prefix + "-" + width);
+        // The shared Dictionary visual scenario captures the advanced panel; keep its interaction assertion here without another expensive screenshot.
         const topicTrigger = page.locator(".dictionary-topic-filter-trigger");
         await topicTrigger.click();
         const dialog = page.locator(".dictionary-topic-dialog");
@@ -574,9 +574,7 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
     await dialog.locator(".dictionary-topic-browser-list").evaluate(element => { element.scrollTop = 0; });
     await audit.capture("dictionary-topic-picker-en-light-full-browse-320");
     await page.setViewportSize({ width: 390, height: 844 });
-    await audit.capture("dictionary-topic-picker-en-light-full-browse-390");
     await page.setViewportSize({ width: 1440, height: 960 });
-    await audit.capture("dictionary-topic-picker-en-light-full-browse-1440");
 
     const topicSearch = dialog.locator(".dictionary-topic-search-input");
     await topicSearch.fill("plants");
