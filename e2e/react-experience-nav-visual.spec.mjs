@@ -221,3 +221,33 @@ test('Dictionary curated topic filters combine with other filters and work in Pe
   await expect(page.locator('.kanji-catalog-tile[aria-label^="手 —"]')).toHaveCount(1);
   await expect(page.locator('.kanji-catalog-tile[aria-label^="山 —"]')).toHaveCount(0);
 });
+
+test('Dictionary Kanji matrix exposes row/column semantics and directional keyboard navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+
+  const grid = page.locator('.kanji-catalog-grid[role="grid"]');
+  await expect(grid).toBeVisible();
+  await expect(grid.locator('[role="row"]').first()).toBeVisible();
+  await expect(grid.locator('[role="gridcell"]').first()).toBeVisible();
+
+  const tiles = grid.locator('.kanji-catalog-tile');
+  await expect(tiles.first()).toHaveAttribute('tabindex', '0');
+  const first = await tiles.first().getAttribute('aria-label');
+  await tiles.first().focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tiles.nth(1)).toBeFocused();
+  await expect(tiles.nth(1)).toHaveAttribute('tabindex', '0');
+  await page.keyboard.press('ArrowLeft');
+  await expect(tiles.first()).toBeFocused();
+  await expect(tiles.first()).toHaveAttribute('tabindex', '0');
+
+  await page.keyboard.press('End');
+  await expect(tiles.nth(tiles.count() - 1)).toBeFocused();
+});
