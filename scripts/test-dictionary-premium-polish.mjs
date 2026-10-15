@@ -40,6 +40,7 @@ assert.match(page, /"ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "
 assert.ok(page.includes("formatNumber(Number(value), language)"), "Grade values must be localized in Persian and English");
 assert.ok(dictionaryPageCss.includes(".kanji-catalog-row{\n  display:grid;"), "Lazy Dictionary styles must render each ARIA row as a visual row");
 assert.ok(dictionaryPageCss.includes(".kanji-catalog-cell{min-width:0;}"), "Grid cells must be shrinkable at narrow viewports");
+assert.match(dictionaryPageCss, /\.dictionary-page\{[\s\S]*?min-width:0;[\s\S]*?box-sizing:border-box;/, "The Dictionary route must not expand beyond the mobile content box");
 assert.match(page, /<svg viewBox="0 0 24 24"/, "Search affordance should use vector iconography");
 assert.match(card, /if \(key === "structure"\) return "Structure";/, "Use a clear English label for the structure section");
 assert.match(card, /if \(key === "structure"\) return "ساختار";/, "Use a clear Persian label for the structure section");
