@@ -522,6 +522,11 @@ test("a first-time learner can recover from unavailable practice by returning to
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   await page.getByRole("button", { name: "Practice", exact: true }).click();
   await expect(page.locator(".practice-home")).toBeVisible({ timeout: 10000 });
+  await page.evaluate(() => {
+    const boundary = window.__KANJI5_V19_V2_BOUNDARY__;
+    if (!boundary) throw new Error("Learning engine boundary is unavailable for the recovery test");
+    boundary.startExercise = async () => { throw new Error("KANJI5_NO_EXERCISE_AVAILABLE"); };
+  });
   await page.locator(".practice-start-button").click();
   const errorBanner = page.locator(".app-error-banner");
   await expect(errorBanner).toBeVisible({ timeout: 10000 });
