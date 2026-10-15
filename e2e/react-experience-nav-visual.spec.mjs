@@ -255,7 +255,7 @@ test('Dictionary Kanji matrix exposes row/column semantics and directional keybo
 });
 
 
-test('Dictionary topic selector stays within short mobile viewports and keeps its list scrollable' (async ({ page }) => {
+test('Dictionary topic selector stays within short mobile viewports and keeps its list scrollable', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('kanji5-onboarding-v2', 'complete');
     localStorage.setItem('kanji5-ui-language', 'en');
