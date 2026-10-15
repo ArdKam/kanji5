@@ -1,6 +1,6 @@
 @import "./noto-serif-jp.css";
-:root{--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;--jp-font:"Noto Serif JP","Hiragino Mincho ProN",serif;font-family:var(--ui-font);--fa-font:"Vazirmatn",var(--ui-font),sans-serif;color:#292B2D;background:#F7F4EE;--washi:#F7F4EE;--paper:#FDFBF7;--sumi:#292B2D;--ink:#53545A;--mute:#73777A;--shu:#505F83;--sakura:#D6A1AA;--ai:#505F83;--matcha:#8C9B87;--line:#DED8CE;--line-soft:#E9E3DA;--line-interactive:#8B93A5;--surface-soft:linen;--surface-panel:rgba(251,248,240,.7);--progress-track:#e9e3d8;
-  --text-xs:11px;
+:root{--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;--jp-font:"Noto Serif JP","Hiragino Mincho ProN",serif;font-family:var(--ui-font);--fa-font:"Vazirmatn",var(--ui-font),sans-serif;color:#292B2D;background:#F7F4EE;--washi:#F7F4EE;--paper:#FDFBF7;--sumi:#292B2D;--ink:#53545A;--mute:#62666A;--shu:#505F83;--sakura:#D6A1AA;--ai:#505F83;--matcha:#8C9B87;--line:#DED8CE;--line-soft:#E9E3DA;--line-interactive:#8B93A5;--surface-soft:linen;--surface-panel:rgba(251,248,240,.7);--progress-track:#e9e3d8;
+  --text-xs:12px;
   --text-sm:13px;
   --text-base:15px;
   --text-md:17px;
@@ -1439,7 +1439,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   html[dir="rtl"] .header-tools-menu{
     animation-name:headerMenuPopoverIn!important;
   }
-  .header-menu-scrim{display:none;}
+  .header-menu-scrim{display:block;background:rgba(16,24,40,.22);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
 }
 @keyframes headerMenuPopoverIn{
   from{transform:translateY(-4px) scale(.985);opacity:0}

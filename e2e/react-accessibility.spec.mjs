@@ -473,3 +473,114 @@ test("Settings destructive confirmations move focus into the confirmation and ke
   await expect(resetDialog).toBeHidden();
   await expect(reset).toBeFocused();
 });
+
+
+test("the More drawer is modal and blocks account/background interaction on desktop and mobile", async ({ page }) => {
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await clean(page);
+    await page.evaluate(() => {
+      localStorage.setItem("kanji5-ui-language", "en");
+      localStorage.setItem("kanji5-theme", "light");
+    });
+    await page.reload();
+    await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+    const trigger = page.locator(".header-menu-trigger");
+    const accountButton = page.locator(".account-button");
+    await trigger.click();
+    const menu = page.locator("#header-tools-menu");
+    const scrim = page.locator(".header-menu-scrim");
+    await expect(menu).toBeVisible();
+    await expect(menu).toHaveAttribute("aria-modal", "true");
+    await expect(scrim).toBeVisible();
+    await expect(accountButton).toBeDisabled();
+    await expect(page.locator(".experience-nav")).toHaveAttribute("inert", "");
+    await expect(page.locator("#primary-content")).toHaveAttribute("inert", "");
+    const bounds = await accountButton.boundingBox();
+    expect(bounds).not.toBeNull();
+    const scrimIsHitTarget = await page.evaluate(({ x, y }) => {
+      const target = document.elementFromPoint(x, y);
+      return Boolean(target?.classList.contains("header-menu-scrim"));
+    }, { x: (bounds?.x ?? 0) + (bounds?.width ?? 0) / 2, y: (bounds?.y ?? 0) + (bounds?.height ?? 0) / 2 });
+    expect(scrimIsHitTarget).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(menu).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await expect(accountButton).toBeEnabled();
+    await expect(page.locator(".experience-nav")).not.toHaveAttribute("inert", "");
+    await expect(page.locator("#primary-content")).not.toHaveAttribute("inert", "");
+  }
+});
+
+test("a first-time learner can recover from unavailable practice by returning to Learning", async ({ page }) => {
+  await clean(page);
+  await page.evaluate(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-theme", "light");
+  });
+  await page.reload();
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  await page.getByRole("button", { name: "Practice", exact: true }).click();
+  await expect(page.locator(".practice-home")).toBeVisible({ timeout: 10000 });
+  await page.locator(".practice-start-button").click();
+  const errorBanner = page.locator(".app-error-banner");
+  await expect(errorBanner).toBeVisible({ timeout: 10000 });
+  await expect(errorBanner.getByRole("button", { name: "Learning", exact: true })).toBeVisible();
+  await errorBanner.getByRole("button", { name: "Learning", exact: true }).click();
+  await expect(page.locator(".learning-card-front")).toBeVisible({ timeout: 10000 });
+});
+
+test("active Learning-card shortcuts have a visible label and reference info sits with reading content", async ({ page }) => {
+  await clean(page);
+  await page.evaluate(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.reload();
+  await expect(page.locator("#root .learning-card-front .button.primary.wide")).toBeVisible({ timeout: 10000 });
+  await page.locator("#root .learning-card-front .button.primary.wide").click();
+  const card = page.locator("#root .learning-card");
+  const activeShortcut = card.locator(".learning-back-page-shortcut.active");
+  await expect(activeShortcut).toBeVisible();
+  await expect(activeShortcut.locator(".learning-back-page-shortcut-label")).toBeVisible();
+  const referenceButton = card.locator(".learning-back-readings-block .learning-reference-trigger");
+  if (await referenceButton.count()) {
+    await expect(referenceButton).toContainText("More meanings & readings");
+    await expect(referenceButton).toBeVisible();
+  }
+});
+
+test("muted text and the extra-small type token meet the light-theme readability baseline", async ({ page }) => {
+  await clean(page);
+  await page.evaluate(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-theme", "light");
+  });
+  await page.reload();
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  const metrics = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const size = Number.parseFloat(root.getPropertyValue("--text-xs"));
+    const probe = document.createElement("span");
+    probe.style.color = "var(--mute)";
+    document.body.append(probe);
+    const mute = getComputedStyle(probe).color;
+    probe.remove();
+    const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
+    const luminance = (value) => rgb(value).map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const contrast = (foreground, background) => {
+      const pair = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+      return (pair[0] + 0.05) / (pair[1] + 0.05);
+    };
+    return {
+      size,
+      paper: contrast(mute, "rgb(253, 251, 247)"),
+      washi: contrast(mute, "rgb(247, 244, 238)"),
+      secondary: contrast(mute, "rgb(238, 233, 224)"),
+    };
+  });
+  expect(metrics.size).toBeGreaterThanOrEqual(12);
+  expect(metrics.paper).toBeGreaterThanOrEqual(4.5);
+  expect(metrics.washi).toBeGreaterThanOrEqual(4.5);
+  expect(metrics.secondary).toBeGreaterThanOrEqual(4.5);
+});
