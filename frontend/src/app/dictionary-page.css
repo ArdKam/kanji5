@@ -386,3 +386,5 @@
     max-width:100%;
   }
 }
+/* The shared dialog keyframes translate from the desktop-centered position. Disable that transform animation for viewport-filling mobile sheets. */
+@media(max-width:720px),(max-height:520px){.dialog.dictionary-topic-dialog[open]{animation:none;}}
