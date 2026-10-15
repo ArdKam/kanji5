@@ -167,11 +167,11 @@ test("Learning-card language metadata and pronunciation describe the actual cont
     }).click();
     await expect(card).toHaveClass(/is-revealed/);
     if (language === "fa") {
-      await expect(card.locator(".learning-meaning-source-note")).toHaveAttribute("lang", "fa");
-      await expect(card.locator(".learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveAttribute("lang", "fa");
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
       await expect(card.locator(".learning-back-meaning")).toHaveAttribute("lang", "en");
     } else {
-      await expect(card.locator(".learning-meaning-source-note")).toHaveCount(0);
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveCount(0);
       await expect(card.locator(".learning-back-meaning")).toHaveAttribute("lang", "en");
     }
 
@@ -181,6 +181,13 @@ test("Learning-card language metadata and pronunciation describe the actual cont
     await expect(row).not.toHaveAttribute("lang", "ja");
     await expect(row.locator(".example-main [lang='ja']")).toHaveCount(2);
     await expect(row.locator(".example-meaning")).toHaveAttribute("lang", "en");
+    await expect(row.locator(".example-source-label")).toHaveText(language === "fa" ? "مثال منبع، بازبینی‌نشده" : "Source example · not reviewed");
+    if (language === "fa") {
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveAttribute("lang", "fa");
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
+    } else {
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveCount(0);
+    }
     const wordAudio = row.locator(".audio-button");
     await expect(wordAudio).toHaveAttribute("aria-label", new RegExp(language === "fa" ? "پخش تلفظ واژه" : "Play pronunciation of"));
   }
