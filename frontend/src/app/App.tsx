@@ -111,7 +111,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const secondaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("secondary"):(learnerMeaningModel.secondary??[]);
   const referenceMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("reference"):(learnerMeaningModel.reference??[]);
   const meaningLanguage=useReviewedLocalizedMeanings?getLanguage():"en";
-  const meaningFallbackLabel=getLanguage()==="fa"&&!useReviewedLocalizedMeanings?"ترجمهٔ فارسی بازبینی‌شده در دسترس نیست؛ معنی منبع به انگلیسی نمایش داده می‌شود.":"";
+  const meaningFallbackLabel=getLanguage()==="fa"&&!useReviewedLocalizedMeanings?t("reviewedPersianMeaningUnavailable"):"";
   const pronunciationReading=String(learnerReadingModel.coreOn?.find(value=>String(value).trim())??card.on?.find(value=>String(value).trim())??learnerReadingModel.coreKun?.find(value=>String(value).trim())??card.kun?.find(value=>String(value).trim())??"").trim();
   const pronunciationWord=String(card.examples?.find(example=>example?.word&&example?.reading)?.word??"").trim();
   const pronunciationTarget=pronunciationReading||pronunciationWord;
