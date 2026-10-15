@@ -108,7 +108,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const reviewedLocalizedPrimary=reviewedLocalizedRecords.filter(record=>record.priority==="primary");
   const useReviewedLocalizedMeanings=reviewedLocalizedPrimary.length>0;
   const localizedMeaningsFor=(priority:"primary"|"secondary"|"reference")=>reviewedLocalizedRecords.filter(record=>record.priority===priority).map(record=>record.text??"").filter(Boolean);
-  const primaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("primary"):(learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]));
+  const primaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("primary"):(Array.isArray(learnerMeaningModel.primary)?learnerMeaningModel.primary:(card.meanings??[]));
   const secondaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("secondary"):(learnerMeaningModel.secondary??[]);
   const referenceMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("reference"):(learnerMeaningModel.reference??[]);
   const meaningLanguage=useReviewedLocalizedMeanings?getLanguage():"en";
