@@ -72,6 +72,12 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test e2e/visual-audit.spec.mjs e2e/design-system-visual-coverage.spec.mjs --timeout=30000 --retries=0 --reporter=line
 
+      - name: Verify header menu account overlay on desktop and mobile
+        env:
+          CI: "true"
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test e2e/react-learning-card-flip.spec.mjs --grep "structured header menu keeps account inactive|mobile menu prevents account click-through" --timeout=30000 --retries=0 --reporter=line
+
       - name: Publish the screenshots and machine-readable audit report
         id: visual-evidence
         if: always()
