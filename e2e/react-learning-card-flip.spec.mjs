@@ -117,6 +117,59 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("Learning-card language metadata and pronunciation describe the actual content", async ({ page }) => {
+  await routeExamples(page, 2);
+  for (const language of ["en", "fa"]) {
+    await page.addInitScript(value => {
+      localStorage.setItem("kanji5-ui-language", value);
+      localStorage.setItem("kanji5-onboarding-v2", "complete");
+    }, language);
+    await page.goto("/");
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+    const isolatedKanjiAudio = card.locator(".learning-card-front .kanji-row .audio-button");
+    await expect(isolatedKanjiAudio).toBeVisible();
+    await expect(isolatedKanjiAudio).toHaveAttribute("aria-label", language === "fa" ? /پخش خوانش/ : /Play reading/);
+
+    await card.getByRole("button", {
+      name: /(Reveal meaning & readings|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information))/,
+    }).click();
+    await expect(card).toHaveClass(/is-revealed/);
+    if (language === "fa") {
+      await expect(card.locator(".learning-meaning-source-note")).toHaveAttribute("lang", "fa");
+      await expect(card.locator(".learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
+      await expect(card.locator(".learning-back-meaning")).toHaveAttribute("lang", "en");
+    } else {
+      await expect(card.locator(".learning-meaning-source-note")).toHaveCount(0);
+      await expect(card.locator(".learning-back-meaning")).toHaveAttribute("lang", "en");
+    }
+
+    await goToBackPage(page, card, 1);
+    const row = card.locator(".learning-back-page.active .example-row").first();
+    await expect(row).toBeVisible();
+    await expect(row).not.toHaveAttribute("lang", "ja");
+    await expect(row.locator(".example-main [lang='ja']")).toHaveCount(2);
+    await expect(row.locator(".example-meaning")).toHaveAttribute("lang", "en");
+    const wordAudio = row.locator(".audio-button");
+    await expect(wordAudio).toHaveAttribute("aria-label", new RegExp(language === "fa" ? "پخش تلفظ واژه" : "Play pronunciation of"));
+  }
+});
+
+test("speech controls are unavailable rather than misleading when speech synthesis is unsupported", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    Object.defineProperty(window, "speechSynthesis", { configurable: true, value: undefined });
+    Object.defineProperty(window, "SpeechSynthesisUtterance", { configurable: true, value: undefined });
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const audio = card.locator(".learning-card-front .kanji-row .audio-button");
+  await expect(audio).toBeDisabled();
+  await expect(audio).toHaveAttribute("aria-label", "Audio unavailable in this browser");
+});
+
 test("first Learning-card reveal has its styles ready and transitions cleanly at required viewports", async ({ page }) => {
   await routeExamples(page, 2);
   await page.addInitScript(() => {
