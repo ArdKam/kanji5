@@ -8,6 +8,9 @@ const css = await read("frontend/src/app/learning-card-enhancements.css");
 const e2e = await read("e2e/react-learning-card-flip.spec.mjs");
 
 assert.match(helper, /export function selectExamplesForReading/);
+assert.match(helper, /export function inferMeaningLanguage/);
+assert.match(helper, /declared === "en" \|\| declared === "fa" \|\| declared === "ja"/);
+assert.match(helper, /if \(\/\^\[\\x00-\\x7f\]\*\[A-Za-z\]/);
 assert.match(helper, /meaningLanguage\?: "en" \| "fa" \| "ja" \| "unknown"/);
 assert.match(helper, /meaningLanguage: example\.meaningLanguage/);
 assert.match(helper, /\[\.\.\.word\]\[0\] !== target/);
