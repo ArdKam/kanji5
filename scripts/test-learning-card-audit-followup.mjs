@@ -46,6 +46,8 @@ assert.match(i18n, /japaneseVoiceUnavailable:"A Japanese voice is unavailable in
 assert.match(app, /voiceState\.checked&&!voiceState\.available/);
 assert.match(app, /t\("japaneseVoiceUnavailable"\)/);
 assert.match(app, /meaningLanguage/);
+assert.match(app, /inferMeaningLanguage\(e\?\.meaning,e\?\.meaningLanguage,source\)/);
+assert.match(await read("frontend/src/app/learning-copy.ts"), /inferMeaningLanguage/);
 assert.match(learnerContent, /reviewStatus/);
 assert.match(learnerContent, /reviewedBy/);
 assert.match(learnerContent, /provenance/);
