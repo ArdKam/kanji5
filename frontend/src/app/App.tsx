@@ -446,7 +446,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         info={visualStructureInfo}
                         ready={visualStructureReady}
                         language={getLanguage()}
-                        enabled={revealed && backPage === 0}
                         onOpen={()=>setStructureDialogOpen(true)}
                       />
                     </div>

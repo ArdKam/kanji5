@@ -117,6 +117,135 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("first Learning-card reveal has its styles ready and transitions cleanly at required viewports", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+
+    const before = await card.evaluate((el) => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const cssLoaded = Array.from(document.styleSheets).some((sheet) => {
+        try {
+          return Array.from(sheet.cssRules).some((rule) => rule.selectorText === ".kanji-structure-preview");
+        } catch {
+          return false;
+        }
+      });
+      return {
+        cssLoaded,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        frontBackface: front ? getComputedStyle(front).backfaceVisibility : "",
+        backBackface: back ? getComputedStyle(back).backfaceVisibility : "",
+      };
+    });
+    expect(before.cssLoaded).toBe(true);
+    expect(before.lateStyleInjector).toBe(false);
+    expect(before.frontBackface).toBe("hidden");
+    expect(before.backBackface).toBe("hidden");
+
+    await page.evaluate(() => {
+      const target = document.querySelector(".learning-card-flip");
+      if (!target) throw new Error("Learning-card flip element is missing");
+      const frames = [];
+      const started = performance.now();
+      window.__rinemiLearningFlipFrames = frames;
+      const sample = () => {
+        const r = target.getBoundingClientRect();
+        frames.push({
+          at: performance.now() - started,
+          transform: getComputedStyle(target).transform,
+          rect: [r.x, r.y, r.width, r.height].map(value => Math.round(value * 10) / 10),
+        });
+        if (performance.now() - started < 850) requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+
+    const reveal = card.getByRole("button", {
+      name: /(Reveal meaning & readings|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information))/,
+    });
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(900);
+
+    const after = await card.evaluate((el) => {
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const revealButton = front?.querySelector(".button.primary.wide");
+      const r = revealButton?.getBoundingClientRect();
+      const hit = r ? document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) : null;
+      return {
+        frontAriaHidden: front?.getAttribute("aria-hidden"),
+        frontInert: front?.inert,
+        backAriaHidden: back?.getAttribute("aria-hidden"),
+        backInert: back?.inert,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        revealButtonIsHitTarget: Boolean(revealButton && hit && (hit === revealButton || revealButton.contains(hit))),
+      };
+    });
+    const frames = await page.evaluate(() => window.__rinemiLearningFlipFrames || []);
+    expect(after.frontAriaHidden).toBe("true");
+    expect(after.frontInert).toBe(true);
+    expect(after.backAriaHidden).toBe("false");
+    expect(after.backInert).toBe(false);
+    expect(after.lateStyleInjector).toBe(false);
+    expect(after.revealButtonIsHitTarget).toBe(false);
+    expect(frames.length).toBeGreaterThan(8);
+    expect(new Set(frames.map(frame => frame.transform)).size).toBeGreaterThan(2);
+
+    const toggle = card.locator(".learning-card-back .reading-toggle");
+    await expect(toggle).toHaveText("Show all readings in Hiragana");
+    await toggle.click();
+    await expect(toggle).toHaveText("Use normal reading notation");
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await toggle.click();
+    await expect(toggle).toHaveText("Show all readings in Hiragana");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  }
+});
+
+test("Learning-card reveal respects reduced-motion preferences", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const durationSeconds = await card.locator(".learning-card-flip").evaluate(el => {
+    const durations = getComputedStyle(el).transitionDuration.split(",").map(value => {
+      const token = value.trim();
+      return token.endsWith("ms") ? Number.parseFloat(token) / 1000 : Number.parseFloat(token);
+    });
+    return Math.max(...durations);
+  });
+  expect(durationSeconds).toBeLessThanOrEqual(0.005);
+  await card.getByRole("button", {
+    name: /(Reveal meaning & readings|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information))/,
+  }).click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  await expect(card.locator(".learning-card-back")).toHaveAttribute("aria-hidden", "false");
+  await expect(card.locator(".learning-card-back")).toHaveJSProperty("inert", false);
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -143,7 +272,7 @@ test("reference meanings and readings open in a keyboard-accessible modal", asyn
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
-    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings");
+    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings");
 
     await trigger.click();
     const dialog = page.locator("#learning-reference-info");
@@ -406,8 +535,14 @@ test("learning-card structure is a compact preview with full details in a modal"
     const nav = card.locator(".learning-back-page-nav .learning-back-page-shortcut");
     await expect(nav).toHaveCount(4);
     const previewPage = card.locator(".learning-back-page.active");
+    const previewLabel = previewPage.locator(".kanji-structure-preview-label");
     const preview = previewPage.locator(".kanji-structure-preview-action");
+    await expect(previewLabel).toHaveText("Visual components");
+    await expect(preview).toHaveText("View full structure ↗");
     await expect(preview).toBeVisible({ timeout: 10000 });
+    await expect(preview).toHaveCSS("border-width", "0px");
+    const previewBox = await preview.boundingBox();
+    expect(previewBox?.height ?? 0).toBeGreaterThanOrEqual(44);
     const metrics = await previewPage.evaluate(pageEl => {
       const scroll = pageEl.querySelector(".learning-back-scroll");
       const overview = pageEl.querySelector(".learning-back-overview");
