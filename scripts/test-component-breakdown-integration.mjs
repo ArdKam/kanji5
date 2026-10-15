@@ -11,7 +11,7 @@ assert(app.includes('import { KanjiStructurePreview } from "./KanjiStructurePrev
 assert(app.includes("getVisualStructureInfo(card.character)"), "Learning card must request the canonical visual structure");
 assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typed visual structure contract");
 assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
-assert(app.includes("enabled={revealed && backPage === 0}"), "Card-specific presentation styles should be deferred until the learning back face is revealed");
+assert(!app.includes('enabled={revealed && backPage === 0}'), "Structure preview styles must not depend on the reveal state");
 const structurePreview = await readFile(new URL("../frontend/src/app/KanjiStructurePreview.tsx", import.meta.url), "utf8");
 assert(/No finer components recorded/.test(structurePreview), "Atomic preview must use a concise English empty state");
 assert(/جزء دیداری ریزتری ثبت نشده/.test(structurePreview), "Atomic preview must use a concise Persian empty state");
@@ -26,5 +26,10 @@ assert(dictionary.includes("getVisualStructureInfo(item.character)"), "Dictionar
 assert(dictionary.includes("<ComponentBreakdown"), "Dictionary must render the shared visual structure component");
 assert(dictionary.includes("components={componentInfo.components}"), "Legacy learning dependencies must remain separate for the optional learning path");
 assert(engine.includes("getVisualStructureInfo: (character: string) => Promise<VisualStructureInfo>"), "Typed engine boundary must expose visual structure access");
+
+assert(app.includes('import("./learning-card-enhancements.css?inline")'), "Learning-card enhancements must load through a controlled pre-flip path");
+assert(app.indexOf("await ensureLearningCardStyles();") < app.indexOf("onReveal();"), "The reveal transition must wait until enhancement styles are applied");
+assert(!structurePreview.includes('learning-card-enhancements.css?inline'), "Structure preview must not import enhancement CSS lazily on first reveal");
+assert(!structurePreview.includes('data-rinemi-learning-card-styles'), "Structure preview must not inject a style element during the reveal transition");
 
 console.log("Kanji visual-structure integration contract passed for the Learning Card and Dictionary.");
