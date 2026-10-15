@@ -429,3 +429,37 @@
   .kanji-structure-preview { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .kanji-structure-preview-action { justify-self: start; white-space: normal; text-align: start; }
 }
+
+
+/* One evidence-backed vocabulary example may accompany a priority reading without
+   expanding the first page into a vocabulary list. */
+.learning-card .reading-vocabulary-examples {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  min-width: 0;
+  margin-top: 1px;
+  color: var(--mute);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.learning-card .reading-vocabulary-example {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  max-width: 100%;
+  min-width: 0;
+}
+.learning-card .reading-vocabulary-example > span {
+  color: var(--ink);
+  font-family: var(--jp-font);
+  font-size: 12px;
+  font-weight: 650;
+}
+.learning-card .reading-vocabulary-example > small {
+  color: var(--mute);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
