@@ -54,11 +54,25 @@ for(const file of cssSources){
   assert.equal(bad.length,0,`8px/9px font-size remains in ${file}: ${bad.map(m=>m[1]).join(", ")}`);
 }
 
-const semanticPageCssFiles=["frontend/src/app/dictionary-page.css","frontend/src/app/practice-home.css","frontend/src/app/exercise-layout.css"];
-for(const file of semanticPageCssFiles){
+const semanticConsumerCssFiles=[
+  "frontend/src/experience-nav.css",
+  "frontend/src/app/component-breakdown.css",
+  "frontend/src/app/dictionary.css",
+  "frontend/src/app/dictionary-page.css",
+  "frontend/src/app/exercise-layout.css",
+  "frontend/src/app/handwriting-practice.css",
+  "frontend/src/app/learning-card-enhancements.css",
+  "frontend/src/app/learning-surface.css",
+  "frontend/src/app/mnemonic-support.css",
+  "frontend/src/app/practice-home.css",
+  "frontend/src/app/reading-lab-playback.css",
+  "frontend/src/app/topic-learning.css",
+  "frontend/src/app/traditional-radical.css",
+];
+for(const file of semanticConsumerCssFiles){
   const source=fs.readFileSync(file,"utf8");
-  assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout)-[a-z0-9-]+/i,"missing direct semantic tokens in "+file);
-  assert.doesNotMatch(source,/var\(--(?:washi|paper|sumi|ink|mute|line-soft|line-interactive|line|surface-soft|surface-panel|ai|shu|matcha|color-danger|color-success|color-warning|jp-font|text-display-sm|text-base|text-title|text-lg|text-md|text-sm|text-xs|radius-xl|radius-lg|radius-md|radius-sm|motion-interaction)\b/,"legacy token remains in migrated page stylesheet: "+file);
+  assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout|z)-[a-z0-9-]+/i,"missing direct semantic tokens in "+file);
+  assert.doesNotMatch(source,/var\(--(?:washi|paper|sumi|ink|mute|shu|ai|matcha|sakura|line|border|line-soft|line-interactive|surface-soft|surface-panel|color-surface-elevated|color-success|color-warning|color-danger|color-background|color-text|color-text-muted|color-primary|color-border|color-border-subtle|color-focus|jp-font|ui-font|fa-font|text-xs|text-sm|text-base|text-md|text-lg|text-xl|text-2xl|text-heading|text-title|text-display-xs|text-display-sm|text-display-md|text-display-xl|text-display-lg|text-display-kanji|text-stimulus-kanji|text-display-compact|text-display-wide|text-display-tall|space-[0-9]+|radius-(?:sm|md|lg|xl|full)|motion-(?:interaction|hover|tab|fast|slow|normal|flip)|nav-bar-height|z-(?:base|content|nav|overlay|modal)|progress-track|skeleton-(?:base|highlight|track|fill))\b/,"legacy token remains in migrated consumer stylesheet: "+file);
 }
 
 
