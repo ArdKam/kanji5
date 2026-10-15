@@ -54,7 +54,7 @@ assert.ok(styles.includes(".badge-red{border-color:color-mix(in srgb,var(--color
 assert.ok(dictionary.includes(".placement-option.wrong{border-color:color-mix(in srgb,var(--ds-state-danger-text) 42%,var(--ds-color-border))"));
 assert.ok(dictionary.includes(":root[data-theme=\"dark\"] .dictionary-card-dialog .dialog-close"), "Dictionary close control needs a manual-Dark foreground override");
 assert.ok(dictionary.includes(":root[data-theme=\"system\"] .dictionary-card-dialog .dialog-close"), "Dictionary close control needs a System-Dark foreground override");
-assert.ok(dictionary.includes("color: var(--sumi);"), "Dictionary close control must use the resolved high-contrast ink token");
+assert.ok(dictionary.includes("color: var(--ds-color-text-primary);"), "Dictionary close control must use the resolved high-contrast ink token");
 assert.ok(dictionary.includes(".handwriting-result.retry{border-color:color-mix(in srgb,var(--ds-state-danger-text) 42%,var(--ds-color-border))"));
 
 function linear(value) {

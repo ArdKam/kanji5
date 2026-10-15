@@ -83,7 +83,7 @@ assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyfram
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-previous-in/);
 
 assert.match(dictionaryPageCss,/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--ds-motion-interaction\) ease/);
-assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--motion-hover\) ease/);
+assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--ds-motion-hover\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/reading-lab-playback.css","utf8"),/\.reading-lab-sentence-repeat[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
 
 console.log("Kanji5 UI hardening final design/motion/dark-mode contract passed.");
