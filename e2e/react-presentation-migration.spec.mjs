@@ -125,9 +125,12 @@ test('empty session progress indicator is absent before a session starts',async(
 
 test('custom study starts a filtered JLPT/new-card session',async({page})=>{
   await clean(page);
+  const practiceCssPresentBeforeOpen=await page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/practice-experience.*\.css/.test(entry.name)));
+  expect(practiceCssPresentBeforeOpen).toBe(false);
   await page.getByRole('button',{name:'تمرین',exact:true}).click();
   const practiceHome=page.locator('.practice-home');
   await expect(practiceHome).toBeVisible({timeout:10000});
+  await expect.poll(async()=>page.evaluate(()=>performance.getEntriesByType('resource').some(entry=>/practice-experience.*\.css/.test(entry.name)))).toBe(true);
   const advanced=practiceHome.locator('.practice-advanced');
   await expect(advanced).toBeVisible();
   await advanced.locator('summary').click();

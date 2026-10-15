@@ -102,4 +102,7 @@ for(const file of migratedTokenCssFiles){
 assert.doesNotMatch(mainSource,/import\s+["']\.\/app\/dictionary-catalog\.css["']/,"Dictionary catalog styles must not enter the startup bundle");
 assert.match(appSource,/import\(["']\.\/dictionary-catalog\.css["']\)/,"Dictionary catalog CSS must be loaded on demand");
 assert.match(appSource,/dictionaryCatalogStylesReady/,"Dictionary screen must wait until its CSS chunk is ready");
+assert.doesNotMatch(mainSource,/import\s+["']\.\/app\/(?:practice-home|exercise-layout)\.css["']/,"Practice CSS must not enter the startup bundle");
+assert.match(appSource,/import\(["']\.\/practice-experience\.css["']\)/,"Practice styles must load on demand");
+assert.match(appSource,/practiceExperienceStylesReady/,"Practice screen must wait until its CSS chunk is ready");
 console.log("Kanji5 UI hardening final design/motion/dark-mode contract passed.");
