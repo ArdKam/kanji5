@@ -31,7 +31,7 @@ const DictionaryPageRoute = lazy(async () => {
   return { default: WithDictionaryStyles };
 });
 const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
-import { learningCopy } from "./learning-copy";
+import { learningCopy, selectExamplesForReading } from "./learning-copy";
 import learningSurfaceStyles from "./learning-surface.css?inline";
 import { isOnboardingComplete } from "./onboarding";
 import { UiIcon } from "./UiIcon";
@@ -316,6 +316,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   },[activeCharacter,directExamplesSignature,examplesRetryKey]);
   const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
   const visibleExamples=examplesExpanded?displayExamples:displayExamples.slice(0,4);
+  const onReadingExamples=displayedOn[0]?selectExamplesForReading(activeCharacter,displayedOn[0],displayExamples,1):[];
+  const kunReadingExamples=displayedKun[0]?selectExamplesForReading(activeCharacter,displayedKun[0],displayExamples,1):[];
   const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
   const mnemonicSupport=buildMnemonicSupport({
     character:card.character??"",
@@ -457,7 +459,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("useNormalReadingNotation"):t("showAllReadingsInHiragana")}</button></div>
-                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn} examples={onReadingExamples}/><Reading title="Kun’yomi" values={displayedKun} examples={kunReadingExamples}/></div>
                     </div>
                     <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
                       <KanjiStructurePreview
@@ -633,7 +635,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     </div>
   </section>
 }
-function Reading({title,values}:{title:string;values:string[]}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title}/>:null}</div>}
+function Reading({title,values,examples=[]}:{title:string;values:string[];examples?:Array<{word?:string;reading?:string;meaning?:string}>}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title}/>:null}{examples.length?<div className="reading-vocabulary-examples" aria-label={title+" vocabulary examples"}>{examples.map(example=><span className="reading-vocabulary-example" key={example.word}><span lang="ja">{example.word}</span><small lang="en">{example.meaning}</small></span>)}</div>:null}</div>}
 function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
   if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
