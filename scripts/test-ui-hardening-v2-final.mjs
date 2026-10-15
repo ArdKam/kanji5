@@ -42,6 +42,8 @@ const cssSources=[
   "frontend/src/app/mnemonic-support.css",
   "frontend/src/app/dictionary.css",
   "frontend/src/app/dictionary-page.css",
+  "frontend/src/app/practice-home.css",
+  "frontend/src/app/exercise-layout.css",
   "frontend/src/app/component-breakdown.css",
   "frontend/src/app/traditional-radical.css",
   "frontend/src/experience-nav.css"
@@ -52,13 +54,21 @@ for(const file of cssSources){
   assert.equal(bad.length,0,`8px/9px font-size remains in ${file}: ${bad.map(m=>m[1]).join(", ")}`);
 }
 
-assert.match(dictionaryPageCss,/\.dictionary-view-button[\s\S]*?transition:background var\(--motion-interaction\) ease/);
+const semanticPageCssFiles=["frontend/src/app/dictionary-page.css","frontend/src/app/practice-home.css","frontend/src/app/exercise-layout.css"];
+for(const file of semanticPageCssFiles){
+  const source=fs.readFileSync(file,"utf8");
+  assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout)-[a-z0-9-]+/i,"missing direct semantic tokens in "+file);
+  assert.doesNotMatch(source,/var\(--(?:washi|paper|sumi|ink|mute|line-soft|line-interactive|line|surface-soft|surface-panel|ai|shu|matcha|color-danger|color-success|color-warning|jp-font|text-display-sm|text-base|text-title|text-lg|text-md|text-sm|text-xs|radius-xl|radius-lg|radius-md|radius-sm|motion-interaction)\b/,"legacy token remains in migrated page stylesheet: "+file);
+}
+
+
+assert.match(dictionaryPageCss,/\.dictionary-view-button[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-card\.is-navigation-next\{animation:dictionary-card-next-in var\(--motion-tab\)/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.dictionary-card\.is-navigation-previous\{animation:dictionary-card-previous-in var\(--motion-tab\)/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-next-in/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/@keyframes dictionary-card-previous-in/);
 
-assert.match(dictionaryPageCss,/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--motion-interaction\) ease/);
+assert.match(dictionaryPageCss,/\.kanji-catalog-tile[\s\S]*?transition:transform var\(--ds-motion-interaction\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/dictionary.css","utf8"),/\.reading-lab-reader-sentence[\s\S]*?transition:border-color var\(--motion-hover\) ease/);
 assert.match(fs.readFileSync("frontend/src/app/reading-lab-playback.css","utf8"),/\.reading-lab-sentence-repeat[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
 
