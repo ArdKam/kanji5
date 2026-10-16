@@ -356,6 +356,77 @@ test("Learning card remains interactive when reduced motion is requested", async
   await expect(card.locator(".learning-back-meaning")).toBeVisible();
 });
 
+test("Learning meaning and structure stay reachable in compact and landscape layouts", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.addInitScript(() => {
+    const language = new URL(window.location.href).searchParams.get("rinemi-test-language");
+    if (language === "fa" || language === "en") localStorage.setItem("kanji5-ui-language", language);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  for (const scenario of [
+    { language: "en", viewport: { width: 844, height: 390 } },
+    { language: "fa", viewport: { width: 844, height: 390 } },
+    { language: "en", viewport: { width: 320, height: 740 } },
+    { language: "fa", viewport: { width: 320, height: 740 } },
+  ]) {
+    await page.setViewportSize(scenario.viewport);
+    await page.goto("/?rinemi-test-language=" + scenario.language);
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+    const reveal = page.getByRole("button", {
+      name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/,
+    });
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(520);
+
+    const focus = await page.evaluate(() => {
+      const node = document.querySelector(".learning-card-back > .sr-only");
+      return { focused: node === document.activeElement, text: node?.textContent?.trim() || "" };
+    });
+    expect(focus.focused).toBe(true);
+    expect(focus.text).toMatch(/(معنی و ساختار|Meaning & structure)/);
+    const cardBoundsAfterReveal = await card.evaluate(el => {
+      const rect = el.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, viewportHeight: window.innerHeight };
+    });
+    const navigationBounds = await page.locator(".experience-nav").boundingBox();
+    expect(navigationBounds).not.toBeNull();
+    expect(cardBoundsAfterReveal.top).toBeGreaterThanOrEqual(-1);
+    expect(cardBoundsAfterReveal.bottom).toBeLessThanOrEqual(cardBoundsAfterReveal.viewportHeight + 1);
+    expect(cardBoundsAfterReveal.bottom).toBeLessThanOrEqual((navigationBounds?.y ?? cardBoundsAfterReveal.viewportHeight) - 1);
+
+    const scroll = card.locator(".learning-back-page.active .learning-back-scroll");
+    const previewAction = card.locator(".learning-back-page.active .kanji-structure-preview-action");
+    await expect(previewAction).toBeVisible();
+    const metrics = await scroll.evaluate((el) => {
+      const action = el.querySelector(".kanji-structure-preview-action");
+      if (!(action instanceof HTMLElement)) throw new Error("Full-structure action is missing from the meaning page");
+      const before = { scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
+      el.scrollTop = el.scrollHeight;
+      const scroller = el.getBoundingClientRect();
+      const target = action.getBoundingClientRect();
+      return {
+        overflowY: getComputedStyle(el).overflowY,
+        ...before,
+        scrollTop: el.scrollTop,
+        actionTop: target.top,
+        actionBottom: target.bottom,
+        scrollTopEdge: scroller.top,
+        scrollBottomEdge: scroller.bottom,
+        viewportHeight: window.innerHeight,
+      };
+    });
+    expect(metrics.overflowY).toBe("auto");
+    expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
+    if (scenario.viewport.height <= 460) expect(metrics.scrollTop).toBeGreaterThan(0);
+    expect(metrics.actionTop).toBeGreaterThanOrEqual(metrics.scrollTopEdge - 1);
+    expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.scrollBottomEdge + 1);
+    await expect(card.locator(".learning-card-back .rating-grid")).toBeVisible();
+    await assertCardBounds(card);
+  }
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });
