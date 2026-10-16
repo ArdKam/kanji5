@@ -685,8 +685,8 @@ test("rating buttons keep the same hardest-to-easiest physical order in English 
         buttons.map((button) => {
           const rect = button.getBoundingClientRect();
           const rating = [...button.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name))?.slice("rating-".length);
-          return { rating, left: rect.left };
-        }).sort((a, b) => a.left - b.left).map((item) => item.rating)
+          return { rating, top: rect.top, left: rect.left };
+        }).sort((a, b) => a.top - b.top || a.left - b.left).map((item) => item.rating)
       );
 
       expect(physicalOrder).toEqual(["again", "hard", "good", "easy"]);
