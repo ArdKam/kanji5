@@ -672,3 +672,28 @@ test("a short fast horizontal touch flick advances the learning-card pager", asy
   await swipePager(page, pager, 0.55, 0.47);
   await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
 });
+
+test("rating buttons keep the same hardest-to-easiest physical order in English and Persian", async ({ browser }) => {
+  for (const language of ["en", "fa"]) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 2);
+      const card = await revealLearningCard(page, language);
+      await expect(card.locator(".learning-back-readings bdi[lang=\"ja\"][dir=\"ltr\"]")).toHaveCount(2);
+      const physicalOrder = await card.locator(".rating-grid button").evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const rect = button.getBoundingClientRect();
+          const rating = [...button.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name))?.slice("rating-".length);
+          return { rating, top: rect.top, left: rect.left };
+        }).sort((a, b) => a.top - b.top || a.left - b.left).map((item) => item.rating)
+      );
+
+      expect(physicalOrder).toEqual(["again", "hard", "good", "easy"]);
+      await expect(card.locator(".rating-grid .rating-again")).toHaveAttribute("dir", language === "fa" ? "rtl" : "ltr");
+      await expect(card.locator(".rating-grid .rating-easy")).toHaveAttribute("dir", language === "fa" ? "rtl" : "ltr");
+    } finally {
+      await context.close();
+    }
+  }
+});

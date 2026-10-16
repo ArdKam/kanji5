@@ -4,9 +4,37 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
+const app = await read("frontend/src/app/App.tsx");
+const onboarding = await read("frontend/src/app/onboarding/OnboardingFlow.tsx");
 const dictionary = await read("frontend/src/app/dictionary.css");
 const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
+
+const linearChannel = (value) => {
+  const channel = Number.parseInt(value, 16) / 255;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+};
+const relativeLuminance = (hex) => {
+  const channels = hex.slice(1).match(/.{2}/g).map(linearChannel);
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+};
+const contrastRatio = (foreground, background) => {
+  const first = relativeLuminance(foreground);
+  const second = relativeLuminance(background);
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+};
+
+// Keep muted light-theme copy readable on the secondary paper surface.
+assert.ok(styles.includes("--mute:#62666A;"), "Light-theme muted text must use the verified contrast token");
+assert.ok(contrastRatio("#62666A", "#EEE9E0") >= 4.5, "Muted text must reach WCAG AA contrast on the secondary surface");
+assert.ok(onboarding.includes("--mute:#62666A;"), "The onboarding shell must use the same readable muted-text token");
+assert.ok(contrastRatio("#62666A", "#F7F4EE") >= 4.5, "Onboarding muted text must reach WCAG AA contrast on its paper surface");
+
+// The rating row has one stable physical order regardless of the app's RTL/LTR locale.
+assert.ok(styles.includes(".rating-grid{direction:ltr;display:grid;"), "Rating grid must keep a stable left-to-right physical order");
+assert.ok(app.includes('const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;'), "Rating choices must be ordered hardest-to-easiest in the DOM");
+assert.ok(app.includes('dir={getLanguage()==="fa"?"rtl":"ltr"}'), "Rating labels must retain their language direction");
+assert.ok(app.includes('<bdi lang="ja" dir="ltr">'), "Learning-card Japanese readings must be isolated from surrounding RTL text");
 
 const darkStart = styles.indexOf("@media(prefers-color-scheme:dark){");
 const contrastStart = styles.indexOf("@media(prefers-contrast:more){", darkStart);

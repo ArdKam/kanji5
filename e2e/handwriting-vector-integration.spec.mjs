@@ -196,16 +196,24 @@ test("handwriting UI remains usable in English and reduced-motion mode",async({p
   await expect(page.locator("html")).toHaveAttribute("dir","ltr");
   await menu.getByRole("button",{name:/close menu/i}).click();
   await page.emulateMedia({reducedMotion:"reduce"});
-  await page.setViewportSize({width:390,height:844});
   const handwriting=await openSchoolHandwriting(page);
-  const canvasBox=await handwriting.locator(".handwriting-canvas-wrap").boundingBox();
-  expect(canvasBox?.width??999).toBeLessThanOrEqual(286);
-  const actionBoxes=await handwriting.locator(".handwriting-actions .button").evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
-  expect(actionBoxes.every(height=>height>=44)).toBe(true);
+  for (const viewport of [{width:320,height:568},{width:360,height:640},{width:390,height:844}]) {
+    await page.setViewportSize(viewport);
+    const canvasBox=await handwriting.locator(".handwriting-canvas-wrap").boundingBox();
+    expect(canvasBox?.width??0, "Handwriting canvas must have a rendered width at "+viewport.width+"px").toBeGreaterThan(0);
+    expect(canvasBox?.width??999, "Handwriting canvas must fit its narrow viewport").toBeLessThanOrEqual(viewport.width);
+    expect(canvasBox?.height??0, "Handwriting canvas must have a rendered height").toBeGreaterThan(0);
+    expect(Math.abs((canvasBox?.width??0)-(canvasBox?.height??0)), "Handwriting canvas must remain square").toBeLessThanOrEqual(2);
+    const documentWidth=await page.evaluate(()=>document.documentElement.scrollWidth);
+    expect(documentWidth, "Handwriting practice must not create horizontal page overflow at "+viewport.width+"px").toBeLessThanOrEqual(viewport.width+1);
+    const actionBoxes=await handwriting.locator(".handwriting-actions .button").evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
+    expect(actionBoxes.every(height=>height>=44)).toBe(true);
+  }
   const help=handwriting.locator(".handwriting-help");
   await expect(help).toHaveText(/mouse|touch|stylus/i);
   await expect(handwriting.locator(".handwriting-ink-canvas")).toHaveAttribute("aria-label","Handwriting practice");
   await expect(handwriting.locator(".handwriting-ink-canvas")).toHaveAttribute("aria-describedby",/handwriting-help-/);
+  await expect(handwriting.locator(".handwriting-ink-canvas")).toHaveCSS("touch-action","none");
   await expect(handwriting.locator(".handwriting-guide-canvas")).toHaveAttribute("aria-hidden","true");
 });
 
