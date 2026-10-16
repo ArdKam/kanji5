@@ -395,7 +395,7 @@
   width: auto;
   height: auto;
   min-width: 44px;
-  min-height: 44px;
+  min-height: 48px;
   max-width: 100%;
   padding: 5px 8px;
   border: 0;
@@ -421,7 +421,7 @@
 /* Keep the structure action available without forcing it into the meaning line. */
 .kanji-structure-preview-action {
   min-width: 44px;
-  min-height: 44px;
+  min-height: 48px;
   max-width: 180px;
   padding: 8px;
   border: 0 !important;
