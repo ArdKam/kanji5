@@ -319,6 +319,43 @@ test("Learning card styles are ready before reveal and the flip preserves intera
   }
 });
 
+test("Learning card remains interactive when reduced motion is requested", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "fa");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const reveal = page.getByRole("button", { name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/ });
+  await reveal.click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  const result = await card.evaluate(el => {
+    const flip = el.querySelector(".learning-card-flip");
+    const front = el.querySelector(".learning-card-front");
+    const back = el.querySelector(".learning-card-back");
+    if (!(flip instanceof HTMLElement) || !(front instanceof HTMLElement) || !(back instanceof HTMLElement)) {
+      throw new Error("Learning card state is unavailable after a reduced-motion reveal");
+    }
+    const duration = getComputedStyle(flip).transitionDuration.split(",")[0].trim();
+    const seconds = duration.endsWith("ms") ? Number.parseFloat(duration) / 1000 : Number.parseFloat(duration);
+    return {
+      seconds,
+      m11: new DOMMatrixReadOnly(getComputedStyle(flip).transform).m11,
+      frontInert: front.inert,
+      backInert: back.inert,
+    };
+  });
+  expect(result.seconds).toBeLessThan(0.01);
+  expect(result.m11).toBeLessThan(-0.99);
+  expect(result.frontInert).toBe(true);
+  expect(result.backInert).toBe(false);
+  await expect(card.locator(".learning-back-meaning")).toBeVisible();
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });
