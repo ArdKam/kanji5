@@ -680,6 +680,7 @@ test("rating buttons keep the same hardest-to-easiest physical order in English 
       const page = await context.newPage();
       await routeExamples(page, 2);
       const card = await revealLearningCard(page, language);
+      await expect(card.locator(".learning-back-readings bdi[lang=\"ja\"][dir=\"ltr\"]")).toHaveCount(2);
       const physicalOrder = await card.locator(".rating-grid button").evaluateAll((buttons) =>
         buttons.map((button) => {
           const rect = button.getBoundingClientRect();
