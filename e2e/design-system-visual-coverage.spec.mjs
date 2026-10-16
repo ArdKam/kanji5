@@ -244,6 +244,7 @@ test("visual coverage: learning-card back pages in light theme", async ({ page }
     await startApp(page, { language: "en", theme: "light" });
     const card = page.locator("#root .learning-card");
     await expect(card).toBeVisible({ timeout: 15000 });
+    await expect.poll(() => page.locator("style[data-rinemi-learning-card-styles]").count()).toBe(1);
     const revealButton = page.getByRole("button", {
       name: /(Reveal meaning & readings|Show (answer|kanji information)|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها))/,
     });
