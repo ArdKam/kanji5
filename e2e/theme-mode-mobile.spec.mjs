@@ -137,18 +137,23 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const revealHover = await assertTextContrast(reveal, "System Dark primary hover state");
   expect(revealHover.background, "Hover must retain the accessible brand-red palette").toBe("rgb(228, 124, 114)");
 
+  await page.keyboard.press("Tab");
   await reveal.focus();
   const revealFocus = await assertTextContrast(reveal, "System Dark primary focus state");
   expect(revealFocus.outlineWidth).toBe("3px");
   expect(revealFocus.outlineStyle).toBe("solid");
 
   await reveal.click();
+  await expect(reveal, "The reveal control must enter a real disabled state after activation").toBeDisabled();
+  expect(await reveal.evaluate(element => getComputedStyle(element).cursor)).toBe("not-allowed");
+  expect(await reveal.evaluate(element => getComputedStyle(element).opacity)).toBe("0.58");
   const backAudio = page.locator("#root .learning-card-back .audio-button").first();
   await expect(backAudio).toBeVisible({ timeout: 10_000 });
   await assertTextContrast(backAudio, "System Dark learning-card audio control");
   await backAudio.hover();
   const audioHover = await assertTextContrast(backAudio, "System Dark audio hover state");
   expect(audioHover.background).toBe("rgb(23, 22, 20)");
+  await page.keyboard.press("Tab");
   await backAudio.focus();
   const audioFocus = await assertTextContrast(backAudio, "System Dark audio focus state");
   expect(audioFocus.outlineWidth).toBe("3px");
