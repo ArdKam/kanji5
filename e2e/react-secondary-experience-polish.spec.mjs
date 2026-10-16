@@ -141,6 +141,60 @@ test("Prepared Mnemonics supports grade and JLPT filters plus inline create/edit
   await row.getByRole("button", { name: "Cancel", exact: true }).click();
 });
 
+test("Prepared Mnemonics load-more follows the dialog scroll and remains keyboard accessible", async ({ page }) => {
+  await clean(page, "en");
+  await page.setViewportSize({ width: 1280, height: 720 });
+
+  const dialog = await openMenuItem(page, "Prepared mnemonics");
+  const rows = dialog.locator(".prepared-mnemonic-library-row.is-curated");
+  const more = dialog.locator(".prepared-mnemonic-library-more");
+  await expect(rows).toHaveCount(60);
+  await expect(more).toBeVisible();
+
+  const layout = await dialog.evaluate((el) => {
+    const button = el.querySelector(".prepared-mnemonic-library-more");
+    const list = el.querySelector(".prepared-mnemonic-library-list");
+    const buttonStyle = getComputedStyle(button);
+    el.scrollTop = 0;
+    const topAtStart = button.getBoundingClientRect().top + el.scrollTop;
+    el.scrollTop = el.scrollHeight;
+    const buttonRect = button.getBoundingClientRect();
+    const lastRowRect = el.querySelector(".prepared-mnemonic-library-row:last-of-type")?.getBoundingClientRect();
+    const dialogRect = el.getBoundingClientRect();
+    return {
+      position: buttonStyle.position,
+      overflowY: getComputedStyle(el).overflowY,
+      listOverflowY: getComputedStyle(list).overflowY,
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      topAtStart,
+      topAfterScroll: buttonRect.top + el.scrollTop,
+      buttonTop: buttonRect.top,
+      buttonBottom: buttonRect.bottom,
+      lastRowBottom: lastRowRect?.bottom ?? NaN,
+      dialogBottom: dialogRect.bottom
+    };
+  });
+
+  expect(layout.position).toBe("static");
+  expect(layout.overflowY).toBe("auto");
+  expect(layout.listOverflowY).toBe("visible");
+  expect(layout.scrollHeight).toBeGreaterThan(layout.clientHeight);
+  expect(Math.abs(layout.topAtStart - layout.topAfterScroll)).toBeLessThanOrEqual(2);
+  expect(layout.lastRowBottom).toBeLessThanOrEqual(layout.buttonTop);
+  expect(layout.buttonBottom).toBeLessThanOrEqual(layout.dialogBottom);
+
+  await more.focus();
+  await page.keyboard.press("Enter");
+  await expect(rows).toHaveCount(120);
+
+  const search = dialog.locator(".prepared-mnemonic-library-search");
+  await search.fill("study");
+  await expect.poll(() => dialog.locator(".prepared-mnemonic-library-row.is-curated").count(), { timeout: 10000 }).toBeGreaterThan(0);
+  await expect(search).toHaveValue("study");
+  await dialog.locator(".dialog-close").click();
+});
+
 test("Prepared Mnemonics cards remain contained on mobile", async ({ page }) => {
   await clean(page, "en");
   await page.setViewportSize({ width: 390, height: 844 });
