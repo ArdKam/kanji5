@@ -80,6 +80,11 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     return result;
   };
   const primaryButton = page.locator("#root .learning-card .button.primary.wide");
+  const expectPrimaryColors = async (context, expectedBackground, expectedForeground) => {
+    await expect.poll(() => background(primaryButton)).toBe(expectedBackground);
+    await expect.poll(() => primaryButton.evaluate((element) => getComputedStyle(element).color)).toBe(expectedForeground);
+    return assertTextContrast(primaryButton, context);
+  };
   const isDarkSurface = async () =>
     (await background(surface)).includes("35, 33, 30");
 
@@ -95,39 +100,29 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await chooseTheme("Light");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect.poll(isDarkSurface).toBe(false);
-  const lightPrimary = await controlStyle(primaryButton);
-  expect(lightPrimary.background, "Manual Light must retain the Light-mode palette").toBe("rgb(80, 95, 131)");
-  expect(lightPrimary.foreground).toBe("rgb(253, 251, 247)");
-  expect(lightPrimary.contrast, "Manual Light primary button text must meet WCAG AA contrast").toBeGreaterThanOrEqual(4.5);
+  await expectPrimaryColors("Manual Light primary button", "rgb(80, 95, 131)", "rgb(253, 251, 247)");
   expect(await background(nav)).not.toContain("35, 33, 30");
 
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(isDarkSurface).toBe(true);
-  const manualDarkPrimary = await assertTextContrast(primaryButton, "Manual Dark primary button");
-  expect(manualDarkPrimary.background, "Manual Dark primary must use brand red").toBe("rgb(224, 106, 95)");
-  expect(manualDarkPrimary.foreground).toBe("rgb(23, 22, 20)");
+  await expectPrimaryColors("Manual Dark primary button", "rgb(224, 106, 95)", "rgb(23, 22, 20)");
 
   await chooseTheme("System");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
   await expect.poll(isDarkSurface).toBe(true);
-  const systemDarkPrimary = await assertTextContrast(primaryButton, "System + OS Dark primary button");
-  expect(systemDarkPrimary.background, "System + OS Dark primary must use brand red").toBe("rgb(224, 106, 95)");
-  expect(systemDarkPrimary.foreground).toBe("rgb(23, 22, 20)");
+  await expectPrimaryColors("System + OS Dark primary button", "rgb(224, 106, 95)", "rgb(23, 22, 20)");
 
   // In System mode, changing the device scheme should move all tracked surfaces.
   await page.emulateMedia({ colorScheme: "light" });
   await expect.poll(isDarkSurface).toBe(false);
   expect(await background(nav)).not.toContain("35, 33, 30");
-  const systemLightPrimary = await assertTextContrast(primaryButton, "System + OS Light primary button");
-  expect(systemLightPrimary.background, "System + OS Light must not inherit Dark brand-red styling").toBe("rgb(80, 95, 131)");
-  expect(systemLightPrimary.foreground).toBe("rgb(253, 251, 247)");
+  await expectPrimaryColors("System + OS Light primary button", "rgb(80, 95, 131)", "rgb(253, 251, 247)");
 
   // Switch back to System + OS Dark before measuring dark-mode contrast.
   await page.emulateMedia({ colorScheme: "dark" });
   await expect.poll(isDarkSurface).toBe(true);
-  const systemDarkAfterOsChange = await assertTextContrast(primaryButton, "System after switching back to OS Dark");
-  expect(systemDarkAfterOsChange.background).toBe("rgb(224, 106, 95)");
+  await expectPrimaryColors("System after switching back to OS Dark", "rgb(224, 106, 95)", "rgb(23, 22, 20)");
   const selectedThemeControl = page.locator("#header-tools-menu .menu-theme-button.active");
   await expect(selectedThemeControl).toBeVisible();
   await assertTextContrast(selectedThemeControl, "Selected theme control");
@@ -145,11 +140,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
 
   const reveal = primaryButton;
   await expect(reveal).toBeVisible({ timeout: 10_000 });
-  const revealNormal = await assertTextContrast(reveal, "System Dark primary button");
-  expect(revealNormal.background).toBe("rgb(224, 106, 95)");
-  expect(revealNormal.foreground).toBe("rgb(23, 22, 20)");
+  await expectPrimaryColors("System Dark primary button", "rgb(224, 106, 95)", "rgb(23, 22, 20)");
 
   await reveal.hover();
+  await expect.poll(async () => (await controlStyle(reveal)).backgroundRGB).toEqual([228, 124, 114]);
   const revealHover = await assertTextContrast(reveal, "System Dark primary hover state");
   expect(revealHover.backgroundRGB, "Hover must retain the accessible brand-red palette").toEqual([228, 124, 114]);
 
