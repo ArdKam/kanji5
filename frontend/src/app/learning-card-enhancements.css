@@ -93,12 +93,16 @@
 .learning-back-identity-visual { min-width: 0; }
 .learning-card-back .learning-back-page:first-child .learning-back-scroll {
   overflow-y: hidden;
-  padding: 4px 2px 4px;
-  gap: 5px;
+  padding: 2px 2px 2px;
+  gap: 4px;
+}
+.learning-card-back .learning-back-page:first-child .kanji-structure-preview {
+  min-height: 48px;
+  padding: 3px 8px;
 }
 .learning-card-back .learning-back-page:first-child .learning-back-overview,
 .learning-card-back .learning-back-page:first-child .learning-back-identity {
-  gap: 5px;
+  gap: 4px;
 }
 .learning-card-back .learning-back-page:first-child .learning-back-meaning {
   font-size: clamp(19px, 2.3vw, 25px) !important;
