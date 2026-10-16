@@ -3691,7 +3691,7 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
     display: none !important;
   }
   #root .learning-card[data-card-density] {
-    height: calc(100dvh - 142px) !important;
+    height: calc(100dvh - 160px) !important;
     min-height: 0 !important;
     margin-bottom: var(--space-2);
   }
