@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ComponentProps, type PointerEvent } from "react";
-import { KanjiStructurePreview } from "./KanjiStructurePreview";
+import { ensureLearningCardStyles, KanjiStructurePreview } from "./KanjiStructurePreview";
 import { useModalDialog } from "./useModalDialog";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
@@ -131,14 +131,27 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
-  const handleReveal=useCallback(()=>{
+  const [revealStylesPending,setRevealStylesPending]=useState(false);
+  const handleReveal=useCallback(async()=>{
+    if(revealed || busy || revealStylesPending)return;
+    setRevealStylesPending(true);
+    try {
+      await ensureLearningCardStyles();
+    } catch (error) {
+      console.error("Learning-card styles were unavailable before reveal.", error);
+      setRevealStylesPending(false);
+      return;
+    }
     const active=document.activeElement;
     if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
       active.blur();
     }
     shouldFocusBackRef.current=true;
     onReveal();
-  },[onReveal]);
+  },[onReveal,revealed,busy,revealStylesPending]);
+  useEffect(()=>{
+    if(revealed || !busy)setRevealStylesPending(false);
+  },[revealed,busy]);
   useEffect(()=>{
     if(!revealed||!shouldFocusBackRef.current)return;
     shouldFocusBackRef.current=false;
@@ -405,7 +418,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed||Boolean(busy)||revealStylesPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("meaningAndStructure")}</span>
