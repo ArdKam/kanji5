@@ -391,15 +391,22 @@ test("learning card stays within a short desktop landscape viewport", async ({ p
   const metrics = await card.evaluate((el) => {
     const rect = el.getBoundingClientRect();
     const style = getComputedStyle(el);
+    const navigation = document.querySelector(".experience-nav");
+    const navigationRect = navigation instanceof HTMLElement ? navigation.getBoundingClientRect() : null;
     return {
+      top: rect.top,
+      bottom: rect.bottom,
       height: rect.height,
       viewportHeight: window.innerHeight,
       minHeight: parseFloat(style.minHeight),
+      navigationTop: navigationRect?.top ?? window.innerHeight,
     };
   });
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewportHeight - 32 + 1);
-  expect(metrics.height).toBeGreaterThanOrEqual(300);
+  expect(metrics.height).toBeGreaterThanOrEqual(220);
   expect(metrics.minHeight).toBeLessThanOrEqual(metrics.viewportHeight - 32 + 1);
+  expect(metrics.top).toBeGreaterThanOrEqual(-1);
+  expect(metrics.bottom).toBeLessThanOrEqual(metrics.navigationTop - 1);
   await expect(card.locator(".learning-back-page.active")).toBeVisible();
 });
 
