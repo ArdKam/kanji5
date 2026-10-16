@@ -67,7 +67,9 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
       foreground: style.color,
       contrast: (pair[0] + 0.05) / (pair[1] + 0.05),
       outlineColor: style.outlineColor,
-      outlineRGB: channels(style.outlineColor).map(Math.round),
+      outlineRGB: style.outlineStyle === "none" || style.outlineColor === "auto"
+        ? null
+        : channels(style.outlineColor).map(Math.round),
       outlineWidth: style.outlineWidth,
       outlineStyle: style.outlineStyle
     };
