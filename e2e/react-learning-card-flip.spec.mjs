@@ -120,6 +120,11 @@ async function assertCardBounds(card) {
 test("Learning card styles are ready before reveal and the flip preserves interactive faces", async ({ page }) => {
   await routeExamples(page, 5);
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const language = new URL(window.location.href).searchParams.get("rinemi-test-language");
+    if (language === "fa" || language === "en") localStorage.setItem("kanji5-ui-language", language);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
 
   for (const scenario of [
     { language: "en", viewport: { width: 1280, height: 720 } },
@@ -130,11 +135,7 @@ test("Learning card styles are ready before reveal and the flip preserves intera
     { language: "fa", viewport: { width: 844, height: 390 } },
   ]) {
     await page.setViewportSize(scenario.viewport);
-    await page.addInitScript(value => {
-      localStorage.setItem("kanji5-ui-language", value);
-      localStorage.setItem("kanji5-onboarding-v2", "complete");
-    }, scenario.language);
-    await page.goto("/");
+    await page.goto("/?rinemi-test-language=" + scenario.language);
 
     const card = page.locator("#root .learning-card");
     await expect(card).toBeVisible({ timeout: 20000 });
