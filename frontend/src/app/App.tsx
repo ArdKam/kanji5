@@ -137,6 +137,9 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     if(revealed || busy || revealStylesPendingRef.current)return;
     revealStylesPendingRef.current=true;
     setRevealStylesPending(true);
+    // A click can scroll the reveal button to the viewport edge on short screens.
+    // Keep the whole card anchored in view before changing its face.
+    frontFaceRef.current?.closest(".learning-card")?.scrollIntoView({block:"nearest",inline:"nearest"});
     try {
       await ensureLearningCardStyles();
     } catch (error) {
