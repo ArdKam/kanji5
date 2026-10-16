@@ -165,7 +165,7 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
             meaning: rect(".learning-back-meaning"),
             readings: rect(".learning-back-readings-block"),
             structure: rect(".learning-back-identity-visual"),
-            scroll: { left: scrollRect.left, right: scrollRect.right, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth },
+            scroll: { left: scrollRect.left, right: scrollRect.right, top: scrollRect.top, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth, scrollHeight: scroll.scrollHeight, scrollTop: scroll.scrollTop },
           };
         });
         expect(geometry.glyph.width).toBeGreaterThanOrEqual(44);
@@ -174,7 +174,7 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
         expect(geometry.label.top).toBeLessThanOrEqual(geometry.meaning.top + 1);
         expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.readings.top + 2);
         expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.structure.top + 2);
-        expect(geometry.structure.bottom).toBeLessThanOrEqual(geometry.scroll.bottom + 1);
+        expect(geometry.structure.bottom - geometry.scroll.top + geometry.scroll.scrollTop).toBeLessThanOrEqual(geometry.scroll.scrollHeight + 1);
         expect(geometry.scroll.scrollWidth).toBeLessThanOrEqual(geometry.scroll.clientWidth + 1);
       }
     } finally {
@@ -728,18 +728,26 @@ test("learning-card structure is a compact preview with full details in a modal"
     await expect(preview).toBeVisible({ timeout: 10000 });
     const metrics = await previewPage.evaluate(pageEl => {
       const scroll = pageEl.querySelector(".learning-back-scroll");
-      const overview = pageEl.querySelector(".learning-back-overview");
-      const scrollRect = scroll?.getBoundingClientRect();
-      const overviewRect = overview?.getBoundingClientRect();
+      if (!(scroll instanceof HTMLElement)) throw new Error("Meaning/structure scroll container is missing");
       return {
-        overflowY: scroll ? getComputedStyle(scroll).overflowY : "",
-        scrollTop: scroll?.scrollTop ?? -1,
-        scrollBottom: scrollRect?.bottom ?? Infinity,
-        overviewBottom: overviewRect?.bottom ?? Infinity,
+        overflowY: getComputedStyle(scroll).overflowY,
+        scrollHeight: scroll.scrollHeight,
+        clientHeight: scroll.clientHeight,
       };
     });
     expect(metrics.overflowY).toBe("auto");
-    expect(metrics.overviewBottom).toBeLessThanOrEqual(metrics.scrollBottom + 1);
+    expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+
+    await preview.scrollIntoViewIfNeeded();
+    const reachableBounds = await preview.evaluate(el => {
+      const scroll = el.closest(".learning-back-scroll");
+      if (!(scroll instanceof HTMLElement)) throw new Error("Full-structure action is outside its scroll container");
+      const target = el.getBoundingClientRect();
+      const viewport = scroll.getBoundingClientRect();
+      return { top: target.top, bottom: target.bottom, viewportTop: viewport.top, viewportBottom: viewport.bottom };
+    });
+    expect(reachableBounds.top).toBeGreaterThanOrEqual(reachableBounds.viewportTop - 1);
+    expect(reachableBounds.bottom).toBeLessThanOrEqual(reachableBounds.viewportBottom + 1);
 
     await preview.click();
     const dialog = page.locator(".kanji-structure-dialog");
