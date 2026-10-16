@@ -120,6 +120,11 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const selectedThemeControl = page.locator("#header-tools-menu .menu-theme-button.active");
   await expect(selectedThemeControl).toBeVisible();
   await assertTextContrast(selectedThemeControl, "Selected theme control");
+  await page.keyboard.press("Tab");
+  await selectedThemeControl.focus();
+  const selectedThemeFocus = await controlStyle(selectedThemeControl);
+  expect(selectedThemeFocus.outlineWidth).toBe("3px");
+  expect(selectedThemeFocus.outlineColor).toBe("rgb(233, 148, 140)");
   const menuClose = page.locator(".header-tools-menu-close");
   await expect(menuClose).toBeVisible();
   await menuClose.hover();
@@ -142,6 +147,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const revealFocus = await assertTextContrast(reveal, "System Dark primary focus state");
   expect(revealFocus.outlineWidth).toBe("3px");
   expect(revealFocus.outlineStyle).toBe("solid");
+  expect(revealFocus.outlineColor).toBe("rgb(233, 148, 140)");
 
   await reveal.click();
   await expect(reveal, "The reveal control must enter a real disabled state after activation").toBeDisabled();
@@ -158,6 +164,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const audioFocus = await assertTextContrast(backAudio, "System Dark audio focus state");
   expect(audioFocus.outlineWidth).toBe("3px");
   expect(audioFocus.outlineStyle).toBe("solid");
+  expect(audioFocus.outlineColor).toBe("rgb(233, 148, 140)");
 
   const ratings = page.locator("#root .learning-card .rating-grid .rating");
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
