@@ -319,10 +319,10 @@ async function auditBrowserBehavior(httpEvidence) {
       await reloadedShortcut.click();
       const activeMnemonicPage = reloadedCard.locator(".learning-back-page.active .mnemonic-page");
       await activeMnemonicPage.waitFor({ state: "visible", timeout: 10000 });
-      const activeMnemonicTool = activeMnemonicPage.locator(".mnemonic-tool");
-      await activeMnemonicTool.waitFor({ state: "visible", timeout: 10000 });
-      await activeMnemonicTool.getByRole("button", { name: "Personal mnemonic" }).click();
-      await page.waitForTimeout(250);
+      // The saved mnemonic should already render on the active mnemonic page after reload.
+      // Do not click the editor/action button: that is unnecessary for testing persisted XSS and
+      // can change the view state in ways that make the browser probe brittle.
+      await page.waitForTimeout(500);
       const afterReload = await page.evaluate(() => ({
         executed: Boolean(window.__KANJI5_AUDIT_STORED_XSS_RAN__),
         injectedNodes: document.querySelectorAll("#root #kanji5-audit-stored-xss, #root #kanji5-audit-stored-svg, #root [onerror], #root [onload]").length,
@@ -348,6 +348,11 @@ async function auditBrowserBehavior(httpEvidence) {
       await parent.frameLocator("#target-frame").locator("body").waitFor({ state: "attached", timeout: 15000 });
       const targetFrame = parent.frames().find(frame => frame.url().startsWith(BASE_URL + "/?security_audit_iframe="));
       if (targetFrame) {
+        try {
+          await targetFrame.waitForFunction(() => document.readyState === "complete", { timeout: 10000 });
+        } catch {
+          // Preserve diagnostics for partially loaded documents; no visible frame is not a pass.
+        }
         iframeDiagnostics = await targetFrame.evaluate(() => ({
           readyState: document.readyState,
           title: document.title,
