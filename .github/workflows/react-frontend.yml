@@ -288,7 +288,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          docker run --rm -t \
+          docker run --rm -t --user root \
             -v "$PWD:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
