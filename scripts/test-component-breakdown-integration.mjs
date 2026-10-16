@@ -7,7 +7,7 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(app.includes('import { KanjiStructurePreview } from "./KanjiStructurePreview";'), "Learning card must use the compact visual-structure preview");
+assert(app.includes('import { ensureLearningCardStyles, KanjiStructurePreview } from "./KanjiStructurePreview";'), "Learning card must use the compact visual-structure preview and shared stylesheet readiness gate");
 assert(app.includes("getVisualStructureInfo(card.character)"), "Learning card must request the canonical visual structure");
 assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typed visual structure contract");
 assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
