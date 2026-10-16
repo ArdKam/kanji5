@@ -48,18 +48,26 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const background = async (locator) =>
     locator.evaluate((element) => getComputedStyle(element).backgroundColor);
   const controlStyle = async (locator) => locator.evaluate((element) => {
-    const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
-    const luminance = (value) => value.map((channel) => {
+    const channels = (value) => {
+      const srgb = value.match(/^color\\(srgb\\s+([\\d.e+-]+)\\s+([\\d.e+-]+)\\s+([\\d.e+-]+)/i);
+      if (srgb) return srgb.slice(1, 4).map((channel) => Number(channel) * 255);
+      const rgb = value.match(/^rgba?\\(([^)]+)\\)$/i);
+      if (rgb) return rgb[1].split(/[,\\s/]+/).filter(Boolean).slice(0, 3).map(Number);
+      throw new Error("Unsupported computed CSS color: " + value);
+    };
+    const luminance = (value) => channels(value).map((channel) => {
       const normalized = channel / 255;
       return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
     }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
     const style = getComputedStyle(element);
-    const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+    const pair = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => b - a);
     return {
       background: style.backgroundColor,
+      backgroundRGB: channels(style.backgroundColor).map(Math.round),
       foreground: style.color,
       contrast: (pair[0] + 0.05) / (pair[1] + 0.05),
       outlineColor: style.outlineColor,
+      outlineRGB: channels(style.outlineColor).map(Math.round),
       outlineWidth: style.outlineWidth,
       outlineStyle: style.outlineStyle
     };
@@ -124,7 +132,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await selectedThemeControl.focus();
   const selectedThemeFocus = await controlStyle(selectedThemeControl);
   expect(selectedThemeFocus.outlineWidth).toBe("3px");
-  expect(selectedThemeFocus.outlineColor).toBe("rgb(233, 148, 140)");
+  expect(selectedThemeFocus.outlineRGB).toEqual([233, 148, 140]);
   const menuClose = page.locator(".header-tools-menu-close");
   await expect(menuClose).toBeVisible();
   await menuClose.hover();
@@ -140,14 +148,14 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
 
   await reveal.hover();
   const revealHover = await assertTextContrast(reveal, "System Dark primary hover state");
-  expect(revealHover.background, "Hover must retain the accessible brand-red palette").toBe("rgb(228, 124, 114)");
+  expect(revealHover.backgroundRGB, "Hover must retain the accessible brand-red palette").toEqual([228, 124, 114]);
 
   await page.keyboard.press("Tab");
   await reveal.focus();
   const revealFocus = await assertTextContrast(reveal, "System Dark primary focus state");
   expect(revealFocus.outlineWidth).toBe("3px");
   expect(revealFocus.outlineStyle).toBe("solid");
-  expect(revealFocus.outlineColor).toBe("rgb(233, 148, 140)");
+  expect(revealFocus.outlineRGB).toEqual([233, 148, 140]);
 
   await reveal.click();
   await expect(reveal, "The reveal control must enter a real disabled state after activation").toBeDisabled();
@@ -164,7 +172,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const audioFocus = await assertTextContrast(backAudio, "System Dark audio focus state");
   expect(audioFocus.outlineWidth).toBe("3px");
   expect(audioFocus.outlineStyle).toBe("solid");
-  expect(audioFocus.outlineColor).toBe("rgb(233, 148, 140)");
+  expect(audioFocus.outlineRGB).toEqual([233, 148, 140]);
 
   const ratings = page.locator("#root .learning-card .rating-grid .rating");
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
