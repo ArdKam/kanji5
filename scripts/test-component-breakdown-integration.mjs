@@ -11,8 +11,10 @@ assert(app.includes('import { KanjiStructurePreview } from "./KanjiStructurePrev
 assert(app.includes("getVisualStructureInfo(card.character)"), "Learning card must request the canonical visual structure");
 assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typed visual structure contract");
 assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
-assert(app.includes("enabled={revealed && backPage === 0}"), "Card-specific presentation styles should be deferred until the learning back face is revealed");
 const structurePreview = await readFile(new URL("../frontend/src/app/KanjiStructurePreview.tsx", import.meta.url), "utf8");
+assert(structurePreview.includes('import "./learning-card-enhancements.css";'), "Learning-card CSS must be available before reveal");
+assert(!/useEffect|learning-card-enhancements\\.css\\?inline|data-rinemi-learning-card-styles|enabled: boolean/.test(structurePreview), "Structure preview must not inject styles during reveal");
+assert(!app.includes("enabled={revealed && backPage === 0}"), "Structure preview styling must not depend on a post-reveal effect");
 assert(/No finer components recorded/.test(structurePreview), "Atomic preview must use a concise English empty state");
 assert(/جزء دیداری ریزتری ثبت نشده/.test(structurePreview), "Atomic preview must use a concise Persian empty state");
 assert(/className="kanji-structure-preview-empty"/.test(structurePreview), "Atomic preview must use its compact empty-state style");
