@@ -48,11 +48,34 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const background = async (locator) =>
     locator.evaluate((element) => getComputedStyle(element).backgroundColor);
   const controlStyle = async (locator) => locator.evaluate((element) => {
+    // Chromium may serialize color-mix() results as Oklab instead of RGB.
+    // Convert computed CSS colors to sRGB before calculating WCAG luminance.
     const channels = (value) => {
       const srgb = value.match(/^color\(srgb\s+([\d.e+-]+)\s+([\d.e+-]+)\s+([\d.e+-]+)/i);
-      if (srgb) return srgb.slice(1, 4).map((channel) => Number(channel) * 255);
+      if (srgb) return srgb.slice(1, 4).map((channel) => Math.min(255, Math.max(0, Number(channel) * 255)));
       const rgb = value.match(/^rgba?\(([^)]+)\)$/i);
-      if (rgb) return rgb[1].split(/[,\s/]+/).filter(Boolean).slice(0, 3).map(Number);
+      if (rgb) return rgb[1].split(/[, \s/]+/).filter(Boolean).slice(0, 3).map(Number);
+      const oklab = value.match(/^oklab\(\s*([\d.e+-]+)\s+([+-]?[\d.e+-]+)\s+([+-]?[\d.e+-]+)(?:\s*\/\s*[\d.e+-]+)?\s*\)$/i);
+      if (oklab) {
+        const [L, a, b] = oklab.slice(1, 4).map(Number);
+        const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+        const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+        const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+        const l = l_ ** 3;
+        const m = m_ ** 3;
+        const s = s_ ** 3;
+        const linearRGB = [
+          4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+          -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+          -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+        ];
+        return linearRGB.map((channel) => {
+          const encoded = channel <= 0.0031308
+            ? 12.92 * channel
+            : 1.055 * Math.pow(channel, 1 / 2.4) - 0.055;
+          return Math.min(255, Math.max(0, encoded * 255));
+        });
+      }
       throw new Error("Unsupported computed CSS color: " + value);
     };
     const luminance = (value) => channels(value).map((channel) => {
