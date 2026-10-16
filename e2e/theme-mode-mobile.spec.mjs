@@ -161,6 +161,40 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await menuClose.click();
   await expect(page.locator("#header-tools-menu")).toHaveCount(0);
 
+  // Exercise the topic-selection dialog in a real Dark-mode browser state.
+  const topicLauncher = page.locator("#root .learning-route-button");
+  await expect(topicLauncher).toBeVisible({ timeout: 10_000 });
+  await topicLauncher.click();
+  const topicDialog = page.locator("dialog.topic-learning-dialog");
+  await expect(topicDialog).toBeVisible();
+  const topicSearch = topicDialog.locator(".topic-learning-search input");
+  const topicSearchContainer = topicDialog.locator(".topic-learning-search");
+  await topicSearch.focus();
+  const topicSearchFocus = await controlStyle(topicSearchContainer);
+  expect(topicSearchFocus.outlineWidth, "Topic search must expose a visible keyboard focus ring").toBe("3px");
+  expect(topicSearchFocus.outlineStyle).toBe("solid");
+  expect(topicSearchFocus.outlineRGB).toEqual([233, 148, 140]);
+  const firstTopicBeforeSearch = topicDialog.locator(".topic-learning-tile").first();
+  const topicLabel = await firstTopicBeforeSearch.locator("strong").innerText();
+  await topicSearch.fill(topicLabel);
+  await expect(topicDialog.locator(".topic-learning-tile")).toHaveCount(1);
+  const selectedTopicTile = topicDialog.locator(".topic-learning-tile").first();
+  await selectedTopicTile.click();
+  await expect(selectedTopicTile).toHaveAttribute("aria-pressed", "true");
+  await assertTextContrast(selectedTopicTile, "Selected topic tile");
+  const activeFocusOption = topicDialog.locator(".topic-learning-focus-option.active");
+  await expect(activeFocusOption).toBeVisible();
+  await expect(activeFocusOption).toHaveAttribute("aria-pressed", "true");
+  await assertTextContrast(activeFocusOption, "Selected topic-focus option");
+  await activeFocusOption.hover();
+  await assertTextContrast(activeFocusOption, "Selected topic-focus option hover state");
+  const topicClose = topicDialog.locator(".topic-learning-close");
+  await expect(topicClose).toBeVisible();
+  await topicClose.hover();
+  await assertTextContrast(topicClose, "Topic-dialog close control hover state");
+  await topicClose.click();
+  await expect(topicDialog).toBeHidden();
+
   const reveal = primaryButton;
   await expect(reveal).toBeVisible({ timeout: 10_000 });
   await expectPrimaryColors("System Dark primary button", "rgb(224, 106, 95)", "rgb(23, 22, 20)");
