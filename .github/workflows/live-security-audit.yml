@@ -1,0 +1,42 @@
+name: Live Security Surface Audit
+
+on:
+  pull_request:
+    paths:
+      - "scripts/test-live-security-surface.mjs"
+      - ".github/workflows/live-security-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-security-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-security-audit:
+    name: Read-only production penetration smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out audit branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install pinned test dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run strict read-only probes against deployed production
+        env:
+          KANJI5_LIVE_URL: https://ardkam.github.io/kanji5
+        run: node scripts/test-live-security-surface.mjs
