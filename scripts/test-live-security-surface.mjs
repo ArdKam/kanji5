@@ -314,8 +314,14 @@ async function auditBrowserBehavior(httpEvidence) {
       await reloadedCard.waitFor({ state: "visible", timeout: 20000 });
       const revealedAfterReload = await reloadedCard.evaluate(element => element.classList.contains("is-revealed"));
       if (!revealedAfterReload) await reloadedCard.getByRole("button", { name: "Reveal meaning & readings" }).click();
-      await reloadedCard.locator('.learning-back-page-shortcut[aria-label="Personal mnemonic"]').click();
-      await reloadedCard.locator(".mnemonic-tool").getByRole("button", { name: "Personal mnemonic" }).click();
+      const reloadedShortcut = reloadedCard.locator('.learning-back-page-shortcut[aria-label="Personal mnemonic"]');
+      await reloadedShortcut.waitFor({ state: "visible", timeout: 10000 });
+      await reloadedShortcut.click();
+      const activeMnemonicPage = reloadedCard.locator(".learning-back-page.active .mnemonic-page");
+      await activeMnemonicPage.waitFor({ state: "visible", timeout: 10000 });
+      const activeMnemonicTool = activeMnemonicPage.locator(".mnemonic-tool");
+      await activeMnemonicTool.waitFor({ state: "visible", timeout: 10000 });
+      await activeMnemonicTool.getByRole("button", { name: "Personal mnemonic" }).click();
       await page.waitForTimeout(250);
       const afterReload = await page.evaluate(() => ({
         executed: Boolean(window.__KANJI5_AUDIT_STORED_XSS_RAN__),
@@ -337,11 +343,31 @@ async function auditBrowserBehavior(httpEvidence) {
     const parentHtml = '<!doctype html><meta charset="utf-8"><title>security audit parent</title><iframe id="target-frame" style="width:1200px;height:800px" src="' + BASE_URL + '/?security_audit_iframe=' + Date.now() + '"></iframe>';
     await parent.goto("data:text/html;charset=utf-8," + encodeURIComponent(parentHtml), { waitUntil: "domcontentloaded", timeout: 15000 });
     let appRenderedInsideFrame = false;
+    let iframeDiagnostics = null;
     try {
-      await parent.frameLocator("#target-frame").locator("#root .app-shell").waitFor({ state: "visible", timeout: 15000 });
-      appRenderedInsideFrame = true;
-    } catch {
-      appRenderedInsideFrame = false;
+      await parent.frameLocator("#target-frame").locator("body").waitFor({ state: "attached", timeout: 15000 });
+      const targetFrame = parent.frames().find(frame => frame.url().startsWith(BASE_URL + "/?security_audit_iframe="));
+      if (targetFrame) {
+        iframeDiagnostics = await targetFrame.evaluate(() => ({
+          readyState: document.readyState,
+          title: document.title,
+          rootExists: Boolean(document.querySelector("#root")),
+          rootChildCount: document.querySelector("#root")?.childElementCount ?? -1,
+          appShellVisible: (() => {
+            const el = document.querySelector("#root .app-shell");
+            if (!el) return false;
+            const rect = el.getBoundingClientRect();
+            const style = getComputedStyle(el);
+            return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+          })(),
+          frameElementPresent: Boolean(window.frameElement),
+          isTopLevel: window.self === window.top,
+          bodyTextPrefix: (document.body?.innerText || "").slice(0, 160)
+        }));
+        appRenderedInsideFrame = Boolean(iframeDiagnostics.appShellVisible);
+      }
+    } catch (error) {
+      warn("IFRAME_DIAGNOSTIC_ERROR", String(error?.message || error));
     }
 
     if (appRenderedInsideFrame) {
@@ -349,8 +375,10 @@ async function auditBrowserBehavior(httpEvidence) {
     } else if (httpEvidence.clickjackingHeader) {
       pass("BROWSER_CLICKJACKING_FRAME_BLOCK", "Target did not render inside the iframe and an effective HTTP framing header was present.");
     } else {
-      fail("BROWSER_CLICKJACKING_FRAME_BLOCK", "HIGH", "The target did not render, but no effective HTTP framing header exists; the browser result is inconclusive.");
-      warn("IFRAME_RESPONSE_STATUS", "Target response status observed by the parent page: " + String(iframeResponseStatus));
+      // Absence of a framing policy is directly verified from the production HTTP headers.
+      // Whether an attacker can render the full UI remains a separate browser/runtime question.
+      fail("CLICKJACKING_RESPONSE_POLICY_MISSING", "HIGH", "No effective HTTP X-Frame-Options or CSP frame-ancestors directive exists on the production response.");
+      warn("BROWSER_IFRAME_EMBEDDING_INCONCLUSIVE", "The page returned HTTP " + String(iframeResponseStatus) + " but the app shell did not visibly render inside the iframe. Diagnostics: " + JSON.stringify(iframeDiagnostics));
     }
     await parent.close();
   } finally {
