@@ -34,6 +34,7 @@ assert.ok(contrastRatio("#62666A", "#F7F4EE") >= 4.5, "Onboarding muted text mus
 assert.ok(styles.includes(".rating-grid{direction:ltr;display:grid;"), "Rating grid must keep a stable left-to-right physical order");
 assert.ok(app.includes('const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;'), "Rating choices must be ordered hardest-to-easiest in the DOM");
 assert.ok(app.includes('dir={getLanguage()==="fa"?"rtl":"ltr"}'), "Rating labels must retain their language direction");
+assert.ok(app.includes('<bdi lang="ja" dir="ltr">'), "Learning-card Japanese readings must be isolated from surrounding RTL text");
 
 const darkStart = styles.indexOf("@media(prefers-color-scheme:dark){");
 const contrastStart = styles.indexOf("@media(prefers-contrast:more){", darkStart);
