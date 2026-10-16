@@ -3665,3 +3665,10 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
   .learning-card .rating-grid .rating{transition:none!important;}
 }
 
+/* Container-level focus states need the same opaque, theme-aware indicator as controls. */
+.topic-learning-search:focus-within,
+.account-password-field:focus-within,
+.setting-toggle-row:focus-within .setting-toggle-visual{
+  outline:3px solid var(--color-focus)!important;
+  outline-offset:3px!important;
+}
