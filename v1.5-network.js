@@ -17,23 +17,31 @@ function sentenceContentId(id,text,english){
 }
 
 
-async function requestJSON(url){
+async function requestJSON(url,{strict=false}={}){
   try{
     const response=await fetch(url,{cache:'force-cache'});
+    if(strict&&response.headers?.get?.('X-Kanji5-Offline-Fallback')==='1'){
+      throw new Error('KANJI5_VOCABULARY_OFFLINE_FALLBACK');
+    }
     if(!response.ok){
-      globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',new Error(`Network request failed (${response.status})`),{endpoint:new URL(url).pathname,status:response.status,dataAffected:'false'});
+      const error=new Error(`Network request failed (${response.status})`);
+      if(strict)throw error;
+      globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',error,{endpoint:new URL(url).pathname,status:response.status,dataAffected:'false'});
       return null;
     }
-    return await response.json();
+    const payload=await response.json();
+    if(strict&&!Array.isArray(payload))throw new Error('KANJI5_VOCABULARY_INVALID_RESPONSE');
+    return payload;
   }catch(error){
     globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',error,{endpoint:(()=>{try{return new URL(url).pathname}catch(_){return 'unknown'}})(),dataAffected:'false'});
+    if(strict)throw error;
     return null;
   }
 }
 
 export async function fetchWords(character){
-  const data=await requestJSON(`${API_ORIGIN}/v1/words/${encodeURIComponent(character)}`);
-  if(!Array.isArray(data))return [];
+  const data=await requestJSON(`${API_ORIGIN}/v1/words/${encodeURIComponent(character)}`,{strict:true});
+  if(!Array.isArray(data))throw new Error("KANJI5_VOCABULARY_INVALID_RESPONSE");
   const out=[],seen=new Set();
   for(const entry of data){
     for(const variant of Array.isArray(entry?.variants)?entry.variants:[]){

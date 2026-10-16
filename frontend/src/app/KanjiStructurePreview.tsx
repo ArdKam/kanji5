@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import "./learning-card-enhancements.css";
 import type { VisualStructureInfo } from "./engine";
 import type { Language } from "./i18n";
 
@@ -7,35 +7,19 @@ export function KanjiStructurePreview({
   info,
   ready,
   language,
-  enabled,
   onOpen,
 }: {
   character: string;
   info: VisualStructureInfo | null;
   ready: boolean;
   language: Language;
-  enabled: boolean;
   onOpen: () => void;
 }) {
-  useEffect(() => {
-    if (!enabled) return;
-    let active = true;
-    void import("./learning-card-enhancements.css?inline").then(({ default: cssText }) => {
-      if (!active || document.querySelector("style[data-rinemi-learning-card-styles]")) return;
-      const style = document.createElement("style");
-      style.dataset.rinemiLearningCardStyles = "true";
-      style.textContent = cssText;
-      document.head.append(style);
-    }).catch((error: unknown) => {
-      console.error("Learning-card presentation styles could not be loaded.", error);
-    });
-    return () => { active = false; };
-  }, [enabled]);
   const components = info?.available ? info.components : [];
   const visibleComponents = components.slice(0, 4);
   const remaining = Math.max(0, components.length - visibleComponents.length);
   const previewLabel = language === "fa" ? "اجزای دیداری" : "Visual components";
-  const actionLabel = language === "fa" ? "جزئیات ساختار" : "Structure details";
+  const actionLabel = language === "fa" ? "مشاهدهٔ ساختار کامل" : "View full structure";
   const actionAriaLabel = language === "fa"
     ? "مشاهدهٔ ساختار کامل کانجی " + character
     : "View full structure for " + character;
@@ -45,21 +29,24 @@ export function KanjiStructurePreview({
 
   return (
     <section className="kanji-structure-preview" aria-label={previewLabel} aria-busy={!ready}>
-      <div className="kanji-structure-preview-glyphs" aria-hidden="true">
-        {!ready ? (
-          <span className="kanji-structure-preview-skeleton" />
-        ) : visibleComponents.length ? (
-          <>
-            {visibleComponents.map((component, index) => (
-              <span className="kanji-structure-preview-glyph" lang="ja" key={component.character + "-" + index}>
-                {component.character}
-              </span>
-            ))}
-            {remaining ? <span className="kanji-structure-preview-more">+{remaining}</span> : null}
-          </>
-        ) : (
-          <span className="kanji-structure-preview-empty">{emptyStateLabel}</span>
-        )}
+      <div className="kanji-structure-preview-copy">
+        <span className="kanji-structure-preview-label">{previewLabel}</span>
+        <div className="kanji-structure-preview-glyphs" aria-hidden="true">
+          {!ready ? (
+            <span className="kanji-structure-preview-skeleton" />
+          ) : visibleComponents.length ? (
+            <>
+              {visibleComponents.map((component, index) => (
+                <span className="kanji-structure-preview-glyph" lang="ja" key={component.character + "-" + index}>
+                  {component.character}
+                </span>
+              ))}
+              {remaining ? <span className="kanji-structure-preview-more">+{remaining}</span> : null}
+            </>
+          ) : (
+            <span className="kanji-structure-preview-empty">{emptyStateLabel}</span>
+          )}
+        </div>
       </div>
       {ready ? (
         <button

@@ -69,6 +69,7 @@ function contrast(foreground, background) {
 }
 assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
 assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#e06a5f") >= 4.5, "Dark red primary buttons must retain WCAG AA label contrast");
 
 
 assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
@@ -77,7 +78,11 @@ const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDark
 const manualDark = styles.slice(manualDarkStart, manualLightStart);
 assert.ok(manualDark.includes("--color-surface-elevated:#2b2824"), "Manual Dark must define its own elevated surface token");
 assert.ok(manualDark.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Manual Dark must define its own loading tokens");
-assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:#171614;}"), "Dark primary buttons need a readable explicit foreground");
+assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:var(--paper)}"), "Light-theme primary buttons retain their intended accent");
+for (const theme of ["dark", "system"]) {
+  const primaryRule = `:root[data-theme="${theme}"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}`;
+  assert.ok(styles.includes(primaryRule), `${theme} primary actions must use the red accent rather than indigo`);
+}
 assert.ok(styles.includes(".button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text without flattening rating colors");
 assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
 assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");

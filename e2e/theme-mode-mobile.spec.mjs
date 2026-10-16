@@ -87,6 +87,8 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
 
   const reveal = page.locator("#root .learning-card .button.wide");
   await expect(reveal).toBeVisible({ timeout: 10_000 });
+  const primaryButtonBackground = () => reveal.evaluate(element => getComputedStyle(element).backgroundColor);
+  await expect.poll(primaryButtonBackground).toBe("rgb(224, 106, 95)"); // System + OS Dark uses the red accent.
   const revealContrast = await reveal.evaluate((element) => {
     const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
     const luminance = (value) => value.map((channel) => {
@@ -125,5 +127,6 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await assertRatingPalette(); // System + OS Dark
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect.poll(primaryButtonBackground).toBe("rgb(224, 106, 95)"); // Manually selected Dark also uses the red accent.
   await assertRatingPalette(); // Manually selected Dark
 });

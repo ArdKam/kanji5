@@ -226,13 +226,10 @@ async function listKanji(){
 async function getVocabulary(character){
   const normalized=String(character||'').trim();
   if(!normalized)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:'',items:[]};
-  try{
-    const network=await loadNetwork();
-    const items=await network.fetchWords(normalized);
-    return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:Array.isArray(items)?items.slice(0,8):[]};
-  }catch{
-    return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:[]};
-  }
+  const network=await loadNetwork();
+  const items=await network.fetchWords(normalized);
+  if(!Array.isArray(items))throw new Error('KANJI5_VOCABULARY_INVALID_RESPONSE');
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:items.slice(0,8)};
 }
 async function getComponentInfo(character){
   const normalized=String(character||'').trim();

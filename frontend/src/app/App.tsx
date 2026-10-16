@@ -31,7 +31,7 @@ const DictionaryPageRoute = lazy(async () => {
   return { default: WithDictionaryStyles };
 });
 const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
-import { learningCopy } from "./learning-copy";
+import { inferMeaningLanguage, learningCopy, selectExamplesForReading } from "./learning-copy";
 import learningSurfaceStyles from "./learning-surface.css?inline";
 import { isOnboardingComplete } from "./onboarding";
 import { UiIcon } from "./UiIcon";
@@ -59,6 +59,7 @@ import {
   saveMnemonic,
   updateSettings,
   type Rating,
+  type LearnerMeaningLanguage,
   type VisualStructureInfo,
   type Settings,
   type Snapshot,
@@ -92,7 +93,7 @@ const modalityLabel=(modality:string,stage:string)=>{
 const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==="context"?"برای این جمله گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن.":"برای این واژه گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن."):(mode==="context"?"Not enough safe choices are available for this sentence. Continue to the next exercise.":"Not enough safe choices are available for this word. Continue to the next exercise.");
 
 function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
-function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
+function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";const [voiceState,setVoiceState]=useState<{checked:boolean;available:boolean}>({checked:false,available:true});useEffect(()=>{if(unsupported){setVoiceState({checked:true,available:false});return}const synth=window.speechSynthesis;const refresh=()=>{const voices=typeof synth.getVoices==="function"?synth.getVoices():[];const japanese=voices.some(voice=>/^ja(?:-|$)/i.test(voice.lang));setVoiceState(voices.length?{checked:true,available:japanese}:{checked:false,available:true})};refresh();synth.addEventListener?.("voiceschanged",refresh);return()=>synth.removeEventListener?.("voiceschanged",refresh)},[unsupported]);const missingJapaneseVoice=voiceState.checked&&!voiceState.available;const unavailable=unsupported||missingJapaneseVoice;const accessibleLabel=unsupported?t("audioUnavailable"):missingJapaneseVoice?t("japaneseVoiceUnavailable"):label;return <button className="audio-button" type="button" disabled={unavailable} aria-label={accessibleLabel} title={accessibleLabel} onClick={()=>{if(unavailable)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;const voice=window.speechSynthesis.getVoices?.().find(candidate=>/^ja(?:-|$)/i.test(candidate.lang));if(voice)u.voice=voice;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
 
 const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
@@ -102,9 +103,22 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const revealed=Boolean(card.revealed);
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
-  const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
-  const secondaryMeanings=learnerMeaningModel.secondary??[];
-  const referenceMeanings=learnerMeaningModel.reference??[];
+  const meaningRecords=Array.isArray(card.learnerMeaningRecords)?card.learnerMeaningRecords:[];
+  const reviewedLocalizedRecords=meaningRecords.filter(record=>record.language===getLanguage()&&record.reviewStatus==="verified"&&Boolean(record.text));
+  const reviewedLocalizedPrimary=reviewedLocalizedRecords.filter(record=>record.priority==="primary");
+  const useReviewedLocalizedMeanings=reviewedLocalizedPrimary.length>0;
+  const localizedMeaningsFor=(priority:"primary"|"secondary"|"reference")=>reviewedLocalizedRecords.filter(record=>record.priority===priority).map(record=>record.text??"").filter(Boolean);
+  const primaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("primary"):(Array.isArray(learnerMeaningModel.primary)?learnerMeaningModel.primary:(card.meanings??[]));
+  const secondaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("secondary"):(learnerMeaningModel.secondary??[]);
+  const referenceMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("reference"):(learnerMeaningModel.reference??[]);
+  const meaningLanguage=useReviewedLocalizedMeanings?getLanguage():"en";
+  const meaningFallbackLabel=getLanguage()==="fa"&&!useReviewedLocalizedMeanings?t("reviewedPersianMeaningUnavailable"):"";
+  const pronunciationReading=String(learnerReadingModel.coreOn?.find(value=>String(value).trim())??card.on?.find(value=>String(value).trim())??learnerReadingModel.coreKun?.find(value=>String(value).trim())??card.kun?.find(value=>String(value).trim())??"").trim();
+  const pronunciationWord=String(card.examples?.find(example=>example?.word&&example?.reading)?.word??"").trim();
+  const pronunciationTarget=pronunciationReading||pronunciationWord;
+  const pronunciationLabel=pronunciationReading
+    ? (getLanguage()==="fa"?"پخش خوانش «"+pronunciationReading+"» با گفتار مرورگر":"Play reading “"+pronunciationReading+"” using browser speech")
+    : (getLanguage()==="fa"?"پخش تلفظ واژهٔ «"+pronunciationWord+"» با گفتار مرورگر":"Play word “"+pronunciationWord+"” using browser speech");
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
   const [visualStructureReady,setVisualStructureReady]=useState(false);
@@ -112,12 +126,25 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const [referenceInfoOpen,setReferenceInfoOpen]=useState(false);
   const [structureDialogOpen,setStructureDialogOpen]=useState(false);
   const referenceInfoTriggerRef=useRef<HTMLButtonElement|null>(null);
-  const [personalMnemonic,setPersonalMnemonic]=useState("");
-  const [mnemonicDraft,setMnemonicDraft]=useState("");
-  const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
-  const [mnemonicEditing,setMnemonicEditing]=useState(false);
-  const [mnemonicBusy,setMnemonicBusy]=useState(false);
-  const [mnemonicError,setMnemonicError]=useState("");
+  const activeCharacter=String(card.character??"");
+  const [personalMnemonicState,setPersonalMnemonicState]=useState<{character:string;value:string}>({character:"",value:""});
+  const personalMnemonic=personalMnemonicState.character===activeCharacter?personalMnemonicState.value:"";
+  const setPersonalMnemonic=useCallback((value:string)=>setPersonalMnemonicState({character:activeCharacter,value}),[activeCharacter]);
+  const [mnemonicDraftState,setMnemonicDraftState]=useState<{character:string;value:string}>({character:"",value:""});
+  const mnemonicDraft=mnemonicDraftState.character===activeCharacter?mnemonicDraftState.value:"";
+  const setMnemonicDraft=useCallback((value:string)=>setMnemonicDraftState({character:activeCharacter,value}),[activeCharacter]);
+  const [preparedMnemonicState,setPreparedMnemonicState]=useState<{character:string;value:PreparedMnemonic|null}>({character:"",value:null});
+  const preparedMnemonic=preparedMnemonicState.character===activeCharacter?preparedMnemonicState.value:null;
+  const setPreparedMnemonic=useCallback((value:PreparedMnemonic|null)=>setPreparedMnemonicState({character:activeCharacter,value}),[activeCharacter]);
+  const [mnemonicEditingState,setMnemonicEditingState]=useState<{character:string;value:boolean}>({character:"",value:false});
+  const mnemonicEditing=mnemonicEditingState.character===activeCharacter&&mnemonicEditingState.value;
+  const setMnemonicEditing=useCallback((value:boolean|((previous:boolean)=>boolean))=>setMnemonicEditingState(state=>({character:activeCharacter,value:typeof value==="function"?value(state.character===activeCharacter&&state.value):value})),[activeCharacter]);
+  const [mnemonicBusyState,setMnemonicBusyState]=useState<{character:string;value:boolean}>({character:"",value:false});
+  const mnemonicBusy=mnemonicBusyState.character===activeCharacter&&mnemonicBusyState.value;
+  const setMnemonicBusy=useCallback((value:boolean)=>setMnemonicBusyState({character:activeCharacter,value}),[activeCharacter]);
+  const [mnemonicErrorState,setMnemonicErrorState]=useState<{character:string;value:string}>({character:"",value:""});
+  const mnemonicError=mnemonicErrorState.character===activeCharacter?mnemonicErrorState.value:"";
+  const setMnemonicError=useCallback((value:string)=>setMnemonicErrorState({character:activeCharacter,value}),[activeCharacter]);
   const closeReferenceInfo=useCallback(()=>setReferenceInfoOpen(false),[]);
   const referenceInfoDialogRef=useModalDialog(referenceInfoOpen,closeReferenceInfo);
   const closeMnemonicEditor=useCallback(()=>{
@@ -131,16 +158,24 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
+  const revealPendingRef=useRef(false);
+  const [revealPending,setRevealPending]=useState(false);
   const handleReveal=useCallback(()=>{
+    if(revealed||revealPendingRef.current)return;
+    revealPendingRef.current=true;
+    setRevealPending(true);
     const active=document.activeElement;
     if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
       active.blur();
     }
     shouldFocusBackRef.current=true;
     onReveal();
-  },[onReveal]);
+  },[onReveal,revealed]);
   useEffect(()=>{
-    if(!revealed||!shouldFocusBackRef.current)return;
+    if(!revealed)return;
+    revealPendingRef.current=false;
+    setRevealPending(false);
+    if(!shouldFocusBackRef.current)return;
     shouldFocusBackRef.current=false;
     requestAnimationFrame(()=>{
       backFaceFocusRef.current?.focus({preventScroll:true});
@@ -247,39 +282,54 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const referenceOn=learnerReadingModel.referenceOn??[];
   const referenceKun=learnerReadingModel.referenceKun??[];
   const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
-  const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
-  const [examplesResolved,setExamplesResolved]=useState(false);
-  const [examplesError,setExamplesError]=useState(false);
+  const [examplesState,setExamplesState]=useState<{character:string;status:"loading"|"resolved"|"error";items:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:"verified"|"unreviewed"|"unknown"}>}>({character:"",status:"loading",items:[]});
   const [examplesRetryKey,setExamplesRetryKey]=useState(0);
   const [examplesExpanded,setExamplesExpanded]=useState(false);
-  const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
+  const examplesMatch=examplesState.character===activeCharacter;
+  const vocabularyExamples=examplesMatch?examplesState.items:[];
+  const examplesError=examplesMatch&&examplesState.status==="error";
+  const examplesLoading=Boolean(activeCharacter)&&(!examplesMatch||examplesState.status==="loading");
+  const directExamplesSignature=JSON.stringify((Array.isArray(card.examples)?card.examples:[]).map(e=>[e?.word??"",e?.reading??"",e?.meaning??"",e?.meaningLanguage??"",e?.source??"",e?.sourceVersion??"",e?.reviewStatus??""]));
+  const exampleCount=vocabularyExamples.length;
   useEffect(()=>{
     let active=true;
-    const directExamples=Array.isArray(card.examples)?card.examples:[];
-    setExamplesError(false);
-    if(directExamples.length>0){
-      setVocabularyExamples(directExamples);
-      setExamplesResolved(true);
+    const character=String(card.character??"");
+    const validExamples=(Array.isArray(card.examples)?card.examples:[])
+      .filter(e=>Boolean(String(e?.word??"").trim()&&String(e?.reading??"").trim()&&String(e?.meaning??"").trim()))
+      .slice(0,6)
+      .map(e=>{
+        const source=String(e?.source??"").trim();
+        const meaningLanguage=inferMeaningLanguage(String(e?.meaning??""),e?.meaningLanguage,source);
+        return {...e,source:source||undefined,meaningLanguage,reviewStatus:e?.reviewStatus??(source?"unreviewed":"unknown")};
+      });
+    if(validExamples.length>0){
+      setExamplesState({character,status:"resolved",items:validExamples});
       return ()=>{active=false};
     }
-    setVocabularyExamples([]);
-    setExamplesResolved(false);
-    if(!card.character){setExamplesResolved(true);return ()=>{active=false};}
-    void getVocabulary(card.character).then(result=>{
+    if(!character){
+      setExamplesState({character,status:"resolved",items:[]});
+      return ()=>{active=false};
+    }
+    setExamplesState({character,status:"loading",items:[]});
+    void getVocabulary(character).then(result=>{
       if(!active)return;
-      const items=Array.isArray(result?.items)?result.items.slice(0,6):[];
-      setVocabularyExamples(items);
-      setExamplesResolved(true);
+      const items=Array.isArray(result?.items)
+        ? result.items.filter(item=>Boolean(String(item?.word??"").trim()&&String(item?.reading??"").trim()&&String(item?.meaning??"").trim())).slice(0,6).map(item=>({
+            ...item,
+            meaningLanguage:item.meaningLanguage??"unknown",
+            reviewStatus:item.reviewStatus??((item.source||item.provenance?.source)?"unreviewed":"unknown")
+          }))
+        : [];
+      setExamplesState({character,status:"resolved",items});
     }).catch(()=>{
-      if(active){
-        setExamplesResolved(true);
-        setExamplesError(true);
-      }
+      if(active)setExamplesState({character,status:"error",items:[]});
     });
     return ()=>{active=false};
-  },[card.character,card.examples?.length,examplesRetryKey]);
-  const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
+  },[activeCharacter,directExamplesSignature,examplesRetryKey]);
+  const displayExamples=examplesMatch&&examplesState.status==="resolved"?examplesState.items:[];
   const visibleExamples=examplesExpanded?displayExamples:displayExamples.slice(0,4);
+  const onReadingExamples=displayedOn[0]?selectExamplesForReading(activeCharacter,displayedOn[0],displayExamples,1):[];
+  const kunReadingExamples=displayedKun[0]?selectExamplesForReading(activeCharacter,displayedKun[0],displayExamples,1):[];
   const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
   const mnemonicSupport=buildMnemonicSupport({
     character:card.character??"",
@@ -301,7 +351,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const readingCount=displayedOn.length+displayedKun.length;
   const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
   const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
-  const examplesLoading=!examplesResolved;
   const hasExamplesPage=true;
   const backPageCount=4;
   const [backPage,setBackPage]=useState(0);
@@ -404,23 +453,25 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
-        <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character&&pronunciationTarget?<Audio value={pronunciationTarget} label={pronunciationLabel}/>:null}</div>
+        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed||revealPending||Boolean(busy)} aria-busy={revealPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span></div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
-                    {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
-                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    {meaningFallbackLabel?<p className="learning-meaning-source-note" lang="fa">{meaningFallbackLabel}</p>:null}
+                    {primaryMeanings.length?<div className="meanings learning-back-meaning" lang={meaningLanguage}>{primaryMeanings.join(" · ")}</div>:null}
+                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning" lang={meaningLanguage}>{secondaryMeanings.join(" · ")}</div>:null}
+                    {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                     <div className="learning-back-readings-block">
-                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
-                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("useNormalReadingNotation"):t("showAllReadingsInHiragana")}</button></div>
+                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn} examples={onReadingExamples}/><Reading title="Kun’yomi" values={displayedKun} examples={kunReadingExamples}/></div>
                     </div>
                     <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
                       <KanjiStructurePreview
@@ -428,7 +479,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         info={visualStructureInfo}
                         ready={visualStructureReady}
                         language={getLanguage()}
-                        enabled={revealed && backPage === 0}
                         onOpen={()=>setStructureDialogOpen(true)}
                       />
                     </div>
@@ -444,11 +494,12 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                   {!examplesLoading && examplesError ? (
                     <div className="learning-examples-error" role="alert">
                       <span>{getLanguage()==="fa"?"بارگذاری مثال‌های واژگانی ناموفق بود.":"Vocabulary examples could not be loaded."}</span>
-                      <button className="button secondary" type="button" onClick={()=>setExamplesRetryKey(value=>value+1)}>{t("tryAgain")}</button>
+                      <button className="button secondary" type="button" onClick={()=>{setExamplesState({character:activeCharacter,status:"loading",items:[]});setExamplesRetryKey(value=>value+1)}}>{t("tryAgain")}</button>
                     </div>
                   ) : null}
                   {!examplesLoading && !examplesError && !displayExamples.length ? <p className="learning-examples-empty">{getLanguage()==="fa"?"برای این کانجی مثال واژگانی در دسترس نیست.":"No vocabulary examples are available for this kanji."}</p> : null}
-                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
+                  {!examplesLoading && !examplesError && getLanguage()==="fa" && displayExamples.some(example=>example.meaningLanguage!=="fa") ? <p className="learning-meaning-source-note" lang="fa">{t("reviewedPersianMeaningUnavailable")}</p> : null}
+                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i}><span className="example-content"><span className="example-main">{e.word?<span lang="ja">{e.word}</span>:null}{e.word&&e.reading?<span aria-hidden="true"> · </span>:null}{e.reading?<span lang="ja">{e.reading}</span>:null}</span>{e.meaning?<small className="example-meaning" lang={e.meaningLanguage&&e.meaningLanguage!=="unknown"?e.meaningLanguage:undefined} dir="auto">{e.meaning}</small>:null}{e.meaning?<small className="example-source-label" lang={getLanguage()}>{e.reviewStatus==="verified"?t("verifiedSourceExample"):e.reviewStatus==="unreviewed"?t("unreviewedSourceExample"):t("sourceExampleReviewUnknown")}</small>:null}</span>{e.reading?<Audio value={e.reading} label={(getLanguage()==="fa"?"پخش تلفظ واژهٔ ":"Play pronunciation of ")+(e.word??"")}/>:null}</div>) : null}
                   {!examplesLoading && !examplesError && displayExamples.length>4 ? <button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button> : null}
                 </div>
               </div>
@@ -529,7 +580,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             </div>
             <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
               <div className="learning-back-scroll">
-                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
+                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer key={card.character} character={card.character} language={getLanguage()}/>:null}</div>
               </div>
             </div>
           </div>
@@ -560,7 +611,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
           </div>
           <div className="dialog-grid learning-reference-info-grid">
-            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
+            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong lang={meaningLanguage}>{referenceMeanings.join(" · ")}</strong></div>:null}
             {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
             {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
           </div>
@@ -597,7 +648,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     </div>
   </section>
 }
-function Reading({title,values}:{title:string;values:string[]}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title}/>:null}</div>}
+function Reading({title,values,examples=[]}:{title:string;values:string[];examples?:Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:"verified"|"unreviewed"|"unknown"}>}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title+" "+values[0]}/>:null}{examples.length?<div className="reading-vocabulary-examples" aria-label={title+" vocabulary examples"}>{examples.map(example=><span className="reading-vocabulary-example" key={example.word}><span lang="ja">{example.word}</span><small className="reading-vocabulary-gloss" lang={example.meaningLanguage&&example.meaningLanguage!=="unknown"?example.meaningLanguage:undefined} dir="auto">{example.meaning}</small></span>)}</div>:null}</div>}
 function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
   if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;

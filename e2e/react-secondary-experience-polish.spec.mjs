@@ -74,6 +74,16 @@ test("Prepared Mnemonics waits for the catalog, exposes loading, search, modes, 
   await expect(dialog.locator(".prepared-mnemonic-mode-tab").first()).toHaveAttribute("aria-pressed", "true");
   await expect(dialog.locator(".prepared-mnemonic-library-row.is-curated")).toHaveCount(60);
 
+  const moreButton = dialog.locator(".prepared-mnemonic-library-more");
+  await expect(moreButton).toBeVisible();
+  await expect(moreButton).toHaveCSS("position", "static");
+  const initialMoreTop = await moreButton.evaluate(element => element.getBoundingClientRect().top);
+  await dialog.evaluate(element => { element.scrollTop = Math.min(260, element.scrollHeight - element.clientHeight); });
+  await expect.poll(() => dialog.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  const scrolledMoreTop = await moreButton.evaluate(element => element.getBoundingClientRect().top);
+  expect(scrolledMoreTop).toBeLessThan(initialMoreTop - 20);
+  await dialog.evaluate(element => { element.scrollTop = 0; });
+
   const search = dialog.locator(".prepared-mnemonic-library-search");
   await search.fill("study");
   await expect.poll(async () => dialog.locator(".prepared-mnemonic-library-row").count(), { timeout: 10000 }).toBeGreaterThan(0);

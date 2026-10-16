@@ -1,3 +1,17 @@
+export type LearnerMeaningLanguage = "en" | "fa" | "ja" | "unknown";
+export type LearnerMeaningPriority = "primary" | "secondary" | "reference";
+export type LearnerMeaningReviewStatus = "verified" | "unreviewed" | "rejected" | "unavailable";
+export type LearnerMeaningRecord = {
+  text: string | null;
+  language: LearnerMeaningLanguage;
+  priority: LearnerMeaningPriority;
+  provenance: { source: string; version: string | null; entryId: string | null; url: string | null };
+  reviewStatus: LearnerMeaningReviewStatus;
+  reviewNotes: string;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+};
+
 export type Rating = "Again" | "Hard" | "Good" | "Easy";
 export type HandwritingSkill = {version?:string;attempts?:number;correct?:number;accuracy?:number;score?:number;averageScore?:number;recentAverageScore?:number;confidence?:number;consistency?:number;state?:string;momentum?:number;errorStreak?:number;successStreak?:number;lastScore?:number;lastOutcome?:string|null;feedbackCode?:string|null;feedbackStroke?:number|null;weakestMetric?:string|null;metrics?:{shape?:number|null;endpoints?:number|null;length?:number|null;direction?:number|null;curvature?:number|null;placement?:number|null}};
 export type HandwritingGradeLike = {overallSimilarity?:number;feedbackCode?:string;feedbackStroke?:number|null;perStroke?:Array<Record<string,unknown>>};
@@ -43,8 +57,9 @@ export type Snapshot = {
     kun?: string[];
     sourceMeanings?: string[];
     learnerMeanings?: { primary?: string[]; secondary?: string[]; reference?: string[] };
+    learnerMeaningRecords?: LearnerMeaningRecord[];
     learnerReadings?: { coreOn?: string[]; coreKun?: string[]; vocabularySupported?: string[]; referenceOn?: string[]; referenceKun?: string[] };
-    examples?: { word?: string; reading?: string; meaning?: string }[];
+    examples?: { word?: string; reading?: string; meaning?: string; meaningLanguage?: LearnerMeaningLanguage; source?: string; sourceVersion?: string | null; reviewStatus?: "verified" | "unreviewed" | "unknown" }[];
     hint?: string;
     revealLabel?: string;
   };
@@ -167,7 +182,7 @@ export type KanjiCatalogItem = KanjiDictionaryResult & { mastery:number; state?:
 export type CustomStudyFocus = "available" | "due" | "new" | "weak" | "mistakes";
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number; topicId?: string; topicCharacters?: string[]; /** @deprecated Use topicCharacters. */ characterScope?: string[] };
 
-export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
+export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string; sourceVersion?: string | null; meaningLanguage?: LearnerMeaningLanguage; reviewStatus?: "verified" | "unreviewed" | "unknown"; provenance?: { source?: string; sourceVersion?: string | null; sourceId?: string | null } };
 export type RadicalInfo = { character:string; available:boolean; radicalId:number|null; radical:{id:number;glyph:string;strokeCount:number;meanings:string[];sourceForms?:string[]}|null; coverage?:{available?:number;total?:number;fraction?:number}|null; source?:{name?:string;upstreamVersion?:string;license?:string;radicalDefinitionsRevision?:number}|null; };
 export type ComponentInfo = {
   character: string;

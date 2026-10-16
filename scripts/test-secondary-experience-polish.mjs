@@ -15,6 +15,7 @@ assert.ok(styles.includes(".stats-hero"),"stats hero hierarchy missing");
 assert.ok(styles.includes(".settings-save-region"),"settings sticky action region missing");
 assert.ok(styles.includes(".reading-lab-analysis"),"reading analysis hierarchy missing");
 assert.ok(styles.includes(".prepared-mnemonic-library-row"),"mnemonic library row polish missing");
+assert.ok(!/\.prepared-mnemonic-library-more\s*\{[^}]*position\s*:\s*sticky/s.test(styles), "prepared-mnemonic load-more action must stay in normal document flow");
 assert.ok(styles.includes("/* Prepared Mnemonics Library — consolidated premium surface. */"),"mnemonic library must have one consolidated style block");
 assert.ok(!styles.includes("Prepared Mnemonics Library v2:")&&!styles.includes("Prepared Mnemonics Library v3:"),"superseded mnemonic CSS generations remain");
 assert.ok(!styles.includes(".prepared-mnemonic-library \n.prepared-mnemonic-library-row{"),"legacy malformed mnemonic selector remains");

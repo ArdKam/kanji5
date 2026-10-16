@@ -117,6 +117,245 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("a priority reading only shows a word with matching recorded pronunciation", async ({ page }) => {
+  await page.route("https://kanjiapi.dev/v1/words/**", async route => {
+    const url = new URL(route.request().url());
+    const character = decodeURIComponent(url.pathname.split("/").pop() || "");
+    const data = character === "日"
+      ? [{ variants: [{ written: "日曜日", pronounced: "にちようび" }], meanings: [{ glosses: ["Sunday"] }] }]
+      : [];
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(data) });
+  });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  await expect(card.locator(".kanji-display")).toHaveText("日");
+  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
+  await expect(card).toHaveClass(/is-revealed/);
+  const linkedExample = card.locator(".learning-back-page.active .reading-vocabulary-example");
+  await expect(linkedExample).toBeVisible({ timeout: 10000 });
+  await expect(linkedExample.locator("[lang='ja']")).toHaveText("日曜日");
+  await expect(linkedExample.locator(".reading-vocabulary-gloss[lang='en']")).toHaveText("Sunday");
+});
+
+test("Learning-card language metadata and pronunciation describe the actual content", async ({ page }) => {
+  await routeExamples(page, 2);
+  for (const language of ["en", "fa"]) {
+    await page.addInitScript(value => {
+      localStorage.setItem("kanji5-ui-language", value);
+      localStorage.setItem("kanji5-onboarding-v2", "complete");
+      if (window.speechSynthesis) {
+        Object.defineProperty(window.speechSynthesis, "getVoices", {
+          configurable: true,
+          value: () => [{ lang: "ja-JP", name: "Test Japanese voice" }],
+        });
+      }
+    }, language);
+    await page.goto("/");
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+    const isolatedKanjiAudio = card.locator(".learning-card-front .kanji-row .audio-button");
+    await expect(isolatedKanjiAudio).toBeVisible();
+    await expect(isolatedKanjiAudio).toHaveAttribute("aria-label", language === "fa" ? /پخش خوانش/ : /Play reading/);
+
+    await card.getByRole("button", {
+      name: /(Reveal meaning & readings|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information))/,
+    }).click();
+    await expect(card).toHaveClass(/is-revealed/);
+    if (language === "fa") {
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveAttribute("lang", "fa");
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
+      await expect(card.locator(".learning-back-meaning")).toHaveAttribute("lang", "en");
+    } else {
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveCount(0);
+      await expect(card.locator(".learning-back-meaning")).toHaveAttribute("lang", "en");
+    }
+
+    await goToBackPage(page, card, 1);
+    const row = card.locator(".learning-back-page.active .example-row").first();
+    await expect(row).toBeVisible();
+    await expect(row).not.toHaveAttribute("lang", "ja");
+    await expect(row.locator(".example-main [lang='ja']")).toHaveCount(2);
+    await expect(row.locator(".example-meaning")).toHaveAttribute("lang", "en");
+    await expect(row.locator(".example-source-label")).toHaveText(language === "fa" ? "وضعیت بازبینی مشخص نیست" : "Source review status unknown");
+    if (language === "fa") {
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveAttribute("lang", "fa");
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toContainText("ترجمهٔ فارسی بازبینی‌شده");
+    } else {
+      await expect(card.locator(".learning-back-page.active .learning-meaning-source-note")).toHaveCount(0);
+    }
+    const wordAudio = row.locator(".audio-button");
+    await expect(wordAudio).toHaveAttribute("aria-label", new RegExp(language === "fa" ? "پخش تلفظ واژه" : "Play pronunciation of"));
+  }
+});
+
+test("speech controls are unavailable rather than misleading when speech synthesis is unsupported", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    Object.defineProperty(window, "speechSynthesis", { configurable: true, value: undefined });
+    Object.defineProperty(window, "SpeechSynthesisUtterance", { configurable: true, value: undefined });
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const audio = card.locator(".learning-card-front .kanji-row .audio-button");
+  await expect(audio).toBeDisabled();
+  await expect(audio).toHaveAttribute("aria-label", "Audio is not available in this browser");
+});
+
+test("audio is disabled with a specific explanation when no Japanese voice is available", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    if (window.speechSynthesis) {
+      Object.defineProperty(window.speechSynthesis, "getVoices", {
+        configurable: true,
+        value: () => [{ lang: "en-US", name: "Test English voice" }],
+      });
+    }
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const audio = card.locator(".learning-card-front .kanji-row .audio-button");
+  await expect(audio).toBeDisabled();
+  await expect(audio).toHaveAttribute("aria-label", "A Japanese voice is unavailable in this browser");
+});
+
+test("first Learning-card reveal has its styles ready and transitions cleanly at required viewports", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+
+    const before = await card.evaluate((el) => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const cssLoaded = Array.from(document.styleSheets).some((sheet) => {
+        try {
+          return Array.from(sheet.cssRules).some((rule) => rule.selectorText === ".kanji-structure-preview");
+        } catch {
+          return false;
+        }
+      });
+      return {
+        cssLoaded,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        frontBackface: front ? getComputedStyle(front).backfaceVisibility : "",
+        backBackface: back ? getComputedStyle(back).backfaceVisibility : "",
+      };
+    });
+    expect(before.cssLoaded).toBe(true);
+    expect(before.lateStyleInjector).toBe(false);
+    expect(before.frontBackface).toBe("hidden");
+    expect(before.backBackface).toBe("hidden");
+
+    await page.evaluate(() => {
+      const target = document.querySelector(".learning-card-flip");
+      if (!target) throw new Error("Learning-card flip element is missing");
+      const frames = [];
+      const started = performance.now();
+      window.__rinemiLearningFlipFrames = frames;
+      const sample = () => {
+        const r = target.getBoundingClientRect();
+        frames.push({
+          at: performance.now() - started,
+          transform: getComputedStyle(target).transform,
+          rect: [r.x, r.y, r.width, r.height].map(value => Math.round(value * 10) / 10),
+        });
+        if (performance.now() - started < 850) requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+
+    const reveal = card.getByRole("button", {
+      name: /(Reveal meaning & readings|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information))/,
+    });
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(900);
+
+    const after = await card.evaluate((el) => {
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const revealButton = front?.querySelector(".button.primary.wide");
+      const r = revealButton?.getBoundingClientRect();
+      const hit = r ? document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) : null;
+      return {
+        frontAriaHidden: front?.getAttribute("aria-hidden"),
+        frontInert: front?.inert,
+        backAriaHidden: back?.getAttribute("aria-hidden"),
+        backInert: back?.inert,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        revealButtonIsHitTarget: Boolean(revealButton && hit && (hit === revealButton || revealButton.contains(hit))),
+      };
+    });
+    const frames = await page.evaluate(() => window.__rinemiLearningFlipFrames || []);
+    expect(after.frontAriaHidden).toBe("true");
+    expect(after.frontInert).toBe(true);
+    expect(after.backAriaHidden).toBe("false");
+    expect(after.backInert).toBe(false);
+    expect(after.lateStyleInjector).toBe(false);
+    expect(after.revealButtonIsHitTarget).toBe(false);
+    expect(frames.length).toBeGreaterThan(8);
+    expect(new Set(frames.map(frame => frame.transform)).size).toBeGreaterThan(2);
+
+    const toggle = card.locator(".learning-card-back .reading-toggle");
+    await expect(toggle).toHaveText("Show all readings in Hiragana");
+    await toggle.click();
+    await expect(toggle).toHaveText("Use normal reading notation");
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await toggle.click();
+    await expect(toggle).toHaveText("Show all readings in Hiragana");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  }
+});
+
+test("Learning-card reveal respects reduced-motion preferences", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "en");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const durationSeconds = await card.locator(".learning-card-flip").evaluate(el => {
+    const durations = getComputedStyle(el).transitionDuration.split(",").map(value => {
+      const token = value.trim();
+      return token.endsWith("ms") ? Number.parseFloat(token) / 1000 : Number.parseFloat(token);
+    });
+    return Math.max(...durations);
+  });
+  expect(durationSeconds).toBeLessThanOrEqual(0.005);
+  await card.getByRole("button", {
+    name: /(Reveal meaning & readings|نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Show (answer|kanji information))/,
+  }).click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  await expect(card.locator(".learning-card-back")).toHaveAttribute("aria-hidden", "false");
+  await expect(card.locator(".learning-card-back")).toHaveJSProperty("inert", false);
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -143,7 +382,7 @@ test("reference meanings and readings open in a keyboard-accessible modal", asyn
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
-    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings");
+    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings");
 
     await trigger.click();
     const dialog = page.locator("#learning-reference-info");
@@ -406,8 +645,14 @@ test("learning-card structure is a compact preview with full details in a modal"
     const nav = card.locator(".learning-back-page-nav .learning-back-page-shortcut");
     await expect(nav).toHaveCount(4);
     const previewPage = card.locator(".learning-back-page.active");
+    const previewLabel = previewPage.locator(".kanji-structure-preview-label");
     const preview = previewPage.locator(".kanji-structure-preview-action");
+    await expect(previewLabel).toHaveText("Visual components");
+    await expect(preview).toHaveText("View full structure↗");
     await expect(preview).toBeVisible({ timeout: 10000 });
+    await expect(preview).toHaveCSS("border-width", "0px");
+    const previewBox = await preview.boundingBox();
+    expect(previewBox?.height ?? 0).toBeGreaterThanOrEqual(44);
     const metrics = await previewPage.evaluate(pageEl => {
       const scroll = pageEl.querySelector(".learning-back-scroll");
       const overview = pageEl.querySelector(".learning-back-overview");

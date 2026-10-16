@@ -219,7 +219,7 @@ export function DictionaryKanjiCard({
       </div>
       <div className="dictionary-stroke-order-wrap" style={{ display: "grid", gap: 7 }}>
         <h3 className="dictionary-stroke-order-heading" style={{ margin: 0, paddingInline: 2, color: "var(--mute)", fontSize: 12, fontWeight: 800, lineHeight: 1.3 }}>{t("strokeOrder", language)}</h3>
-        <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
+        <StrokeOrderViewer key={item.character} character={item.character} language={language} mode="dictionary-loop" />
       </div>
       <div className="readings-header dictionary-readings-header"><span>{t("reading", language)}</span></div>
       <div className="readings learning-back-readings dictionary-readings">

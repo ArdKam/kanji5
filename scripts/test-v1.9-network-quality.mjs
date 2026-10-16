@@ -39,7 +39,7 @@ try{
   assert(sentences.some(x=>x.id===selectedContextA.id));
 
   globalThis.fetch=async()=>{throw new Error('offline')};
-  assert.deepEqual(await network.fetchWords('学'),[]);
+  await assert.rejects(network.fetchWords('学'),/offline/);
   assert.deepEqual(await network.fetchContextSentences('学'),[]);
   assert(calls.length>=2);
   console.log('v1.9 network/content quality tests passed');

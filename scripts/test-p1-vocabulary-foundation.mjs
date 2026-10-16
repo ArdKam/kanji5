@@ -11,6 +11,7 @@ assert.deepEqual(first.glosses,['school','schoolhouse']);
 assert.equal(first.word,'学校');
 assert.equal(first.meaning,'school; schoolhouse');
 assert.equal(first.source,'kanjiapi.dev');
+assert.equal(first.meaningLanguage,'en','known KanjiAPI glosses should declare English language metadata');
 assert.equal(first.provenance.source,'kanjiapi.dev');
 
 const sourced=core.normalizeVocabularyItem({id:'jm:12345',word:'日本語',reading:'にほんご',meaning:'Japanese language',source:'jmdict',sourceVersion:'2026-01'});
