@@ -29,13 +29,13 @@ function policyHasFrameAncestors(policy) {
 }
 
 function parseCspMeta(html) {
-  const tag = html.match(/<meta\b(?=[^>]*http-equiv=["']Content-Security-Policy["'])(?=[^>]*content=["']([^"']*)["'])[^>]*>/i);
-  return tag?.[1] || "";
+  const tag = html.match(/<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*>/i)?.[0] || "";
+  return tag.match(/\bcontent="([^"]*)"/i)?.[1] || "";
 }
 
 function parseReferrerMeta(html) {
-  const tag = html.match(/<meta\b(?=[^>]*name=["']referrer["'])(?=[^>]*content=["']([^"']*)["'])[^>]*>/i);
-  return tag?.[1] || "";
+  const tag = html.match(/<meta\b[^>]*name=["']referrer["'][^>]*>/i)?.[0] || "";
+  return tag.match(/\bcontent="([^"]*)"/i)?.[1] || "";
 }
 
 function getDirective(policy, name) {
@@ -132,9 +132,15 @@ async function auditSourceMaps() {
         headers: { "cache-control": "no-cache" },
       });
       if (response.status === 200) {
-        fail("SOURCE_MAP_NOT_PUBLIC_" + path, "MEDIUM", "A public .map URL returned HTTP 200.");
-        // Do not print the returned source-map contents.
-        await response.body?.cancel();
+        const body = await response.text();
+        const isSourceMap = /"version"\s*:\s*3/.test(body.slice(0, 20000))
+          && /"sources"\s*:/.test(body.slice(0, 20000))
+          && /"mappings"\s*:/.test(body.slice(0, 20000));
+        if (isSourceMap) {
+          fail("SOURCE_MAP_NOT_PUBLIC_" + path, "MEDIUM", "A public .map URL returned a source-map document; contents suppressed.");
+        } else {
+          pass("SOURCE_MAP_NOT_PUBLIC_" + path, "HTTP 200 was a non-source-map response; body suppressed.");
+        }
       } else if ([403, 404, 410].includes(response.status)) {
         pass("SOURCE_MAP_NOT_PUBLIC_" + path, "HTTP " + response.status);
       } else {
