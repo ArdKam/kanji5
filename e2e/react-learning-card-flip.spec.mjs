@@ -205,6 +205,7 @@ test("Learning card styles are ready before reveal and the flip preserves intera
 
     const card = page.locator("#root .learning-card");
     await expect(card).toBeVisible({ timeout: 20000 });
+    await expect.poll(() => page.locator("style[data-rinemi-learning-card-styles]").count()).toBe(1);
 
     const before = await card.evaluate(el => {
       const flip = el.querySelector(".learning-card-flip");
@@ -224,7 +225,7 @@ test("Learning card styles are ready before reveal and the flip preserves intera
         : Number.parseFloat(duration);
       return {
         previewDisplay: getComputedStyle(preview).display,
-        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        stylesReadyBeforeReveal: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
         transitionSeconds,
         frontBackface: getComputedStyle(front).backfaceVisibility,
         backBackface: getComputedStyle(back).backfaceVisibility,
@@ -238,7 +239,7 @@ test("Learning card styles are ready before reveal and the flip preserves intera
     });
 
     expect(before.previewDisplay).toBe("grid");
-    expect(before.lateStyleInjector).toBe(false);
+    expect(before.stylesReadyBeforeReveal).toBe(true);
     expect(before.transitionSeconds).toBeGreaterThan(0.01);
     expect(before.frontBackface).toBe("hidden");
     expect(before.backBackface).toBe("hidden");
