@@ -102,6 +102,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await reveal.click();
   const ratings = page.locator("#root .learning-card .rating-grid .rating");
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
+  await expect(ratings).toHaveText(["Again", "Hard", "Good", "Easy"]);
   const assertRatingPalette = async () => {
     const palette = await ratings.evaluateAll((elements) => elements.map((element) => {
       const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
@@ -113,11 +114,11 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
       const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
       return { background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
     }));
-    expect(palette.map((item) => item.background), "Feedback ratings must preserve distinct Easy/Good/Hard/Again colors").toEqual([
-      "rgb(39, 48, 59)",
-      "rgb(40, 49, 40)",
-      "rgb(51, 47, 39)",
+    expect(palette.map((item) => item.background), "Feedback ratings must preserve fixed Again/Hard/Good/Easy order and distinct colors").toEqual([
       "rgb(51, 39, 36)",
+      "rgb(51, 47, 39)",
+      "rgb(40, 49, 40)",
+      "rgb(39, 48, 59)",
     ]);
     expect(palette.every((item) => item.contrast >= 4.5), "Every feedback rating label must meet WCAG AA contrast").toBe(true);
   };

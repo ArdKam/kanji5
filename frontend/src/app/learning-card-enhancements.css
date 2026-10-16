@@ -394,3 +394,77 @@
 .learning-card[data-card-density="dense"] .learning-card-back .stroke-order-controls{grid-template-columns:minmax(0,1fr) minmax(104px,auto) minmax(0,1fr)}
 .learning-card .learning-card-back .stroke-order-controls .button:nth-child(2){grid-column:2;order:0;min-width:104px}
 @media(max-width:380px){.learning-card .learning-card-back .stroke-order-controls{grid-template-columns:minmax(0,1fr) minmax(88px,auto) minmax(0,1fr);gap:4px}.learning-card .learning-card-back .stroke-order-controls .button:nth-child(2){min-width:88px;padding-inline:5px}}
+
+
+/* Keep the selected back-page shortcut self-describing without making inactive shortcuts noisy. */
+.learning-back-page-shortcut.active {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 44px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding-inline: 10px;
+}
+.learning-back-page-shortcut-label {
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.learning-reference-trigger {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+@media (max-width: 380px) {
+  .learning-back-page-shortcut.active {
+    gap: 5px;
+    padding-inline: 7px;
+  }
+}
+
+
+/* Keep the reference-reading action in the readings header to avoid adding a full extra row to the compact overview. */
+.learning-back-readings-block .readings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.readings-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.learning-back-readings-block .reading-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.learning-back-readings-block .learning-reference-trigger {
+  flex: 0 0 auto;
+  max-width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding-inline: 8px;
+  gap: 5px;
+  font-size: var(--text-xs);
+}
+@media (max-width: 380px) {
+  .readings-header-actions { gap: 3px; }
+  .learning-back-readings-block .learning-reference-trigger { padding-inline: 5px; gap: 3px; }
+}

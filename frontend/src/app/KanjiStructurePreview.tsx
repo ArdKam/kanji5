@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { VisualStructureInfo } from "./engine";
 import type { Language } from "./i18n";
 
@@ -7,30 +6,14 @@ export function KanjiStructurePreview({
   info,
   ready,
   language,
-  enabled,
   onOpen,
 }: {
   character: string;
   info: VisualStructureInfo | null;
   ready: boolean;
   language: Language;
-  enabled: boolean;
   onOpen: () => void;
 }) {
-  useEffect(() => {
-    if (!enabled) return;
-    let active = true;
-    void import("./learning-card-enhancements.css?inline").then(({ default: cssText }) => {
-      if (!active || document.querySelector("style[data-rinemi-learning-card-styles]")) return;
-      const style = document.createElement("style");
-      style.dataset.rinemiLearningCardStyles = "true";
-      style.textContent = cssText;
-      document.head.append(style);
-    }).catch((error: unknown) => {
-      console.error("Learning-card presentation styles could not be loaded.", error);
-    });
-    return () => { active = false; };
-  }, [enabled]);
   const components = info?.available ? info.components : [];
   const visibleComponents = components.slice(0, 4);
   const remaining = Math.max(0, components.length - visibleComponents.length);
