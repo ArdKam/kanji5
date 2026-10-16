@@ -3706,3 +3706,24 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
     font-size: clamp(44px, 14vh, 64px);
   }
 }
+
+
+/* Portrait screens with limited height need a smaller outer card and a
+   scrollable answer pane; leave the dedicated mobile-landscape rule untouched. */
+@media (max-width: 760px) and (max-height: 760px) and (orientation: portrait) {
+  #root .learning-card[data-card-density] {
+    height: calc(100dvh - 260px) !important;
+    min-height: 0 !important;
+    margin-bottom: var(--space-2);
+  }
+  #root .learning-card .learning-card-face {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  #root .learning-card .learning-card-front .kanji-row {
+    min-height: clamp(48px, 12vh, 82px);
+  }
+  #root .learning-card .learning-card-front .kanji-display {
+    font-size: clamp(44px, 8vh, 72px);
+  }
+}
