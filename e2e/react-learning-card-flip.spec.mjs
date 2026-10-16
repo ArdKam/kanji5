@@ -117,6 +117,72 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("learning-card answer presents kanji, meaning, readings and structure in a stable hierarchy", async ({ browser }) => {
+  await Promise.all(["en", "fa"].map(async (language) => {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 2);
+      const card = await revealLearningCard(page, language);
+      const overview = card.locator(".learning-back-page").nth(0);
+      const identityHeading = overview.locator(".learning-back-identity-heading");
+      const glyph = identityHeading.locator(".learning-back-kanji");
+      const meaningLabel = identityHeading.getByRole("heading", { level: 3 });
+      const primaryMeaning = identityHeading.locator(".learning-back-meaning");
+      const readings = overview.locator(".learning-back-readings-block");
+      const structure = overview.locator(".learning-back-identity-visual");
+
+      await expect(glyph).toBeVisible();
+      await expect(glyph).toHaveAttribute("lang", "ja");
+      await expect(glyph).toHaveAttribute("dir", "ltr");
+      expect((await glyph.innerText()).trim()).not.toBe("");
+      await expect(meaningLabel).toBeVisible();
+      await expect(primaryMeaning).toBeVisible();
+      await expect(readings).toBeVisible();
+      await expect(structure).toBeVisible();
+
+      for (const viewport of [
+        { width: 1280, height: 720 },
+        { width: 390, height: 844 },
+        { width: 320, height: 844 },
+      ]) {
+        await page.setViewportSize(viewport);
+        await expect(glyph).toBeVisible();
+        const geometry = await overview.evaluate((pageEl) => {
+          const rect = (selector) => {
+            const element = pageEl.querySelector(selector);
+            if (!(element instanceof HTMLElement)) throw new Error("Missing hierarchy element: " + selector);
+            const r = element.getBoundingClientRect();
+            return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height };
+          };
+          const scroll = pageEl.querySelector(".learning-back-scroll");
+          if (!(scroll instanceof HTMLElement)) throw new Error("Learning overview scroll container unavailable");
+          const scrollRect = scroll.getBoundingClientRect();
+          return {
+            glyph: rect(".learning-back-kanji"),
+            heading: rect(".learning-back-identity-heading"),
+            label: rect(".learning-back-section-label"),
+            meaning: rect(".learning-back-meaning"),
+            readings: rect(".learning-back-readings-block"),
+            structure: rect(".learning-back-identity-visual"),
+            scroll: { left: scrollRect.left, right: scrollRect.right, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth },
+          };
+        });
+        expect(geometry.glyph.width).toBeGreaterThanOrEqual(44);
+        expect(geometry.glyph.height).toBeGreaterThanOrEqual(44);
+        expect(geometry.heading.right).toBeLessThanOrEqual(geometry.scroll.right + 1);
+        expect(geometry.label.top).toBeLessThanOrEqual(geometry.meaning.top + 1);
+        expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.readings.top + 2);
+        expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.structure.top + 2);
+        expect(geometry.structure.bottom).toBeLessThanOrEqual(geometry.scroll.bottom + 1);
+        expect(geometry.scroll.scrollWidth).toBeLessThanOrEqual(geometry.scroll.clientWidth + 1);
+      }
+    } finally {
+      await context.close();
+    }
+  }));
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });

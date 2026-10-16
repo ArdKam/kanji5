@@ -416,8 +416,14 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
               <div className="learning-back-scroll">
                 <div className="learning-back-overview">
                   <div className="learning-back-identity">
-                    {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
-                    {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    <div className="learning-back-identity-heading">
+                      <span className="learning-back-kanji" lang="ja" dir="ltr">{text(card.character??"")}</span>
+                      <div className="learning-back-meaning-group">
+                        <h3 className="learning-back-section-label">{t("meaning")}</h3>
+                        {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
+                        {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                      </div>
+                    </div>
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
