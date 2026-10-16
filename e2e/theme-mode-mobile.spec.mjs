@@ -153,7 +153,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await selectedThemeControl.focus();
   const selectedThemeFocus = await controlStyle(selectedThemeControl);
   expect(selectedThemeFocus.outlineWidth).toBe("3px");
-  expect(selectedThemeFocus.outlineRGB).toEqual([233, 148, 140]);
+  expect(selectedThemeFocus.outlineRGB).toEqual([255, 155, 145]);
   const menuClose = page.locator(".header-tools-menu-close");
   await expect(menuClose).toBeVisible();
   await menuClose.hover();
@@ -173,7 +173,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const topicSearchFocus = await controlStyle(topicSearchContainer);
   expect(topicSearchFocus.outlineWidth, "Topic search must expose a visible keyboard focus ring").toBe("3px");
   expect(topicSearchFocus.outlineStyle).toBe("solid");
-  expect(topicSearchFocus.outlineRGB).toEqual([233, 148, 140]);
+  expect(topicSearchFocus.outlineRGB).toEqual([255, 155, 145]);
   const firstTopicBeforeSearch = topicDialog.locator(".topic-learning-tile").first();
   const topicLabel = await firstTopicBeforeSearch.locator("strong").innerText();
   await topicSearch.fill(topicLabel);
@@ -209,7 +209,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const revealFocus = await assertTextContrast(reveal, "System Dark primary focus state");
   expect(revealFocus.outlineWidth).toBe("3px");
   expect(revealFocus.outlineStyle).toBe("solid");
-  expect(revealFocus.outlineRGB).toEqual([233, 148, 140]);
+  expect(revealFocus.outlineRGB).toEqual([255, 155, 145]);
 
   await reveal.click();
   await expect(reveal, "The reveal control must enter a real disabled state after activation").toBeDisabled();
@@ -227,7 +227,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const audioFocus = await assertTextContrast(backAudio, "System Dark audio focus state");
   expect(audioFocus.outlineWidth).toBe("3px");
   expect(audioFocus.outlineStyle).toBe("solid");
-  expect(audioFocus.outlineRGB).toEqual([233, 148, 140]);
+  expect(audioFocus.outlineRGB).toEqual([255, 155, 145]);
 
   const ratings = page.locator("#root .learning-card .rating-grid .rating");
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });

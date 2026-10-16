@@ -3622,3 +3622,58 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
   .dialog[open],
   .dialog[open]::backdrop{animation:none!important;}
 }
+
+/* UI/UX audit hardening: visible focus, resilient rating controls, and narrow-screen text flow. */
+:root{
+  --color-focus:#26406b;
+}
+:root[data-theme="dark"]{
+  --color-focus:#ff9b91;
+}
+@media(prefers-color-scheme:dark){
+  :root[data-theme="system"]{--color-focus:#ff9b91;}
+}
+/* Keep the focus ring opaque so it remains visible over varied surfaces. */
+:is(button,input,textarea,select,summary,a,[tabindex]):focus-visible{
+  outline:3px solid var(--color-focus)!important;
+  outline-offset:3px;
+}
+/* Review choices are primary learning controls: preserve label clarity and touch size. */
+.learning-card .rating-grid{
+  align-items:stretch;
+}
+.learning-card .rating-grid .rating{
+  min-width:0;
+  min-height:48px;
+  padding-inline:clamp(8px,1.4vw,16px);
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+}
+.learning-card .rating-grid .rating:focus-visible{
+  outline-offset:3px;
+  position:relative;
+  z-index:1;
+}
+@media(max-width:360px){
+  .learning-card .rating-grid{gap:6px;}
+  .learning-card .rating-grid .rating{padding-inline:6px;font-size:var(--text-sm);}
+  .daily-summary{gap:7px;}
+  .stat-card{padding:11px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .learning-card .rating-grid .rating{transition:none!important;}
+}
+
+/* Container-level focus states need the same opaque, theme-aware indicator as controls. */
+.topic-learning-search:focus-within,
+.account-password-field:focus-within,
+.setting-toggle-row:focus-within .setting-toggle-visual{
+  outline:3px solid var(--color-focus)!important;
+  outline-offset:3px!important;
+}
+/* Composite fields expose focus on their shared boundary; avoid a second nested ring. */
+.topic-learning-search input:focus-visible,
+.account-password-field input:focus-visible{
+  outline:0!important;
+}
