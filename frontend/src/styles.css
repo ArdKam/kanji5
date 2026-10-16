@@ -3672,3 +3672,8 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
   outline:3px solid var(--color-focus)!important;
   outline-offset:3px!important;
 }
+/* Composite fields expose focus on their shared boundary; avoid a second nested ring. */
+.topic-learning-search input:focus-visible,
+.account-password-field input:focus-visible{
+  outline:0!important;
+}
