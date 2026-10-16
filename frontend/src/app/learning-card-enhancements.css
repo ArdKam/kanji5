@@ -436,6 +436,8 @@
   align-items: center;
   justify-content: flex-start;
   gap: 7px;
+  width: auto;
+  height: auto;
   min-width: 44px;
   min-height: 48px;
   max-width: 100%;
