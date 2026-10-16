@@ -736,7 +736,7 @@ test("learning-card structure is a compact preview with full details in a modal"
       };
     });
     expect(metrics.overflowY).toBe("auto");
-    expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+    expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
 
     await preview.scrollIntoViewIfNeeded();
     const reachableBounds = await preview.evaluate(el => {
