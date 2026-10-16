@@ -1234,8 +1234,8 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 /* Secondary menu sections retain the centered modal presentation. */
 .secondary-page-host{display:contents;}
 
-.learning-back-identity-visual{min-height:60px;display:grid;place-items:center;min-width:0;}
-.learning-back-identity-placeholder{width:100%;min-height:60px;display:grid;place-items:center;}
+.learning-back-identity-visual{min-height:54px;display:grid;place-items:center;min-width:0;}
+.learning-back-identity-placeholder{width:100%;min-height:54px;display:grid;place-items:center;}
 .learning-back-identity-placeholder span{display:block;width:clamp(48px,8vw,60px);height:clamp(48px,8vw,60px);border-radius:14px;background:linear-gradient(90deg,#eee7da 20%,#f8f3e9 40%,#eee7da 60%);background-size:220% 100%;animation:kanji5-loading-shimmer 1.1s linear infinite;}
 /* Answer-side hierarchy: preserve the studied glyph, then foreground the meaning, readings and optional structure. */
 .learning-back-identity-heading{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:10px;min-width:0;}
