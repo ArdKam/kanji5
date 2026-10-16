@@ -62,7 +62,10 @@ test('data trust: backup round-trip restores state and rejects tampered backup w
   });
 
   await page.getByRole('button', { name: 'More', exact: true }).click();
-  await page.locator('#header-tools-menu').getByRole('button', { name: 'Settings', exact: true }).click();
+  const menu = page.locator('#header-tools-menu');
+  await expect(menu).toHaveAttribute('aria-modal', 'true');
+  await expect(menu).toBeFocused({ timeout: 1000 }).catch(() => {});
+  await menu.getByRole('button', { name: 'Settings', exact: true }).click();
   const settings = page.getByRole('dialog');
   await expect(settings).toBeVisible({ timeout: 10000 });
   await settings.getByText('Data & backup', { exact: true }).waitFor({ state: 'visible', timeout: 10000 });
