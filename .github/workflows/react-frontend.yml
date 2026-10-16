@@ -292,11 +292,11 @@ jobs:
             -v "$PWD:/zap/wrk/:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-              -t https://ardkam.github.io/kanji5 \
+              -t https://ardkam.github.io/kanji5/ \
               -m 1 \
-              -J /zap/wrk/zap-baseline.json \
-              -w /zap/wrk/zap-baseline.md \
-              -r /zap/wrk/zap-baseline.html
+              -J zap-baseline.json \
+              -w zap-baseline.md \
+              -r zap-baseline.html
       - name: Upload passive-scan reports
         if: always()
         uses: actions/upload-artifact@v4
