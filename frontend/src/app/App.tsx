@@ -137,9 +137,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     if(revealed || busy || revealStylesPendingRef.current)return;
     revealStylesPendingRef.current=true;
     setRevealStylesPending(true);
-    // A click can scroll the reveal button to the viewport edge on short screens.
-    // Keep the whole card anchored in view before changing its face.
-    frontFaceRef.current?.closest(".learning-card")?.scrollIntoView({block:"nearest",inline:"nearest"});
     try {
       await ensureLearningCardStyles();
     } catch (error) {
@@ -148,6 +145,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       setRevealStylesPending(false);
       return;
     }
+    // CSS insertion can change compact-landscape geometry; anchor after styles settle.
+    frontFaceRef.current?.closest(".learning-card")?.scrollIntoView({block:"nearest",inline:"nearest"});
     const active=document.activeElement;
     if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
       active.blur();
