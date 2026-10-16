@@ -96,7 +96,7 @@ function Audio({value,label}:{value:string;label:string}){const unsupported=type
 
 const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
-const ratingOptions=(language:Language)=>language==="en"?([["Easy",t("easy")],["Good",t("good")],["Hard",t("hard")],["Again",t("again")]] as const):([["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const);
+const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;
 
 function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
@@ -132,6 +132,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
   const handleReveal=useCallback(()=>{
+    // Keep the full card in view on short screens before changing the visible face.
+    frontFaceRef.current?.closest(".learning-card")?.scrollIntoView({block:"nearest",inline:"nearest"});
     const active=document.activeElement;
     if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
       active.blur();
@@ -408,8 +410,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
-        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
+        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("meaningAndStructure")}</span>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span></div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
@@ -418,6 +420,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                   <div className="learning-back-identity">
                     {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                     {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                    {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
@@ -428,7 +431,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         info={visualStructureInfo}
                         ready={visualStructureReady}
                         language={getLanguage()}
-                        enabled={revealed && backPage === 0}
                         onOpen={()=>setStructureDialogOpen(true)}
                       />
                     </div>
@@ -552,11 +554,11 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
-          <div className="rating-grid">{ratingOptions(getLanguage()).map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
+          <div className="rating-grid">{ratingOptions().map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
         </div>
           <dialog hidden={!referenceInfoOpen} ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
           <div className="learning-reference-dialog-head">
-            <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"}</h2>
+            <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</h2>
             <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
           </div>
           <div className="dialog-grid learning-reference-info-grid">

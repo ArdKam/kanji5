@@ -240,14 +240,16 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
       }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
       const style = getComputedStyle(element);
       const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
-      return { background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
+      const rating = Array.from(element.classList).find((name) => /^rating-(again|hard|good|easy)$/.test(name))?.slice("rating-".length);
+      return { rating, background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
     }));
-    expect(palette.map((item) => item.background), "Feedback ratings must preserve distinct Easy/Good/Hard/Again colors").toEqual([
-      "rgb(39, 48, 59)",
-      "rgb(40, 49, 40)",
-      "rgb(51, 47, 39)",
-      "rgb(51, 39, 36)",
-    ]);
+    const backgrounds = Object.fromEntries(palette.map((item) => [item.rating, item.background]));
+    expect(backgrounds, "Feedback ratings must preserve distinct semantic colors independent of DOM order").toEqual({
+      easy: "rgb(39, 48, 59)",
+      good: "rgb(40, 49, 40)",
+      hard: "rgb(51, 47, 39)",
+      again: "rgb(51, 39, 36)",
+    });
     expect(palette.every((item) => item.contrast >= 4.5), "Every feedback rating label must meet WCAG AA contrast").toBe(true);
   };
 

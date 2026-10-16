@@ -154,13 +154,22 @@ test("Prepared Mnemonics load-more follows the dialog scroll and remains keyboar
   const layout = await dialog.evaluate((el) => {
     const button = el.querySelector(".prepared-mnemonic-library-more");
     const list = el.querySelector(".prepared-mnemonic-library-list");
+    const lastRow = list?.lastElementChild;
+    if (!(button instanceof HTMLElement) || !(list instanceof HTMLElement) || !(lastRow instanceof HTMLElement)) {
+      throw new Error("Prepared Mnemonics scroll elements are incomplete");
+    }
     const buttonStyle = getComputedStyle(button);
     el.scrollTop = 0;
-    const topAtStart = button.getBoundingClientRect().top + el.scrollTop;
+    const dialogAtStart = el.getBoundingClientRect();
+    const buttonAtStart = button.getBoundingClientRect();
+    const lastRowAtStart = lastRow.getBoundingClientRect();
+    const topAtStart = buttonAtStart.top - dialogAtStart.top;
+    const lastRowBottomAtStart = lastRowAtStart.bottom - dialogAtStart.top;
+
     el.scrollTop = el.scrollHeight;
-    const buttonRect = button.getBoundingClientRect();
-    const lastRowRect = el.querySelector(".prepared-mnemonic-library-row:last-of-type")?.getBoundingClientRect();
-    const dialogRect = el.getBoundingClientRect();
+    const scrollTopAfter = el.scrollTop;
+    const dialogAfter = el.getBoundingClientRect();
+    const buttonAfter = button.getBoundingClientRect();
     return {
       position: buttonStyle.position,
       overflowY: getComputedStyle(el).overflowY,
@@ -168,11 +177,13 @@ test("Prepared Mnemonics load-more follows the dialog scroll and remains keyboar
       scrollHeight: el.scrollHeight,
       clientHeight: el.clientHeight,
       topAtStart,
-      topAfterScroll: buttonRect.top + el.scrollTop,
-      buttonTop: buttonRect.top,
-      buttonBottom: buttonRect.bottom,
-      lastRowBottom: lastRowRect?.bottom ?? NaN,
-      dialogBottom: dialogRect.bottom
+      lastRowBottomAtStart,
+      scrollTopAfter,
+      buttonTopAfter: buttonAfter.top,
+      buttonBottomAfter: buttonAfter.bottom,
+      dialogTopAfter: dialogAfter.top,
+      dialogBottomAfter: dialogAfter.bottom,
+      movement: buttonAtStart.top - buttonAfter.top
     };
   });
 
@@ -180,9 +191,11 @@ test("Prepared Mnemonics load-more follows the dialog scroll and remains keyboar
   expect(layout.overflowY).toBe("auto");
   expect(layout.listOverflowY).toBe("visible");
   expect(layout.scrollHeight).toBeGreaterThan(layout.clientHeight);
-  expect(Math.abs(layout.topAtStart - layout.topAfterScroll)).toBeLessThanOrEqual(2);
-  expect(layout.lastRowBottom).toBeLessThanOrEqual(layout.buttonTop);
-  expect(layout.buttonBottom).toBeLessThanOrEqual(layout.dialogBottom);
+  expect(layout.lastRowBottomAtStart).toBeLessThanOrEqual(layout.topAtStart);
+  expect(layout.scrollTopAfter).toBeGreaterThan(0);
+  expect(Math.abs(layout.movement - layout.scrollTopAfter)).toBeLessThanOrEqual(2);
+  expect(layout.buttonTopAfter).toBeGreaterThanOrEqual(layout.dialogTopAfter - 1);
+  expect(layout.buttonBottomAfter).toBeLessThanOrEqual(layout.dialogBottomAfter + 1);
 
   await more.focus();
   await page.keyboard.press("Enter");
