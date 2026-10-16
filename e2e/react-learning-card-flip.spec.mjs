@@ -447,29 +447,38 @@ test("learning session feedback stays compact and auto-dismisses", async ({ page
   await expect(feedback).toBeHidden({ timeout: 6000 });
 });
 
-test("learning rating feedback controls stay fully inside the card on mobile",async({page})=>{
-  await page.setViewportSize({width:390,height:844});
+test("learning rating feedback controls stay fully inside the card on narrow mobile widths",async({page})=>{
   const card=await revealLearningCard(page,"en");
   const grid=card.locator(".rating-grid");
-  await expect(grid).toBeVisible();
-  const metrics=await grid.evaluate(el=>{
-    const gridRect=el.getBoundingClientRect();
-    const buttons=[...el.querySelectorAll("button")].map(button=>{
-      const r=button.getBoundingClientRect();
-      return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,visible:r.width>0&&r.height>0};
+  for(const viewport of [{width:390,height:844},{width:360,height:844},{width:320,height:844}]){
+    await page.setViewportSize(viewport);
+    await expect(grid).toBeVisible();
+    const metrics=await grid.evaluate(el=>{
+      const gridRect=el.getBoundingClientRect();
+      const cardRect=el.closest(".learning-card").getBoundingClientRect();
+      const buttons=[...el.querySelectorAll("button")].map(button=>{
+        const r=button.getBoundingClientRect();
+        return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,visible:r.width>0&&r.height>0};
+      });
+      return {left:gridRect.left,right:gridRect.right,cardLeft:cardRect.left,cardRight:cardRect.right,buttons};
     });
-    return {left:gridRect.left,right:gridRect.right,buttons};
-  });
-  expect(metrics.buttons).toHaveLength(4);
-  for(const button of metrics.buttons){
-    expect(button.visible).toBe(true);
-    expect(button.left).toBeGreaterThanOrEqual(metrics.left-1);
-    expect(button.right).toBeLessThanOrEqual(metrics.right+1);
-    expect(button.width).toBeGreaterThanOrEqual(44);
-    expect(button.height).toBeGreaterThanOrEqual(44);
+    expect(metrics.buttons).toHaveLength(4);
+    expect(metrics.left).toBeGreaterThanOrEqual(metrics.cardLeft-1);
+    expect(metrics.right).toBeLessThanOrEqual(metrics.cardRight+1);
+    expect(metrics.left).toBeGreaterThanOrEqual(0);
+    expect(metrics.right).toBeLessThanOrEqual(viewport.width);
+    for(const button of metrics.buttons){
+      expect(button.visible).toBe(true);
+      expect(button.left).toBeGreaterThanOrEqual(metrics.left-1);
+      expect(button.right).toBeLessThanOrEqual(metrics.right+1);
+      expect(button.width).toBeGreaterThanOrEqual(44);
+      expect(button.height).toBeGreaterThanOrEqual(44);
+      expect(button.left).toBeGreaterThanOrEqual(0);
+      expect(button.right).toBeLessThanOrEqual(viewport.width);
+    }
+    const navTop = await page.locator(".experience-nav").evaluate(el => el.getBoundingClientRect().top);
+    expect(Math.max(...metrics.buttons.map(button => button.bottom))).toBeLessThanOrEqual(navTop + 1);
   }
-  const navTop = await page.locator(".experience-nav").evaluate(el => el.getBoundingClientRect().top);
-  expect(Math.max(...metrics.buttons.map(button => button.bottom))).toBeLessThanOrEqual(navTop + 1);
 });
 
 
