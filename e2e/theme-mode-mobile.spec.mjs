@@ -49,10 +49,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     locator.evaluate((element) => getComputedStyle(element).backgroundColor);
   const controlStyle = async (locator) => locator.evaluate((element) => {
     const channels = (value) => {
-      const srgb = value.match(/^color\\(srgb\\s+([\\d.e+-]+)\\s+([\\d.e+-]+)\\s+([\\d.e+-]+)/i);
+      const srgb = value.match(/^color\(srgb\s+([\d.e+-]+)\s+([\d.e+-]+)\s+([\d.e+-]+)/i);
       if (srgb) return srgb.slice(1, 4).map((channel) => Number(channel) * 255);
-      const rgb = value.match(/^rgba?\\(([^)]+)\\)$/i);
-      if (rgb) return rgb[1].split(/[,\\s/]+/).filter(Boolean).slice(0, 3).map(Number);
+      const rgb = value.match(/^rgba?\(([^)]+)\)$/i);
+      if (rgb) return rgb[1].split(/[,\s/]+/).filter(Boolean).slice(0, 3).map(Number);
       throw new Error("Unsupported computed CSS color: " + value);
     };
     const luminance = (value) => channels(value).map((channel) => {
