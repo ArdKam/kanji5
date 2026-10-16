@@ -344,6 +344,65 @@ test("visual coverage: learning-card faces, inner pages, rating feedback, themes
     await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
     await audit.capture("learning-back-meaning-structure-320px-dark");
 
+    // Short landscape is a distinct constraint: verify the last structure action
+    // can be reached by scrolling the meaning page instead of being clipped.
+    await page.setViewportSize({ width: 844, height: 390 });
+    await shortcuts.nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await card.evaluate(el => el.scrollIntoView({ block: "start", inline: "nearest" }));
+    const cardBounds = await card.evaluate(el => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      const nav = document.querySelector(".experience-nav");
+      const navTop = nav instanceof HTMLElement ? nav.getBoundingClientRect().top : window.innerHeight;
+      return {
+        top: rect.top, bottom: rect.bottom, height: rect.height,
+        cssHeight: style.height, cssMinHeight: style.minHeight,
+        shortViewportMedia: matchMedia("(max-height: 460px)").matches,
+        viewportHeight: window.innerHeight, navTop
+      };
+    });
+    expect(cardBounds.shortViewportMedia).toBe(true);
+    expect(parseFloat(cardBounds.cssHeight)).toBeLessThanOrEqual(cardBounds.navTop - 1);
+    expect(parseFloat(cardBounds.cssMinHeight)).toBeLessThanOrEqual(cardBounds.navTop - 1);
+    expect(cardBounds.top).toBeGreaterThanOrEqual(-1);
+    expect(cardBounds.bottom).toBeLessThanOrEqual(cardBounds.viewportHeight + 1);
+    expect(cardBounds.bottom).toBeLessThanOrEqual(cardBounds.navTop - 1);
+    const meaningScroll = card.locator(".learning-back-page.active .learning-back-scroll");
+    const structureAction = card.locator(".learning-back-page.active .kanji-structure-preview-action");
+    const scrollMetrics = await meaningScroll.evaluate((el) => {
+      const action = el.querySelector(".kanji-structure-preview-action");
+      if (!(action instanceof HTMLElement)) throw new Error("Meaning page structure action is missing");
+      return {
+        overflowY: getComputedStyle(el).overflowY,
+        scrollHeight: el.scrollHeight,
+        clientHeight: el.clientHeight,
+      };
+    });
+    expect(scrollMetrics.overflowY).toBe("auto");
+    expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+    await meaningScroll.evaluate((el) => { el.scrollTop = 0; });
+    await audit.capture("learning-back-meaning-structure-short-landscape-dark");
+    const scrolledMetrics = await meaningScroll.evaluate((el) => {
+      const action = el.querySelector(".kanji-structure-preview-action");
+      if (!(action instanceof HTMLElement)) throw new Error("Meaning page structure action is missing after scroll");
+      el.scrollTop = el.scrollHeight;
+      const viewport = el.getBoundingClientRect();
+      const target = action.getBoundingClientRect();
+      return {
+        scrollTop: el.scrollTop,
+        targetTop: target.top,
+        targetBottom: target.bottom,
+        viewportTop: viewport.top,
+        viewportBottom: viewport.bottom,
+      };
+    });
+    expect(scrolledMetrics.scrollTop).toBeGreaterThan(0);
+    expect(scrolledMetrics.targetTop).toBeGreaterThanOrEqual(scrolledMetrics.viewportTop - 1);
+    expect(scrolledMetrics.targetBottom).toBeLessThanOrEqual(scrolledMetrics.viewportBottom + 1);
+    await expect(structureAction).toBeVisible();
+    await audit.capture("learning-back-meaning-structure-short-landscape-dark-scrolled");
+
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole("button", { name: "More", exact: true }).click();
     const rtlMenu = page.locator("#header-tools-menu");
@@ -362,6 +421,60 @@ test("visual coverage: learning-card faces, inner pages, rating feedback, themes
     await shortcuts.nth(0).click();
     await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
     await audit.capture("learning-back-meaning-structure-320px-dark-persian");
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await page.setViewportSize({ width: 844, height: 390 });
+    await shortcuts.nth(0).click();
+    await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+    await card.evaluate(el => el.scrollIntoView({ block: "start", inline: "nearest" }));
+    const persianCardBounds = await card.evaluate(el => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      const nav = document.querySelector(".experience-nav");
+      const navTop = nav instanceof HTMLElement ? nav.getBoundingClientRect().top : window.innerHeight;
+      return {
+        top: rect.top, bottom: rect.bottom, height: rect.height,
+        cssHeight: style.height, cssMinHeight: style.minHeight,
+        shortViewportMedia: matchMedia("(max-height: 460px)").matches,
+        viewportHeight: window.innerHeight, navTop
+      };
+    });
+    expect(persianCardBounds.shortViewportMedia).toBe(true);
+    expect(parseFloat(persianCardBounds.cssHeight)).toBeLessThanOrEqual(persianCardBounds.navTop - 1);
+    expect(parseFloat(persianCardBounds.cssMinHeight)).toBeLessThanOrEqual(persianCardBounds.navTop - 1);
+    expect(persianCardBounds.top).toBeGreaterThanOrEqual(-1);
+    expect(persianCardBounds.bottom).toBeLessThanOrEqual(persianCardBounds.viewportHeight + 1);
+    expect(persianCardBounds.bottom).toBeLessThanOrEqual(persianCardBounds.navTop - 1);
+    const persianMeaningScroll = card.locator(".learning-back-page.active .learning-back-scroll");
+    const persianStructureAction = card.locator(".learning-back-page.active .kanji-structure-preview-action");
+    const persianScrollMetrics = await persianMeaningScroll.evaluate((el) => ({
+      overflowY: getComputedStyle(el).overflowY,
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+    }));
+    expect(persianScrollMetrics.overflowY).toBe("auto");
+    expect(persianScrollMetrics.scrollHeight).toBeGreaterThan(persianScrollMetrics.clientHeight);
+    await persianMeaningScroll.evaluate((el) => { el.scrollTop = 0; });
+    await audit.capture("learning-back-meaning-structure-short-landscape-dark-persian");
+    const persianScrolledMetrics = await persianMeaningScroll.evaluate((el) => {
+      const action = el.querySelector(".kanji-structure-preview-action");
+      if (!(action instanceof HTMLElement)) throw new Error("Persian meaning page structure action is missing");
+      el.scrollTop = el.scrollHeight;
+      const viewport = el.getBoundingClientRect();
+      const target = action.getBoundingClientRect();
+      return {
+        scrollTop: el.scrollTop,
+        targetTop: target.top,
+        targetBottom: target.bottom,
+        viewportTop: viewport.top,
+        viewportBottom: viewport.bottom,
+      };
+    });
+    expect(persianScrolledMetrics.scrollTop).toBeGreaterThan(0);
+    expect(persianScrolledMetrics.targetTop).toBeGreaterThanOrEqual(persianScrolledMetrics.viewportTop - 1);
+    expect(persianScrolledMetrics.targetBottom).toBeLessThanOrEqual(persianScrolledMetrics.viewportBottom + 1);
+    await expect(persianStructureAction).toBeVisible();
+    await audit.capture("learning-back-meaning-structure-short-landscape-dark-persian-scrolled");
     await page.setViewportSize({ width: 390, height: 844 });
 
     const rating = card.locator(".rating-grid button").nth(2);
