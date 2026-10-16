@@ -132,13 +132,16 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
   const [revealStylesPending,setRevealStylesPending]=useState(false);
+  const revealStylesPendingRef=useRef(false);
   const handleReveal=useCallback(async()=>{
-    if(revealed || busy || revealStylesPending)return;
+    if(revealed || busy || revealStylesPendingRef.current)return;
+    revealStylesPendingRef.current=true;
     setRevealStylesPending(true);
     try {
       await ensureLearningCardStyles();
     } catch (error) {
       console.error("Learning-card styles were unavailable before reveal.", error);
+      revealStylesPendingRef.current=false;
       setRevealStylesPending(false);
       return;
     }
@@ -148,9 +151,12 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     }
     shouldFocusBackRef.current=true;
     onReveal();
-  },[onReveal,revealed,busy,revealStylesPending]);
+  },[onReveal,revealed,busy]);
   useEffect(()=>{
-    if(revealed || !busy)setRevealStylesPending(false);
+    if(revealed || !busy){
+      revealStylesPendingRef.current=false;
+      setRevealStylesPending(false);
+    }
   },[revealed,busy]);
   useEffect(()=>{
     if(!revealed||!shouldFocusBackRef.current)return;
