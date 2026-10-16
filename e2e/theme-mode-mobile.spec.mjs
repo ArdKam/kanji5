@@ -219,6 +219,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await expect(backAudio).toBeVisible({ timeout: 10_000 });
   await assertTextContrast(backAudio, "System Dark learning-card audio control");
   await backAudio.hover();
+  await expect.poll(() => background(backAudio)).toBe("rgb(23, 22, 20)");
   const audioHover = await assertTextContrast(backAudio, "System Dark audio hover state");
   expect(audioHover.background).toBe("rgb(23, 22, 20)");
   await page.keyboard.press("Tab");
