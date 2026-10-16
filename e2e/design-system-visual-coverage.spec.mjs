@@ -541,6 +541,38 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
         await expect(dialog).toBeVisible();
         await expect(dialog.locator('[data-topic-id="all"]')).toHaveAttribute("aria-pressed", "true");
         await expect(dialog.locator(".dictionary-topic-option[data-topic-id]:not([data-topic-id='all'])")).toHaveCount(24);
+        const dialogLayout = await dialog.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          const list = element.querySelector(".dictionary-topic-browser-list");
+          const search = element.querySelector(".dictionary-topic-search-input");
+          const allOption = element.querySelector('[data-topic-id="all"]');
+          const bounds = (node) => {
+            if (!(node instanceof HTMLElement)) return null;
+            const r = node.getBoundingClientRect();
+            return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
+          };
+          return {
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            dialog: bounds(element),
+            list: bounds(list),
+            listOverflowY: list ? getComputedStyle(list).overflowY : "",
+            search: bounds(search),
+            allOption: bounds(allOption),
+            documentWidth: document.documentElement.scrollWidth,
+          };
+        });
+        expect(dialogLayout.dialog.width, "Topic picker must have a rendered width").toBeGreaterThan(0);
+        expect(dialogLayout.dialog.height, "Topic picker must have a rendered height").toBeGreaterThan(0);
+        expect(dialogLayout.dialog.left, "Topic picker must not clip past the left viewport edge").toBeGreaterThanOrEqual(-1);
+        expect(dialogLayout.dialog.right, "Topic picker must not clip past the right viewport edge").toBeLessThanOrEqual(dialogLayout.viewportWidth + 1);
+        expect(dialogLayout.dialog.top, "Topic picker must not clip past the top viewport edge").toBeGreaterThanOrEqual(-1);
+        expect(dialogLayout.dialog.bottom, "Topic picker must not clip past the bottom viewport edge").toBeLessThanOrEqual(dialogLayout.viewportHeight + 1);
+        expect(dialogLayout.search?.height ?? 0, "Topic search must stay visible").toBeGreaterThan(0);
+        expect(dialogLayout.allOption?.height ?? 0, "All-topics option must stay visible").toBeGreaterThan(0);
+        expect(dialogLayout.list?.height ?? 0, "Topic list must retain a scrollable content region").toBeGreaterThan(40);
+        expect(dialogLayout.listOverflowY).toMatch(/auto|scroll/);
+        expect(dialogLayout.documentWidth, "Topic picker must not create horizontal page overflow").toBeLessThanOrEqual(dialogLayout.viewportWidth + 1);
         await audit.capture("dictionary-topic-picker-" + variant.prefix + "-" + width);
         await page.keyboard.press("Escape");
         await expect(dialog).toBeHidden();
