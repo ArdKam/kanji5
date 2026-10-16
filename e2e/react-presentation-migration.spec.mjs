@@ -109,13 +109,22 @@ test('React presentation can switch language from More Menu and keep Settings fo
   await expect(page.locator('html')).toHaveAttribute('dir','rtl');
 });
 
-test('English learning rating buttons are ordered Easy, Good, Hard, Again',async({page})=>{
-  await page.addInitScript(()=>{localStorage.setItem('kanji5-ui-language','en');localStorage.setItem('kanji5-onboarding-v2','complete')});
-  await page.goto('/');
-  await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
-  await page.getByRole('button',{name:'Reveal meaning & readings',exact:true}).click();
-  await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
-  await expect(page.locator('.rating-grid .rating')).toHaveText(['Easy','Good','Hard','Again']);
+test('Learning rating buttons follow Again, Hard, Good, Easy order in Persian and English',async({page})=>{
+  await page.addInitScript(()=>{
+    const language=new URL(window.location.href).searchParams.get('rinemi-test-language');
+    if(language==='fa'||language==='en')localStorage.setItem('kanji5-ui-language',language);
+    localStorage.setItem('kanji5-onboarding-v2','complete');
+  });
+  for(const scenario of [
+    {language:'en',labels:['Again','Hard','Good','Easy'],reveal:'Reveal meaning & readings'},
+    {language:'fa',labels:['دوباره','سخت','خوب','آسان'],reveal:'نمایش معنی و خوانش‌ها'},
+  ]){
+    await page.goto('/?rinemi-test-language='+scenario.language);
+    await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+    await page.getByRole('button',{name:scenario.reveal,exact:true}).click();
+    await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
+    await expect(page.locator('.rating-grid .rating')).toHaveText(scenario.labels);
+  }
 });
 
 test('empty session progress indicator is absent before a session starts',async({page})=>{
