@@ -69,6 +69,8 @@ function contrast(foreground, background) {
 }
 assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
 assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#e06a5f") >= 4.5, "Dark brand-red primary button text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#e47c72") >= 4.5, "Dark brand-red primary hover/focus text must meet WCAG AA contrast");
 
 
 assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
@@ -77,7 +79,15 @@ const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDark
 const manualDark = styles.slice(manualDarkStart, manualLightStart);
 assert.ok(manualDark.includes("--color-surface-elevated:#2b2824"), "Manual Dark must define its own elevated surface token");
 assert.ok(manualDark.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Manual Dark must define its own loading tokens");
-assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:#171614;}"), "Dark primary buttons need a readable explicit foreground");
+assert.ok(styles.includes(':root[data-theme="dark"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}'), "Manual Dark primary buttons must use the brand red with an explicit high-contrast foreground");
+assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}'), "System + OS Dark primary buttons must use the brand red with an explicit high-contrast foreground");
+assert.ok(styles.includes(':root[data-theme="dark"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--shu) 88%,#fff);border-color:var(--shu);color:#171614;box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 28%,transparent);}'), "Manual Dark primary hover/focus states must remain red and preserve contrast");
+assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--shu) 88%,#fff);border-color:var(--shu);color:#171614;box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 28%,transparent);}'), "System Dark primary hover/focus states must remain red and preserve contrast");
+assert.ok(styles.includes(':root[data-theme="dark"] .audio-button:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "Manual Dark audio focus must use the theme-aware focus color");
+assert.ok(systemDark.includes(':root[data-theme="system"] .audio-button:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "System Dark audio focus must use the theme-aware focus color");
+assert.equal(styles.includes(':root[data-theme="light"] .button.primary{background:var(--shu);'), false, "Dark brand-red primary rules must not leak into manual Light");
+assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-search:focus-within { outline-color: var(--color-focus); }'), "Manual Dark topic search must have a visible focus ring");
+assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-search:focus-within { outline-color: var(--color-focus); }'), "System Dark topic search must have a visible focus ring");
 assert.ok(styles.includes(".button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text without flattening rating colors");
 assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
 assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
