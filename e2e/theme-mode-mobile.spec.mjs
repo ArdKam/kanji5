@@ -47,6 +47,29 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
 
   const background = async (locator) =>
     locator.evaluate((element) => getComputedStyle(element).backgroundColor);
+  const controlStyle = async (locator) => locator.evaluate((element) => {
+    const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
+    const luminance = (value) => value.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const style = getComputedStyle(element);
+    const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+    return {
+      background: style.backgroundColor,
+      foreground: style.color,
+      contrast: (pair[0] + 0.05) / (pair[1] + 0.05),
+      outlineColor: style.outlineColor,
+      outlineWidth: style.outlineWidth,
+      outlineStyle: style.outlineStyle
+    };
+  });
+  const assertTextContrast = async (locator, context) => {
+    const result = await controlStyle(locator);
+    expect(result.contrast, `${context} text must meet WCAG AA contrast`).toBeGreaterThanOrEqual(4.5);
+    return result;
+  };
+  const primaryButton = page.locator("#root .learning-card .button.primary.wide");
   const isDarkSurface = async () =>
     (await background(surface)).includes("35, 33, 30");
 
@@ -62,44 +85,75 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await chooseTheme("Light");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect.poll(isDarkSurface).toBe(false);
+  const lightPrimary = await assertTextContrast(primaryButton, "Manual Light primary button");
+  expect(lightPrimary.background, "Manual Light must retain the Light-mode palette").toBe("rgb(80, 95, 131)");
+  expect(lightPrimary.foreground).toBe("rgb(253, 251, 247)");
   expect(await background(nav)).not.toContain("35, 33, 30");
 
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(isDarkSurface).toBe(true);
+  const manualDarkPrimary = await assertTextContrast(primaryButton, "Manual Dark primary button");
+  expect(manualDarkPrimary.background, "Manual Dark primary must use brand red").toBe("rgb(224, 106, 95)");
+  expect(manualDarkPrimary.foreground).toBe("rgb(23, 22, 20)");
 
   await chooseTheme("System");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
   await expect.poll(isDarkSurface).toBe(true);
+  const systemDarkPrimary = await assertTextContrast(primaryButton, "System + OS Dark primary button");
+  expect(systemDarkPrimary.background, "System + OS Dark primary must use brand red").toBe("rgb(224, 106, 95)");
+  expect(systemDarkPrimary.foreground).toBe("rgb(23, 22, 20)");
 
   // In System mode, changing the device scheme should move all tracked surfaces.
   await page.emulateMedia({ colorScheme: "light" });
   await expect.poll(isDarkSurface).toBe(false);
   expect(await background(nav)).not.toContain("35, 33, 30");
+  const systemLightPrimary = await assertTextContrast(primaryButton, "System + OS Light primary button");
+  expect(systemLightPrimary.background, "System + OS Light must not inherit Dark brand-red styling").toBe("rgb(80, 95, 131)");
+  expect(systemLightPrimary.foreground).toBe("rgb(253, 251, 247)");
 
   // Switch back to System + OS Dark before measuring dark-mode contrast.
   await page.emulateMedia({ colorScheme: "dark" });
   await expect.poll(isDarkSurface).toBe(true);
+  const systemDarkAfterOsChange = await assertTextContrast(primaryButton, "System after switching back to OS Dark");
+  expect(systemDarkAfterOsChange.background).toBe("rgb(224, 106, 95)");
+  const selectedThemeControl = page.locator("#header-tools-menu .menu-theme-button.active");
+  await expect(selectedThemeControl).toBeVisible();
+  await assertTextContrast(selectedThemeControl, "Selected theme control");
   const menuClose = page.locator(".header-tools-menu-close");
   await expect(menuClose).toBeVisible();
+  await menuClose.hover();
+  await assertTextContrast(menuClose, "Tools-menu close control in hover state");
   await menuClose.click();
   await expect(page.locator("#header-tools-menu")).toHaveCount(0);
 
-  const reveal = page.locator("#root .learning-card .button.wide");
+  const reveal = primaryButton;
   await expect(reveal).toBeVisible({ timeout: 10_000 });
-  const revealContrast = await reveal.evaluate((element) => {
-    const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
-    const luminance = (value) => value.map((channel) => {
-      const normalized = channel / 255;
-      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
-    const style = getComputedStyle(element);
-    const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
-    return (pair[0] + 0.05) / (pair[1] + 0.05);
-  });
-  expect(revealContrast, "Neutral button label must retain WCAG AA contrast in Dark mode").toBeGreaterThanOrEqual(4.5);
+  const revealNormal = await assertTextContrast(reveal, "System Dark primary button");
+  expect(revealNormal.background).toBe("rgb(224, 106, 95)");
+  expect(revealNormal.foreground).toBe("rgb(23, 22, 20)");
+
+  await reveal.hover();
+  const revealHover = await assertTextContrast(reveal, "System Dark primary hover state");
+  expect(revealHover.background, "Hover must retain the accessible brand-red palette").toBe("rgb(228, 124, 114)");
+
+  await reveal.focus();
+  const revealFocus = await assertTextContrast(reveal, "System Dark primary focus state");
+  expect(revealFocus.outlineWidth).toBe("3px");
+  expect(revealFocus.outlineStyle).toBe("solid");
 
   await reveal.click();
+  const backAudio = page.locator("#root .learning-card-back .audio-button").first();
+  await expect(backAudio).toBeVisible({ timeout: 10_000 });
+  await assertTextContrast(backAudio, "System Dark learning-card audio control");
+  await backAudio.hover();
+  const audioHover = await assertTextContrast(backAudio, "System Dark audio hover state");
+  expect(audioHover.background).toBe("rgb(23, 22, 20)");
+  await backAudio.focus();
+  const audioFocus = await assertTextContrast(backAudio, "System Dark audio focus state");
+  expect(audioFocus.outlineWidth).toBe("3px");
+  expect(audioFocus.outlineStyle).toBe("solid");
+
   const ratings = page.locator("#root .learning-card .rating-grid .rating");
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
   const assertRatingPalette = async () => {
