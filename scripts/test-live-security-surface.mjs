@@ -53,6 +53,22 @@ async function fetchWithTimeout(url, options = {}) {
 
 async function auditHttpSurface() {
   console.log("\n=== HTTPS and response headers ===");
+  const httpUrl = BASE_URL.replace(/^https:/i, "http:") + "/?security_audit_http_probe=" + Date.now();
+  try {
+    const plainHttp = await fetchWithTimeout(httpUrl, {
+      redirect: "manual",
+      headers: { "cache-control": "no-cache" },
+    });
+    const location = plainHttp.headers.get("location") || "";
+    let redirectProtocol = "";
+    try { redirectProtocol = new URL(location, httpUrl).protocol; } catch {}
+    const upgraded = [301, 302, 303, 307, 308].includes(plainHttp.status) && redirectProtocol === "https:";
+    record("HTTP_UPGRADES_TO_HTTPS", upgraded, "HIGH", "HTTP " + plainHttp.status + " redirects to HTTPS", "Plain HTTP did not return an explicit redirect to HTTPS (status=" + plainHttp.status + ", location-present=" + Boolean(location) + ").");
+    await plainHttp.body?.cancel();
+  } catch (error) {
+    fail("HTTP_UPGRADES_TO_HTTPS", "HIGH", "Plain HTTP upgrade probe failed: " + String(error?.message || error));
+  }
+
   let response;
   let html = "";
   try {
