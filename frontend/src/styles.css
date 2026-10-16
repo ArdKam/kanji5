@@ -258,7 +258,7 @@ html[dir="ltr"] .learning-back-page{direction:ltr;}
 
 .header-tools{position:static;display:flex;align-items:flex-start;gap:8px;z-index:100;flex:0 0 auto;}
 .header-menu-trigger{position:relative;z-index:101;display:inline-grid;place-items:center;width:44px;min-width:44px;height:44px;padding:8px;font-size:var(--text-md);line-height:1;}
-.header-menu-scrim{position:fixed;inset:0;z-index:110;border:0;padding:0;background:rgba(16,24,40,.34);cursor:default;animation:headerMenuScrimIn var(--motion-scrim) ease both;}
+.header-menu-scrim{position:fixed;inset:0;z-index:110;border:0;padding:0;background:rgba(16,24,40,.30);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);cursor:default;animation:headerMenuScrimIn var(--motion-scrim) ease both;}
 .header-tools-menu{position:fixed;inset-block:0;inset-inline-end:0;z-index:120;display:flex;flex-direction:column;width:min(360px,88vw);max-width:100vw;margin:0;padding:0;border:0;border-inline-start:1px solid var(--line);border-radius:0;background:var(--paper);box-shadow:-24px 0 70px -42px rgba(16,24,40,.6);overflow:hidden;animation:headerMenuDrawerIn var(--motion-menu) cubic-bezier(.22,1,.36,1) both;}
 .header-tools-menu.open{display:flex;}
 .header-tools-menu-header{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:72px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--paper);}
@@ -917,7 +917,7 @@ html[dir="ltr"] .header-tools-menu{border-inline-start:1px solid var(--line);bor
   inset-block-start:0;
   pointer-events:auto;
 }
-.header-actions .header-tools{inset-inline-start:0;z-index:4;}
+.header-actions .header-tools{inset-inline-start:0;z-index:101;}
 .header-actions .account-button{inset-inline-start:48px;z-index:5;}
 .header-menu-trigger{width:44px;height:44px;min-height:44px;}
 .header .account-button{width:44px;min-width:44px;height:44px;min-height:44px;padding:4px;}
@@ -1439,7 +1439,6 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   html[dir="rtl"] .header-tools-menu{
     animation-name:headerMenuPopoverIn!important;
   }
-  .header-menu-scrim{display:none;}
 }
 @keyframes headerMenuPopoverIn{
   from{transform:translateY(-4px) scale(.985);opacity:0}

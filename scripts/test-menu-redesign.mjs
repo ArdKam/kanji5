@@ -20,7 +20,9 @@ assert.doesNotMatch(css,/\.header\.menu-open \.account-button\{[^}]*visibility:\
 
 assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:absolute!important;[\s\S]*?max-height:min\(640px/);
 assert.match(css,/@media\(max-width:760px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:fixed!important;[\s\S]*?inset-inline-start:0!important;[\s\S]*?inset-inline-end:auto!important;/);
-assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-menu-scrim\{display:none;\}/);
+assert.match(css,/\.header-actions \.header-tools\{inset-inline-start:0;z-index:101;\}/, "the menu stacking context must sit above the account control on mobile and desktop");
+assert.match(css,/\.header-menu-scrim\{[^}]*backdrop-filter:blur\(4px\);-webkit-backdrop-filter:blur\(4px\)/, "the menu scrim must blur background content on all viewports");
+assert.doesNotMatch(css,/\.header-menu-scrim\{display:none;\}/, "the full-screen scrim must stay enabled on desktop as well");
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.header-tools-menu\{animation:none!important;\}/);
 
 for(const label of [
@@ -47,5 +49,7 @@ for(const marker of [
 
 assert.ok(app.includes('setHeaderMenuOpen(false);window.requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>(".header-menu-trigger")?.focus())'),"Escape focus restoration missing");
 assert.ok(app.includes('document.addEventListener("pointerdown",onPointerDown,true)'),"outside-click handling missing");
+assert.ok(app.includes("if(scrim.contains(target))return;"),"scrim must close the menu on click instead of unmounting during pointerdown");
+assert.ok(app.includes("disabled={headerMenuOpen}"),"account control must be disabled for the full open-menu state");
 
 console.log("Kanji5 menu redesign contract passed.");

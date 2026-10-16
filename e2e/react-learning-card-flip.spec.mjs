@@ -525,9 +525,64 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await page.getByRole("button", { name: "More", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
+  const scrim = page.locator(".header-menu-scrim");
+  await expect(scrim).toBeVisible();
+  const scrimFilter = await scrim.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const matchedFilterRules = [];
+    const visitRules = (rules) => {
+      for (const rule of Array.from(rules)) {
+        if (rule.selectorText && element.matches(rule.selectorText)) {
+          const declared = rule.style;
+          const standard = declared?.getPropertyValue("backdrop-filter");
+          const webkit = declared?.getPropertyValue("-webkit-backdrop-filter");
+          if (standard || webkit) {
+            matchedFilterRules.push({
+              selector: rule.selectorText,
+              standard,
+              webkit,
+              standardPriority: declared.getPropertyPriority("backdrop-filter"),
+              webkitPriority: declared.getPropertyPriority("-webkit-backdrop-filter")
+            });
+          }
+        }
+        if (rule.cssRules) {
+          try { visitRules(rule.cssRules); } catch {}
+        }
+      }
+    };
+    const styleSheets = [];
+    for (const sheet of Array.from(document.styleSheets)) {
+      styleSheets.push({ href: sheet.href, disabled: sheet.disabled });
+      try { visitRules(sheet.cssRules); } catch {}
+    }
+    return {
+      standard: style.getPropertyValue("backdrop-filter"),
+      webkit: style.getPropertyValue("-webkit-backdrop-filter"),
+      supportsStandard: CSS.supports("backdrop-filter", "blur(4px)"),
+      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)"),
+      matchedFilterRules,
+      styleSheets
+    };
+  });
+  const shippedCssResponse = await page.request.get("/react-dist/kanji5-react.css");
+  const shippedCss = await shippedCssResponse.text();
+  console.log("shipped header menu CSS:", JSON.stringify(shippedCss.split("}").filter(rule => rule.includes(".header-menu-scrim")).map(rule => rule + "}").slice(0, 8)));
+  console.log("header menu scrim filter:", JSON.stringify(scrimFilter));
+  expect(
+    scrimFilter.standard === "blur(4px)" || scrimFilter.webkit === "blur(4px)"
+  ).toBe(true);
   await expect(account).toBeVisible();
+  await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
+  const desktopAccountBounds = await account.boundingBox();
+  if (!desktopAccountBounds) throw new Error("Desktop account bounds unavailable while menu is open");
+  const desktopAccountIsBehindMenuLayer = await page.evaluate(({ x, y }) => {
+    const hit = document.elementFromPoint(x, y);
+    return Boolean(hit?.closest(".header-menu-scrim, .header-tools-menu"));
+  }, { x: desktopAccountBounds.x + desktopAccountBounds.width / 2, y: desktopAccountBounds.y + desktopAccountBounds.height / 2 });
+  expect(desktopAccountIsBehindMenuLayer).toBe(true);
   await expect(menu.locator(".header-tools-menu-section").nth(0)).toContainText("Learning tools");
   await expect(menu.getByRole("button", { name: "Grammar guide", exact: true })).toBeVisible();
   await expect(menu.getByRole("button", { name: "Japanese text reader", exact: true })).toBeVisible();
@@ -539,6 +594,7 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await menu.getByRole("button", { name: "فارسی", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(account).toBeVisible();
+  await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
 
@@ -546,6 +602,7 @@ test("structured header menu keeps account inactive until the menu closes and ex
   await expect(menu).toBeHidden();
   await expect(page.getByRole("button", { name: "بیشتر", exact: true })).toBeFocused();
   await expect(account).toBeVisible();
+  await expect(account).toBeEnabled();
 });
 
 test("mobile menu prevents account click-through until the drawer closes", async ({ page }) => {
@@ -561,9 +618,62 @@ test("mobile menu prevents account click-through until the drawer closes", async
   await page.getByRole("button", { name: "بیشتر", exact: true }).click();
   const menu = page.locator("#header-tools-menu");
   await expect(menu).toBeVisible();
+  const scrim = page.locator(".header-menu-scrim");
+  await expect(scrim).toBeVisible();
+  const scrimFilter = await scrim.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const matchedFilterRules = [];
+    const visitRules = (rules) => {
+      for (const rule of Array.from(rules)) {
+        if (rule.selectorText && element.matches(rule.selectorText)) {
+          const declared = rule.style;
+          const standard = declared?.getPropertyValue("backdrop-filter");
+          const webkit = declared?.getPropertyValue("-webkit-backdrop-filter");
+          if (standard || webkit) {
+            matchedFilterRules.push({
+              selector: rule.selectorText,
+              standard,
+              webkit,
+              standardPriority: declared.getPropertyPriority("backdrop-filter"),
+              webkitPriority: declared.getPropertyPriority("-webkit-backdrop-filter")
+            });
+          }
+        }
+        if (rule.cssRules) {
+          try { visitRules(rule.cssRules); } catch {}
+        }
+      }
+    };
+    const styleSheets = [];
+    for (const sheet of Array.from(document.styleSheets)) {
+      styleSheets.push({ href: sheet.href, disabled: sheet.disabled });
+      try { visitRules(sheet.cssRules); } catch {}
+    }
+    return {
+      standard: style.getPropertyValue("backdrop-filter"),
+      webkit: style.getPropertyValue("-webkit-backdrop-filter"),
+      supportsStandard: CSS.supports("backdrop-filter", "blur(4px)"),
+      supportsWebkit: CSS.supports("-webkit-backdrop-filter", "blur(4px)"),
+      matchedFilterRules,
+      styleSheets
+    };
+  });
+  const shippedCssResponse = await page.request.get("/react-dist/kanji5-react.css");
+  const shippedCss = await shippedCssResponse.text();
+  console.log("shipped header menu CSS:", JSON.stringify(shippedCss.split("}").filter(rule => rule.includes(".header-menu-scrim")).map(rule => rule + "}").slice(0, 8)));
+  console.log("header menu scrim filter:", JSON.stringify(scrimFilter));
+  expect(
+    scrimFilter.standard === "blur(4px)" || scrimFilter.webkit === "blur(4px)"
+  ).toBe(true);
   await expect(account).toBeVisible();
+  await expect(account).toBeDisabled();
   await expect(account).toHaveCSS("visibility", "visible");
   await expect(account).toHaveCSS("pointer-events", "none");
+  const mobileAccountIsBehindMenuLayer = await page.evaluate(({ x, y }) => {
+    const hit = document.elementFromPoint(x, y);
+    return Boolean(hit?.closest(".header-menu-scrim, .header-tools-menu"));
+  }, { x: accountBounds.x + accountBounds.width / 2, y: accountBounds.y + accountBounds.height / 2 });
+  expect(mobileAccountIsBehindMenuLayer).toBe(true);
 
   // Click the account button's screen position. It stays visible, but the open-menu
   // state must prevent click-through and must not open the account dialog.
@@ -572,9 +682,11 @@ test("mobile menu prevents account click-through until the drawer closes", async
     accountBounds.y + accountBounds.height / 2
   );
   await expect(page.locator(".account-dialog:visible")).toHaveCount(0);
+  if (await menu.isVisible()) await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
 
   await expect(account).toBeVisible();
+  await expect(account).toBeEnabled();
   await account.click();
   await expect(page.locator(".account-dialog:visible")).toBeVisible();
 });
