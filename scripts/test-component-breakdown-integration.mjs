@@ -12,8 +12,11 @@ assert(app.includes("getVisualStructureInfo(card.character)"), "Learning card mu
 assert(app.includes("VisualStructureInfo|null"), "Learning card must use the typed visual structure contract");
 assert(app.includes("<KanjiStructurePreview"), "Learning card must show a preview rather than the full tree inline");
 const structurePreview = await readFile(new URL("../frontend/src/app/KanjiStructurePreview.tsx", import.meta.url), "utf8");
-assert(structurePreview.includes('import "./learning-card-enhancements.css";'), "Learning-card CSS must be available before reveal");
-assert(!/useEffect|data-rinemi-learning-card-styles|enabled: boolean/.test(structurePreview) && !structurePreview.includes("?inline"), "Structure preview must not inject styles during reveal");
+assert(structurePreview.includes('import("./learning-card-enhancements.css?inline")'), "Learning-card CSS must be preloaded from its isolated style chunk");
+assert(structurePreview.includes("export function ensureLearningCardStyles()"), "Learning-card styles must expose an awaitable readiness gate");
+assert(structurePreview.includes("void ensureLearningCardStyles()"), "Learning-card style preloading must start before reveal");
+assert(!/useEffect|enabled: boolean/.test(structurePreview), "Structure preview must not inject styles through a post-reveal effect");
+assert(app.includes("await ensureLearningCardStyles()"), "The first flip must wait until the CSS is attached");
 assert(!app.includes("enabled={revealed && backPage === 0}"), "Structure preview styling must not depend on a post-reveal effect");
 assert(/No finer components recorded/.test(structurePreview), "Atomic preview must use a concise English empty state");
 assert(/جزء دیداری ریزتری ثبت نشده/.test(structurePreview), "Atomic preview must use a concise Persian empty state");
