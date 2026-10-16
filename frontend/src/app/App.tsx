@@ -597,7 +597,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     </div>
   </section>
 }
-function Reading({title,values}:{title:string;values:string[]}){return <div className="reading"><span>{title}</span><strong lang="ja">{values.length?values.join(" · "):"—"}</strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title}/>:null}</div>}
+function Reading({title,values}:{title:string;values:string[]}){return <div className="reading"><span>{title}</span><strong><bdi lang="ja" dir="ltr">{values.length?values.join(" · "):"—"}</bdi></strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title}/>:null}</div>}
 function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
   const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
   if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
