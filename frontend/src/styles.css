@@ -3700,7 +3700,7 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
     gap: 4px;
   }
   #root .learning-card .learning-card-front .kanji-row {
-    min-height: 82px;
+    min-height: clamp(42px, 19vh, 74px);
   }
   #root .learning-card .learning-card-front .kanji-display {
     font-size: clamp(44px, 14vh, 64px);
