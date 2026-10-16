@@ -287,6 +287,7 @@ test("visual coverage: learning-card faces, inner pages, rating feedback, themes
     await startApp(page, { language: "en", theme: "light" });
     const card = page.locator("#root .learning-card");
     await expect(card).toBeVisible({ timeout: 15000 });
+    await expect.poll(() => page.locator("style[data-rinemi-learning-card-styles]").count()).toBe(1);
     await audit.capture("learning-front-desktop-light");
     await page.setViewportSize({ width: 768, height: 1024 });
     await audit.capture("learning-front-tablet-light");
