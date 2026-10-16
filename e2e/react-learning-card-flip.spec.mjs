@@ -209,14 +209,14 @@ test("reference meanings and readings open in a keyboard-accessible modal", asyn
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
-    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings");
+    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings");
 
     await trigger.click();
     const dialog = page.locator("#learning-reference-info");
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAttribute("aria-labelledby", "learning-reference-info-title");
     await expect.poll(() => dialog.evaluate(el => el.matches(":modal"))).toBe(true);
-    await expect(dialog.getByRole("heading", { name: scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings" })).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings" })).toBeVisible();
     const rows = dialog.locator(".learning-reference-info-grid .stat-row");
     await expect.poll(async () => rows.count()).toBeGreaterThan(0);
 
@@ -486,7 +486,7 @@ test("learning-card structure is a compact preview with full details in a modal"
         overviewBottom: overviewRect?.bottom ?? Infinity,
       };
     });
-    expect(metrics.overflowY).toBe("hidden");
+    expect(metrics.overflowY).toBe("auto");
     expect(metrics.overviewBottom).toBeLessThanOrEqual(metrics.scrollBottom + 1);
 
     await preview.click();
