@@ -276,6 +276,38 @@ jobs:
         working-directory: .
         run: npx playwright test --config=playwright.compat.config.mjs --timeout=90000 --retries=0 --project=webkit e2e/react-browser-compat.spec.mjs
 
+
+  zap-passive-baseline:
+    name: OWASP ZAP passive production baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Run OWASP ZAP baseline (passive only)
+        shell: bash
+        run: |
+          set -o pipefail
+          docker run --rm -t \
+            -v "$PWD:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+              -t https://ardkam.github.io/kanji5 \
+              -m 1 \
+              -J /zap/wrk/zap-baseline.json \
+              -w /zap/wrk/zap-baseline.md \
+              -r /zap/wrk/zap-baseline.html
+      - name: Upload passive-scan reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rinemi-zap-passive-baseline
+          path: |
+            zap-baseline.json
+            zap-baseline.md
+            zap-baseline.html
+          if-no-files-found: warn
+
   live-production-security:
     name: Read-only live penetration smoke
     runs-on: ubuntu-latest
