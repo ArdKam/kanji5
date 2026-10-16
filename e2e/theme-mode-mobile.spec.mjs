@@ -76,7 +76,7 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   });
   const assertTextContrast = async (locator, context) => {
     const result = await controlStyle(locator);
-    expect(result.contrast, `${context} text must meet WCAG AA contrast`).toBeGreaterThanOrEqual(4.5);
+    expect(result.contrast, `${context} text must meet WCAG AA contrast (foreground=${result.foreground}; background=${result.background}; opacity=${await locator.evaluate(element => getComputedStyle(element).opacity)})`).toBeGreaterThanOrEqual(4.5);
     return result;
   };
   const primaryButton = page.locator("#root .learning-card .button.primary.wide");
@@ -95,9 +95,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await chooseTheme("Light");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await expect.poll(isDarkSurface).toBe(false);
-  const lightPrimary = await assertTextContrast(primaryButton, "Manual Light primary button");
+  const lightPrimary = await controlStyle(primaryButton);
   expect(lightPrimary.background, "Manual Light must retain the Light-mode palette").toBe("rgb(80, 95, 131)");
   expect(lightPrimary.foreground).toBe("rgb(253, 251, 247)");
+  expect(lightPrimary.contrast, "Manual Light primary button text must meet WCAG AA contrast").toBeGreaterThanOrEqual(4.5);
   expect(await background(nav)).not.toContain("35, 33, 30");
 
   await chooseTheme("Dark");
