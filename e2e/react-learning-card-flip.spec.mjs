@@ -183,6 +183,142 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
   }));
 });
 
+test("Learning card styles are ready before reveal and the flip preserves interactive faces", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const language = new URL(window.location.href).searchParams.get("rinemi-test-language");
+    if (language === "fa" || language === "en") localStorage.setItem("kanji5-ui-language", language);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+
+  for (const scenario of [
+    { language: "en", viewport: { width: 1280, height: 720 } },
+    { language: "fa", viewport: { width: 390, height: 844 } },
+    { language: "en", viewport: { width: 844, height: 390 } },
+    { language: "fa", viewport: { width: 1280, height: 720 } },
+    { language: "en", viewport: { width: 390, height: 844 } },
+    { language: "fa", viewport: { width: 844, height: 390 } },
+  ]) {
+    await page.setViewportSize(scenario.viewport);
+    await page.goto("/?rinemi-test-language=" + scenario.language);
+
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+
+    const before = await card.evaluate(el => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const preview = el.querySelector(".kanji-structure-preview");
+      const reveal = el.querySelector(".learning-card-front .button.primary");
+      if (!(flip instanceof HTMLElement) || !(front instanceof HTMLElement) ||
+          !(back instanceof HTMLElement) || !(preview instanceof HTMLElement) ||
+          !(reveal instanceof HTMLElement)) throw new Error("Learning card flip elements are incomplete");
+      const rect = reveal.getBoundingClientRect();
+      const revealInViewport = rect.bottom > 0 && rect.right > 0 &&
+        rect.top < window.innerHeight && rect.left < window.innerWidth;
+      const duration = getComputedStyle(flip).transitionDuration.split(",")[0].trim();
+      const transitionSeconds = duration.endsWith("ms")
+        ? Number.parseFloat(duration) / 1000
+        : Number.parseFloat(duration);
+      return {
+        previewDisplay: getComputedStyle(preview).display,
+        lateStyleInjector: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        transitionSeconds,
+        frontBackface: getComputedStyle(front).backfaceVisibility,
+        backBackface: getComputedStyle(back).backfaceVisibility,
+        frontAriaHidden: front.getAttribute("aria-hidden"),
+        frontInert: front.inert,
+        backAriaHidden: back.getAttribute("aria-hidden"),
+        backInert: back.inert,
+        revealInViewport,
+        revealBounds: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      };
+    });
+
+    expect(before.previewDisplay).toBe("grid");
+    expect(before.lateStyleInjector).toBe(false);
+    expect(before.transitionSeconds).toBeGreaterThan(0.01);
+    expect(before.frontBackface).toBe("hidden");
+    expect(before.backBackface).toBe("hidden");
+    expect(before.frontAriaHidden).toBe("false");
+    expect(before.frontInert).toBe(false);
+    expect(before.backAriaHidden).toBe("true");
+    expect(before.backInert).toBe(true);
+    expect(before.revealInViewport, JSON.stringify(before)).toBe(true);
+
+    await page.evaluate(() => {
+      const flip = document.querySelector("#root .learning-card-flip");
+      if (!(flip instanceof HTMLElement)) throw new Error("Learning card flip is unavailable for sampling");
+      const frames = [];
+      const start = performance.now();
+      const sample = () => {
+        frames.push(getComputedStyle(flip).transform);
+        if (performance.now() - start < 900) requestAnimationFrame(sample);
+        else window.__rinemiLearningCardFlipFrames = frames;
+      };
+      window.__rinemiLearningCardFlipFrames = frames;
+      requestAnimationFrame(sample);
+    });
+
+    const reveal = page.getByRole("button", {
+      name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/,
+    });
+    await expect(reveal).toBeInViewport();
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(950);
+
+    const after = await card.evaluate(el => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const activePage = el.querySelector(".learning-back-page.active");
+      const meaning = el.querySelector(".learning-back-page.active .learning-back-meaning");
+      const readings = el.querySelector(".learning-back-page.active .learning-back-readings");
+      const pageLabels = Array.from(el.querySelectorAll(".learning-back-page")).map(node => node.getAttribute("aria-label"));
+      const shortcutLabels = Array.from(el.querySelectorAll(".learning-back-page-shortcut")).map(node => node.getAttribute("aria-label"));
+      if (!(flip instanceof HTMLElement) || !(front instanceof HTMLElement) ||
+          !(back instanceof HTMLElement) || !activePage || !meaning || !readings) {
+        throw new Error("Learning card content is incomplete after reveal");
+      }
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(flip).transform);
+      const rect = el.getBoundingClientRect();
+      return {
+        transformM11: matrix.m11,
+        frontAriaHidden: front.getAttribute("aria-hidden"),
+        frontInert: front.inert,
+        backAriaHidden: back.getAttribute("aria-hidden"),
+        backInert: back.inert,
+        meaningText: meaning.textContent?.trim() || "",
+        meaningVisible: getComputedStyle(meaning).display !== "none" && meaning.getBoundingClientRect().height > 0,
+        readingsVisible: getComputedStyle(readings).display !== "none" && readings.getBoundingClientRect().height > 0,
+        pageLabels,
+        shortcutLabels,
+        cardLeft: rect.left,
+        cardRight: rect.right,
+        viewportWidth: window.innerWidth,
+      };
+    });
+    const frames = await page.evaluate(() => window.__rinemiLearningCardFlipFrames || []);
+    expect(new Set(frames).size).toBeGreaterThan(2);
+    expect(after.transformM11).toBeLessThan(-0.99);
+    expect(after.frontAriaHidden).toBe("true");
+    expect(after.frontInert).toBe(true);
+    expect(after.backAriaHidden).toBe("false");
+    expect(after.backInert).toBe(false);
+    expect(after.meaningText.length).toBeGreaterThan(0);
+    expect(after.meaningVisible).toBe(true);
+    expect(after.readingsVisible).toBe(true);
+    expect(after.shortcutLabels).toHaveLength(4);
+    expect(after.shortcutLabels).toEqual(after.pageLabels);
+    expect(after.cardLeft).toBeGreaterThanOrEqual(-1);
+    expect(after.cardRight).toBeLessThanOrEqual(after.viewportWidth + 1);
+    await assertCardBounds(card);
+  }
+});
+
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
   await routeExamples(page, 2);
   await page.setViewportSize({ width: 1280, height: 720 });
