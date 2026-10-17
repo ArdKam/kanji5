@@ -16,7 +16,8 @@
   --ds-brand-sumi: #292B2D;
   --ds-brand-indigo: #505F83;
   --ds-brand-sakura: #D6A1AA;
-  --ds-brand-moss: light-dark(#8C9B87, #A9B77C);
+  --ds-brand-moss: #8C9B87;
+  --ds-color-progress-accent: light-dark(var(--ds-brand-moss), #A9B77C);
   --ds-brand-secondary-surface: #EEE9E0;
   --ds-brand-border: #DED8CE;
 
