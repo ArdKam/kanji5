@@ -117,6 +117,81 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("front-side recall cue remains legible and correctly ordered across theme and viewport", async ({ browser }) => {
+  const scenarios = [
+    { language: "en", theme: "light", viewport: { width: 1280, height: 720 } },
+    { language: "fa", theme: "light", viewport: { width: 390, height: 844 } },
+    { language: "en", theme: "dark", viewport: { width: 390, height: 844 } },
+    { language: "fa", theme: "dark", viewport: { width: 1280, height: 720 } },
+  ];
+
+  for (const scenario of scenarios) {
+    const context = await browser.newContext({ viewport: scenario.viewport });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 2);
+      await page.addInitScript(({ language, theme }) => {
+        localStorage.setItem("kanji5-ui-language", language);
+        localStorage.setItem("kanji5-theme", theme);
+        localStorage.setItem("kanji5-onboarding-v2", "complete");
+      }, { language: scenario.language, theme: scenario.theme });
+      await page.goto("/");
+      const card = page.locator("#root .learning-card");
+      await expect(card).toBeVisible({ timeout: 20000 });
+      await expect(page.locator("html")).toHaveAttribute("data-theme", scenario.theme);
+      await expect(page.locator("html")).toHaveAttribute("lang", scenario.language);
+
+      const cue = card.locator(".learning-recall-cue");
+      const reveal = card.locator(".learning-card-front .button.primary.wide");
+      await expect(cue).toBeVisible();
+      await expect(cue).toHaveText(
+        scenario.language === "fa"
+          ? "قبل از دیدن پاسخ، معنی کانجی و دست‌کم یکی از خوانش‌هایش را از حافظه به یاد بیاور."
+          : "Before revealing, recall the meaning and at least one reading from memory."
+      );
+      await expect(reveal).toHaveAttribute("aria-describedby", "learning-recall-cue");
+      await expect(reveal).toBeEnabled();
+
+      const geometry = await card.evaluate((el) => {
+        const bounds = (selector) => {
+          const target = el.querySelector(selector);
+          if (!(target instanceof HTMLElement)) throw new Error("Missing learning-card element: " + selector);
+          const rect = target.getBoundingClientRect();
+          return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+        };
+        const rgb = value => value.match(/[\\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+        const luminance = value => {
+          const channels = rgb(value);
+          if (channels.length !== 3) return null;
+          const normalized = channels.map(channel => channel / 255).map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+          return normalized[0] * 0.2126 + normalized[1] * 0.7152 + normalized[2] * 0.0722;
+        };
+        const foreground = luminance(getComputedStyle(el.querySelector(".learning-recall-cue")).color);
+        const surface = luminance(getComputedStyle(el).backgroundColor);
+        const contrast = foreground === null || surface === null ? null : (Math.max(foreground, surface) + 0.05) / (Math.min(foreground, surface) + 0.05);
+        return {
+          face: bounds(".learning-card-front"),
+          row: bounds(".learning-card-front .kanji-row"),
+          cue: bounds(".learning-recall-cue"),
+          reveal: bounds(".learning-card-front .button.primary.wide"),
+          horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+          contrast,
+        };
+      });
+      expect(geometry.cue.left).toBeGreaterThanOrEqual(geometry.face.left - 1);
+      expect(geometry.cue.right).toBeLessThanOrEqual(geometry.face.right + 1);
+      expect(geometry.cue.top).toBeGreaterThanOrEqual(geometry.row.bottom - 1);
+      expect(geometry.cue.bottom).toBeLessThanOrEqual(geometry.reveal.top + 1);
+      expect(geometry.cue.height).toBeGreaterThan(0);
+      expect(geometry.horizontalOverflow).toBe(false);
+      expect(geometry.contrast, JSON.stringify(geometry)).not.toBeNull();
+      expect(geometry.contrast, JSON.stringify(geometry)).toBeGreaterThanOrEqual(4.5);
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 test("learning-card answer presents kanji, meaning, readings and structure in a stable hierarchy", async ({ browser }) => {
   await Promise.all(["en", "fa"].map(async (language) => {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
@@ -534,6 +609,11 @@ test("learning card exposes four full-content back pages in Persian and English"
       await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings").first()).toBeVisible();
       const exampleCount = await card.locator(".learning-back-page").nth(1).locator(".example-row").count();
       expect(exampleCount).toBeGreaterThan(2);
+      const firstExample = card.locator(".learning-back-page").nth(1).locator(".example-row").first();
+      await expect(firstExample.locator(".example-main")).toHaveAttribute("lang", "ja");
+      await expect(firstExample.locator(".example-main")).toHaveAttribute("dir", "ltr");
+      await expect(firstExample.locator(".example-meaning")).toHaveAttribute("lang", "en");
+      await expect(firstExample.locator(".example-meaning")).toHaveAttribute("dir", "ltr");
       await expect(card.locator(".learning-back-page").nth(2).locator(".mnemonic-page")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-page")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".example-row")).toHaveCount(0);
