@@ -18,7 +18,7 @@
   max-width:none;
   min-height:100px;
   padding:14px 16px;
-  border-radius:var(--radius-lg);
+  border-radius:var(--ds-radius-lg);
   margin-inline:0;
 }
 @media(max-width:760px){
