@@ -20,7 +20,7 @@ function contrast(first, second) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-assert.ok(shell.includes('font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif'), "Startup shell should use the English UI family");
+assert.ok(shell.includes('font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif'), "Startup shell should use the English UI family");
 assert.ok(shell.includes('font-family:"Vazirmatn","Plus Jakarta Sans",system-ui,sans-serif'), "Persian startup copy should use Vazirmatn");
 assert.ok(shell.includes(':root[data-theme="dark"] #kanji5-startup-shell'), "Explicit dark mode must theme the startup shell");
 assert.ok(shell.includes('@media(prefers-color-scheme:dark){') && shell.includes(':root[data-theme="system"] #kanji5-startup-shell'), "System dark mode must theme the startup shell only under the OS dark query");
