@@ -93,3 +93,43 @@ Before building telemetry, first verify whether current session aggregates can a
 - Verify a learner who completes quick start sees an actual first learning card and can commit a rating without a registration prompt; verify the guided path retains its placement and settings semantics.
 - Run return-after-absence scenarios (3/7/14 days) and validate the exact effects of Again/Hard/Good/Easy with the engine's scheduling contract.
 - After merge/deploy only, smoke the published app and verify that the live artifact matches the approved commit. An open PR is not deployment evidence.
+
+
+## Implementation and verification handoff — 2026-10-17
+
+### Change record
+
+- **PR:** [#562 — feat(onboarding): shorten time to first learning session](https://github.com/ArdKam/kanji5/pull/562)
+- **Working branch:** `fix/onboarding-first-session-20261017`
+- **Code-bearing head verified in this handoff:** `c5a97c74f6d303e1588190ab5ce83fc3f34f3a10`
+- **Status:** open, draft, not merged; no production deployment is claimed.
+- **Scope:** welcome copy/actions, bilingual copy, onboarding E2E selectors/coverage, this audit, and its additive roadmap handoff. Learning-engine authority and persistence contracts are unchanged.
+
+### Regression found and fixed
+
+The first React presentation E2E attempt failed because `e2e/react-presentation-migration.spec.mjs` still expected the previous Persian welcome CTA `شروع کنیم`. The new UI's guided CTA is `تنظیم جلسهٔ اول`; both stale assertions were updated. Other guided-path selectors in onboarding/account/theme/design-coverage and live-smoke script coverage were aligned with the new CTA.
+
+**Rerun evidence on the code-bearing head `c5a97c7`:**
+- React presentation E2E: **passed**.
+- React accessibility gate: **passed**.
+- React PWA release gate and final release matrix: **passed**.
+- WebKit compatibility workflow: **passed** (11/11 steps).
+- Automated UI visual audit: **passed** (14/14 steps).
+- React presentation build workflow run [#3821](https://github.com/ArdKam/kanji5/actions/runs/39014636590): still **in progress** at the last check, with 42/53 main-job steps completed and the Data Trust tab-persistence gate active; no failures were reported in the inspected state.
+
+These checks are evidence for the listed PR head only. A documentation-only follow-up commit and base-branch reconciliation may trigger a newer run; refresh the PR and verify the exact latest head before treating CI as complete.
+
+### Safe next actions
+
+1. Confirm all required workflows finish successfully on the exact latest PR head. If a new failure appears, diagnose it before updating status.
+2. Keep PR #562 draft until the full build, required E2E/accessibility/PWA/release gates, and visual audit are green.
+3. Review the merge-base/current-main state. Other contributors appended a runtime-initialization handoff in `ROADMAP.md` after this branch was started; preserve it verbatim and merge/reconcile the latest main rather than overwriting that work.
+4. After merge, record the merge SHA, rerun applicable current-main gates, then verify deployed artifact parity and production smoke. Do not describe an open-PR check as merge, current-main, or deployment evidence.
+
+### Explicitly not done
+
+- No user-level or remote analytics instrumentation was added.
+- Return-after-absence behavior for 3/7/14-day gaps has not been validated in a real runtime session.
+- Rating explanations have not been changed; validate them against the authoritative scheduler contract before editing.
+- Dictionary/handwriting/Reading Lab contextual discovery changes remain recommendations, not implementation in PR #562.
+- Activation and W1/W4 retention are metric specifications, not measured results; use a consent/purpose review before adding cross-device cohort telemetry.
