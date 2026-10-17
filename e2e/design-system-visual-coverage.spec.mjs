@@ -154,7 +154,7 @@ test("visual coverage: onboarding steps, selected states, RTL-sized layouts and 
     await audit.capture("onboarding-welcome-320px");
     await page.setViewportSize({ width: 1440, height: 960 });
 
-    await onboarding.getByRole("button", { name: /Let's begin/ }).click();
+    await onboarding.getByRole("button", { name: /Set up my first session/ }).click();
     await expect(onboarding.getByRole("heading", { name: "How you learn each kanji" })).toBeVisible();
     await audit.capture("onboarding-learning-loop-desktop");
     await page.setViewportSize({ width: 390, height: 844 });
