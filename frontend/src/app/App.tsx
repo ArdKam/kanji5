@@ -145,8 +145,22 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       setRevealStylesPending(false);
       return;
     }
-    // CSS insertion can change compact-landscape geometry; anchor after styles settle.
-    frontFaceRef.current?.closest(".learning-card")?.scrollIntoView({block:"nearest",inline:"nearest"});
+    // Let the browser apply the card-only stylesheet before reveal. Avoid an unconditional
+    // scrollIntoView(): on short landscape screens the fixed navigation plus scroll-padding
+    // can make the browser scroll a card that is already inside the usable viewport off the top.
+    const cardElement = frontFaceRef.current?.closest(".learning-card");
+    if (cardElement instanceof HTMLElement) {
+      const bounds = cardElement.getBoundingClientRect();
+      const navigation = document.querySelector(".experience-nav");
+      const navigationTop = navigation instanceof HTMLElement
+        ? navigation.getBoundingClientRect().top
+        : window.innerHeight;
+      if (bounds.top < 0) {
+        cardElement.scrollIntoView({ block: "start", inline: "nearest" });
+      } else if (bounds.bottom > navigationTop - 1) {
+        window.scrollBy({ top: bounds.bottom - (navigationTop - 1), behavior: "instant" });
+      }
+    }
     const active=document.activeElement;
     if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
       active.blur();
