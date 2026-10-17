@@ -164,22 +164,22 @@
 
 
 /* Semantic review outcomes; text labels remain visible and color is not the only cue. */
-.app-shell .learning-card-back .rating.rating-again {
+.app-shell .rating.rating-again {
   color: var(--ds-review-again-text);
   border: 1px solid var(--ds-review-again-border);
   background: var(--ds-review-again-bg);
 }
-.app-shell .learning-card-back .rating.rating-hard {
+.app-shell .rating.rating-hard {
   color: var(--ds-review-hard-text);
   border: 1px solid var(--ds-review-hard-border);
   background: var(--ds-review-hard-bg);
 }
-.app-shell .learning-card-back .rating.rating-good {
+.app-shell .rating.rating-good {
   color: var(--ds-review-good-text);
   border: 1px solid var(--ds-review-good-border);
   background: var(--ds-review-good-bg);
 }
-.app-shell .learning-card-back .rating.rating-easy {
+.app-shell .rating.rating-easy {
   color: var(--ds-review-easy-text);
   border: 1px solid var(--ds-review-easy-border);
   background: var(--ds-review-easy-bg);
@@ -209,9 +209,10 @@ button:focus-visible, a[href]:focus-visible, input:focus-visible, select:focus-v
   border-color: var(--ds-color-action-primary);
   color: var(--ds-color-action-primary-text);
 }
-:root .app-shell .button.primary:hover:not(:disabled) {
+:root .app-shell .button.primary:is(:hover, :focus-visible):not(:disabled) {
   background: var(--ds-color-action-primary-hover);
   border-color: var(--ds-color-action-primary-hover);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-focus-ring) 28%, transparent);
 }
 :root .app-shell .button.primary:active:not(:disabled) {
   background: var(--ds-color-action-primary-pressed);
