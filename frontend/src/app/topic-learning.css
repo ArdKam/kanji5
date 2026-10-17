@@ -42,10 +42,10 @@
 .topic-learning-focus-option { min-height: 42px; padding: 8px 12px; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-full); background: var(--ds-color-surface); color: var(--ds-color-text-secondary); font-size: var(--ds-type-small); font-weight: 700; }
 .topic-learning-focus-option.active { border-color: var(--ds-color-action-primary); background: var(--ds-color-action-primary); color: var(--ds-color-surface); }
 :root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }
-:root[data-theme="dark"] .topic-learning-search:focus-within { outline-color: color-mix(in srgb, var(--ds-color-action-primary) 72%, #fff); }
+:root[data-theme="dark"] .topic-learning-search:focus-within { outline-color: var(--ds-focus-ring); }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; }
-  :root[data-theme="system"] .topic-learning-search:focus-within { outline-color: color-mix(in srgb, var(--ds-color-action-primary) 72%, #fff); }
+  :root[data-theme="system"] .topic-learning-search:focus-within { outline-color: var(--ds-focus-ring); }
 }
 .topic-learning-message { margin: 0; padding: 10px 12px; border-inline-start: 3px solid var(--ds-color-action-primary); background: color-mix(in srgb, var(--ds-color-action-primary) 7%, var(--ds-color-surface)); color: var(--ds-color-text-secondary); font-size: var(--ds-type-small); line-height: 1.6; }
 .topic-learning-start { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 50px; }
