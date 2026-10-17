@@ -425,8 +425,9 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
-        <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed||Boolean(busy)||revealStylesPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        <div className="kanji-row"><span className="kanji-display" lang="ja" dir="ltr">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
+        <p id="learning-recall-cue" className="learning-recall-cue">{learningCopy("recallBeforeReveal",getLanguage())}</p>
+        <button className="button primary wide" type="button" aria-describedby="learning-recall-cue" onClick={handleReveal} disabled={revealed||Boolean(busy)||revealStylesPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("meaningAndStructure")}</span>
@@ -475,7 +476,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     </div>
                   ) : null}
                   {!examplesLoading && !examplesError && !displayExamples.length ? <p className="learning-examples-empty">{getLanguage()==="fa"?"برای این کانجی مثال واژگانی در دسترس نیست.":"No vocabulary examples are available for this kanji."}</p> : null}
-                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
+                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main" lang="ja" dir="ltr">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning" lang="en" dir="ltr">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
                   {!examplesLoading && !examplesError && displayExamples.length>4 ? <button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button> : null}
                 </div>
               </div>
