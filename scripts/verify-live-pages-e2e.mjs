@@ -60,8 +60,8 @@ try {
     }
     const manifestEntries = Object.values(reactManifest);
     const reactEntry = manifestEntries.find(entry => entry?.file === 'kanji5-react.js');
-    if (!reactEntry || !Array.isArray(reactEntry.css) || !reactEntry.css.includes('kanji5-react.css')) {
-      throw new Error('LIVE_PWA_REACT_ENTRY_OR_STYLESHEET_MISSING');
+    if (!reactEntry) {
+      throw new Error('LIVE_PWA_REACT_ENTRY_MISSING');
     }
     const manifestAssets = new Set();
     const manifestVisited = new Set();
@@ -76,9 +76,12 @@ try {
       for (const dependency of [...(entry.imports || []), ...(entry.dynamicImports || [])]) visitManifest(dependency);
     }
     for (const key of Object.keys(reactManifest)) visitManifest(key);
-    if (!manifestAssets.has('kanji5-react.js') || !manifestAssets.has('kanji5-react.css')) {
-      throw new Error('LIVE_PWA_REACT_MANIFEST_REQUIRED_ASSETS_MISSING');
+    if (!manifestAssets.has('kanji5-react.js')) {
+      throw new Error('LIVE_PWA_REACT_MANIFEST_ENTRY_JS_MISSING');
     }
+    // index.html loads the stable stylesheet directly; confirm it explicitly even
+    // when Vite does not list it in the JavaScript entry's css metadata.
+    manifestAssets.add('kanji5-react.css');
     await Promise.all([...manifestAssets].map(asset =>
       fetchLiveAsset(new URL('react-dist/' + asset, pwaBase).href, 'react-dist/' + asset)
     ));
