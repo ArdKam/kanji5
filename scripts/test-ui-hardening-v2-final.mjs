@@ -15,7 +15,7 @@ for(const token of [
   "--text-display-lg:var(--ds-type-display-lg)",
   "--space-1:var(--ds-space-1)","--space-8:var(--ds-space-8)",
   "--radius-sm:var(--ds-radius-sm)","--radius-md:var(--ds-radius-md)","--radius-lg:var(--ds-radius-lg)","--radius-xl:var(--ds-radius-xl)",
-  "--radius-full:999px","--nav-bar-height:66px"
+  "--radius-full:var(--ds-radius-full)","--nav-bar-height:var(--ds-layout-nav-height)"
 ]) assert.ok(css.includes(token),`missing design token: ${token}`);
 
 assert.match(css,/\.button:active:not\(:disabled\)[\s\S]*?transform:scale\(\.97\)/);
