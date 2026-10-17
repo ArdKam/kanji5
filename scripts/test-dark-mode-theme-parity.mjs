@@ -51,7 +51,7 @@ for (const selector of [
 ]) {
   assert.ok(systemDark.includes(selector), "Missing System-scoped selector: " + selector);
 }
-assert.ok(false, "placeholder");
+assert.ok(designSystem.includes("--ds-color-surface-subtle: light-dark(#F1EDE6, #292724);") && designSystem.includes("--ds-color-progress-track: light-dark(#E9E3D8, #35312C);"), "System dark palette must resolve surface and progress tokens through semantic values");
 assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|audio-button|button|pager-button|settings-language-button|progress|stimulus|example-row|reason|insights|header-tools-menu|rating-again|rating-hard|rating-good|rating-easy)(?:[,{])/.test(systemDark), false, "Unscoped dark overrides could leak into manual Light mode");
 
 // System onboarding overrides are cloned from manual Dark, but only under the OS dark query.
