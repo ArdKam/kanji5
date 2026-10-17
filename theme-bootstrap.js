@@ -12,7 +12,7 @@ try{
   // Keep onboarding theme-aware without coupling this layer to React component CSS.
   // The same dark rules are cloned for System, but only inside the OS dark media query.
   const darkRules=
-    ':root[data-theme="dark"] .kanji5-onboarding-root{--paper:#171614;--ink:#f4efe3;--mute:#b8afa2;--line:rgba(169,158,141,.24);--line-strong:rgba(169,158,141,.42);--indigo:#e06a5f;--shu:#e06a5f;--washi:rgba(35,33,30,.82);--shadow:0 28px 70px rgba(0,0,0,.32);}' +
+    ':root[data-theme="dark"] .kanji5-onboarding-root{--paper:var(--ds-color-canvas);--ink:var(--ds-color-text-primary);--mute:var(--ds-color-text-muted);--line:color-mix(in srgb,var(--ds-color-border) 24%,transparent);--line-strong:color-mix(in srgb,var(--ds-color-border-strong) 42%,transparent);--indigo:var(--ds-color-action-primary);--shu:var(--ds-color-action-primary);--washi:var(--ds-color-surface-overlay);--shadow:0 28px 70px rgba(0,0,0,.32);}' +
     ':root[data-theme="dark"] .kanji5-onboarding-root :is(.kanji5-onboarding-language,.kanji5-onboarding-choice,.kanji5-onboarding-option,.kanji5-onboarding-range-option,.kanji5-onboarding-secondary,.kanji5-onboarding-placement-band,.kanji5-onboarding-host-error,.kanji5-onboarding-swipe-hint:before){background:var(--washi);}' +
     ':root[data-theme="dark"] .kanji5-onboarding-root .kanji5-onboarding-choice.is-selected{border-color:color-mix(in srgb,var(--indigo) 42%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--indigo) 10%,transparent),var(--washi));}' +
     ':root[data-theme="dark"] .kanji5-onboarding-root :is(.kanji5-onboarding-option.is-selected,.kanji5-onboarding-range-option.is-selected){border-color:color-mix(in srgb,var(--indigo) 42%,var(--line));background:color-mix(in srgb,var(--indigo) 9%,var(--washi));}' +
