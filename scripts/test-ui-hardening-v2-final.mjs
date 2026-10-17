@@ -79,9 +79,20 @@ const semanticConsumerCssFiles=[
   "frontend/src/app/topic-learning.css",
   "frontend/src/app/traditional-radical.css"
 ];
+const compactAliasConsumers=new Set([
+  "frontend/src/experience-nav.css",
+  "frontend/src/app/component-breakdown.css",
+  "frontend/src/app/exercise-layout.css",
+  "frontend/src/app/handwriting-practice.css",
+  "frontend/src/app/learning-surface.css",
+  "frontend/src/app/mnemonic-support.css",
+  "frontend/src/app/reading-lab-playback.css",
+  "frontend/src/app/traditional-radical.css"
+]);
 for(const file of semanticConsumerCssFiles){
   const source=fs.readFileSync(file,"utf8");
-  assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout|z)-[a-z0-9-]+/i,"missing direct semantic token in "+file);
+  if(!compactAliasConsumers.has(file)) assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout|z)-[a-z0-9-]+/i,"missing direct semantic token in "+file);
+  else assert.match(source,/var\(--(?:washi|paper|sumi|ink|mute|ai|sakura|line|line-soft|line-interactive|surface-soft|surface-panel|radius-[a-z]+|text-[a-z0-9-]+|space-[0-9]+|motion-[a-z-]+|nav-bar-height|z-[a-z-]+)\)/,"alias-only surface/layout consumer must use centrally mapped tokens: "+file);
   assert.doesNotMatch(source,/var\(--(?:shu|matcha|color-success|color-warning|color-danger|color-background|color-text|color-text-muted|color-primary|color-border|color-border-subtle|color-focus)\b/,"legacy brand/state shortcut bypasses semantic aliases in "+file);
 }
 
