@@ -24,9 +24,9 @@ const ranked = allKanji
   .map((x, i) => ({
     id: x.character,
     character: x.character,
-    meaning: (x.meanings?.en || []).slice(0, 3),
-    on: (x.readings?.on || []).slice(0, 4),
-    kun: (x.readings?.kun || []).slice(0, 4),
+    meaning: x.meanings?.en || [],
+    on: x.readings?.on || [],
+    kun: x.readings?.kun || [],
     strokes: x.stroke_count,
     grade: x.grade,
     jlpt: x.jlpt_waller || null,
