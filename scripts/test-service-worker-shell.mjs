@@ -5,6 +5,13 @@ const sw=fs.readFileSync('sw.js','utf8');
 assert.match(sw,/react-dist\/\.vite\/manifest\.json/,'Service worker must know the Vite React manifest');
 assert.match(sw,/dynamicImports/,'Service worker must traverse dynamically imported React chunks');
 assert.match(sw,/async function precacheReactManifest/,'Service worker must precache the React asset graph from the manifest');
+assert.doesNotMatch(sw,/self\.skipWaiting\s*\(/,'An update must not replace the active asset graph while older tabs are still open.');
+const manifestBlock=sw.slice(sw.indexOf('async function precacheReactManifest'),sw.indexOf("self.addEventListener('install'"));
+assert.match(manifestBlock,/if\(!response\.ok\)throw new Error/,'A missing React manifest must fail the candidate worker installation.');
+assert.match(manifestBlock,/SW_REACT_ENTRY_MISSING_FROM_MANIFEST/,'The Vite manifest must include the shipped React entry.');
+assert.match(manifestBlock,/SW_REACT_STYLESHEET_MISSING_FROM_MANIFEST/,'The Vite manifest must include the shipped React stylesheet.');
+assert.match(manifestBlock,/await cache\.addAll\(\[\.\.\.urls\]\)/,'The worker must precache every resolved React asset dependency.');
+assert.doesNotMatch(manifestBlock,/catch\s*\([^)]*\)\s*\{\s*\}/,'React asset precache failures must not be swallowed.');
 
 const match=sw.match(/const SHELL=(\[[\s\S]*?\]);/);
 assert.ok(match,'Service worker SHELL manifest not found.');
