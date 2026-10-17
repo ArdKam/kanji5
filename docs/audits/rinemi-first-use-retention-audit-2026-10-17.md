@@ -133,3 +133,23 @@ These checks are evidence for the listed PR head only. A documentation-only foll
 - Rating explanations have not been changed; validate them against the authoritative scheduler contract before editing.
 - Dictionary/handwriting/Reading Lab contextual discovery changes remain recommendations, not implementation in PR #562.
 - Activation and W1/W4 retention are metric specifications, not measured results; use a consent/purpose review before adding cross-device cohort telemetry.
+
+
+## Concurrent-document reconciliation — 2026-10-17
+
+The stale branch was reconciled without editing or removing another contributor's audit content.
+
+- Latest main included during reconciliation: `e6cd4c120a7faece53c1e1bba9846a4c6d043004`.
+- Reconciliation commit on the PR branch: `b3038115c62369d579169b2dc9d0df3fa345ed27`, with both the current-main commit and previous PR branch head `46b249bde713482d420317c21d7dbc7944f0152d` as parents.
+- The merge tree is based on current main, then overlays only the PR's own changed paths. The current-main additions for product strategy, learning-effectiveness planning, and the runtime-initialization audit were preserved. `ROADMAP.md` contains those latest main contents verbatim plus the new section 29 handoff.
+- A direct compare of current main against the reconciled branch reports **0 commits behind** and changes in only these 10 intended files: `ROADMAP.md`, this audit, the four onboarding/visual E2E files, `frontend/src/app/i18n.ts`, `frontend/src/app/onboarding/OnboardingFlow.tsx`, and `scripts/verify-live-pages-e2e.mjs`. No runtime-initialization implementation files are part of this PR's current diff.
+
+### CI refresh after reconciliation
+
+Because the reconciliation creates a new PR head, earlier successes on `c5a97c7` remain historical evidence for that code-bearing head; the latest head must be checked independently.
+
+- New React presentation workflow: [#3841](https://github.com/ArdKam/kanji5/actions/runs/39015336529) — **in progress** at last inspection; `npm run typecheck` and `npm run build` passed, the root contract/unit suite was active at 20/53 main-job steps, with no failures reported in the inspected state.
+- New automated UI visual audit: [#670](https://github.com/ArdKam/kanji5/actions/runs/39015336453) — **in progress** at last inspection, with 8/13 steps complete and no failures reported.
+- WebKit compatibility for workflow #3841 was completing its final cleanup step after the smoke itself passed; confirm the overall run conclusion.
+
+**Next action:** poll the new runs for the reconciled head `b3038115c62369d579169b2dc9d0df3fa345ed27`. Keep PR #562 in draft until the complete required CI set is green. Do not update the main roadmap directly from a stale branch copy; future edits should fetch the current main version and append narrowly, or use a new evidence file if another author is editing the same section.
