@@ -189,3 +189,18 @@ Main advanced again while this work was open and updated the runtime-initializat
 3. Verify the deployment job reports `LIVE_PAGES_ARTIFACT_VERIFIED`, matching staged/live hashes for the app entrypoint, service worker, React JS/CSS and Supabase vendor asset, then passes its live offline/core-product E2E.
 4. Only after those exact-SHA checks pass should this handoff and roadmap entry be marked **MERGED / DEPLOYED / VERIFIED**. If main advances meanwhile, follow the stale-SHA guard and verify the newer main build/deployment instead.
 5. Keep future learner-research work separate: validate the first-card action end-to-end in the live artifact, run 3/7/14-day return scenarios, review Again/Hard/Good/Easy semantics, and evaluate contextual Dictionary/handwriting/Reading Lab discovery. No new analytics or user-content telemetry was added in this implementation.
+
+## Final release resolution — 2026-10-17
+
+**Status: MERGED / DEPLOYED / VERIFIED.** The onboarding quick-start and guest-first changes are present in production.
+
+- **Merged main SHA:** `687c0a135ca89a2b5661d8ac01d4454157c3d358`.
+- **Current-main CI:** [React presentation workflow #3848, attempt 2](https://github.com/ArdKam/kanji5/actions/runs/39016377389) passed all 54 steps, including build/typecheck, root contracts, React presentation E2E, onboarding, accessibility, PWA/release matrix and cross-browser smoke. Attempt 1 had one Firefox timeout locating the Learning-card reveal button; the same check passed on attempt 2 and did not reproduce, so no code was changed to suppress it.
+- **Deployment:** [GitHub Pages deployment #1702](https://github.com/ArdKam/kanji5/actions/runs/39017314976) succeeded for the **same exact SHA**. Its `Verify verified React commit is still current main`, build, dependency audits, root contracts, engine boundary, R12 security checks, staged-site validation and Pages deployment all passed.
+- **Live artifact parity:** the deployment log emitted `LIVE_PAGES_ARTIFACT_VERIFIED`. All checked live resources returned HTTP 200 and the staged/live SHA-256 hashes matched for `index.html`, `react-entry.js`, `sw.js`, `react-dist/kanji5-react.js`, `react-dist/kanji5-react.css`, and `vendor/supabase-js-2.117.2.js`.
+- **Live offline/core-product acceptance:** the live verification script emitted `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`; the deployment job completed successfully at 2026-10-17T08:27:44Z.
+- **Roadmap:** section 29 now records **MERGED / DEPLOYED / VERIFIED** and links this evidence. The historical “PR open / deployment pending” text in earlier dated snapshots is preserved as historical context; it is superseded by this final status record.
+
+### Remaining product research, not release blockers for this implementation
+
+The software/release task is complete. Follow-up learning-effectiveness work remains open: test the live first-card/reveal/rating journey with real learners, run 3/7/14-day return scenarios, validate rating explanations against the authoritative scheduler contract, and measure whether learners discover Dictionary, handwriting and Reading Lab naturally. Activation/W1/W4 definitions remain **metric specifications, not measured product results**. No analytics or raw learner-content telemetry was added.
