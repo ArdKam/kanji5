@@ -78,3 +78,23 @@ The source inspection confirmed the live Supabase account-state table has RLS en
 5. Continue the existing highest-priority release gates in the main product-engineering audit. In particular, do not mark public beta ready until educational, security, privacy and governance acceptance is closed or has an explicit approved disposition.
 
 **Do not reopen RI-01/RI-02** merely because this document is old. Revisit only if a regression is demonstrated on current `main`, the production artifact differs from the verified source, or new runtime evidence changes the findings.
+
+
+---
+
+## Post-merge resolution — 2026-10-17
+
+**Implementation status:** RI-01 and RI-02 were merged to current `main` by squash merge of [PR #559](https://github.com/ArdKam/kanji5/pull/559), commit [`3c50ea5edadfe2c660030646fca175a8f9657c82`](https://github.com/ArdKam/kanji5/commit/3c50ea5edadfe2c660030646fca175a8f9657c82). The implementation is on main; production deployment has not yet been confirmed with this commit.
+
+**PR-head evidence before merge:** engine workflow [39014128916](https://github.com/ArdKam/kanji5/actions/runs/39014128916) and React presentation workflow [39014128937](https://github.com/ArdKam/kanji5/actions/runs/39014128937) both passed. The root suite reported 164 test scripts passed, including the new runtime-init regression; the configured React/browser/release gates passed.
+
+**Post-merge verification at this snapshot:**
+
+- Main-branch learning-engine validation: [run 39015164322](https://github.com/ArdKam/kanji5/actions/runs/39015164322) — **success** on merged SHA `3c50ea5edadfe2c660030646fca175a8f9657c82`.
+- React presentation workflow for that SHA: [run 39015164270](https://github.com/ArdKam/kanji5/actions/runs/39015164270) — still running at this snapshot.
+- A subsequent documentation-only main commit `e6cd4c120a7faece53c1e1bba9846a4c6d043004` triggered a new React presentation build [39015256428](https://github.com/ArdKam/kanji5/actions/runs/39015256428), also running at this snapshot. Use the latest main SHA and its release run for final deployment verification.
+- Earlier Pages deployment attempt [39015164086](https://github.com/ArdKam/kanji5/actions/runs/39015164086) stopped at the intentional stale-release guard because its triggering workflow payload referenced older `827fefa4cdfe0bb65e73e3951247b96bca1f3082`. This is neither a successful deployment nor evidence of a runtime regression.
+
+**Completion gate:** do not call the fix deployed until current-main React/engine CI passes and the Pages deployment for the exact release SHA passes artifact equality and live/offline smoke. Record the final build and deployment workflow IDs, deployed SHA, live asset hash verification, and live/offline smoke result here. If another commit advances `main` during release validation, expect the deployment's stale-SHA guard to refuse the older artifact; verify the latest current-main run instead.
+
+The older bullets under “Status at the time of this record” above are historical snapshots. This resolution supersedes only the statement that PR #559 is still open; it does not close the unrelated security, educational-content, account-deletion, or privacy acceptance gaps.
