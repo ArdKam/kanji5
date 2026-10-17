@@ -151,7 +151,7 @@ Character direction:
 - Calm, attentive, intelligent, slightly wry; friendly without a baby-like face.
 - Rounded head, small ears, restrained eyes and linework.
 - No teacher outfit, pointer, graduation cap, glasses, speech bubble, or “look at this” gesture.
-- Sumi outline, warm-paper body, muted-indigio details, and only a small sakura accent.
+- Sumi outline, warm-paper body, muted-indigo details, and only a small sakura accent.
 - No geometric robot aesthetic, glossy 3D, anime treatment, giant eyes, blush marks, or busy props.
 
 Usage rules:
