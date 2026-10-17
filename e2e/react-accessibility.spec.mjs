@@ -505,12 +505,8 @@ test('extra-small UI type uses a 12px minimum', async ({page})=>{
 
 test('Practice startup failure provides a direct return to Learning', async ({page})=>{
   await clean(page);
-  await expect.poll(()=>page.evaluate(()=>Boolean(window.__KANJI5_EDU_BRIDGE__?.start)),{timeout:10000}).toBe(true);
-  await page.evaluate(()=>{
-    const bridge=window.__KANJI5_EDU_BRIDGE__;
-    bridge.start=async()=>({started:false});
-  });
-
+  // A fresh profile has no seen cards. Let the real lazy-loaded education runtime
+  // return started:false rather than mocking the frozen bridge object.
   await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.locator('#root .practice-start-button').click();
