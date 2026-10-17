@@ -1,16 +1,18 @@
 /* Learning-card-only polish: keep navigation and grading visually distinct. */
 .kanji-structure-preview {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   min-width: 0;
   min-height: 48px;
-  padding: 6px 8px;
-  border: 1px solid var(--line-soft, var(--line));
+  padding: 6px 0;
+  border: 0;
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--washi) 56%, var(--paper));
+  background: transparent;
 }
+.kanji-structure-preview-copy { display: grid; gap: 4px; min-width: 0; }
+.kanji-structure-preview-label { color: var(--mute); font-size: var(--text-xs); font-weight: 600; line-height: 1.35; }
 .kanji-structure-preview-glyphs {
   display: flex;
   align-items: center;
@@ -386,11 +388,27 @@
   flex-wrap: wrap;
 }
 
-.learning-reference-trigger {
-  min-height: 44px;
-  display: grid;
-  place-items: center;
+.learning-card-back .learning-reference-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  width: auto;
+  height: auto;
+  min-width: 44px;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--accent, var(--ink));
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  text-align: start;
 }
+.learning-card-back .learning-reference-trigger span { overflow-wrap: anywhere; }
+.learning-card-back .learning-reference-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
 
 
@@ -399,3 +417,77 @@
 .learning-card[data-card-density="dense"] .learning-card-back .stroke-order-controls{grid-template-columns:minmax(0,1fr) minmax(104px,auto) minmax(0,1fr)}
 .learning-card .learning-card-back .stroke-order-controls .button:nth-child(2){grid-column:2;order:0;min-width:104px}
 @media(max-width:380px){.learning-card .learning-card-back .stroke-order-controls{grid-template-columns:minmax(0,1fr) minmax(88px,auto) minmax(0,1fr);gap:4px}.learning-card .learning-card-back .stroke-order-controls .button:nth-child(2){min-width:88px;padding-inline:5px}}
+
+
+/* Keep the structure action available without forcing it into the meaning line. */
+.kanji-structure-preview-action {
+  min-width: 44px;
+  min-height: 48px;
+  max-width: 180px;
+  padding: 8px;
+  border: 0 !important;
+  border-radius: 8px;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--accent, var(--ink));
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.kanji-structure-preview-action:hover { color: var(--shu); }
+.kanji-structure-preview-action:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.kanji-structure-preview-action-placeholder { width: 116px; min-width: 44px; min-height: 44px; border: 0; }
+@media (max-width: 420px) {
+  .kanji-structure-preview { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .kanji-structure-preview-action { justify-self: start; white-space: normal; text-align: start; }
+}
+
+
+/* On short desktop-landscape screens, keep the Learning card between the
+   compact header and fixed bottom navigation instead of scrolling it off-screen. */
+@media (min-width: 761px) and (max-height: 460px) {
+  #root .content > .card-topline:has(+ .learning-card) {
+    display: none !important;
+  }
+  #root .learning-card[data-card-density] {
+    height: calc(100dvh - 160px) !important;
+    min-height: 0 !important;
+    margin-bottom: var(--space-2);
+  }
+  #root .learning-card .learning-card-face {
+    padding: 8px 12px;
+    gap: 4px;
+  }
+  #root .learning-card .learning-card-front .kanji-row {
+    min-height: clamp(42px, 19vh, 74px);
+  }
+  #root .learning-card .learning-card-front .kanji-display {
+    font-size: clamp(44px, 14vh, 64px);
+  }
+  #root .learning-card .learning-card-front .learning-recall-cue {
+    font-size: 10px;
+    line-height: 1.25;
+  }
+}
+
+
+/* Portrait screens with limited height need a smaller outer card and a
+   scrollable answer pane; leave the dedicated mobile-landscape rule untouched. */
+@media (max-width: 760px) and (max-height: 760px) and (orientation: portrait) {
+  #root .learning-card[data-card-density] {
+    height: calc(100dvh - 260px) !important;
+    min-height: 0 !important;
+    margin-bottom: var(--space-2);
+  }
+  #root .learning-card .learning-card-face {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  #root .learning-card .learning-card-front .kanji-row {
+    min-height: clamp(48px, 12vh, 82px);
+  }
+  #root .learning-card .learning-card-front .kanji-display {
+    font-size: clamp(44px, 8vh, 72px);
+  }
+}
