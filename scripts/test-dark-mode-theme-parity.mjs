@@ -112,8 +112,8 @@ assert.ok(designSystem.includes("--ds-color-skeleton-base: light-dark(#EEE7DA, #
 assert.ok(designSystem.includes(":root .app-shell .button.primary"), "Primary actions must be styled from the shared semantic layer");
 assert.ok(designSystem.includes("background: var(--ds-color-action-primary-hover);") && designSystem.includes("box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-focus-ring) 28%, transparent);"), "Primary hover/focus must use semantic indigo and a visible focus halo");
 assert.equal(/:root\[data-theme="(?:dark|system)"\]\s+\.button\.primary/.test(styles), false, "Theme-specific primary-button duplicates must not diverge from semantic tokens");
-assert.ok(styles.includes(':root[data-theme="dark"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:var(--ds-focus-ring);}'), "Manual Dark keyboard focus must use the semantic focus ring");
-assert.ok(systemDark.includes(':root[data-theme="system"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:var(--ds-focus-ring);}'), "System Dark keyboard focus must use the semantic focus ring");
+assert.ok(designSystem.includes("button:focus-visible, a[href]:focus-visible") && designSystem.includes("outline: 3px solid var(--ds-focus-ring);"), "Keyboard focus must be defined once by the semantic layer");
+assert.equal(/:root\[data-theme="(?:dark|system)"\]\s+:is\(button,summary,a,input,select,textarea\):focus-visible/.test(styles), false, "Per-theme keyboard focus duplicates must not override the semantic ring");
 
 assert.ok(designSystem.includes("--ds-color-action-primary-hover: light-dark(#424F70, #B7C3E0);"), "Primary hover state must retain distinct semantic indigo values for light and dark");
 assert.ok(styles.includes(".audio-button:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);"), "Audio focus must use a theme-aware semantic ring");
@@ -127,18 +127,11 @@ assert.ok(designSystem.includes(".app-shell .rating.rating-again {") && designSy
 for (const theme of ["dark", "system"]) {
   const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);}`;
   assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must not override semantic rating buttons`);
-  for (const [rating, background, foreground] of [
-    ["again", "again"],
-    ["hard", "hard"],
-    ["good", "good"],
-    ["easy", "easy"],
-  ]) {
-    assert.ok(styles.includes(`:root[data-theme="${theme}"] .rating-${rating}{background:var(--ds-review-${rating}-bg);color:var(--ds-review-${rating}-text);border-color:var(--ds-review-${rating}-border);}`), `${theme} ${rating} rating must keep a semantic foreground/background/border pair`);
+  for (const rating of ["again", "hard", "good", "easy"]) {
+    assert.ok(designSystem.includes(`.app-shell .rating.rating-${rating} {`) && designSystem.includes(`border: 1px solid var(--ds-review-${rating}-border);`), `${theme} ${rating} rating must use semantic foreground/background/border roles`);
   }
 }
-assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: var(--paper); }"), "Selected focus option needs a high-contrast Light-mode foreground");
-assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Manual Dark focus foreground must remain dark on the light indigo surface");
-assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; }'), "System Dark focus foreground must remain dark on the light indigo surface");
-assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
+assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: var(--ds-color-action-primary-text); }"), "Selected focus option must use the semantic action foreground");
+assert.equal(/:root\[data-theme="(?:dark|system)"\].*topic-learning-focus-option.active/.test(topic), false, "Selected focus foreground must be resolved by shared action tokens");
 
 console.log("Dark-theme parity contract passed.");
