@@ -12,14 +12,15 @@ async function clean(page){
 
 async function seedSeenCard(page){
   await expect(page.locator("#root .learning-card")).toBeVisible({timeout:10000});
+  const reviewedCharacter=(await page.locator("#root .learning-card .kanji-display").textContent()).trim();
   await page.locator("#root .learning-card .button.wide").click();
   await expect(page.locator("#root .learning-card .rating-good")).toBeVisible({timeout:5000});
   await page.locator("#root .learning-card .rating-good").click();
   await expect(page.locator("#root .learning-card")).toBeVisible({timeout:10000});
+  return reviewedCharacter;
 }
 
-async function startProductionExercise(page){
-  const character=(await page.locator("#root .learning-card .kanji-display").textContent()).trim();
+async function startProductionExercise(page,character){
   await page.evaluate(({character})=>{
     window.__KANJI5_V19_RECOVERY_TARGET__={character,mode:"production",contentId:character};
   },{character});
@@ -33,8 +34,8 @@ test("Production Recall Space reveals the answer only from the exercise surface"
   for(const viewport of [{width:1280,height:720},{width:390,height:844}]){
     await page.setViewportSize(viewport);
     await clean(page);
-    await seedSeenCard(page);
-    await startProductionExercise(page);
+    const reviewedCharacter=await seedSeenCard(page);
+    await startProductionExercise(page,reviewedCharacter);
 
     const exercise=page.locator("#root #exercise");
     await expect(exercise.locator("kbd")).toHaveText("Space");
@@ -58,8 +59,8 @@ test("Production Recall Space reveals the answer only from the exercise surface"
 test("Production Recall Space does not hijack focused native controls",async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await clean(page);
-  await seedSeenCard(page);
-  await startProductionExercise(page);
+  const reviewedCharacter=await seedSeenCard(page);
+  await startProductionExercise(page,reviewedCharacter);
 
   const exercise=page.locator("#root #exercise");
   const optionsHint=exercise.getByRole("button",{name:"کمک: نمایش گزینه‌ها"});
@@ -73,8 +74,8 @@ test("Production Recall Space does not hijack focused native controls",async({pa
 test("Production Recall Space is ignored from focused text fields",async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await clean(page);
-  await seedSeenCard(page);
-  await startProductionExercise(page);
+  const reviewedCharacter=await seedSeenCard(page);
+  await startProductionExercise(page,reviewedCharacter);
 
   const exercise=page.locator("#root #exercise");
   for(const tag of ["input","textarea"]){
@@ -96,8 +97,8 @@ test("Production Recall Space is ignored from focused text fields",async({page})
 test("Production Recall 1/2 grade keys invoke the visible self-report controls",async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await clean(page);
-  await seedSeenCard(page);
-  await startProductionExercise(page);
+  const reviewedCharacter=await seedSeenCard(page);
+  await startProductionExercise(page,reviewedCharacter);
 
   const exercise=page.locator("#root #exercise");
   await page.evaluate(()=>{

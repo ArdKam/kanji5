@@ -1,6 +1,6 @@
 @import "./noto-serif-jp.css";
 :root{--ui-font:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif;--jp-font:"Noto Serif JP","Hiragino Mincho ProN",serif;font-family:var(--ui-font);--fa-font:"Vazirmatn",var(--ui-font),sans-serif;color:#292B2D;background:#F7F4EE;--washi:#F7F4EE;--paper:#FDFBF7;--sumi:#292B2D;--ink:#53545A;--mute:#62666A;--shu:#505F83;--sakura:#D6A1AA;--ai:#505F83;--matcha:#8C9B87;--line:#DED8CE;--line-soft:#E9E3DA;--line-interactive:#8B93A5;--surface-soft:linen;--surface-panel:rgba(251,248,240,.7);--progress-track:#e9e3d8;
-  --text-xs:11px;
+  --text-xs:12px;
   --text-sm:13px;
   --text-base:15px;
   --text-md:17px;
@@ -3686,3 +3686,6 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
 .account-password-field input:focus-visible{
   outline:0!important;
 }
+
+/* Modal drawer state: avoid a visibly active bottom dock behind the exclusive More dialog. */
+.experience-nav[inert]{visibility:hidden;pointer-events:none;}

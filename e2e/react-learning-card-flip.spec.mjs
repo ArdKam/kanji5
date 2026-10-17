@@ -148,6 +148,8 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
       ]) {
         await page.setViewportSize(viewport);
         await expect(glyph).toBeVisible();
+        // The overview can be slightly taller after readable 12px microtype; ensure its structure remains reachable by scrolling rather than clipping it.
+        await structure.scrollIntoViewIfNeeded();
         const geometry = await overview.evaluate((pageEl) => {
           const rect = (selector) => {
             const element = pageEl.querySelector(selector);
@@ -474,20 +476,25 @@ test("learning-card structure is a compact preview with full details in a modal"
     const previewPage = card.locator(".learning-back-page.active");
     const preview = previewPage.locator(".kanji-structure-preview-action");
     await expect(preview).toBeVisible({ timeout: 10000 });
+    await expect(preview).toBeVisible();
+    await preview.scrollIntoViewIfNeeded();
     const metrics = await previewPage.evaluate(pageEl => {
       const scroll = pageEl.querySelector(".learning-back-scroll");
       const overview = pageEl.querySelector(".learning-back-overview");
+      const preview = pageEl.querySelector(".kanji-structure-preview-action");
       const scrollRect = scroll?.getBoundingClientRect();
-      const overviewRect = overview?.getBoundingClientRect();
+      const previewRect = preview?.getBoundingClientRect();
       return {
         overflowY: scroll ? getComputedStyle(scroll).overflowY : "",
-        scrollTop: scroll?.scrollTop ?? -1,
+        scrollHeight: scroll?.scrollHeight ?? 0,
+        clientHeight: scroll?.clientHeight ?? 0,
         scrollBottom: scrollRect?.bottom ?? Infinity,
-        overviewBottom: overviewRect?.bottom ?? Infinity,
+        previewBottom: previewRect?.bottom ?? Infinity,
       };
     });
-    expect(metrics.overflowY).toBe("hidden");
-    expect(metrics.overviewBottom).toBeLessThanOrEqual(metrics.scrollBottom + 1);
+    expect(metrics.overflowY).toBe("auto");
+    expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
+    expect(metrics.previewBottom).toBeLessThanOrEqual(metrics.scrollBottom + 1);
 
     await preview.click();
     const dialog = page.locator(".kanji-structure-dialog");
