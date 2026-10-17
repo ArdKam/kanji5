@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ComponentProps, type PointerEvent } from "react";
-import { KanjiStructurePreview } from "./KanjiStructurePreview";
+import { ensureLearningCardStyles, KanjiStructurePreview } from "./KanjiStructurePreview";
 import { useModalDialog } from "./useModalDialog";
 import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
 import { MnemonicSupportPanel } from "./MnemonicSupport";
@@ -131,14 +131,49 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const frontFaceRef=useRef<HTMLDivElement|null>(null);
   const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
   const shouldFocusBackRef=useRef(false);
-  const handleReveal=useCallback(()=>{
+  const [revealStylesPending,setRevealStylesPending]=useState(false);
+  const revealStylesPendingRef=useRef(false);
+  const handleReveal=useCallback(async()=>{
+    if(revealed || busy || revealStylesPendingRef.current)return;
+    revealStylesPendingRef.current=true;
+    setRevealStylesPending(true);
+    try {
+      await ensureLearningCardStyles();
+    } catch (error) {
+      console.error("Learning-card styles were unavailable before reveal.", error);
+      revealStylesPendingRef.current=false;
+      setRevealStylesPending(false);
+      return;
+    }
+    // Let the browser apply the card-only stylesheet before reveal. Avoid an unconditional
+    // scrollIntoView(): on short landscape screens the fixed navigation plus scroll-padding
+    // can make the browser scroll a card that is already inside the usable viewport off the top.
+    const cardElement = frontFaceRef.current?.closest(".learning-card");
+    if (cardElement instanceof HTMLElement) {
+      const bounds = cardElement.getBoundingClientRect();
+      const navigation = document.querySelector(".experience-nav");
+      const navigationTop = navigation instanceof HTMLElement
+        ? navigation.getBoundingClientRect().top
+        : window.innerHeight;
+      if (bounds.top < 0) {
+        cardElement.scrollIntoView({ block: "start", inline: "nearest" });
+      } else if (bounds.bottom > navigationTop - 1) {
+        window.scrollBy({ top: bounds.bottom - (navigationTop - 1), behavior: "instant" });
+      }
+    }
     const active=document.activeElement;
     if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
       active.blur();
     }
     shouldFocusBackRef.current=true;
     onReveal();
-  },[onReveal]);
+  },[onReveal,revealed,busy]);
+  useEffect(()=>{
+    if(revealed || !busy){
+      revealStylesPendingRef.current=false;
+      setRevealStylesPending(false);
+    }
+  },[revealed,busy]);
   useEffect(()=>{
     if(!revealed||!shouldFocusBackRef.current)return;
     shouldFocusBackRef.current=false;
@@ -404,12 +439,13 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
-        <div className="kanji-row"><span className="kanji-display" lang="ja">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
-        <button className="button primary wide" type="button" onClick={handleReveal} disabled={revealed}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+        <div className="kanji-row"><span className="kanji-display" lang="ja" dir="ltr">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
+        <p id="learning-recall-cue" className="learning-recall-cue">{learningCopy("recallBeforeReveal",getLanguage())}</p>
+        <button className="button primary wide" type="button" aria-describedby="learning-recall-cue" onClick={handleReveal} disabled={revealed||Boolean(busy)||revealStylesPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
-        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("kanjiStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span>{hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"button secondary learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"} aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={18}/></button>:null}</div></div>
+        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("meaningAndStructure")}</span>
+        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span></div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
@@ -422,6 +458,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         <h3 className="learning-back-section-label">{t("meaning")}</h3>
                         {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                         {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                        {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                       </div>
                     </div>
                     <div className="learning-back-readings-block">
@@ -434,7 +471,6 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         info={visualStructureInfo}
                         ready={visualStructureReady}
                         language={getLanguage()}
-                        enabled={revealed && backPage === 0}
                         onOpen={()=>setStructureDialogOpen(true)}
                       />
                     </div>
@@ -454,7 +490,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     </div>
                   ) : null}
                   {!examplesLoading && !examplesError && !displayExamples.length ? <p className="learning-examples-empty">{getLanguage()==="fa"?"برای این کانجی مثال واژگانی در دسترس نیست.":"No vocabulary examples are available for this kanji."}</p> : null}
-                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
+                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main" lang="ja" dir="ltr">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning" lang="en" dir="ltr">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
                   {!examplesLoading && !examplesError && displayExamples.length>4 ? <button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button> : null}
                 </div>
               </div>
@@ -562,7 +598,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
         </div>
           <dialog hidden={!referenceInfoOpen} ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
           <div className="learning-reference-dialog-head">
-            <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های مرجع":"More reference meanings and readings"}</h2>
+            <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</h2>
             <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
           </div>
           <div className="dialog-grid learning-reference-info-grid">
