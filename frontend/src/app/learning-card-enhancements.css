@@ -7,7 +7,7 @@
   min-width: 0;
   min-height: 48px;
   padding: 6px 8px;
-  border: 1px solid var(--line-soft, var(--ds-color-border));
+  border: 1px solid var(--ds-color-border-subtle, var(--ds-color-border));
   border-radius: var(--ds-radius-md);
   background: color-mix(in srgb, var(--ds-color-canvas) 56%, var(--ds-color-surface));
 }
@@ -333,7 +333,7 @@
   min-height: 64px;
   margin: 4px 0 0;
   padding: 12px 10px;
-  border: 1px solid var(--line-soft, var(--ds-color-border));
+  border: 1px solid var(--ds-color-border-subtle, var(--ds-color-border));
   border-radius: var(--ds-radius-md);
   background: var(--ds-color-canvas);
   color: var(--ds-color-text-muted);
