@@ -464,6 +464,10 @@
   #root .learning-card .learning-card-front .kanji-display {
     font-size: clamp(44px, 14vh, 64px);
   }
+  #root .learning-card .learning-card-front .learning-recall-cue {
+    font-size: 10px;
+    line-height: 1.25;
+  }
 }
 
 
