@@ -49,7 +49,7 @@ const COPY: Record<Language, Record<LearningCopyKey, string>> = {
   },
   en: {
     revealMeaningAndReadings: "Reveal meaning & readings",
-    recallBeforeReveal: "Before revealing, recall the meaning and at least one reading from memory.",
+    recallBeforeReveal: "Before revealing, try to recall any meaning or reading you know.",
     recommendedLearning: "Recommended learning",
     learnByTopic: "Learn by topic",
     topicLearningTitle: "Choose a learning topic",
