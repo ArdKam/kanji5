@@ -486,6 +486,7 @@ test('More menu blocks background controls while modal is open and restores focu
   await expect(menu).toBeVisible();
   await expect(menu).toHaveAttribute('aria-modal','true');
   await expect(page.locator('.experience-nav')).toHaveAttribute('inert','');
+  await expect(page.locator('.experience-nav')).toBeHidden();
   await expect(page.locator('#primary-content')).toHaveAttribute('inert','');
   await expect(page.locator('.account-button')).toBeDisabled();
   await expect(menu.locator('button:not([disabled])').first()).toBeFocused();
