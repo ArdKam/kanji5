@@ -72,7 +72,7 @@ The source inspection confirmed the live Supabase account-state table has RLS en
 ## Required next steps
 
 1. Refresh current `main`, PR #559's diff/base/head and exact-head checks before integrating; do not use this dated record as proof of future status.
-2. Review and merge PR #559 only if the four-file change is still minimal and the green exact-head checks remain valid. Its current PR description still says CI is pending and should be reconciled with the successful workflow results.
+2. Review and merge PR #559 only if the four-file change is still minimal and the green exact-head checks remain valid. Its PR description was updated on 2026-10-17 to record the successful workflows; refresh that evidence if the head changes or checks are rerun.
 3. After merge, record the merge SHA and current-main engine/React workflow results here and in the roadmap. If the head changed, rerun the relevant tests rather than transferring success from the prior SHA.
 4. Confirm the runtime fix is included in a new successful Pages build/deployment and live/offline smoke before calling it deployed.
 5. Continue the existing highest-priority release gates in the main product-engineering audit. In particular, do not mark public beta ready until educational, security, privacy and governance acceptance is closed or has an explicit approved disposition.
