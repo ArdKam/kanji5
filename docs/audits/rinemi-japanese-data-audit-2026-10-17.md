@@ -88,6 +88,30 @@ A kanji's on’yomi/kun’yomi are not a substitute for the reading of a multi-k
 
 Treat normalized headword and kana reading as distinct indexed fields; preserve the original written form, reading, and gloss; normalize Unicode and half-/full-width forms for matching without changing displayed source data; and make radical, visual-component, and topic filters independently understandable. Every index change must leave stable kanji IDs and existing review records unchanged.
 
+## Additional audited surfaces
+
+### Mnemonic coverage versus curation
+
+The prepared mnemonic contract tests define coverage for all 2,136 catalog entries, but the curated library contains 259 entries. The remaining 1,877 are deterministic generated scaffolds/fallbacks, not independent human-authored curated stories. UI provenance labels distinguish these categories. The 259 curated items are about 12.1% of the catalog; a complete string for each character must not be described as 2,136 individually curated mnemonics.
+
+The current automated mnemonic tests also verify bilingual non-empty outputs, duplicate checks in the curated Persian/English text, component/readings support contracts, and semantic sentinel examples. These guards cannot prove that all generated scaffolds are accurate or useful; review effort should be weighted toward high-frequency kanji, lookalike confusions, and reading hooks that are used in learner-facing examples.
+
+### Dictionary search and navigation
+
+The actual search path in `frontend/src/app/DictionaryPage.tsx` normalizes text with `trim().toLocaleLowerCase()` and searches only the target character, displayed English meanings, on’yomi, and kun’yomi. It does not perform Unicode NFKC normalization, and it does not index vocabulary-example headwords/readings, classical radicals, visual component labels, or mnemonic text. This behavior can make a half-width/full-width query less reliable and means the feature behaves as a **kanji dictionary search**, not a Japanese lexical dictionary search. This is an observed capability boundary, not proof that every one of those fields must be searchable in the same query box.
+
+Existing filtering does support JLPT, school grade, learning/mastery state, and curated topics; detailed view is paginated in chunks of 160. The topic catalogue is intentionally partial. The next UX/data-indexing batch should explicitly decide whether word lookup is in scope, and if it is, add a normalized headword/reading index as a separate, provenance-preserving data layer rather than making the kanji list query depend on dynamically fetched per-card examples.
+
+### Reading-type contract
+
+The static kanji schema separates `on` and `kun` arrays, while the vocabulary entry has its own lexical kana reading. That is the correct broad separation to retain. The catalog does **not** preserve an explicit per-reading flag for "listed as a reading in the official 常用漢字表" versus "listed in KANJIDIC2 as a broader dictionary reading". KANJIDIC2 readings should not be represented as if they are all officially prescribed Jōyō table readings. If the product wants to teach official table readings specifically, add source-scoped reading records rather than guessing this distinction from on/kun type or JLPT label.
+
+### Dynamic vocabulary and sentence acceptance
+
+The current validator is a fast structural gate, not a Japanese editorial review. It checks that a vocabulary item is non-empty, contains the target kanji, has a kana reading, and has a gloss; the just-fixed regression ensures the whole reading field is kana-only. It does not confirm that the reading is correct for that word, that the gloss matches the relevant sense, that the example is common, or that it fits a beginner's level.
+
+Context validation verifies Japanese-script presence, target-character presence, and a non-empty English translation. It cannot detect awkward grammar, mistranslation, culturally odd sentence construction, or excessive vocabulary difficulty. The existing C4 QA record already acknowledges that the remote kanjiapi.dev/Tatoeba samples have not had independent final-release review. The next content-quality batch should capture a dated, reproducible sample and track reviewer decisions and rejection reasons.
+
 ## Safety of content changes
 
 - Do not change a kanji's `id`/character key to repair a meaning, reading, stroke count or tag.
