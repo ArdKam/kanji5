@@ -113,7 +113,9 @@ jobs:
         run: node scripts/test-v1.9-learner-model.mjs && node scripts/test-v1.9-learner-model-evidence.mjs
       - name: Run deterministic content selection regression
         run: node scripts/test-v1.9-deterministic-content-selection.mjs
-      - name: Run aggregate contract and unit tests
+      - name: Audit pinned kanji glosses and readings against source
+  run: node scripts/audit-kanji-source-overflow.mjs
+- name: Run aggregate contract and unit tests
         run: npm test
       - name: Run React presentation contract gate
         run: node scripts/test-react-migration.mjs
