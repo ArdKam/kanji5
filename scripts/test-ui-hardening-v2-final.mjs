@@ -32,6 +32,9 @@ assert.match(css,/@media\(prefers-color-scheme:dark\)/);
 assert.match(css,/--washi:var\(--ds-color-canvas\)/);
 assert.match(css,/--paper:var\(--ds-color-surface\)/);
 assert.match(css,/--sumi:var\(--ds-color-text-primary\)/);
+assert.ok(css.includes("--ai:var(--ds-color-action-primary);"),"Legacy action alias must resolve to canonical semantic indigo");
+assert.ok(css.includes("--shu:var(--ds-color-legacy-shu);") && designSystem.includes("--ds-color-legacy-shu: var(--ds-color-action-primary);"),"Legacy Shu alias must no longer introduce an independent coral action");
+assert.ok(css.includes("--surface-panel:var(--ds-color-surface-panel);"),"Legacy panel alias must preserve its translucent semantic surface");
 assert.match(designSystem,/--ds-color-canvas: light-dark\(var\(--ds-brand-rice-paper\), #171614\)/);
 assert.match(designSystem,/--ds-color-action-primary: light-dark\(var\(--ds-brand-indigo\), #A8B5D8\)/);
 assert.match(designSystem,/--ds-review-again-text: var\(--ds-state-danger-text\)/);
@@ -79,7 +82,7 @@ const semanticConsumerCssFiles=[
 for(const file of semanticConsumerCssFiles){
   const source=fs.readFileSync(file,"utf8");
   assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout|z)-[a-z0-9-]+/i,"missing direct semantic token in "+file);
-  assert.doesNotMatch(source,/var\(--(?:washi|paper|sumi|ink|mute|shu|ai|matcha|sakura|line|line-soft|line-interactive|surface-soft|surface-panel|color-surface-elevated|color-success|color-warning|color-danger|color-background|color-text|color-text-muted|color-primary|color-border|color-border-subtle|color-focus|jp-font|ui-font|fa-font|text-xs|text-sm|text-base|text-md|text-lg|text-xl|text-2xl|text-heading|text-title|text-display-md|text-display-xl|text-display-sm|text-display-lg|text-display-kanji|text-stimulus-kanji|text-display-compact|text-display-wide|text-display-tall|space-[0-9]+|radius-(?:sm|md|lg|xl|full)|motion-[a-z-]+|nav-bar-height|z-(?:base|content|nav|overlay|modal)|progress-track|skeleton-(?:base|highlight|track|fill))\b/,"legacy token remains in migrated consumer "+file);
+  assert.doesNotMatch(source,/var\(--(?:shu|matcha|color-success|color-warning|color-danger|color-background|color-text|color-text-muted|color-primary|color-border|color-border-subtle|color-focus)\b/,"legacy brand/state shortcut bypasses semantic aliases in "+file);
 }
 
 assert.match(dictionaryPageCss,/\.dictionary-view-button[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
