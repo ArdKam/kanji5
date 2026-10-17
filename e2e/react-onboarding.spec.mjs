@@ -33,6 +33,25 @@ async function reachStartingPoint(page) {
   return onboarding;
 }
 
+test("welcome offers a one-tap guest learning path with a clear daily workload", async ({ page }) => {
+  await fresh(page);
+  const onboarding = page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({ timeout: 20000 });
+
+  const quickStart = onboarding.getByRole("button", { name: "Start learning now", exact: true });
+  await expect(quickStart).toBeVisible();
+  await expect(quickStart).toHaveClass(/kanji5-onboarding-primary/);
+  await expect(onboarding.getByRole("button", { name: "Set up my first session", exact: true })).toBeVisible();
+  await expect(onboarding).toContainText("Starts with 5 new kanji a day");
+  await expect(onboarding).toContainText("Reviews are scheduled separately");
+
+  await quickStart.click();
+  await expect(onboarding).toHaveCount(0);
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("kanji5-onboarding-v2"))).toBe("complete");
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("kanji5-onboarding-progress-v2"))).toBeNull();
+});
+
 test("first-run onboarding is a dedicated full-page guest-first journey", async ({ page }) => {
   await fresh(page);
   const onboarding = await reachStartingPoint(page);
@@ -43,6 +62,8 @@ test("first-run onboarding is a dedicated full-page guest-first journey", async 
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "An account is optional" })).toBeVisible();
   await expect(onboarding.getByRole("button", { name: "Continue as a guest", exact: true })).toBeVisible();
+  await expect(onboarding.getByRole("button", { name: "Continue as a guest", exact: true })).toHaveClass(/kanji5-onboarding-primary/);
+  await expect(onboarding.getByRole("button", { name: "Create account", exact: true })).toHaveClass(/kanji5-onboarding-secondary/);
   await onboarding.getByRole("button", { name: "Continue as a guest", exact: true }).click();
   await expect(onboarding).toHaveCount(0);
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
