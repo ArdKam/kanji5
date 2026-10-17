@@ -146,8 +146,8 @@ test("front-side recall cue remains legible and correctly ordered across theme a
       await expect(cue).toBeVisible();
       await expect(cue).toHaveText(
         scenario.language === "fa"
-          ? "قبل از دیدن پاسخ، معنی کانجی و دست‌کم یکی از خوانش‌هایش را از حافظه به یاد بیاور."
-          : "Before revealing, recall the meaning and at least one reading from memory."
+          ? "پیش از دیدن پاسخ، هر معنایی یا خوانشی را که به یاد می‌آوری حدس بزن."
+          : "Before revealing, try to recall any meaning or reading you know."
       );
       await expect(reveal).toHaveAttribute("aria-describedby", "learning-recall-cue");
       await expect(reveal).toBeEnabled();
