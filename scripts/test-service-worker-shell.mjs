@@ -9,7 +9,7 @@ assert.doesNotMatch(sw,/self\.skipWaiting\s*\(/,'An update must not replace the 
 const manifestBlock=sw.slice(sw.indexOf('async function precacheReactManifest'),sw.indexOf("self.addEventListener('install'"));
 assert.match(manifestBlock,/if\(!response\.ok\)throw new Error/,'A missing React manifest must fail the candidate worker installation.');
 assert.match(manifestBlock,/SW_REACT_ENTRY_MISSING_FROM_MANIFEST/,'The Vite manifest must include the shipped React entry.');
-assert.match(manifestBlock,/SW_REACT_STYLESHEET_MISSING_FROM_MANIFEST/,'The Vite manifest must include the shipped React stylesheet.');
+assert.match(manifestBlock,/urls\.add\('\.\/react-dist\/kanji5-react\.css'\)/,'The stable React stylesheet must be explicitly precached even if Vite omits it from the JS entry metadata.');
 assert.match(manifestBlock,/await cache\.addAll\(\[\.\.\.urls\]\)/,'The worker must precache every resolved React asset dependency.');
 assert.doesNotMatch(manifestBlock,/catch\s*\([^)]*\)\s*\{\s*\}/,'React asset precache failures must not be swallowed.');
 
@@ -23,7 +23,7 @@ assert.ok(reactManifest&&typeof reactManifest==='object'&&!Array.isArray(reactMa
 const manifestEntries=Object.values(reactManifest);
 const reactEntry=manifestEntries.find(entry=>entry?.file==='kanji5-react.js');
 assert.ok(reactEntry,'Built React manifest must describe kanji5-react.js.');
-assert.ok(Array.isArray(reactEntry.css)&&reactEntry.css.includes('kanji5-react.css'),'Built React manifest must describe kanji5-react.css.');
+assert.ok(fs.existsSync('react-dist/kanji5-react.css'),'Stable React stylesheet must exist in the built artifact.');
 const manifestAssets=new Set();
 const manifestVisited=new Set();
 function visitManifest(key){
@@ -38,7 +38,7 @@ function visitManifest(key){
   for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visitManifest(dependency);
 }
 for(const key of Object.keys(reactManifest))visitManifest(key);
-assert.ok(manifestAssets.has('kanji5-react.js')&&manifestAssets.has('kanji5-react.css'),'Built React asset graph must include its entry JS and CSS.');
+assert.ok(manifestAssets.has('kanji5-react.js'),'Built React asset graph must include its entry JS.');
 for(const asset of manifestAssets){
   assert.ok(fs.existsSync('react-dist/'+asset),'Every React-manifest asset must exist in the built artifact: '+asset);
 }
