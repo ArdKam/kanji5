@@ -52,7 +52,7 @@ The repository and product documentation reviewed at the strategy baseline descr
 
 Primary repository references:
 
-- [README](../../README.md)
+- [README](../README.md)
 - [Public Product Guide](PUBLIC-PRODUCT.md)
 - [Project Structure](../PROJECT-STRUCTURE.md)
 - [Educational Content Audit](EDUCATIONAL-CONTENT-AUDIT.md)
@@ -348,7 +348,7 @@ At every later audit, the contributor/agent must:
 ## 12. Reference sources
 
 ### Rinemi repository
-- [Current README](../../README.md)
+- [Current README](../README.md)
 - [Public product guide](PUBLIC-PRODUCT.md)
 - [Project structure and authority boundaries](../PROJECT-STRUCTURE.md)
 - [Canonical roadmap](../ROADMAP.md)
