@@ -5,6 +5,44 @@ const sw=fs.readFileSync('sw.js','utf8');
 assert.match(sw,/react-dist\/\.vite\/manifest\.json/,'Service worker must know the Vite React manifest');
 assert.match(sw,/dynamicImports/,'Service worker must traverse dynamically imported React chunks');
 assert.match(sw,/async function precacheReactManifest/,'Service worker must precache the React asset graph from the manifest');
+assert.doesNotMatch(sw,/self\.skipWaiting\s*\(/,'An update must not replace the active asset graph while older tabs are still open.');
+const manifestBlock=sw.slice(sw.indexOf('async function precacheReactManifest'),sw.indexOf("self.addEventListener('install'"));
+assert.match(manifestBlock,/if\(!response\.ok\)throw new Error/,'A missing React manifest must fail the candidate worker installation.');
+assert.match(manifestBlock,/SW_REACT_ENTRY_MISSING_FROM_MANIFEST/,'The Vite manifest must include the shipped React entry.');
+assert.match(manifestBlock,/SW_REACT_STYLESHEET_MISSING_FROM_MANIFEST/,'The Vite manifest must include the shipped React stylesheet.');
+assert.match(manifestBlock,/await cache\.addAll\(\[\.\.\.urls\]\)/,'The worker must precache every resolved React asset dependency.');
+assert.doesNotMatch(manifestBlock,/catch\s*\([^)]*\)\s*\{\s*\}/,'React asset precache failures must not be swallowed.');
+
+// This test runs after Vite builds react-dist. The service worker cannot safely
+// install offline support unless the generated manifest and every referenced
+// static/dynamic dependency are present in the actual release artifact.
+const reactManifestPath='react-dist/.vite/manifest.json';
+assert.ok(fs.existsSync(reactManifestPath),'Built React manifest must exist before precache verification.');
+const reactManifest=JSON.parse(fs.readFileSync(reactManifestPath,'utf8'));
+assert.ok(reactManifest&&typeof reactManifest==='object'&&!Array.isArray(reactManifest)&&Object.keys(reactManifest).length,'Built React manifest must be a non-empty object.');
+const manifestEntries=Object.values(reactManifest);
+const reactEntry=manifestEntries.find(entry=>entry?.file==='kanji5-react.js');
+assert.ok(reactEntry,'Built React manifest must describe kanji5-react.js.');
+assert.ok(Array.isArray(reactEntry.css)&&reactEntry.css.includes('kanji5-react.css'),'Built React manifest must describe kanji5-react.css.');
+const manifestAssets=new Set();
+const manifestVisited=new Set();
+function visitManifest(key){
+  if(manifestVisited.has(key))return;
+  manifestVisited.add(key);
+  const entry=reactManifest[key];
+  assert.ok(entry,'Built React manifest references a missing dependency entry: '+key);
+  for(const value of [entry.file,...(entry.css||[]),...(entry.assets||[])]){
+    if(typeof value!=='string'||!value)continue;
+    manifestAssets.add(value.replace(/^\.\//,''));
+  }
+  for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visitManifest(dependency);
+}
+for(const key of Object.keys(reactManifest))visitManifest(key);
+assert.ok(manifestAssets.has('kanji5-react.js')&&manifestAssets.has('kanji5-react.css'),'Built React asset graph must include its entry JS and CSS.');
+for(const asset of manifestAssets){
+  assert.ok(fs.existsSync('react-dist/'+asset),'Every React-manifest asset must exist in the built artifact: '+asset);
+}
+console.log('React manifest asset graph passed ('+manifestAssets.size+' assets).');
 
 const match=sw.match(/const SHELL=(\[[\s\S]*?\]);/);
 assert.ok(match,'Service worker SHELL manifest not found.');
