@@ -22,8 +22,8 @@ function contrast(first, second) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 
-assert.ok(shell.includes('font-family:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif'), "Startup shell should use the English UI family");
-assert.ok(shell.includes('font-family:"Vazirmatn","Plus Jakarta Sans",system-ui,sans-serif'), "Persian startup copy should use Vazirmatn");
+assert.match(shell,/font-family:\s*"Plus Jakarta Sans Variable",\s*"Plus Jakarta Sans",\s*system-ui,\s*-apple-system,\s*"Segoe UI",\s*sans-serif/,"Startup shell should use the English UI family");
+assert.match(shell,/font-family:\s*"Vazirmatn",\s*"Plus Jakarta Sans",\s*system-ui,\s*sans-serif/,"Persian startup copy should use Vazirmatn");
 assert.ok(shell.includes("background: var(--ds-color-canvas)") && shell.includes("color: var(--ds-color-text-primary)"), "Startup shell must use shared semantic surface and text tokens");
 assert.ok(!shell.includes(':root[data-theme="dark"]') && !shell.includes("@media(prefers-color-scheme:dark)"), "Startup shell must consume shared tokens rather than duplicate theme palettes");
 assert.ok(shell.includes("background: var(--ds-color-canvas)") && shell.includes("background: var(--ds-color-surface)"), "Startup shell must derive canvas and card surfaces from semantic tokens");
