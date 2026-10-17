@@ -56,6 +56,7 @@ Some historical declarations and page-specific overrides remain in `styles.css` 
 | Canvas | `#F7F4EE` | `#171614` |
 | Surface | `#FDFBF7` | `#23211E` |
 | Subtle surface | `#F1EDE6` | `#292724` |
+| Panel surface | `rgba(251, 248, 240, .7)` | `rgba(35, 33, 30, .78)` |
 | Elevated surface | `#FFFDF8` | `#2B2824` |
 | Primary text | `#292B2D` | `#F4EFE3` |
 | Secondary text | `#53545A` | `#DDD5C8` |
