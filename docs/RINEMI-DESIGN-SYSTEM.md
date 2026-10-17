@@ -45,7 +45,7 @@ Some historical declarations and page-specific overrides remain in `styles.css` 
 | `--ds-brand-sumi` | `#292B2D` | Core ink |
 | `--ds-brand-indigo` | `#505F83` | Primary action and focus family |
 | `--ds-brand-sakura` | `#D6A1AA` | Restrained brand accent |
-| `--ds-brand-moss` | `#8C9B87` | Supporting progress accent |
+| `--ds-brand-moss` | `#8C9B87` | Brand palette reference |
 | `--ds-brand-secondary-surface` | `#EEE9E0` | Secondary paper surface |
 | `--ds-brand-border` | `#DED8CE` | Soft border |
 
@@ -61,6 +61,7 @@ Some historical declarations and page-specific overrides remain in `styles.css` 
 | Secondary text | `#53545A` | `#DDD5C8` |
 | Muted text | `#62676B` | `#B8AFA2` |
 | Primary action | `#505F83` | `#A8B5D8` |
+| Progress accent | `#8C9B87` | `#A9B77C` |
 | Primary action text | `#FDFBF7` | `#171614` |
 | Strong border | `#ABA398` | `#A99E8D` |
 | Focus ring | `#505F83` | `#A9C1ED` |
