@@ -14,6 +14,7 @@ assert.equal(packageJson.dependencies["@fontsource-variable/plus-jakarta-sans"],
 assert.match(frontendEntry,/import "\.\/plus-jakarta\.css";/,"Plus Jakarta Sans stylesheet must be imported from the frontend bundle");
 assert.match(css,/--ui-font:var\(--ds-font-latin\)/,"Legacy UI font alias must resolve through the semantic Latin font token");
 assert.match(css,/--jp-font:var\(--ds-font-japanese\)/,"Japanese typography alias must resolve through the semantic Japanese font token");
+assert.match(designSystem,/--ds-font-latin:\s*"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,sans-serif/,"Semantic Latin font token must retain the local Plus Jakarta Sans family");
 assert.match(frontendEntry,/import "\.\/plus-jakarta\.css";/,"Plus Jakarta Sans stylesheet import must remain explicit");
 assert.doesNotMatch(css,/font-family:[^;]*\bInter\b/,"Inter must not remain an explicit UI font family");
 assert.ok(jpCss.includes('font-family:"Noto Serif JP";'),"Local Noto Serif JP @font-face is missing");
