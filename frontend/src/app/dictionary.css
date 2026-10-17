@@ -1001,10 +1001,10 @@
   display: grid;
   gap: .5rem;
   margin-top: 1rem;
-  border-top: 1px solid var(--border, rgba(31, 38, 46, .12));
+  border-top: 1px solid var(--ds-color-border, rgba(31, 38, 46, .12));
 }
 .dictionary-accordion-section {
-  border-bottom: 1px solid var(--border, rgba(31, 38, 46, .12));
+  border-bottom: 1px solid var(--ds-color-border, rgba(31, 38, 46, .12));
 }
 .dictionary-accordion-trigger {
   appearance: none;
