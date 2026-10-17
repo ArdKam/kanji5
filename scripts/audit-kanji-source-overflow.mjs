@@ -77,6 +77,7 @@ report.entriesWithAnyFormerOverflow = formerOverflowCharacters.size;
 const sorted = sourceEntries.slice().sort((a, b) => {
   const af = a.frequency == null ? Infinity : Number(a.frequency);
   const bf = b.frequency == null ? Infinity : Number(b.frequency);
+  return af - bf;
 });
 for (let index = 0; index < sorted.length; index += 1) {
   const expected = sorted[index], stored = snapshotEntries[index];
