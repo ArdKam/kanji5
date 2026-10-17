@@ -8,6 +8,30 @@
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
+## 2.0.2 Current product/engineering audit handoff — 2026-10-17
+
+**Dated evidence record:** [docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md). This audit is additive: it does not rewrite the historical C4/R12/R13 implementation records, and it does not treat an open PR as completion evidence.
+
+**Observed baseline:** main at 085524dc58547e33e42fcaff75784b0c6d3fe6b3; React presentation build passed in workflow run 38964130926; GitHub Pages deployment passed in run 38965141947. The deployment process rebuilt from the exact SHA, checked it was current main, validated the artifact, compared selected live asset hashes and ran live/offline smoke checks. Repository metadata reported main protection disabled. Re-verify all of this before a later release; this is a dated snapshot.
+
+**Open release blockers — keep acceptance OPEN until current evidence closes them:**
+- **Education/content:** independent human QA for meanings/readings/examples/context/curated mnemonics and empirical placement validation remain outstanding in docs/EDUCATIONAL-CONTENT-AUDIT.md and docs/C4-SAMPLE-CONTENT-QA.md.
+- **Security:** PR #554 documents a 2026-10-16 live smoke with positive CSP/XSS/RLS checks and gaps around HTTP security headers and Supabase leaked-password protection. Re-run on the exact current deployed SHA; exploitability and authenticated testing are not claimed complete.
+- **Privacy/governance:** docs/RELEASE-EVIDENCE.md and docs/LEGAL-REVIEW-CHECKLIST.md report no account-delete API, no complete local browser-data erasure path, incomplete private request/retention/Privacy/Terms evidence. A database cascade is not a user-facing deletion workflow.
+
+**Highest-priority current-main work:**
+1. Reconcile open PRs against current main and protect main. The checked queue had overlapping Learning-card candidates (#558/#550/#545/#538), UX/design-system candidates (#548/#547/#535/#540), menu candidates (#531/#529), and other stale-base work. Port unique value, retarget, supersede or close; do not merge the queue in bulk.
+2. Keep PR #558 unmerged until the exact updated head passes its Learning-card gate. Candidate 61e22b1 failed two compact/landscape bounds tests in run 38971761198; both reported top=-32px. This is a candidate-branch failure, not a failure of the already-deployed main build.
+3. Fix the current service-worker empty-result ambiguity in sw.js/VocabularyExamples.tsx: an uncached offline API failure may return [] with HTTP 200 plus X-Kanji5-Offline-Fallback, while the UI displays a normal empty state. Preserve old-client/offline compatibility and distinguish missing data from transport failure.
+4. Plan a reviewed Persian learner-meaning overlay without replacing the authoritative source glosses or migrating learner state. Existing kanji-data.json has 2,136 records but its source meanings are English; the 24-topic Dictionary taxonomy currently has 1,156 assignments across 849 unique kanji and explicitly documents partial coverage.
+5. Continue visual/theme/typography polish only after these gates: frontend/src/styles.css still sets --text-xs to 11px, although muted contrast and dark-mode contracts exist. Consolidate overlapping design-system changes rather than introducing a parallel system.
+
+**Architecture constraints remain unchanged:** FSRS scheduling authority; v1.9 Learner Model authority; Adaptive Planner selection authority; engine-owned grading/recovery/persistence; React presentation-only. No broad rewrite, duplicate scheduler, parallel learner state or broad persistence migration without a demonstrated defect.
+
+**Release order:** (0) protect main and reconcile PRs → (1) close educational, security and privacy/governance acceptance → (2) fix Learning-card and offline correctness → (3) stage Persian content and reviewed Dictionary improvements → (4) run measured retention/learning studies. Public-beta invitation remains blocked until the applicable P0 gates are proven against one frozen release candidate SHA.
+
+**Handoff rule:** Future audits must refresh current main, open PRs, exact-head workflows and deployed evidence. Once a finding is fixed, record the merge SHA, exact verification run(s), any remaining acceptance-only work, and a DO NOT REOPEN instruction unless a current-main regression is demonstrated.
+
 ---
 
 ## 0. Product direction
@@ -2387,3 +2411,34 @@ The review distinguishes direct semantic matches from high-frequency, transparen
 A reviewed expansion adds **144 topic assignments** across **112 previously untagged kanji**, increasing coverage from 737/2,136 (34.5%) to **849/2,136 (39.7%)**. The taxonomy remains at 24 categories and 1,156 assignments. The batch prioritizes direct catalog meanings and transparent topic associations among higher-frequency entries; `融` is the one compound-supported Money & finance assignment, explicitly grounded in `金融` / `融資` rather than automated gloss matching.
 
 The integrity test now enumerates all 144 new assignments, preserves the 13 negative semantic guardrails from the prior audit, and checks the exact post-expansion totals. No kanji source records, filter behavior, learning-engine decisions, evidence, or persistence changed. Remaining untagged entries: 1,287, available through “All topics” and Dictionary text search.
+
+
+---
+
+# 28. Learning-engine runtime initialization reliability — 2026-10-17
+
+**Supplemental evidence record:** [docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md](docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md). This entry is additive; it deliberately does not rewrite the concurrently maintained [Product & Engineering Audit](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md).
+
+- **Confirmed RI-01:** the Adaptive Planner used zero-delay recursive polling while waiting for the authoritative v1.6 session API. Proposed fix: one-shot session-authority readiness event in [PR #559](https://github.com/ArdKam/kanji5/pull/559).
+- **Confirmed RI-02:** the learner runtime silently swallowed import failures for the planner, recovery, evaluation and v1.9 boundary. PR #559 reports these through observability with console fallback.
+- **Verification:** engine workflow [39014128916](https://github.com/ArdKam/kanji5/actions/runs/39014128916) and React presentation workflow [39014128937](https://github.com/ArdKam/kanji5/actions/runs/39014128937) passed on the PR head; the root suite reported 164 test scripts passed. These results are for an open, unmerged PR, not current-main/deployment evidence.
+- **Current status:** PR #559 remains **OPEN / NOT MERGED**. Keep the finding open until merged, current-main checks pass, and a new deployed artifact passes live/offline verification. PR #559's description was updated on 2026-10-17 to link the completed successful workflow runs.
+- **Architecture guardrail:** no second scheduler, learner-state owner, grading/recovery implementation or persistence migration. Keep FSRS, v1.9 Learner Model, Adaptive Planner selection, engine-owned grading/recovery/persistence and presentation-only React boundaries intact.
+
+**Next action:** refresh the current PR/main state, review the narrow diff, merge only with valid exact-head green checks, then record the merge SHA and post-merge/deployment evidence in the supplemental audit document. Do not mark the fix complete based on open-PR CI alone.
+
+
+---
+
+# 29. First-use activation and sustainable-study retention — 2026-10-17
+
+**Status:** **IN PROGRESS / PR OPEN**. See [PR #562](https://github.com/ArdKam/kanji5/pull/562) and the dated implementation/evidence record [docs/audits/rinemi-first-use-retention-audit-2026-10-17.md](docs/audits/rinemi-first-use-retention-audit-2026-10-17.md). This is an additive handoff. Existing R2 onboarding status is not reopened; this is a low-risk usability refinement based on source review.
+
+- **Current scope on the PR branch:** add a primary one-tap guest quick start from the welcome page using the existing engine path and the five-new-Kanji/day default; retain a guided setup path with optional placement; clarify new-card workload versus scheduled reviews; make guest continuation primary over account creation; localize copy in English/Persian; update and extend E2E selectors/tests.
+- **Architecture/data boundary:** presentation/onboarding only. Do not introduce another scheduler, duplicate learner state, change FSRS/Learner Model/Adaptive Planner/grading/recovery/persistence authority, migrate storage, or add remote analytics as part of this task.
+- **CI note for code-bearing PR head `c5a97c74f6d303e1588190ab5ce83fc3f34f3a10` (2026-10-17):** React presentation E2E, accessibility, PWA release gate, final release matrix, WebKit compatibility and automated visual audit passed in the inspected runs. The React presentation build workflow [#3821](https://github.com/ArdKam/kanji5/actions/runs/39014636590) was still running its full sequence at the last inspection (42/53 main-job steps completed, no reported failures). An earlier E2E run failed only because a Persian test retained the old welcome-button label; those two assertions were updated and the rerun passed. Refresh the status on the exact latest head before calling any gate complete.
+- **Do not count as DONE:** PR remains draft/open and has not been merged or deployed. Passing checks on a PR head are not evidence of current-main or live production verification. After merge, record merge SHA, re-run required current-main checks, and verify live asset parity/smoke before completion.
+- **Remaining learner validation:** confirm the quick-start route lands on a usable first card and allows a rating without an account prompt; test return after 3/7/14 missed days; validate Again/Hard/Good/Easy explanations against the authoritative scheduler contract; test whether Dictionary, handwriting and Reading Lab are discovered naturally after a first successful task.
+- **Metrics/telemetry:** the audit defines activation within 24 hours, time to first meaningful result, due-review completion, W1 and W4 retention, feature task-completion rate, weekly consistency, and later delayed-recall evidence with exact denominators/data needs. These are definitions, not current measured results. No instrumentation has been added. Prefer existing/local aggregates; a future cohort design needs explicit purpose, consent, opt-out, retention/deletion, and exclusion of raw answers, drawing paths, personal mnemonics, pasted reading text, and exact search queries.
+
+**Next action:** re-read PR #562 and the latest `main` before continuing. Keep the current PR draft until the exact latest head passes all required workflows. Do not overwrite concurrent roadmap or audit edits; append a dated addendum or use a separate evidence file when another contributor is editing the same document.
