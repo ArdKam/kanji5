@@ -14,6 +14,11 @@ assert.equal(v.items.length,2,'valid vocabulary should be retained and exact dup
 assert.equal(v.rejected.length,2,'both malformed candidates should be rejected');
 assert(v.rejected.every(x=>Array.isArray(x.reasons)&&x.reasons.length>0));
 assert.equal(validateVocabularyEntry({word:'学校',reading:'gakkou',meaning:'school'},'学').valid,false,'romaji-only reading is invalid for KanjiAPI content');
+assert.equal(validateVocabularyEntry({word:'学校',reading:'がっこう',meaning:'school'},'学').valid,true,'kana-only readings should remain valid');
+assert.equal(validateVocabularyEntry({word:'学校',reading:'ガッコウ',meaning:'school'},'学').valid,true,'katakana-only readings should remain valid');
+assert.equal(validateVocabularyEntry({word:'学校',reading:'gakkouがっこう',meaning:'school'},'学').valid,false,'mixed romaji and kana must not pass the reading gate');
+assert.equal(validateVocabularyEntry({word:'学校',reading:'がっこうabc',meaning:'school'},'学').valid,false,'Latin contamination after kana must not pass the reading gate');
+assert.equal(validateVocabularyEntry({word:'学校',reading:'学校',meaning:'school'},'学').valid,false,'kanji-only strings are not valid kana readings');
 assert.equal(selectDeterministic(v.items,x=>x.word)?.word,'学ぶ','selection must follow the documented stable lexical ordering');
 
 const contexts=[
