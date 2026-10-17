@@ -78,6 +78,12 @@ KANJIDIC2 is a valuable broad character dictionary, but it is not identical to t
 
 The generator no longer truncates English glosses, on’yomi, or kun’yomi arrays. The dataset is regenerated from the exact upstream commit. CI now compares all 2,136 character records and fails if any meaning, reading, stroke count, grade, JLPT value, frequency, sort position, identity, or classical-radical mapping differs from the source projection. Presentation components continue to limit visible content and learner-priority policies keep rare/reference senses out of primary prompts; completeness does not require displaying every gloss or reading at once.
 
+### P1 — Persian-first lexical meaning coverage is missing
+
+The canonical generated character schema stores English glosses in `meaning: string[]`; it has no parallel Persian gloss field or per-gloss provenance record. The React learning card localizes its interface controls and labels, but the primary/secondary/reference meaning projection still comes from those same English strings. Therefore **2,136/2,136 kanji lack an explicitly sourced Persian gloss in the canonical dataset**. This is a measured localization/content gap, not evidence that any individual English gloss is linguistically incorrect.
+
+Do not fill Persian glosses by silently machine-translating the English KANJIDIC2 field: a kanji's senses are contextual, and English reference glosses can include lexicalized, technical, archaic, affixal, or grammatical uses. Introduce separate `meaning.fa`/localized-sense records with per-entry Japanese reference, translation provenance, reviewer status, and source version; preserve the English source glosses as immutable reference data. Start with a reviewable high-frequency batch whose sense priorities have been checked against Japanese-language lexicographic references, then extend coverage in small batches. Dynamic vocabulary meanings need the same locale/provenance policy and should be audited from a frozen result set before claims of full coverage.
+
 ### P1 — Freeze and review provider examples
 
 Create a privacy-safe frozen sample of the actual production result sets (kanji, word, reading, gloss, provider/reference, retrieval date, and the validator's accepted/rejected reason). Have a reviewer verify the *word-reading pairing* and meaning alignment against Japanese dictionaries, then classify learner level and pedagogical usefulness. Structural validity must not be described as lexicographic verification.
