@@ -2,6 +2,7 @@ import type { Language } from "./i18n";
 
 export type LearningCopyKey =
   | "revealMeaningAndReadings"
+  | "recallBeforeReveal"
   | "recommendedLearning"
   | "learnByTopic"
   | "topicLearningTitle"
@@ -25,6 +26,7 @@ export type LearningCopyKey =
 const COPY: Record<Language, Record<LearningCopyKey, string>> = {
   fa: {
     revealMeaningAndReadings: "نمایش معنی و خوانش‌ها",
+    recallBeforeReveal: "پیش از دیدن پاسخ، هر معنایی یا خوانشی را که به یاد می‌آوری حدس بزن.",
     recommendedLearning: "یادگیری پیشنهادی",
     learnByTopic: "یادگیری بر اساس موضوع",
     topicLearningTitle: "انتخاب موضوع یادگیری",
@@ -47,6 +49,7 @@ const COPY: Record<Language, Record<LearningCopyKey, string>> = {
   },
   en: {
     revealMeaningAndReadings: "Reveal meaning & readings",
+    recallBeforeReveal: "Before revealing, try to recall any meaning or reading you know.",
     recommendedLearning: "Recommended learning",
     learnByTopic: "Learn by topic",
     topicLearningTitle: "Choose a learning topic",
