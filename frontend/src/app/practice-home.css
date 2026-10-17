@@ -2,19 +2,19 @@
 .practice-home{display:grid;gap:20px;min-width:0}
 .practice-home :is(h2,h3,h4,p){margin:0}
 .practice-home-header{display:grid;gap:7px}
-.practice-home-header h2{font-size:var(--text-title)}
+.practice-home-header h2{font-size:var(--ds-type-heading-lg)}
 .practice-home-hero{display:flex;align-items:end;justify-content:space-between;gap:18px}
 .practice-home-hero-copy{display:grid;gap:8px}
 .practice-home-hero h3{font-size:clamp(21px,3vw,28px);font-weight:760}
 .practice-topic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
 .practice-topic-card{display:grid;grid-template-columns:40px minmax(0,1fr) 12px;align-items:center;gap:8px;min-height:72px;padding:10px;text-align:start}
-.practice-topic-card.is-selected{border-color:var(--shu)}
-.practice-topic-glyph{display:grid;place-items:center;font:27px/1 var(--jp-font)}
+.practice-topic-card.is-selected{border-color:var(--ds-color-action-primary)}
+.practice-topic-glyph{display:grid;place-items:center;font:27px/1 var(--ds-font-japanese)}
 .practice-topic-copy{display:grid;gap:4px}
-.practice-all-topics>summary,.practice-advanced>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;font-size:var(--text-sm);font-weight:760;cursor:pointer}
+.practice-all-topics>summary,.practice-advanced>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;font-size:var(--ds-type-small);font-weight:760;cursor:pointer}
 .practice-topic-selected{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px 18px}
 .practice-topic-selected-copy{display:grid;gap:5px}
-.practice-topic-status.is-error,.practice-topic-message,.practice-custom-message{color:var(--color-danger)}
+.practice-topic-status.is-error,.practice-topic-message,.practice-custom-message{color:var(--ds-state-danger-text)}
 .practice-custom-panel{display:grid;gap:15px;padding:14px 0 20px}
 .practice-focus-fieldset{display:grid;gap:8px}
 .practice-focus-options{display:flex;flex-wrap:wrap;gap:7px}
