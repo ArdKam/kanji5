@@ -42,15 +42,14 @@ const contrastStart = styles.indexOf("@media(prefers-contrast:more){", darkStart
 assert.ok(darkStart >= 0 && contrastStart > darkStart, "System dark media block should exist");
 const systemDark = styles.slice(darkStart, contrastStart);
 
-// These fixed-color overrides must only run for the explicit System preference.
-for (const selector of [
-  ':root[data-theme="system"] .rating-again',
-  ':root[data-theme="system"] .rating-hard',
-  ':root[data-theme="system"] .rating-good',
-  ':root[data-theme="system"] .rating-easy',
-]) {
-  assert.ok(systemDark.includes(selector), "Missing System-scoped selector: " + selector);
+// Review outcomes are shared semantic component styles; the token values themselves
+// resolve per color scheme, so duplicate hard-coded theme selectors are not needed.
+for (const rating of ["again", "hard", "good", "easy"]) {
+  assert.ok(designSystem.includes(`.app-shell .rating.rating-${rating} {`), `Missing semantic review style: ${rating}`);
+  assert.ok(designSystem.includes(`--ds-review-${rating}-text:`), `Missing semantic review text token: ${rating}`);
+  assert.ok(designSystem.includes(`--ds-review-${rating}-bg:`), `Missing semantic review surface token: ${rating}`);
 }
+assert.equal(/:root\[data-theme="(?:dark|system)"\]\s+\.rating-(?:again|hard|good|easy)\s*\{/.test(styles), false, "Duplicate theme-specific rating rules must not shadow semantic outcomes");
 assert.ok(designSystem.includes("--ds-color-surface-subtle: light-dark(#F1EDE6, #292724);") && designSystem.includes("--ds-color-progress-track: light-dark(#E9E3D8, #35312C);"), "System dark palette must resolve surface and progress tokens through semantic values");
 assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|audio-button|button|pager-button|settings-language-button|progress|stimulus|example-row|reason|insights|header-tools-menu|rating-again|rating-hard|rating-good|rating-easy)(?:[,{])/.test(systemDark), false, "Unscoped dark overrides could leak into manual Light mode");
 
@@ -65,7 +64,7 @@ assert.ok(styles.includes(".reading{min-height:96px;padding:14px;border:1px soli
 assert.ok(styles.includes(".reason{margin:7px 0 0;padding:8px 10px;border:1px solid var(--line-soft);border-radius:14px;background:var(--surface-soft);"));
 assert.ok(styles.includes(".insights{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-panel)}"));
 assert.ok(styles.includes(':root[data-theme="dark"]{color-scheme:dark;}'), "Manual dark mode should select the dark semantic palette");
-assert.ok(styles.includes("--progress-track:#35312c;"));
+assert.ok(styles.includes("--progress-track:var(--ds-color-progress-track);"), "Progress track alias must resolve to the semantic token");
 assert.ok(styles.includes("background:radial-gradient(circle at 8% 6%,rgba(184,74,56,.05),transparent 24rem),var(--washi);color:var(--sumi)"));
 assert.equal(styles.includes(':root[data-theme="dark"] :root[data-theme="dark"] .progress'), false, "Broken double-root progress selector must not return");
 assert.equal(styles.includes("@media(prefers-color-scheme:dark){#kanji5-account-launcher"), false, "Account launcher OS-dark styling must not override a manually selected Light theme");
@@ -110,22 +109,21 @@ const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDark
 const manualDark = styles.slice(manualDarkStart, manualLightStart);
 assert.ok(manualDark.includes("color-scheme:dark;"), "Manual Dark must select the dark color scheme");
 assert.ok(designSystem.includes("--ds-color-skeleton-base: light-dark(#EEE7DA, #292724);") && designSystem.includes("--ds-color-skeleton-highlight: light-dark(#F8F3E9, #35312C);"), "Loading colors must be defined semantically for both themes");
-assert.ok(styles.includes(':root[data-theme="dark"] .button.primary{background:var(--ds-color-action-primary);border-color:var(--ds-color-action-primary);color:var(--ds-color-action-primary-text);}'), "Manual Dark primary buttons must use semantic indigo with an explicit foreground");
-assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary{background:var(--ds-color-action-primary);border-color:var(--ds-color-action-primary);color:var(--ds-color-action-primary-text);}'), "System + OS Dark primary buttons must use semantic indigo");
-assert.ok(styles.includes(':root[data-theme="dark"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:var(--ds-color-action-primary-hover);border-color:var(--ds-color-action-primary-hover);color:var(--ds-color-action-primary-text);box-shadow:0 0 0 2px color-mix(in srgb,var(--ds-focus-ring) 28%,transparent);}'), "Manual Dark primary hover/focus states must use semantic indigo and preserve contrast");
+assert.ok(designSystem.includes(":root .app-shell .button.primary"), "Primary actions must be styled from the shared semantic layer");
+assert.ok(designSystem.includes("background: var(--ds-color-action-primary-hover);") && designSystem.includes("box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-focus-ring) 28%, transparent);"), "Primary hover/focus must use semantic indigo and a visible focus halo");
+assert.equal(/:root\[data-theme="(?:dark|system)"\]\s+\.button\.primary/.test(styles), false, "Theme-specific primary-button duplicates must not diverge from semantic tokens");
 assert.ok(styles.includes(':root[data-theme="dark"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:var(--ds-focus-ring);}'), "Manual Dark keyboard focus must use the semantic focus ring");
 assert.ok(systemDark.includes(':root[data-theme="system"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:var(--ds-focus-ring);}'), "System Dark keyboard focus must use the semantic focus ring");
 
-assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:var(--ds-color-action-primary-hover);border-color:var(--ds-color-action-primary-hover);color:var(--ds-color-action-primary-text);box-shadow:0 0 0 2px color-mix(in srgb,var(--ds-focus-ring) 28%,transparent);}'), "System Dark primary hover/focus states must use semantic indigo");
-assert.ok(styles.includes(':root[data-theme="dark"] .audio-button:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "Manual Dark audio focus must use the semantic focus color");
-assert.ok(systemDark.includes(':root[data-theme="system"] .audio-button:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "System Dark audio focus must use the semantic focus color");
+assert.ok(designSystem.includes("--ds-color-action-primary-hover: light-dark(#424F70, #B7C3E0);"), "Primary hover state must retain distinct semantic indigo values for light and dark");
+assert.ok(styles.includes(".audio-button:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);"), "Audio focus must use a theme-aware semantic ring");
 assert.equal(styles.includes(':root[data-theme="light"] .button.primary{background:var(--shu);'), false, "Dark brand-red primary rules must not leak into manual Light");
-assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-search:focus-within { outline-color: var(--ds-focus-ring); }'), "Manual Dark topic search must have a visible semantic focus ring");
-assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-search:focus-within { outline-color: var(--ds-focus-ring); }'), "System Dark topic search must have a visible semantic focus ring");
+assert.ok(topic.includes(".topic-learning-search:focus-within { outline: 3px solid var(--ds-focus-ring);"), "Topic search focus must use the shared semantic focus ring");
+assert.equal(/:root\[data-theme="(?:dark|system)"\].*topic-learning-search:focus-within/.test(topic), false, "Topic search must not duplicate focus rules per theme");
 assert.ok(styles.includes(".button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);"), "Dark neutral controls must resolve through semantic surface/text roles without flattening rating colors");
 assert.ok(styles.includes("--skeleton-base:var(--ds-color-skeleton-base);--skeleton-highlight:var(--ds-color-skeleton-highlight);--skeleton-track:var(--ds-color-skeleton-track);--skeleton-fill:var(--ds-color-skeleton-fill);"), "Loading placeholders must use semantic skeleton tokens");
 assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
-assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:var(--ds-review-again-bg);color:var(--ds-review-again-text);border-color:var(--ds-review-again-border);}'), "Dark Again feedback must use semantic review tokens");
+assert.ok(designSystem.includes(".app-shell .rating.rating-again {") && designSystem.includes("background: var(--ds-review-again-bg);"), "Again outcome must be themed by the shared semantic component rule");
 for (const theme of ["dark", "system"]) {
   const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);}`;
   assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must not override semantic rating buttons`);
