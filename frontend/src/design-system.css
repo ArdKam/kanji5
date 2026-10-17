@@ -27,6 +27,7 @@
   --ds-color-surface-subtle: light-dark(#F1EDE6, #292724);
   --ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);
   --ds-color-surface-overlay: light-dark(rgba(253, 251, 247, .96), rgba(23, 22, 20, .94));
+  --ds-color-surface-panel: light-dark(rgba(251, 248, 240, .7), rgba(35, 33, 30, .78));
   --ds-color-input: light-dark(#FFFDF9, #23211E);
   --ds-color-disabled: light-dark(#E9E3DA, #302D29);
 
