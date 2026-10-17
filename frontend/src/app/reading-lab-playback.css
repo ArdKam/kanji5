@@ -3,13 +3,13 @@
 .reading-lab-sentence-autoplay{
   min-height:36px;
   padding:5px 9px;
-  font-size:var(--ds-type-caption);
-  transition:background var(--ds-motion-interaction) ease,border-color var(--ds-motion-interaction) ease,color var(--ds-motion-interaction) ease,box-shadow var(--ds-motion-interaction) ease;
+  font-size:var(--text-xs);
+  transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease,box-shadow var(--motion-interaction) ease;
 }
 .reading-lab-sentence-autoplay.is-active{
-  border-color:color-mix(in srgb,var(--ai) 34%,var(--ds-color-border));
-  background:color-mix(in srgb,var(--ai) 8%,var(--ds-color-surface));
-  color:var(--ds-color-text-secondary);
+  border-color:color-mix(in srgb,var(--ai) 34%,var(--line));
+  background:color-mix(in srgb,var(--ai) 8%,var(--paper));
+  color:var(--ink);
   box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ai) 10%,transparent);
 }
 @media(max-width:640px){
