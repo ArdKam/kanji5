@@ -33,6 +33,7 @@ assert.match(css,/--washi:var\(--ds-color-canvas\)/);
 assert.match(css,/--paper:var\(--ds-color-surface\)/);
 assert.match(css,/--sumi:var\(--ds-color-text-primary\)/);
 assert.ok(css.includes("--ai:var(--ds-color-action-primary);"),"Legacy action alias must resolve to canonical semantic indigo");
+assert.ok(css.includes("--matcha:var(--ds-color-progress-accent);"),"Legacy progress accent alias must map to a theme-aware semantic role");
 assert.ok(css.includes("--shu:var(--ds-color-legacy-shu);") && designSystem.includes("--ds-color-legacy-shu: var(--ds-color-action-primary);"),"Legacy Shu alias must no longer introduce an independent coral action");
 assert.ok(css.includes("--surface-panel:var(--ds-color-surface-panel);"),"Legacy panel alias must preserve its translucent semantic surface");
 assert.match(designSystem,/--ds-color-canvas: light-dark\(var\(--ds-brand-rice-paper\), #171614\)/);
@@ -93,7 +94,7 @@ for(const file of semanticConsumerCssFiles){
   const source=fs.readFileSync(file,"utf8");
   if(!compactAliasConsumers.has(file)) assert.match(source,/var\(--ds-(?:color|brand|state|type|font|space|radius|motion|layout|z)-[a-z0-9-]+/i,"missing direct semantic token in "+file);
   else assert.match(source,/var\(--(?:washi|paper|sumi|ink|mute|ai|sakura|line|line-soft|line-interactive|surface-soft|surface-panel|radius-[a-z]+|text-[a-z0-9-]+|space-[0-9]+|motion-[a-z-]+|nav-bar-height|z-[a-z-]+)\)/,"alias-only surface/layout consumer must use centrally mapped tokens: "+file);
-  assert.doesNotMatch(source,/var\(--(?:shu|matcha|color-success|color-warning|color-danger|color-background|color-text|color-text-muted|color-primary|color-border|color-border-subtle|color-focus)\b/,"legacy brand/state shortcut bypasses semantic aliases in "+file);
+  assert.doesNotMatch(source,/var\(--(?:shu|color-success|color-warning|color-danger|color-background|color-text|color-text-muted|color-primary|color-border|color-border-subtle|color-focus)\b/,"legacy brand/state shortcut bypasses semantic aliases in "+file);
 }
 
 assert.match(dictionaryPageCss,/\.dictionary-view-button[\s\S]*?transition:background var\(--ds-motion-interaction\) ease/);
