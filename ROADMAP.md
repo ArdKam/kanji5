@@ -2411,3 +2411,18 @@ The review distinguishes direct semantic matches from high-frequency, transparen
 A reviewed expansion adds **144 topic assignments** across **112 previously untagged kanji**, increasing coverage from 737/2,136 (34.5%) to **849/2,136 (39.7%)**. The taxonomy remains at 24 categories and 1,156 assignments. The batch prioritizes direct catalog meanings and transparent topic associations among higher-frequency entries; `融` is the one compound-supported Money & finance assignment, explicitly grounded in `金融` / `融資` rather than automated gloss matching.
 
 The integrity test now enumerates all 144 new assignments, preserves the 13 negative semantic guardrails from the prior audit, and checks the exact post-expansion totals. No kanji source records, filter behavior, learning-engine decisions, evidence, or persistence changed. Remaining untagged entries: 1,287, available through “All topics” and Dictionary text search.
+
+
+---
+
+# 28. Learning-engine runtime initialization reliability — 2026-10-17
+
+**Supplemental evidence record:** [docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md](docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md). This entry is additive; it deliberately does not rewrite the concurrently maintained [Product & Engineering Audit](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md).
+
+- **Confirmed RI-01:** the Adaptive Planner used zero-delay recursive polling while waiting for the authoritative v1.6 session API. Proposed fix: one-shot session-authority readiness event in [PR #559](https://github.com/ArdKam/kanji5/pull/559).
+- **Confirmed RI-02:** the learner runtime silently swallowed import failures for the planner, recovery, evaluation and v1.9 boundary. PR #559 reports these through observability with console fallback.
+- **Verification:** engine workflow [39014128916](https://github.com/ArdKam/kanji5/actions/runs/39014128916) and React presentation workflow [39014128937](https://github.com/ArdKam/kanji5/actions/runs/39014128937) passed on the PR head; the root suite reported 164 test scripts passed. These results are for an open, unmerged PR, not current-main/deployment evidence.
+- **Current status:** PR #559 remains **OPEN / NOT MERGED**. Keep the finding open until merged, current-main checks pass, and a new deployed artifact passes live/offline verification. PR #559's description was updated on 2026-10-17 to link the completed successful workflow runs.
+- **Architecture guardrail:** no second scheduler, learner-state owner, grading/recovery implementation or persistence migration. Keep FSRS, v1.9 Learner Model, Adaptive Planner selection, engine-owned grading/recovery/persistence and presentation-only React boundaries intact.
+
+**Next action:** refresh the current PR/main state, review the narrow diff, merge only with valid exact-head green checks, then record the merge SHA and post-merge/deployment evidence in the supplemental audit document. Do not mark the fix complete based on open-PR CI alone.
