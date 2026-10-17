@@ -7,6 +7,19 @@ const KEY='v19LearnerModel',EVIDENCE_KEY='v19LearnerEvidence',SCHEMA=1,EVIDENCE_
 let apiPromise=null,integrityPromise=null;
 const api=()=>apiPromise||(apiPromise=import('./v1.9-learner-model-core.js'));
 const integrity=()=>integrityPromise||(integrityPromise=import('./v1.9-data-integrity-core.js'));
+function reportModuleLoadFailure(module,error){
+  const observability=window.__KANJI5_OBSERVABILITY__;
+  try{
+    if(typeof observability?.capture==='function'){
+      observability.capture('dynamic-import-failure',error,{module,dataAffected:'unknown'});
+      return;
+    }
+  }catch(reportError){
+    console.error('Rinemi module-load reporting failed.',{module,error,reportError});
+    return;
+  }
+  console.error('Rinemi module failed to load.',{module,error});
+}
 function readEvidence(){const components=state.readComponents?.()||{},value=components[EVIDENCE_KEY];return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
 function sanitizeEvidence(value){if(!value||typeof value!=='object'||Array.isArray(value))return{};const out={};for(const [key,item] of Object.entries(value)){if(!/^[a-zA-Z0-9_]{1,40}$/.test(key))continue;if(key==='feedbackStroke'&&Number.isFinite(Number(item)))out[key]=Math.max(1,Math.min(64,Math.round(Number(item))));else if(typeof item==='number'&&Number.isFinite(item))out[key]=Math.max(0,Math.min(1,item));else if(typeof item==='string')out[key]=item.slice(0,80);else if(typeof item==='boolean')out[key]=item}return out}
 function writeEvidence(character,detail){if(!character||!detail?.mode)return false;const components=state.readComponents?.()||{},all=readEvidence(),byChar=Array.isArray(all[character])?all[character].slice():[];byChar.push({at:new Date().toISOString(),mode:String(detail.mode),modality:['free_recall','cued_recall','cued_recognition','recognition','production','handwriting'].includes(String(detail.modality||detail.evidence?.modality||''))?String(detail.modality||detail.evidence?.modality):'unknown',outcome:String(detail.outcome||'wrong'),correct:detail.correct===true,quality:String(detail.quality||detail.outcome||'wrong'),score:Number.isFinite(Number(detail.score))?Number(detail.score):detail.correct?1:0,graderVersion:String(detail.graderVersion||'legacy-unversioned'),schemaVersion:Number(detail.schemaVersion)||1,evidence:sanitizeEvidence(detail.evidence)});all[character]=byChar.slice(-EVIDENCE_LIMIT);return Boolean(state.writeComponents?.({...components,[EVIDENCE_KEY]:all}))}
@@ -25,8 +38,8 @@ if('requestIdleCallback' in window)window.requestIdleCallback(scheduleLearnerHyd
 else window.setTimeout(scheduleLearnerHydration,1000);
 document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(()=>{void updateCore()},0));
 document.addEventListener('kanji5:v1.6-education-result',e=>{const d=e?.detail||{};writeEvidence(String(d.character||''),d);setTimeout(()=>{void updateCore()},0)});
-void import('./v1.9-adaptive-planner.js').catch(()=>{});
-void import('./v1.9-recovery.js').catch(()=>{});
-void import('./v1.9-learning-evaluation.js').catch(()=>{});
-void import('./v1.9-v2-boundary.js').catch(()=>{});
+void import('./v1.9-adaptive-planner.js').catch(error=>reportModuleLoadFailure('./v1.9-adaptive-planner.js',error));
+void import('./v1.9-recovery.js').catch(error=>reportModuleLoadFailure('./v1.9-recovery.js',error));
+void import('./v1.9-learning-evaluation.js').catch(error=>reportModuleLoadFailure('./v1.9-learning-evaluation.js',error));
+void import('./v1.9-v2-boundary.js').catch(error=>reportModuleLoadFailure('./v1.9-v2-boundary.js',error));
 })();
