@@ -26,7 +26,7 @@ export type LearningCopyKey =
 const COPY: Record<Language, Record<LearningCopyKey, string>> = {
   fa: {
     revealMeaningAndReadings: "نمایش معنی و خوانش‌ها",
-    recallBeforeReveal: "قبل از دیدن پاسخ، معنی کانجی و دست‌کم یکی از خوانش‌هایش را از حافظه به یاد بیاور.",
+    recallBeforeReveal: "پیش از دیدن پاسخ، هر معنایی یا خوانشی را که به یاد می‌آوری حدس بزن.",
     recommendedLearning: "یادگیری پیشنهادی",
     learnByTopic: "یادگیری بر اساس موضوع",
     topicLearningTitle: "انتخاب موضوع یادگیری",
