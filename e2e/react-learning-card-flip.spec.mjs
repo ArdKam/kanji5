@@ -159,7 +159,7 @@ test("front-side recall cue remains legible and correctly ordered across theme a
           const rect = target.getBoundingClientRect();
           return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
         };
-        const rgb = value => value.match(/[\\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+        const rgb = value => value.match(/[0-9.]+/g)?.slice(0, 3).map(Number) ?? [];
         const luminance = value => {
           const channels = rgb(value);
           if (channels.length !== 3) return null;
