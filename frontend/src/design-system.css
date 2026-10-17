@@ -198,22 +198,22 @@ button:focus-visible, a[href]:focus-visible, input:focus-visible, select:focus-v
 }
 
 /* Review ratings share shape and typography, but each outcome keeps its own meaning. */
-.app-shell .learning-card-back .rating.rating-again {
+.app-shell .rating.rating-again {
   color: var(--ds-review-again-text);
   border: 1px solid var(--ds-review-again-border);
   background: var(--ds-review-again-bg);
 }
-.app-shell .learning-card-back .rating.rating-hard {
+.app-shell .rating.rating-hard {
   color: var(--ds-review-hard-text);
   border: 1px solid var(--ds-review-hard-border);
   background: var(--ds-review-hard-bg);
 }
-.app-shell .learning-card-back .rating.rating-good {
+.app-shell .rating.rating-good {
   color: var(--ds-review-good-text);
   border: 1px solid var(--ds-review-good-border);
   background: var(--ds-review-good-bg);
 }
-.app-shell .learning-card-back .rating.rating-easy {
+.app-shell .rating.rating-easy {
   color: var(--ds-review-easy-text);
   border: 1px solid var(--ds-review-easy-border);
   background: var(--ds-review-easy-bg);
