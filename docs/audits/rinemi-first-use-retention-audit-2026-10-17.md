@@ -153,3 +153,14 @@ Because the reconciliation creates a new PR head, earlier successes on `c5a97c7`
 - WebKit compatibility for workflow #3841 was completing its final cleanup step after the smoke itself passed; confirm the overall run conclusion.
 
 **Next action:** inspect the exact current PR HEAD and poll the React presentation and visual-audit workflows attached to that exact commit. Immediately before this note was refreshed, a documentation-only follow-up had advanced the PR head to `10fc48a39f4e87c9f7ce6784c52151562c712091`; its new React presentation run [#3843](https://github.com/ArdKam/kanji5/actions/runs/39015402752) was queued and visual audit [#672](https://github.com/ArdKam/kanji5/actions/runs/39015402875) was pending. **This audit-file update itself may advance the PR head and retrigger checks**, so those run numbers are historical snapshots, not a substitute for checking the current PR page. Keep PR #562 in draft until the complete required CI set is green. Do not update the main roadmap directly from a stale branch copy; future edits should fetch the current main version and append narrowly, or use a new evidence file if another author is editing the same section.
+
+
+## Second concurrent-main reconciliation — 2026-10-17
+
+Main advanced again while this work was open and updated the runtime-initialization handoff in `ROADMAP.md` / `docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md`. That update is preserved verbatim. The first-use roadmap entry was re-appended after the current-main copy rather than replacing or editing the other contributor's material.
+
+- **Latest main incorporated:** `19abe7fce8598a3618d9a9a1c20bb106d86520bd`.
+- **Second reconciliation merge commit on this PR branch:** `833f2933c6763053bb32dfa26c19bc44b84d3fb0`, parents `19abe7fce8598a3618d9a9a1c20bb106d86520bd` and `df23989cb7ccb11af28962d8f5debc3b4619cb1a`.
+- **Diff check after this reconciliation:** current main → branch reports **zero commits behind** and only 10 intended changed files. `ROADMAP.md` begins with the exact current-main content and appends section 29; section 29 links back to this audit.
+- **Checks at commit `833f293`:** React presentation workflow [#3845](https://github.com/ArdKam/kanji5/actions/runs/39015542087) was queued and automated visual audit [#675](https://github.com/ArdKam/kanji5/actions/runs/39015542208) was pending at the last check. These are not pass results.
+- **Current constraint:** this audit append itself will change the PR head and may create yet another pair of workflow runs. Always inspect the live PR head and only count checks attached to that exact head. If main changes again before merge, repeat the same additive reconciliation; do not force-push or write to main.
