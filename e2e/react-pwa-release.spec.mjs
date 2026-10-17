@@ -22,7 +22,7 @@ test('PWA shell survives offline reload and preserves local learning state', asy
   expect(manifest.scope).toBe('./');
   expect(manifest.id).toBe('./');
   expect(manifest.icons?.length).toBeGreaterThan(0);
-  expect(manifest.icons.every(icon=>String(icon.purpose||'').split(/\\s+/).includes('any'))).toBe(true);
+  expect(manifest.icons.every(icon=>String(icon.purpose||'').split(/\s+/).includes('any'))).toBe(true);
   expect(manifest.icons.map(icon=>icon.sizes)).toEqual(expect.arrayContaining(['192x192','512x512']));
   const iconResponses=await page.evaluate(async icons=>Promise.all(icons.map(async icon=>{
     const response=await fetch(new URL(icon.src,location.href));
