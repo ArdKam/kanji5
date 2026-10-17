@@ -13,6 +13,7 @@ const i18n = await fs.readFile("frontend/src/app/i18n.ts", "utf8");
 const settings = await fs.readFile("frontend/src/app/SettingsDialog.tsx", "utf8");
 const personalMnemonicBackup = await fs.readFile("frontend/src/app/MnemonicBackup.tsx", "utf8");
 const styles = await fs.readFile("frontend/src/styles.css", "utf8");
+const designSystem = await fs.readFile("frontend/src/design-system.css", "utf8");
 const icon = await fs.readFile("icon.svg", "utf8");
 const icon192 = await fs.readFile("icon-192.svg", "utf8");
 const icon512 = await fs.readFile("icon-512.svg", "utf8");
@@ -36,13 +37,15 @@ assert.ok(manifest.display === "standalone" && manifest.start_url === "./" && ma
 assert.ok(app.includes('<h1 dir="ltr">Rinemi</h1>') && app.includes('className="header-brand-mark" src="./icon.svg"'), "main app header must render the wordmark and brand mark");
 assert.ok(onboarding.includes("<strong>Rinemi</strong>") && !onboarding.includes("<strong>Kanji5</strong>"), "onboarding header must use Rinemi rather than the legacy brand");
 assert.ok(onboarding.includes('className="kanji5-onboarding-brand-mark" src="./icon.svg"'), "onboarding must use the canonical Rinemi mark");
-assert.ok(onboarding.includes("--paper:#F7F4EE") && onboarding.includes("--indigo:#505F83") && onboarding.includes("--shu:#505F83") && onboarding.includes("--sakura:#D6A1AA"), "onboarding palette must match the Rinemi system");
+assert.ok(onboarding.includes("--paper:#F7F4EE") && onboarding.includes("--indigo:var(--ds-color-action-primary)") && onboarding.includes("--shu:var(--ds-color-action-primary)") && onboarding.includes("--sakura:#D6A1AA"), "onboarding palette must map brand actions to the shared semantic tokens");
+assert.ok(designSystem.includes("--ds-brand-indigo: #505F83;") && designSystem.includes("--ds-brand-sakura: #D6A1AA;"), "semantic brand tokens must preserve the canonical indigo and sakura palette");
 assert.ok(!onboarding.includes("--indigo:#304f74") && !onboarding.includes("--shu:#b56d72"), "onboarding must not retain its legacy palette");
 assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — پنج کانجی در روز" : "Rinemi — Five kanji a day";'), "dynamic document title must use Rinemi in both languages");
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
 }
-assert.ok(styles.includes("--shu:#505F83;") && styles.includes("--sakura:#D6A1AA;"), "UI tokens must include the Rinemi indigo and sakura palette");
+assert.ok(styles.includes("--shu:var(--ds-color-legacy-shu);") && styles.includes("--sakura:var(--ds-brand-sakura);"), "UI brand aliases must be backed by the semantic palette");
+assert.ok(designSystem.includes("--ds-color-legacy-shu: var(--ds-color-action-primary);"), "Legacy Shu alias must resolve to the canonical action token");
 for (const [name, source] of [["icon.svg", icon], ["icon-192.svg", icon192], ["icon-512.svg", icon512]]) {
   assert.ok(source.includes("Rinemi"), name + " must carry accessible Rinemi naming");
   assert.ok(source.includes("#505F83") && source.includes("#D6A1AA") && source.includes("#F7F4EE"), name + " must match the canonical palette");
