@@ -14,7 +14,7 @@ test("System onboarding follows OS changes without darkening System-Light", asyn
   await page.goto("/");
   const onboarding = page.locator('[data-testid="onboarding-flow"]');
   await expect(onboarding).toBeVisible({ timeout: 20000 });
-  await onboarding.getByRole("button", { name: /Let's begin/ }).click();
+  await onboarding.getByRole("button", { name: /Set up my first session/ }).click();
   await expect(onboarding.getByRole("heading", { name: "How you learn each kanji" })).toBeVisible();
   await onboarding.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "Where should we start?" })).toBeVisible();
