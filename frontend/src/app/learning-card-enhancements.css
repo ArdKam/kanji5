@@ -79,7 +79,7 @@
   border-color: var(--line-interactive);
 }
 .kanji-structure-preview-action:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--ds-color-action-primary) 36%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--ai) 36%, transparent);
   outline-offset: 2px;
 }
 .kanji-structure-preview-arrow { color: var(--mute); font-size: 15px; }
