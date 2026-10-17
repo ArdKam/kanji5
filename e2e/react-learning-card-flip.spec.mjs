@@ -148,6 +148,8 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
       ]) {
         await page.setViewportSize(viewport);
         await expect(glyph).toBeVisible();
+        // The overview can be slightly taller after readable 12px microtype; ensure its structure remains reachable by scrolling rather than clipping it.
+        await structure.scrollIntoViewIfNeeded();
         const geometry = await overview.evaluate((pageEl) => {
           const rect = (selector) => {
             const element = pageEl.querySelector(selector);
