@@ -19,9 +19,14 @@ const topicAssignments = taxonomy.topics.flatMap(topic =>
   topic.characters.trim().split(/\s+/).filter(Boolean).map(character => ({ topicId: topic.id, character }))
 );
 const uniqueTopicCharacters = new Set(topicAssignments.map(entry => entry.character));
-const onAtLimit = records.filter(entry => entry.on.length === 4).length;
-const kunAtLimit = records.filter(entry => entry.kun.length === 4).length;
-const meaningsAtLimit = records.filter(entry => entry.meaning.length === 3).length;
+const totalGlosses = records.reduce((sum, entry) => sum + entry.meaning.length, 0);
+const totalOnReadings = records.reduce((sum, entry) => sum + entry.on.length, 0);
+const totalKunReadings = records.reduce((sum, entry) => sum + entry.kun.length, 0);
+const formerCapAudit = {
+  meaning: { cap: 3, recordsAffected: records.filter(entry => entry.meaning.length > 3).length, valuesRestored: records.reduce((sum, entry) => sum + Math.max(0, entry.meaning.length - 3), 0) },
+  on: { cap: 4, recordsAffected: records.filter(entry => entry.on.length > 4).length, valuesRestored: records.reduce((sum, entry) => sum + Math.max(0, entry.on.length - 4), 0) },
+  kun: { cap: 4, recordsAffected: records.filter(entry => entry.kun.length > 4).length, valuesRestored: records.reduce((sum, entry) => sum + Math.max(0, entry.kun.length - 4), 0) },
+};
 const validReadingToken = /^[\u3040-\u30ff・ー〜～.·-]+$/u;
 const radicalIds = new Set(radicalCatalog.radicals.map(radical => radical.id));
 const radicalGlyphs = new Set(radicalCatalog.radicals.map(radical => radical.glyph));
@@ -96,9 +101,16 @@ for (const topic of taxonomy.topics) {
   assert.equal(new Set(members).size, members.length, "Duplicate membership within topic " + topic.id);
 }
 
-assert.equal(meaningsAtLimit, 1492, "Update the source-cap review count when the source snapshot changes");
-assert.equal(onAtLimit, 22, "Update the source-cap review count when the source snapshot changes");
-assert.equal(kunAtLimit, 273, "Update the source-cap review count when the source snapshot changes");
+assert.deepEqual(
+  { glosses: totalGlosses, onReadings: totalOnReadings, kunReadings: totalKunReadings },
+  { glosses: 7937, onReadings: 2850, kunReadings: 3905 },
+  "The pinned source snapshot must retain every gloss and reading value",
+);
+assert.deepEqual(formerCapAudit, {
+  meaning: { cap: 3, recordsAffected: 1038, valuesRestored: 2402 },
+  on: { cap: 4, recordsAffected: 6, valuesRestored: 6 },
+  kun: { cap: 4, recordsAffected: 145, valuesRestored: 339 },
+}, "Update this audit only when the pinned source and complete-projection counts are reviewed");
 
 const audit = {
   catalog: {
@@ -108,9 +120,10 @@ const audit = {
     emptyMeaningEntries: records.filter(entry => !entry.meaning.length).length,
     emptyOnReadings: records.filter(entry => !entry.on.length).length,
     emptyKunReadings: records.filter(entry => !entry.kun.length).length,
-    recordsAtCurrentMeaningCap: meaningsAtLimit,
-    recordsAtCurrentOnReadingCap: onAtLimit,
-    recordsAtCurrentKunReadingCap: kunAtLimit,
+    totalGlosses,
+    totalOnReadings,
+    totalKunReadings,
+    valuesRestoredFromFormerCaps: formerCapAudit,
     nullFrequency: records.filter(entry => entry.frequency === null).length,
     nullJlpt: records.filter(entry => entry.jlpt === null).length,
   },
@@ -139,7 +152,7 @@ const audit = {
     coverageFraction: Number((uniqueTopicCharacters.size / records.length).toFixed(6)),
   },
   reviewRequired: [
-    "The builder currently caps English glosses at 3 and each reading class at 4; records at those limits are candidates for comparison with the pinned source, not proof that source values were lost.",
+    "The source auditor compares the complete projection from the pinned revision and fails if any gloss or reading is missing.",
     "kanjiapi.dev vocabulary and Tatoeba sentence results are runtime-fetched; their full live result sets are not frozen by this offline static-dataset audit.",
     "Topic associations are curated partial coverage, not a completeness requirement for all 2,136 kanji.",
   ],

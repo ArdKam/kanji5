@@ -2,7 +2,7 @@
 
 **Audit date:** 2026-10-17  
 **Baseline branch/commit:** `main` at `085524dc58547e33e42fcaff75784b0c6d3fe6b3`  
-**Purpose:** reproducible data-integrity baseline and prioritization. This is not an assertion that every gloss, reading, compound, or sentence has already received independent human lexicographic review.
+**Purpose:** reproducible data-integrity baseline and prioritization. PR #561 restores source values previously removed by the data builder. This is not an assertion that every gloss, reading, compound, or sentence has already received independent human lexicographic review.
 
 ## Executive result
 
@@ -26,13 +26,17 @@ The new `scripts/test-kanji-data-pipeline-audit.mjs` is intended to make the bas
 | Visual structure | Declared coverage 2,136/2,136 | KanjiVG tree roots are complete in the committed snapshot and existing contract test |
 | Learning dependencies | 2,100/2,136; 36 explicit source gaps | Not a completeness failure: TopoKanji dependencies are optional learning scaffolds, not canonical radical/structure data |
 | Topic taxonomy | 24 topics; 1,156 assignments; 849 unique kanji | 1,287 characters are not topic-tagged; this is documented partial curation |
-| Glosses at current cap | 1,492 entries contain 3 glosses | Candidates for comparison with source; not proof of discarded values |
-| On’yomi at current cap | 22 entries contain 4 readings | Candidates for comparison with source; not proof of discarded values |
-| Kun’yomi at current cap | 273 entries contain 4 readings | Candidates for comparison with source; not proof of discarded values |
+| English glosses | 7,937 source values; 7,937 retained after the correction | Restores 2,402 formerly discarded glosses across 1,038 kanji |
+| On’yomi | 2,850 source values; 2,850 retained after the correction | Restores 6 formerly discarded readings across 6 kanji |
+| Kun’yomi | 3,905 source values; 3,905 retained after the correction | Restores 339 formerly discarded readings across 145 kanji |
 
-The cap counts are particularly important: the current generator limits glosses to three and each reading class to four. Because those limits have already been applied in `kanji-data.json`, the committed output alone cannot tell us whether additional source values were omitted. A source-to-output comparison is needed before reporting an exact count of omitted readings or meanings.
+The generator previously limited English glosses to three and each reading class to four. The pinned-source CI audit verified that the pre-correction snapshot omitted 2,402 English glosses, 6 on’yomi, and 339 kun’yomi (2,747 values across 1,086 characters). This batch removes the caps, regenerates the snapshot from the exact pinned source revision, and adds a CI comparison that fails on any missing or different gloss, reading, stroke count, grade, JLPT value, frequency, order, character ID, or classical radical mapping.
 
-## Verified defect corrected in this batch
+## Verified defects corrected in this batch
+
+### Source-field truncation in the static catalog
+
+The pinned-source audit established that the builder discarded 2,747 KANJIDIC2-derived values due to `.slice(0, 3)` and `.slice(0, 4)` caps: 2,402 English glosses, 6 on’yomi, and 339 kun’yomi. The generator now preserves the full source arrays and `kanji-data.json` is regenerated from the same pinned commit. Presentation code continues to prioritize and limit what it displays; no new kanji IDs, review records, or scheduler data are created. `scripts/audit-kanji-source-overflow.mjs` now compares the full projection, checks metadata and ordering, and enforces zero mismatches.
 
 ### Vocabulary reading validator accepted mixed-script strings
 
@@ -68,9 +72,9 @@ KANJIDIC2 is a valuable broad character dictionary, but it is not identical to t
 
 ## Findings to carry into the next batches
 
-### P1 — Compare the generator output against the pinned source
+### P1 — Preserve the full pinned source projection — implemented in this batch
 
-Remove arbitrary reading/gloss truncation only together with a regenerated `kanji-data.json` and regression evidence. The source file was not available to this audit execution as a readable local payload, so no records are fabricated and no exact loss count is claimed. Before changing the dataset, run the builder in CI or another environment with access to its pinned source; compare every character's original `meanings.en`, `readings.on`, and `readings.kun` arrays with generated output. If display density is the concern, retain complete data and limit display in the presentation layer instead.
+The generator no longer truncates English glosses, on’yomi, or kun’yomi arrays. The dataset is regenerated from the exact upstream commit. CI now compares all 2,136 character records and fails if any meaning, reading, stroke count, grade, JLPT value, frequency, sort position, identity, or classical-radical mapping differs from the source projection. Presentation components continue to limit visible content and learner-priority policies keep rare/reference senses out of primary prompts; completeness does not require displaying every gloss or reading at once.
 
 ### P1 — Freeze and review provider examples
 
@@ -124,7 +128,7 @@ Context validation verifies Japanese-script presence, target-character presence,
 ## Current acceptance status
 
 - **Structural baseline:** measured from the committed static data.
-- **Vocabulary reading-shape validator:** corrected in the audit branch; regression tests added. CI still needs to confirm the complete suite.
-- **Complete source comparison for capped readings/glosses:** pending access to the pinned source during a reproducible build.
+- **Vocabulary reading-shape validator:** corrected in the audit branch; regression tests added.
+- **Static source completeness:** the generator and dataset now retain all 7,937 glosses, 2,850 on’yomi, and 3,905 kun’yomi from the pinned input; CI compares the full projection.
 - **Independent review of live vocabulary/context examples:** pending.
 - **Per-entry linguistic corrections:** only apply after a source can be cited for the specific correction; this batch deliberately does not invent examples or readings.
