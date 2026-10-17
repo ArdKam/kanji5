@@ -164,3 +164,28 @@ Main advanced again while this work was open and updated the runtime-initializat
 - **Diff check after this reconciliation:** current main → branch reports **zero commits behind** and only 10 intended changed files. `ROADMAP.md` begins with the exact current-main content and appends section 29; section 29 links back to this audit.
 - **Checks at commit `833f293`:** React presentation workflow [#3845](https://github.com/ArdKam/kanji5/actions/runs/39015542087) was queued and automated visual audit [#675](https://github.com/ArdKam/kanji5/actions/runs/39015542208) was pending at the last check. These are not pass results.
 - **Current constraint:** this audit append itself will change the PR head and may create yet another pair of workflow runs. Always inspect the live PR head and only count checks attached to that exact head. If main changes again before merge, repeat the same additive reconciliation; do not force-push or write to main.
+
+
+## Post-merge verification handoff — 2026-10-17
+
+### Merge record
+
+- **Implementation PR:** [#562 — feat(onboarding): shorten time to first learning session](https://github.com/ArdKam/kanji5/pull/562), merged by squash.
+- **Merge/current-main SHA:** `687c0a135ca89a2b5661d8ac01d4454157c3d358`.
+- **Tested PR head before merge:** `729355d7e6987d746704d7c409b633ef4ddf3bdf`.
+- The merge contains the intended onboarding UI/copy/E2E updates and roadmap section 29. The change is live in source on `main`; deployment of this SHA must be proven separately.
+
+### Current-main verification snapshot
+
+- **Pre-merge exact-head evidence:** React presentation workflow [#3846](https://github.com/ArdKam/kanji5/actions/runs/39015567626) and visual audit [#676](https://github.com/ArdKam/kanji5/actions/runs/39015567621) both succeeded. The full React presentation suite, accessibility, PWA/release matrix, WebKit, Firefox and visual audit passed on the PR head.
+- **Post-merge React presentation workflow:** [#3848](https://github.com/ArdKam/kanji5/actions/runs/39016377389) attempt 1 failed at Firefox browser compatibility smoke, where the Learning-card reveal button selector `#root .learning-card-front .button.wide` did not appear within 15 seconds. The same smoke had passed on the tested PR head. On **attempt 2**, the root contract suite, React presentation E2E, accessibility, PWA/release matrix, Firefox smoke, navigation, Data Trust, account shell, first-run onboarding and Stats gates passed.
+- **At this snapshot:** attempt 2 was still in progress at 46/53 main-job steps; the learning-card flip gate was active, with no failures reported for attempt 2. Confirm the final workflow conclusion before treating current-main CI as complete.
+- **Deployment caution:** deploy [#1700](https://github.com/ArdKam/kanji5/actions/runs/39016244199) succeeded but was for the older SHA `19abe7fce8598a3618d9a9a1c20bb106d86520bd`, not this onboarding merge. Deploy attempt [#1701](https://github.com/ArdKam/kanji5/actions/runs/39016719681) was skipped because the first merged-SHA build attempt failed. Neither is evidence that `687c0a1` was published.
+
+### Exact next actions
+
+1. Confirm workflow #3848 attempt 2 finishes with overall `success` on head `687c0a135ca89a2b5661d8ac01d4454157c3d358`.
+2. Confirm a fresh Pages deployment is triggered for that same SHA and completes successfully.
+3. Verify the deployment job reports `LIVE_PAGES_ARTIFACT_VERIFIED`, matching staged/live hashes for the app entrypoint, service worker, React JS/CSS and Supabase vendor asset, then passes its live offline/core-product E2E.
+4. Only after those exact-SHA checks pass should this handoff and roadmap entry be marked **MERGED / DEPLOYED / VERIFIED**. If main advances meanwhile, follow the stale-SHA guard and verify the newer main build/deployment instead.
+5. Keep future learner-research work separate: validate the first-card action end-to-end in the live artifact, run 3/7/14-day return scenarios, review Again/Hard/Good/Easy semantics, and evaluate contextual Dictionary/handwriting/Reading Lab discovery. No new analytics or user-content telemetry was added in this implementation.
