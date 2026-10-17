@@ -7,10 +7,10 @@
   transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease,box-shadow var(--motion-interaction) ease;
 }
 .reading-lab-sentence-autoplay.is-active{
-  border-color:color-mix(in srgb,var(--shu) 34%,var(--line));
-  background:color-mix(in srgb,var(--shu) 8%,var(--paper));
+  border-color:color-mix(in srgb,var(--ai) 34%,var(--line));
+  background:color-mix(in srgb,var(--ai) 8%,var(--paper));
   color:var(--ink);
-  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--shu) 10%,transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ai) 10%,transparent);
 }
 @media(max-width:640px){
   .reading-lab-sentence-repeat,

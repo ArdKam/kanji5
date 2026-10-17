@@ -498,7 +498,12 @@ test('More menu blocks background controls while modal is open and restores focu
 
 test('extra-small UI type uses a 12px minimum', async ({page})=>{
   await clean(page);
-  const token=await page.locator(':root').evaluate(element=>getComputedStyle(element).getPropertyValue('--text-xs').trim());
+  const token=await page.locator(':root').evaluate(element=>{
+    const style=getComputedStyle(element);
+    const raw=style.getPropertyValue('--text-xs').trim();
+    const alias=raw.match(/^var\(\s*(--[\w-]+)/);
+    return alias ? style.getPropertyValue(alias[1]).trim() : raw;
+  });
   expect(Number.parseFloat(token)).toBeGreaterThanOrEqual(12);
 });
 
