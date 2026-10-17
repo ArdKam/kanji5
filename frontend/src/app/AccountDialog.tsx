@@ -75,7 +75,7 @@ function formatSyncedAt(value: string | null, language: Language) {
   }
 }
 
-export function AccountButton({ language, onClick }: { language: Language; onClick: () => void }) {
+export function AccountButton({ language, onClick, disabled = false }: { language: Language; onClick: () => void; disabled?: boolean }) {
   const [state, setState] = useState<AccountState>({ status: "loading", user: null, syncStatus: "idle", error: null, recoveryPending: false, syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null } });
   useEffect(() => {
     let active = true;
@@ -97,6 +97,7 @@ export function AccountButton({ language, onClick }: { language: Language; onCli
   return <button
     className={"account-button "+(state.status === "signed-in" ? "is-signed-in" : "")}
     type="button"
+    disabled={disabled}
     onClick={onClick}
     aria-label={label}
     title={label}
