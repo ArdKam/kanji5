@@ -12,10 +12,23 @@ test('PWA shell survives offline reload and preserves local learning state', asy
   });
   await expect.poll(async()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
 
-  const manifest=await page.evaluate(async()=>fetch('./manifest.webmanifest').then(r=>r.json()));
+  const manifest=await page.evaluate(async()=>{
+    const response=await fetch('./manifest.webmanifest');
+    if(!response.ok)throw new Error('PWA_MANIFEST_UNAVAILABLE:'+response.status);
+    return response.json();
+  });
   expect(manifest.display).toBe('standalone');
   expect(manifest.start_url).toBe('./');
+  expect(manifest.scope).toBe('./');
+  expect(manifest.id).toBe('./');
   expect(manifest.icons?.length).toBeGreaterThan(0);
+  expect(manifest.icons.map(icon=>icon.sizes)).toEqual(expect.arrayContaining(['192x192','512x512']));
+  const iconResponses=await page.evaluate(async icons=>Promise.all(icons.map(async icon=>{
+    const response=await fetch(new URL(icon.src,location.href));
+    return {src:icon.src,status:response.status,contentType:response.headers.get('content-type')||''};
+  })),manifest.icons);
+  expect(iconResponses.every(icon=>icon.status===200),JSON.stringify(iconResponses)).toBe(true);
+  expect(iconResponses.every(icon=>icon.contentType.includes('image/svg+xml')),JSON.stringify(iconResponses)).toBe(true);
 
   const requiredCaches=await page.evaluate(async()=>{
     const required=['./index.html','./app-bootstrap.js','./react-entry.js','./react-dist/kanji5-react.js','./react-dist/kanji5-react.css','./v1.6-session.js','./v1.9-v2-boundary.js'];
