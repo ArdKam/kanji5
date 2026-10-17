@@ -473,3 +473,30 @@ test("Settings destructive confirmations move focus into the confirmation and ke
   await expect(resetDialog).toBeHidden();
   await expect(reset).toBeFocused();
 });
+
+
+test('More menu blocks background controls while modal is open and restores focus', async ({page})=>{
+  await clean(page);
+  await page.setViewportSize({width:390,height:844});
+  const trigger=page.locator('.header-menu-trigger');
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+
+  const menu=page.locator('#header-tools-menu');
+  await expect(menu).toBeVisible();
+  await expect(menu).toHaveAttribute('aria-modal','true');
+  await expect(page.locator('.experience-nav')).toHaveAttribute('inert','');
+  await expect(page.locator('#primary-content')).toHaveAttribute('inert','');
+  await expect(page.locator('.account-button')).toBeDisabled();
+  await expect(menu.locator('button:not([disabled])').first()).toBeFocused();
+
+  await page.keyboard.press('Escape');
+  await expect(menu).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test('extra-small UI type uses a 12px minimum', async ({page})=>{
+  await clean(page);
+  const token=await page.locator(':root').evaluate(element=>getComputedStyle(element).getPropertyValue('--text-xs').trim());
+  expect(Number.parseFloat(token)).toBeGreaterThanOrEqual(12);
+});
