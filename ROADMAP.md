@@ -8,6 +8,30 @@
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
+## 2.0.2 Current product/engineering audit handoff — 2026-10-17
+
+**Dated evidence record:** [docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md). This audit is additive: it does not rewrite the historical C4/R12/R13 implementation records, and it does not treat an open PR as completion evidence.
+
+**Observed baseline:** main at 085524dc58547e33e42fcaff75784b0c6d3fe6b3; React presentation build passed in workflow run 38964130926; GitHub Pages deployment passed in run 38965141947. The deployment process rebuilt from the exact SHA, checked it was current main, validated the artifact, compared selected live asset hashes and ran live/offline smoke checks. Repository metadata reported main protection disabled. Re-verify all of this before a later release; this is a dated snapshot.
+
+**Open release blockers — keep acceptance OPEN until current evidence closes them:**
+- **Education/content:** independent human QA for meanings/readings/examples/context/curated mnemonics and empirical placement validation remain outstanding in docs/EDUCATIONAL-CONTENT-AUDIT.md and docs/C4-SAMPLE-CONTENT-QA.md.
+- **Security:** PR #554 documents a 2026-10-16 live smoke with positive CSP/XSS/RLS checks and gaps around HTTP security headers and Supabase leaked-password protection. Re-run on the exact current deployed SHA; exploitability and authenticated testing are not claimed complete.
+- **Privacy/governance:** docs/RELEASE-EVIDENCE.md and docs/LEGAL-REVIEW-CHECKLIST.md report no account-delete API, no complete local browser-data erasure path, incomplete private request/retention/Privacy/Terms evidence. A database cascade is not a user-facing deletion workflow.
+
+**Highest-priority current-main work:**
+1. Reconcile open PRs against current main and protect main. The checked queue had overlapping Learning-card candidates (#558/#550/#545/#538), UX/design-system candidates (#548/#547/#535/#540), menu candidates (#531/#529), and other stale-base work. Port unique value, retarget, supersede or close; do not merge the queue in bulk.
+2. Keep PR #558 unmerged until the exact updated head passes its Learning-card gate. Candidate 61e22b1 failed two compact/landscape bounds tests in run 38971761198; both reported top=-32px. This is a candidate-branch failure, not a failure of the already-deployed main build.
+3. Fix the current service-worker empty-result ambiguity in sw.js/VocabularyExamples.tsx: an uncached offline API failure may return [] with HTTP 200 plus X-Kanji5-Offline-Fallback, while the UI displays a normal empty state. Preserve old-client/offline compatibility and distinguish missing data from transport failure.
+4. Plan a reviewed Persian learner-meaning overlay without replacing the authoritative source glosses or migrating learner state. Existing kanji-data.json has 2,136 records but its source meanings are English; the 24-topic Dictionary taxonomy currently has 1,156 assignments across 849 unique kanji and explicitly documents partial coverage.
+5. Continue visual/theme/typography polish only after these gates: frontend/src/styles.css still sets --text-xs to 11px, although muted contrast and dark-mode contracts exist. Consolidate overlapping design-system changes rather than introducing a parallel system.
+
+**Architecture constraints remain unchanged:** FSRS scheduling authority; v1.9 Learner Model authority; Adaptive Planner selection authority; engine-owned grading/recovery/persistence; React presentation-only. No broad rewrite, duplicate scheduler, parallel learner state or broad persistence migration without a demonstrated defect.
+
+**Release order:** (0) protect main and reconcile PRs → (1) close educational, security and privacy/governance acceptance → (2) fix Learning-card and offline correctness → (3) stage Persian content and reviewed Dictionary improvements → (4) run measured retention/learning studies. Public-beta invitation remains blocked until the applicable P0 gates are proven against one frozen release candidate SHA.
+
+**Handoff rule:** Future audits must refresh current main, open PRs, exact-head workflows and deployed evidence. Once a finding is fixed, record the merge SHA, exact verification run(s), any remaining acceptance-only work, and a DO NOT REOPEN instruction unless a current-main regression is demonstrated.
+
 ---
 
 ## 0. Product direction
