@@ -92,9 +92,10 @@
 .kanji-structure-preview-action-placeholder { width: 116px; border-color: transparent; }
 .learning-back-identity-visual { min-width: 0; }
 .learning-card-back .learning-back-page:first-child .learning-back-scroll {
-  overflow-y: hidden;
+  overflow-y: auto;
   padding: 2px 2px 2px;
   gap: 4px;
+  overscroll-behavior: contain;
 }
 .learning-card-back .learning-back-page:first-child .kanji-structure-preview {
   min-height: 48px;
