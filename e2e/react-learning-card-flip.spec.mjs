@@ -117,6 +117,81 @@ async function assertCardBounds(card) {
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewport);
 }
 
+test("front-side recall cue remains legible and correctly ordered across theme and viewport", async ({ browser }) => {
+  const scenarios = [
+    { language: "en", theme: "light", viewport: { width: 1280, height: 720 } },
+    { language: "fa", theme: "light", viewport: { width: 390, height: 844 } },
+    { language: "en", theme: "dark", viewport: { width: 390, height: 844 } },
+    { language: "fa", theme: "dark", viewport: { width: 1280, height: 720 } },
+  ];
+
+  for (const scenario of scenarios) {
+    const context = await browser.newContext({ viewport: scenario.viewport });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 2);
+      await page.addInitScript(({ language, theme }) => {
+        localStorage.setItem("kanji5-ui-language", language);
+        localStorage.setItem("kanji5-theme", theme);
+        localStorage.setItem("kanji5-onboarding-v2", "complete");
+      }, { language: scenario.language, theme: scenario.theme });
+      await page.goto("/");
+      const card = page.locator("#root .learning-card");
+      await expect(card).toBeVisible({ timeout: 20000 });
+      await expect(page.locator("html")).toHaveAttribute("data-theme", scenario.theme);
+      await expect(page.locator("html")).toHaveAttribute("lang", scenario.language);
+
+      const cue = card.locator(".learning-recall-cue");
+      const reveal = card.locator(".learning-card-front .button.primary.wide");
+      await expect(cue).toBeVisible();
+      await expect(cue).toHaveText(
+        scenario.language === "fa"
+          ? "پیش از دیدن پاسخ، هر معنایی یا خوانشی را که به یاد می‌آوری حدس بزن."
+          : "Before revealing, try to recall any meaning or reading you know."
+      );
+      await expect(reveal).toHaveAttribute("aria-describedby", "learning-recall-cue");
+      await expect(reveal).toBeEnabled();
+
+      const geometry = await card.evaluate((el) => {
+        const bounds = (selector) => {
+          const target = el.querySelector(selector);
+          if (!(target instanceof HTMLElement)) throw new Error("Missing learning-card element: " + selector);
+          const rect = target.getBoundingClientRect();
+          return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+        };
+        const rgb = value => value.match(/[0-9.]+/g)?.slice(0, 3).map(Number) ?? [];
+        const luminance = value => {
+          const channels = rgb(value);
+          if (channels.length !== 3) return null;
+          const normalized = channels.map(channel => channel / 255).map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+          return normalized[0] * 0.2126 + normalized[1] * 0.7152 + normalized[2] * 0.0722;
+        };
+        const foreground = luminance(getComputedStyle(el.querySelector(".learning-recall-cue")).color);
+        const surface = luminance(getComputedStyle(el).backgroundColor);
+        const contrast = foreground === null || surface === null ? null : (Math.max(foreground, surface) + 0.05) / (Math.min(foreground, surface) + 0.05);
+        return {
+          face: bounds(".learning-card-front"),
+          row: bounds(".learning-card-front .kanji-row"),
+          cue: bounds(".learning-recall-cue"),
+          reveal: bounds(".learning-card-front .button.primary.wide"),
+          horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+          contrast,
+        };
+      });
+      expect(geometry.cue.left).toBeGreaterThanOrEqual(geometry.face.left - 1);
+      expect(geometry.cue.right).toBeLessThanOrEqual(geometry.face.right + 1);
+      expect(geometry.cue.top).toBeGreaterThanOrEqual(geometry.row.bottom - 1);
+      expect(geometry.cue.bottom).toBeLessThanOrEqual(geometry.reveal.top + 1);
+      expect(geometry.cue.height).toBeGreaterThan(0);
+      expect(geometry.horizontalOverflow).toBe(false);
+      expect(geometry.contrast, JSON.stringify(geometry)).not.toBeNull();
+      expect(geometry.contrast, JSON.stringify(geometry)).toBeGreaterThanOrEqual(4.5);
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 test("learning-card answer presents kanji, meaning, readings and structure in a stable hierarchy", async ({ browser }) => {
   await Promise.all(["en", "fa"].map(async (language) => {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
@@ -167,7 +242,7 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
             meaning: rect(".learning-back-meaning"),
             readings: rect(".learning-back-readings-block"),
             structure: rect(".learning-back-identity-visual"),
-            scroll: { left: scrollRect.left, right: scrollRect.right, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth },
+            scroll: { left: scrollRect.left, right: scrollRect.right, top: scrollRect.top, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth, scrollHeight: scroll.scrollHeight, scrollTop: scroll.scrollTop },
           };
         });
         expect(geometry.glyph.width).toBeGreaterThanOrEqual(44);
@@ -176,13 +251,258 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
         expect(geometry.label.top).toBeLessThanOrEqual(geometry.meaning.top + 1);
         expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.readings.top + 2);
         expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.structure.top + 2);
-        expect(geometry.structure.bottom).toBeLessThanOrEqual(geometry.scroll.bottom + 1);
+        expect(geometry.structure.bottom - geometry.scroll.top + geometry.scroll.scrollTop).toBeLessThanOrEqual(geometry.scroll.scrollHeight + 1);
         expect(geometry.scroll.scrollWidth).toBeLessThanOrEqual(geometry.scroll.clientWidth + 1);
       }
     } finally {
       await context.close();
     }
   }));
+});
+
+test("Learning card styles are ready before reveal and the flip preserves interactive faces", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const language = new URL(window.location.href).searchParams.get("rinemi-test-language");
+    if (language === "fa" || language === "en") localStorage.setItem("kanji5-ui-language", language);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+
+  for (const scenario of [
+    { language: "en", viewport: { width: 1280, height: 720 } },
+    { language: "fa", viewport: { width: 390, height: 844 } },
+    { language: "en", viewport: { width: 844, height: 390 } },
+    { language: "fa", viewport: { width: 1280, height: 720 } },
+    { language: "en", viewport: { width: 390, height: 844 } },
+    { language: "fa", viewport: { width: 844, height: 390 } },
+  ]) {
+    await page.setViewportSize(scenario.viewport);
+    await page.goto("/?rinemi-test-language=" + scenario.language);
+
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+    await expect.poll(() => page.locator("style[data-rinemi-learning-card-styles]").count()).toBe(1);
+
+    const before = await card.evaluate(el => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const preview = el.querySelector(".kanji-structure-preview");
+      const reveal = el.querySelector(".learning-card-front .button.primary");
+      if (!(flip instanceof HTMLElement) || !(front instanceof HTMLElement) ||
+          !(back instanceof HTMLElement) || !(preview instanceof HTMLElement) ||
+          !(reveal instanceof HTMLElement)) throw new Error("Learning card flip elements are incomplete");
+      const rect = reveal.getBoundingClientRect();
+      const revealInViewport = rect.bottom > 0 && rect.right > 0 &&
+        rect.top < window.innerHeight && rect.left < window.innerWidth;
+      const duration = getComputedStyle(flip).transitionDuration.split(",")[0].trim();
+      const transitionSeconds = duration.endsWith("ms")
+        ? Number.parseFloat(duration) / 1000
+        : Number.parseFloat(duration);
+      return {
+        previewDisplay: getComputedStyle(preview).display,
+        stylesReadyBeforeReveal: Boolean(document.querySelector("style[data-rinemi-learning-card-styles]")),
+        transitionSeconds,
+        frontBackface: getComputedStyle(front).backfaceVisibility,
+        backBackface: getComputedStyle(back).backfaceVisibility,
+        frontAriaHidden: front.getAttribute("aria-hidden"),
+        frontInert: front.inert,
+        backAriaHidden: back.getAttribute("aria-hidden"),
+        backInert: back.inert,
+        revealInViewport,
+        revealBounds: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+      };
+    });
+
+    expect(before.previewDisplay).toBe("grid");
+    expect(before.stylesReadyBeforeReveal).toBe(true);
+    expect(before.transitionSeconds).toBeGreaterThan(0.01);
+    expect(before.frontBackface).toBe("hidden");
+    expect(before.backBackface).toBe("hidden");
+    expect(before.frontAriaHidden).toBe("false");
+    expect(before.frontInert).toBe(false);
+    expect(before.backAriaHidden).toBe("true");
+    expect(before.backInert).toBe(true);
+    expect(before.revealInViewport, JSON.stringify(before)).toBe(true);
+
+    await page.evaluate(() => {
+      const flip = document.querySelector("#root .learning-card-flip");
+      if (!(flip instanceof HTMLElement)) throw new Error("Learning card flip is unavailable for sampling");
+      const frames = [];
+      const start = performance.now();
+      const sample = () => {
+        frames.push(getComputedStyle(flip).transform);
+        if (performance.now() - start < 900) requestAnimationFrame(sample);
+        else window.__rinemiLearningCardFlipFrames = frames;
+      };
+      window.__rinemiLearningCardFlipFrames = frames;
+      requestAnimationFrame(sample);
+    });
+
+    const reveal = page.getByRole("button", {
+      name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/,
+    });
+    await expect(reveal).toBeInViewport();
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(950);
+
+    const after = await card.evaluate(el => {
+      const flip = el.querySelector(".learning-card-flip");
+      const front = el.querySelector(".learning-card-front");
+      const back = el.querySelector(".learning-card-back");
+      const activePage = el.querySelector(".learning-back-page.active");
+      const meaning = el.querySelector(".learning-back-page.active .learning-back-meaning");
+      const readings = el.querySelector(".learning-back-page.active .learning-back-readings");
+      const pageLabels = Array.from(el.querySelectorAll(".learning-back-page")).map(node => node.getAttribute("aria-label"));
+      const shortcutLabels = Array.from(el.querySelectorAll(".learning-back-page-shortcut")).map(node => node.getAttribute("aria-label"));
+      if (!(flip instanceof HTMLElement) || !(front instanceof HTMLElement) ||
+          !(back instanceof HTMLElement) || !activePage || !meaning || !readings) {
+        throw new Error("Learning card content is incomplete after reveal");
+      }
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(flip).transform);
+      const rect = el.getBoundingClientRect();
+      return {
+        transformM11: matrix.m11,
+        frontAriaHidden: front.getAttribute("aria-hidden"),
+        frontInert: front.inert,
+        backAriaHidden: back.getAttribute("aria-hidden"),
+        backInert: back.inert,
+        meaningText: meaning.textContent?.trim() || "",
+        meaningVisible: getComputedStyle(meaning).display !== "none" && meaning.getBoundingClientRect().height > 0,
+        readingsVisible: getComputedStyle(readings).display !== "none" && readings.getBoundingClientRect().height > 0,
+        pageLabels,
+        shortcutLabels,
+        cardLeft: rect.left,
+        cardRight: rect.right,
+        viewportWidth: window.innerWidth,
+      };
+    });
+    const frames = await page.evaluate(() => window.__rinemiLearningCardFlipFrames || []);
+    expect(new Set(frames).size).toBeGreaterThan(2);
+    expect(after.transformM11).toBeLessThan(-0.99);
+    expect(after.frontAriaHidden).toBe("true");
+    expect(after.frontInert).toBe(true);
+    expect(after.backAriaHidden).toBe("false");
+    expect(after.backInert).toBe(false);
+    expect(after.meaningText.length).toBeGreaterThan(0);
+    expect(after.meaningVisible).toBe(true);
+    expect(after.readingsVisible).toBe(true);
+    expect(after.shortcutLabels).toHaveLength(4);
+    expect(after.shortcutLabels).toEqual(after.pageLabels);
+    expect(after.cardLeft).toBeGreaterThanOrEqual(-1);
+    expect(after.cardRight).toBeLessThanOrEqual(after.viewportWidth + 1);
+    await assertCardBounds(card);
+  }
+});
+
+test("Learning card remains interactive when reduced motion is requested", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-ui-language", "fa");
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  const reveal = page.getByRole("button", { name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/ });
+  await reveal.click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+  const result = await card.evaluate(el => {
+    const flip = el.querySelector(".learning-card-flip");
+    const front = el.querySelector(".learning-card-front");
+    const back = el.querySelector(".learning-card-back");
+    if (!(flip instanceof HTMLElement) || !(front instanceof HTMLElement) || !(back instanceof HTMLElement)) {
+      throw new Error("Learning card state is unavailable after a reduced-motion reveal");
+    }
+    const duration = getComputedStyle(flip).transitionDuration.split(",")[0].trim();
+    const seconds = duration.endsWith("ms") ? Number.parseFloat(duration) / 1000 : Number.parseFloat(duration);
+    return {
+      seconds,
+      m11: new DOMMatrixReadOnly(getComputedStyle(flip).transform).m11,
+      frontInert: front.inert,
+      backInert: back.inert,
+    };
+  });
+  expect(result.seconds).toBeLessThan(0.01);
+  expect(result.m11).toBeLessThan(-0.99);
+  expect(result.frontInert).toBe(true);
+  expect(result.backInert).toBe(false);
+  await expect(card.locator(".learning-back-meaning")).toBeVisible();
+});
+
+test("Learning meaning and structure stay reachable in compact and landscape layouts", async ({ page }) => {
+  await routeExamples(page, 5);
+  await page.addInitScript(() => {
+    const language = new URL(window.location.href).searchParams.get("rinemi-test-language");
+    if (language === "fa" || language === "en") localStorage.setItem("kanji5-ui-language", language);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+  });
+  for (const scenario of [
+    { language: "en", viewport: { width: 844, height: 390 } },
+    { language: "fa", viewport: { width: 844, height: 390 } },
+    { language: "en", viewport: { width: 320, height: 740 } },
+    { language: "fa", viewport: { width: 320, height: 740 } },
+  ]) {
+    await page.setViewportSize(scenario.viewport);
+    await page.goto("/?rinemi-test-language=" + scenario.language);
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 20000 });
+    const reveal = page.getByRole("button", {
+      name: /(نمایش (پاسخ|اطلاعات کانجی|معنی و خوانش‌ها)|Reveal meaning & readings|Show (answer|kanji information))/,
+    });
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await page.waitForTimeout(520);
+
+    const focus = await page.evaluate(() => {
+      const node = document.querySelector(".learning-card-back > .sr-only");
+      return { focused: node === document.activeElement, text: node?.textContent?.trim() || "" };
+    });
+    expect(focus.focused).toBe(true);
+    expect(focus.text).toMatch(/(معنی و ساختار|Meaning & structure)/);
+    const cardBoundsAfterReveal = await card.evaluate(el => {
+      const rect = el.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, viewportHeight: window.innerHeight };
+    });
+    const navigationBounds = await page.locator(".experience-nav").boundingBox();
+    expect(navigationBounds).not.toBeNull();
+    expect(cardBoundsAfterReveal.top).toBeGreaterThanOrEqual(-1);
+    expect(cardBoundsAfterReveal.bottom).toBeLessThanOrEqual(cardBoundsAfterReveal.viewportHeight + 1);
+    expect(cardBoundsAfterReveal.bottom).toBeLessThanOrEqual((navigationBounds?.y ?? cardBoundsAfterReveal.viewportHeight) - 1);
+
+    const scroll = card.locator(".learning-back-page.active .learning-back-scroll");
+    const previewAction = card.locator(".learning-back-page.active .kanji-structure-preview-action");
+    await expect(previewAction).toBeVisible();
+    const metrics = await scroll.evaluate((el) => {
+      const action = el.querySelector(".kanji-structure-preview-action");
+      if (!(action instanceof HTMLElement)) throw new Error("Full-structure action is missing from the meaning page");
+      const before = { scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
+      el.scrollTop = el.scrollHeight;
+      const scroller = el.getBoundingClientRect();
+      const target = action.getBoundingClientRect();
+      return {
+        overflowY: getComputedStyle(el).overflowY,
+        ...before,
+        scrollTop: el.scrollTop,
+        actionTop: target.top,
+        actionBottom: target.bottom,
+        scrollTopEdge: scroller.top,
+        scrollBottomEdge: scroller.bottom,
+        viewportHeight: window.innerHeight,
+      };
+    });
+    expect(metrics.overflowY).toBe("auto");
+    expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
+    if (scenario.viewport.height <= 460) expect(metrics.scrollTop).toBeGreaterThan(0);
+    expect(metrics.actionTop).toBeGreaterThanOrEqual(metrics.scrollTopEdge - 1);
+    expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.scrollBottomEdge + 1);
+    await expect(card.locator(".learning-card-back .rating-grid")).toBeVisible();
+    await assertCardBounds(card);
+  }
 });
 
 test("learning first page keeps readings above the rating footer on desktop", async ({ page }) => {
@@ -211,14 +531,14 @@ test("reference meanings and readings open in a keyboard-accessible modal", asyn
     await expect(trigger).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-controls", "learning-reference-info");
-    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings");
+    await expect(trigger).toHaveAccessibleName(scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings");
 
     await trigger.click();
     const dialog = page.locator("#learning-reference-info");
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAttribute("aria-labelledby", "learning-reference-info-title");
     await expect.poll(() => dialog.evaluate(el => el.matches(":modal"))).toBe(true);
-    await expect(dialog.getByRole("heading", { name: scenario.language === "fa" ? "معنی‌ها و خوانش‌های مرجع" : "More reference meanings and readings" })).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: scenario.language === "fa" ? "معنی‌ها و خوانش‌های بیشتر" : "More meanings & readings" })).toBeVisible();
     const rows = dialog.locator(".learning-reference-info-grid .stat-row");
     await expect.poll(async () => rows.count()).toBeGreaterThan(0);
 
@@ -257,15 +577,22 @@ test("learning card stays within a short desktop landscape viewport", async ({ p
   const metrics = await card.evaluate((el) => {
     const rect = el.getBoundingClientRect();
     const style = getComputedStyle(el);
+    const navigation = document.querySelector(".experience-nav");
+    const navigationRect = navigation instanceof HTMLElement ? navigation.getBoundingClientRect() : null;
     return {
+      top: rect.top,
+      bottom: rect.bottom,
       height: rect.height,
       viewportHeight: window.innerHeight,
       minHeight: parseFloat(style.minHeight),
+      navigationTop: navigationRect?.top ?? window.innerHeight,
     };
   });
   expect(metrics.height).toBeLessThanOrEqual(metrics.viewportHeight - 32 + 1);
-  expect(metrics.height).toBeGreaterThanOrEqual(300);
+  expect(metrics.height).toBeGreaterThanOrEqual(220);
   expect(metrics.minHeight).toBeLessThanOrEqual(metrics.viewportHeight - 32 + 1);
+  expect(metrics.top).toBeGreaterThanOrEqual(-1);
+  expect(metrics.bottom).toBeLessThanOrEqual(metrics.navigationTop - 1);
   await expect(card.locator(".learning-back-page.active")).toBeVisible();
 });
 
@@ -284,6 +611,11 @@ test("learning card exposes four full-content back pages in Persian and English"
       await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings").first()).toBeVisible();
       const exampleCount = await card.locator(".learning-back-page").nth(1).locator(".example-row").count();
       expect(exampleCount).toBeGreaterThan(2);
+      const firstExample = card.locator(".learning-back-page").nth(1).locator(".example-row").first();
+      await expect(firstExample.locator(".example-main")).toHaveAttribute("lang", "ja");
+      await expect(firstExample.locator(".example-main")).toHaveAttribute("dir", "ltr");
+      await expect(firstExample.locator(".example-meaning")).toHaveAttribute("lang", "en");
+      await expect(firstExample.locator(".example-meaning")).toHaveAttribute("dir", "ltr");
       await expect(card.locator(".learning-back-page").nth(2).locator(".mnemonic-page")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(3).locator(".stroke-page")).toHaveCount(1);
       await expect(card.locator(".learning-back-page").nth(0).locator(".example-row")).toHaveCount(0);
@@ -476,25 +808,28 @@ test("learning-card structure is a compact preview with full details in a modal"
     const previewPage = card.locator(".learning-back-page.active");
     const preview = previewPage.locator(".kanji-structure-preview-action");
     await expect(preview).toBeVisible({ timeout: 10000 });
-    await expect(preview).toBeVisible();
-    await preview.scrollIntoViewIfNeeded();
     const metrics = await previewPage.evaluate(pageEl => {
       const scroll = pageEl.querySelector(".learning-back-scroll");
-      const overview = pageEl.querySelector(".learning-back-overview");
-      const preview = pageEl.querySelector(".kanji-structure-preview-action");
-      const scrollRect = scroll?.getBoundingClientRect();
-      const previewRect = preview?.getBoundingClientRect();
+      if (!(scroll instanceof HTMLElement)) throw new Error("Meaning/structure scroll container is missing");
       return {
-        overflowY: scroll ? getComputedStyle(scroll).overflowY : "",
-        scrollHeight: scroll?.scrollHeight ?? 0,
-        clientHeight: scroll?.clientHeight ?? 0,
-        scrollBottom: scrollRect?.bottom ?? Infinity,
-        previewBottom: previewRect?.bottom ?? Infinity,
+        overflowY: getComputedStyle(scroll).overflowY,
+        scrollHeight: scroll.scrollHeight,
+        clientHeight: scroll.clientHeight,
       };
     });
     expect(metrics.overflowY).toBe("auto");
     expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
-    expect(metrics.previewBottom).toBeLessThanOrEqual(metrics.scrollBottom + 1);
+
+    await preview.scrollIntoViewIfNeeded();
+    const reachableBounds = await preview.evaluate(el => {
+      const scroll = el.closest(".learning-back-scroll");
+      if (!(scroll instanceof HTMLElement)) throw new Error("Full-structure action is outside its scroll container");
+      const target = el.getBoundingClientRect();
+      const viewport = scroll.getBoundingClientRect();
+      return { top: target.top, bottom: target.bottom, viewportTop: viewport.top, viewportBottom: viewport.bottom };
+    });
+    expect(reachableBounds.top).toBeGreaterThanOrEqual(reachableBounds.viewportTop - 1);
+    expect(reachableBounds.bottom).toBeLessThanOrEqual(reachableBounds.viewportBottom + 1);
 
     await preview.click();
     const dialog = page.locator(".kanji-structure-dialog");
