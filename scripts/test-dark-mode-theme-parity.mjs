@@ -72,7 +72,8 @@ assert.equal(styles.includes("@media(prefers-color-scheme:dark){#kanji5-account-
 assert.ok(styles.includes(':root[data-theme="system"] #kanji5-account-launcher'));
 
 // Theme-aware semantic colors are used for error text and destructive indicators.
-assert.ok(styles.includes("--color-danger:#a23a2a"));
+assert.ok(styles.includes("--color-danger:var(--ds-state-danger-text);"), "Legacy danger alias must resolve through semantic danger token");
+assert.ok(designSystem.includes("--ds-state-danger-text: light-dark(#8E3026, #FF9B91);"));
 assert.ok(designSystem.includes("--ds-state-danger-text: light-dark(#8E3026, #FF9B91);"), "Danger text must use a semantic light/dark foreground");
 assert.ok(styles.includes(".account-error{margin:12px 0 0;color:var(--color-danger)"));
 assert.ok(styles.includes(".sync-error{color:var(--color-danger)"));
