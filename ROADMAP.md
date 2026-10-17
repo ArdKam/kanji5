@@ -71,6 +71,13 @@ The product should expand in layers rather than turning into an all-in-one Japan
 
 Vocabulary, Context/Reading, and Grammar must reinforce that loop rather than compete with it.
 
+### Product strategy and planning references
+
+- **Product positioning and competitive strategy:** [docs/PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md](docs/PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md) — target audience, competitor matrix, differentiated value proposition, ranked opportunities, and 6–12-month strategic direction. Treat recommendations as hypotheses until validated; this is not a completion ledger.
+- **Learning effectiveness and transfer:** [docs/LEARNING-EFFECTIVENESS-ROADMAP.md](docs/LEARNING-EFFECTIVENESS-ROADMAP.md) — educational sequence, learning-outcome evaluation, and implementation-level learning priorities.
+
+This `ROADMAP.md` remains the canonical source for current execution status, dependencies, release blockers, and sequencing. Keep detailed educational acceptance in the learning-effectiveness and educational-content documents; do not duplicate their backlogs here.
+
 ---
 
 # 1. Architecture and product guardrails
