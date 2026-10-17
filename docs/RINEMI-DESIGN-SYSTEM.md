@@ -184,3 +184,8 @@ The existing screenshot harness is kept intact. `npm run e2e:visual` and `npm ru
 ## Latest visual evidence
 
 The visual capture report from 2026-10-14 at commit `ba5069d09caf8c39c027ac200e35021e2bcb2798` is **pre-integration baseline evidence** from the design-system source branch. It covers 42 primary viewport/scroll captures and focused suites for Dictionary (25 screenshots), Learning back pages (9), Learning faces/themes/breakpoints (25), and onboarding/system-theme states (26). The source report recorded no page/console errors, failed requests/responses, broken images, or horizontal overflow in the captured screens; four scroll captures had no meaningful scroll range. Those results do not verify this integration branch. The current PR's fresh CI artifacts must be reviewed before claiming its rendered appearance is verified. Neither automated captures nor contrast assertions alone establish full WCAG conformance; manual keyboard, screen-reader, and representative-device checks remain necessary.
+
+
+### Compact compatibility aliases and CSS budget
+
+The 226 KiB shipped React CSS budget is unchanged. Repeated neutral surface, border, typography, radius, spacing, and motion references may use compact legacy aliases in high-volume component stylesheets while those aliases resolve exclusively to this semantic token layer in `frontend/src/styles.css`. This is a bundle-size exception, not a second palette. Brand-action, focus, review-outcome, and state roles remain semantic; legacy action aliases such as `--ai` and `--shu` resolve to the canonical indigo action token. Revisit and remove compatibility aliases only when the same exact artifact remains within the existing budget and all rendered checks pass.
