@@ -12,29 +12,49 @@ const API_TTL_MS=7*24*60*60*1000;
 const API_MAX_ENTRIES=250;
 const API_INFLIGHT=new Map();
 async function precacheReactManifest(cache){
-  try{
-    const response=await fetch('./react-dist/.vite/manifest.json',{cache:'no-store'});
-    if(!response.ok)return;
-    const manifest=await response.json();
-    const urls=new Set(['./react-dist/.vite/manifest.json']);
-    const visited=new Set();
-    const visit=key=>{
-      if(visited.has(key))return;
-      visited.add(key);
-      const entry=manifest?.[key];
-      if(!entry)return;
-      for(const value of [entry.file,...(entry.css||[]),...(entry.assets||[])])if(typeof value==='string'&&value)urls.add('./react-dist/'+value.replace(/^\.\//,''));
-      for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visit(dependency);
-    };
-    for(const key of Object.keys(manifest||{}))visit(key);
-    await cache.addAll([...urls]);
-  }catch(_){}
+  const manifestUrl='./react-dist/.vite/manifest.json';
+  const response=await fetch(manifestUrl,{cache:'no-store'});
+  if(!response.ok)throw new Error('SW_REACT_MANIFEST_UNAVAILABLE:'+response.status);
+  const manifest=await response.clone().json();
+  if(!manifest||typeof manifest!=='object'||Array.isArray(manifest)||!Object.keys(manifest).length){
+    throw new Error('SW_REACT_MANIFEST_INVALID');
+  }
+  const entries=Object.values(manifest);
+  const mainEntry=entries.find(entry=>entry?.file==='kanji5-react.js');
+  if(!mainEntry)throw new Error('SW_REACT_ENTRY_MISSING_FROM_MANIFEST');
+  // The root stylesheet is linked directly by index.html in this build, so
+  // do not assume Vite attaches it to this JavaScript entry's `css` array.
+  // Require the stable CSS URL explicitly below; cache.addAll then proves it is
+  // present in the candidate release before the worker can install.
+
+  // Cache the manifest itself and every referenced static/dynamic dependency.
+  // Any failure rejects installation so an incomplete new release cannot replace
+  // the currently active worker and its compatible asset graph.
+  await cache.put(manifestUrl,response);
+  const urls=new Set();
+  const visited=new Set();
+  const visit=key=>{
+    if(visited.has(key))return;
+    visited.add(key);
+    const entry=manifest[key];
+    if(!entry)throw new Error('SW_REACT_DEPENDENCY_MISSING_FROM_MANIFEST:'+key);
+    for(const value of [entry.file,...(entry.css||[]),...(entry.assets||[])]){
+      if(typeof value==='string'&&value)urls.add('./react-dist/'+value.replace(/^\.\//,''));
+    }
+    for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visit(dependency);
+  };
+  for(const key of Object.keys(manifest))visit(key);
+  if(!urls.has('./react-dist/kanji5-react.js')){
+    throw new Error('SW_REACT_ENTRY_ASSET_MISSING_FROM_MANIFEST');
+  }
+  urls.add('./react-dist/kanji5-react.css');
+  await cache.addAll([...urls]);
 }
 self.addEventListener('install',e=>e.waitUntil(Promise.all([
   caches.open(CACHE).then(async c=>{await c.addAll(SHELL);await precacheReactManifest(c)}),
   caches.open(DATA_CACHE).then(c=>c.addAll(['./kanji-data.json','./kanji-components.json','./kanji-visual-structure.json'])),
   caches.open(API_CACHE)
-]).then(()=>self.skipWaiting())));
+])));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('kanji5-')&&!([CACHE,DATA_CACHE,API_CACHE].includes(k))).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback,{ignoreSearch:true});if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback,{ignoreSearch:false}))||Response.error()}}
 async function staleWhileRevalidate(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback||req);const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone()).catch(()=>{});return r}).catch(()=>null);if(hit){void update;return hit}const fresh=await update;return fresh||Response.error()}
