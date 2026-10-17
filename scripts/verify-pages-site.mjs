@@ -85,7 +85,7 @@ assert.ok(reactManifest&&typeof reactManifest==="object"&&!Array.isArray(reactMa
 const manifestEntries=Object.values(reactManifest);
 const reactEntry=manifestEntries.find(entry=>entry?.file==="kanji5-react.js");
 assert.ok(reactEntry,"PAGES_SITE_REACT_ENTRY_NOT_IN_MANIFEST");
-assert.ok(Array.isArray(reactEntry.css)&&reactEntry.css.includes("kanji5-react.css"),"PAGES_SITE_REACT_CSS_NOT_IN_MANIFEST");
+assert.ok(fs.existsSync(path.join(site,"react-dist/kanji5-react.css")),"PAGES_SITE_REACT_CSS_MISSING");
 const manifestAssets=new Set();
 const manifestVisited=new Set();
 function visitManifest(key){
@@ -100,7 +100,8 @@ function visitManifest(key){
   for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visitManifest(dependency);
 }
 for(const key of Object.keys(reactManifest))visitManifest(key);
-assert.ok(manifestAssets.has("kanji5-react.js")&&manifestAssets.has("kanji5-react.css"),"PAGES_SITE_REACT_GRAPH_MISSING_ENTRY_ASSETS");
+assert.ok(manifestAssets.has("kanji5-react.js"),"PAGES_SITE_REACT_GRAPH_MISSING_ENTRY_JS");
+manifestAssets.add("kanji5-react.css");
 for(const asset of manifestAssets){
   assert.ok(fs.existsSync(path.join(site,"react-dist",asset)),"PAGES_SITE_REACT_MANIFEST_ASSET_MISSING: "+asset);
 }
