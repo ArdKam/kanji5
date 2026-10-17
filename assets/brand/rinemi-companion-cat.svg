@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Rinemi cat companion</title>
+  <desc id="desc">A calm, attentive cat drawn with warm paper, sumi ink and muted indigo, with a small sakura detail.</desc>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M158 177c22 0 39-12 39-29 0-10-7-18-16-17-8 1-12 8-9 14 2 4 6 5 9 3" fill="none" stroke="#505F83" stroke-width="8"/>
+    <path d="M69 187c-8-20-4-40 10-53 11-11 27-16 42-16 18 0 35 6 45 19 11 14 14 33 7 50l-4 8H75z" fill="#F7F4EE" stroke="#292B2D" stroke-width="5.5"/>
+    <path d="M82 164c-3 12-2 25 5 32m25-31c2 13 1 22-2 31m31-32c4 12 5 22 2 32" fill="none" stroke="#292B2D" stroke-width="4.5"/>
+    <path d="M72 91 78 67c1-5 5-7 9-3l15 11c11-4 23-4 34 0l15-11c4-4 8-2 9 3l6 24c7 8 10 18 8 29-3 22-25 34-58 34s-55-12-58-34c-2-11 1-21 9-29z" fill="#F7F4EE" stroke="#292B2D" stroke-width="5.5"/>
+    <path d="m84 69 3 12 9-7zM156 69l-3 12-9-7z" fill="#D6A1AA" stroke="none"/>
+    <path d="M90 99q6-6 12 0q-6 6-12 0zM138 99q6-6 12 0q-6 6-12 0z" fill="#FDFBF7" stroke="#292B2D" stroke-width="3.5"/>
+    <circle cx="96" cy="99" r="2.2" fill="#292B2D" stroke="none"/>
+    <circle cx="144" cy="99" r="2.2" fill="#292B2D" stroke="none"/>
+    <path d="M88 115 75 113m14 8-13 2m76-8 13-2m-14 8 13 2" fill="none" stroke="#53545A" stroke-width="3"/>
+    <path d="M115 112q5 5 10 0l-5-4z" fill="#D6A1AA" stroke="#292B2D" stroke-width="2.5"/>
+    <path d="M120 114v5m0 0q-6 7-11 1m11-1q6 7 11 1" fill="none" stroke="#292B2D" stroke-width="3.2"/>
+    <path d="M95 151q25 14 50 0" fill="none" stroke="#505F83" stroke-width="6"/>
+    <circle cx="120" cy="161" r="4" fill="#D6A1AA" stroke="none"/>
+  </g>
+</svg>
