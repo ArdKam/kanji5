@@ -39,6 +39,7 @@ const report = {
   sampleEntries: [],
   sourceProjectionMismatches: [],
   metadataMismatches: { strokes: 0, grade: 0, jlpt: 0, frequency: 0, radical: 0 },
+  identityMismatches: 0,
   orderMismatches: 0,
 };
 const formerOverflowCharacters = new Set();
@@ -101,13 +102,14 @@ for (let index = 0; index < sorted.length; index += 1) {
     mismatch(stored.character, "radical", expected.radical?.classical, radicalMap.kanji[expected.character]);
   }
   if (stored.id !== expected.character || stored.character !== expected.character) {
+    report.identityMismatches += 1;
     mismatch(stored.character, "identity", expected.character, { id: stored.id, character: stored.character });
   }
 }
 report.completeProjectionMismatchCount =
   Object.values(report.fields).reduce((sum, field) => sum + field.missingOrDifferentValues, 0) +
   Object.values(report.metadataMismatches).reduce((sum, value) => sum + value, 0) +
-  report.orderMismatches;
+  report.orderMismatches + report.identityMismatches;
 
 console.log("Rinemi pinned-source completeness audit");
 console.log(JSON.stringify(report, null, 2));
@@ -126,6 +128,7 @@ if (summaryPath) {
     "",
     "Metadata mismatches: " + JSON.stringify(report.metadataMismatches),
     "Order mismatches: " + report.orderMismatches,
+    "Identity mismatches: " + report.identityMismatches,
     "Complete projection mismatches: " + report.completeProjectionMismatchCount,
   ];
   await appendFile(summaryPath, lines.join("\n") + "\n", "utf8");
