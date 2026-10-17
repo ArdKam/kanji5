@@ -22,9 +22,10 @@ async function precacheReactManifest(cache){
   const entries=Object.values(manifest);
   const mainEntry=entries.find(entry=>entry?.file==='kanji5-react.js');
   if(!mainEntry)throw new Error('SW_REACT_ENTRY_MISSING_FROM_MANIFEST');
-  if(!Array.isArray(mainEntry.css)||!mainEntry.css.includes('kanji5-react.css')){
-    throw new Error('SW_REACT_STYLESHEET_MISSING_FROM_MANIFEST');
-  }
+  // The root stylesheet is linked directly by index.html in this build, so
+  // do not assume Vite attaches it to this JavaScript entry's `css` array.
+  // Require the stable CSS URL explicitly below; cache.addAll then proves it is
+  // present in the candidate release before the worker can install.
 
   // Cache the manifest itself and every referenced static/dynamic dependency.
   // Any failure rejects installation so an incomplete new release cannot replace
@@ -43,9 +44,10 @@ async function precacheReactManifest(cache){
     for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visit(dependency);
   };
   for(const key of Object.keys(manifest))visit(key);
-  if(!urls.has('./react-dist/kanji5-react.js')||!urls.has('./react-dist/kanji5-react.css')){
-    throw new Error('SW_REACT_REQUIRED_ASSET_MISSING_FROM_MANIFEST');
+  if(!urls.has('./react-dist/kanji5-react.js')){
+    throw new Error('SW_REACT_ENTRY_ASSET_MISSING_FROM_MANIFEST');
   }
+  urls.add('./react-dist/kanji5-react.css');
   await cache.addAll([...urls]);
 }
 self.addEventListener('install',e=>e.waitUntil(Promise.all([
