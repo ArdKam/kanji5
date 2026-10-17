@@ -1,7 +1,7 @@
 export const DATA_QUALITY_VERSION='1.9.0-data-quality';
 
 const JAPANESE_RE=/[\u3040-\u30ff\u3400-\u9fff]/;
-const KANA_RE=/[\u3040-\u30ff]/;
+const KANA_ONLY_RE=/^[\u3040-\u30ff]+$/u;
 const LATIN_RE=/[A-Za-z]/;
 
 export function normalizeContentText(value){
@@ -25,7 +25,7 @@ export function validateVocabularyEntry(entry,character=''){
   if(!word) reasons.push('empty_word');
   if(target&&!word.includes(target)) reasons.push('missing_target');
   if(!reading) reasons.push('empty_reading');
-  if(reading&&!KANA_RE.test(reading)) reasons.push('malformed_reading');
+  if(reading&&!KANA_ONLY_RE.test(reading)) reasons.push('malformed_reading');
   if(!meaning) reasons.push('empty_meaning');
   if(word&&[...word].length<2) reasons.push('too_short');
   return {valid:reasons.length===0,reasons,entry:{...entry,word,reading,meaning}};
