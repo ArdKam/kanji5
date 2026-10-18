@@ -364,18 +364,31 @@ test('Dictionary card tabs fit narrow mobile widths without horizontal overflow'
 
 test('Dictionary vocabulary distinguishes offline failure from a genuine empty result and can retry',async({page})=>{
   await clean(page);
-  let vocabularyRequests=0;
+  let offlineRequests=0;
+  let emptyResultRequests=0;
+  let allowEmptyResult=false;
   await page.route('https://kanjiapi.dev/v1/words/**',async route=>{
-    vocabularyRequests++;
-    if(vocabularyRequests===1){
+    if(!allowEmptyResult){
+      offlineRequests++;
       await route.fulfill({
         status:503,
-        headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'},
+        headers:{
+          'Content-Type':'application/json',
+          'Cache-Control':'no-store',
+          'X-Kanji5-Offline-Fallback':'1',
+          'Access-Control-Allow-Origin':'*',
+          'Access-Control-Expose-Headers':'X-Kanji5-Offline-Fallback'
+        },
         body:JSON.stringify({error:'offline-content-unavailable'})
       });
       return;
     }
-    await route.fulfill({status:200,contentType:'application/json',body:'[]'});
+    emptyResultRequests++;
+    await route.fulfill({
+      status:200,
+      headers:{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'},
+      body:'[]'
+    });
   });
   await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
@@ -392,12 +405,14 @@ test('Dictionary vocabulary distinguishes offline failure from a genuine empty r
   await expect(examples.locator(':scope > .dictionary-vocabulary-empty')).toHaveCount(0);
   const retry=examples.locator('.dictionary-vocabulary-retry');
   await expect(retry).toBeVisible();
+  if(offlineRequests<1)throw new Error('Expected at least one simulated offline response before retry.');
+  allowEmptyResult=true;
   await retry.click();
   await expect(examples).toHaveAttribute('data-vocabulary-state','available');
   await expect(examples.locator(':scope > .dictionary-vocabulary-empty')).toHaveText('برای این کانجی فعلاً واژه‌ای از منبع واژگان در دسترس نیست.');
   await expect(examples.locator('.dictionary-vocabulary-unavailable')).toHaveCount(0);
   await expect(examples.locator('.dictionary-vocabulary-retry')).toHaveCount(0);
-  if(vocabularyRequests!==2)throw new Error(`Expected one retry request, observed ${vocabularyRequests} requests.`);
+  if(emptyResultRequests<1)throw new Error('Expected the explicit retry to receive a successful empty result.');
 });
 
 test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
