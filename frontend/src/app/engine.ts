@@ -168,6 +168,7 @@ export type CustomStudyFocus = "available" | "due" | "new" | "weak" | "mistakes"
 export type CustomStudyFilter = { level?: "all" | "N5" | "N4" | "N3" | "N2" | "N1"; focus?: CustomStudyFocus; limit?: number; topicId?: string; topicCharacters?: string[]; /** @deprecated Use topicCharacters. */ characterScope?: string[] };
 
 export type VocabularyItem = { word: string; reading: string; meaning: string; source?: string };
+export type VocabularyAvailability = "available" | "offline" | "unavailable";
 export type RadicalInfo = { character:string; available:boolean; radicalId:number|null; radical:{id:number;glyph:string;strokeCount:number;meanings:string[];sourceForms?:string[]}|null; coverage?:{available?:number;total?:number;fraction?:number}|null; source?:{name?:string;upstreamVersion?:string;license?:string;radicalDefinitionsRevision?:number}|null; };
 export type ComponentInfo = {
   character: string;
@@ -378,7 +379,7 @@ export async function restoreBackup(backup: PortableBackup): Promise<BackupSumma
   return summary;
 }
 
-export async function getVocabulary(character: string): Promise<{ character: string; items: VocabularyItem[] }> {
+export async function getVocabulary(character: string): Promise<{ character: string; items: VocabularyItem[]; availability?: VocabularyAvailability }> {
   return (await waitForEngine()).getVocabulary(character);
 }
 
