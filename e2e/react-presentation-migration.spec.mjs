@@ -115,7 +115,10 @@ test('English learning rating buttons use a stable hardest-to-easiest order',asy
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
   await page.getByRole('button',{name:'Reveal meaning & readings',exact:true}).click();
   await expect(page.locator('.rating-grid')).toBeVisible({timeout:10000});
-  await expect(page.locator('.rating-grid .rating')).toHaveText(['Again','Hard','Good','Easy']);
+  const ratingOrder = await page.locator('.rating-grid .rating').evaluateAll(buttons =>
+    buttons.map(button => ['again','hard','good','easy'].find(rating => button.classList.contains(`rating-${rating}`)) || null)
+  );
+  expect(ratingOrder).toEqual(['again','hard','good','easy']);
 });
 
 test('empty session progress indicator is absent before a session starts',async({page})=>{
