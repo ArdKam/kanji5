@@ -8,6 +8,8 @@
 .learning-card-topline .learning-context-label{color:var(--mute);font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;overflow-wrap:anywhere}
 .app-shell .content>.learning-card{height:min(590px,calc(100dvh - 32px));min-height:min(500px,calc(100dvh - 32px))}
 .learning-card-front .kanji-row{min-height:clamp(180px,28vh,240px);gap:14px}
+.learning-card-front .kanji-row{position:relative}
+.learning-card-front .kanji-audio-control{position:absolute;inset-inline-end:clamp(0px,2vw,12px);top:50%;transform:translateY(-50%);display:grid;place-items:center}
 .learning-card-front .kanji-display{font-size:clamp(104px,16vw,150px)}
 .learning-card-front .learning-recall-cue{
   width:min(100%,520px);
@@ -45,6 +47,9 @@
 .learning-card-back .stroke-order-panel .stroke-order-controls .button{min-height:44px}
 .learning-card-back .stroke-order-stage{border-radius:var(--radius-lg);background:color-mix(in srgb,var(--washi) 65%,var(--paper))}
 .learning-card-back .rating{min-height:46px;font-weight:800;transition:transform var(--motion-fast) ease}
+.learning-back-footer .rating-prompt{margin:0 0 6px;color:var(--mute);font-size:var(--text-xs);font-weight:700;line-height:1.35;text-align:center}
+.learning-card-back .rating-grid .rating{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;padding-block:6px;line-height:1.2}
+.learning-card-back .rating-interval{font-size:var(--text-xs);font-weight:650;line-height:1.15;white-space:nowrap;opacity:.9}
 .learning-card-back .rating:hover:not(:disabled){transform:translateY(-1px)}
 .learning-card-back .rating-again{color:#8e3026;border-color:color-mix(in srgb,var(--shu) 52%,var(--line));background:color-mix(in srgb,var(--shu) 7%,var(--paper))}
 .learning-card-back .rating-hard{color:#76510a;border-color:color-mix(in srgb,#9a6700 42%,var(--line));background:color-mix(in srgb,#d29c2e 9%,var(--paper))}
