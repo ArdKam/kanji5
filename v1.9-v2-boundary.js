@@ -6,7 +6,7 @@ if(!state)throw new Error('KANJI5_STATE_REQUIRED');
 function captureFailure(type,error,extra={}){window.__KANJI5_OBSERVABILITY__?.capture?.(type,error,{dataAffected:'unknown',...extra})}
 function reportDynamicImportFailure(module,category,error){captureFailure('dynamic-import-failure',error,{module});if(category!=='dynamic-import-failure')captureFailure(category,error,{module});}
 let corePromise=null;const load=()=>corePromise||(corePromise=import('./v1.9-v2-contract-core.js').catch(error=>{reportDynamicImportFailure('./v1.9-v2-contract-core.js','dynamic-import-failure',error);throw error;}));
-let learning=null,exercise=null,feedback=null,adaptiveReason=null;
+let learning=null,exercise=null,feedback=null,adaptiveReason=null,learningRefreshRevision=0;
 let educationRuntimePromise=null;
 let networkPromise=null;
 function loadNetwork(){
@@ -365,7 +365,28 @@ async function getStats(){
   try{return await statsInFlight}finally{statsInFlight=null}
 }
 async function publishStartupSnapshot(){const viewModel=await startupSnapshot();document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-startup-view-model',{detail:viewModel}));return viewModel}
-async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
+async function refreshLearning(){
+  const revision=++learningRefreshRevision;
+  const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;
+  if(!bridge?.snapshot)return learning;
+  const source=await bridge.snapshot();
+  if(revision!==learningRefreshRevision)return learning;
+  const sameRevealedCard=Boolean(source?.revealed&&learning?.revealed&&source?.contentId===learning?.contentId);
+  learning=core.buildLearningCardViewModel({...source,ratingPreviews:sameRevealedCard?learning.ratingPreviews:null});
+  await publish();
+  if(source?.revealed&&typeof bridge.previewLearningRatings==="function"){
+    try{
+      const ratingPreviews=await bridge.previewLearningRatings();
+      if(revision!==learningRefreshRevision)return learning;
+      const latest=await bridge.snapshot();
+      if(latest?.revealed&&latest?.contentId===source?.contentId){
+        learning=core.buildLearningCardViewModel({...latest,ratingPreviews});
+        await publish();
+      }
+    }catch(error){captureFailure('learning-rating-preview-failed',error,{contentId:source?.contentId});}
+  }
+  return learning;
+}
 async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 async function rateLearning(rating){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(await bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 
