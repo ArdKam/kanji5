@@ -380,7 +380,7 @@ async function refreshLearning(){
         learning=core.buildLearningCardViewModel({...latest,ratingPreviews});
         await publish();
       }
-    }catch(_){}
+    }catch(error){captureFailure('learning-rating-preview-failed',error,{contentId:source?.contentId});}
   }
   return learning;
 }
