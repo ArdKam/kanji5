@@ -363,6 +363,7 @@ test('Dictionary card tabs fit narrow mobile widths without horizontal overflow'
 });
 
 test('Dictionary vocabulary distinguishes offline failure from a genuine empty result and can retry',async({page})=>{
+  await clean(page);
   let vocabularyRequests=0;
   await page.route('https://kanjiapi.dev/v1/words/**',async route=>{
     vocabularyRequests++;
@@ -376,7 +377,6 @@ test('Dictionary vocabulary distinguishes offline failure from a genuine empty r
     }
     await route.fulfill({status:200,contentType:'application/json',body:'[]'});
   });
-  await clean(page);
   await page.locator('.experience-nav .experience-tab').nth(2).click();
   const pageRoot=page.locator('.dictionary-page');
   await expect(pageRoot).toBeVisible();
