@@ -125,7 +125,7 @@ test('data trust: local-data erasure clears this browser only and preserves unre
   await page.waitForFunction(() => Boolean(window.__KANJI5_ACCOUNT__ && typeof window.__KANJI5_ACCOUNT__.getState === 'function'));
 
   let cloudRequests = 0;
-  await page.route('https://vbrtzkejodkddfdbolbo.supabase.co/**', async route => {
+  await page.route('https://vbrtzkejodkddfdbolbo.supabase.co/rest/v1/**', async route => {
     cloudRequests += 1;
     await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
   });
