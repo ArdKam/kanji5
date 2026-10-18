@@ -54,7 +54,7 @@ self.addEventListener('install',e=>e.waitUntil(Promise.all([
   caches.open(CACHE).then(async c=>{await c.addAll(SHELL);await precacheReactManifest(c)}),
   caches.open(DATA_CACHE).then(c=>c.addAll(['./kanji-data.json','./kanji-components.json','./kanji-visual-structure.json'])),
   caches.open(API_CACHE)
-])))
+])););
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('kanji5-')&&!([CACHE,DATA_CACHE,API_CACHE].includes(k))).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 async function cacheFirst(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback,{ignoreSearch:true});if(hit)return hit;try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch(_){return(await c.match(fallback,{ignoreSearch:false}))||Response.error()}}
 async function staleWhileRevalidate(req,name,fallback=req){const c=await caches.open(name),hit=await c.match(fallback||req);const update=fetch(req).then(r=>{if(r.ok)c.put(req,r.clone()).catch(()=>{});return r}).catch(()=>null);if(hit){void update;return hit}const fresh=await update;return fresh||Response.error()}
