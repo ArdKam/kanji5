@@ -435,7 +435,7 @@
   text-underline-offset: 3px;
   white-space: nowrap;
 }
-.kanji-structure-preview-action:hover { color: var(--shu); }
+.kanji-structure-preview-action:hover { color: var(--ds-color-action-primary); }
 .kanji-structure-preview-action:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .kanji-structure-preview-action-placeholder { width: 116px; min-width: 44px; min-height: 44px; border: 0; }
 @media (max-width: 420px) {
