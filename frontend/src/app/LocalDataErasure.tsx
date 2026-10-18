@@ -109,10 +109,11 @@ export function LocalDataErasure({ language }: { language: Language }) {
       // The guarded removal below will surface a storage error if the browser blocks storage access.
     }
 
-    if (hasLocalAuthSession && window.__KANJI5_ACCOUNT__?.signOutLocal) {
+    const accountApi = window.__KANJI5_ACCOUNT__;
+    if (hasLocalAuthSession && accountApi?.signOutLocal) {
       try {
         // Explicitly sign out only this browser session; never invalidate other devices.
-        await window.__KANJI5_ACCOUNT__.signOutLocal();
+        await accountApi.signOutLocal();
       } catch {
         // Continue with removal of this browser's persisted auth keys as a local fallback.
       }
