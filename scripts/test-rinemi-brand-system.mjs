@@ -34,7 +34,7 @@ for (const color of ["#F7F4EE", "#FDFBF7", "#292B2D", "#505F83", "#D6A1AA"]) {
   assert.ok(cat.includes(color), "Companion SVG is missing canonical palette color: " + color);
 }
 assert.ok(!/<image\b|(?:href|src)=["']https?:\/\//i.test(cat), "Companion asset must stay self-contained and work offline");
-assert.ok(guide.includes("cat is a") && guide.includes("not a teacher") && guide.includes("source audit"), "Brand guide must preserve the companion contract and source-audit record");
+assert.ok(guide.includes("cat is a") && guide.includes("not a teacher") && guide.toLowerCase().includes("source audit"), "Brand guide must preserve the companion contract and source-audit record");
 assert.ok(contrast("#62666A", "#FDFBF7") >= 4.5, "Startup muted copy must pass WCAG AA on paper");
 assert.ok(contrast("#B8AFA2", "#23211E") >= 4.5, "Startup muted copy must pass WCAG AA on dark paper");
 assert.ok(contrast("#171614", "#A8B5D8") >= 4.5, "Dark indigo recovery action must pass WCAG AA");
