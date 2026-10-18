@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Rinemi uses a calm Japanese editorial language: warm paper, sumi text, muted indigo actions, disciplined typography, and restrained supporting color. The design system standardizes meaning, state, and interaction without making Learning, Practice, Dictionary, and reading tools look like copies of the same template.
+Rinemi uses a calm Japanese editorial language: warm paper, sumi text, muted indigo actions in Light, the established coral primary action in Dark, disciplined typography, and restrained supporting color. The design system standardizes meaning, state, and interaction without making Learning, Practice, Dictionary, and reading tools look like copies of the same template.
 
 ## Enforceable principles
 
@@ -43,7 +43,7 @@ Some historical declarations and page-specific overrides remain in `styles.css` 
 | `--ds-brand-rice-paper` | `#F7F4EE` | Main canvas |
 | `--ds-brand-surface` | `#FDFBF7` | Primary surface |
 | `--ds-brand-sumi` | `#292B2D` | Core ink |
-| `--ds-brand-indigo` | `#505F83` | Primary action and focus family |
+| `--ds-brand-indigo` | `#505F83` | Light primary action and focus family |
 | `--ds-brand-sakura` | `#D6A1AA` | Restrained brand accent |
 | `--ds-brand-moss` | `#8C9B87` | Brand palette reference |
 | `--ds-brand-secondary-surface` | `#EEE9E0` | Secondary paper surface |
@@ -57,15 +57,16 @@ Some historical declarations and page-specific overrides remain in `styles.css` 
 | Surface | `#FDFBF7` | `#23211E` |
 | Subtle surface | `#F1EDE6` | `#292724` |
 | Panel surface | `rgba(251, 248, 240, .7)` | `rgba(35, 33, 30, .78)` |
+| Onboarding choice surface | `rgba(253, 251, 247, .58)` | `rgba(35, 33, 30, .82)` |
 | Elevated surface | `#FFFDF8` | `#2B2824` |
 | Primary text | `#292B2D` | `#F4EFE3` |
 | Secondary text | `#53545A` | `#DDD5C8` |
 | Muted text | `#62676B` | `#B8AFA2` |
-| Primary action | `#505F83` | `#A8B5D8` |
+| Primary action | `#505F83` | `#E06A5F` |
 | Progress accent | `#8C9B87` | `#A9B77C` |
 | Primary action text | `#FDFBF7` | `#171614` |
 | Strong border | `#ABA398` | `#A99E8D` |
-| Focus ring | `#505F83` | `#A9C1ED` |
+| Focus ring | `#505F83` | `#FF9B91` |
 
 Explicit `light` and `dark` preferences are stable. `system` follows `prefers-color-scheme` until the user chooses an explicit theme. Native control `color-scheme` follows that same preference.
 
@@ -82,7 +83,7 @@ Learning review uses distinct Again, Hard, Good, and Easy roles:
 | Good | `#43582B` / `#EDF2E7` | `#B9D49A` / `#283128` |
 | Easy | `#314B6F` / `#ECF1F8` | `#A9C1ED` / `#27303B` |
 
-The automated visual coverage suite calculates text contrast for each outcome and primary actions in light, dark, and system modes. Dark actions use the same muted indigo family as the dark wordmark (`#A8B5D8`); coral is reserved for danger/retry semantics. Color is reinforced by the visible outcome label, not used as the only signal.
+The automated visual coverage suite calculates text contrast for each outcome and primary actions in light, dark, and system modes. Light primary actions use the muted indigo family; Dark primary actions retain coral (`#E06A5F`) to preserve the established product behavior. Indigo remains part of the dark wordmark and focus/selection identity. Review danger/retry remains a separate semantic role even where its dark foreground also uses coral; labels, borders, and backgrounds reinforce state beyond hue alone.
 
 ## Typography
 
