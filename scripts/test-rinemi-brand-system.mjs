@@ -28,7 +28,7 @@ assert.ok(shell.includes("background: var(--ds-color-canvas)") && shell.includes
 assert.ok(!shell.includes(':root[data-theme="dark"]') && !shell.includes("@media(prefers-color-scheme:dark)"), "Startup shell must consume shared tokens rather than duplicate theme palettes");
 assert.ok(shell.includes("background: var(--ds-color-canvas)") && shell.includes("background: var(--ds-color-surface)"), "Startup shell must derive canvas and card surfaces from semantic tokens");
 assert.ok(shell.includes("background: var(--ds-color-action-primary)") && shell.includes("color: var(--ds-color-action-primary-text)"), "Startup recovery action must use semantic indigo and its matching foreground");
-assert.ok(shell.includes('@media(prefers-reduced-motion:reduce)'), "Startup shell must retain a reduced-motion path");
+assert.ok(/@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)/.test(shell), "Startup shell must retain a reduced-motion path");
 
 assert.ok(cat.includes('viewBox="0 0 240 240"'), "Companion art should use a scalable viewBox");
 assert.ok(cat.includes('aria-labelledby="title desc"') && cat.includes('<title id="title">') && cat.includes('<desc id="desc">'), "Companion SVG needs accessible metadata");
