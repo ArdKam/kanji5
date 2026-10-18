@@ -190,7 +190,7 @@ function renderCard(){
   answer.id='answerBox';
   answer.classList.toggle('show',Boolean(state.revealed));
   const answerBox=dom('div','answerbox');
-  const meaning=dom('div','meaning',item.meaning.join(' · ')||'—');
+  const meaning=dom('div','meaning',(Array.isArray(item.meaning)?item.meaning.slice(0,3):[]).join(' · ')||'—');
 
   const readings=dom('div','readings');
   const buildReadbox=(title,items)=>{
@@ -218,7 +218,7 @@ function renderCard(){
     box.append(t,values);
     return box;
   };
-  readings.append(buildReadbox("On'yomi",Array.isArray(item.on)?item.on:[]),buildReadbox("Kun'yomi",Array.isArray(item.kun)?item.kun:[]));
+  readings.append(buildReadbox("On'yomi",Array.isArray(item.on)?item.on.slice(0,4):[]),buildReadbox("Kun'yomi",Array.isArray(item.kun)?item.kun.slice(0,4):[]));
 
   const examples=dom('div','examples');examples.id='examples';
   const meta=dom('div','meta');
