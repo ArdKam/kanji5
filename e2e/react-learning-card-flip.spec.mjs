@@ -1114,3 +1114,66 @@ test("rating buttons keep the same hardest-to-easiest physical order in English 
     }
   }
 });
+
+
+test("kanji stays centered independently of audio and rating buttons show FSRS intervals", async ({ browser }) => {
+  for (const language of ["en", "fa"]) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 2);
+      await page.addInitScript((value) => {
+        localStorage.setItem("kanji5-ui-language", value);
+        localStorage.setItem("kanji5-onboarding-v2", "complete");
+      }, language);
+      await page.goto("/");
+      const card = page.locator("#root .learning-card");
+      await expect(card).toBeVisible({ timeout: 20000 });
+      const front = card.locator(".learning-card-front");
+      const geometry = await front.evaluate((face) => {
+        const row = face.querySelector(".kanji-row");
+        const glyph = face.querySelector(".kanji-display");
+        const audio = face.querySelector(".kanji-audio-control");
+        if (!(row instanceof HTMLElement) || !(glyph instanceof HTMLElement) || !(audio instanceof HTMLElement)) {
+          throw new Error("Kanji centering geometry is incomplete");
+        }
+        const r = row.getBoundingClientRect();
+        const g = glyph.getBoundingClientRect();
+        const a = audio.getBoundingClientRect();
+        return {
+          rowCenter: r.left + r.width / 2,
+          glyphCenter: g.left + g.width / 2,
+          audioPosition: getComputedStyle(audio).position,
+          overlap: g.left < a.right && g.right > a.left && g.top < a.bottom && g.bottom > a.top,
+          hasHorizontalOverflow: face.scrollWidth > face.clientWidth + 1,
+        };
+      });
+      expect(Math.abs(geometry.glyphCenter - geometry.rowCenter)).toBeLessThanOrEqual(1);
+      expect(geometry.audioPosition).toBe("absolute");
+      expect(geometry.overlap).toBe(false);
+      expect(geometry.hasHorizontalOverflow).toBe(false);
+
+      await front.locator(".button.primary.wide").click();
+      await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+      await expect(card.locator(".learning-back-footer .rating-prompt")).toHaveText(
+        language === "fa" ? "چقدر خوب به یاد آوردی؟" : "How well did you recall it?",
+      );
+      await expect(card.locator(".learning-card-back > .card-topline")).toHaveCount(0);
+      const ratingButtons = card.locator(".rating-grid .rating");
+      await expect(ratingButtons).toHaveCount(4);
+      const ratingOrder = await ratingButtons.evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const rating = [...button.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name));
+          return rating?.slice("rating-".length);
+        }),
+      );
+      expect(ratingOrder).toEqual(["again", "hard", "good", "easy"]);
+      for (let index = 0; index < 4; index += 1) {
+        const interval = card.locator(".rating-grid .rating-interval").nth(index);
+        await expect(interval).not.toHaveText("—", { timeout: 10000 });
+      }
+    } finally {
+      await context.close();
+    }
+  }
+});
