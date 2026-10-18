@@ -165,9 +165,10 @@ Effort means relative implementation and ongoing content/support burden. Ratings
 | 4 | Targeted repair for persistent kanji errors | High | Medium | Reduce recurring errors and improve delayed recall against a defined baseline; no claim of planner superiority without evidence. |
 | 5 | Curated beginner vocabulary and sentence collection | High | Medium–high | Pilot a maintained collection of roughly 300–500 useful, reviewed words only after provenance, validation, correction and updates are operational. |
 | 6 | Onboarding, manageable workload, missed-day return | High | Low–medium | Improve first-session completion and 7/30-day cohort retention without coercive streaks or notifications. |
-| 7 | Anki-friendly import/export interoperability | Medium | Medium | Build only if learner research shows that switching cost blocks activation; test import integrity and clear error reporting. |
-| 8 | Grammar in context | Conditional | Medium initially; high for full course | Try concise explanations inside Reading Lab first; require a repeated demand signal before a standalone curriculum. |
-| 9 | AI tutor, community, broad gamification, additional language packs | Unproven | High and ongoing | Defer until a specific problem, expected benefit, privacy design, evaluation plan, and maintenance owner exist. |
+| 7 | Kanji bookmarks and a saved-kanji list | High | Low | Validate that learners return to saved kanji and start useful practice from the saved list; ensure bookmarks never alter review state. |
+| 8 | Anki `.apkg` deck import (MVP) | Medium; potentially high for experienced learners | Medium–high | Proceed only if learner research confirms switching cost is a real activation barrier; measure import completion, card fidelity, and clear handling of unsupported content. |
+| 9 | Grammar in context | Conditional | Medium initially; high for full course | Try concise explanations inside Reading Lab first; require a repeated demand signal before a standalone curriculum. |
+| 10 | AI tutor, community, broad gamification, additional language packs | Unproven | High and ongoing | Defer until a specific problem, expected benefit, privacy design, evaluation plan, and maintenance owner exist. |
 
 ### Feature disposition
 
@@ -178,6 +179,14 @@ Effort means relative implementation and ongoing content/support burden. Ratings
 **Simplify:** Keep the five-skill/adaptive engine, but present it through a straightforward Practice action. Reveal reference detail progressively. Keep the main navigation focused on Today, Kanji/learning, and Explore/reading.
 
 **Defer:** A standalone grammar curriculum, large vocabulary expansion, AI tutoring/conversation, community features, complex gamification, many additional language interfaces, and app-store packaging before PWA quality is established.
+
+### 2026-10-18 — Two proposed learner-owned study features
+
+- **Kanji bookmarks — first:** a small, high-value improvement after release-critical gates. Save/unsave a kanji from Dictionary surfaces and revisit saved kanji through a dedicated list/filter. Keep it separate from FSRS review state and preserve stable identity, local persistence, backup/restore, and existing sync contracts.
+- **Anki deck import — research-gated follow-on:** let a learner import a local `.apkg` deck and review supported cards in Rinemi. Begin with a bounded format-support contract, preview before import, explicit treatment of unsupported note types/templates/media, safe HTML/media handling, duplicate-import behavior, and validation that the existing review engine can own imported-card scheduling without creating a parallel scheduler.
+- Detailed scope and acceptance gates: [Kanji Bookmarks & Anki Deck Import feature roadmap](FEATURE-ROADMAP-ANKI-IMPORT-AND-KANJI-BOOKMARKS.md).
+
+These are **planned**, not implemented or release-ready. They must not delay Public Kanji release or override the canonical release blockers.
 
 ## 7. Strategic 6–12-month roadmap
 
@@ -202,7 +211,9 @@ Audit a representative sample of meanings, readings, vocabulary, examples, mnemo
 
 Connect Reading Lab, Dictionary, known vocabulary and future practice. Use a small, reviewed and properly sourced collection of short texts. Keep content and learner-state authority within current engine boundaries.
 
-**Exit evidence:** measure lookup-to-practice continuity, active use of reading, and comprehension on defined tasks. Do not treat word lookups, time spent, or immediate recognition alone as comprehension.
+After release-critical work is secure, ship a small **Kanji Bookmarks** increment: learners can save/unsave kanji from Dictionary surfaces and return to a saved-kanji list. This is a navigation/personal-organization feature, not a second review system; it must preserve existing kanji/card identity and leave FSRS, grading, evidence and learner state untouched.
+
+**Exit evidence:** measure lookup-to-practice continuity, active use of reading, and comprehension on defined tasks. For bookmarks, measure whether learners revisit saved kanji and start a useful learning/practice action. Do not treat saves, word lookups, time spent, or immediate recognition alone as comprehension.
 
 ### Phase 4 — Add only the vocabulary breadth the reading path needs
 **May–July 2027**
@@ -214,7 +225,7 @@ Pilot approximately 300–500 useful beginner words linked to kanji, readings, P
 ### Phase 5 — Choose expansion from evidence
 **August–October 2027**
 
-Decide among contextual grammar support, import/export improvements, and public-beta distribution based on retained-user needs. Do not automatically start a full grammar curriculum.
+Decide among contextual grammar support, **Anki `.apkg` import**, and public-beta distribution based on retained-user needs. Before implementation, verify through learner interviews/tasks that an existing Anki collection is a meaningful switching barrier. Start with a constrained, explicitly documented set of supported note/card types and clear warnings for unsupported templates or media. Do not silently discard content, execute imported card JavaScript, or claim complete scheduling-history transfer until it is verified on representative decks. Do not automatically start a full grammar curriculum.
 
 **Provisional beta signals:** at least 25% seven-day retention and 15% thirty-day retention among activated cohorts, measured with explicit denominators/windows and interpreted alongside delayed recall and reading-comprehension results. These are initial targets for validation, not industry benchmarks or proof of product-market fit.
 
