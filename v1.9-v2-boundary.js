@@ -362,7 +362,18 @@ async function getStats(){
   try{return await statsInFlight}finally{statsInFlight=null}
 }
 async function publishStartupSnapshot(){const viewModel=await startupSnapshot();document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-startup-view-model',{detail:viewModel}));return viewModel}
-async function refreshLearning(){const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;if(!bridge?.snapshot){return learning}learning=core.buildLearningCardViewModel(await bridge.snapshot());await publish();return learning}
+async function refreshLearning(){
+  const core=await load(),bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;
+  if(!bridge?.snapshot)return learning;
+  const source=await bridge.snapshot();
+  let ratingPreviews=null;
+  if(source?.revealed&&typeof bridge.previewLearningRatings==="function"){
+    try{ratingPreviews=await bridge.previewLearningRatings()}catch(_){ratingPreviews=null}
+  }
+  learning=core.buildLearningCardViewModel({...source,ratingPreviews});
+  await publish();
+  return learning;
+}
 async function revealLearning(direct=false){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(bridge?.reveal?.(Boolean(direct)));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 async function rateLearning(rating){const bridge=window.__KANJI5_V19_REVIEW_BRIDGE__;const ok=Boolean(await bridge?.rate?.(rating));if(ok)setTimeout(()=>{void refreshLearning()},0);return ok}
 
