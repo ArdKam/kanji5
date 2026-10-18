@@ -119,14 +119,22 @@ export function LocalDataErasure({ language }: { language: Language }) {
     }
 
     const failed = new Set<string>();
-    if (removeMatchingStorageKeys(window.localStorage, key =>
-      key.startsWith("kanji5-") || key === "v19RecoveryState" || authStorageKeys.has(key)
-    )) {
+    try {
+      if (removeMatchingStorageKeys(window.localStorage, key =>
+        key.startsWith("kanji5-") || key === "v19RecoveryState" || authStorageKeys.has(key)
+      )) {
+        failed.add("local");
+      }
+    } catch {
       failed.add("local");
     }
-    if (removeMatchingStorageKeys(window.sessionStorage, key =>
-      key.startsWith("kanji5-") || key === "v19RecoveryState"
-    )) {
+    try {
+      if (removeMatchingStorageKeys(window.sessionStorage, key =>
+        key.startsWith("kanji5-") || key === "v19RecoveryState"
+      )) {
+        failed.add("session");
+      }
+    } catch {
       failed.add("session");
     }
 
@@ -134,8 +142,14 @@ export function LocalDataErasure({ language }: { language: Language }) {
       if (typeof window.caches !== "undefined") {
         const cacheNames = await window.caches.keys();
         const apiCaches = cacheNames.filter(name => name.startsWith("kanji5-api-"));
-        const results = await Promise.all(apiCaches.map(name => window.caches.delete(name)));
-        if (results.some(deleted => !deleted)) failed.add("cache");
+        for (const name of apiCaches) {
+          try {
+            await window.caches.delete(name);
+            if ((await window.caches.keys()).includes(name)) failed.add("cache");
+          } catch {
+            failed.add("cache");
+          }
+        }
       }
     } catch {
       failed.add("cache");
