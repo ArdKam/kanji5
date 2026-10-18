@@ -177,7 +177,7 @@ test('data trust: local-data erasure clears this browser only and preserves unre
 
   const confirmation = erasure.getByRole('alertdialog');
   await expect(confirmation).toBeVisible();
-  await expect(confirmation).toContainText('It does not delete your account or synced cloud data');
+  await expect(confirmation).toContainText('Your account and cloud copy remain unchanged');
   await confirmation.getByRole('textbox', { name: 'Confirmation phrase', exact: true }).fill('DELETE');
   const navigation = page.waitForNavigation({ waitUntil: 'domcontentloaded' });
   await confirmation.getByRole('button', { name: "Erase this browser's data", exact: true }).click();
