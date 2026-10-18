@@ -98,6 +98,24 @@ const PAGER_AXIS_LOCK_DISTANCE=12;
 const PAGER_AXIS_RATIO=2;
 const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;
 
+const formatReviewInterval=(dueAt:string|null|undefined)=>{
+  if(!dueAt)return "—";
+  const due=Date.parse(dueAt);
+  if(!Number.isFinite(due))return "—";
+  const minutes=Math.max(0,Math.round((due-Date.now())/60000));
+  if(minutes<60){
+    const value=Math.max(1,minutes);
+    return getLanguage()==="fa"?`${fa(value)} دقیقه`:`${value}m`;
+  }
+  const hours=minutes/60;
+  if(hours<24){
+    const value=Math.max(1,Math.round(hours));
+    return getLanguage()==="fa"?`${fa(value)} ساعت`:`${value}h`;
+  }
+  const days=Math.max(1,Math.round(hours/24));
+  return getLanguage()==="fa"?`${fa(days)} روز`:`${days}d`;
+};
+
 function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const learnerMeaningModel=card.learnerMeanings??{};
@@ -439,13 +457,12 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
         <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
-        <div className="kanji-row"><span className="kanji-display" lang="ja" dir="ltr">{text(card.character)}</span>{card.character?<Audio value={card.character} label={t("playKanjiPronunciation")}/>:null}</div>
+        <div className="kanji-row"><span className="kanji-display" lang="ja" dir="ltr">{text(card.character)}</span>{card.character?<span className="kanji-audio-control"><Audio value={card.character} label={t("playKanjiPronunciation")}/></span>:null}</div>
         <p id="learning-recall-cue" className="learning-recall-cue">{learningCopy("recallBeforeReveal",getLanguage())}</p>
         <button className="button primary wide" type="button" aria-describedby="learning-recall-cue" onClick={handleReveal} disabled={revealed||Boolean(busy)||revealStylesPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
       </div>
       <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
         <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("meaningAndStructure")}</span>
-        <div className="card-topline"><span className="badge badge-red">{t("learning")}</span><div className="actions"><span>{t("cardBack")}</span></div></div>
         <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
           <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
             <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
@@ -594,7 +611,8 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
-          <div className="rating-grid">{ratingOptions().map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" dir={getLanguage()==="fa"?"rtl":"ltr"} disabled={Boolean(busy)} onClick={()=>handleRate(r)}>{l}</button>)}</div>
+          <p className="rating-prompt">{learningCopy("rateRecall",getLanguage())}</p>
+          <div className="rating-grid">{ratingOptions().map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" dir={getLanguage()==="fa"?"rtl":"ltr"} disabled={Boolean(busy)} onClick={()=>handleRate(r)}><span className="rating-label">{l}</span><small className="rating-interval">{formatReviewInterval(card.ratingPreviews?.[r])}</small></button>)}</div>
         </div>
           <dialog hidden={!referenceInfoOpen} ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
           <div className="learning-reference-dialog-head">
