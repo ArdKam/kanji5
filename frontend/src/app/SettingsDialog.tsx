@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { usePageDialog } from "./usePageDialog";
 import { t, type Language } from "./i18n";
 import { DataBackup } from "./DataBackup";
+import { LocalDataErasure } from "./LocalDataErasure";
 import type { Settings, Snapshot } from "./engine";
 
 type NumberSettingProps = {
@@ -334,6 +335,7 @@ export function SettingsDialog({
             </button>
           )}
         </section>
+        <LocalDataErasure language={language} />
         </div>
 
         <div className="settings-save-region">

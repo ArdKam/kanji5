@@ -37,6 +37,8 @@ export type AccountApi = {
   sendPasswordReset: (email: string) => Promise<void>;
   setPassword: (newPassword: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Clears only the persisted session for this browser, never other device sessions. */
+  signOutLocal?: () => Promise<void>;
   syncNow: () => Promise<void>;
 };
 
