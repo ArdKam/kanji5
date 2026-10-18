@@ -24,6 +24,68 @@ try {
       localStorage.setItem('kanji5-onboarding-v2', 'complete');
     });
     await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Use Playwright's direct HTTP client (not the service worker or browser cache)
+    // to verify the deployed install metadata and every generated offline asset.
+    let pwaProbeCounter = 0;
+    const fetchLiveAsset = async (url, label) => {
+      const target = new URL(url);
+      target.searchParams.set('rinemi-release-probe', `${Date.now()}-${pwaProbeCounter++}`);
+      const response = await page.request.get(target.toString(), { timeout: 20000 });
+      if (!response.ok()) throw new Error(`LIVE_PWA_ASSET_UNAVAILABLE:${label}:${response.status()}`);
+      return response;
+    };
+    const pwaBase = baseUrl + '/';
+    const manifestResponse = await fetchLiveAsset(new URL('manifest.webmanifest', pwaBase).href, 'manifest.webmanifest');
+    const pwaManifest = await manifestResponse.json();
+    if (pwaManifest.display !== 'standalone' || pwaManifest.start_url !== './' || pwaManifest.scope !== './' || pwaManifest.id !== './') {
+      throw new Error('LIVE_PWA_MANIFEST_INSTALL_METADATA_INVALID: ' + JSON.stringify({
+        display: pwaManifest.display,
+        start_url: pwaManifest.start_url,
+        scope: pwaManifest.scope,
+        id: pwaManifest.id,
+      }));
+    }
+    if (!Array.isArray(pwaManifest.icons) || !pwaManifest.icons.some(icon => icon.sizes === '192x192') || !pwaManifest.icons.some(icon => icon.sizes === '512x512')) {
+      throw new Error('LIVE_PWA_MANIFEST_REQUIRED_ICONS_MISSING');
+    }
+    await Promise.all(pwaManifest.icons.map(icon =>
+      fetchLiveAsset(new URL(icon.src, pwaBase).href, 'icon:' + icon.src)
+    ));
+
+    const reactManifestResponse = await fetchLiveAsset(new URL('react-dist/.vite/manifest.json', pwaBase).href, 'react-dist/.vite/manifest.json');
+    const reactManifest = await reactManifestResponse.json();
+    if (!reactManifest || typeof reactManifest !== 'object' || Array.isArray(reactManifest) || !Object.keys(reactManifest).length) {
+      throw new Error('LIVE_PWA_REACT_MANIFEST_INVALID');
+    }
+    const manifestEntries = Object.values(reactManifest);
+    const reactEntry = manifestEntries.find(entry => entry?.file === 'kanji5-react.js');
+    if (!reactEntry) {
+      throw new Error('LIVE_PWA_REACT_ENTRY_MISSING');
+    }
+    const manifestAssets = new Set();
+    const manifestVisited = new Set();
+    function visitManifest(key) {
+      if (manifestVisited.has(key)) return;
+      manifestVisited.add(key);
+      const entry = reactManifest[key];
+      if (!entry) throw new Error('LIVE_PWA_REACT_DEPENDENCY_ENTRY_MISSING: ' + key);
+      for (const value of [entry.file, ...(entry.css || []), ...(entry.assets || [])]) {
+        if (typeof value === 'string' && value) manifestAssets.add(value.replace(/^\.\//, ''));
+      }
+      for (const dependency of [...(entry.imports || []), ...(entry.dynamicImports || [])]) visitManifest(dependency);
+    }
+    for (const key of Object.keys(reactManifest)) visitManifest(key);
+    if (!manifestAssets.has('kanji5-react.js')) {
+      throw new Error('LIVE_PWA_REACT_MANIFEST_ENTRY_JS_MISSING');
+    }
+    // index.html loads the stable stylesheet directly; confirm it explicitly even
+    // when Vite does not list it in the JavaScript entry's css metadata.
+    manifestAssets.add('kanji5-react.css');
+    await Promise.all([...manifestAssets].map(asset =>
+      fetchLiveAsset(new URL('react-dist/' + asset, pwaBase).href, 'react-dist/' + asset)
+    ));
+    console.log(`LIVE_PWA_MANIFEST_AND_ASSET_GRAPH_VERIFIED assets=${manifestAssets.size}`);
+
     const onboarding = page.locator('[data-testid="onboarding-flow"]');
     const appShell = page.locator('#root .app-shell');
     await Promise.race([
