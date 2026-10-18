@@ -75,7 +75,6 @@ for(const item of shell){
   assert.ok(fs.existsSync(path.join(site,relative)),"PAGES_SITE_SW_ASSET_MISSING: "+relative);
 }
 assert.ok(fs.existsSync(path.join(site,"react-dist/assets")),"PAGES_SITE_REACT_ASSETS_MISSING");
-
 // Validate the staged release artifact itself—not just source files or the Vite build.
 // This manifest is a required service-worker install dependency and enumerates lazy chunks.
 const reactManifestPath=path.join(site,"react-dist/.vite/manifest.json");
