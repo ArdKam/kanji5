@@ -27,7 +27,7 @@ assert(
   "The redundant learning/card-back header must not take space away from the answer",
 );
 
-const backStart = app.indexOf('<div className="learning-card-back"');
+const backStart = app.indexOf('<div className="learning-card-face learning-card-back"');
 assert(backStart >= 0, "Learning-card back face is required");
 const pagerStart = app.indexOf('className="learning-back-pager-shell"', backStart);
 assert(pagerStart > backStart, "Learning-card back pager is required");
