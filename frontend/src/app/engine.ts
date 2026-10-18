@@ -38,6 +38,7 @@ export type Snapshot = {
     isNew?: boolean;
     character?: string;
     revealed?: boolean;
+    ratingPreviews?: Partial<Record<Rating, string | null>> | null;
     meanings?: string[];
     on?: string[];
     kun?: string[];
