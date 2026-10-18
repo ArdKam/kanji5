@@ -1162,7 +1162,10 @@ test("kanji stays centered independently of audio and rating buttons show FSRS i
       const ratingButtons = card.locator(".rating-grid .rating");
       await expect(ratingButtons).toHaveCount(4);
       const ratingOrder = await ratingButtons.evaluateAll((buttons) =>
-        buttons.map((button) => [...button.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name))?.slice(7),
+        buttons.map((button) => {
+          const rating = [...button.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name));
+          return rating?.slice("rating-".length);
+        }),
       );
       expect(ratingOrder).toEqual(["again", "hard", "good", "easy"]);
       for (let index = 0; index < 4; index += 1) {
