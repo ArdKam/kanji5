@@ -490,8 +490,8 @@
   line-height:1.45;
 }
 .placement-option:hover:not(:disabled){border-color:color-mix(in srgb, var(--ai) 35%, var(--line));}
-.placement-option.correct{border-color:color-mix(in srgb,var(--ds-state-success-text) 42%,var(--line));background:color-mix(in srgb,var(--ds-state-success-text) 9%,var(--paper));}
-.placement-option.wrong{border-color:color-mix(in srgb,var(--ds-state-danger-text) 42%,var(--line));background:color-mix(in srgb,var(--ds-state-danger-text) 7%,var(--paper));}
+.placement-option.correct{border-color:color-mix(in srgb,var(--ds-state-success-text) 42%,var(--ds-color-border));background:color-mix(in srgb,var(--ds-state-success-text) 9%,var(--paper));}
+.placement-option.wrong{border-color:color-mix(in srgb,var(--ds-state-danger-text) 42%,var(--ds-color-border));background:color-mix(in srgb,var(--ds-state-danger-text) 7%,var(--paper));}
 .placement-feedback{color:var(--ink);font-size:var(--text-sm);font-weight:850;}
 .placement-result-score{
   display:flex;
@@ -749,9 +749,9 @@
 .handwriting-result-score span{color:var(--mute);font-size:var(--text-xs);font-weight:800;}
 .handwriting-result-copy{min-width:0;display:grid;gap:2px;line-height:1.5;}
 .handwriting-result-copy small{color:var(--mute);font-size:var(--text-xs);}
-.handwriting-result.great{border-color:color-mix(in srgb,var(--ds-state-success-text) 42%,var(--line));}
+.handwriting-result.great{border-color:color-mix(in srgb,var(--ds-state-success-text) 42%,var(--ds-color-border));}
 .handwriting-result.good{border-color:color-mix(in srgb,var(--ds-state-warning-text) 42%,var(--line));}
-.handwriting-result.retry{border-color:color-mix(in srgb,var(--ds-state-danger-text) 42%,var(--line));}@media(max-width:520px){
+.handwriting-result.retry{border-color:color-mix(in srgb,var(--ds-state-danger-text) 42%,var(--ds-color-border));}@media(max-width:520px){
   .handwriting-canvas-wrap{width:min(285px,100%);}
   .handwriting-header p{max-width:220px;}
   .handwriting-header-end{gap:4px;}
@@ -925,7 +925,7 @@
   font-size:var(--text-xs);
   direction:ltr;
 }
-.grammar-option.correct{border-color:color-mix(in srgb,var(--ds-state-success-text) 42%,var(--line));background:color-mix(in srgb,var(--ds-state-success-text) 9%,var(--paper));}
+.grammar-option.correct{border-color:color-mix(in srgb,var(--ds-state-success-text) 42%,var(--ds-color-border));background:color-mix(in srgb,var(--ds-state-success-text) 9%,var(--paper));}
 .grammar-feedback{
   margin:0;
   color:var(--ai);
