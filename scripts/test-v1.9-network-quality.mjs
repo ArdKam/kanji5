@@ -24,6 +24,9 @@ globalThis.fetch=async url=>{
 };
 try{
   const network=await import('../v1.5-network.js?quality-test=1');
+  const vocabularyResult=await network.fetchWordsResult('学');
+  assert.equal(vocabularyResult.availability,'available');
+  assert.deepEqual(vocabularyResult.items.map(x=>x.word),['学校','学ぶ']);
   const words=await network.fetchWords('学');
   assert.deepEqual(words.map(x=>x.word),['学校','学ぶ']);
   assert(words.every(x=>x.source==='kanjiapi.dev'));
@@ -38,7 +41,13 @@ try{
   assert.deepEqual(selectedContextA,selectedContextB);
   assert(sentences.some(x=>x.id===selectedContextA.id));
 
+  globalThis.fetch=async()=>new Response(JSON.stringify({error:'offline-content-unavailable'}),{status:503,headers:{'content-type':'application/json','X-Kanji5-Offline-Fallback':'1'}});
+  assert.deepEqual(await network.fetchWordsResult('学'),{availability:'offline',items:[]});
+  assert.deepEqual(await network.fetchWords('学'),[]);
+  globalThis.fetch=async()=>new Response('[]',{status:200,headers:{'content-type':'application/json'}});
+  assert.deepEqual(await network.fetchWordsResult('学'),{availability:'available',items:[]});
   globalThis.fetch=async()=>{throw new Error('offline')};
+  assert.deepEqual(await network.fetchWordsResult('学'),{availability:'unavailable',items:[]});
   assert.deepEqual(await network.fetchWords('学'),[]);
   assert.deepEqual(await network.fetchContextSentences('学'),[]);
   assert(calls.length>=2);
