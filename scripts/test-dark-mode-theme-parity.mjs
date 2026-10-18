@@ -98,9 +98,9 @@ function contrast(foreground, background) {
 }
 assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
 assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
-assert.ok(contrast("#171614", "#A8B5D8") >= 4.5, "Dark indigo primary action text must meet WCAG AA contrast");
-assert.ok(contrast("#171614", "#B7C3E0") >= 4.5, "Dark indigo primary hover text must meet WCAG AA contrast");
-assert.ok(contrast("#A8B5D8", "#171614") >= 3, "Dark indigo focus ring must meet the 3:1 non-text contrast target against the app canvas");
+assert.ok(contrast("#171614", "#E06A5F") >= 4.5, "Dark coral primary action text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#E47C72") >= 4.5, "Dark coral primary hover text must meet WCAG AA contrast");
+assert.ok(contrast("#FF9B91", "#171614") >= 3, "Dark focus ring must meet the 3:1 non-text contrast target against the app canvas");
 
 
 assert.ok(designSystem.includes("--ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);"), "Elevated surfaces must use matching light/dark semantic values");
@@ -110,12 +110,12 @@ const manualDark = styles.slice(manualDarkStart, manualLightStart);
 assert.ok(manualDark.includes("color-scheme:dark;"), "Manual Dark must select the dark color scheme");
 assert.ok(designSystem.includes("--ds-color-skeleton-base: light-dark(#EEE7DA, #292724);") && designSystem.includes("--ds-color-skeleton-highlight: light-dark(#F8F3E9, #35312C);"), "Loading colors must be defined semantically for both themes");
 assert.ok(designSystem.includes(":root .app-shell .button.primary"), "Primary actions must be styled from the shared semantic layer");
-assert.ok(designSystem.includes("background: var(--ds-color-action-primary-hover);") && designSystem.includes("box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-focus-ring) 28%, transparent);"), "Primary hover/focus must use semantic indigo and a visible focus halo");
+assert.ok(designSystem.includes("background: var(--ds-color-action-primary-hover);") && designSystem.includes("box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-focus-ring) 28%, transparent);"), "Primary hover/focus must use semantic action tokens and a visible focus halo");
 assert.equal(/:root\[data-theme="(?:dark|system)"\]\s+\.button\.primary/.test(styles), false, "Theme-specific primary-button duplicates must not diverge from semantic tokens");
 assert.ok(designSystem.includes("button:focus-visible, a[href]:focus-visible") && designSystem.includes("outline: 3px solid var(--ds-focus-ring);"), "Keyboard focus must be defined once by the semantic layer");
 assert.equal(/:root\[data-theme="(?:dark|system)"\]\s+:is\(button,summary,a,input,select,textarea\):focus-visible/.test(styles), false, "Per-theme keyboard focus duplicates must not override the semantic ring");
 
-assert.ok(designSystem.includes("--ds-color-action-primary-hover: light-dark(#424F70, #B7C3E0);"), "Primary hover state must retain distinct semantic indigo values for light and dark");
+assert.ok(designSystem.includes("--ds-color-action-primary-hover: light-dark(#424F70, #E47C72);"), "Primary hover state must retain distinct semantic indigo values for light and dark");
 assert.ok(styles.includes(".audio-button:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);"), "Audio focus must use a theme-aware semantic ring");
 assert.equal(styles.includes(':root[data-theme="light"] .button.primary{background:var(--shu);'), false, "Dark brand-red primary rules must not leak into manual Light");
 assert.ok(topic.includes(".topic-learning-search:focus-within { outline: 3px solid var(--ds-focus-ring);"), "Topic search focus must use the shared semantic focus ring");
