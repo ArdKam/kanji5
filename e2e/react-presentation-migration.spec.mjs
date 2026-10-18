@@ -362,6 +362,43 @@ test('Dictionary card tabs fit narrow mobile widths without horizontal overflow'
   }
 });
 
+test('Dictionary vocabulary distinguishes offline failure from a genuine empty result and can retry',async({page})=>{
+  let vocabularyRequests=0;
+  await page.route('https://kanjiapi.dev/v1/words/**',async route=>{
+    vocabularyRequests++;
+    if(vocabularyRequests===1){
+      await route.fulfill({
+        status:503,
+        headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'},
+        body:JSON.stringify({error:'offline-content-unavailable'})
+      });
+      return;
+    }
+    await route.fulfill({status:200,contentType:'application/json',body:'[]'});
+  });
+  await clean(page);
+  await page.locator('.experience-nav .experience-tab').nth(2).click();
+  const pageRoot=page.locator('.dictionary-page');
+  await expect(pageRoot).toBeVisible();
+  const tile=pageRoot.locator('.kanji-catalog-tile').first();
+  await expect(tile).toBeVisible();
+  await tile.click();
+  const card=page.getByRole('dialog');
+  await expect(card).toBeVisible();
+  await card.getByRole('tab',{name:'واژه',exact:true}).click();
+  const examples=card.locator('.dictionary-vocabulary');
+  await expect(examples).toHaveAttribute('data-vocabulary-state','offline');
+  await expect(examples.locator('.dictionary-vocabulary-unavailable')).toContainText('در حالت آفلاین');
+  await expect(examples.locator('.dictionary-vocabulary-empty')).toHaveCount(0);
+  const retry=examples.locator('.dictionary-vocabulary-retry');
+  await expect(retry).toBeVisible();
+  await retry.click();
+  await expect(examples).toHaveAttribute('data-vocabulary-state','available');
+  await expect(examples.locator('.dictionary-vocabulary-empty')).toHaveText('برای این کانجی فعلاً واژه‌ای از منبع واژگان در دسترس نیست.');
+  await expect(examples.locator('.dictionary-vocabulary-retry')).toHaveCount(0);
+  if(vocabularyRequests!==2)throw new Error(`Expected one retry request, observed ${vocabularyRequests} requests.`);
+});
+
 test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
   await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
