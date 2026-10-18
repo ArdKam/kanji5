@@ -516,6 +516,11 @@ const api = {
     const { error } = await c.auth.signOut();
     if (error) throw error;
   },
+  async signOutLocal() {
+    const c = await getClient();
+    const { error } = await c.auth.signOut({ scope: 'local' });
+    if (error) throw error;
+  },
   async syncNow() {
     await syncNow();
   },
