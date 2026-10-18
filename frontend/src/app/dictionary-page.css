@@ -138,7 +138,7 @@
   font:inherit;
   white-space:nowrap;
   cursor:pointer;
-  transition:background var(--motion-interaction) ease,border-color var(--motion-interaction) ease,color var(--motion-interaction) ease,box-shadow var(--motion-interaction) ease;
+  transition:background var(--ds-motion-interaction) ease,border-color var(--ds-motion-interaction) ease,color var(--ds-motion-interaction) ease,box-shadow var(--ds-motion-interaction) ease;
 }.dictionary-view-button.active{
   border-color:var(--line);
   background:var(--paper);
@@ -235,7 +235,7 @@
   font:inherit;
   cursor:pointer;
   isolation:isolate;
-  transition:transform var(--motion-interaction) ease, border-color var(--motion-interaction) ease, box-shadow var(--motion-interaction) ease;
+  transition:transform var(--ds-motion-interaction) ease, border-color var(--ds-motion-interaction) ease, box-shadow var(--ds-motion-interaction) ease;
 }.kanji-catalog-tile:hover{
   transform:translateY(-1px);
   border-color:color-mix(in srgb, var(--ai) 40%, var(--line));
