@@ -71,7 +71,7 @@ test('React presentation meets core keyboard, focus, motion and touch-target acc
   const reveal=page.locator('#root .learning-card-front .button.primary.wide');
   await expect(reveal).toBeVisible();
   await reveal.click();
-  await page.getByRole('button',{name:'خوب',exact:true}).click();
+  await page.locator('#root .learning-card-back .rating.rating-good').click();
   await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
   await page.getByRole('button',{name:'شروع تمرین',exact:true}).click();
