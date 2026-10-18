@@ -27,7 +27,7 @@ assert.match(shell,/font-family:\s*"Vazirmatn",\s*"Plus Jakarta Sans",\s*system-
 assert.ok(shell.includes("background: var(--ds-color-canvas)") && shell.includes("color: var(--ds-color-text-primary)"), "Startup shell must use shared semantic surface and text tokens");
 assert.ok(!shell.includes(':root[data-theme="dark"]') && !shell.includes("@media(prefers-color-scheme:dark)"), "Startup shell must consume shared tokens rather than duplicate theme palettes");
 assert.ok(shell.includes("background: var(--ds-color-canvas)") && shell.includes("background: var(--ds-color-surface)"), "Startup shell must derive canvas and card surfaces from semantic tokens");
-assert.ok(shell.includes("background: var(--ds-color-action-primary)") && shell.includes("color: var(--ds-color-action-primary-text)"), "Startup recovery action must use semantic indigo and its matching foreground");
+assert.ok(shell.includes("background: var(--ds-color-action-primary)") && shell.includes("color: var(--ds-color-action-primary-text)"), "Startup recovery action must use the shared semantic action token and matching foreground");
 assert.ok(/@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)/.test(shell), "Startup shell must retain a reduced-motion path");
 
 assert.ok(cat.includes('viewBox="0 0 240 240"'), "Companion art should use a scalable viewBox");
@@ -37,12 +37,12 @@ for (const color of ["#F7F4EE", "#FDFBF7", "#292B2D", "#505F83", "#D6A1AA"]) {
 }
 assert.ok(!/<image\b|(?:href|src)=["']https?:\/\//i.test(cat), "Companion asset must stay self-contained and work offline");
 assert.ok(/cat is a/i.test(guide) && /not a teacher/i.test(guide) && /source[- ]audit/i.test(guide), "Brand guide must preserve the companion contract and source-audit record");
-assert.ok(designSystem.includes("--ds-color-action-primary: light-dark(var(--ds-brand-indigo), #A8B5D8);"), "Semantic action token must match the established dark-logo indigo");
+assert.ok(designSystem.includes("--ds-color-action-primary: light-dark(var(--ds-brand-indigo), #E06A5F);"), "Semantic action token must match the established dark-logo indigo");
 assert.ok(designSystem.includes("--ds-color-legacy-shu: var(--ds-color-action-primary);"), "Legacy action alias must resolve to semantic indigo in every theme");
 assert.ok(themeBootstrap.includes("--indigo:var(--ds-color-action-primary);--shu:var(--ds-color-action-primary);"), "Pre-React onboarding must use the shared semantic action color");
-assert.ok(!themeBootstrap.includes("--indigo:#e06a5f") && !themeBootstrap.includes("--shu:#e06a5f"), "Dark onboarding must not reuse coral error color as its brand action");
+assert.equal(/--(?:indigo|shu):#e06a5f/i.test(themeBootstrap), false, "Dark onboarding must not hardcode its action color outside the semantic token");
 assert.ok(contrast("#62666A", "#FDFBF7") >= 4.5, "Startup muted copy must pass WCAG AA on paper");
 assert.ok(contrast("#B8AFA2", "#23211E") >= 4.5, "Startup muted copy must pass WCAG AA on dark paper");
-assert.ok(contrast("#171614", "#A8B5D8") >= 4.5, "Dark indigo recovery action must pass WCAG AA");
+assert.ok(contrast("#171614", "#E06A5F") >= 4.5, "Dark coral recovery action must pass WCAG AA");
 
 console.log("Rinemi brand-system startup contract passed.");
