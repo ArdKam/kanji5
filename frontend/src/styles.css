@@ -2556,7 +2556,8 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
   padding-top:10px;
   margin-bottom:4px;
 }
-.settings-reset-trigger{
+.settings-reset-trigger,
+.settings-local-data-trigger{
   width:100%;
   min-height:42px;
   display:flex;
@@ -2574,11 +2575,14 @@ mastery-loading-placeholder span{height:12px;border-radius:999px;background:line
   transition:color .16s ease,background .16s ease;
 }
 .settings-reset-trigger:hover:not(:disabled),
-.settings-reset-trigger:focus-visible{
+.settings-reset-trigger:focus-visible,
+.settings-local-data-trigger:hover:not(:disabled),
+.settings-local-data-trigger:focus-visible{
   color:var(--shu);
   background:color-mix(in srgb,var(--shu) 4%,transparent);
 }
-.settings-reset-trigger span:last-child{
+.settings-reset-trigger span:last-child,
+.settings-local-data-trigger span:last-child{
   font-size:18px;
   line-height:1;
   color:currentColor;
