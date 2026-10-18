@@ -55,7 +55,7 @@ Treat colors as roles, not independent decoration. The light palette below match
 | Sumi / primary text | #292B2D | Headings, body text, primary neutral |
 | Ink / secondary text | #53545A | Supporting content with emphasis |
 | Muted text | #62666A | Metadata, hints, secondary labels |
-| Shu / brand indigo | #505F83 | Primary action, focus family, selected navigation |
+| Shu / brand indigo | #505F83 | Light primary action, focus family, selected navigation |
 | Sakura | #D6A1AA | Small decorative accent only |
 | Matcha | #8C9B87 | Progress and positive emphasis, with a text label |
 | Line | #DED8CE | Borders and separators |
@@ -73,7 +73,8 @@ Treat colors as roles, not independent decoration. The light palette below match
 | Muted text | #B8AFA2 | Metadata and hints |
 | Line | #746B60 | Borders and separators |
 | Soft line | #4B463F | Low-emphasis dividers |
-| Shu / dark-theme brand indigo | #A8B5D8 | Primary actions and brand accents |
+| Dark-theme brand indigo | #A8B5D8 | Dark wordmark and brand identity accents |
+| Dark-theme primary action / Shu action | #E06A5F | Filled primary buttons; preserve the established dark-mode behavior |
 | Matcha | #A9B77C | Positive/progress emphasis |
 | Sakura | #D6A1AA | Small decorative accent only |
 
@@ -110,7 +111,7 @@ Use the existing spacing and radius scale as the baseline; do not create a secon
 
 Component contracts:
 
-- **Primary action:** one clear primary action per local decision area. Indigo fill with a foreground that passes contrast in the resolved theme.
+- **Primary action:** one clear primary action per local decision area. Use the semantic action token: indigo fill in Light and coral `#E06A5F` in Dark, with a foreground that passes contrast in the resolved theme.
 - **Secondary action:** neutral surface and border; no decorative accent competing with the primary action.
 - **Cards/surfaces:** paper surface, restrained border, optional subtle shadow. Do not add a card wrapper when spacing and hierarchy already suffice.
 - **Navigation and icon buttons:** one coherent line-icon family, consistent optical size and stroke weight. Use 18–20 px glyphs and accessible labels for icon-only controls.
@@ -181,7 +182,7 @@ Findings:
 - The onboarding welcome currently uses a large 漢 hero mark, not a mascot. That is a good content-led base; introduce the cat only as a secondary companion after the concurrent onboarding/design-system work has settled.
 - Search/filter empty states are appropriately text-led. The global loading shell uses skeletons and an abstract mark; preserve the skeleton pattern.
 - startup-shell.css hard-codes a light-only canvas/card and an Inter font stack, even though the app supports Light, Dark, and System and the rest of the UI uses Plus Jakarta Sans/Vazirmatn. This pass aligns its font stack and adds explicit dark/system-dark shell colors.
-- Dark-mode app/onboarding overrides currently use coral #E06A5F for the Shu action family, while the dark logo uses indigo #A8B5D8. Existing theme-parity tests encode the coral behavior. This is a real brand inconsistency; reconcile the shared stylesheet, theme-bootstrap.js, and tests together after the open design-system work, rather than patching one file in isolation.
+- Resolved dark-mode contract: the filled primary action uses coral `#E06A5F` for continuity and strong contrast; the dark logo remains indigo `#A8B5D8`. This is a documented theme-specific action exception, not a separate hard-coded palette. React, startup, and onboarding must consume the same semantic tokens; the theme-parity tests verify that behavior.
 - The manifest icons are listed as “any maskable.” Keep their full-bleed square safe background; this is an intentional platform behavior, not a logo inconsistency.
 - The companion SVG is added as a reusable source asset. Its UI placement is deliberately deferred until the in-flight service-worker integrity change can add it to the authoritative shell precache, and the onboarding/design-system work can consume it without competing edits.
 - The design-system foundation and integration PRs were open during this audit. This pass does not edit their shared React token files, onboarding component, dark-theme parity test, service worker, or design-system document.
