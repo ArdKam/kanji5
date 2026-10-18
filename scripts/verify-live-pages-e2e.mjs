@@ -24,7 +24,6 @@ try {
       localStorage.setItem('kanji5-onboarding-v2', 'complete');
     });
     await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
-
     // Use Playwright's direct HTTP client (not the service worker or browser cache)
     // to verify the deployed install metadata and every generated offline asset.
     let pwaProbeCounter = 0;
@@ -99,7 +98,7 @@ try {
     }
 
     if (await onboarding.isVisible().catch(() => false)) {
-      await onboarding.getByRole('button', { name: "Let's begin", exact: true }).click();
+      await onboarding.getByRole('button', { name: "Set up my first session", exact: true }).click();
       await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
       await onboarding.getByRole('button', { name: /Start from the beginning/ }).click();
       await onboarding.getByRole('button', { name: 'Continue', exact: true }).click();
