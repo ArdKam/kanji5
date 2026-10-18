@@ -5,6 +5,7 @@ const sw=fs.readFileSync('sw.js','utf8');
 assert.match(sw,/react-dist\/\.vite\/manifest\.json/,'Service worker must know the Vite React manifest');
 assert.match(sw,/dynamicImports/,'Service worker must traverse dynamically imported React chunks');
 assert.match(sw,/async function precacheReactManifest/,'Service worker must precache the React asset graph from the manifest');
+
 assert.doesNotMatch(sw,/self\.skipWaiting\s*\(/,'An update must not replace the active asset graph while older tabs are still open.');
 const manifestBlock=sw.slice(sw.indexOf('async function precacheReactManifest'),sw.indexOf("self.addEventListener('install'"));
 assert.match(manifestBlock,/if\(!response\.ok\)throw new Error/,'A missing React manifest must fail the candidate worker installation.');
@@ -54,6 +55,12 @@ for(const required of ['./v2-domain-core.js','./v2-evidence-core.js','./v2-relat
 assert.ok(!shell.includes("./kanji-visual-structure.json"),"Large canonical visual data must not be cached twice in the shell and data caches");
 assert.ok(sw.includes("c.addAll(['./kanji-data.json','./kanji-components.json','./kanji-visual-structure.json'])"),"Canonical visual structure must be precached in the offline data cache");
 assert.ok(sw.includes("u.pathname.endsWith('/kanji-visual-structure.json')"),"Canonical visual structure requests must be served from the data cache");
+const offlineFallbackLine=sw.split("\n").find(line=>line.includes("offline-content-unavailable"));
+assert.ok(offlineFallbackLine,"Uncached API failure must have an explicit offline fallback response.");
+assert.match(offlineFallbackLine,/status:503/,"Offline API failure must not masquerade as HTTP 200 success.");
+assert.match(offlineFallbackLine,/X-Kanji5-Offline-Fallback/,"Offline API failure must retain its machine-readable marker.");
+assert.doesNotMatch(offlineFallbackLine,/new Response\('\[\]'\s*,\s*\{status:200/,"Offline API failure must not return a successful empty list.");
+
 const duplicates=shell.filter((item,index)=>shell.indexOf(item)!==index);
 assert.deepEqual(duplicates,[],'Service worker SHELL contains duplicate entries.');
 
