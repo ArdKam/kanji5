@@ -17,23 +17,33 @@ function sentenceContentId(id,text,english){
 }
 
 
-async function requestJSON(url){
+async function requestJSONResult(url){
   try{
     const response=await fetch(url,{cache:'force-cache'});
+    if(response.headers?.get?.('X-Kanji5-Offline-Fallback')==='1'){
+      return {availability:'offline',data:null};
+    }
     if(!response.ok){
       globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',new Error(`Network request failed (${response.status})`),{endpoint:new URL(url).pathname,status:response.status,dataAffected:'false'});
-      return null;
+      return {availability:'unavailable',data:null};
     }
-    return await response.json();
+    return {availability:'available',data:await response.json()};
   }catch(error){
     globalThis.__KANJI5_OBSERVABILITY__?.capture?.('network-request-failure',error,{endpoint:(()=>{try{return new URL(url).pathname}catch(_){return 'unknown'}})(),dataAffected:'false'});
-    return null;
+    return {availability:'unavailable',data:null};
   }
 }
 
-export async function fetchWords(character){
-  const data=await requestJSON(`${API_ORIGIN}/v1/words/${encodeURIComponent(character)}`);
-  if(!Array.isArray(data))return [];
+async function requestJSON(url){
+  const result=await requestJSONResult(url);
+  return result.availability==='available'?result.data:null;
+}
+
+export async function fetchWordsResult(character){
+  const result=await requestJSONResult(`${API_ORIGIN}/v1/words/${encodeURIComponent(character)}`);
+  if(result.availability!=='available')return {availability:result.availability,items:[]};
+  if(!Array.isArray(result.data))return {availability:'unavailable',items:[]};
+  const data=result.data;
   const out=[],seen=new Set();
   for(const entry of data){
     for(const variant of Array.isArray(entry?.variants)?entry.variants:[]){
@@ -47,7 +57,11 @@ export async function fetchWords(character){
     }
     if(out.length>=24)break;
   }
-  return validateVocabularyList(out,character).items.slice(0,12);
+  return {availability:'available',items:validateVocabularyList(out,character).items.slice(0,12)};
+}
+
+export async function fetchWords(character){
+  return (await fetchWordsResult(character)).items;
 }
 
 export async function fetchContextSentences(character){
