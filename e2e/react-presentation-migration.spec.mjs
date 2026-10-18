@@ -389,12 +389,13 @@ test('Dictionary vocabulary distinguishes offline failure from a genuine empty r
   const examples=card.locator('.dictionary-vocabulary');
   await expect(examples).toHaveAttribute('data-vocabulary-state','offline');
   await expect(examples.locator('.dictionary-vocabulary-unavailable')).toContainText('در حالت آفلاین');
-  await expect(examples.locator('.dictionary-vocabulary-empty')).toHaveCount(0);
+  await expect(examples.locator(':scope > .dictionary-vocabulary-empty')).toHaveCount(0);
   const retry=examples.locator('.dictionary-vocabulary-retry');
   await expect(retry).toBeVisible();
   await retry.click();
   await expect(examples).toHaveAttribute('data-vocabulary-state','available');
-  await expect(examples.locator('.dictionary-vocabulary-empty')).toHaveText('برای این کانجی فعلاً واژه‌ای از منبع واژگان در دسترس نیست.');
+  await expect(examples.locator(':scope > .dictionary-vocabulary-empty')).toHaveText('برای این کانجی فعلاً واژه‌ای از منبع واژگان در دسترس نیست.');
+  await expect(examples.locator('.dictionary-vocabulary-unavailable')).toHaveCount(0);
   await expect(examples.locator('.dictionary-vocabulary-retry')).toHaveCount(0);
   if(vocabularyRequests!==2)throw new Error(`Expected one retry request, observed ${vocabularyRequests} requests.`);
 });
