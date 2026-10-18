@@ -225,13 +225,16 @@ async function listKanji(){
 }
 async function getVocabulary(character){
   const normalized=String(character||'').trim();
-  if(!normalized)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:'',items:[]};
+  if(!normalized)return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:'',items:[],availability:'available'};
   try{
     const network=await loadNetwork();
-    const items=await network.fetchWords(normalized);
-    return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:Array.isArray(items)?items.slice(0,8):[]};
+    const result=typeof network.fetchWordsResult==='function'
+      ? await network.fetchWordsResult(normalized)
+      : {availability:'available',items:await network.fetchWords(normalized)};
+    const availability=result?.availability==='offline'?'offline':result?.availability==='available'?'available':'unavailable';
+    return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:Array.isArray(result?.items)?result.items.slice(0,8):[],availability};
   }catch{
-    return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:[]};
+    return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-vocabulary',character:normalized,items:[],availability:'unavailable'};
   }
 }
 async function getComponentInfo(character){

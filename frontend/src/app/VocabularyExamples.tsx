@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getVocabulary, type KanjiCatalogItem, type VocabularyItem } from "./engine";
+import { getVocabulary, type KanjiCatalogItem, type VocabularyAvailability, type VocabularyItem } from "./engine";
 import { formatNumber, t, type Language } from "./i18n";
 import { DictionaryAudio } from "./DictionaryPrimitives";
 
@@ -18,6 +18,8 @@ function renderWord(word: string, reading: string, target: string) {
 export function VocabularyExamples({ character: kanjiCharacter, language, catalog, onSelectKanji }: { character: string; language: Language; catalog: KanjiCatalogItem[]; onSelectKanji: (item: KanjiCatalogItem) => void }) {
   const [items, setItems] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [availability, setAvailability] = useState<VocabularyAvailability>("available");
+  const [retryVersion, setRetryVersion] = useState(0);
   const [showAllExamples, setShowAllExamples] = useState(false);
   const [showAllGraph, setShowAllGraph] = useState(false);
 
@@ -25,17 +27,24 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
     let active = true;
     setItems([]);
     setLoading(true);
+    setAvailability("available");
     setShowAllExamples(false);
     setShowAllGraph(false);
     void getVocabulary(kanjiCharacter).then(result => {
-      if (active) setItems((result.items ?? []).slice(0, 8));
+      if (active) {
+        setItems((result.items ?? []).slice(0, 8));
+        setAvailability(result.availability ?? "available");
+      }
     }).catch(() => {
-      if (active) setItems([]);
+      if (active) {
+        setItems([]);
+        setAvailability("unavailable");
+      }
     }).finally(() => {
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, [kanjiCharacter]);
+  }, [kanjiCharacter, retryVersion]);
 
   const catalogByCharacter = useMemo(() => new Map(catalog.map(item => [item.character, item])), [catalog]);
   const vocabularyEdges = useMemo(() => items.map(item => {
@@ -47,7 +56,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
   const visibleGraphEdges = showAllGraph ? graphEdges : graphEdges.slice(0, 3);
 
   return (
-    <section className="dictionary-vocabulary" aria-label={t("dictionaryVocabulary", language)}>
+    <section className="dictionary-vocabulary" aria-label={t("dictionaryVocabulary", language)} data-vocabulary-state={loading ? "loading" : availability}>
       <div className="dictionary-vocabulary-header">
         <div>
           <h3>{t("dictionaryVocabulary", language)}</h3>
@@ -119,7 +128,13 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
           ) : null}
         </>
       ) : null}
-      {!loading && !items.length ? <p className="dictionary-vocabulary-empty">{t("dictionaryVocabularyEmpty", language)}</p> : null}
+      {!loading && availability !== "available" ? (
+        <div className="dictionary-vocabulary-unavailable">
+          <p className="dictionary-vocabulary-empty" role="status">{t(availability === "offline" ? "dictionaryVocabularyOffline" : "dictionaryVocabularyUnavailable", language)}</p>
+          <button className="button secondary dictionary-vocabulary-retry" type="button" onClick={() => setRetryVersion(value => value + 1)}>{t("tryAgain", language)}</button>
+        </div>
+      ) : null}
+      {!loading && availability === "available" && !items.length ? <p className="dictionary-vocabulary-empty">{t("dictionaryVocabularyEmpty", language)}</p> : null}
     </section>
   );
 }
