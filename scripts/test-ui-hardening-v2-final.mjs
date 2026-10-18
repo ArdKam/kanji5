@@ -37,7 +37,7 @@ assert.ok(css.includes("--matcha:var(--ds-color-progress-accent);"),"Legacy prog
 assert.ok(css.includes("--shu:var(--ds-color-legacy-shu);") && designSystem.includes("--ds-color-legacy-shu: var(--ds-color-action-primary);"),"Legacy Shu alias must no longer introduce an independent coral action");
 assert.ok(css.includes("--surface-panel:var(--ds-color-surface-panel);"),"Legacy panel alias must preserve its translucent semantic surface");
 assert.match(designSystem,/--ds-color-canvas: light-dark\(var\(--ds-brand-rice-paper\), #171614\)/);
-assert.match(designSystem,/--ds-color-action-primary: light-dark\(var\(--ds-brand-indigo\), #A8B5D8\)/);
+assert.match(designSystem,/--ds-color-action-primary: light-dark\(var\(--ds-brand-indigo\), #E06A5F\)/);
 assert.match(designSystem,/--ds-review-again-text: var\(--ds-state-danger-text\)/);
 assert.match(designSystem,/--ds-review-hard-text: var\(--ds-state-warning-text\)/);
 assert.match(designSystem,/--ds-review-good-text: var\(--ds-state-success-text\)/);
