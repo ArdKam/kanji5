@@ -234,7 +234,7 @@ export function LocalDataErasure({ language }: { language: Language }) {
       ) : (
         <button
           ref={triggerRef}
-          className="settings-reset-trigger"
+          className="settings-local-data-trigger"
           type="button"
           onClick={() => {
             setError("");
