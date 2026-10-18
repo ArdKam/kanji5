@@ -28,6 +28,7 @@
   --ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);
   --ds-color-surface-overlay: light-dark(rgba(253, 251, 247, .96), rgba(23, 22, 20, .94));
   --ds-color-surface-panel: light-dark(rgba(251, 248, 240, .7), rgba(35, 33, 30, .78));
+  --ds-color-surface-onboarding-choice: light-dark(rgba(253, 251, 247, .58), rgba(35, 33, 30, .82));
   --ds-color-input: light-dark(#FFFDF9, #23211E);
   --ds-color-disabled: light-dark(#E9E3DA, #302D29);
 
@@ -36,16 +37,16 @@
   --ds-color-text-secondary: light-dark(#53545A, #DDD5C8);
   --ds-color-text-muted: light-dark(#62666A, #B8AFA2);
   --ds-color-text-inverse: light-dark(#FDFBF7, #171614);
-  --ds-color-action-primary: light-dark(var(--ds-brand-indigo), #A8B5D8);
+  --ds-color-action-primary: light-dark(var(--ds-brand-indigo), #E06A5F);
   --ds-color-action-primary-text: light-dark(#FDFBF7, #171614);
-  --ds-color-action-primary-hover: light-dark(#424F70, #B7C3E0);
-  --ds-color-action-primary-pressed: light-dark(#36425F, #91A1CE);
+  --ds-color-action-primary-hover: light-dark(#424F70, #E47C72);
+  --ds-color-action-primary-pressed: light-dark(#36425F, #E06A5F);
   --ds-color-action-secondary-hover: light-dark(#F1EDE6, #302D29);
   --ds-color-border: light-dark(var(--ds-brand-border), #746B60);
   --ds-color-border-subtle: light-dark(#E9E3DA, #4B463F);
   --ds-color-border-strong: light-dark(#ABA398, #A99E8D);
   --ds-color-border-interactive: light-dark(#8B93A5, #A99E8D);
-  --ds-focus-ring: light-dark(#505F83, #A8B5D8);
+  --ds-focus-ring: light-dark(#505F83, #FF9B91);
   --ds-focus-offset: 3px;
   --ds-disabled-opacity: .58;
 
