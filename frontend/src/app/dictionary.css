@@ -1493,7 +1493,7 @@
   border:1px solid transparent;
   border-radius:13px;
   scroll-margin-block:12px;
-  transition:border-color var(--motion-hover) ease,background var(--motion-hover) ease,box-shadow var(--motion-hover) ease;
+  transition:border-color var(--ds-motion-hover) ease,background var(--ds-motion-hover) ease,box-shadow var(--ds-motion-hover) ease;
 }
 .reading-lab-sentence-support{grid-column:2;display:grid;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);}
 .reading-lab-sentence-support-actions{display:flex;flex-wrap:wrap;gap:6px;}
