@@ -455,7 +455,7 @@
     display: none !important;
   }
   #root .learning-card[data-card-density] {
-    height: calc(100dvh - 160px) !important;
+    height: calc(100dvh - 140px) !important;
     min-height: 0 !important;
     margin-bottom: var(--space-2);
   }
@@ -510,4 +510,19 @@
  .learning-card-back .learning-back-page-shortcut{flex:0 0 44px;min-height:44px}
  .learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
  .learning-card-back .learning-back-footer .rating-grid .rating{min-width:0;padding:5px 2px;font-size:var(--text-xs);line-height:1.15;white-space:normal;overflow-wrap:anywhere}
+}
+
+/* Persian labels need a little more room on short landscape screens; retain touch targets. */
+@media (max-height: 460px) and (min-width: 761px) {
+  .learning-card-back .learning-back-page:first-child .learning-back-scroll { padding-top: 2px; padding-bottom: 2px; gap: 2px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity { gap: 2px 6px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block { gap: 3px; margin-top: 0; }
+  .learning-card-back .learning-back-page:first-child .readings-header { gap: 4px; font-size: 10px; }
+  .learning-card-back .learning-back-page:first-child .reading-toggle { min-height: 44px; padding: 3px 6px; font-size: 10px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings { gap: 4px; }
+  .learning-card-back .learning-back-page:first-child .reading { gap: 1px; min-height: 36px; padding: 3px; }
+  .learning-card-back .learning-back-page:first-child .reading > span { font-size: 10px; line-height: 1.15; }
+  .learning-card-back .learning-back-page:first-child .reading > strong { font-size: var(--text-sm); line-height: 1.15; overflow-wrap: anywhere; }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example { gap: 1px 4px; margin-top: 0; padding-top: 2px; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview { min-height: 36px; padding: 2px 4px; }
 }
