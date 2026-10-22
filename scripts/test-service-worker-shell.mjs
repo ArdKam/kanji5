@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const sw=fs.readFileSync('sw.js','utf8');
-assert.match(sw,/react-dist\/\.vite\/manifest\.json/,'Service worker must know the Vite React manifest');
+assert.match(sw,/react-dist\/manifest\.json/,'Service worker must know the public React manifest');
 assert.match(sw,/dynamicImports/,'Service worker must traverse dynamically imported React chunks');
 assert.match(sw,/async function precacheReactManifest/,'Service worker must precache the React asset graph from the manifest');
 
@@ -17,7 +17,7 @@ assert.doesNotMatch(manifestBlock,/catch\s*\([^)]*\)\s*\{\s*\}/,'React asset pre
 // This test runs after Vite builds react-dist. The service worker cannot safely
 // install offline support unless the generated manifest and every referenced
 // static/dynamic dependency are present in the actual release artifact.
-const reactManifestPath='react-dist/.vite/manifest.json';
+const reactManifestPath='react-dist/manifest.json';
 assert.ok(fs.existsSync(reactManifestPath),'Built React manifest must exist before precache verification.');
 const reactManifest=JSON.parse(fs.readFileSync(reactManifestPath,'utf8'));
 assert.ok(reactManifest&&typeof reactManifest==='object'&&!Array.isArray(reactManifest)&&Object.keys(reactManifest).length,'Built React manifest must be a non-empty object.');

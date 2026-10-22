@@ -12,7 +12,7 @@ const API_TTL_MS=7*24*60*60*1000;
 const API_MAX_ENTRIES=250;
 const API_INFLIGHT=new Map();
 async function precacheReactManifest(cache){
-  const manifestUrl='./react-dist/.vite/manifest.json';
+  const manifestUrl='./react-dist/manifest.json';
   const response=await fetch(manifestUrl,{cache:'no-store'});
   if(!response.ok)throw new Error('SW_REACT_MANIFEST_UNAVAILABLE:'+response.status);
   const manifest=await response.clone().json();
