@@ -13,7 +13,8 @@
 ### Current candidate disposition at this checkpoint
 
 - **#597:** merged as `544c7c0`; closeout remains subject to the mainline build and deployed live verification above.
-- **#598:** current security-audit candidate still needs exact-head CI to finish, then a read-only manual run against the actually deployed main SHA. Its results must distinguish HTTP response headers/CSP and Supabase production configuration; do not report these as passed without live evidence.
+- **#600:** current-main security-audit candidate, ported from the #598 implementation onto main at `544c7c0`. Its exact-head build, engine, WebKit, and browser diagnostics were still running when this entry was refreshed. Merge only after all required checks pass; dispatch the read-only audit against the actual deployed main SHA afterward.
+- **#598:** older stale-base source candidate for the same audit. Do not merge both implementations; once #600's checks pass, close #598 as superseded.
 - **#595:** compact Learning-card candidate has received further commits. Its latest observed exact head was `73afec487d465ca1626c0371d9dc24de6c1d12d9`; required checks were in progress. Recheck the latest SHA before review or merge.
 - **#596:** onboarding-answer-review candidate `6767959c695ab16b7944d7c3f62e3d6cc3db506f` had the engine and visual checks passed, while its React build was still in progress. Recheck the exact head before merge. Prefer #596 over the overlapping predecessor #593 only if all required checks and Persian/English mobile behavior pass.
 - **#592:** the fresh semantic-token candidate's exact-head React build failed at `1b33917168a0de4cd9a6c79d2221241d8ad9eb40`, while its engine and visual checks passed. Inspect the failing build log, fix the actual cause (including the existing 2,202 KB budget if that is the failure), and re-run all required checks. Do not merge with a failing build or raise the budget to hide an overage.
