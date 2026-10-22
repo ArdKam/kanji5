@@ -1,0 +1,64 @@
+name: Rinemi live security audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-production-security:
+    name: Read-only live security smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out current audit harness
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install pinned test dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run strict read-only production probes
+        env:
+          KANJI5_LIVE_URL: https://ardkam.github.io/kanji5
+        run: node scripts/run-live-security-smoke.mjs
+
+  zap-passive-baseline:
+    name: OWASP ZAP passive baseline (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out current audit harness
+        uses: actions/checkout@v4
+      - name: Run OWASP ZAP baseline (passive only)
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          docker run --rm -t --user root \
+            -v "$PWD:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+              -t https://ardkam.github.io/kanji5/ \
+              -m 1 \
+              -J zap-baseline.json \
+              -w zap-baseline.md \
+              -r zap-baseline.html
+      - name: Upload passive-scan reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rinemi-zap-passive-baseline
+          path: |
+            zap-baseline.json
+            zap-baseline.md
+            zap-baseline.html
+          if-no-files-found: warn
