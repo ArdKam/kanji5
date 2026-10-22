@@ -520,6 +520,78 @@ test("learning first page keeps readings above the rating footer on desktop", as
   expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
 });
 
+test("compact hybrid keeps readings, one vocabulary example, and ratings visible on a short phone", async ({ browser }) => {
+  for (const language of ["en", "fa"]) {
+    const context = await browser.newContext({ viewport: { width: 360, height: 640 } });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 5);
+      const card = await revealLearningCard(page, language);
+      await expect(card.locator(".learning-back-quick-example")).toBeVisible();
+      await expect(card.locator(".pager-current")).toBeVisible();
+
+      const metrics = await card.evaluate((el) => {
+        const active = el.querySelector(".learning-back-page.active");
+        const scroller = active?.querySelector(".learning-back-scroll");
+        const readings = active?.querySelector(".learning-back-readings-block");
+        const quickExample = active?.querySelector(".learning-back-quick-example");
+        const footer = el.querySelector(".learning-back-footer");
+        const navigation = document.querySelector(".experience-nav");
+        const indicator = el.querySelector(".pager-current");
+        const grid = el.querySelector(".learning-back-footer .rating-grid");
+        if (!(scroller instanceof HTMLElement) ||
+            !(readings instanceof HTMLElement) ||
+            !(quickExample instanceof HTMLElement) ||
+            !(footer instanceof HTMLElement) ||
+            !(indicator instanceof HTMLElement) ||
+            !(grid instanceof HTMLElement)) {
+          throw new Error("Compact learning-card geometry is incomplete");
+        }
+        const bounds = (node) => {
+          const rect = node.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+        };
+        const scrollBounds = bounds(scroller);
+        const readingBounds = bounds(readings);
+        const exampleBounds = bounds(quickExample);
+        const footerBounds = bounds(footer);
+        const indicatorBounds = bounds(indicator);
+        const ratingBounds = [...grid.querySelectorAll(".rating")].map(bounds);
+        const columns = getComputedStyle(grid).gridTemplateColumns;
+        return {
+          readingsVisibleWithoutScrolling:
+            readingBounds.top >= scrollBounds.top - 1 &&
+            readingBounds.bottom <= scrollBounds.bottom + 1 &&
+            scroller.scrollTop <= 1,
+          readingsAboveFooter: readingBounds.bottom <= footerBounds.top + 1,
+          exampleVisibleWithoutScrolling:
+            exampleBounds.top >= scrollBounds.top - 1 &&
+            exampleBounds.bottom <= scrollBounds.bottom + 1 &&
+            scroller.scrollTop <= 1,
+          indicatorVisible: indicatorBounds.width > 0 && indicatorBounds.height > 0,
+          ratingColumns: columns.split(" ").length,
+          ratingTargetsValid: ratingBounds.length === 4 &&
+            ratingBounds.every((bounds) => bounds.width >= 44 && bounds.height >= 44),
+          footerBeforeNavigation: !(navigation instanceof HTMLElement) ||
+            footerBounds.bottom <= navigation.getBoundingClientRect().top + 1,
+          noHorizontalOverflow: el.scrollWidth <= el.clientWidth + 1,
+        };
+      });
+
+      expect(metrics.readingsVisibleWithoutScrolling).toBe(true);
+      expect(metrics.readingsAboveFooter).toBe(true);
+      expect(metrics.exampleVisibleWithoutScrolling).toBe(true);
+      expect(metrics.indicatorVisible).toBe(true);
+      expect(metrics.ratingColumns).toBe(4);
+      expect(metrics.ratingTargetsValid).toBe(true);
+      expect(metrics.footerBeforeNavigation).toBe(true);
+      expect(metrics.noHorizontalOverflow).toBe(true);
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 test("reference meanings and readings open in a keyboard-accessible modal", async ({ page }) => {
   for (const scenario of [
     { language: "en", viewport: { width: 1280, height: 720 }, closeLabel: "Close" },
