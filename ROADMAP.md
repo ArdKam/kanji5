@@ -21,9 +21,9 @@
 
 ### Release verification — do not overstate
 
-- **Current main workflows:** React presentation build and learning-engine validation were triggered against merge SHA `a7e0f602a6e8640cd46b56829915f3c92351e23c`; WebKit had passed while the full React browser suite and aggregate engine tests were still running at the last read. Check the exact-SHA Actions run before proceeding.
-- **Pages deployment:** the previous known-good attempt is not evidence for the new SHA. The deployment workflow must rebuild the exact promoted commit, compare staged and live artifact hashes, and finish `LIVE_PAGES_ARTIFACT_VERIFIED` plus the live/offline/core-product smoke. Until that exact-SHA deployment succeeds, the public release remains **unverified**.
-- **Residual security acceptance:** the Vite dependency vulnerability is addressed, but this does not close all R12 security work. Run [#554](https://github.com/ArdKam/kanji5/pull/554) against the actual deployed SHA and report HTTP security headers and Supabase leaked-password protection as separate findings; do not claim authenticated security verification without evidence.
+- **Current main workflows:** React presentation build, `validate-learning-engine`, and `webkit-compat` all passed against merge SHA `a7e0f602a6e8640cd46b56829915f3c92351e23c`. The React build passed all 54 steps; the root suite reported all 167 `scripts/test-*.mjs` tests passed.
+- **Pages deployment:** [run #39857524248](https://github.com/ArdKam/kanji5/actions/runs/39857524248) completed successfully against the same SHA. Staged/live hashes matched for `index.html`, `react-entry.js`, `sw.js`, the React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`. The live offline/core-product browser smoke passed (2 tests). This verifies the deployment on that exact SHA; it does **not** close the PWA readiness PR/manual device checks or all security acceptance.
+- **Residual security acceptance:** the Vite dependency vulnerability is addressed, but this does not close all R12 security work. Deployment run #39857524248 explicitly logged `LIVE_CSP_HEADER=absent`; GitHub Pages is currently relying on the HTML meta CSP rather than a response CSP header. Run [#554](https://github.com/ArdKam/kanji5/pull/554) against the deployed SHA and report HTTP security headers and Supabase leaked-password protection as separate findings; do not claim authenticated security verification without evidence.
 
 ### Current candidate queue
 
