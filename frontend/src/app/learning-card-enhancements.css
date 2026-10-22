@@ -317,7 +317,7 @@
 .learning-card-back .learning-back-page:first-child .learning-back-identity-visual{grid-area:visual}
 .learning-card-back .learning-back-page:first-child .learning-back-readings{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
 .learning-card-back .learning-back-page:first-child .reading{grid-template-columns:minmax(0,1fr);gap:1px;min-height:36px;padding:3px}
-.learning-card-back .learning-back-page:first-child .reading>span,.learning-card-back .learning-back-page:first-child .reading>strong,.learning-card-back .learning-back-page:first-child .reading>.audio-button{grid-column:1;grid-row:auto}
+.learning-card-back .learning-back-page:first-child .reading>strong{grid-column:1;line-height:1.15;overflow-wrap:anywhere}
 .learning-card-back .learning-back-page:first-child .reading>.audio-button{display:none}
 .learning-card-back .learning-back-page:first-child .kanji-structure-preview{min-height:32px;padding:2px 4px}
 }
@@ -499,11 +499,11 @@
 .learning-back-quick-example-meaning{color:var(--mute);direction:ltr;overflow-wrap:anywhere}
 .kanji-structure-preview:has(.kanji-structure-preview-empty){min-height:28px;padding-block:0}
 .kanji-structure-preview-empty{padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.learning-back-page-nav .pager-current{display:inline-flex;margin-inline-start:auto;padding-inline:5px;color:var(--mute);font-size:var(--text-xs);font-weight:700;white-space:nowrap}
+.learning-back-page-nav .pager-current{margin-inline-start:auto;color:var(--mute);font-size:var(--text-xs);white-space:nowrap}
 @media(max-width:420px){
- .learning-card-back .learning-back-footer{padding:5px 0 calc(3px + env(safe-area-inset-bottom))}
- .learning-card-back .learning-back-page-nav{justify-content:space-between;gap:1px;margin-bottom:4px;min-height:44px}
- .learning-card-back .learning-back-page-shortcut{flex:0 0 44px;min-height:44px}
- .learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
- .learning-card-back .learning-back-footer .rating-grid .rating{min-width:0;padding:5px 2px;font-size:var(--text-xs);line-height:1.15;white-space:normal;overflow-wrap:anywhere}
+.learning-card-back .learning-back-footer{padding:5px 0 calc(3px + env(safe-area-inset-bottom))}
+.learning-card-back .learning-back-page-nav{justify-content:space-between;gap:1px;margin-bottom:4px;min-height:44px}
+.learning-card-back .learning-back-page-shortcut{flex:0 0 44px;min-height:44px}
+.learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.learning-card-back .learning-back-footer .rating-grid .rating{min-width:0;padding:5px 2px;font-size:var(--text-xs);line-height:1.15;white-space:normal;overflow-wrap:anywhere}
 }
