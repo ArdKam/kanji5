@@ -21,7 +21,7 @@ No project-level open-source license has been approved. `LICENSE` is intentional
 | frontend | @types/react-dom | 19.2.0 | MIT | Development |
 | frontend | @vitejs/plugin-react | 5.2.0 | MIT | Build tooling |
 | frontend | typescript | 5.8.3 | Apache-2.0 | Build tooling |
-| frontend | vite | 8.1.5 | MIT | Build tooling |
+| frontend | vite | 8.1.6 | MIT | Build tooling |
 | frontend | @supabase/supabase-js | 2.117.2 | MIT | Runtime; vendored |
 
 ## Vendored/runtime content
