@@ -50,7 +50,7 @@ try {
     const reveal = page.locator('#root .learning-card-front .button.primary.wide');
     await reveal.waitFor({ state: 'visible', timeout: 10000 });
     await reveal.click();
-    await page.getByRole('button', { name: 'Good', exact: true }).click();
+    await page.getByRole('button', { name: /^Good(?:\\s|$)/ }).click();
     await expect.poll(async () => page.evaluate(() => {
       const raw = localStorage.getItem('kanji5-v1-reviews');
       const reviews = raw ? JSON.parse(raw) : [];
