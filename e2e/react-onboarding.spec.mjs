@@ -105,7 +105,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-placement-breakdown .kanji5-onboarding-placement-band")).toHaveCount(4);
   await expect(onboarding.locator(".kanji5-onboarding-placement-status")).toBeVisible();
-  const reviewToggle = onboarding.getByRole("button", { name: /Review answers/ });
+  const reviewToggle = onboarding.locator(".kanji5-onboarding-review-toggle");
   await expect(reviewToggle).toHaveAttribute("aria-expanded", "false");
   await reviewToggle.click();
   const answerReview = onboarding.locator("#onboarding-placement-answer-review");

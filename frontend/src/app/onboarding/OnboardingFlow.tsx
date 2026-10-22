@@ -513,7 +513,7 @@ export function OnboardingFlow({
                       <span className="kanji5-onboarding-review-kanji" lang="ja">{question.stimulus}</span>
                       <span className="kanji5-onboarding-review-meta">
                         <strong>{formatNumber(index + 1, language)} · {question.level ?? "—"}</strong>
-                        <small>{t("onboardingPlacementYourAnswer", language)}</small>
+                        
                       </span>
                       <span className={"kanji5-onboarding-review-status " + (isCorrect ? "is-correct" : "is-incorrect")}>
                         {isCorrect ? t("correct", language) : t("wrong", language)}
