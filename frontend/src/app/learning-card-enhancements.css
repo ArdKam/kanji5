@@ -585,47 +585,4 @@
     overflow-wrap: anywhere;
   }
 }
-@media (min-width: 761px) {
-  .learning-card-back .learning-back-page:first-child .learning-back-identity {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas: "heading readings" "quick visual";
-    align-items: start;
-    gap: 10px 16px;
-  }
-  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading {
-    grid-area: heading;
-  }
-  .learning-card-back .learning-back-page:first-child .learning-back-readings-block {
-    grid-area: readings;
-  }
-  .learning-card-back .learning-back-page:first-child .learning-back-quick-example {
-    grid-area: quick;
-  }
-  .learning-card-back .learning-back-page:first-child .learning-back-identity-visual {
-    grid-area: visual;
-    align-self: center;
-  }
-}
 
-/* Flatten nested mnemonic panels while keeping their disclosure and actions intact. */
-.learning-card-back .mnemonic-page .mnemonic-support {
-  padding: 6px 0;
-  border: 0;
-  border-top: 1px solid var(--line-soft, var(--line));
-  border-radius: 0;
-  background: transparent;
-}
-.learning-card-back .mnemonic-page .mnemonic-support-item {
-  padding: 4px 6px;
-  border: 0;
-  border-inline-start: 2px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-}
-.learning-card-back .mnemonic-page .mnemonic-prepared:not(.mnemonic-prepared-collapsed),
-.learning-card-back .mnemonic-page .mnemonic-prepared-collapsed {
-  padding-inline: 0;
-  border-inline: 0;
-  border-radius: 0;
-  background: transparent;
-}
