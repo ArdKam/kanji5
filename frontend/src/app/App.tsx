@@ -481,6 +481,13 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                    {!examplesLoading&&!examplesError&&displayExamples[0]?.word?(
+                      <div className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
+                        <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
+                        <span className="learning-back-quick-example-main" lang="ja" dir="ltr">{[displayExamples[0].word,displayExamples[0].reading].filter(Boolean).join(" · ")}</span>
+                        {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang="en" dir="ltr">{displayExamples[0].meaning}</small>:null}
+                      </div>
+                    ):null}
                     </div>
                     <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
                       <KanjiStructurePreview
@@ -607,7 +614,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
               <UiIcon name="writing" size={18}/>
             </button>
-            <span className="pager-current sr-only" aria-live="polite">
+            <span className="pager-current" aria-live="polite">
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
