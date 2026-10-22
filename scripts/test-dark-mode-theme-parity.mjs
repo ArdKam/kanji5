@@ -86,7 +86,7 @@ assert.ok(styles.includes("--nav-bar-height:var(--ds-layout-nav-height);"), "nav
 assert.ok(designSystem.includes("--ds-layout-nav-height: 66px;"), "semantic navigation height must preserve the 66px interaction layout");
 assert.ok(styles.includes("outline:3px solid var(--ds-focus-ring)!important;"), "keyboard focus must use the semantic focus role");
 assert.ok(designSystem.includes("--ds-focus-ring: light-dark(#505F83, #FF9B91);"), "focus-ring colors must remain theme-aware");
-assert.ok(designSystem.includes("@media (prefers-reduced-motion: reduce)"), "the shared layer must disable motion for reduced-motion users");
+assert.ok(styles.includes("@media(prefers-reduced-motion:reduce)") && styles.includes("transition-duration:.001ms!important"), "the shared styles layer must disable motion for reduced-motion users");
 assert.ok(styles.includes("@media(prefers-reduced-motion:reduce)"), "legacy components must retain their reduced-motion fallback");
 assert.ok(!styles.includes("--washi:#171614") && !styles.includes("--color-danger:#a23a2a"), "duplicate hard-coded theme variables must not return");
 
