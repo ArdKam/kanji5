@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const logic = fs.readFileSync("frontend/src/app/placement-logic.ts", "utf8");
 const diagnostic = fs.readFileSync("frontend/src/app/PlacementDiagnostic.tsx", "utf8");
+const answerReview = fs.readFileSync("frontend/src/app/onboarding/PlacementAnswerReview.tsx", "utf8");
 const entry = fs.readFileSync("frontend/src/app/OnboardingEntry.tsx", "utf8");
 const flow = fs.readFileSync("frontend/src/app/onboarding/OnboardingFlow.tsx", "utf8");
 const model = fs.readFileSync("frontend/src/app/onboarding/onboarding-model.ts", "utf8");
@@ -20,7 +21,8 @@ assert.ok(entry.includes("scorePlacementAnswers(placementRecords, map)"));
 assert.ok(entry.includes("setPlacementRecords([])"));
 assert.ok(flow.includes("placementSummary") && flow.includes("placementSeed"));
 assert.ok(flow.includes("onPlacementRestart?."));
-assert.ok(flow.includes("correctOptionId"));
+assert.ok(flow.includes('lazy(() => import("./PlacementAnswerReview")'));
+assert.ok(answerReview.includes("correctOptionId"));
 assert.ok(flow.includes("showPlacementReview"));
 assert.ok(flow.includes("onboardingPlacementReviewAnswers"));
 assert.ok(entry.includes("correctOptionId: record.options.find(option => option.correct)?.id"));

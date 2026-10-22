@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { formatNumber, t, type Language } from "../i18n";
+
+const PlacementAnswerReview = lazy(() => import("./PlacementAnswerReview").then(module => ({ default: module.PlacementAnswerReview })));
 import {
   canProceedFromPlacement,
   canProceedFromStartingPoint,
@@ -59,7 +61,7 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:7px 28px 20px;min-height:54px}.kanji5-onboarding-footer-action{padding:10px 0;font-size:12px}.kanji5-onboarding-primary:focus-visible,.kanji5-onboarding-secondary:focus-visible,.kanji5-onboarding-ghost:focus-visible,.kanji5-onboarding-footer-action:focus-visible,.kanji5-onboarding-language button:focus-visible,.kanji5-onboarding-choice:focus-visible,.kanji5-onboarding-option:focus-visible,.kanji5-onboarding-range-option:focus-visible{outline:3px solid rgba(80,95,131,.26);outline-offset:3px}.kanji5-onboarding-host-error{position:fixed;left:50%;bottom:20px;z-index:3;transform:translateX(-50%);max-width:min(640px,calc(100% - 32px));padding:12px 15px;border:1px solid rgba(214,161,170,.28);border-radius:16px;background:rgba(253,251,247,.95);color:var(--mute);font-size:12px;line-height:1.5;box-shadow:0 12px 30px rgba(41,43,45,.14);text-align:center}
 @media(max-width:860px){.kanji5-onboarding-header{padding:13px 16px 8px}.kanji5-onboarding-main{padding:12px 16px 10px}.kanji5-onboarding-stage{display:block;min-height:0;width:min(680px,100%)}.kanji5-onboarding-visual{min-height:210px;height:30svh;max-height:260px;margin-bottom:18px;padding:16px;border-radius:28px}.kanji5-onboarding-visual-art{width:min(74vw,290px)}.kanji5-onboarding-visual-kanji{font-size:90px}.kanji5-onboarding-panel-shell{display:block}.kanji5-onboarding-panel{width:100%}.kanji5-onboarding-panel h1{max-width:none;font-size:clamp(31px,8vw,44px)}.kanji5-onboarding-body{margin-top:14px;font-size:15px}.kanji5-onboarding-loop{grid-template-columns:1fr}.kanji5-onboarding-loop-step+.kanji5-onboarding-loop-step{border-inline-start:0;border-top:1px solid var(--line)}.kanji5-onboarding-loop-step{padding:15px 0}.kanji5-onboarding-option-grid,.kanji5-onboarding-range{grid-template-columns:1fr}.kanji5-onboarding-range-option{min-height:82px;grid-template-columns:auto minmax(0,1fr);align-items:center}.kanji5-onboarding-account-actions{width:100%}.kanji5-onboarding-footer{padding:6px 16px 14px}.kanji5-onboarding-progress{min-width:122px}.kanji5-onboarding-progress-track{width:78px}.kanji5-onboarding-brand strong{display:none}}
 @media(max-width:500px){.kanji5-onboarding-header{grid-template-columns:1fr auto}.kanji5-onboarding-progress{grid-column:1/-1;grid-row:2;justify-self:center;order:3;margin-top:4px}.kanji5-onboarding-language{grid-column:2}.kanji5-onboarding-main{padding-top:9px}.kanji5-onboarding-visual{height:24svh;min-height:166px;max-height:205px;margin-bottom:15px}.kanji5-onboarding-visual:before{top:26px;left:28px}.kanji5-onboarding-visual:after{right:26px;bottom:28px}.kanji5-onboarding-visual-kanji{font-size:78px}.kanji5-onboarding-stimulus{width:118px;height:118px;font-size:62px}.kanji5-onboarding-choice{grid-template-columns:30px minmax(0,1fr) auto;padding:15px}.kanji5-onboarding-choice-arrow{width:27px}.kanji5-onboarding-actions{margin-top:19px}.kanji5-onboarding-actions .kanji5-onboarding-primary{flex:1}.kanji5-onboarding-actions .kanji5-onboarding-ghost{flex:0 0 auto}.kanji5-onboarding-swipe-hint{margin-top:11px}}
-.kanji5-onboarding-review-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin:18px 0 0;text-align:start}.kanji5-onboarding-review-toggle>span:last-child{font-size:18px;line-height:1}.kanji5-onboarding-review-list{display:grid;gap:10px;margin:14px 0 0}.kanji5-onboarding-review-list[hidden]{display:none}.kanji5-onboarding-review-item{display:grid;gap:12px;min-width:0;padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(253,251,247,.66)}.kanji5-onboarding-review-head{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:11px}.kanji5-onboarding-review-kanji{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--washi);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:27px}.kanji5-onboarding-review-meta{display:grid;gap:4px;min-width:0}.kanji5-onboarding-review-meta strong{font-size:12px}.kanji5-onboarding-review-meta small{color:var(--mute);font-size:11px}.kanji5-onboarding-review-status{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 9px;border:1px solid var(--line);border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}.kanji5-onboarding-review-status.is-correct{border-color:rgba(73,119,91,.3);background:rgba(73,119,91,.09);color:#3E6B50}.kanji5-onboarding-review-status.is-incorrect{border-color:rgba(176,88,101,.3);background:rgba(214,161,170,.16);color:#8B4350}.kanji5-onboarding-review-answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kanji5-onboarding-review-answer{display:grid;gap:5px;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:rgba(253,251,247,.55)}.kanji5-onboarding-review-answer span{color:var(--mute);font-size:11px}.kanji5-onboarding-review-answer strong{font-size:13px;line-height:1.5;overflow-wrap:anywhere}@media(max-width:540px){.kanji5-onboarding-review-head{grid-template-columns:40px minmax(0,1fr)}.kanji5-onboarding-review-kanji{min-width:40px;min-height:40px}.kanji5-onboarding-review-status{grid-column:1/-1;justify-self:start}.kanji5-onboarding-review-answers{grid-template-columns:1fr}}.kanji5-onboarding-placement-total{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:15px 0 0;color:var(--mute);font-size:12px}.kanji5-onboarding-placement-total strong{color:var(--ink);font-variant-numeric:tabular-nums}.kanji5-onboarding-placement-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:17px}.kanji5-onboarding-placement-band{display:flex;flex-direction:column;gap:6px;padding:11px 9px;border:1px solid var(--line);border-radius:12px;background:rgba(253,251,247,.56);min-width:0}.kanji5-onboarding-placement-band span{color:var(--mute);font-size:11px;font-weight:800}.kanji5-onboarding-placement-band strong{font-size:15px;font-variant-numeric:tabular-nums}.kanji5-onboarding-placement-status{margin:13px 0 0;color:var(--mute);font-size:13px;line-height:1.75}.kanji5-onboarding-placement-breakdown+.kanji5-onboarding-placement-status{margin-top:13px}@media(max-width:540px){.kanji5-onboarding-placement-breakdown{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.kanji5-onboarding-panel,.kanji5-onboarding-visual-art,.kanji5-onboarding-primary,.kanji5-onboarding-secondary,.kanji5-onboarding-choice,.kanji5-onboarding-option,.kanji5-onboarding-range-option,.kanji5-onboarding-language button,.kanji5-onboarding-progress-track span{animation:none!important;transition:none!important}}`;
+.kanji5-onboarding-review-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin:18px 0 0;text-align:start}.kanji5-onboarding-review-toggle>span:last-child{font-size:18px;line-height:1}.kanji5-onboarding-placement-total{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:15px 0 0;color:var(--mute);font-size:12px}.kanji5-onboarding-placement-total strong{color:var(--ink);font-variant-numeric:tabular-nums}.kanji5-onboarding-placement-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:17px}.kanji5-onboarding-placement-band{display:flex;flex-direction:column;gap:6px;padding:11px 9px;border:1px solid var(--line);border-radius:12px;background:rgba(253,251,247,.56);min-width:0}.kanji5-onboarding-placement-band span{color:var(--mute);font-size:11px;font-weight:800}.kanji5-onboarding-placement-band strong{font-size:15px;font-variant-numeric:tabular-nums}.kanji5-onboarding-placement-status{margin:13px 0 0;color:var(--mute);font-size:13px;line-height:1.75}.kanji5-onboarding-placement-breakdown+.kanji5-onboarding-placement-status{margin-top:13px}@media(max-width:540px){.kanji5-onboarding-placement-breakdown{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.kanji5-onboarding-panel,.kanji5-onboarding-visual-art,.kanji5-onboarding-primary,.kanji5-onboarding-secondary,.kanji5-onboarding-choice,.kanji5-onboarding-option,.kanji5-onboarding-range-option,.kanji5-onboarding-language button,.kanji5-onboarding-progress-track span{animation:none!important;transition:none!important}}`;
 
 export type OnboardingFlowProps = {
   language: Language;
@@ -492,46 +494,12 @@ export function OnboardingFlow({
               <span>{t(showPlacementReview ? "onboardingPlacementHideReview" : "onboardingPlacementReviewAnswers", language)} ({formatNumber(placementQuestions.length, language)})</span>
               <span aria-hidden="true">{showPlacementReview ? "−" : "+"}</span>
             </button>
-            <div
-              id="onboarding-placement-answer-review"
-              className="kanji5-onboarding-review-list"
-              aria-label={t("onboardingPlacementReviewAnswers", language)}
-              hidden={!showPlacementReview}
-            >
-              {placementQuestions.map((question, index) => {
-                const answer = draft.placementAnswers.find(item => item.questionId === question.id);
-                const selectedOption = question.options.find(option => option.id === answer?.optionId);
-                const correctOption = question.options.find(option => option.id === question.correctOptionId);
-                const isCorrect = Boolean(answer && question.correctOptionId && answer.optionId === question.correctOptionId);
-                return (
-                  <article
-                    className="kanji5-onboarding-review-item"
-                    key={question.id}
-                    data-result={isCorrect ? "correct" : "incorrect"}
-                  >
-                    <div className="kanji5-onboarding-review-head">
-                      <span className="kanji5-onboarding-review-kanji" lang="ja">{question.stimulus}</span>
-                      <span className="kanji5-onboarding-review-meta">
-                        <strong>{formatNumber(index + 1, language)} · {question.level ?? "—"}</strong>
-                        
-                      </span>
-                      <span className={"kanji5-onboarding-review-status " + (isCorrect ? "is-correct" : "is-incorrect")}>
-                        {isCorrect ? t("correct", language) : t("wrong", language)}
-                      </span>
-                    </div>
-                    <div className="kanji5-onboarding-review-answers">
-                      <div className="kanji5-onboarding-review-answer">
-                        <span>{t("onboardingPlacementYourAnswer", language)}</span>
-                        <strong>{selectedOption?.label ?? "—"}</strong>
-                      </div>
-                      <div className="kanji5-onboarding-review-answer">
-                        <span>{t("onboardingPlacementCorrectAnswer", language)}</span>
-                        <strong>{correctOption?.label ?? "—"}</strong>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+            <div id="onboarding-placement-answer-review" hidden={!showPlacementReview}>
+              {showPlacementReview ? (
+                <Suspense fallback={<p className="kanji5-onboarding-placement-status" role="status">{language === "fa" ? "در حال آماده‌سازی مرور پاسخ‌ها…" : "Loading answer review…"}</p>}>
+                  <PlacementAnswerReview language={language} questions={placementQuestions} answers={draft.placementAnswers} />
+                </Suspense>
+              ) : null}
             </div>
             <div className="kanji5-onboarding-actions">
               <button className="kanji5-onboarding-ghost" type="button" onClick={startOverPlacement} disabled={busy || completing || !placementQuestions.length}>{t("onboardingPlacementRestart", language)}</button>
