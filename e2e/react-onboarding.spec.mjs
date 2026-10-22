@@ -71,6 +71,7 @@ test("first-run onboarding is a dedicated full-page guest-first journey", async 
 });
 
 test("placement path shares the existing kanji diagnostic contract", async ({ page }) => {
+  test.setTimeout(45000);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await fresh(page);
   const onboarding = await reachStartingPoint(page);
@@ -82,6 +83,9 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   const progress = onboarding.getByRole("progressbar", { name: "Question progress" });
   await expect(progress).toHaveAttribute("aria-valuenow", "1");
   await expect(progress).toHaveAttribute("aria-valuemax", "20");
+  await expect(onboarding.locator(".kanji5-onboarding-review-toggle")).toHaveCount(0);
+  await expect(onboarding.locator(".kanji5-onboarding-review-item")).toHaveCount(0);
+  await expect(onboarding).not.toContainText("Correct answer");
 
   const surface = onboarding.locator(".kanji5-onboarding-main");
   const box = await surface.boundingBox();
@@ -105,6 +109,7 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-placement-breakdown .kanji5-onboarding-placement-band")).toHaveCount(4);
   await expect(onboarding.locator(".kanji5-onboarding-placement-status")).toBeVisible();
+  const scoreBeforeReview = await onboarding.locator(".kanji5-onboarding-placement-total").textContent();
   const reviewToggle = onboarding.locator(".kanji5-onboarding-review-toggle");
   await expect(reviewToggle).toHaveAttribute("aria-expanded", "false");
   await reviewToggle.click();
@@ -118,9 +123,24 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await onboarding.getByRole("button", { name: /Hide answer review/ }).click();
   await expect(reviewToggle).toHaveAttribute("aria-expanded", "false");
   await expect(answerReview).toBeHidden();
+  await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toHaveText(scoreBeforeReview ?? "");
 
-  await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
-  await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
+  // The same post-assessment review is localized and remains optional in Persian RTL.
+  await onboarding.getByRole("button", { name: "فارسی", exact: true }).click();
+  await expect(onboarding).toHaveAttribute("dir", "rtl");
+  const persianScore = await onboarding.locator(".kanji5-onboarding-placement-total").textContent();
+  await expect(reviewToggle).toHaveAttribute("aria-expanded", "false");
+  await reviewToggle.click();
+  await expect(answerReview).toBeVisible();
+  await expect(answerReview).toContainText("پاسخ تو");
+  await expect(answerReview).toContainText("پاسخ درست");
+  await expect(answerReview.locator(".kanji5-onboarding-review-status")).toHaveCount(20);
+  await reviewToggle.click();
+  await expect(answerReview).toBeHidden();
+  await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toHaveText(persianScore ?? "");
+
+  await onboarding.getByRole("button", { name: /استفاده از این نقطه/ }).click();
+  await expect(onboarding.locator(".kanji5-onboarding-range")).toBeVisible();
 });
 
 test("placement reload resumes the same sampled paper and scored answers", async ({ page }) => {
