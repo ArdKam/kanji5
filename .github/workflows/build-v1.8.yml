@@ -30,29 +30,6 @@ on:
       - '.github/workflows/build-v1.8.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'v1.9-*.js'
-      - 'v1.8-*.js'
-      - 'v1.7-*.js'
-      - 'v1.6-*.js'
-      - 'v1.5-*.js'
-      - 'v1.4-*.js'
-      - 'v1.3-*.js'
-      - 'scripts/test-*.mjs'
-      - 'scripts/test-all.mjs'
-      - 'e2e/v1.9-*.mjs'
-      - 'e2e/v1.8-*.mjs'
-      - 'e2e/v1.7-*.mjs'
-      - 'V1.9-ROADMAP.md'
-      - 'V2-ROADMAP.md'
-      - 'V1.8-ROADMAP.md'
-      - 'ARCHITECTURE.md'
-      - 'ROADMAP.md'
-      - 'CHANGELOG.md'
-      - 'README.md'
-      - 'package.json'
-      - 'sw.js'
-      - 'index.html'
       - '.github/workflows/build-v1.8.yml'
 
   workflow_dispatch:
