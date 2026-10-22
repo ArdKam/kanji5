@@ -15,7 +15,7 @@ const frontendExpected={
   '@types/react-dom':['19.2.0','MIT'],
   '@vitejs/plugin-react':['5.2.0','MIT'],
   'typescript':['5.8.3','Apache-2.0'],
-  'vite':['8.1.5','MIT'],
+  'vite':['8.1.6','MIT'],
 };
 
 function assertLock(lock, expected, label){
