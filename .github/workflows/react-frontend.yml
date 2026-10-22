@@ -6,6 +6,7 @@ on:
     paths:
       - "frontend/**"
       - "docs/react-migration.md"
+      - "ROADMAP.md"
       - ".github/workflows/react-frontend.yml"
       - "scripts/test-react-migration.mjs"
       - "scripts/test-react-shipped-artifact.mjs"
