@@ -16,7 +16,7 @@ export function PlacementAnswerReview({
   return (
     <>
       <style data-placement-answer-review-styles>{reviewStyles}</style>
-      <div className="kanji5-onboarding-review-list" aria-label={t("onboardingPlacementReviewAnswers", language)}>
+      <div className="kanji5-onboarding-review-list" role="region" tabIndex={0} aria-label={t("onboardingPlacementReviewAnswers", language)}>
         {questions.map((question, index) => {
           const selectedId = answersByQuestion.get(question.id);
           const selectedOption = question.options.find(option => option.id === selectedId);
