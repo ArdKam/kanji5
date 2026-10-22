@@ -89,8 +89,12 @@ async function goToBackPage(page, card, targetIndex) {
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
 
-async function revealLearningCard(page, language = "fa") {
-  await page.addInitScript((value) => { localStorage.setItem("kanji5-ui-language", value); localStorage.setItem("kanji5-onboarding-v2", "complete"); }, language);
+async function revealLearningCard(page, language = "fa", theme = null) {
+  await page.addInitScript(({ value, theme: themeValue }) => {
+    localStorage.setItem("kanji5-ui-language", value);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    if (themeValue) localStorage.setItem("kanji5-theme", themeValue);
+  }, { value: language, theme });
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
@@ -520,13 +524,24 @@ test("learning first page keeps readings above the rating footer on desktop", as
   expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
 });
 
-test("compact hybrid keeps readings, one vocabulary example, and ratings visible on a short phone", async ({ browser }) => {
-  for (const language of ["en", "fa"]) {
-    const context = await browser.newContext({ viewport: { width: 360, height: 640 } });
+test("compact hybrid keeps readings, one vocabulary example, and ratings visible across responsive themes", async ({ browser }) => {
+  const scenarios = [
+    { language: "fa", theme: "light", viewport: { width: 360, height: 640 } },
+    { language: "en", theme: "dark", viewport: { width: 360, height: 640 } },
+    { language: "en", theme: "light", viewport: { width: 390, height: 844 } },
+    { language: "fa", theme: "dark", viewport: { width: 390, height: 844 } },
+    { language: "fa", theme: "light", viewport: { width: 844, height: 390 } },
+    { language: "en", theme: "dark", viewport: { width: 844, height: 390 } },
+  ];
+
+  for (const scenario of scenarios) {
+    const context = await browser.newContext({ viewport: scenario.viewport });
     try {
       const page = await context.newPage();
       await routeExamples(page, 5);
-      const card = await revealLearningCard(page, language);
+      const card = await revealLearningCard(page, scenario.language, scenario.theme);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", scenario.theme);
+      await expect(page.locator("html")).toHaveAttribute("lang", scenario.language);
       await expect(card.locator(".learning-back-quick-example")).toBeVisible();
       await expect(card.locator(".pager-current")).toBeVisible();
 
@@ -578,14 +593,14 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
         };
       });
 
-      expect(metrics.readingsVisibleWithoutScrolling).toBe(true);
-      expect(metrics.readingsAboveFooter).toBe(true);
-      expect(metrics.exampleVisibleWithoutScrolling).toBe(true);
-      expect(metrics.indicatorVisible).toBe(true);
-      expect(metrics.ratingColumns).toBe(4);
-      expect(metrics.ratingTargetsValid).toBe(true);
-      expect(metrics.footerBeforeNavigation).toBe(true);
-      expect(metrics.noHorizontalOverflow).toBe(true);
+      expect(metrics.readingsVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.readingsAboveFooter, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.exampleVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.indicatorVisible, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.ratingColumns, JSON.stringify(scenario)).toBe(4);
+      expect(metrics.ratingTargetsValid, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.footerBeforeNavigation, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.noHorizontalOverflow, JSON.stringify(scenario)).toBe(true);
     } finally {
       await context.close();
     }
