@@ -20,7 +20,7 @@
 - Closed **#531** as the competing account-menu layering candidate; **#529** is the preferred interaction-level source because it adds a real disabled state for the Account button while the menu is open. Any visual layering from #531 must be verified in screenshots before porting.
 - Added current-main disposition comments to the remaining PRs and converted stale or failing candidates to **Draft** so their old heads are not presented as merge-ready.
 - Corrected the earlier status of the service-worker empty-result ambiguity: the distinction between offline/unavailable vocabulary and a genuine empty response is implemented on current main in [`b4693fe`](https://github.com/ArdKam/kanji5/commit/b4693fee32e89cd02dba41f5814641dd8bc8bcb7). Do not re-open it unless a current-main regression is demonstrated.
-- Local browser-data erasure is now implemented in [`3c66655`](https://github.com/ArdKam/kanji5/commit/3c66655f679a800182a346f4d527a890222fa1fc); it is still **not** account deletion and does not erase synced cloud data.
+- Local browser-data erasure is now implemented in [`3c66655`](https://github.com/ArdKam/kanji5/commit/3c66655f679a46f599185db4444e279fcde577f6); it is still **not** account deletion and does not erase synced cloud data.
 
 ### Exact-head evidence: do not promote candidates yet
 
