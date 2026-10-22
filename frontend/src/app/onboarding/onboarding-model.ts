@@ -29,6 +29,8 @@ export type PlacementQuestion = {
   prompt: string;
   stimulus: string;
   options: PlacementOption[];
+  /** Correct option is shown only in the completed-result review, never during the quiz. */
+  correctOptionId?: string;
   level?: string | null;
 };
 

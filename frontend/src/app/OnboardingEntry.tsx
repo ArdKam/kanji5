@@ -42,6 +42,7 @@ function toPlacementQuestions(records: PlacementQuestionRecord[]): PlacementQues
     prompt: record.prompt,
     stimulus: record.stimulus,
     level: record.level,
+    correctOptionId: record.options.find(option => option.correct)?.id,
     options: record.options.map(option => ({ id: option.id, label: option.label })),
   }));
 }
