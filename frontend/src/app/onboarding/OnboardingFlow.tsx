@@ -40,7 +40,7 @@ const ONBOARDING_STYLES = `.kanji5-onboarding-entry{position:fixed;inset:0;z-ind
 .kanji5-onboarding-language button:hover{transform:translateY(-1px)}
 .kanji5-onboarding-language button.is-active{background:var(--ink);color:#fff}
 .kanji5-onboarding-main{flex:1;min-height:0;width:100%;padding:22px 28px 10px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
-.kanji5-onboarding-stage{width:min(760px,100%);min-height:min(650px,calc(100svh - 150px));margin:auto;display:flex;align-items:center;justify-content:center}
+.kanji5-onboarding-stage{width:min(760px,100%);min-height:min(650px,calc(100svh - 150px));margin:auto;display:flex;align-items:center;justify-content:center}.kanji5-onboarding-stage.is-placement-result{align-items:flex-start;min-height:0;padding-block:10px}
 .kanji5-onboarding-panel-shell{display:flex;align-items:center;min-width:0}.kanji5-onboarding-step-wrap{min-width:0;transition:transform var(--motion-onboarding-step,220ms) cubic-bezier(.22,.75,.2,1)}
 .kanji5-onboarding-panel{width:min(680px,100%);text-align:start;animation:onbEnterForward var(--motion-onboarding,380ms) cubic-bezier(.22,.75,.2,1) both}.kanji5-onboarding-stage.is-back .kanji5-onboarding-panel{animation-name:onbEnterBack}
 @keyframes onbEnterForward{from{opacity:0;transform:translate3d(-22px,8px,0)}to{opacity:1;transform:none}}@keyframes onbEnterBack{from{opacity:0;transform:translate3d(22px,8px,0)}to{opacity:1;transform:none}}
@@ -561,7 +561,7 @@ export function OnboardingFlow({
           </div>
         </header>
         <main className="kanji5-onboarding-main" aria-live="polite" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel} onClickCapture={handleClickCapture}>
-          <div className={"kanji5-onboarding-stage " + (transitionDirection === "back" ? "is-back" : "is-forward")}>
+          <div className={"kanji5-onboarding-stage " + (transitionDirection === "back" ? "is-back" : "is-forward") + (step === "placement-result" ? " is-placement-result" : "")}>
             <div className="kanji5-onboarding-panel-shell">
               <div key={step + ":" + placementIndex} className="kanji5-onboarding-step-wrap" style={dragX ? { transform: "translate3d(" + dragX + "px,0,0)" } : undefined}>
                 {renderStep()}
