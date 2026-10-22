@@ -52,7 +52,7 @@
 
 The repository-rulesets read returned an empty list. The GitHub integration could not read `branches/main/protection` (HTTP 403, “Resource not accessible by integration”), and the available GitHub actions in this session do not expose a branch-protection write operation. Consequently, I **cannot claim that current main is protected or that protection was changed**. The earlier audit recorded protection as disabled, but current status could not be independently confirmed.
 
-Before considering Step 1 complete, the repository owner must use GitHub Settings to protect `main` (branch protection or a repository ruleset): require pull requests, require the project's passing CI/release checks, block force-pushes and branch deletion, and prevent accidental direct pushes. Confirm the saved rule by reading it back through an authorized admin connection.
+Before considering Step 1 complete, the repository owner must complete [issue #584](https://github.com/ArdKam/kanji5/issues/584) in GitHub Settings and protect `main` (branch protection or a repository ruleset): require pull requests, require the project's passing CI/release checks, block force-pushes and branch deletion, and prevent accidental direct pushes. Confirm the saved rule by reading it back through an authorized admin connection.
 
 **Step 1 exit criteria:** duplicate stale branches are closed; every remaining candidate has a documented disposition and is Draft until refreshed and green; the selected PWA/design candidates pass their exact-head checks; live-smoke is green for the current promoted SHA; and main-branch protection is confirmed. Until the final two owner/CI items pass, Step 1 is **PARTIAL**, not DONE.
 
