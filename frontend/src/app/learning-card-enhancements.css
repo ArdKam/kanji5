@@ -311,15 +311,19 @@
 }
 @media (max-height: 460px) and (min-width: 761px) {
   .learning-card-back .learning-back-page:first-child .learning-back-scroll { padding-top: 3px; padding-bottom: 4px; gap: 4px; }
-  .learning-card-back .learning-back-page:first-child .learning-back-identity { gap: 3px; }
-  .learning-card-back .learning-back-page:first-child .learning-back-readings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .learning-card-back .learning-back-page:first-child .reading { grid-template-columns: minmax(0, 1fr); gap: 2px; min-height: 0; padding: 4px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:"heading readings" "quick visual"; align-items:start; gap:3px 8px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading { grid-area:heading; }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block { grid-area:readings; }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example { grid-area:quick; }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-visual { grid-area:visual; }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .learning-card-back .learning-back-page:first-child .reading { grid-template-columns:minmax(0,1fr); gap:2px; min-height:0; padding:4px; }
   .learning-card-back .learning-back-page:first-child .reading > span,
   .learning-card-back .learning-back-page:first-child .reading > strong,
-  .learning-card-back .learning-back-page:first-child .reading > .audio-button { grid-column: 1; grid-row: auto; }
-  .learning-card-back .learning-back-page:first-child .reading > .audio-button { display: none; }
-  .learning-card-back .learning-back-page:first-child .kanji-structure-preview { min-height: 40px; padding: 3px 5px; }
-  .kanji-structure-preview-glyph { min-width: 28px; min-height: 30px; }
+  .learning-card-back .learning-back-page:first-child .reading > .audio-button { grid-column:1; grid-row:auto; }
+  .learning-card-back .learning-back-page:first-child .reading > .audio-button { display:none; }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview { min-height:40px; padding:3px 5px; }
+  .kanji-structure-preview-glyph { min-width:28px; min-height:30px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .kanji-structure-preview-action { transition: none; }
