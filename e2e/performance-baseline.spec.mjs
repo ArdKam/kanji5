@@ -99,7 +99,7 @@ for (const profile of profiles) {
       const fcp = paints.find((entry) => entry.name === "first-contentful-paint")?.startTime ?? 0;
       const perf = window.__KANJI5_PERF_BASELINE__ ?? { lcp: 0, cls: 0, longTasks: [], layoutShiftSources: [] };
       const appResourceEntries = resources
-        .filter((entry) => /react-dist|react-entry|app-bootstrap|v1\\.|vendor\\//.test(entry.name));
+        .filter((entry) => /react-dist|react-entry|app-bootstrap|v1[.]|vendor[/]/.test(entry.name));
       const appResources = appResourceEntries
         .reduce((sum, entry) => sum + Number(entry.transferSize || 0), 0);
       const appResourceDetails = appResourceEntries.map((entry) => ({

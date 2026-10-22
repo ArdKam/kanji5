@@ -986,10 +986,6 @@ html[lang="fa"] .kanji-stimulus,html[lang="fa"] .first-readings,html[lang="fa"] 
 .audio-button{border-color:var(--line-interactive);transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease;}
 .audio-button:hover:not(:disabled){background:var(--washi);border-color:var(--ai);transform:scale(1.06);box-shadow:0 5px 14px -10px rgba(38,64,107,.65);}
 .audio-button:focus-visible{outline:3px solid var(--ds-focus-ring);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);transform:scale(1.04);}
-.rating-again{border:1px solid #c8756d;background:#f8e9e7;color:#7a302b;}
-.rating-hard{border:1px solid #c5a35d;background:#f7f0df;color:#6c531e;}
-.rating-good{border:1px solid #8eae91;background:#eaf2e9;color:#315b38;}
-.rating-easy{border:1px solid #8da8c9;background:#eaf0f8;color:#294d77;}
 .learning-card[data-card-density="compact"] .example-meaning,.learning-card[data-card-density="dense"] .example-meaning{font-size:var(--text-xs);}
 .learning-card[data-card-density="dense"] .example-main{font-size:var(--text-xs);}
 .learning-card[data-card-density="dense"] .learning-card-back .reading>strong{font-size:var(--text-sm);}
@@ -1101,14 +1097,7 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:var(--washi);col
 
 :root[data-theme="dark"] #kanji5-account-launcher{border-color:var(--line)!important;background:var(--paper)!important;color:var(--sumi)!important;}
 
-/* Accessibility baseline: one focus language, predictable reduced-motion behavior, and dark-theme surface parity. */
-:where(button,input,textarea,select,summary,a):focus-visible{
-  outline:3px solid color-mix(in srgb,var(--color-focus) 68%,transparent);
-  outline-offset:3px;
-}
-:where(button,input,textarea,select):disabled{
-  cursor:not-allowed;
-}
+/* Keyboard focus and disabled states are owned by the shared design-system layer. */
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto!important;}
   *,*::before,*::after{

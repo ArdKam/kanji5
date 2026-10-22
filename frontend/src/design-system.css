@@ -18,7 +18,6 @@
   --ds-brand-sakura: #D6A1AA;
   --ds-brand-moss: #8C9B87;
   --ds-color-progress-accent: light-dark(var(--ds-brand-moss), #A9B77C);
-  --ds-brand-secondary-surface: #EEE9E0;
   --ds-brand-border: #DED8CE;
 
   /* Semantic surfaces. */
@@ -26,29 +25,23 @@
   --ds-color-surface: light-dark(var(--ds-brand-surface), #23211E);
   --ds-color-surface-subtle: light-dark(#F1EDE6, #292724);
   --ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);
-  --ds-color-surface-overlay: light-dark(rgba(253, 251, 247, .96), rgba(23, 22, 20, .94));
   --ds-color-surface-panel: light-dark(rgba(251, 248, 240, .7), rgba(35, 33, 30, .78));
   --ds-color-surface-onboarding-choice: light-dark(rgba(253, 251, 247, .58), rgba(35, 33, 30, .82));
-  --ds-color-input: light-dark(#FFFDF9, #23211E);
-  --ds-color-disabled: light-dark(#E9E3DA, #302D29);
 
   /* Semantic text and interactive controls. */
   --ds-color-text-primary: light-dark(var(--ds-brand-sumi), #F4EFE3);
   --ds-color-text-secondary: light-dark(#53545A, #DDD5C8);
   --ds-color-text-muted: light-dark(#62666A, #B8AFA2);
-  --ds-color-text-inverse: light-dark(#FDFBF7, #171614);
   --ds-color-action-primary: light-dark(var(--ds-brand-indigo), #E06A5F);
   --ds-color-action-primary-text: light-dark(#FDFBF7, #171614);
   --ds-color-action-primary-hover: light-dark(#424F70, #E47C72);
   --ds-color-action-primary-pressed: light-dark(#36425F, #E06A5F);
-  --ds-color-action-secondary-hover: light-dark(#F1EDE6, #302D29);
   --ds-color-border: light-dark(var(--ds-brand-border), #746B60);
   --ds-color-border-subtle: light-dark(#E9E3DA, #4B463F);
   --ds-color-border-strong: light-dark(#ABA398, #A99E8D);
   --ds-color-border-interactive: light-dark(#8B93A5, #A99E8D);
   --ds-focus-ring: light-dark(#505F83, #FF9B91);
   --ds-focus-offset: 3px;
-  --ds-disabled-opacity: .58;
 
   /* State roles are independent from the brand palette. */
   --ds-state-success-text: light-dark(#43582B, #B9D49A);
@@ -133,7 +126,6 @@
   --ds-motion-hover: 180ms;
   --ds-motion-flip: 480ms;
   --ds-motion-feedback: 480ms;
-  --ds-motion-ease-standard: cubic-bezier(.2, .7, .2, 1);
   --ds-motion-interaction: 160ms;
   --ds-motion-tab: 280ms;
   --ds-motion-pager: 420ms;
@@ -142,20 +134,13 @@
   --ds-motion-progress: 250ms;
   --ds-motion-menu: 280ms;
   --ds-motion-scrim: 200ms;
-  --ds-motion-dialog-open: 240ms;
   --ds-motion-popover: var(--ds-motion-hover);
   --ds-z-base: 0;
   --ds-z-content: 1;
   --ds-z-nav: 40;
   --ds-z-overlay: 100;
   --ds-z-modal: 200;
-  --ds-layout-content-max: 880px;
   --ds-layout-nav-height: 66px;
-  --ds-layout-dialog-max: 780px;
-  --ds-breakpoint-tablet: 760px;
-  --ds-breakpoint-narrow: 380px;
-  --ds-target-min: 44px;
-  --ds-target-aa-min: 24px;
 
   /* Legacy compatibility names are declared once in styles.css and reference semantic tokens above. */
 }
