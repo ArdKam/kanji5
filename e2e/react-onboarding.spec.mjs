@@ -105,6 +105,20 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toBeVisible();
   await expect(onboarding.locator(".kanji5-onboarding-placement-breakdown .kanji5-onboarding-placement-band")).toHaveCount(4);
   await expect(onboarding.locator(".kanji5-onboarding-placement-status")).toBeVisible();
+  const reviewToggle = onboarding.getByRole("button", { name: /Review answers/ });
+  await expect(reviewToggle).toHaveAttribute("aria-expanded", "false");
+  await reviewToggle.click();
+  const answerReview = onboarding.locator("#onboarding-placement-answer-review");
+  await expect(answerReview).toBeVisible();
+  await expect(answerReview.locator(".kanji5-onboarding-review-item")).toHaveCount(20);
+  await expect(answerReview.locator(".kanji5-onboarding-review-answer")).toHaveCount(40);
+  await expect(answerReview).toContainText("Your answer");
+  await expect(answerReview).toContainText("Correct answer");
+  await expect(answerReview.locator(".kanji5-onboarding-review-status")).toHaveCount(20);
+  await onboarding.getByRole("button", { name: /Hide answer review/ }).click();
+  await expect(reviewToggle).toHaveAttribute("aria-expanded", "false");
+  await expect(answerReview).toBeHidden();
+
   await onboarding.getByRole("button", { name: /Use this starting point/ }).click();
   await expect(onboarding.getByRole("heading", { name: "How many new kanji each day?" })).toBeVisible();
 });

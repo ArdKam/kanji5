@@ -46,6 +46,8 @@ The shared implementation lives in `placement-assessment-core.js` and is consume
 - A band is provisionally demonstrated at 4/5 (80%).
 - The recommendation is contiguous from N5 upward: a strong N2 result cannot jump over an un-demonstrated N4 or N5 band.
 - Per-band scores and confidence warnings appear in the onboarding result.
+- After all 20 answers are submitted, the result offers an optional, expandable answer review that shows each Kanji, the learner's selected option, the correct option, and a textual correct/incorrect status in Persian and English.
+- Do not reveal correctness while the placement questions are still being answered; this avoids teaching the answer to later items in the same diagnostic. Opening or closing the completed review does not change the saved answers or placement score.
 - Complete results are still provisional. Scores of 3/5 or 4/5 mark a boundary case; incomplete item/band coverage or unanswered items mark the result limited.
 - Passing every band through N2 explicitly states that N1 is outside the assessment range.
 
