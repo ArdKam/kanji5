@@ -233,10 +233,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
   const readRatingPalette = () => ratings.evaluateAll((elements) => elements.map((element) => {
     const rgb = (value) => {
-      const srgb = value.match(/^color\\(srgb\\s+([\\d.e+-]+)\\s+([\\d.e+-]+)\\s+([\\d.e+-]+)/i);
+      const srgb = value.match(/^color\(srgb\s+([\d.e+-]+)\s+([\d.e+-]+)\s+([\d.e+-]+)/i);
       if (srgb) return srgb.slice(1, 4).map(Number).map((channel) => channel * 255);
-      const match = value.match(/^rgba?\\(([^)]+)\\)$/i);
-      if (match) return match[1].split(/[,\\s]+/).filter(Boolean).slice(0, 3).map(Number);
+      const match = value.match(/^rgba?\(([^)]+)\)$/i);
+      if (match) return match[1].split(/[ ,\s]+/).filter(Boolean).slice(0, 3).map(Number);
       throw new Error("Unsupported computed CSS color: " + value);
     };
     const luminance = (value) => rgb(value).map((channel) => {
