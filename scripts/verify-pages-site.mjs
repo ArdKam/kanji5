@@ -14,6 +14,7 @@ const required=[
   "react-entry.js",
   "react-dist/kanji5-react.js",
   "react-dist/kanji5-react.css",
+  "react-dist/manifest.json",
   "manifest.webmanifest",
   "kanji-data.json",
   "kanji-components.json",
@@ -74,6 +75,35 @@ for(const item of shell){
   assert.ok(fs.existsSync(path.join(site,relative)),"PAGES_SITE_SW_ASSET_MISSING: "+relative);
 }
 assert.ok(fs.existsSync(path.join(site,"react-dist/assets")),"PAGES_SITE_REACT_ASSETS_MISSING");
+// Validate the staged release artifact itself—not just source files or the Vite build.
+// This manifest is a required service-worker install dependency and enumerates lazy chunks.
+const reactManifestPath=path.join(site,"react-dist/manifest.json");
+assert.ok(fs.existsSync(reactManifestPath),"PAGES_SITE_REACT_MANIFEST_MISSING");
+const reactManifest=JSON.parse(fs.readFileSync(reactManifestPath,"utf8"));
+assert.ok(reactManifest&&typeof reactManifest==="object"&&!Array.isArray(reactManifest)&&Object.keys(reactManifest).length,"PAGES_SITE_REACT_MANIFEST_INVALID");
+const manifestEntries=Object.values(reactManifest);
+const reactEntry=manifestEntries.find(entry=>entry?.file==="kanji5-react.js");
+assert.ok(reactEntry,"PAGES_SITE_REACT_ENTRY_NOT_IN_MANIFEST");
+assert.ok(fs.existsSync(path.join(site,"react-dist/kanji5-react.css")),"PAGES_SITE_REACT_CSS_MISSING");
+const manifestAssets=new Set();
+const manifestVisited=new Set();
+function visitManifest(key){
+  if(manifestVisited.has(key))return;
+  manifestVisited.add(key);
+  const entry=reactManifest[key];
+  assert.ok(entry,"PAGES_SITE_REACT_DEPENDENCY_ENTRY_MISSING: "+key);
+  for(const value of [entry.file,...(entry.css||[]),...(entry.assets||[])]){
+    if(typeof value!=="string"||!value)continue;
+    manifestAssets.add(value.replace(/^\.\//,""));
+  }
+  for(const dependency of [...(entry.imports||[]),...(entry.dynamicImports||[])])visitManifest(dependency);
+}
+for(const key of Object.keys(reactManifest))visitManifest(key);
+assert.ok(manifestAssets.has("kanji5-react.js"),"PAGES_SITE_REACT_GRAPH_MISSING_ENTRY_JS");
+manifestAssets.add("kanji5-react.css");
+for(const asset of manifestAssets){
+  assert.ok(fs.existsSync(path.join(site,"react-dist",asset)),"PAGES_SITE_REACT_MANIFEST_ASSET_MISSING: "+asset);
+}
 const maps=[];
 (function walk(dir){
   for(const entry of fs.readdirSync(dir,{withFileTypes:true})){

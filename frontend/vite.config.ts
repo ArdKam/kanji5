@@ -8,7 +8,7 @@ export default defineConfig({
     outDir: "../react-dist",
     emptyOutDir: true,
     cssCodeSplit: false,
-    manifest: true,
+    manifest: "manifest.json",
     sourcemap: false,
     rollupOptions: {
       output: {
