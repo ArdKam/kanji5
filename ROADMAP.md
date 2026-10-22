@@ -8,6 +8,56 @@
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
+## 2.0.3 Current-main PR reconciliation — 2026-10-22
+
+**Snapshot:** current `main` at `6e9a6c14fa92bb6f70d0d586050c6e2e0674b74d`. This section supersedes stale PR-queue dispositions in earlier audit handoffs below. PR state is not completion evidence; only current-main code and exact-head checks count.
+
+### Actions completed in this reconciliation
+
+- Closed **#517** and **#581** as duplicate PWA/offline candidates superseded by **#582**. All three touch the same eight PWA/offline files; #582 is based directly on this main SHA.
+- Closed **#569** (brand-only) and **#571** (older design-system integration) in favor of **#580**. #580 covers the older changed-file sets and includes current Learning-card/contract coverage. Any genuinely unique behavior must be ported, not discarded.
+- Closed **#538** in favor of **#550** as the single first-render Learning-card CSS-readiness candidate.
+- Closed **#531** as the competing account-menu layering candidate; **#529** is the preferred interaction-level source because it adds a real disabled state for the Account button while the menu is open. Any visual layering from #531 must be verified in screenshots before porting.
+- Added current-main disposition comments to the remaining PRs and converted stale or failing candidates to **Draft** so their old heads are not presented as merge-ready.
+- Corrected the earlier status of the service-worker empty-result ambiguity: the distinction between offline/unavailable vocabulary and a genuine empty response is implemented on current main in [`b4693fe`](https://github.com/ArdKam/kanji5/commit/b4693fee32e89cd02dba41f5814641dd8bc8bcb7). Do not re-open it unless a current-main regression is demonstrated.
+- Local browser-data erasure is now implemented in [`3c66655`](https://github.com/ArdKam/kanji5/commit/3c66655f679a46f599185db4444e279fcde577f6); it is still **not** account deletion and does not erase synced cloud data.
+
+### Exact-head evidence: do not promote candidates yet
+
+- **Current main / Pages live smoke:** build, learning-engine validation, and WebKit checks passed on the checked commit. The later Pages deployment job [39171657996](https://github.com/ArdKam/kanji5/actions/runs/39171657996) verified staged/live hashes, but its live smoke failed at `scripts/verify-live-pages-e2e.mjs:53` while looking for the accessible name `Good` exactly. The current rating button also exposes its FSRS interval, so update this selector to the current rating contract, rerun the same-SHA deployment/live smoke, and record the result. A green source build alone is not release-integrity completion.
+- **PWA candidate #582:** exact-head build workflow [39171075976](https://github.com/ArdKam/kanji5/actions/runs/39171075976) failed the Production Recall unknown-self-grade test because the expected exercise surface did not appear within the timeout. Fix and rerun the candidate before merging it. Manual Android/iOS install, update, and cold-start checks remain separate release gates.
+- **Design-system candidate #580:** exact-head build [39171688320](https://github.com/ArdKam/kanji5/actions/runs/39171688320) failed the performance transfer budget: **2,207 KB against 2,202 KB** (5 KB over). Reduce the shipped transfer below budget and rerun the exact-head suite. A screenshot-capture job is not approval of the visual direction; manually review the rendered artifacts at mobile/desktop, Persian RTL/English LTR, and light/dark states. Preserve the calm premium Japanese-editorial hierarchy—do not merge broad visual changes solely because token contracts pass.
+
+### Disposition of the remaining open PR queue
+
+| PR | Current disposition | Required next action |
+|---|---|---|
+| [#582 PWA/offline](https://github.com/ArdKam/kanji5/pull/582) | Draft; sole PWA candidate | Fix the failing Production Recall E2E and pass the exact-head build, offline, stale-client, and browser checks. |
+| [#580 design system](https://github.com/ArdKam/kanji5/pull/580) | Draft; sole broad integration candidate | Resolve the 5 KB performance-budget failure; inspect screenshots; port only still-needed unique changes from #540/#547/#533 and retain the premium brand direction. |
+| [#579 compact hybrid Learning card](https://github.com/ArdKam/kanji5/pull/579) | Draft; preferred card-layout candidate | Refresh against the latest rating-prompt/FSRS-interval main state and run 360×640, 390×844, and 844×390 coverage in Persian/English and light/dark. Preserve the four-page sequence and learning-engine authority. |
+| [#554 live security smoke](https://github.com/ArdKam/kanji5/pull/554) | Draft; useful verification harness | Update the outdated `Good` selector, run against the exact current deployed SHA, and separately report HTTP response headers and Supabase leaked-password protection. |
+| [#550 first-render card flip](https://github.com/ArdKam/kanji5/pull/550) | Draft; sole CSS-readiness candidate | Refresh the 19-commits-behind branch to current main, validate style readiness before reveal, and run the full card/visual regression suite. |
+| [#548 Learning/Practice UX](https://github.com/ArdKam/kanji5/pull/548) | Draft; source candidate | Compare each interaction/recovery fix with current main and port only still-reproduced gaps. |
+| [#547 design-system/UX integration](https://github.com/ArdKam/kanji5/pull/547) | Draft; source candidate, not mergeable as-is | Inventory unique Practice/i18n/accessibility changes against #580 and current main; port missing verified behavior into the chosen integration. |
+| [#545 card, learner-content, and vocabulary failure states](https://github.com/ArdKam/kanji5/pull/545) | Draft; broad divergent source branch | Do not merge wholesale. Compare its content/QA and offline stroke-order tests with current main; split out only unique, independently verified work. |
+| [#540 design-system foundation](https://github.com/ArdKam/kanji5/pull/540) | Draft; source candidate, not mergeable as-is | Audit unique Dictionary catalog/style, Vite/artifact, and shell-contract changes against #580/current main; port only gaps still needed. |
+| [#537 sync integrity/offline cache](https://github.com/ArdKam/kanji5/pull/537) | Draft; source candidate | Compare per-key settings clocks, deletion tombstones, conflict resolution, and offline cache behavior with current sync code; test any port against cloud/local data safety. |
+| [#535 priority UX audit fixes](https://github.com/ArdKam/kanji5/pull/535) | Draft; source candidate | Check first-practice recovery, Dictionary and onboarding changes against current source; carry forward only reproducible regressions. |
+| [#533 theme contrast/rating colors](https://github.com/ArdKam/kanji5/pull/533) | Draft; source candidate | Port verified semantic-color/contrast improvements through the single design-system path. Recheck computed colors and avoid restoring obsolete rating styles. |
+| [#530 Reading Lab focus layout](https://github.com/ArdKam/kanji5/pull/530) | Draft; source candidate | Compare DOM/focus order, empty state, and compact responsive behavior with the current Reader; rerun keyboard, RTL/LTR, and mobile tests. |
+| [#529 account behind menu](https://github.com/ArdKam/kanji5/pull/529) | Draft; preferred interaction-level source | Port the smallest current-main-based disabled-state/scrim fix; validate pointer and keyboard click-through plus screenshots before/after opening the menu. |
+| [#522 Practice terminology](https://github.com/ArdKam/kanji5/pull/522) | Draft; small terminology change | Port the Practice label and corresponding docs/tests onto fresh main; verify accessible names/selectors in Persian and English. |
+
+### Main-branch protection — unresolved owner action
+
+The repository-rulesets read returned an empty list. The GitHub integration could not read `branches/main/protection` (HTTP 403, “Resource not accessible by integration”), and the available GitHub actions in this session do not expose a branch-protection write operation. Consequently, I **cannot claim that current main is protected or that protection was changed**. The earlier audit recorded protection as disabled, but current status could not be independently confirmed.
+
+Before considering Step 1 complete, the repository owner must complete [issue #584](https://github.com/ArdKam/kanji5/issues/584) in GitHub Settings and protect `main` (branch protection or a repository ruleset): require pull requests, require the project's passing CI/release checks, block force-pushes and branch deletion, and prevent accidental direct pushes. Confirm the saved rule by reading it back through an authorized admin connection.
+
+**Step 1 exit criteria:** duplicate stale branches are closed; every remaining candidate has a documented disposition and is Draft until refreshed and green; the selected PWA/design candidates pass their exact-head checks; live-smoke is green for the current promoted SHA; and main-branch protection is confirmed. Until the final two owner/CI items pass, Step 1 is **PARTIAL**, not DONE.
+
+---
+
 ## 2.0.2 Current product/engineering audit handoff — 2026-10-17
 
 **Dated evidence record:** [docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md). This audit is additive: it does not rewrite the historical C4/R12/R13 implementation records, and it does not treat an open PR as completion evidence.
