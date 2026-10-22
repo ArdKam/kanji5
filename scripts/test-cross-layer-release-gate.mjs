@@ -6,38 +6,15 @@ const pagesWorkflow = fs.readFileSync(".github/workflows/pages-deploy.yml", "utf
 const performanceGate = fs.readFileSync("e2e/performance-baseline.spec.mjs", "utf8");
 const boundaryGate = fs.readFileSync("e2e/react-engine-boundary-gate.spec.mjs", "utf8");
 
-for (const pattern of [
-  '      - "v1.3-*.js"',
-  '      - "v1.4-*.js"',
-  '      - "v1.5-*.js"',
-  '      - "v1.6-*.js"',
-  '      - "v1.7-*.js"',
-  '      - "v1.8-*.js"',
-  '      - "v1.9-*.js"',
-  '      - "review-runtime.js"',
-  '      - "supabase-sync.js"',
-  '      - "vendor/**"',
-  '      - "kanji-data.json"',
-  '      - "kanji-components.json"',
-  '      - "kanji-visual-structure.json"',
-]) {
-  assert.equal(
-    reactWorkflow.split(pattern).length - 1,
-    1,
-    `React pull-request release filter must cover runtime/data change: ${pattern}`,
-  );
-}
+const pullRequestTrigger = reactWorkflow.split("  pull_request:")[1]?.split("\n  push:")[0] || "";
+assert.ok(pullRequestTrigger.trim().length === 0, "React required checks must run on every pull request, without path filtering");
 
 assert.match(
   reactWorkflow,
   /push:\s*\n\s+branches:\s*\n\s+- main\s*\n\s*\npermissions:/,
   "React release workflow must run unconditionally on main pushes",
 );
-assert.equal(
-  reactWorkflow.split('      - "e2e/react-engine-boundary-gate.spec.mjs"').length - 1,
-  1,
-  "React boundary gate must remain covered by the pull-request path filter",
-);
+assert.match(reactWorkflow, /pull_request:\s*\n\s*push:/, "React build must keep an unconditional pull_request trigger");
 assert.match(reactWorkflow, /name: Run engine-to-React boundary gate/);
 assert.match(reactWorkflow, /e2e\/react-engine-boundary-gate\.spec\.mjs/);
 
