@@ -233,22 +233,28 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
   const assertRatingPalette = async () => {
     const palette = await ratings.evaluateAll((elements) => elements.map((element) => {
-      const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
-      const luminance = (value) => value.map((channel) => {
+      const rgb = (value) => {
+        const srgb = value.match(/^color\(srgb\s+([\d.e+-]+)\s+([\d.e+-]+)\s+([\d.e+-]+)/i);
+        if (srgb) return srgb.slice(1, 4).map(Number).map((channel) => channel * 255);
+        const match = value.match(/^rgba?\(([^)]+)\)$/i);
+        if (match) return match[1].split(/[,\s]+/).filter(Boolean).slice(0, 3).map(Number);
+        throw new Error("Unsupported computed CSS color: " + value);
+      };
+      const luminance = (value) => rgb(value).map((channel) => {
         const normalized = channel / 255;
         return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
       }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
       const style = getComputedStyle(element);
-      const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+      const pair = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => b - a);
       const rating = [...element.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name));
-      return { rating, background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
+      return { rating, background: rgb(style.backgroundColor).map(Math.round), contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
     }));
     const backgrounds = Object.fromEntries(palette.map((item) => [item.rating, item.background]));
     expect(backgrounds, "Each rating must retain its own semantic dark-mode color regardless of DOM order").toEqual({
-      "rating-again": "rgb(51, 39, 36)",
-      "rating-hard": "rgb(51, 47, 39)",
-      "rating-good": "rgb(40, 49, 40)",
-      "rating-easy": "rgb(39, 48, 59)",
+      "rating-again": [51, 39, 36],
+      "rating-hard": [51, 47, 39],
+      "rating-good": [40, 49, 40],
+      "rating-easy": [39, 48, 59],
     });
     expect(palette.every((item) => item.contrast >= 4.5), "Every feedback rating label must meet WCAG AA contrast").toBe(true);
   };
