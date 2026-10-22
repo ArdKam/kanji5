@@ -139,7 +139,9 @@ test("placement path shares the existing kanji diagnostic contract", async ({ pa
   await expect(answerReview).toBeHidden();
   await expect(onboarding.locator(".kanji5-onboarding-placement-total")).toHaveText(persianScore ?? "");
 
-  await onboarding.getByRole("button", { name: /استفاده از این نقطه/ }).click();
+  const useLevelButton = onboarding.getByRole("button", { name: /استفاده از این نقطه/ });
+  await expect(useLevelButton).toBeInViewport();
+  await useLevelButton.click();
   await expect(onboarding.locator(".kanji5-onboarding-range")).toBeVisible();
 });
 
