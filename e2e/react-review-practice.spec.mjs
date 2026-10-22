@@ -8,9 +8,19 @@ async function clean(page){
 }
 async function seedSeenCard(page){
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
+  const reviewCount=()=>page.evaluate(()=>{
+    const raw=localStorage.getItem('kanji5-v1-reviews');
+    const reviews=raw?JSON.parse(raw):[];
+    return Array.isArray(reviews)?reviews.length:0;
+  });
+  const before=await reviewCount();
   await page.locator('#root .learning-card .button.wide').click();
   await expect(page.locator('#root .learning-card .rating-good')).toBeVisible({timeout:5000});
   await page.locator('#root .learning-card .rating-good').click();
+  // The card remains visible while the review action is asynchronous. Wait for
+  // the authoritative persisted review instead of treating that visibility as
+  // evidence that the card is now eligible for Practice.
+  await expect.poll(reviewCount,{timeout:10000,message:'Review was not persisted before entering Practice'}).toBeGreaterThan(before);
   await expect(page.locator('#root .learning-card')).toBeVisible({timeout:10000});
 }
 
