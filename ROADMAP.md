@@ -41,9 +41,9 @@ This release fix does not close the independent R12/R13/C4 acceptance gates:
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
-## 2.0.4 Current-main release integrity and PR reconciliation — 2026-10-23
+## 2.0.4 Previous release-integrity checkpoint — 2026-10-23 (superseded by §2.0.5)
 
-**Current release SHA:** `a7e0f602a6e8640cd46b56829915f3c92351e23c` (PR #586 merged). All exact-head checks on the pre-merge PR commit `a9070b56d7205561f14007692424f359d989955f` passed: `build`, `validate-learning-engine`, `webkit-compat`, and visual/browser diagnostics. The mainline React build and learning-engine workflow have been triggered against the merge commit; the first post-fix Pages deployment and live smoke must still be confirmed from their own run before calling the release healthy.
+**Release SHA at that checkpoint:** `a7e0f602a6e8640cd46b56829915f3c92351e23c` (PR #586 merged). All exact-head checks on the pre-merge PR commit `a9070b56d7205561f14007692424f359d989955f` passed: `build`, `validate-learning-engine`, `webkit-compat`, and visual/browser diagnostics. The mainline React build and learning-engine workflow have been triggered against the merge commit; the first post-fix Pages deployment and live smoke must still be confirmed from their own run before calling the release healthy.
 
 ### Completed on current main
 
@@ -58,7 +58,7 @@ This release fix does not close the independent R12/R13/C4 acceptance gates:
 - **Pages deployment:** [run #39857524248](https://github.com/ArdKam/kanji5/actions/runs/39857524248) completed successfully against the same SHA. Staged/live hashes matched for `index.html`, `react-entry.js`, `sw.js`, the React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`. The live offline/core-product browser smoke passed (2 tests). This verifies the deployment on that exact SHA; it does **not** close the PWA readiness PR/manual device checks or all security acceptance.
 - **Residual security acceptance:** the Vite dependency vulnerability is addressed, but this does not close all R12 security work. Deployment run #39857524248 explicitly logged `LIVE_CSP_HEADER=absent`; GitHub Pages is currently relying on the HTML meta CSP rather than a response CSP header. Run [#554](https://github.com/ArdKam/kanji5/pull/554) against the deployed SHA and report HTTP security headers and Supabase leaked-password protection as separate findings; do not claim authenticated security verification without evidence.
 
-### Current candidate queue
+### Candidate queue recorded at that checkpoint
 
 | PR | Current disposition | Required next action |
 |---|---|---|
@@ -78,7 +78,7 @@ This release fix does not close the independent R12/R13/C4 acceptance gates:
 | [#585 smoke selector](https://github.com/ArdKam/kanji5/pull/585) | Closed, superseded by merged #586 | Do not reopen; the compatible selector is now on main. |
 | [#587 earlier roadmap update](https://github.com/ArdKam/kanji5/pull/587) | Closed, superseded by this current-main documentation PR | Do not reopen; its source branch was based on the vulnerable pre-fix main. |
 
-### Remaining release-integrity exit criteria
+### Release-integrity exit criteria recorded at that checkpoint
 
 Step 1 remains **PARTIAL** until all three are proven against current SHA(s): (1) successful post-fix React build and learning-engine validation on `main`; (2) successful GitHub Pages deployment with staged/live artifact hashes and live/offline/core-product smoke on that same promoted SHA; and (3) #589 exact-head gates pass before PWA merge. Ruleset configuration is complete, but that does not substitute for a live release verification.
 
