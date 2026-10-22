@@ -471,6 +471,10 @@ export function OnboardingFlow({
                 </Suspense>
               ) : null}
             </div>
+            <div className="kanji5-onboarding-actions">
+              <button className="kanji5-onboarding-ghost" type="button" onClick={startOverPlacement} disabled={busy || completing || !placementQuestions.length}>{t("onboardingPlacementRestart", language)}</button>
+              <button className="kanji5-onboarding-primary" type="button" onClick={advance} disabled={busy || completing || !completedPlacement}>{t("onboardingPlacementUse", language)}</button>
+            </div>
             {draft.placementSummary ? (
               <>
                 <div className="kanji5-onboarding-placement-breakdown" aria-label={language === "fa" ? "نتیجه به تفکیک سطح" : "Score by band"}>
@@ -502,10 +506,7 @@ export function OnboardingFlow({
               </>
             ) : null}
 
-            <div className="kanji5-onboarding-actions">
-              <button className="kanji5-onboarding-ghost" type="button" onClick={startOverPlacement} disabled={busy || completing || !placementQuestions.length}>{t("onboardingPlacementRestart", language)}</button>
-              <button className="kanji5-onboarding-primary" type="button" onClick={advance} disabled={busy || completing || !completedPlacement}>{t("onboardingPlacementUse", language)}</button>
-            </div>
+
           </section>
         );
       case "daily-rhythm":
