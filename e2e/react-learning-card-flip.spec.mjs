@@ -89,8 +89,12 @@ async function goToBackPage(page, card, targetIndex) {
   await expect(card.locator(".learning-back-page.active")).toHaveCount(1);
 }
 
-async function revealLearningCard(page, language = "fa") {
-  await page.addInitScript((value) => { localStorage.setItem("kanji5-ui-language", value); localStorage.setItem("kanji5-onboarding-v2", "complete"); }, language);
+async function revealLearningCard(page, language = "fa", theme = null) {
+  await page.addInitScript(({ value, theme: themeValue }) => {
+    localStorage.setItem("kanji5-ui-language", value);
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    if (themeValue) localStorage.setItem("kanji5-theme", themeValue);
+  }, { value: language, theme });
   await page.goto("/");
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   const card = page.locator("#root .learning-card");
@@ -518,6 +522,89 @@ test("learning first page keeps readings above the rating footer on desktop", as
   const footerBounds = await footer.boundingBox();
   if (!readingsBounds || !footerBounds) throw new Error("Learning readings/footer geometry unavailable");
   expect(readingsBounds.y + readingsBounds.height).toBeLessThanOrEqual(footerBounds.y + 1);
+});
+
+test("compact hybrid keeps readings, one vocabulary example, and ratings visible across responsive themes", async ({ browser }) => {
+  const scenarios = [
+    { language: "fa", theme: "light", viewport: { width: 360, height: 640 } },
+    { language: "en", theme: "dark", viewport: { width: 360, height: 640 } },
+    { language: "en", theme: "light", viewport: { width: 390, height: 844 } },
+    { language: "fa", theme: "dark", viewport: { width: 390, height: 844 } },
+    { language: "fa", theme: "light", viewport: { width: 844, height: 390 } },
+    { language: "en", theme: "dark", viewport: { width: 844, height: 390 } },
+  ];
+
+  for (const scenario of scenarios) {
+    const context = await browser.newContext({ viewport: scenario.viewport });
+    try {
+      const page = await context.newPage();
+      await routeExamples(page, 5);
+      const card = await revealLearningCard(page, scenario.language, scenario.theme);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", scenario.theme);
+      await expect(page.locator("html")).toHaveAttribute("lang", scenario.language);
+      await expect(card.locator(".learning-back-quick-example")).toBeVisible();
+      await expect(card.locator(".pager-current")).toBeVisible();
+
+      const metrics = await card.evaluate((el) => {
+        const active = el.querySelector(".learning-back-page.active");
+        const scroller = active?.querySelector(".learning-back-scroll");
+        const readings = active?.querySelector(".learning-back-readings-block");
+        const quickExample = active?.querySelector(".learning-back-quick-example");
+        const footer = el.querySelector(".learning-back-footer");
+        const navigation = document.querySelector(".experience-nav");
+        const indicator = el.querySelector(".pager-current");
+        const grid = el.querySelector(".learning-back-footer .rating-grid");
+        if (!(scroller instanceof HTMLElement) ||
+            !(readings instanceof HTMLElement) ||
+            !(quickExample instanceof HTMLElement) ||
+            !(footer instanceof HTMLElement) ||
+            !(indicator instanceof HTMLElement) ||
+            !(grid instanceof HTMLElement)) {
+          throw new Error("Compact learning-card geometry is incomplete");
+        }
+        const bounds = (node) => {
+          const rect = node.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+        };
+        const scrollBounds = bounds(scroller);
+        const readingBounds = bounds(readings);
+        const exampleBounds = bounds(quickExample);
+        const footerBounds = bounds(footer);
+        const indicatorBounds = bounds(indicator);
+        const ratingBounds = [...grid.querySelectorAll(".rating")].map(bounds);
+        const columns = getComputedStyle(grid).gridTemplateColumns;
+        return {
+          readingsVisibleWithoutScrolling:
+            readingBounds.top >= scrollBounds.top - 1 &&
+            readingBounds.bottom <= scrollBounds.bottom + 1 &&
+            scroller.scrollTop <= 1,
+          readingsAboveFooter: readingBounds.bottom <= footerBounds.top + 1,
+          exampleVisibleWithoutScrolling:
+            exampleBounds.top >= scrollBounds.top - 1 &&
+            exampleBounds.bottom <= scrollBounds.bottom + 1 &&
+            scroller.scrollTop <= 1,
+          indicatorVisible: indicatorBounds.width > 0 && indicatorBounds.height > 0,
+          ratingColumns: columns.split(" ").length,
+          ratingTargetsValid: ratingBounds.length === 4 &&
+            ratingBounds.every((bounds) => bounds.width >= 44 && bounds.height >= 44),
+          footerBeforeNavigation: !(navigation instanceof HTMLElement) ||
+            footerBounds.bottom <= navigation.getBoundingClientRect().top + 1,
+          noHorizontalOverflow: el.scrollWidth <= el.clientWidth + 1,
+        };
+      });
+
+      expect(metrics.readingsVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.readingsAboveFooter, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.exampleVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.indicatorVisible, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.ratingColumns, JSON.stringify(scenario)).toBe(4);
+      expect(metrics.ratingTargetsValid, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.footerBeforeNavigation, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.noHorizontalOverflow, JSON.stringify(scenario)).toBe(true);
+    } finally {
+      await context.close();
+    }
+  }
 });
 
 test("reference meanings and readings open in a keyboard-accessible modal", async ({ page }) => {
