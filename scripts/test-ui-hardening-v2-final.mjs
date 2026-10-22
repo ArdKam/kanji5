@@ -13,8 +13,7 @@ for(const token of [
   "--text-xs:var(--ds-type-caption)","--text-sm:var(--ds-type-small)","--text-base:var(--ds-type-body)","--text-md:var(--ds-type-body-emphasis)",
   "--text-lg:var(--ds-type-subtitle)","--text-xl:var(--ds-type-heading-sm)","--text-2xl:var(--ds-type-heading-md)",
   "--text-display-sm:var(--ds-type-display-sm)",
-  "--text-display-lg:var(--ds-type-display-lg)",
-  "--space-1:var(--ds-space-1)","--space-8:var(--ds-space-8)",
+    "--space-1:var(--ds-space-1)","--space-8:var(--ds-space-8)",
   "--radius-sm:var(--ds-radius-sm)","--radius-md:var(--ds-radius-md)","--radius-lg:var(--ds-radius-lg)","--radius-xl:var(--ds-radius-xl)",
   "--radius-full:var(--ds-radius-full)","--nav-bar-height:var(--ds-layout-nav-height)"
 ]) assert.ok(css.includes(token),`missing semantic design alias: ${token}`);

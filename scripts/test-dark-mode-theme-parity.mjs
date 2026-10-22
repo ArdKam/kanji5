@@ -56,11 +56,10 @@ assert.ok(styles.includes(".rating-grid{direction:ltr;display:grid;"), "Rating g
 assert.ok(app.includes('const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;'), "Rating choices must be ordered hardest-to-easiest in the DOM");
 assert.ok(app.includes('dir={getLanguage()==="fa"?"rtl":"ltr"}'), "Rating labels must retain their language direction");
 assert.ok(app.includes('<bdi lang="ja" dir="ltr">'), "Learning-card Japanese readings must be isolated from surrounding RTL text");
-for (const rating of ["again", "hard", "good", "easy"]) {
-  assert.ok(designSystem.includes(`.app-shell .rating.rating-${rating} {`), `${rating} rating must have a semantic rule`);
-  assert.ok(designSystem.includes(`color: var(--ds-review-${rating}-text);`), `${rating} rating must use its semantic foreground role`);
-  assert.ok(designSystem.includes(`background: var(--ds-review-${rating}-bg);`), `${rating} rating must use its semantic background role`);
-  assert.ok(designSystem.includes(`border: 1px solid var(--ds-review-${rating}-border);`), `${rating} rating must use its semantic border role`);
+for (const [rating, role] of [["again", "danger"], ["hard", "warning"], ["good", "success"], ["easy", "info"]]) {
+  assert.ok(styles.includes(`.rating-${rating}{color:var(--ds-state-${role}-text);`), `${rating} rating must use its semantic foreground role`);
+  assert.ok(styles.includes(`border-color:var(--ds-state-${role}-border);`), `${rating} rating must use its semantic border role`);
+  assert.ok(styles.includes(`background:var(--ds-state-${role}-bg)}`), `${rating} rating must use its semantic background role`);
 }
 for (const [foreground, background] of [
   ["#8E3026", "#F8ECE8"], ["#FF9B91", "#332724"],

@@ -43,7 +43,7 @@ assert.ok(i18n.includes('document.title = language === "fa" ? "Rinemi — پنج
 for (const legacy of ["Kanji5", "Kanji 5", "Kanji-yar", "کانجی‌یار", "کانجی ۵"]) {
   assert.ok(!i18n.includes(legacy), "localized UI must not retain legacy brand text: " + legacy);
 }
-assert.ok(styles.includes("--shu:var(--ds-color-legacy-shu);") && styles.includes("--sakura:var(--ds-brand-sakura);"), "UI aliases must delegate to semantic brand roles");
+assert.ok(styles.includes("--shu:var(--ds-color-action-primary);") && styles.includes("--sakura:var(--ds-brand-sakura);"), "UI aliases must delegate to semantic brand roles");
 assert.ok(designSystem.includes("--ds-brand-indigo: #505F83;") && designSystem.includes("--ds-brand-sakura: #D6A1AA;"), "the semantic source must define the canonical Rinemi indigo and sakura palette");
 for (const [name, source] of [["icon.svg", icon], ["icon-192.svg", icon192], ["icon-512.svg", icon512]]) {
   assert.ok(source.includes("Rinemi"), name + " must carry accessible Rinemi naming");
