@@ -255,6 +255,9 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     "rating-easy": [39, 48, 59],
   };
   const assertRatingPalette = async () => {
+    // Leave the hover state before checking base tokens; a pointer left on a
+    // rating after the theme-menu click legitimately produces a color-mixed hover surface.
+    await page.mouse.move(0, 0);
     // Theme tokens transition between schemes; wait for the full target values
     // instead of sampling an in-flight color midway through the CSS transition.
     await expect.poll(async () => Object.fromEntries((await readRatingPalette()).map((item) => [item.rating, item.background]))).toEqual(expectedBackgrounds);
