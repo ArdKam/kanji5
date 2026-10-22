@@ -1,3 +1,36 @@
+## 2.0.5 Current-main release follow-up — 2026-10-23
+
+**Current main at this checkpoint:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a`, merge of [PR #597](https://github.com/ArdKam/kanji5/pull/597), which publishes the Vite manifest at `react-dist/manifest.json` rather than the hidden `.vite` path.
+
+### Verified evidence
+
+- Before #597 merged, mainline deployment run [#39871282639](https://github.com/ArdKam/kanji5/actions/runs/39871282639) failed at the live offline/core-product E2E stage with `LIVE_PWA_ASSET_UNAVAILABLE:react-dist/.vite/manifest.json:404`. Source build, artifact staging, deployment, and selected live asset hash checks had passed; the final live PWA manifest assertion did not.
+- The #597 exact-head checks observed before merge passed: `build`, `validate-learning-engine`, `webkit-compat`, and automated browser visual diagnostics. The candidate changes update the Vite output path and the service-worker, staged-site, live-site, and contract checks together.
+- After the merge, main at `544c7c096d4b3579d288c5a9a2beb2b672604d6a` reported `validate-learning-engine` and `webkit-compat` successful, while the React `build` was still in progress at this checkpoint.
+- **Post-merge Pages deployment and live/offline smoke are not yet verified in this record.** Do not infer success from the merge or pre-merge checks. R7 release acceptance stays PARTIAL until the promoted main SHA has successful deployment, live public-manifest/assets, hash equality, offline/core-product, and stale-client results.
+- The active ruleset `Protect main — PR and CI` (ID `25670314`) remains configured to require PRs, resolved conversations, up-to-date branches, `build`, `validate-learning-engine`, and `webkit-compat`.
+
+### Current candidate disposition at this checkpoint
+
+- **#597:** merged as `544c7c0`; closeout remains subject to the mainline build and deployed live verification above.
+- **#598:** current security-audit candidate still needs exact-head CI to finish, then a read-only manual run against the actually deployed main SHA. Its results must distinguish HTTP response headers/CSP and Supabase production configuration; do not report these as passed without live evidence.
+- **#595:** compact Learning-card candidate has received further commits. Its latest observed exact head was `73afec487d465ca1626c0371d9dc24de6c1d12d9`; required checks were in progress. Recheck the latest SHA before review or merge.
+- **#596:** onboarding-answer-review candidate `6767959c695ab16b7944d7c3f62e3d6cc3db506f` had the engine and visual checks passed, while its React build was still in progress. Recheck the exact head before merge. Prefer #596 over the overlapping predecessor #593 only if all required checks and Persian/English mobile behavior pass.
+- **#592:** the fresh semantic-token candidate's exact-head React build failed at `1b33917168a0de4cd9a6c79d2221241d8ad9eb40`, while its engine and visual checks passed. Inspect the failing build log, fix the actual cause (including the existing 2,202 KB budget if that is the failure), and re-run all required checks. Do not merge with a failing build or raise the budget to hide an overage.
+- Older draft UX, card, design-system, menu, content, and sync PRs remain source candidates only. Reconcile their unique diffs against current main; do not bulk merge them.
+
+### Keep the public-beta gates open
+
+This release fix does not close the independent R12/R13/C4 acceptance gates:
+- Security: current deployed response-header/CSP and source-map evidence; Supabase leaked-password protection must be rechecked in production and resolved or formally dispositioned.
+- Privacy/governance: no end-user account deletion or full browser-data erasure is documented as implemented; retention, private privacy/account requests, final Privacy/Terms, target markets/age treatment, and project license still need approved outcomes.
+- Educational validity: independent review of production-provider content samples and empirical placement stability/bias remain outstanding.
+- Device/accessibility: real-device PWA install/update/offline checks, representative assistive-technology/zoom/keyboard checks, and performance evidence remain release acceptance work.
+
+**Instruction for the next review:** refresh the current main SHA, current PR heads, exact-head check conclusions, and post-merge Pages run before changing any of these statuses. Historical runs are not evidence for a newer SHA.
+
+---
+
 # Rinemi — Unified Product, Engineering & Public-Release Roadmap
 
 > **Brand naming rule (2026-10-09):** Rinemi is the canonical customer-facing name in the application, PWA metadata, brand assets, and public product copy. `kanji5` repository/deployment paths, `KANJI5_*` runtime contracts, stored data keys, backup-format identifiers and build asset names remain compatibility identifiers until a separate migration is designed and tested.
