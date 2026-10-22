@@ -1,4 +1,4 @@
-.kanji5-onboarding-review-list{display:grid;gap:10px;margin:14px 0 0}
+.kanji5-onboarding-review-list{display:grid;gap:10px;margin:14px 0 0;max-height:min(42svh,320px);overflow:auto;overscroll-behavior:contain}
 .kanji5-onboarding-review-item{display:grid;gap:12px;min-width:0;padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(253,251,247,.66)}
 .kanji5-onboarding-review-head{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:11px}
 .kanji5-onboarding-review-kanji{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--washi);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:27px}
