@@ -209,33 +209,40 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     }
     setVisualStructureInfo(null);
     setVisualStructureReady(false);
-    const character = card.character;
-    const meanings = [...primaryMeanings,...secondaryMeanings];
-    const mnemonicModule = import("./prepared-mnemonic-core");
-    void mnemonicModule.then(({buildPreparedMnemonic})=>{
-      if(!active)return;
-      setPreparedMnemonic(buildPreparedMnemonic({character,meanings}));
-    }).catch(()=>{
-      if(active)setPreparedMnemonic(null);
-    });
+    setPreparedMnemonic(null);
     void getVisualStructureInfo(card.character).then(info=>{
       if(!active)return;
       setVisualStructureInfo(info);
       setVisualStructureReady(true);
-      void mnemonicModule.then(({buildPreparedMnemonic})=>{
-        if(!active)return;
-        setPreparedMnemonic(buildPreparedMnemonic(
-          {character,meanings},
-          info.available ? info.components.map(component=>component.character) : []
-        ));
-      });
     }).catch(()=>{
       if(!active)return;
       setVisualStructureInfo(null);
       setVisualStructureReady(true);
     });
     return ()=>{active=false};
-  },[card.character,preparedMeaningKey]);
+  },[card.character]);
+
+  // The curated mnemonic corpus is large; defer its chunk until the learner opens
+  // the mnemonic page rather than fetching it as part of the initial Learning screen.
+  useEffect(()=>{
+    let active=true;
+    const mnemonicPage=hasExamplesPage?2:1;
+    if(!card.character||!revealed||backPage!==mnemonicPage){
+      return ()=>{active=false};
+    }
+    const character=card.character;
+    const meanings=[...primaryMeanings,...secondaryMeanings];
+    const components=visualStructureInfo?.available
+      ? visualStructureInfo.components.map(component=>component.character)
+      : [];
+    void import("./prepared-mnemonic-core").then(({buildPreparedMnemonic})=>{
+      if(!active)return;
+      setPreparedMnemonic(buildPreparedMnemonic({character,meanings},components));
+    }).catch(()=>{
+      if(active)setPreparedMnemonic(null);
+    });
+    return ()=>{active=false};
+  },[card.character,preparedMeaningKey,backPage,hasExamplesPage,revealed,visualStructureInfo]);
   useEffect(()=>{
     setHiraganaReadings(false);
     setReferenceInfoOpen(false);
