@@ -122,6 +122,9 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
   const [confirmPassword, setConfirmPassword] = useState("");
   const [setPasswordOnly, setSetPasswordOnly] = useState(false);
   const [securityEditing, setSecurityEditing] = useState(false);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  const deleteConfirmationRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -147,6 +150,8 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
     setConfirmPassword("");
     setSetPasswordOnly(false);
     setSecurityEditing(false);
+    setDeleteConfirmationOpen(false);
+    setDeleteConfirmationText("");
     if (state.user) {
       setDisplayName(state.user.name && state.user.name !== state.user.email ? state.user.name : "");
     } else {
@@ -155,6 +160,12 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
       setEmailIntent(initialEmailIntent);
     }
   }, [open, state.user?.id, initialEmailIntent]);
+
+  useEffect(() => {
+    if (!open || !deleteConfirmationOpen) return;
+    const frame = window.requestAnimationFrame(() => deleteConfirmationRef.current?.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [open, deleteConfirmationOpen]);
 
   useEffect(() => {
     if (!open || !state.recoveryPending) return;
@@ -183,6 +194,8 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
         : code === "AUTH_RESET_EMAIL_REQUIRED" ? t("emailRequired", language)
         : code === "AUTH_RESET_FAILED" ? t("passwordResetError", language)
         : code === "AUTH_SET_PASSWORD_FAILED" ? t("passwordChangeError", language)
+        : code === "AUTH_ACCOUNT_DELETE_FAILED" ? (language === "fa" ? "حذف حساب انجام نشد. اتصال را بررسی کن و دوباره تلاش کن." : "Account deletion could not be confirmed. Check your connection and try again.")
+        : code === "AUTH_DELETE_CONFIRMATION_REQUIRED" ? (language === "fa" ? "برای تأیید، عبارت DELETE را دقیقاً وارد کن." : "Type DELETE exactly to confirm account deletion.")
         : code === "Password should be at least 6 characters." ? t("passwordTooShort", language)
         : t("authError", language);
       setAuthMessage(message);
@@ -262,6 +275,15 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
     setSetPasswordOnly(false);
     setSecurityEditing(false);
     setAuthMessage(t("passwordChanged", language));
+  });
+
+  const submitAccountDeletion = () => void run(async () => {
+    if (deleteConfirmationText !== "DELETE") throw new Error("AUTH_DELETE_CONFIRMATION_REQUIRED");
+    const api = await getAccountApi();
+    await api.deleteAccount();
+    setDeleteConfirmationOpen(false);
+    setDeleteConfirmationText("");
+    onClose();
   });
 
   const lastSynced = formatSyncedAt(state.syncSummary.lastSyncedAt, language);
@@ -422,6 +444,51 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
         <section className="account-section account-section-actions">
           <div><h3>{t("accountActions", language)}</h3></div>
           <button className="account-signout-button" type="button" disabled={busy} onClick={() => void run(async () => { const api = await getAccountApi(); await api.signOut(); onClose(); })}>{t("signOut", language)}</button>
+        </section>
+
+        <section className="account-section account-section-delete" aria-labelledby="account-delete-title">
+          <div className="account-section-heading">
+            <div>
+              <h3 id="account-delete-title">{language === "fa" ? "حذف حساب و داده‌های ابری" : "Delete account and cloud data"}</h3>
+              <p>{language === "fa"
+                ? "این کار حساب و داده‌های همگام‌سازی‌شدهٔ ابری را برای همیشه حذف می‌کند. پیشرفت محلی این مرورگر پاک نمی‌شود؛ برای پاک‌کردن آن، جداگانه از تنظیمات داده‌های محلی را پاک کن."
+                : "Permanently deletes your account and synced cloud data. Learning data stored locally in this browser remains; use Settings → Clear data from this browser separately if you want to erase it too."}</p>
+            </div>
+          </div>
+          {!deleteConfirmationOpen ? (
+            <button className="button danger account-delete-trigger" type="button" disabled={busy} onClick={() => { setAuthMessage(null); setDeleteConfirmationText(""); setDeleteConfirmationOpen(true); }}>
+              {language === "fa" ? "حذف دائمی حساب" : "Delete account"}
+            </button>
+          ) : (
+            <div className="account-delete-confirmation" aria-labelledby="account-delete-confirm-title" aria-describedby="account-delete-confirm-help">
+              <strong id="account-delete-confirm-title">{language === "fa" ? "این حذف قابل بازگشت نیست" : "This deletion cannot be undone"}</strong>
+              <p id="account-delete-confirm-help">{language === "fa"
+                ? "دسترسی حساب و داده‌های ابری حذف می‌شوند. داده‌های محلی و پشتیبان‌های دانلودشده جداگانه باقی می‌مانند. برای تأیید، عبارت DELETE را دقیقاً وارد کن."
+                : "Your account and cloud copy will be permanently removed. Local browser data and downloaded backups are separate and remain. Type DELETE exactly to confirm."}</p>
+              <label className="account-delete-confirm-label" htmlFor="account-delete-confirm-input">
+                <span>{language === "fa" ? "عبارت تأیید" : "Confirmation phrase"}</span>
+                <input
+                  ref={deleteConfirmationRef}
+                  id="account-delete-confirm-input"
+                  type="text"
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  value={deleteConfirmationText}
+                  onChange={event => setDeleteConfirmationText(event.target.value)}
+                  disabled={busy}
+                />
+              </label>
+              <div className="account-inline-actions">
+                <button className="button danger" type="button" disabled={busy || deleteConfirmationText !== "DELETE"} onClick={submitAccountDeletion}>
+                  {busy ? (language === "fa" ? "در حال حذف…" : "Deleting…") : (language === "fa" ? "تأیید حذف حساب" : "Confirm account deletion")}
+                </button>
+                <button className="button secondary" type="button" disabled={busy} onClick={() => { setDeleteConfirmationOpen(false); setDeleteConfirmationText(""); }}>
+                  {language === "fa" ? "انصراف" : "Cancel"}
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {authMessage ? <p className="account-message" role="status">{authMessage}</p> : null}
