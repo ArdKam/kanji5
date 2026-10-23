@@ -103,7 +103,7 @@ export function stablePayload(payload) {
     deckVersion: payload?.deckVersion || null,
     educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
     syncSchemaVersion: Number(payload?.syncSchemaVersion) || SYNC_SCHEMA_VERSION,
-    v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || 2,
+    v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || 1,
     sessionHistory: Array.isArray(payload?.sessionHistory) ? payload.sessionHistory : [],
     components: payload?.components && typeof payload.components === 'object' ? payload.components : {},
     componentUpdatedAtByKey: payload?.componentUpdatedAtByKey && typeof payload.componentUpdatedAtByKey === 'object' ? payload.componentUpdatedAtByKey : {},
