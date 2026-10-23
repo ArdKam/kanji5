@@ -13,7 +13,7 @@ R13 engineering/governance reconciliation is **merged to current `main`**. Repos
 Verified repository-side reconciliation:
 - Privacy/data documentation matches the current browser/runtime model.
 - Terms remain explicitly a legal-review draft.
-- Account deletion is **not** claimed as implemented; the current account API has no delete operation or UI.
+- A self-service account-deletion candidate now has a typed-confirmation UI and calls the active JWT-verified `delete-account` function. Production availability is not claimed until the candidate is deployed and a controlled authenticated deletion smoke test verifies it.
 - Reset learning progress is distinguished from complete local-data deletion.
 - Backup/export scope and exclusions are documented without claiming a complete cloud export.
 - Retention is not assigned an invented fixed period.
