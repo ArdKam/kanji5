@@ -88,6 +88,21 @@ Useful primary references:
 - EDRDG JMdict project: https://www.edrdg.org/wiki/JMdict-EDICT_Dictionary_Project.html
 - Tatoeba reuse FAQ: https://en.wiki.tatoeba.org/articles/show/faq
 
+## Targeted lexicographic spot-check
+
+**Scope:** a small check of benchmark items previously named in the project QA record. This is an illustrative source check, not a representative sample of the full catalog or dynamic provider responses. A Japanese dictionary reading can confirm a word/read association; it does not by itself validate the chosen English gloss or Persian localization.
+
+| Item in the project sample | Reference evidence | Disposition |
+|---|---|---|
+| 学ぶ（まなぶ） | 漢字ペディア's 学 entry lists 音「ガク」 and 訓「まなぶ」, and defines 学 as studying/researching/learner. https://www.kanjipedia.jp/kanji/0000923700/ | Reading supported for this lexeme; no correction proposed. English “to study; to learn” is broadly aligned, but not an independently reviewed translation. |
+| 学生（がくせい） | 漢字ペディア's 生 entry lists 学生（ガクセイ） among compounds. https://www.kanjipedia.jp/kanji/0003833400/ | Reading supported at the compound level; no correction proposed. The English “student” remains an editorial gloss, not a native Japanese-only dictionary field. |
+| 日本（にほん） | 漢字ペディア's 日本 entry gives ニホン and explicitly notes that ニッポン is also read. https://www.kanjipedia.jp/kotoba/0005439300 | The sample reading is valid, but the lexeme has a common alternative reading. Do not silently replace it; represent alternates where teaching goals and space allow. |
+| 今日（きょう） | 漢字ペディア's 今日 entry lists きょう for “this day/today” and notes a separate こんにち reading/sense (“these days/current era”). https://www.kanjipedia.jp/kotoba/0002418800 | Reading is supported for the intended “today” sense. This is a concrete example of why a reading must be checked against a word and sense, not inferred from the isolated character alone. |
+| 会議（かいぎ） | 漢字ペディア's 会 entry lists 会議（カイギ） among compounds; its 議 entry also lists 会議（カイギ）. https://www.kanjipedia.jp/kanji/0000756800/ and https://www.kanjipedia.jp/kanji/0001324000/ | Reading supported at the compound level; no correction proposed. |
+| Official-table reading distinction | 漢字ペディア marks readings included in the 常用漢字表 with a distinct symbol in its reading index; the Agency for Cultural Affairs also publishes the official Jōyō index. https://www.kanjipedia.jp/include/popup_onkun.html and https://www.bunka.go.jp/kokugo_nihongo/sisaku/joho/joho/kijun/naikaku/kanji/joyokanjisakuin/ | Confirms the source distinction discussed above. Do not assume that every KANJIDIC2 dictionary reading is a table-listed reading. |
+
+These checks did not identify a specific incorrect reading in these sampled words. They do **not** verify every sense, etymology, learner-level suitability, provider result, or translation in the application. No corpus record was modified.
+
 ## Unresolved review queue
 
 1. **Native Japanese / lexicographic review:** review on/kun entries that are prioritized for teaching, ambiguous readings, and a representative sample of high-frequency and assessment-target characters against Kanjipedia and the official Jōyō table. Record character, exact field, reference URL, reviewed value, reviewer, and date.
