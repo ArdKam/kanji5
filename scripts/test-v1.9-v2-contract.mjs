@@ -15,6 +15,8 @@ assert.equal(learning.kind,'learning-card');assert.equal(learning.character,'学
 assert.deepEqual(learning.learnerMeaningRecords.map(record=>record.text),['study','learning']);
 assert.ok(learning.learnerMeaningRecords.every(record=>record.language==='en'&&record.reviewStatus==='unreviewed'));
 assert.equal(learning.learnerMeaningRecords[0].provenance.source,'KANJIDIC2 fixture');
+const reprojectedLearning=buildLearningCardViewModel(learning);
+assert.deepEqual(reprojectedLearning.learnerMeaningRecords,learning.learnerMeaningRecords,'Meaning provenance must survive the boundary snapshot re-projecting an existing learning view-model');
 const feedback=buildFeedbackViewModel({mode:'reading',outcome:'near_miss',score:0.7,retryCount:1,recovered:true});
 assert.equal(feedback.outcome,'near_miss');assert.equal(feedback.recovered,true);assert.equal(feedback.retryCount,1);
 const learner=buildLearnerSkillSummary({version:'1.9.0-learner-model',attributes:{reading:{state:'weak',accuracy:.4,recentAccuracy:.3,confidence:.6,momentum:-.2,attempts:5,recentAttempts:3,repeatedFailure:true}}});
