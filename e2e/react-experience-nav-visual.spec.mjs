@@ -357,13 +357,32 @@ test('Saved Kanji bookmarks persist, filter correctly, and remain separate from 
   expect(character).toBeTruthy();
   const saveButton = page.locator('.dictionary-bookmark-toggle').first();
   await expect(saveButton).toHaveAttribute('aria-pressed', 'false');
+  const reviewStateBefore = await page.evaluate(() => {
+    const backup = window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.();
+    return {
+      cards: backup?.data?.core?.cards,
+      reviews: backup?.data?.core?.reviews,
+      knowledge: backup?.data?.core?.knowledge,
+    };
+  });
   await saveButton.click();
   await expect(saveButton).toHaveAttribute('aria-pressed', 'true');
   await expect(savedFilter).toContainText('1');
 
-  const backup = await page.evaluate(() => window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.());
-  expect(backup?.data?.components?.kanjiBookmarks?.[character]).toMatchObject({ saved: true });
-  expect(backup?.data?.core?.cards?.[character]).toBeUndefined();
+  const backup = await page.evaluate(target => {
+    const record = window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.();
+    return { bookmark: record?.data?.components?.kanjiBookmarks?.[target] };
+  }, character);
+  expect(backup.bookmark).toMatchObject({ saved: true });
+  const reviewStateAfter = await page.evaluate(() => {
+    const next = window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.();
+    return {
+      cards: next?.data?.core?.cards,
+      reviews: next?.data?.core?.reviews,
+      knowledge: next?.data?.core?.knowledge,
+    };
+  });
+  expect(reviewStateAfter).toEqual(reviewStateBefore);
 
   await page.reload();
   await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
