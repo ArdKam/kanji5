@@ -858,3 +858,58 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
     await audit.persist();
   }
 });
+
+
+
+test("visual evidence: Learning Card rating colors before and after semantic-token fix", async ({ page }, testInfo) => {
+  test.setTimeout(90000);
+  const audit = await createCapture(page, testInfo);
+  try {
+    await startApp(page, { language: "en", theme: "light" });
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 15000 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    const reveal = card.locator(".learning-card-front .button.primary.wide");
+    await expect(reveal).toBeVisible();
+    await reveal.click();
+    await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    const ratings = card.locator(".learning-back-footer .rating-grid .rating");
+    await expect(ratings).toHaveCount(4);
+    await expect(ratings.first()).toBeVisible();
+
+    // Re-apply the exact pre-change rating declarations in the rendered browser for
+    // the baseline capture. Removing this override reveals the actual tested PR CSS.
+    const baselineStyles = `
+      .learning-card-back .rating-again{color:#8e3026;border-color:color-mix(in srgb,var(--shu) 52%,var(--line));background:color-mix(in srgb,var(--shu) 7%,var(--paper))}
+      .learning-card-back .rating-hard{color:#76510a;border-color:color-mix(in srgb,#9a6700 42%,var(--line));background:color-mix(in srgb,#d29c2e 9%,var(--paper))}
+      .learning-card-back .rating-good{color:#43582b;border-color:color-mix(in srgb,var(--matcha) 62%,var(--line));background:color-mix(in srgb,var(--matcha) 11%,var(--paper))}
+      .learning-card-back .rating-easy{color:#314b6f;border-color:color-mix(in srgb,var(--ai) 52%,var(--line));background:color-mix(in srgb,var(--ai) 7%,var(--paper))}
+    `;
+
+    for (const viewport of [
+      { name: "mobile-390x844", width: 390, height: 844 },
+      { name: "desktop-1440x960", width: 1440, height: 960 },
+    ]) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await card.evaluate(element => element.scrollIntoView({ block: "start", inline: "nearest" }));
+      const baselineOverride = await page.addStyleTag({ content: baselineStyles });
+      await audit.capture("learning-ratings-" + viewport.name + "-light-before");
+      await baselineOverride.evaluate(element => element.remove());
+
+      const postFix = await ratings.evaluateAll(elements => elements.map(element => ({
+        className: [...element.classList].find(name => /^rating-(again|hard|good|easy)$/.test(name)),
+        color: getComputedStyle(element).color,
+        background: getComputedStyle(element).backgroundColor,
+        borderColor: getComputedStyle(element).borderTopColor,
+        borderWidth: getComputedStyle(element).borderTopWidth,
+      })));
+      expect(postFix).toHaveLength(4);
+      expect(postFix.every(style => style.borderWidth === "1px")).toBe(true);
+      expect(new Set(postFix.map(style => style.background)).size).toBe(4);
+      await audit.capture("learning-ratings-" + viewport.name + "-light-after");
+    }
+  } finally {
+    await audit.persist();
+  }
+  expect(audit.report.pageErrors, "Uncaught browser errors during Learning Card rating before/after capture").toEqual([]);
+});
