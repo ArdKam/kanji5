@@ -27,4 +27,47 @@ const equalTimeRemoval=mergeV16SyncData(
 );
 assert.deepEqual(equalTimeRemoval.components.kanjiBookmarks['水'],{saved:false,updatedAt:'2026-10-23T10:00:00.000Z'},'equal-time removals must win deterministically');
 
+
+// Component-level clocks preserve independent settings-like records and deletion tombstones.
+const localComponentState = {
+  sessionHistory: [],
+  components: { selectedTopic: { value: "N5" }, localOnly: { value: true }, deletedTopic: { value: "old" } },
+  componentUpdatedAtByKey: {
+    selectedTopic: "2026-10-22T10:00:00.000Z",
+    localOnly: "2026-10-22T09:00:00.000Z",
+    deletedTopic: "2026-10-22T08:00:00.000Z"
+  }
+};
+const remoteComponentState = {
+  sessionHistory: [],
+  components: { selectedTopic: { value: "N4" }, remoteOnly: { value: true } },
+  componentUpdatedAtByKey: {
+    selectedTopic: "2026-10-22T11:00:00.000Z",
+    deletedTopic: "2026-10-23T10:00:00.000Z",
+    remoteOnly: "2026-10-22T08:00:00.000Z"
+  }
+};
+const mergedComponentState = mergeV16SyncData(localComponentState, remoteComponentState);
+assert.deepEqual(mergedComponentState.components.selectedTopic, { value: "N4" }, "The newer component clock must win");
+assert.deepEqual(mergedComponentState.components.localOnly, { value: true }, "Local-only component data must survive");
+assert.deepEqual(mergedComponentState.components.remoteOnly, { value: true }, "Remote-only component data must survive");
+assert.equal(Object.hasOwn(mergedComponentState.components, "deletedTopic"), false, "A newer deletion clock must prevent stale component resurrection");
+assert.equal(mergedComponentState.componentUpdatedAtByKey.deletedTopic, "2026-10-23T10:00:00.000Z");
+
+// The generic component merge must delegate bookmark records to their timestamp/tombstone merge.
+const mergedBookmarkClocks = mergeV16SyncData({
+  sessionHistory: [],
+  components: { kanjiBookmarks: { 日: { saved: true, updatedAt: "2026-10-22T10:00:00.000Z" } } },
+  componentUpdatedAtByKey: { kanjiBookmarks: "2026-10-22T10:00:00.000Z" }
+}, {
+  sessionHistory: [],
+  components: { kanjiBookmarks: { 日: { saved: false, updatedAt: "2026-10-23T10:00:00.000Z" }, 月: { saved: true, updatedAt: "2026-10-22T12:00:00.000Z" } },
+  componentUpdatedAtByKey: { kanjiBookmarks: "2026-10-23T10:00:00.000Z" }
+});
+assert.deepEqual(mergedBookmarkClocks.components.kanjiBookmarks, {
+  日: { saved: false, updatedAt: "2026-10-23T10:00:00.000Z" },
+  月: { saved: true, updatedAt: "2026-10-22T12:00:00.000Z" }
+}, "Bookmark clocks must not bypass the per-kanji tombstone merge");
+assert.ok(mergedBookmarkClocks.componentUpdatedAtByKey.kanjiBookmarks, "Bookmark component clock must be transported");
+
 console.log('v1.6 sync contract: OK');
