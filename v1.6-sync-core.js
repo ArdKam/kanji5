@@ -24,4 +24,37 @@ export function mergeSkillProfile(local,remote){
  }
  return out;
 }
-export function mergeV16SyncData(local={},remote={}){const lh=sanitizeSessionHistory(local.sessionHistory),rh=sanitizeSessionHistory(remote.sessionHistory);return{v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,sessionHistory:mergeSessionHistory(lh,rh),components:{...(local.components||{}),...(remote.components||{})},skillProfile:mergeSkillProfile(local.skillProfile,remote.skillProfile)}}
+function validBookmarkRecord(record){
+ return record&&typeof record==='object'&&typeof record.saved==='boolean'&&typeof record.updatedAt==='string'&&Number.isFinite(Date.parse(record.updatedAt));
+}
+function mergeKanjiBookmarks(local={},remote={}){
+ const out={};
+ const a=local&&typeof local==='object'&&!Array.isArray(local)?local:{};
+ const b=remote&&typeof remote==='object'&&!Array.isArray(remote)?remote:{};
+ for(const character of new Set([...Object.keys(a),...Object.keys(b)])){
+  const left=validBookmarkRecord(a[character])?a[character]:null;
+  const right=validBookmarkRecord(b[character])?b[character]:null;
+  if(!left&&!right)continue;
+  let chosen;
+  if(!left)chosen=right;
+  else if(!right)chosen=left;
+  else{
+   const leftTime=Date.parse(left.updatedAt),rightTime=Date.parse(right.updatedAt);
+   if(leftTime!==rightTime)chosen=leftTime>rightTime?left:right;
+   else if(left.saved!==right.saved)chosen=left.saved?right:left; // Equal-time deletion tombstones win to prevent resurrection.
+   else chosen=JSON.stringify(left)<=JSON.stringify(right)?left:right;
+  }
+  out[character]={saved:chosen.saved,updatedAt:chosen.updatedAt};
+ }
+ return out;
+}
+export function mergeV16SyncData(local={},remote={}){
+ const lh=sanitizeSessionHistory(local.sessionHistory),rh=sanitizeSessionHistory(remote.sessionHistory);
+ const localComponents=local.components&&typeof local.components==='object'?local.components:{};
+ const remoteComponents=remote.components&&typeof remote.components==='object'?remote.components:{};
+ const components={...localComponents,...remoteComponents};
+ if(Object.prototype.hasOwnProperty.call(localComponents,'kanjiBookmarks')||Object.prototype.hasOwnProperty.call(remoteComponents,'kanjiBookmarks')){
+  components.kanjiBookmarks=mergeKanjiBookmarks(localComponents.kanjiBookmarks,remoteComponents.kanjiBookmarks);
+ }
+ return {v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,sessionHistory:mergeSessionHistory(lh,rh),components,skillProfile:mergeSkillProfile(local.skillProfile,remote.skillProfile)};
+}
