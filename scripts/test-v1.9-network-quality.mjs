@@ -45,6 +45,7 @@ try{
   assert.equal(attributedSentence.translationLicense,'CC BY 2.0 FR');
   assert.equal(attributedSentence.translationUrl,'https://tatoeba.org/en/sentences/show/202');
   assert(!sentences.some(x=>x.id===6||x.id===7),'source sentences or translations marked PROBLEM must not be selected');
+  assert(!sentences.some(x=>x.id===4||x.id===5),'source sentences or translations with missing license metadata must not be selected');
   const tatoebaCall=calls.find(url=>url.includes('api.tatoeba.org'));
   assert.deepEqual(new URL(tatoebaCall).searchParams.getAll('license'),['CC BY 2.0 FR','CC0 1.0'],'the request should explicitly select reusable sentence licenses');
   const selectedWordA=network.selectWord(words);const selectedWordB=network.selectWord(words);
