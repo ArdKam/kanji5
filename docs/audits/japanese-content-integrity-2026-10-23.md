@@ -7,8 +7,8 @@
 ## Executive result
 
 - The committed static catalog is structurally consistent on the measured checks: 2,136 unique Jōyō kanji, stable character-based IDs, 7,937 non-empty gloss values, 2,850 on-reading values, and 3,905 kun-reading values.
-- The audit confirmed **no specific incorrect Japanese reading, word, or meaning** suitable for a source-backed content patch. No vocabulary, reading, meaning, JLPT field, topic membership, card ID, or learner record was changed.
-- One reproducible content-integrity defect was found in the validation code: object/array values could be coerced to strings and pass some non-empty / language-shape checks. The patch adds strict field-type gates at validation boundaries and at the KanjiAPI response adapter, with targeted regression fixtures.
+- The audit confirmed **no incorrect static-corpus reading, word, or meaning** suitable for a verified data-value patch. It did identify a second adapter-level defect: alternatives sharing the same written word were deduplicated even when their readings differed. A regression fixture now protects separately sourced 日本 readings (にほん / にっぽん) without asserting the dynamic provider always supplies both.
+- Two reproducible content-integrity defects were found in the runtime adapter/validation path: non-string fields could be coerced into apparently valid text, and distinct readings for the same written vocabulary form could be collapsed. The patch adds strict field-type gates and uses written-form-plus-reading for adapter deduplication, with targeted regression fixtures.
 - Dynamic vocabulary and Tatoeba-derived sentences are not a pinned corpus. Their present structural gates cannot prove reading-to-word association, sense alignment, grammar, translation equivalence, naturalness, or learner-level suitability. Independent review remains a release acceptance requirement.
 - The onboarding placement answer review is already implemented: after completing the assessment, learners can optionally review each Kanji, their selected answer, the correct answer, and a correct/incorrect status in Persian or English. Correctness is not revealed mid-assessment, reducing the risk of cueing later answers. This is useful answer correction, not a semantic explanation or a validated proficiency diagnosis.
 
@@ -44,6 +44,14 @@ Counts were calculated from the files on the observed baseline. Structural check
 - Add regression tests for array-valued written forms/readings/sentences and object-valued meanings/translations/glosses, while retaining the existing valid-entry fixtures.
 
 **Affected corpus records:** none identified or edited. This is a validation-path defect, not a verified correction to any named vocabulary record. Runtime payload counts cannot be claimed because the provider corpus was not frozen or exhaustively sampled.
+
+### P2 — adapter-level deduplication dropped alternate readings for one written form
+
+**Evidence:** `fetchWordsResult` used a set keyed only by the written form (`word`). When a provider record contained two variants with the same written form but different kana readings, the first variant occupied the set and the later reading was silently skipped. The downstream canonical vocabulary identity already distinguishes an item using the written form plus reading, and `validateVocabularyList` also deduplicates by that pair.
+
+**Correction in this branch:** key the adapter's duplicate guard by `word|reading`. Add a fixture containing 日本（にほん／にっぽん） and assert that both variants survive. 漢字ペディア documents ニホン and ニッポン as readings of 日本: https://www.kanjipedia.jp/kotoba/0005439300
+
+**Scope limitation:** this fixes a reproducible lossy transformation, not a claim about the current live KanjiAPI payload. The example regression uses a source-backed alternate-reading fixture; no current provider response was frozen, and no static corpus record was edited.
 
 ## Linguistic and pedagogical findings
 
