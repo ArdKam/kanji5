@@ -4,6 +4,7 @@ import { canonicalContentId } from './v2-domain-core.js';
 
 const API_ORIGIN='https://kanjiapi.dev';
 const TATOEBA_ORIGIN='https://api.tatoeba.org';
+const TATOEBA_REUSABLE_TEXT_LICENSES=new Set(['CC BY 2.0 FR','CC0 1.0']);
 function stableContentHash(value){
   let h=2166136261;
   const source=String(value??'');
@@ -91,10 +92,10 @@ export async function fetchContextSentences(character){
   const out=[],seen=new Set();
   for(const row of rows){
     const text=String(row?.text||'').trim();
-    if(!text||!text.includes(character)||seen.has(text)||row?.license==='PROBLEM')continue;
+    if(!text||!text.includes(character)||seen.has(text)||!TATOEBA_REUSABLE_TEXT_LICENSES.has(row?.license))continue;
     const translations=Array.isArray(row?.translations)?row.translations:[];
     const translation=translations.flatMap(x=>Array.isArray(x)?x:[x])
-      .find(value=>typeof value?.text==='string'&&value.text.trim()&&value.license!=='PROBLEM');
+      .find(value=>typeof value?.text==='string'&&value.text.trim()&&TATOEBA_REUSABLE_TEXT_LICENSES.has(value.license));
     const english=typeof translation?.text==='string'?translation.text.trim():'';
     if(!english)continue;
     seen.add(text);
