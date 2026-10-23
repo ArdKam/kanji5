@@ -3,15 +3,15 @@
 **Assessment date:** 2026-10-23  
 **Source project:** Base44 app “Kanji Flow” (app ID `6adb96c8905a8651ca14ba48`)  
 **Target project:** `ArdKam/kanji5` — Rinemi  
-**Status:** Design and product recommendations; not an implementation or claim that the Base44 live UI has been independently reproduced.  
-**Canonical implementation/release status:** [`ROADMAP.md`](../ROADMAP.md)  
-**Active Learning Card candidate:** [PR #611](https://github.com/ArdKam/kanji5/pull/611)
+**Status:** Design and product recommendations; not a claim that the Base44 live UI has been independently reproduced or that Rinemi’s changes are deployed.  
+**Repository status rechecked:** PR [#611](https://github.com/ArdKam/kanji5/pull/611) merged on 2026-10-23 at `4fa42f1c12c4ab4aff6fd684df64a2d4d87c21a0`; PR [#616](https://github.com/ArdKam/kanji5/pull/616) merged on 2026-10-23 at `766f85c4633ee5d2699509c981bb4cfc456d26f9`. These merges establish source-control status, not current production deployment.  
+**Canonical implementation/release status:** [`ROADMAP.md`](../ROADMAP.md)
 
 ## 1. Decision
 
 Treat Kanji Flow as a **useful mobile UX reference, not a code or learning-engine template**. The valuable lesson is the clarity of its daily-study framing and task-focused presentation. Rinemi should borrow interaction and information-hierarchy patterns only where they improve real study tasks, then implement them with Rinemi’s design tokens, Persian-first learning needs, accessibility standards, and existing authoritative learning engine.
 
-Do not replace Rinemi's Learning Card or create a competing redesign branch while PR #611 is the active compact-hybrid card candidate. First verify that candidate on its exact current head, especially the revealed card—not just the front state—and inspect its actual browser artifacts.
+Do not replace Rinemi's Learning Card or create a competing redesign branch: the compact-hybrid changes were merged through PR #611. Instead, verify the reviewed implementation on current `main` and in the actual deployed application, especially the revealed back—not just the front—and inspect browser artifacts from the merged/deployed SHA.
 
 ## 2. Evidence and confidence
 
@@ -20,7 +20,7 @@ This review combines a source-level reading of the Base44 implementation and a r
 - The Kanji Flow public preview could not be inspected reliably in the browser during the review. The user’s report that its UI feels substantially better on mobile is valid product feedback, but no pixel-level claim about the live page should be inferred from it.
 - Base44 source paths reviewed include `src/pages/Study.jsx`, `src/lib/srs.js`, `src/lib/session.js`, `src/pages/ImportKanji.jsx`, and `base44/functions/importKanji/entry.ts`. Component files such as `StudyFront.jsx`, `StudyBack.jsx`, and `RatingBar.jsx` were not all fully available in the captured output; detailed styling conclusions about them remain provisional.
 - Rinemi's current architecture is documented in [`ARCHITECTURE.md`](../ARCHITECTURE.md). The front-end implementation is in [`frontend/src/app/App.tsx`](https://github.com/ArdKam/kanji5/blob/main/frontend/src/app/App.tsx), [`learning-surface.css`](https://github.com/ArdKam/kanji5/blob/main/frontend/src/app/learning-surface.css), and [`styles.css`](https://github.com/ArdKam/kanji5/blob/main/frontend/src/styles.css).
-- The latest roadmap snapshot records main at `2fda3fbdb76c0931a09eb378e7e778aade24154d` and identifies PR #611 as the fresh-main compact-card candidate. Re-check the actual main, PR head, checks, and deployed SHA before relying on that status.
+- At the first assessment snapshot, the roadmap described PR #611 as a candidate. Status was rechecked on 2026-10-23: PR #611 merged at `4fa42f1c12c4ab4aff6fd684df64a2d4d87c21a0`, and PR #616 subsequently merged at `766f85c4633ee5d2699509c981bb4cfc456d26f9`. Re-check current `main`, passing exact-head checks, and deployment SHA before concluding the behavior is live.
 
 ### Provisional diagnosis of the reveal issue
 
@@ -89,7 +89,7 @@ Base44’s observed code patterns suggest a five-item mobile navigation (Today, 
 
 ## 5. Rinemi implementation alignment
 
-The core ideas above overlap with work already represented in [PR #611](https://github.com/ArdKam/kanji5/pull/611), which is documented in the current roadmap as the fresh-main compact-hybrid Learning Card candidate. Its intended direction includes:
+The core ideas above overlap with the compact-hybrid Learning Card implementation merged in [PR #611](https://github.com/ArdKam/kanji5/pull/611). Its implementation includes:
 
 - a compact first back page with meaning/readings and one useful example;
 - separate vocabulary, mnemonic, and stroke-order views;
@@ -98,7 +98,7 @@ The core ideas above overlap with work already represented in [PR #611](https://
 - deferral of the prepared-mnemonic payload until the mnemonic view is opened; and
 - responsive browser tests across Persian/English, light/dark, portrait and landscape sizes.
 
-**These are candidate changes, not completion claims.** Before merging, inspect exact-head CI and rendered back-face screenshots and verify the performance budget. The documented startup-transfer guardrail is 2,202 KB; never relax it to make a candidate pass. After merge, verify the deployed SHA and live behavior before calling it shipped.
+**Merge status is confirmed; production behavior is a separate gate.** PR #611 merged into `main`, and PR #616 later merged on top of that state. This does not by itself prove the deployed site contains those changes or that every target device behaves correctly. Verify current-main CI, the same-SHA deployment, the actual revealed back-face screenshots, and the startup-transfer budget. The documented guardrail is 2,202 KB; never relax it to force a pass.
 
 Relevant candidate test source: [`react-learning-card-flip.spec.mjs`](https://github.com/ArdKam/kanji5/blob/67155809adedf5a2bbe64599e0649d4a8d6738d2/e2e/react-learning-card-flip.spec.mjs#L524) (the linked SHA is the reviewed candidate snapshot; check the current PR head for later changes).
 
@@ -121,9 +121,9 @@ Use screenshots from the tested candidate to examine the **revealed back**, not 
 
 ## 7. Decision sequence
 
-1. Re-check the current state and exact head of PR #611. Do not start a duplicate Learning Card redesign.
-2. Review all relevant back-face screenshots and the results for all responsive/localization combinations; add missing regression coverage.
-3. If the candidate passes, merge only through the repository’s normal review and CI process; then validate deployment and actual mobile behavior.
+1. Verify current `main` includes the merged PR #611 implementation and review any subsequent Learning Card changes; do not start a duplicate redesign.
+2. Inspect screenshots and test evidence for the revealed back across responsive/localization combinations; confirm the evidence matches the current-main/deployed SHA and add regression coverage for gaps.
+3. Verify the matching deployment and actual mobile behavior. If any defect remains, make a focused follow-up change through the normal branch/PR and CI process rather than treating the original merge as proof of usability.
 4. Run a small task-based comparison of Kanji Flow and Rinemi with the same study tasks. Record observed errors, completion time, scrolling/hunting, and user preference rather than inferring outcomes from looks alone.
 5. Adopt only the patterns that improve task completion and learner confidence without harming readability, accessibility, performance, Persian-first teaching, or engine boundaries.
 6. Revisit daily-workload and navigation ideas after release-critical security, privacy/legal, educational-validation, and physical-device acceptance work remains on track.
@@ -133,9 +133,10 @@ Use screenshots from the tested candidate to examine the **revealed back**, not 
 - [Rinemi execution/release roadmap](../ROADMAP.md)
 - [Rinemi architecture boundaries](../ARCHITECTURE.md)
 - [Product strategy and competitive positioning](PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md)
-- [Learning Card candidate PR #611](https://github.com/ArdKam/kanji5/pull/611)
-- [Candidate responsive card tests](https://github.com/ArdKam/kanji5/blob/67155809adedf5a2bbe64599e0649d4a8d6738d2/e2e/react-learning-card-flip.spec.mjs#L524)
+- [Learning Card implementation PR #611 (merged)](https://github.com/ArdKam/kanji5/pull/611)
+- [Saved Kanji bookmarks PR #616 (merged)](https://github.com/ArdKam/kanji5/pull/616)
+- [Responsive card tests from the reviewed PR #611 snapshot](https://github.com/ArdKam/kanji5/blob/67155809adedf5a2bbe64599e0649d4a8d6738d2/e2e/react-learning-card-flip.spec.mjs#L524)
 
 ---
 
-**Bottom line:** borrow Kanji Flow’s apparent strength in mobile clarity and focused task flow, not its scheduler, architecture, or unreviewed data. Rinemi’s next step is to verify the already-active compact-hybrid Learning Card candidate with real back-face screenshots and exact-head checks, then test broader Today/navigation patterns separately.
+**Bottom line:** borrow Kanji Flow’s apparent strength in mobile clarity and focused task flow, not its scheduler, architecture, or unreviewed data. The compact-hybrid Learning Card is already merged to `main`; the next step is to verify its actual deployed behavior with back-face screenshots and same-SHA release evidence, then test broader Today/navigation patterns separately.
