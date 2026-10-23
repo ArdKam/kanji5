@@ -245,7 +245,7 @@ test('data trust: account deletion requires exact confirmation and leaves local 
   await page.locator('.account-button').click();
   const dialog = page.locator('.account-dialog');
   await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText('Learning data stored locally in this browser remains');
+  await expect(dialog).toContainText('Local browser data and downloaded backups are separate and remain');
 
   await dialog.getByRole('button', { name: 'Delete account', exact: true }).click();
   const confirmation = dialog.locator('.account-delete-confirmation');
