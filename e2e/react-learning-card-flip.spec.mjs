@@ -1320,3 +1320,18 @@ test("Learning-card vocabulary distinguishes offline failure from a valid empty 
   await expect(examples.locator(".learning-examples-error")).toHaveCount(0);
   expect(emptyResultRequests).toBeGreaterThan(0);
 });
+
+
+test("prepared mnemonic payload is deferred until the mnemonic page is opened", async ({ page }) => {
+  const requests = [];
+  page.on("request", request => {
+    if (/prepared-mnemonic-core/.test(request.url())) requests.push(request.url());
+  });
+  await routeExamples(page, 2);
+  const card = await revealLearningCard(page, "en");
+  await page.waitForTimeout(800);
+  expect(requests, "The large prepared-mnemonic chunk must not be fetched on initial Learning render or reveal").toEqual([]);
+  await goToBackPage(page, card, 2);
+  await expect.poll(() => requests.length, { timeout: 10000 }).toBeGreaterThan(0);
+  await expect(card.locator(".learning-back-page").nth(2)).toHaveClass(/active/);
+});
