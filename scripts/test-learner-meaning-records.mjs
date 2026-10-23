@@ -86,6 +86,9 @@ assert.match(app, /record\.reviewStatus==="verified"/);
 assert.match(app, /getLanguage\(\)==="fa"&&!useReviewedLocalizedMeanings/);
 assert.match(app, /reviewedPersianMeaningUnavailable/);
 assert.match(app, /className="example-source-label"/);
+const learningCardStyles = await (await import("node:fs/promises")).readFile(new URL("../frontend/src/app/learning-card-enhancements.css", import.meta.url), "utf8");
+assert.match(learningCardStyles, /\.learning-meaning-source-note\s*\{/);
+assert.match(learningCardStyles, /\.example-source-label\s*\{/);
 assert.match(app, /lang=\{e\.meaningLanguage&&e\.meaningLanguage!==\"unknown\"\?e\.meaningLanguage:\"en\"\}/);
 
 console.log("Learner meaning provenance/review contract passed.");
