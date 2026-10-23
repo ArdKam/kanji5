@@ -1,7 +1,8 @@
 import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
 
-const storage=window.__KANJI5_STORAGE__||localStorage;
+const storage=window.__KANJI5_STORAGE__;
+if(!storage)throw new Error('KANJI5_STORAGE_NOT_LOADED');
 
 const K=window.__KANJI5_STORAGE_KEYS__;
 if(!K)throw new Error("KANJI5_STORAGE_KEYS_NOT_LOADED");
