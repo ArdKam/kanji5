@@ -20,7 +20,7 @@ assert.doesNotMatch(css,/\.header\.menu-open \.account-button\{[^}]*visibility:\
 
 assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:absolute!important;[\s\S]*?max-height:min\(640px/);
 assert.match(css,/@media\(max-width:760px\)[\s\S]*?\.header-tools-menu\{[\s\S]*?position:fixed!important;[\s\S]*?inset-inline-start:0!important;[\s\S]*?inset-inline-end:auto!important;/);
-assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-menu-scrim\{display:none;\}/);
+assert.match(css,/@media\(min-width:761px\)[\s\S]*?\.header-menu-scrim\{display:block;background:rgba\(16,24,40,\.22\);backdrop-filter:blur\(4px\);-webkit-backdrop-filter:blur\(4px\);\}/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)[\s\S]*?\.header-tools-menu\{animation:none!important;\}/);
 
 for(const label of [
