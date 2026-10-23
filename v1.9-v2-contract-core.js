@@ -109,7 +109,7 @@ export function buildLearningCardViewModel(input={}){
   const meanings=Array.isArray(source.meanings)?source.meanings.map(value=>text(value,160)).filter(Boolean).slice(0,8):[];
   const on=Array.isArray(source.on)?source.on.map(value=>text(value,80)).filter(Boolean).slice(0,8):[];
   const kun=Array.isArray(source.kun)?source.kun.map(value=>text(value,80)).filter(Boolean).slice(0,8):[];
-  const learnerContent=buildLearnerContent({character,meanings,on,kun,vocabularySupportedReadings:source.vocabularySupportedReadings});
+  const learnerContent=buildLearnerContent({character,meanings,on,kun,vocabularySupportedReadings:source.vocabularySupportedReadings,meaningLanguage:source.meaningLanguage,meaningProvenance:source.meaningProvenance,meaningRecords:source.meaningRecords});
   const rawExamples=Array.isArray(source.examples)?source.examples.slice(0,12).map(example=>({word:text(example?.word,120),reading:text(example?.reading,120),meaning:text(example?.meaning,240)})).filter(example=>example.word):[];
   const examples=selectLearnerExamples(rawExamples,character,4);
   const previewDue=value=>{
@@ -126,7 +126,7 @@ export function buildLearningCardViewModel(input={}){
         Easy:previewDue(source.ratingPreviews.Easy)
       })
     : null;
-  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'learning-card',domain:'kanji',domainSchemaVersion:DOMAIN_SCHEMA_VERSION,contentId:text(source.contentId,240)||(character?'kanji:'+character:''),active:source.active===true,character,isNew:source.isNew===true,revealed:source.revealed===true,meanings,on,kun,sourceMeanings:learnerContent.sourceMeanings,learnerMeanings:learnerContent.meanings,learnerReadings:learnerContent.readings,examples,ratingPreviews,hint:text(source.hint,240),revealLabel:text(source.revealLabel,120)||'نمایش اطلاعات کانجی'})
+  return Object.freeze({contractVersion:V2_BOUNDARY_VERSION,kind:'learning-card',domain:'kanji',domainSchemaVersion:DOMAIN_SCHEMA_VERSION,contentId:text(source.contentId,240)||(character?'kanji:'+character:''),active:source.active===true,character,isNew:source.isNew===true,revealed:source.revealed===true,meanings,on,kun,sourceMeanings:learnerContent.sourceMeanings,learnerMeanings:learnerContent.meanings,learnerMeaningRecords:learnerContent.meaningRecords,learnerReadings:learnerContent.readings,examples,ratingPreviews,hint:text(source.hint,240),revealLabel:text(source.revealLabel,120)||'نمایش اطلاعات کانجی'})
 }
 
 export function buildFeedbackViewModel(input={}){
