@@ -17,7 +17,7 @@ function sentenceContentId(id,text,english){
 }
 function tatoebaSentenceUrl(id){
   const normalized=String(id??'').trim();
-  return /^\\d+$/.test(normalized)?`https://tatoeba.org/en/sentences/show/${normalized}`:null;
+  return /^\d+$/.test(normalized)?`https://tatoeba.org/en/sentences/show/${normalized}`:null;
 }
 
 
