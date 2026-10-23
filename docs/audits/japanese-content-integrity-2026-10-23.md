@@ -31,7 +31,7 @@ Counts were calculated from the files on the observed baseline. Structural check
 | Vocabulary examples | Retrieved dynamically through the KanjiAPI adapter and normalized/deduplicated | No reproducible full snapshot is committed; per-entry reading/sense validity remains unverified. |
 | Context sentences | Retrieved dynamically from Tatoeba-derived results and structurally filtered | Structural checks cannot establish grammaticality, naturalness, translation fidelity, or level appropriateness. |
 
-## Confirmed defect and correction
+## Confirmed defects and corrections
 
 ### P2 — non-string provider fields could masquerade as usable content
 
