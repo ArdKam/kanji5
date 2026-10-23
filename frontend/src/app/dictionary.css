@@ -1474,8 +1474,27 @@
 .reading-lab-sentence-read{
   min-width:112px;
 }
-.reading-lab-sentence-list{max-height:none;overflow:visible}
-.reading-lab-reader-sentence{padding:13px 11px 14px 9px}
+.reading-lab-sentence-list{
+  display:grid;
+  gap:6px;
+  min-width:0;
+  max-height:min(48dvh,460px);
+  overflow:auto;
+  padding:3px 2px 6px;
+  scroll-padding-block:12px;
+}
+.reading-lab-reader-sentence{
+  display:grid;
+  grid-template-columns:24px minmax(0,1fr);
+  align-items:start;
+  gap:7px;
+  min-width:0;
+  padding:10px 10px 10px 8px;
+  border:1px solid transparent;
+  border-radius:13px;
+  scroll-margin-block:12px;
+  transition:border-color var(--motion-hover) ease,background var(--motion-hover) ease,box-shadow var(--motion-hover) ease;
+}
 .reading-lab-sentence-support{grid-column:2;display:grid;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);}
 .reading-lab-sentence-support-actions{display:flex;flex-wrap:wrap;gap:6px;}
 .reading-lab-support-action{min-height:36px;padding:5px 9px;font-size:var(--text-xs);}
@@ -1513,26 +1532,48 @@
   border-color:color-mix(in srgb,var(--shu) 30%,var(--line));
   background:var(--paper);
 }@media(max-width:640px){
-  .reading-lab-reader-toolbar{
-    align-items:stretch;
-    flex-direction:column;
-  }
-  .reading-lab-sentence-position{
-    justify-content:space-between;
-  }
-  .reading-lab-sentence-controls{
-    width:100%;
-  }
-  .reading-lab-sentence-controls .button{
-    flex:1 1 auto;
-  }
-  .reading-lab-sentence-prev,
-  .reading-lab-sentence-next{
-    flex:0 0 36px!important;
-  }
-  .reading-lab-sentence-list{
-    max-height:42dvh;
-  }}@media(prefers-reduced-motion:reduce){
+  .reading-lab-reader-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"focus focus" "position controls";align-items:center;gap:9px 12px;margin-top:2px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:var(--washi);}
+
+.reading-lab-sentence-position{
+  grid-area:position;
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  min-width:0;
+  color:var(--mute);
+  font-size:var(--text-xs);
+  font-weight:800;
+}
+.reading-lab-sentence-position span{white-space:nowrap;}
+.reading-lab-sentence-position strong{
+  color:var(--ink);
+  font-size:var(--text-sm);
+  direction:ltr;
+  white-space:nowrap;
+}
+.reading-lab-sentence-controls{
+  grid-area:controls;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.reading-lab-sentence-controls .button{
+  min-height:36px;
+  padding:5px 9px;
+  font-size:var(--text-xs);
+}
+.reading-lab-sentence-prev,
+.reading-lab-sentence-next{
+  width:36px;
+  min-width:36px;
+  padding-inline:0!important;
+  font-size:18px!important;
+  line-height:1;
+}
+.reading-lab-sentence-read{
+  min-width:112px;
+}
+.reading-lab-sentence-list{max-height:none;overflow:visible}}@media(prefers-reduced-motion:reduce){
   .reading-lab-reader-sentence{
     transition:none;
   }}
