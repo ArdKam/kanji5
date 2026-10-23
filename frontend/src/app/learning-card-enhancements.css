@@ -407,6 +407,26 @@
     align-items: center;
     padding-top: 2px;
   }
+  .learning-card-back .learning-back-page.active .learning-back-readings-block .readings-header {
+    box-sizing: border-box;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page.active .learning-back-readings-block .learning-back-readings {
+    box-sizing: border-box;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    grid-template-rows: 28px;
+    grid-auto-rows: 28px;
+    align-content: start;
+    overflow: hidden;
+  }
 
   .learning-card-back .learning-back-page:first-child .kanji-structure-preview {
     min-height: 32px;
