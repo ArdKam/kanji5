@@ -135,6 +135,12 @@ The learner-facing contract now separates source meanings/readings from a learne
 - core On/Kun readings are shown first, while remaining readings are reference-tiered;
 - example candidates are deterministically filtered for target containment, valid reading/meaning fields, duplicate removal, and lower-burden ordering.
 
+### Scoped Learning Card content review — 2026-10-15
+
+The [representative Learning Card content review](./audits/learning-card-content-review-2026-10-15.md) records example English gloss priorities and their source provenance, documents the reference-tier handling of classifier/radical senses, and summarizes the review-status contract. It explicitly is **not** independent subject-matter approval or a Persian translation review. No Persian records were marked verified by that review; the Persian-facing fallback to source English glosses remains identified as a limitation, and pronunciation/example pairings remain conservative lexical heuristics rather than a general pronunciation parser.
+
+This document is an engineering evidence artifact only. It does not close the independent human-review, Persian localization/provenance, or placement-validity gates below.
+
 ### Remaining content-quality risk
 
 The deterministic layer does not replace human pedagogical review. The release gate still requires sampled human review of meaning priority, reading usefulness, example naturalness, and context burden.
