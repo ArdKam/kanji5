@@ -231,6 +231,8 @@ export type Boundary = {
   searchKanji: (query: string, limit?: number) => Promise<{ query: string; results: KanjiDictionaryResult[] }>;
   getMnemonic: (character: string) => Promise<{ character: string; text: string }>;
   listPersonalMnemonics?: () => Promise<{ mnemonics: Record<string, string> }>;
+  listKanjiBookmarks?: () => Promise<{ characters: string[]; records: Record<string, { saved: boolean; updatedAt: string }> }>;
+  setKanjiBookmark?: (character: string, saved: boolean) => Promise<{ character: string; saved: boolean; updatedAt: string }>;
   saveMnemonic: (character: string, value: string) => Promise<{ character: string; text: string }>;
   createBackup?: () => PortableBackup | null;
   restoreBackup?: (backup: PortableBackup) => BackupSummary;
@@ -345,6 +347,18 @@ export async function searchKanji(query: string, limit = 24): Promise<{ query: s
 
 export async function listKanji(): Promise<{ results: KanjiCatalogItem[] }> {
   return (await waitForEngine()).listKanji();
+}
+
+export async function listKanjiBookmarks(): Promise<{ characters: string[]; records: Record<string, { saved: boolean; updatedAt: string }> }> {
+  const api = await waitForEngine();
+  if (!api.listKanjiBookmarks) return { characters: [], records: {} };
+  return api.listKanjiBookmarks();
+}
+
+export async function setKanjiBookmark(character: string, saved: boolean): Promise<{ character: string; saved: boolean; updatedAt: string }> {
+  const api = await waitForEngine();
+  if (!api.setKanjiBookmark) throw new Error("KANJI5_BOOKMARK_API_UNAVAILABLE");
+  return api.setKanjiBookmark(character, saved);
 }
 
 export async function listPersonalMnemonics(): Promise<{ mnemonics: Record<string, string> }> {
