@@ -8,9 +8,9 @@ Audit date: 2026-10-06.
 
 Repository-side verification against current `main` at the post-R13 merge baseline `c5997a432aa4b60bc2913cbaec277127b96935db`:
 
-- The current account API exposes authentication, profile/password management, sign-out, and sync, but **no account-delete operation**.
-- The current Settings reset is scoped to learning progress and does not provide complete browser-data erasure.
-- The Supabase schema's `ON DELETE CASCADE` relationship is database behavior, not a user-facing deletion workflow.
+- The current candidate account UI/API adds a typed-confirmation self-service deletion action calling the active, JWT-verified `delete-account` Supabase Edge Function. The function derives the user ID from verified claims, performs server-side account deletion, and returns explicit success; repository tests cover the contract. A controlled authenticated production deletion smoke test remains outstanding.
+- Settings has distinct Reset learning progress and Clear data from this browser actions. The latter clears the known app-owned local/session keys, Reading Lab text/notes, local auth tokens and app API caches while preserving public shell/Kanji data caches and unrelated site data. Its scope is documented and a browser regression test exists; real-device verification remains outstanding.
+- The production `user_learning_state.user_id` foreign key targets `auth.users.id`; account deletion depends on the existing database deletion behavior for that table. This observation is not a substitute for end-to-end deletion verification.
 - The portable backup is schema/checksum validated and is not a complete representation of every browser-held datum.
 - The Supabase browser runtime is vendored at the current pinned version; no third-party CDN is required for that runtime path.
 - Repository search found no application-level product-analytics/advertising SDK or analytics-cookie implementation in the audited code surface.
