@@ -16,7 +16,7 @@
 | F1 | **P1 — high potential privacy/data-integrity impact** | **Low-to-moderate exploitability:** requires an auth transition while a sync request is pending. The browser client used a mutable account ID across async boundaries; RLS still restricts row ownership. This is a client composition/session race, not an RLS bypass. The mocked-browser test exercises the timing locally. |
 | F2 | **P1 — release blocker / medium security impact** | **Low-to-moderate likelihood of direct exploitation, but meaningful credential-stuffing risk:** protection against known leaked passwords is disabled. This check prevents use of known-compromised passwords; it does not prove that an existing account password has been exposed. Live Advisor and organization tier were observed. |
 | F3 | **P1 — release hardening blocker** | **Exploitability depends on another attack path:** absence of a verified response CSP leaves response-only protections, including `frame-ancestors`, unproven. No XSS or clickjacking exploit was reproduced; latest successful deployment evidence is older than current `main`. |
-| F4 | **No database authorization defect confirmed** | Live catalog/policy definitions and grants were inspected read-only. No unauthenticated CRUD grant or missing owner predicate was found. Runtime negative access tests remain separate acceptance work. |
+| F4 | **No database authorization defect confirmed** | Live catalog/policy definitions and grants were inspected read-only. A transaction using the `authenticated` role and a synthetic non-owner claim returned zero visible learner-state rows and was rolled back. Actual HTTP/PostgREST JWT probes on the final deployed SHA remain separate acceptance work. |
 | F5 | **P1 — public-beta capability/privacy blocker** | The active server deletion function is configured securely by inspection, but a production user-facing deletion workflow is not verified end-to-end. No real-user deletion was attempted. |
 
 ## Findings
@@ -55,7 +55,7 @@ Read-only production catalog inspection confirmed:
 - The table grants SELECT/INSERT/UPDATE/DELETE to `authenticated`; no table privilege is granted to `anon`.
 - The account-state table's `user_id` foreign key references `auth.users.id`.
 
-No policy or schema migration was justified by the catalog results. This is verification of definitions/grants, not a substitute for re-running non-owner access probes on the release candidate. Those probes must be read-only or use disposable accounts and must never modify production learner data.
+No policy or schema migration was justified by the catalog results. A read-only transaction explicitly assumed the `authenticated` role, set both supported request-claim settings to a synthetic non-owner UUID, and received `rows_visible_to_non_owner = 0`; it was rolled back. This exercises database role/RLS behavior without touching user data, but it is not an actual PostgREST HTTP request or JWT-backed REST test. Rerun the automated read-only non-owner HTTP probe against the final deployed SHA. Write-denial testing must use disposable accounts or a fully rolled-back synthetic transaction, never modify real learner data.
 
 ### F5 — Account deletion is not yet a released end-to-end product flow
 
