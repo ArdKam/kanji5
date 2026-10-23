@@ -278,6 +278,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   }
   expect(new Set(lightRatingStyles.map(item => item.background)).size, "All four Light-mode rating states must remain visually distinct").toBe(4);
 
+  // Reveal the card first: the hidden back is intentionally inert until it is active.
+  await primaryButton.click();
+  await expect(page.locator("#root .learning-card")).toHaveClass(/is-revealed/);
+
   // Tab navigation must move between rating controls and expose a visible focus ring.
   await ratings.nth(0).focus();
   await page.keyboard.press("Tab");
