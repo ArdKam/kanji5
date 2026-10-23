@@ -47,9 +47,13 @@ export async function fetchWordsResult(character){
   const out=[],seen=new Set();
   for(const entry of data){
     for(const variant of Array.isArray(entry?.variants)?entry.variants:[]){
-      const word=String(variant?.written||'');
-      const reading=String(variant?.pronounced||'');
-      const meaning=(Array.isArray(entry?.meanings)?entry.meanings:[]).flatMap(m=>Array.isArray(m?.glosses)?m.glosses:[]).slice(0,2).join('; ');
+      const word=typeof variant?.written==='string'?variant.written:'';
+      const reading=typeof variant?.pronounced==='string'?variant.pronounced:'';
+      const meaning=(Array.isArray(entry?.meanings)?entry.meanings:[])
+        .flatMap(m=>Array.isArray(m?.glosses)?m.glosses:[])
+        .filter(gloss=>typeof gloss==='string')
+        .slice(0,2)
+        .join('; ');
       if(!word.includes(character)||!reading||!meaning||seen.has(word))continue;
       seen.add(word);
       out.push(normalizeVocabularyItem({word,reading,meaning,source:'kanjiapi.dev'}));
