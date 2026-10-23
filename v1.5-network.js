@@ -91,7 +91,7 @@ export async function fetchContextSentences(character){
   const rows=Array.isArray(payload?.data)?payload.data:[];
   const out=[],seen=new Set();
   for(const row of rows){
-    const text=String(row?.text||'').trim();
+    const text=typeof row?.text==='string'?row.text.trim():'';
     if(!text||!text.includes(character)||seen.has(text)||!TATOEBA_REUSABLE_TEXT_LICENSES.has(row?.license))continue;
     const translations=Array.isArray(row?.translations)?row.translations:[];
     const translation=translations.flatMap(x=>Array.isArray(x)?x:[x])
