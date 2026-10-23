@@ -445,7 +445,7 @@ test('Reading Lab restores the last reading session after closing and reopening'
 
 test('Reading Lab focuses the next unfamiliar kanji without changing the reading session',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('.header-menu-trigger').click();
   await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
   const lab=dialog.locator('.reading-lab');
@@ -717,8 +717,8 @@ test('Reading Lab starts compactly and keeps the Reader in a single-scroll flow 
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   const menu=page.locator('#header-tools-menu');
   await expect(menu).toHaveClass(/open/);
-  await menu.getByRole('button',{name:'آزمایشگاه خواندن',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'آزمایشگاه خواندن'});
+  await menu.getByRole('button',{name:/Reading Lab|آزمایشگاه خواندن/}).click();
+  const dialog=page.getByRole('dialog',{name:/Reading Lab|آزمایشگاه خواندن/});
   await expect(dialog).toBeVisible({timeout:10000});
   expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
   await page.setViewportSize({width:390,height:844});
