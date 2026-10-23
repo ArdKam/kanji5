@@ -60,7 +60,8 @@ function normalizeMeaningRecord(record){
   const requestedReview=MEANING_REVIEW_STATES.has(value.reviewStatus)?value.reviewStatus:'unreviewed';
   const reviewedBy=text(value.reviewedBy,120)||null;
   const reviewedAt=text(value.reviewedAt,80)||null;
-  const canVerify=Boolean(sourceText&&language!=='unknown'&&source!=='unknown'&&reviewedBy&&reviewedAt);
+  const validReviewTimestamp=Boolean(reviewedAt&&Number.isFinite(Date.parse(reviewedAt)));
+  const canVerify=Boolean(sourceText&&language!=='unknown'&&source!=='unknown'&&reviewedBy&&validReviewTimestamp);
   const reviewStatus=requestedReview==='verified'&&!canVerify?'unreviewed':requestedReview;
   const reviewNotes=text(value.reviewNotes,600)||(
     reviewStatus==='unreviewed'?'Translation and learner-facing priority have not been independently reviewed.':''
