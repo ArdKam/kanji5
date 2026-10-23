@@ -343,6 +343,9 @@ export function DictionaryKanjiCard({
 
   const masteryRingOffset = masteryRingCircumference * (1 - mastery / 100);
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
+  const contentCorrectionUrl = new URL("https://github.com/ArdKam/kanji5/issues/new");
+  contentCorrectionUrl.searchParams.set("template", "content_correction.yml");
+  contentCorrectionUrl.searchParams.set("title", "[Content] " + item.character);
 
   return (
     <dialog
@@ -383,6 +386,20 @@ export function DictionaryKanjiCard({
         </div>
         <div className="dictionary-card-content" key={activeSection} data-active-section={activeSection}>
           {renderActivePanel()}
+          <div className="dictionary-content-correction">
+            <a
+              className="dictionary-content-correction-link"
+              href={contentCorrectionUrl.toString()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={language === "fa" ? "گزارش عمومی ایراد محتوایی برای " + item.character : "Report a public content issue for " + item.character}
+            >
+              {language === "fa" ? "گزارش ایراد محتوایی (عمومی)" : "Report a content issue (public)"}
+            </a>
+            <p>{language === "fa"
+              ? "فرم گزارش در GitHub عمومی است؛ اطلاعات شخصی یا یادداشت‌های خصوصی را وارد نکن."
+              : "This opens a public GitHub issue. Do not include personal information or private learner notes."}</p>
+          </div>
         </div>
       </div>
     </dialog>
