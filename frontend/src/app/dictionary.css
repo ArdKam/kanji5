@@ -1609,3 +1609,36 @@
   :root[data-theme="system"] .dictionary-card-dialog .dialog-close:hover {
     color: var(--sumi);
   }}
+
+/* Link the catalog to the structured correction form without mixing it with private account requests. */
+.dictionary-content-correction{
+  display:grid;
+  gap:2px;
+  margin-top:14px;
+  padding-top:8px;
+  border-top:1px solid var(--line-soft);
+}
+.dictionary-content-correction-link{
+  display:inline-flex;
+  align-items:center;
+  justify-self:start;
+  min-height:44px;
+  padding:4px 0;
+  color:var(--shu);
+  font:inherit;
+  font-size:var(--text-sm);
+  font-weight:800;
+  text-underline-offset:3px;
+}
+.dictionary-content-correction-link:focus-visible{
+  outline:2px solid var(--focus,var(--ai));
+  outline-offset:3px;
+  border-radius:4px;
+}
+.dictionary-content-correction p{
+  max-width:60ch;
+  margin:0 0 3px;
+  color:var(--mute);
+  font-size:var(--text-xs);
+  line-height:1.55;
+}

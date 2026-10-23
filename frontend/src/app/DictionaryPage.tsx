@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import { getVisualStructureInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
+import { getVisualStructureInfo, getMnemonic, listKanji, listKanjiBookmarks, setKanjiBookmark, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 import topicData from "./kanji-topics.json";
@@ -184,9 +184,12 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
+  const [bookmarkedCharacters, setBookmarkedCharacters] = useState<string[]>([]);
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [bookmarkStatus, setBookmarkStatus] = useState<"idle" | "error">("idle");
   const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1) + (topic === "all" ? 0 : 1);
   const activeTopic = topic === "all" ? null : KANJI_TOPICS.find(entry => entry.id === topic) ?? null;
-  const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim());
+  const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim()) || savedOnly;
   const normalizedTopicQuery = normalize(topicQuery);
   const visibleTopicGroups = TOPIC_GROUPS.map(group => ({
     ...group,
@@ -238,6 +241,31 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   }, [loadAttempt]);
 
   useEffect(() => {
+    let active = true;
+    void listKanjiBookmarks().then(value => {
+      if (!active) return;
+      setBookmarkedCharacters(value.characters);
+      setBookmarkStatus("idle");
+    }).catch(() => {
+      if (active) setBookmarkStatus("error");
+    });
+    return () => { active = false; };
+  }, []);
+
+  const toggleBookmark = async (character: string) => {
+    const currentlySaved = bookmarkedCharacters.includes(character);
+    try {
+      await setKanjiBookmark(character, !currentlySaved);
+      setBookmarkedCharacters(previous => currentlySaved
+        ? previous.filter(value => value !== character)
+        : [...new Set([...previous, character])].sort((a, b) => a.localeCompare(b, "ja")));
+      setBookmarkStatus("idle");
+    } catch {
+      setBookmarkStatus("error");
+    }
+  };
+
+  useEffect(() => {
     if (!externalSelectedCharacter) return;
     const item = catalog.find(candidate => candidate.character === externalSelectedCharacter);
     if (!item) return;
@@ -267,6 +295,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         }
       }
       if (topic !== "all" && !(TOPIC_IDS_BY_CHARACTER.get(item.character)?.has(topic) ?? false)) return false;
+      if (savedOnly && !bookmarkedCharacters.includes(item.character)) return false;
       if (!q) return true;
       return [item.character, ...item.meanings, ...item.on, ...item.kun].some((value) => normalize(value).includes(q));
     });
@@ -279,7 +308,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       return (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
     });
     return rows;
-  }, [catalog, grade, level, masteryFilter, query, sort, topic]);
+  }, [bookmarkedCharacters, catalog, grade, level, masteryFilter, query, savedOnly, sort, topic]);
 
   const renderedItems = useMemo(
     () => visible.slice(0, viewMode === "detailed" ? detailedVisibleCount : visible.length),
@@ -334,7 +363,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
 
   useEffect(() => {
     setDetailedVisibleCount(DETAILED_PAGE_SIZE);
-  }, [query, level, masteryFilter, grade, sort, topic]);
+  }, [query, level, masteryFilter, grade, sort, topic, savedOnly]);
 
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
@@ -373,6 +402,20 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             ><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m5 5 10 10M15 5 5 15" /></svg></button>
           ) : null}
         </label>
+      </div>
+
+      <div className="dictionary-saved-controls">
+        <button
+          className={"button secondary dictionary-saved-toggle" + (savedOnly ? " is-active" : "")}
+          type="button"
+          aria-pressed={savedOnly}
+          onClick={() => setSavedOnly(value => !value)}
+        >
+          <span aria-hidden="true">{savedOnly ? "★" : "☆"}</span>
+          <span>{language === "fa" ? "کانجی‌های ذخیره‌شده" : "Saved Kanji"}</span>
+          <span className="dictionary-saved-count">{formatNumber(bookmarkedCharacters.length, language)}</span>
+        </button>
+        {bookmarkStatus === "error" ? <p className="dictionary-bookmark-status" role="status">{language === "fa" ? "ذخیره‌سازی کانجی انجام نشد؛ دوباره تلاش کن." : "Could not update saved Kanji. Please retry."}</p> : null}
       </div>
 
       <div className="dictionary-controls">
@@ -606,12 +649,19 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 onRemove={() => setTopic("all")}
               />
             ) : null}
+            {savedOnly ? (
+              <FilterChip
+                label={language === "fa" ? "کانجی‌های ذخیره‌شده" : "Saved Kanji"}
+                removeLabel={language === "fa" ? "حذف فیلتر کانجی ذخیره‌شده" : "Remove saved Kanji filter"}
+                onRemove={() => setSavedOnly(false)}
+              />
+            ) : null}
           </div>
           <button
             className="dictionary-clear-all-filters"
             style={{ flex: "0 0 auto", minHeight: 44, padding: "5px 4px", marginInlineStart: "auto", border: 0, background: "transparent", color: "var(--shu)", font: "inherit", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
             type="button"
-            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}
+            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); setSavedOnly(false); }}
           >
             {language === "fa" ? "پاک کردن همه" : "Clear all"}
           </button>
@@ -625,7 +675,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           <button className="button secondary" type="button" onClick={() => setLoadAttempt(value => value + 1)}>{t("tryAgain", language)}</button>
         </div>
       ) : null}
-      {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{t("dictionaryNoResults", language)}</div> : null}
+      {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{savedOnly ? (language === "fa" ? "هنوز کانجی‌ای ذخیره نکرده‌ای. از نمای جزئیات یا صفحهٔ هر کانجی آن را ذخیره کن." : "You haven’t saved any Kanji yet. Save one from Detailed view or its detail page.") : t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
         <>
           <div
@@ -721,6 +771,22 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                           </span>
                         ) : null}
                       </button>
+                      {viewMode === "detailed" ? (
+                        <button
+                          className={"dictionary-bookmark-toggle" + (bookmarkedCharacters.includes(item.character) ? " is-saved" : "")}
+                          type="button"
+                          aria-pressed={bookmarkedCharacters.includes(item.character)}
+                          aria-label={bookmarkedCharacters.includes(item.character)
+                            ? (language === "fa" ? "حذف " + item.character + " از کانجی‌های ذخیره‌شده" : "Remove " + item.character + " from Saved Kanji")
+                            : (language === "fa" ? "ذخیرهٔ " + item.character : "Save " + item.character + " to Saved Kanji")}
+                          title={bookmarkedCharacters.includes(item.character)
+                            ? (language === "fa" ? "حذف از ذخیره‌شده‌ها" : "Remove from Saved")
+                            : (language === "fa" ? "ذخیرهٔ کانجی" : "Save Kanji")}
+                          onClick={() => void toggleBookmark(item.character)}
+                        >
+                          <span aria-hidden="true">{bookmarkedCharacters.includes(item.character) ? "★" : "☆"}</span>
+                        </button>
+                      ) : null}
                     </div>
                   );
                 })}
@@ -749,6 +815,8 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           item={selected}
           catalog={catalog}
           language={language}
+          bookmarked={bookmarkedCharacters.includes(selected.character)}
+          onToggleBookmark={() => void toggleBookmark(selected.character)}
           onClose={() => setSelected(null)}
           onSelectKanji={setSelected}
           navigationItems={visible}
