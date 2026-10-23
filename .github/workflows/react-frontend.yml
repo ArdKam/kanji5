@@ -148,6 +148,9 @@ jobs:
       - name: Run account shell gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-account-shell.spec.mjs
+      - name: Run auth-session isolation regression
+        working-directory: .
+        run: npx playwright test --timeout=20000 --retries=0 e2e/auth-session-isolation.spec.mjs
       - name: Run first-run onboarding gate
         working-directory: .
         run: npx playwright test --timeout=20000 --retries=0 e2e/react-onboarding.spec.mjs
