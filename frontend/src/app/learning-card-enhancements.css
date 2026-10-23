@@ -344,7 +344,7 @@
   .learning-card-back .learning-back-page:first-child .reading > span {
     grid-column: 1;
     grid-row: 1;
-    font-size: 10px;
+    font-size: var(--text-xs);
     white-space: nowrap;
   }
   .learning-card-back .learning-back-page:first-child .reading > strong {
@@ -364,7 +364,7 @@
     padding-top: 2px;
     overflow: hidden;
     white-space: nowrap;
-    font-size: 10px;
+    font-size: var(--text-xs);
     line-height: 1.15;
   }
   .learning-card-back .learning-back-page:first-child .learning-back-quick-example-label {
