@@ -24,6 +24,7 @@ assert.match(workflow, /name: rinemi-zap-passive-baseline/);
 assert.match(script, /user_learning_state\?select=user_id&limit=1/, "The Supabase check must remain a read-only limited query");
 assert.match(script, /STRICT_SECURITY_AUDIT_FAILED/, "Confirmed security findings must produce a visible failing audit result");
 assert.match(script, /Response contents suppressed|response body suppressed|contents suppressed/i, "Audit must suppress private response bodies from logs");
+assert.match(script, /if \(!cspHeader\)[\s\S]*?fail\("CSP_HTTP_HEADER", "MEDIUM"/, "An absent HTTP CSP response header must remain a blocking audit finding even if another framing control exists.");
 
 const syntax = spawnSync(process.execPath, ["--check", scriptPath], { cwd: root, encoding: "utf8" });
 assert.equal(syntax.status, 0, "Live security script must parse: " + String(syntax.stderr || syntax.stdout));
