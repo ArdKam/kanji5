@@ -404,6 +404,20 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         </label>
       </div>
 
+      <div className="dictionary-saved-controls">
+        <button
+          className={"button secondary dictionary-saved-toggle" + (savedOnly ? " is-active" : "")}
+          type="button"
+          aria-pressed={savedOnly}
+          onClick={() => setSavedOnly(value => !value)}
+        >
+          <span aria-hidden="true">{savedOnly ? "★" : "☆"}</span>
+          <span>{language === "fa" ? "کانجی‌های ذخیره‌شده" : "Saved Kanji"}</span>
+          <span className="dictionary-saved-count">{formatNumber(bookmarkedCharacters.length, language)}</span>
+        </button>
+        {bookmarkStatus === "error" ? <p className="dictionary-bookmark-status" role="status">{language === "fa" ? "ذخیره‌سازی کانجی انجام نشد؛ دوباره تلاش کن." : "Could not update saved Kanji. Please retry."}</p> : null}
+      </div>
+
       <div className="dictionary-controls">
         <div className="dictionary-filter-row">
           <div className="dictionary-level-filter" role="group" aria-label={t("dictionaryLevel", language)}>
@@ -635,12 +649,19 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                 onRemove={() => setTopic("all")}
               />
             ) : null}
+            {savedOnly ? (
+              <FilterChip
+                label={language === "fa" ? "کانجی‌های ذخیره‌شده" : "Saved Kanji"}
+                removeLabel={language === "fa" ? "حذف فیلتر کانجی ذخیره‌شده" : "Remove saved Kanji filter"}
+                onRemove={() => setSavedOnly(false)}
+              />
+            ) : null}
           </div>
           <button
             className="dictionary-clear-all-filters"
             style={{ flex: "0 0 auto", minHeight: 44, padding: "5px 4px", marginInlineStart: "auto", border: 0, background: "transparent", color: "var(--shu)", font: "inherit", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
             type="button"
-            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); }}
+            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); setSavedOnly(false); }
           >
             {language === "fa" ? "پاک کردن همه" : "Clear all"}
           </button>
@@ -654,7 +675,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           <button className="button secondary" type="button" onClick={() => setLoadAttempt(value => value + 1)}>{t("tryAgain", language)}</button>
         </div>
       ) : null}
-      {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{t("dictionaryNoResults", language)}</div> : null}
+      {!loading && !loadError && !visible.length ? <div className="surface dictionary-empty" role="status">{savedOnly ? (language === "fa" ? "هنوز کانجی‌ای ذخیره نکرده‌ای. از نمای جزئیات یا صفحهٔ هر کانجی آن را ذخیره کن." : "You haven’t saved any Kanji yet. Save one from Detailed view or its detail page.") : t("dictionaryNoResults", language)}</div> : null}
       {!loading && visible.length ? (
         <>
           <div
@@ -750,6 +771,22 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
                           </span>
                         ) : null}
                       </button>
+                      {viewMode === "detailed" ? (
+                        <button
+                          className={"dictionary-bookmark-toggle" + (bookmarkedCharacters.includes(item.character) ? " is-saved" : "")}
+                          type="button"
+                          aria-pressed={bookmarkedCharacters.includes(item.character)}
+                          aria-label={bookmarkedCharacters.includes(item.character)
+                            ? (language === "fa" ? "حذف " + item.character + " از کانجی‌های ذخیره‌شده" : "Remove " + item.character + " from Saved Kanji")
+                            : (language === "fa" ? "ذخیرهٔ " + item.character : "Save " + item.character + " to Saved Kanji")}
+                          title={bookmarkedCharacters.includes(item.character)
+                            ? (language === "fa" ? "حذف از ذخیره‌شده‌ها" : "Remove from Saved")
+                            : (language === "fa" ? "ذخیرهٔ کانجی" : "Save Kanji")}
+                          onClick={() => void toggleBookmark(item.character)}
+                        >
+                          <span aria-hidden="true">{bookmarkedCharacters.includes(item.character) ? "★" : "☆"}</span>
+                        </button>
+                      ) : null}
                     </div>
                   );
                 })}
@@ -778,6 +815,8 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
           item={selected}
           catalog={catalog}
           language={language}
+          bookmarked={bookmarkedCharacters.includes(selected.character)}
+          onToggleBookmark={() => void toggleBookmark(selected.character)}
           onClose={() => setSelected(null)}
           onSelectKanji={setSelected}
           navigationItems={visible}
