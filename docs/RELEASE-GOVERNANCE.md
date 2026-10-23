@@ -32,7 +32,7 @@ Verified repository-side reconciliation:
 6. **Production authentication setting:** the connected Supabase security advisor currently reports “Leaked Password Protection Disabled” (WARN). Enable leaked-password protection in production Auth settings, review password-policy impact, rerun the security advisor and record the result before release.
 7. **Security-header evidence:** run the read-only live-security workflow against the deployed candidate. A CSP meta policy exists, but no successful live audit for the final release candidate is recorded here; do not infer HTTP response-header coverage from the meta tag.
 8. **Production configuration evidence:** exact enabled Supabase/provider configuration must be confirmed against the final deployment.
-7. **External service/data licensing:** provider terms/attribution and production usage require final review.
+9. **External service/data licensing:** provider terms/attribution and production usage require final review.
 
 ## Explicitly not claimed
 
