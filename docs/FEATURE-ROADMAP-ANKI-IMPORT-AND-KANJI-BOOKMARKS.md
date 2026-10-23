@@ -1,7 +1,7 @@
 # Rinemi Feature Roadmap — Kanji Bookmarks & Anki Deck Import
 
 **Decision date:** 2026-10-18  
-**Status:** Bookmark MVP is merged to `main` at `766f85c`; production deployment and release evidence are still pending. Anki remains research-gated and unimplemented.  
+**Status:** Bookmark MVP implementation is under review in [PR #616](https://github.com/ArdKam/kanji5/pull/616); it is not yet merged, deployed, or release-ready. Anki remains research-gated and unimplemented.  
 **Parent strategy:** [Product Strategy & Competitive Positioning](PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md)  
 **Canonical execution/release authority:** [`ROADMAP.md`](../ROADMAP.md)
 
