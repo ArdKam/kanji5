@@ -1272,3 +1272,51 @@ test("kanji stays centered independently of audio and rating buttons show FSRS i
     }
   }
 });
+
+
+test("Learning-card vocabulary distinguishes offline failure from a valid empty result and can retry", async ({ page }) => {
+  let offlineRequests = 0;
+  let emptyResultRequests = 0;
+  let allowEmptyResult = false;
+  await page.route("https://kanjiapi.dev/v1/words/**", async route => {
+    if (!allowEmptyResult) {
+      offlineRequests++;
+      await route.fulfill({
+        status: 503,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+          "X-Kanji5-Offline-Fallback": "1",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Expose-Headers": "X-Kanji5-Offline-Fallback"
+        },
+        body: JSON.stringify({ error: "offline-content-unavailable" })
+      });
+      return;
+    }
+    emptyResultRequests++;
+    await route.fulfill({
+      status: 200,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      body: "[]"
+    });
+  });
+  await page.addInitScript(() => localStorage.setItem("kanji5-ui-language", "en"));
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+  await card.getByRole("button", { name: /Reveal meaning & readings|Show answer|Show kanji information/ }).click();
+  await expect(card).toHaveClass(/is-revealed/);
+  await goToBackPage(page, card, 1);
+  const examples = card.locator(".learning-back-page.active .examples");
+  await expect(examples.locator(".learning-examples-error")).toBeVisible({ timeout: 10000 });
+  await expect(examples.locator(".learning-examples-empty")).toHaveCount(0);
+  const retry = examples.getByRole("button", { name: "Try again" });
+  await expect(retry).toBeVisible();
+  expect(offlineRequests).toBeGreaterThan(0);
+  allowEmptyResult = true;
+  await retry.click();
+  await expect(examples.locator(".learning-examples-empty")).toHaveText("No vocabulary examples are available for this kanji.");
+  await expect(examples.locator(".learning-examples-error")).toHaveCount(0);
+  expect(emptyResultRequests).toBeGreaterThan(0);
+});
