@@ -1,6 +1,7 @@
 # Japanese-Language Learning Content Integrity Audit — 2026-10-23
 
-**Content inventory snapshot:** `main` at `766f85c4633ee5d2699509c981bb4cfc456d26f9` (the catalog and topic files analyzed). The pull request is based on `main` at `6e0544954186f12b3b7755f7613cbdc6e782a98a`; intervening PR #619 changed audit documentation only, not the catalog or taxonomy.  
+**Repository baseline:** `main` at `f06396e0f0d353b097072a28d541bc4db290cdb6` (current main when this review branch was prepared).  
+**Static inventory:** `kanji-data.json` blob `6a35d02e4c1aab9974b83b253fe81a81644bbbf1` and `frontend/src/app/kanji-topics.json` blob `45036a2007c4cc5d1ff981219d1f04bf175d9f9a`; both match the files counted on the earlier `766f85c` snapshot. The intervening mainline change was documentation-only and did not alter either inventory file.  
 **Scope:** committed kanji catalog, source provenance, topic taxonomy, content-validation paths, and onboarding placement feedback.  
 **Review type:** reproducible structural inventory plus code-path audit. This is **not** a corpus-wide linguistic verification or independent native-speaker sign-off.
 
