@@ -2,8 +2,9 @@
 
 ## Scope and evidence
 
-- Repository baseline inspected: `main` at `766f85c4633ee5d2699509c981bb4cfc456d26f9`.
-- Production Supabase project metadata: project named Kanji5, ref `vbrtzkejodkddfdbolbo`.
+- Security-code baseline inspected: `main` at `766f85c4633ee5d2699509c981bb4cfc456d26f9`. During the work, `main` advanced to `6e0544954186f12b3b7755f7613cbdc6e782a98a`; the relevant `supabase-sync.js` blob remained `10a9d79d26b75c594c91a6b97482ed36f0ca3281`, and the PR is based on the newer `main`.
+- Production Supabase project metadata: project named Kanji5, ref `vbrtzkejodkddfdbolbo`, organization tier `free`. The repository's `supabase-config.js` targets this project's hostname and contains a public browser key; no service-role/secret-key marker was found. The public key value is intentionally not copied into this report.
+- Production Pages URL: `https://ardkam.github.io/kanji5`; `.github/workflows/pages-deploy.yml` builds and stages the exact React-verified commit before deployment.
 - Production database checks were read-only metadata queries. No user rows or tokens were printed, and no destructive operation was run.
 - Proposed code remediation is on `fix/auth-session-isolation-20261023`; its latest commit is recorded in the linked pull request, not as deployed evidence.
 - Source contract tests and CI are not production verification. The current Pages deploy and the matching live-security workflow must be inspected against the exact promoted SHA before release.
@@ -24,7 +25,9 @@
 
 **Live evidence:** Supabase Security Advisor returned `auth_leaked_password_protection` / “Leaked Password Protection Disabled” for the Kanji5 project. It was the returned security lint. This is an operational Auth setting, not a missing application environment variable or an RLS policy.
 
-**Required action:** an authorized project owner must enable leaked-password protection in the Supabase Dashboard under Authentication password/security settings, after confirming the plan supports it, then rerun Security Advisor and record the dated result. If the project plan does not support this feature, the owner must decide the upgrade/release disposition rather than pretending a code change enables it. No setting was changed by this audit.
+**Required action:** Supabase currently documents this feature as available on Pro and above; the connected production organization reports the Free tier. An authorized owner must decide whether to upgrade to a supported tier, then enable leaked-password protection in Auth settings and rerun Security Advisor. If the owner chooses not to upgrade, the release remains blocked until an explicit documented risk decision/alternative control is approved; do not pretend a code change enables this feature. No setting was changed by this audit.
+
+Reference: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
 
 ### F3 — High / release blocker: deployed response-header coverage is not complete
 
@@ -59,9 +62,11 @@ The live Auth password-protection setting and actual deployed HTTP headers are n
 ## Regression and validation plan
 
 - `scripts/test-auth-session-isolation.mjs` asserts the session snapshot, immutable owner scoping, stale-result guards, auth-generation invalidation and follow-up sync behavior.
+- `e2e/auth-session-isolation.spec.mjs` drives a local mock Supabase client: it holds account A's SELECT response, switches to account B, then releases A's response with a matched optimistic timestamp. It asserts that A-derived data is neither written under B's identity nor applied to local storage. The fixture makes no production network requests and mutates no real accounts.
+- `.github/workflows/react-frontend.yml` runs this browser regression on the PR head.
 - The root test runner `node scripts/test-all.mjs` auto-discovers `scripts/test-*.mjs`; the new test is included automatically.
 - Required CI: root contracts, React build/typecheck, engine-boundary and WebKit/browser checks on the exact PR head.
-- Required acceptance: non-destructive browser test for A-sync-in-flight → sign out/switch account → B-sync; verify A's payload is never written under B's identity and stale A results never replace B/local state. Also rerun live read-only security probes against the frozen promoted SHA.
+- Required acceptance: the new mocked-browser regression must pass, then rerun live read-only security probes against the frozen promoted SHA. The mock isolates the client race; it does not replace RLS access tests or an authenticated multi-device sync test using disposable test accounts.
 - These commands/tests must be reported with actual CI results before claiming pass. This audit author did not run a local checkout test suite or destructive account tests.
 
 ## Rollback and remaining risks
