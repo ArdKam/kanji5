@@ -41,6 +41,15 @@ try{
   assert.deepEqual(selectedContextA,selectedContextB);
   assert(sentences.some(x=>x.id===selectedContextA.id));
 
+  globalThis.fetch=async()=>new Response(JSON.stringify([
+    {variants:[{written:['学校'],pronounced:'がっこう'}],meanings:[{glosses:['school']}]},
+    {variants:[{written:'学校',pronounced:['がっこう']}],meanings:[{glosses:['school']}]},
+    {variants:[{written:'学ぶ',pronounced:'まなぶ'}],meanings:[{glosses:[{not:'a glossary string'}]}]}
+  ]),{status:200,headers:{'content-type':'application/json'}});
+  const malformedResult=await network.fetchWordsResult('学');
+  assert.equal(malformedResult.availability,'available');
+  assert.deepEqual(malformedResult.items,[],'array-valued written/reading fields and non-string glosses must not be coerced into vocabulary entries');
+
   globalThis.fetch=async()=>new Response(JSON.stringify({error:'offline-content-unavailable'}),{status:503,headers:{'content-type':'application/json','X-Kanji5-Offline-Fallback':'1'}});
   assert.deepEqual(await network.fetchWordsResult('学'),{availability:'offline',items:[]});
   assert.deepEqual(await network.fetchWords('学'),[]);
