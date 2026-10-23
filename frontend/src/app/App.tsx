@@ -321,7 +321,10 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     void getVocabulary(card.character).then(result=>{
       if(!active)return;
       const items=Array.isArray(result?.items)?result.items.slice(0,6):[];
+      // The engine exposes source availability separately from the item list.
+      // An offline/unavailable response with [] is not a confirmed empty vocabulary result.
       setVocabularyExamples(items);
+      setExamplesError(result?.availability==="offline"||result?.availability==="unavailable");
       setExamplesResolved(true);
     }).catch(()=>{
       if(active){
