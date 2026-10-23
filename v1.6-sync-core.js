@@ -4,6 +4,18 @@ const completed=h=>Array.isArray(h)?h.filter(x=>x&&x.status!=='active'&&x.endedA
 const MODES=['meaning','reading','production','vocabulary','context'];
 export function sanitizeSessionHistory(history,limit=30){const map=new Map();for(const row of completed(history)){const key=String(row.sessionId||`${row.startedAt||''}|${row.endedAt||''}`);map.set(key,clone(row))}return[...map.values()].sort((a,b)=>String(a.endedAt||'').localeCompare(String(b.endedAt||''))).slice(-Math.max(1,Number(limit)||30))}
 export function mergeSessionHistory(local,remote,limit=30){return sanitizeSessionHistory([...sanitizeSessionHistory(local,limit),...sanitizeSessionHistory(remote,limit)],limit)}
+const timestamp = value => String(value || '');
+function canonicalValue(value) {
+  if (value instanceof Date) return value.toJSON();
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonicalValue(value[key])]));
+  }
+  return value;
+}
+const stableJson = value => JSON.stringify(canonicalValue(value));
+const jsonEqual = (a, b) => stableJson(a) === stableJson(b);
+
 function validProfile(p){return p&&Number(p.schemaVersion)===1&&p.skills&&typeof p.skills==='object'}
 function newer(a,b){return String(a?.updatedAt||'')>=String(b?.updatedAt||'')?a:b}
 export function mergeSkillProfile(local,remote){
@@ -48,13 +60,85 @@ function mergeKanjiBookmarks(local={},remote={}){
  }
  return out;
 }
-export function mergeV16SyncData(local={},remote={}){
+function mergeTimestampMaps(local = {}, remote = {}) {
+  const out = {};
+  for (const key of new Set([...Object.keys(local || {}), ...Object.keys(remote || {})])) {
+    const a = timestamp(local?.[key]), b = timestamp(remote?.[key]);
+    const value = a >= b ? a : b;
+    if (value) out[key] = value;
+  }
+  return out;
+}
+
+function mergeRecordMap(local = {}, remote = {}) {
+  const out = {};
+  for (const key of new Set([...Object.keys(local || {}), ...Object.keys(remote || {})])) {
+    const a = local?.[key], b = remote?.[key];
+    if (!a) out[key] = clone(b);
+    else if (!b) out[key] = clone(a);
+    else out[key] = clone(timestamp(a.updatedAt) >= timestamp(b.updatedAt) ? a : b);
+  }
+  return out;
+}
+
+function mergeComponents(local = {}, remote = {}, localClocks = {}, remoteClocks = {}) {
+  const out = {};
+  const clockMap = mergeTimestampMaps(localClocks, remoteClocks);
+  const keys = new Set([
+    ...Object.keys(local || {}), ...Object.keys(remote || {}),
+    ...Object.keys(localClocks || {}), ...Object.keys(remoteClocks || {})
+  ]);
+  for (const key of keys) {
+    const hasLocal = Object.prototype.hasOwnProperty.call(local || {}, key);
+    const hasRemote = Object.prototype.hasOwnProperty.call(remote || {}, key);
+    const a = local?.[key], b = remote?.[key];
+    const localAt = timestamp(localClocks?.[key]), remoteAt = timestamp(remoteClocks?.[key]);
+
+    if (key === 'kanjiBookmarks' && hasLocal && hasRemote) {
+      out[key] = mergeKanjiBookmarks(a, b);
+      continue;
+    }
+    if (key === 'v19ContentEvidence' && hasLocal && hasRemote) {
+      out[key] = mergeRecordMap(a, b);
+      continue;
+    }
+    if (hasLocal && hasRemote) {
+      if (jsonEqual(a, b)) out[key] = clone(a);
+      else if (localAt && remoteAt) out[key] = clone(localAt !== remoteAt ? (localAt > remoteAt ? a : b) : (stableJson(a) >= stableJson(b) ? a : b));
+      else if (localAt) out[key] = clone(a);
+      else if (remoteAt) out[key] = clone(b);
+      else if (timestamp(a?.updatedAt) || timestamp(b?.updatedAt)) out[key] = clone(newer(a, b));
+      else {
+        out[key] = clone(a); // Legacy conflicts choose local once, then persist a clock to converge.
+        clockMap[key] = new Date().toISOString();
+      }
+      continue;
+    }
+    if (hasLocal) {
+      if (!(remoteAt && (!localAt || remoteAt >= localAt))) out[key] = clone(a);
+      continue;
+    }
+    if (hasRemote) {
+      if (!(localAt && (!remoteAt || localAt >= remoteAt))) out[key] = clone(b);
+    }
+  }
+  return { components: out, componentUpdatedAtByKey: clockMap };
+}
+
+
+export function mergeV16SyncData(local={},remote={}) {
  const lh=sanitizeSessionHistory(local.sessionHistory),rh=sanitizeSessionHistory(remote.sessionHistory);
- const localComponents=local.components&&typeof local.components==='object'?local.components:{};
- const remoteComponents=remote.components&&typeof remote.components==='object'?remote.components:{};
- const components={...localComponents,...remoteComponents};
- if(Object.prototype.hasOwnProperty.call(localComponents,'kanjiBookmarks')||Object.prototype.hasOwnProperty.call(remoteComponents,'kanjiBookmarks')){
-  components.kanjiBookmarks=mergeKanjiBookmarks(localComponents.kanjiBookmarks,remoteComponents.kanjiBookmarks);
- }
- return {v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,sessionHistory:mergeSessionHistory(lh,rh),components,skillProfile:mergeSkillProfile(local.skillProfile,remote.skillProfile)};
+ const mergedComponents=mergeComponents(
+   local.components,
+   remote.components,
+   local.componentUpdatedAtByKey,
+   remote.componentUpdatedAtByKey
+ );
+ return {
+   v16SyncSchemaVersion:V16_SYNC_SCHEMA_VERSION,
+   sessionHistory:mergeSessionHistory(lh,rh),
+   components:mergedComponents.components,
+   componentUpdatedAtByKey:mergedComponents.componentUpdatedAtByKey,
+   skillProfile:mergeSkillProfile(local.skillProfile,remote.skillProfile)
+ };
 }
