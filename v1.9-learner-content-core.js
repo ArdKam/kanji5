@@ -86,7 +86,7 @@ function meaningPriority(meaning,primary,secondary,reference){
 }
 function meaningRecordProjection(value,sourceMeanings,primary,secondary,reference){
   const explicit=(Array.isArray(value.meaningRecords)?value.meaningRecords:[]).map(normalizeMeaningRecord).filter(Boolean);
-  const keys=new Set(explicit.filter(record=>record.text).map(record=>record.text+'|'+record.language));
+  const keys=new Set(explicit.filter(record=>record.text).map(record=>record.text));
   const provenance=value.meaningProvenance&&typeof value.meaningProvenance==='object'?value.meaningProvenance:{};
   const source=text(provenance.source||value.meaningSource||'unknown',180)||'unknown';
   const version=text(provenance.version||value.meaningSourceVersion,100)||null;
@@ -95,7 +95,7 @@ function meaningRecordProjection(value,sourceMeanings,primary,secondary,referenc
   const records=[...explicit];
   for(const meaning of sourceMeanings){
     const language=MEANING_LANGUAGES.has(value.meaningLanguage)?value.meaningLanguage:'unknown';
-    const key=meaning+'|'+language;
+    const key=meaning;
     if(keys.has(key))continue;
     keys.add(key);
     records.push(normalizeMeaningRecord({
