@@ -31,7 +31,10 @@ const emptyState = {
 let state = { ...emptyState };
 let client = null;
 let user = null;
+let authGeneration = 0;
 let syncPromise = null;
+let activeSyncGeneration = null;
+let pendingAuthSyncGeneration = null;
 let pollTimer = null;
 let syncDebounce = null;
 const listeners = new Set();
@@ -61,6 +64,27 @@ function mapUser(value) {
     name: meta.full_name || meta.name || value.email || null,
     avatarUrl: meta.avatar_url || meta.picture || null
   };
+}
+
+function captureAuthSession() {
+  if (!user?.id) return null;
+  return Object.freeze({ userId: String(user.id), generation: authGeneration });
+}
+
+function isCurrentAuthSession(session) {
+  return Boolean(
+    session
+    && user?.id
+    && String(user.id) === session.userId
+    && authGeneration === session.generation
+  );
+}
+
+function assertCurrentAuthSession(session) {
+  if (isCurrentAuthSession(session)) return;
+  const error = new Error('AUTH_SESSION_CHANGED');
+  error.code = 'AUTH_SESSION_CHANGED';
+  throw error;
 }
 
 function localPayload() {
@@ -203,49 +227,66 @@ async function getClient() {
   return client;
 }
 
-async function readRemote() {
+async function readRemote(session) {
+  assertCurrentAuthSession(session);
   const c = await getClient();
+  assertCurrentAuthSession(session);
   const { data, error } = await c.from('user_learning_state')
     .select('payload,updated_at')
-    .eq('user_id', user.id)
+    .eq('user_id', session.userId)
     .maybeSingle();
   if (error) throw error;
+  assertCurrentAuthSession(session);
   if (data?.payload) assertSyncPayloadWithinLimit(data.payload);
   return data ? { payload: data.payload || null, updatedAt: data.updated_at || null } : null;
 }
 
-async function replaceRemote(payload, expectedUpdatedAt = null) {
+async function replaceRemote(payload, session, expectedUpdatedAt = null) {
+  assertCurrentAuthSession(session);
   const c = await getClient();
+  assertCurrentAuthSession(session);
   const now = new Date().toISOString();
   assertSyncPayloadWithinLimit(payload);
   const rowPayload = stablePayload({ ...payload });
   if (expectedUpdatedAt) {
     const { data, error } = await c.from('user_learning_state')
       .update({ payload: rowPayload, updated_at: now })
-      .eq('user_id', user.id)
+      .eq('user_id', session.userId)
       .eq('updated_at', expectedUpdatedAt)
       .select('updated_at')
       .maybeSingle();
     if (error) throw error;
+    assertCurrentAuthSession(session);
     if (!data) return { conflict: true, updatedAt: expectedUpdatedAt };
     return { conflict: false, updatedAt: data.updated_at || now };
   }
   const { data, error } = await c.from('user_learning_state')
-    .insert({ user_id: user.id, payload: rowPayload, updated_at: now })
+    .insert({ user_id: session.userId, payload: rowPayload, updated_at: now })
     .select('updated_at')
     .maybeSingle();
   if (error) {
     if (String(error.code || '') === '23505') return { conflict: true, updatedAt: null };
     throw error;
   }
+  assertCurrentAuthSession(session);
   return { conflict: false, updatedAt: data?.updated_at || now };
 }
 
-async function withSyncLock(task) {
-  if (syncPromise) return syncPromise;
+async function withSyncLock(task, generation) {
+  if (syncPromise) {
+    if (activeSyncGeneration !== generation) pendingAuthSyncGeneration = generation;
+    return syncPromise;
+  }
+  activeSyncGeneration = generation;
   syncPromise = (async () => {
     try { return await task(); }
-    finally { syncPromise = null; }
+    finally {
+      syncPromise = null;
+      activeSyncGeneration = null;
+      const nextGeneration = pendingAuthSyncGeneration;
+      pendingAuthSyncGeneration = null;
+      if (nextGeneration !== null && user?.id && authGeneration === nextGeneration) scheduleSync();
+    }
   })();
   return syncPromise;
 }
@@ -267,11 +308,14 @@ async function refreshPresentationAfterSync() {
   }
 }
 
-async function syncOnce() {
+async function syncOnce(session) {
+  assertCurrentAuthSession(session);
   const local = assertSyncPayloadWithinLimit(localPayload());
-  const remoteRow = await readRemote();
+  const remoteRow = await readRemote(session);
+  assertCurrentAuthSession(session);
   if (!remoteRow?.payload) {
-    const result = await replaceRemote(local);
+    const result = await replaceRemote(local, session);
+    assertCurrentAuthSession(session);
     if (result.conflict) return { retry: true };
     writeLocal(local, result.updatedAt);
     setSyncStatus('synced');
@@ -285,6 +329,7 @@ async function syncOnce() {
   const remoteHash = hashPayload(remotePayload);
 
   if (mergedHash === localHash && mergedHash === remoteHash) {
+    assertCurrentAuthSession(session);
     storage.setItem(SYNC_META_KEY, JSON.stringify({
       educationSchemaVersion: 2,
       syncSchemaVersion: 1,
@@ -297,13 +342,15 @@ async function syncOnce() {
     return { retry: false };
   }
   if (mergedHash === remoteHash) {
+    assertCurrentAuthSession(session);
     writeLocal(merged, remoteRow.updatedAt);
     setSyncStatus('synced');
     await refreshPresentationAfterSync();
     return { retry: false };
   }
 
-  const result = await replaceRemote(merged, remoteRow.updatedAt);
+  const result = await replaceRemote(merged, session, remoteRow.updatedAt);
+  assertCurrentAuthSession(session);
   if (result.conflict) return { retry: true };
   writeLocal(merged, result.updatedAt);
   setSyncStatus('synced');
@@ -312,14 +359,19 @@ async function syncOnce() {
 }
 
 async function syncNow() {
-  if (!user) return;
+  const session = captureAuthSession();
+  if (!session) return;
   return withSyncLock(async () => {
+    if (!isCurrentAuthSession(session)) return;
     setSyncStatus('syncing');
     for (let attempt = 1; attempt <= MAX_SYNC_ATTEMPTS; attempt += 1) {
       try {
-        const result = await syncOnce();
+        const result = await syncOnce(session);
+        assertCurrentAuthSession(session);
         if (!result.retry) return;
       } catch (error) {
+        // A session change is normal during sign-out/account switching, not a sync failure.
+        if (error?.code === 'AUTH_SESSION_CHANGED' || !isCurrentAuthSession(session)) return;
         console.warn('Kanji 5 sync attempt failed', error);
         if (attempt === MAX_SYNC_ATTEMPTS) {
           window.__KANJI5_OBSERVABILITY__?.capture?.('sync-failure',error,{attempts:MAX_SYNC_ATTEMPTS,code:String(error?.code||'')});
@@ -328,9 +380,10 @@ async function syncNow() {
         }
       }
     }
+    if (!isCurrentAuthSession(session)) return;
     window.__KANJI5_OBSERVABILITY__?.capture?.('sync-conflict',{message:'SYNC_CONFLICT'},{attempts:MAX_SYNC_ATTEMPTS});
     setSyncStatus('error', 'SYNC_CONFLICT');
-  });
+  }, session.generation);
 }
 
 function scheduleSync() {
@@ -381,7 +434,13 @@ async function boot() {
   try {
     const c = await getClient();
     c.auth.onAuthStateChange((event, session) => {
-      user = session?.user || null;
+      const nextUser = session?.user || null;
+      const previousUserId = user?.id ? String(user.id) : null;
+      const nextUserId = nextUser?.id ? String(nextUser.id) : null;
+      if (previousUserId !== nextUserId || event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        authGeneration += 1;
+      }
+      user = nextUser;
       const recoveryPending = event === 'PASSWORD_RECOVERY' ? true : state.recoveryPending;
       setState({
         status: user ? 'signed-in' : 'signed-out',
@@ -461,29 +520,41 @@ const api = {
     const normalizedName = String(name || '').trim();
     if (!normalizedName) throw new Error('AUTH_PROFILE_NAME_REQUIRED');
     if (Array.from(normalizedName).length > 40) throw new Error('AUTH_PROFILE_NAME_TOO_LONG');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_USER_REQUIRED');
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({
       data: { full_name: normalizedName }
     });
     if (error) throw error;
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), error: null });
   },
+
   async updatePassword(currentPassword, newPassword) {
     if (!currentPassword || !newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
     if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
     if (!user?.email) throw new Error('AUTH_EMAIL_REQUIRED');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_USER_REQUIRED');
+    const email = user.email;
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { error: reauthError } = await c.auth.signInWithPassword({
-      email: user.email,
+      email,
       password: currentPassword
     });
     if (reauthError) throw new Error('AUTH_CURRENT_PASSWORD_INVALID');
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw error;
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), error: null });
   },
+
   async sendMagicLink(email) {
     const normalizedEmail = String(email || '').trim().toLowerCase();
     if (!normalizedEmail) throw new Error('AUTH_EMAIL_REQUIRED');
@@ -508,22 +579,35 @@ const api = {
   async setPassword(newPassword) {
     if (!newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
     if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_USER_REQUIRED');
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw new Error('AUTH_SET_PASSWORD_FAILED');
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), recoveryPending: false, error: null });
   },
+
   async signOut() {
+    const session = captureAuthSession();
     const c = await getClient();
+    if (session) assertCurrentAuthSession(session);
+    else if (user?.id) throw new Error('AUTH_SESSION_CHANGED');
     const { error } = await c.auth.signOut();
     if (error) throw error;
   },
+
   async signOutLocal() {
+    const session = captureAuthSession();
     const c = await getClient();
+    if (session) assertCurrentAuthSession(session);
+    else if (user?.id) throw new Error('AUTH_SESSION_CHANGED');
     const { error } = await c.auth.signOut({ scope: 'local' });
     if (error) throw error;
   },
+
   async syncNow() {
     await syncNow();
   },
