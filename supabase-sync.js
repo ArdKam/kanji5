@@ -457,19 +457,23 @@ async function boot() {
         setState({ recoveryPending: false });
       }
     });
+    const generationBeforeGetSession = authGeneration;
     const { data, error } = await c.auth.getSession();
     if (error) throw error;
-    user = data.session?.user || null;
-    setState({
-      status: user ? 'signed-in' : 'signed-out',
-      user: mapUser(user),
-      syncStatus: user ? 'syncing' : 'idle',
-      recoveryPending: state.recoveryPending,
-      error: null
-    });
-    if (user) {
-      await syncNow();
-      startSyncLifecycle();
+    // Do not let a delayed initial session read overwrite a newer auth event.
+    if (authGeneration === generationBeforeGetSession) {
+      user = data.session?.user || null;
+      setState({
+        status: user ? 'signed-in' : 'signed-out',
+        user: mapUser(user),
+        syncStatus: user ? 'syncing' : 'idle',
+        recoveryPending: state.recoveryPending,
+        error: null
+      });
+      if (user) {
+        await syncNow();
+        startSyncLifecycle();
+      }
     }
   } catch (error) {
     console.warn('Kanji 5 account unavailable', error);
