@@ -209,33 +209,20 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     }
     setVisualStructureInfo(null);
     setVisualStructureReady(false);
-    const character = card.character;
-    const meanings = [...primaryMeanings,...secondaryMeanings];
-    const mnemonicModule = import("./prepared-mnemonic-core");
-    void mnemonicModule.then(({buildPreparedMnemonic})=>{
-      if(!active)return;
-      setPreparedMnemonic(buildPreparedMnemonic({character,meanings}));
-    }).catch(()=>{
-      if(active)setPreparedMnemonic(null);
-    });
+    setPreparedMnemonic(null);
     void getVisualStructureInfo(card.character).then(info=>{
       if(!active)return;
       setVisualStructureInfo(info);
       setVisualStructureReady(true);
-      void mnemonicModule.then(({buildPreparedMnemonic})=>{
-        if(!active)return;
-        setPreparedMnemonic(buildPreparedMnemonic(
-          {character,meanings},
-          info.available ? info.components.map(component=>component.character) : []
-        ));
-      });
     }).catch(()=>{
       if(!active)return;
       setVisualStructureInfo(null);
       setVisualStructureReady(true);
     });
     return ()=>{active=false};
-  },[card.character,preparedMeaningKey]);
+  },[card.character]);
+
+
   useEffect(()=>{
     setHiraganaReadings(false);
     setReferenceInfoOpen(false);
@@ -321,7 +308,10 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     void getVocabulary(card.character).then(result=>{
       if(!active)return;
       const items=Array.isArray(result?.items)?result.items.slice(0,6):[];
+      // The engine exposes source availability separately from the item list.
+      // An offline/unavailable response with [] is not a confirmed empty vocabulary result.
       setVocabularyExamples(items);
+      setExamplesError(result?.availability==="offline"||result?.availability==="unavailable");
       setExamplesResolved(true);
     }).catch(()=>{
       if(active){
@@ -361,6 +351,27 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
   useEffect(()=>setBackPage(0),[card.character]);
+  // The curated mnemonic corpus is large; defer its chunk until the learner opens
+  // the mnemonic page rather than fetching it as part of the initial Learning screen.
+  useEffect(()=>{
+    let active=true;
+    const mnemonicPage=hasExamplesPage?2:1;
+    if(!card.character||!revealed||backPage!==mnemonicPage){
+      return ()=>{active=false};
+    }
+    const character=card.character;
+    const meanings=[...primaryMeanings,...secondaryMeanings];
+    const components=visualStructureInfo?.available
+      ? visualStructureInfo.components.map(component=>component.character)
+      : [];
+    void import("./prepared-mnemonic-core").then(({buildPreparedMnemonic})=>{
+      if(!active)return;
+      setPreparedMnemonic(buildPreparedMnemonic({character,meanings},components));
+    }).catch(()=>{
+      if(active)setPreparedMnemonic(null);
+    });
+    return ()=>{active=false};
+  },[card.character,preparedMeaningKey,backPage,hasExamplesPage,revealed,visualStructureInfo]);
   const clearLearningFocus=useCallback(()=>{
     const active=document.activeElement;
     if(!(active instanceof HTMLElement))return;
@@ -481,6 +492,13 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     <div className="learning-back-readings-block">
                       <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
                       <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                    {!examplesLoading&&!examplesError&&displayExamples[0]?.word?(
+                      <div className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
+                        <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
+                        <span className="learning-back-quick-example-main" lang="ja" dir="ltr">{[displayExamples[0].word,displayExamples[0].reading].filter(Boolean).join(" · ")}</span>
+                        {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang="en" dir="ltr">{displayExamples[0].meaning}</small>:null}
+                      </div>
+                    ):null}
                     </div>
                     <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
                       <KanjiStructurePreview
@@ -607,7 +625,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
               <UiIcon name="writing" size={18}/>
             </button>
-            <span className="pager-current sr-only" aria-live="polite">
+            <span className="pager-current" aria-live="polite">
               {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
             </span>
           </div>:null}
