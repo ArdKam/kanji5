@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { getAccountApi, type AccountState } from "./account";
 import { t, type Language } from "./i18n";
 import { UiIcon } from "./UiIcon";
