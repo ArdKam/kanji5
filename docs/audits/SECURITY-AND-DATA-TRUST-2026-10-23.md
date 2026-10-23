@@ -59,7 +59,9 @@ No policy or schema migration was justified by the catalog results. This is veri
 
 ### F5 — Account deletion is not yet a released end-to-end product flow
 
-The production Edge Function `delete-account` is ACTIVE and has JWT verification enabled. Its code obtains the target ID from verified user claims, rejects missing user identity, calls the Admin API, and returns explicit deletion success; failures log only a code. It does not accept a target user ID in the request body. The existing foreign key provides a database cascade for `user_learning_state`.
+The production Edge Function `delete-account` is ACTIVE and has JWT verification enabled. Its code obtains the target ID from verified user claims, rejects missing user identity, calls the Admin API, and returns explicit deletion success; failures log only a code. It does not accept a target user ID in the request body.
+
+**Database deletion scope inspected read-only:** `public.user_learning_state` is the only application table found under `public`; its `user_id` foreign key cascades on `auth.users` deletion. No Storage buckets or Storage objects existed at the time of inspection. Supabase Auth's own user-owned identity/session/factor tables also have cascade foreign keys; the built-in `auth.scim_users` relation uses `ON DELETE SET NULL`. This inventory is bounded to the connected project at the inspection time and does not establish retention behavior for provider-side logs, backups, or external services.
 
 PR #617 is an open candidate for the browser UI and Account API integration. Until it is merged, deployed, and tested with a disposable authenticated account, do not claim that end users have a verified production deletion flow. Account deletion must remain distinct from clearing browser-local learner data and downloaded backups. Never test this on a real learner account.
 
