@@ -9,6 +9,16 @@
 - Proposed code remediation is on `fix/auth-session-isolation-20261023`; its latest commit is recorded in the linked pull request, not as deployed evidence.
 - Source contract tests and CI are not production verification. The current Pages deploy and the matching live-security workflow must be inspected against the exact promoted SHA before release.
 
+## Risk ranking
+
+| ID | Priority / impact | Exploitability and evidence |
+|---|---|---|
+| F1 | **P1 — high potential privacy/data-integrity impact** | **Low-to-moderate exploitability:** requires an auth transition while a sync request is pending. The browser client used a mutable account ID across async boundaries; RLS still restricts row ownership. This is a client composition/session race, not an RLS bypass. The mocked-browser test exercises the timing locally. |
+| F2 | **P1 — release blocker / medium security impact** | **Low-to-moderate likelihood of direct exploitation, but meaningful credential-stuffing risk:** protection against known leaked passwords is disabled. This check prevents use of known-compromised passwords; it does not prove that an existing account password has been exposed. Live Advisor and organization tier were observed. |
+| F3 | **P1 — release hardening blocker** | **Exploitability depends on another attack path:** absence of a verified response CSP leaves response-only protections, including `frame-ancestors`, unproven. No XSS or clickjacking exploit was reproduced; latest successful deployment evidence is older than current `main`. |
+| F4 | **No database authorization defect confirmed** | Live catalog/policy definitions and grants were inspected read-only. No unauthenticated CRUD grant or missing owner predicate was found. Runtime negative access tests remain separate acceptance work. |
+| F5 | **P1 — public-beta capability/privacy blocker** | The active server deletion function is configured securely by inspection, but a production user-facing deletion workflow is not verified end-to-end. No real-user deletion was attempted. |
+
 ## Findings
 
 ### F1 — High: in-flight sync was not bound to the identity that started it
