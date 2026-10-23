@@ -1,3 +1,26 @@
+## 2.0.8 Implementation follow-up — 2026-10-23
+
+**Current main at this snapshot:** `15883f263b256f3117ddda50ffb1313fc3122a14`, which includes merged PR #596 (onboarding answer review).
+
+### Work now merged or in a reviewable candidate
+
+- **#596 — onboarding answer review: MERGED** as `15883f263b256f3117ddda50ffb1313fc3122a14`. Exact-head React build, engine validation, and UI visual diagnostics passed before merge. The post-assessment review is optional and bilingual; answers are not revealed during the assessment.
+- **#601 — Learning card/offline vocabulary state:** latest candidate head `e15de2ad88ee8122e299321975215e06226c1d4e`. In addition to compact-card layout, it now honors the engine's `availability` state so an offline/unavailable vocabulary response is not displayed as a confirmed empty result. Its exact-head React, engine, and visual workflows were still running at this snapshot; do not merge until all required checks pass on the latest head.
+- **#602 — focused Reading Lab flow:** [PR #602](https://github.com/ArdKam/kanji5/pull/602), latest head `8eec736324dfdd80ea4b842547ccb3f4b803ffd6`. Ports compact editor, Reader-before-analysis DOM order, retained compact empty-state guidance, no nested sentence scrolling, and responsive browser/static contracts. An earlier run caught an empty-state guidance regression; the current candidate restored the guidance and adjusted its static contract. Exact-head CI is queued/pending and must be green before merge.
+- **#599 — release-evidence documentation:** latest head is recorded on the PR itself. Keep the Supabase leaked-password setting and response CSP header open until verified on production. The new acceptance tracker is [issue #603](https://github.com/ArdKam/kanji5/issues/603).
+- **#600 — live security audit harness:** merge only when exact-head CI passes; the live workflow remains a manual dispatch against an exact deployed SHA.
+- **#592 — semantic design-system integration:** remains draft/blocked by the existing 2,202 KB transfer budget; the observed exact-head artifact was 2,204 KB. Do not relax the budget.
+
+### Offline correctness status
+
+The old audit record below correctly documents the behavior observed on 2026-10-17, but the service-worker contract has since been hardened: current `sw.js` returns HTTP 503 plus `X-Kanji5-Offline-Fallback` for an uncached offline API failure, and network parsing exposes an `offline` availability state. The remaining Learning-card issue was the UI ignoring that field and rendering the ordinary empty vocabulary message. The #601 candidate addresses that presentation error and includes an offline → retry → confirmed-empty browser regression. It is not complete until that exact-head regression suite passes and the candidate is merged.
+
+### Public-beta acceptance tracker
+
+Issue [#603](https://github.com/ArdKam/kanji5/issues/603) now tracks the known production Auth configuration, missing HTTP response CSP header, account deletion and full local-data-erasure workflows, privacy-request channel, legal/terms/license decisions, independent educational review, placement validation, and physical-device checks. These are acceptance obligations, not items that can be closed by a code build alone.
+
+---
+
 ## 2.0.7 Current candidate queue reconciliation — 2026-10-23
 
 This subsection supersedes earlier candidate-queue entries below where their PR status or head SHA differs.
