@@ -411,3 +411,32 @@ test("Reading Lab analysis metrics keep an even grid across desktop and mobile",
   await expect(metrics.locator("> div").first()).toHaveCSS("grid-column-start", "1");
   await expect(metrics.locator("> div").first()).toHaveCSS("grid-column-end", "-1");
 });
+
+
+test("opening the More menu blocks account activation and restores the header on close", async ({ page }) => {
+  await clean(page, "en");
+  const account = page.locator(".header .account-button");
+  const trigger = page.getByRole("button", { name: "More", exact: true });
+  await expect(account).toBeVisible();
+
+  await trigger.click();
+  const menu = page.locator("#header-tools-menu");
+  const scrim = page.locator(".header-menu-scrim");
+  await expect(menu).toBeVisible();
+  await expect(scrim).toBeVisible();
+  await expect(account).toBeDisabled();
+  const bounds = await account.boundingBox();
+  expect(bounds).not.toBeNull();
+  const scrimIsHitTarget = await page.evaluate(({ x, y }) => {
+    return document.elementFromPoint(x, y)?.classList.contains("header-menu-scrim") ?? false;
+  }, { x: (bounds?.x ?? 0) + (bounds?.width ?? 0) / 2, y: (bounds?.y ?? 0) + (bounds?.height ?? 0) / 2 });
+  expect(scrimIsHitTarget).toBe(true);
+  await expect(page.locator(".experience-nav")).toHaveAttribute("inert");
+  await expect(page.locator("#primary-content")).toHaveAttribute("inert");
+
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
+  await expect(scrim).toHaveCount(0);
+  await expect(account).toBeEnabled();
+  await expect(trigger).toBeFocused();
+});
