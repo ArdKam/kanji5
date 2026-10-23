@@ -828,7 +828,16 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
 
 
         </>
-      ) : null}
+      ) : (
+        <section className="reading-lab-empty" aria-labelledby="reading-lab-empty-title">
+          <div className="reading-lab-empty-icon" aria-hidden="true">読</div>
+          <div>
+            <p className="eyebrow">{t("readingLabEmptyEyebrow", language)}</p>
+            <h3 id="reading-lab-empty-title">{t("readingLabEmptyTitle", language)}</h3>
+            <p>{t("readingLabEmptyHint", language)}</p>
+          </div>
+        </section>
+      )}
 
       {value.trim() ? (
 <section className="reading-lab-section reading-lab-listen" aria-labelledby="reading-lab-listen-title">
