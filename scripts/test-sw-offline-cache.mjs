@@ -12,6 +12,7 @@ assert.match(api, /if\(hit\)return hit/, 'A stale cached response must be used a
 assert.match(api, /if\(!raw\.ok\)\{if\(hit&&raw\.status>=500\)return hit;return raw;\}/, 'Stale cached data must not mask a genuine client-side HTTP error');
 assert.match(api, /JSON.stringify\(\{error:'offline-content-unavailable'\}\)/, 'An uncached network failure must be an explicit 503 error rather than an empty success result');
 assert.match(api, /'status':503|status:503/, 'Non-word API failures must return a service-unavailable response');
+assert.equal(/new Response\(\s*['"]\[\]['"]/.test(api), false, 'An uncached words API failure must remain explicitly offline instead of masquerading as an empty successful response');
 assert.match(api, /X-Kanji5-Offline-Fallback/, 'Offline fallback responses must be explicitly marked');
 
 const navigationStart = source.indexOf('async function networkFirst(req,name,fallback,timeoutMs=3500){');
