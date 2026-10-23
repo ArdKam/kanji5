@@ -1573,10 +1573,8 @@
 .reading-lab-sentence-read{
   min-width:112px;
 }
-.reading-lab-sentence-list{max-height:none;overflow:visible}}@media(prefers-reduced-motion:reduce){
-  .reading-lab-reader-sentence{
-    transition:none;
-  }}
+.reading-lab-sentence-list{display:grid;gap:0;min-width:0;max-height:none;overflow:visible;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--paper);scroll-padding-block:16px;}}@media(prefers-reduced-motion:reduce){
+  .reading-lab-reader-sentence{display:grid;grid-template-columns:26px minmax(0,1fr);align-items:start;gap:8px;min-width:0;padding:14px 15px 15px 12px;border:0;border-bottom:1px solid var(--line-soft);border-radius:0;scroll-margin-block:16px;transition:border-color var(--motion-hover) ease,background var(--motion-hover) ease,box-shadow var(--motion-hover) ease;}}
 .reading-lab-heading-line{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .reading-lab-session-status{flex:0 0 auto;max-width:220px;padding:5px 9px;border:1px solid color-mix(in srgb,var(--shu) 24%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--shu) 7%,var(--paper));color:var(--shu);font-size:10px;font-weight:850;line-height:1.35;}
 .reading-lab-sync-status,.reading-lab-word-status{margin:0;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--washi) 78%,var(--paper));color:var(--mute);font-size:10px;line-height:1.5;}
