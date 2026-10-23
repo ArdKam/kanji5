@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
 import { learningCopy } from "./learning-copy";
-import { kanjiSvgUrl, parseStrokePaths, type StrokePath } from "./stroke-order-core";
+import { kanjiSvgUrl, normalizeStrokeOrderCharacter, parseStrokePaths, type StrokePath } from "./stroke-order-core";
 
 export function StrokeOrderViewer({ character, language, mode = "learning" }: { character: string; language: Language; mode?: "learning" | "dictionary-loop" }) {
-  const [paths, setPaths] = useState<StrokePath[]>([]);
+  const activeCharacter = normalizeStrokeOrderCharacter(character);
+  const [pathsState, setPathsState] = useState<{character:string;paths:StrokePath[]}>({character:"",paths:[]});
+  const paths = pathsState.character===activeCharacter ? pathsState.paths : [];
   const [completed, setCompleted] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loadingState, setLoading] = useState(false);
+  const [errorState, setError] = useState("");
+  const [requestCharacter, setRequestCharacter] = useState("");
+  const loading = requestCharacter===activeCharacter ? loadingState : Boolean(activeCharacter);
+  const error = requestCharacter===activeCharacter ? errorState : "";
   const [retryKey, setRetryKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const compactLoop = mode === "dictionary-loop";
@@ -30,12 +35,16 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
 
   useEffect(() => {
     let active = true;
+    const normalized = normalizeStrokeOrderCharacter(character);
+    setRequestCharacter(normalized);
     stopPlayback();
-    setPaths([]);
+    setPathsState({character:normalized,paths:[]});
     setCompleted(0);
     setError("");
-    const normalized = Array.from(String(character || "").trim()).slice(0, 1).join("");
-    if (!normalized) return () => { active = false; };
+    if (!normalized) {
+      setLoading(false);
+      return () => { active = false; };
+    }
 
     setLoading(true);
     (async () => {
@@ -47,7 +56,7 @@ export function StrokeOrderViewer({ character, language, mode = "learning" }: { 
       const next = parseStrokePaths(svg);
       if (!next.length) throw new Error("No stroke paths found");
       if (!active) return;
-      setPaths(next);
+      setPathsState({character:normalized,paths:next});
       setLoading(false);
     })().catch(() => {
       if (!active) return;
