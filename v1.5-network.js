@@ -82,7 +82,8 @@ export async function fetchContextSentences(character){
   url.searchParams.set('is_orphan','no');
   url.searchParams.set('is_unapproved','no');
   // Keep only sentence records with explicitly reusable text licenses.
-  url.searchParams.set('license','CC BY 2.0 FR,CC0 1.0');
+  url.searchParams.append('license','CC BY 2.0 FR');
+  url.searchParams.append('license','CC0 1.0');
   url.searchParams.set('sort','relevance');
   url.searchParams.set('limit','24');
   const payload=await requestJSON(url.toString());
