@@ -879,14 +879,22 @@ test("visual evidence: Learning Card rating colors before and after semantic-tok
     await expect(ratings).toHaveCount(4);
     await expect(ratings.first()).toBeVisible();
 
-    // Re-apply the exact pre-change rating declarations in the rendered browser for
-    // the baseline capture. Removing this override reveals the actual tested PR CSS.
-    const baselineStyles = `
-      .learning-card-back .rating-again{color:#8e3026;border-color:color-mix(in srgb,var(--shu) 52%,var(--line));background:color-mix(in srgb,var(--shu) 7%,var(--paper))}
-      .learning-card-back .rating-hard{color:#76510a;border-color:color-mix(in srgb,#9a6700 42%,var(--line));background:color-mix(in srgb,#d29c2e 9%,var(--paper))}
-      .learning-card-back .rating-good{color:#43582b;border-color:color-mix(in srgb,var(--matcha) 62%,var(--line));background:color-mix(in srgb,var(--matcha) 11%,var(--paper))}
-      .learning-card-back .rating-easy{color:#314b6f;border-color:color-mix(in srgb,var(--ai) 52%,var(--line));background:color-mix(in srgb,var(--ai) 7%,var(--paper))}
-    `;
+    // Switch the inline stylesheet itself. page.addStyleTag() lands in <head>,
+    // but App.tsx injects this stylesheet inside the body after it, overriding it.
+    const learningSurfaceStyle = page.locator("style[data-learning-surface]");
+    const currentLearningStyles = await learningSurfaceStyle.textContent();
+    expect(currentLearningStyles).not.toBeNull();
+    const ratingRulePairs = [
+      { current: ".learning-card-back .rating-again{color:color-mix(in srgb,var(--color-danger) 75%,var(--sumi));border:1px solid color-mix(in srgb,var(--color-danger) 30%,var(--line));background:color-mix(in srgb,var(--color-danger) 7%,var(--paper))}", baseline: ".learning-card-back .rating-again{color:#8e3026;border-color:color-mix(in srgb,var(--shu) 52%,var(--line));background:color-mix(in srgb,var(--shu) 7%,var(--paper))}" },
+      { current: ".learning-card-back .rating-hard{color:color-mix(in srgb,var(--color-warning) 75%,var(--sumi));border:1px solid color-mix(in srgb,var(--color-warning) 34%,var(--line));background:color-mix(in srgb,var(--color-warning) 8%,var(--paper))}", baseline: ".learning-card-back .rating-hard{color:#76510a;border-color:color-mix(in srgb,#9a6700 42%,var(--line));background:color-mix(in srgb,#d29c2e 9%,var(--paper))}" },
+      { current: ".learning-card-back .rating-good{color:color-mix(in srgb,var(--color-success) 76%,var(--sumi));border:1px solid color-mix(in srgb,var(--color-success) 35%,var(--line));background:color-mix(in srgb,var(--color-success) 8%,var(--paper))}", baseline: ".learning-card-back .rating-good{color:#43582b;border-color:color-mix(in srgb,var(--matcha) 62%,var(--line));background:color-mix(in srgb,var(--matcha) 11%,var(--paper))}" },
+      { current: ".learning-card-back .rating-easy{color:color-mix(in srgb,var(--ai) 78%,var(--sumi));border:1px solid color-mix(in srgb,var(--ai) 34%,var(--line));background:color-mix(in srgb,var(--ai) 7%,var(--paper))}", baseline: ".learning-card-back .rating-easy{color:#314b6f;border-color:color-mix(in srgb,var(--ai) 52%,var(--line));background:color-mix(in srgb,var(--ai) 7%,var(--paper))}" },
+    ];
+    let baselineLearningStyles = currentLearningStyles ?? "";
+    for (const pair of ratingRulePairs) {
+      expect(baselineLearningStyles, "PR rating rule is part of the rendered inline stylesheet").toContain(pair.current);
+      baselineLearningStyles = baselineLearningStyles.replace(pair.current, pair.baseline);
+    }
 
     for (const viewport of [
       { name: "mobile-390x844", width: 390, height: 844 },
@@ -894,10 +902,17 @@ test("visual evidence: Learning Card rating colors before and after semantic-tok
     ]) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await card.evaluate(element => element.scrollIntoView({ block: "start", inline: "nearest" }));
-      const baselineOverride = await page.addStyleTag({ content: baselineStyles });
+      await learningSurfaceStyle.evaluate((element, content) => { element.textContent = content; }, baselineLearningStyles);
+      const beforeColors = await ratings.evaluateAll(elements => elements.map(element => getComputedStyle(element).color));
+      expect(beforeColors).toEqual([
+        "rgb(142, 48, 38)",
+        "rgb(118, 81, 10)",
+        "rgb(67, 88, 43)",
+        "rgb(49, 75, 111)",
+      ]);
       await audit.capture("learning-ratings-" + viewport.name + "-light-before");
-      await baselineOverride.evaluate(element => element.remove());
 
+      await learningSurfaceStyle.evaluate((element, content) => { element.textContent = content; }, currentLearningStyles);
       const postFix = await ratings.evaluateAll(elements => elements.map(element => ({
         className: [...element.classList].find(name => /^rating-(again|hard|good|easy)$/.test(name)),
         color: getComputedStyle(element).color,
@@ -906,6 +921,7 @@ test("visual evidence: Learning Card rating colors before and after semantic-tok
         borderWidth: getComputedStyle(element).borderTopWidth,
       })));
       expect(postFix).toHaveLength(4);
+      expect(postFix.every((style, index) => style.color !== beforeColors[index]), "All four rendered label colors must differ from their pre-change declarations").toBe(true);
       expect(postFix.every(style => style.borderWidth === "1px")).toBe(true);
       expect(new Set(postFix.map(style => style.background)).size).toBe(4);
       await audit.capture("learning-ratings-" + viewport.name + "-light-after");
