@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatNumber, t, type Language } from "./i18n";
-import { getVisualStructureInfo, getMnemonic, listKanji, saveMnemonic, type KanjiCatalogItem } from "./engine";
+import { getVisualStructureInfo, getMnemonic, listKanji, listKanjiBookmarks, setKanjiBookmark, saveMnemonic, type KanjiCatalogItem } from "./engine";
 import type { PreparedMnemonic } from "./mnemonic-library";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
 import topicData from "./kanji-topics.json";
@@ -184,9 +184,12 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   const [detailedVisibleCount, setDetailedVisibleCount] = useState(DETAILED_PAGE_SIZE);
   const [selected, setSelected] = useState<KanjiCatalogItem | null>(null);
   const [mnemonicDrafts, setMnemonicDrafts] = useState<Record<string, string>>({});
+  const [bookmarkedCharacters, setBookmarkedCharacters] = useState<string[]>([]);
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [bookmarkStatus, setBookmarkStatus] = useState<"idle" | "error">("idle");
   const activeAdvancedFilterCount = (masteryFilter === "all" ? 0 : 1) + (grade === "all" ? 0 : 1) + (topic === "all" ? 0 : 1);
   const activeTopic = topic === "all" ? null : KANJI_TOPICS.find(entry => entry.id === topic) ?? null;
-  const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim());
+  const hasActiveDictionaryFilters = level !== "all" || activeAdvancedFilterCount > 0 || Boolean(query.trim()) || savedOnly;
   const normalizedTopicQuery = normalize(topicQuery);
   const visibleTopicGroups = TOPIC_GROUPS.map(group => ({
     ...group,
@@ -238,6 +241,31 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
   }, [loadAttempt]);
 
   useEffect(() => {
+    let active = true;
+    void listKanjiBookmarks().then(value => {
+      if (!active) return;
+      setBookmarkedCharacters(value.characters);
+      setBookmarkStatus("idle");
+    }).catch(() => {
+      if (active) setBookmarkStatus("error");
+    });
+    return () => { active = false; };
+  }, []);
+
+  const toggleBookmark = async (character: string) => {
+    const currentlySaved = bookmarkedCharacters.includes(character);
+    try {
+      await setKanjiBookmark(character, !currentlySaved);
+      setBookmarkedCharacters(previous => currentlySaved
+        ? previous.filter(value => value !== character)
+        : [...new Set([...previous, character])].sort((a, b) => a.localeCompare(b, "ja")));
+      setBookmarkStatus("idle");
+    } catch {
+      setBookmarkStatus("error");
+    }
+  };
+
+  useEffect(() => {
     if (!externalSelectedCharacter) return;
     const item = catalog.find(candidate => candidate.character === externalSelectedCharacter);
     if (!item) return;
@@ -267,6 +295,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
         }
       }
       if (topic !== "all" && !(TOPIC_IDS_BY_CHARACTER.get(item.character)?.has(topic) ?? false)) return false;
+      if (savedOnly && !bookmarkedCharacters.includes(item.character)) return false;
       if (!q) return true;
       return [item.character, ...item.meanings, ...item.on, ...item.kun].some((value) => normalize(value).includes(q));
     });
@@ -279,7 +308,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
       return (levelRank[a.jlpt || ""] ?? 99) - (levelRank[b.jlpt || ""] ?? 99) || Number(a.order ?? Infinity) - Number(b.order ?? Infinity);
     });
     return rows;
-  }, [catalog, grade, level, masteryFilter, query, sort, topic]);
+  }, [bookmarkedCharacters, catalog, grade, level, masteryFilter, query, savedOnly, sort, topic]);
 
   const renderedItems = useMemo(
     () => visible.slice(0, viewMode === "detailed" ? detailedVisibleCount : visible.length),
@@ -334,7 +363,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
 
   useEffect(() => {
     setDetailedVisibleCount(DETAILED_PAGE_SIZE);
-  }, [query, level, masteryFilter, grade, sort, topic]);
+  }, [query, level, masteryFilter, grade, sort, topic, savedOnly]);
 
   return (
     <section className="dictionary-page" aria-labelledby="dictionary-page-title">
