@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+assert.equal(manifest.id,'./');
+assert.equal(manifest.scope,'./');
+assert.equal(manifest.display,'standalone');
+assert.equal(manifest.icons.length,2);
+assert.ok(manifest.icons.some(icon=>icon.src==='icon-192.svg'&&icon.sizes==='192x192'));
+assert.ok(manifest.icons.some(icon=>icon.src==='icon-512.svg'&&icon.sizes==='512x512'));
+for (const path of ['icon-192.svg','icon-512.svg']) assert.match(fs.readFileSync(path,'utf8'),/<svg[\s\S]*viewBox="0 0 512 512"/);
+const sw=fs.readFileSync('sw.js','utf8');
+assert.ok(sw.includes('./icon-192.svg')&&sw.includes('./icon-512.svg'));
+console.log('Kanji 5 PWA install metadata contract passed.');

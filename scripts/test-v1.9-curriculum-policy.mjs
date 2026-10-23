@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {CURRICULUM_STAGES,nextCurriculumStage,curriculumDecision,isRetentionVerified} from '../v1.9-curriculum-policy.js';
+assert.deepEqual(CURRICULUM_STAGES,['introduction','exposure','practice','reinforcement','maintenance','delayed_verification','retention_verified']);
+assert.equal(nextCurriculumStage('introduction'),'exposure');
+assert.equal(nextCurriculumStage('maintenance'),'delayed_verification');
+assert.equal(curriculumDecision({stage:'practice',attempts:3,correct:1}).stage,'reinforcement');
+assert.equal(curriculumDecision({stage:'reinforcement',attempts:4,correct:4}).stage,'maintenance');
+assert.equal(curriculumDecision({stage:'maintenance',attempts:8,correct:7,delayedEvidence:1}).stage,'delayed_verification');
+assert.equal(curriculumDecision({stage:'delayed_verification',delayedEvidence:2,retentionVerified:true}).stage,'retention_verified');
+assert.equal(isRetentionVerified(false),false);
+assert.equal(isRetentionVerified(true),true);
+console.log('Kanji 5 curriculum policy contract passed.');

@@ -1,0 +1,15 @@
+.kanji5-onboarding-review-list{display:grid;gap:10px;margin:14px 0 0;max-height:min(42svh,320px);overflow:auto;overscroll-behavior:contain}
+.kanji5-onboarding-review-list:focus-visible{outline:3px solid rgba(80,95,131,.42);outline-offset:3px}
+.kanji5-onboarding-review-item{display:grid;gap:12px;min-width:0;padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(253,251,247,.66)}
+.kanji5-onboarding-review-head{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:11px}
+.kanji5-onboarding-review-kanji{display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--washi);font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-size:27px}
+.kanji5-onboarding-review-meta{display:grid;gap:4px;min-width:0}
+.kanji5-onboarding-review-meta strong{font-size:12px}
+.kanji5-onboarding-review-status{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 9px;border:1px solid var(--line);border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.kanji5-onboarding-review-status.is-correct{border-color:rgba(73,119,91,.3);background:rgba(73,119,91,.09);color:#3E6B50}
+.kanji5-onboarding-review-status.is-incorrect{border-color:rgba(176,88,101,.3);background:rgba(214,161,170,.16);color:#8B4350}
+.kanji5-onboarding-review-answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kanji5-onboarding-review-answer{display:grid;gap:5px;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:rgba(253,251,247,.55)}
+.kanji5-onboarding-review-answer span{color:var(--mute);font-size:11px}
+.kanji5-onboarding-review-answer strong{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:540px){.kanji5-onboarding-review-head{grid-template-columns:40px minmax(0,1fr)}.kanji5-onboarding-review-kanji{min-width:40px;min-height:40px}.kanji5-onboarding-review-status{grid-column:1/-1;justify-self:start}.kanji5-onboarding-review-answers{grid-template-columns:1fr}}

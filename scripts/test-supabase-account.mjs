@@ -1,0 +1,50 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const read = path => fs.readFileSync(path, "utf8");
+const index = read("index.html");
+const reactEntry = read("react-entry.js");
+const sync = read("supabase-sync.js");
+const core = read("v1.5-sync-core.js");
+const account = read("frontend/src/app/account.ts");
+const dialog = read("frontend/src/app/AccountDialog.tsx");
+const schema = read("supabase/schema.sql");
+
+assert.match(index, /supabase-config\.js/);
+assert.doesNotMatch(index, /<script[^>]+src=["\']\.\/supabase-sync\.js["\']/);
+assert.match(reactEntry, /import\(["\']\.\/supabase-sync\.js["\']\)/);
+assert.match(reactEntry, /requestIdleCallback/);
+assert.match(sync, /signInWithOAuth\(\{\s*provider:\s*[\'\"]google[\'\"]/);
+assert.match(sync, /__KANJI5_ACCOUNT__/);
+assert.match(sync, /signInWithPassword/);
+assert.match(sync, /signUpWithPassword/);
+assert.match(sync, /signInWithOtp/);
+assert.match(account, /signInWithPassword/);
+assert.match(account, /sendMagicLink/);
+assert.match(sync, /user_learning_state/);
+assert.match(sync, /replaceRemote/);
+assert.match(sync, /mergeSyncPayload/);
+assert.doesNotMatch(sync, /querySelector\("header > div:last-child"\)/, "Auth/sync transport must not inject legacy DOM into the React shell");
+assert.match(core, /sessionHistory/);
+assert.match(core, /skillProfile/);
+assert.match(core, /v16SyncSchemaVersion/);
+assert.match(account, /getAccountApi/);
+assert.match(dialog, /accountHubTitle/);
+assert.match(dialog, /account-auth-intent/);
+assert.match(dialog, /account-identity-card/);
+assert.match(dialog, /forgotPassword/);
+assert.match(dialog, /PasswordField/);
+assert.match(dialog, /dir="ltr"/);
+assert.doesNotMatch(dialog, /account-section-tabs/);
+assert.match(dialog, /account-signout-button/);
+assert.match(sync, /resetPasswordForEmail/);
+assert.match(sync, /PASSWORD_RECOVERY/);
+assert.match(sync, /setPassword/);
+assert.match(sync, /personalMnemonics/);
+assert.match(schema, /enable row level security/);
+assert.match(schema, /auth\.uid\(\).*user_id/);
+
+console.log("Kanji 5 Supabase account integration contract passed.");
+
+assert.match(sync, /SUPABASE_BROWSER_RUNTIME\s*=\s*['"]\.\/vendor\/supabase-js-2\.117\.2\.js['"]/);
+assert.doesNotMatch(sync, /cdn\.jsdelivr\.net|esm\.sh|unpkg\.com/);

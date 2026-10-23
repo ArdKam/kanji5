@@ -1,0 +1,2617 @@
+## 2.0.9 Current-main follow-up — 2026-10-23
+
+**Current main SHA at update:** `2fda3fbdb76c0931a09eb378e7e778aade24154d`. PR #604 (read-only live-security audit harness) was merged at `2fda3fbdb76c0931a09eb378e7e778aade24154d`; the audit itself still requires manual dispatch after the matching deployment.
+
+### Current dispositions
+- **Public-beta acceptance:** [issue #603](https://github.com/ArdKam/kanji5/issues/603) is the acceptance tracker for leaked-password protection, response CSP header, account deletion/local-data erasure, privacy/legal governance, independent educational review, placement validity and physical-device tests.
+- **Startup transfer:** [issue #609](https://github.com/ArdKam/kanji5/issues/609) blocks changes failing the 2,202 KB limit. Candidate #605 failed at 2,204 KB. [PR #611](https://github.com/ArdKam/kanji5/pull/611) is the fresh-main replacement adding a measured deferral of the ~124 KB prepared-mnemonic chunk until the mnemonic page is opened; this is a hypothesis under test, not a completed performance fix until exact-head CI passes.
+- **Desktop account/menu overlay:** [PR #612](https://github.com/ArdKam/kanji5/pull/612) makes the desktop scrim cover the account hit target and updates the static contract; it must pass current-head browser and unit gates before merge.
+- **Reading Lab:** [PR #606](https://github.com/ArdKam/kanji5/pull/606) remains an older-base candidate with a browser selector failure and is not completion evidence. Re-port to the post-#604 mainline and pass browser/visual gates before merging.
+- **Design system:** [PR #610](https://github.com/ArdKam/kanji5/pull/610) is still draft and based before #604; refresh it after the measured transfer reduction is verified. Never relax the existing budget to force a pass.
+- **Onboarding answer review:** PR #596 is merged on current main; its optional bilingual post-assessment review is implemented. Placement-validity/independent educational sign-off remains open in issue #603.
+
+Only work on the currently promoted main SHA counts as implemented. A green test on a stale branch, a draft PR, or a previous deployment does not close current-main acceptance. Continue to preserve engine authority and avoid a broad persistence migration.
+ 
+## 2.0.8 Implementation follow-up — 2026-10-23
+
+**Current main at this snapshot:** `15883f263b256f3117ddda50ffb1313fc3122a14`, which includes merged PR #596 (onboarding answer review).
+
+### Work now merged or in a reviewable candidate
+
+- **#596 — onboarding answer review: MERGED** as `15883f263b256f3117ddda50ffb1313fc3122a14`. Exact-head React build, engine validation, and UI visual diagnostics passed before merge. The post-assessment review is optional and bilingual; answers are not revealed during the assessment.
+- **#601 — Learning card/offline vocabulary state:** latest candidate head `e15de2ad88ee8122e299321975215e06226c1d4e`. In addition to compact-card layout, it now honors the engine's `availability` state so an offline/unavailable vocabulary response is not displayed as a confirmed empty result. Its exact-head React, engine, and visual workflows were still running at this snapshot; do not merge until all required checks pass on the latest head.
+- **#602 — focused Reading Lab flow:** [PR #602](https://github.com/ArdKam/kanji5/pull/602), latest head `8eec736324dfdd80ea4b842547ccb3f4b803ffd6`. Ports compact editor, Reader-before-analysis DOM order, retained compact empty-state guidance, no nested sentence scrolling, and responsive browser/static contracts. An earlier run caught an empty-state guidance regression; the current candidate restored the guidance and adjusted its static contract. Exact-head CI is queued/pending and must be green before merge.
+- **#599 — release-evidence documentation:** latest head is recorded on the PR itself. Keep the Supabase leaked-password setting and response CSP header open until verified on production. The new acceptance tracker is [issue #603](https://github.com/ArdKam/kanji5/issues/603).
+- **#600 — live security audit harness:** merge only when exact-head CI passes; the live workflow remains a manual dispatch against an exact deployed SHA.
+- **#592 — semantic design-system integration:** remains draft/blocked by the existing 2,202 KB transfer budget; the observed exact-head artifact was 2,204 KB. Do not relax the budget.
+
+### Offline correctness status
+
+The old audit record below correctly documents the behavior observed on 2026-10-17, but the service-worker contract has since been hardened: current `sw.js` returns HTTP 503 plus `X-Kanji5-Offline-Fallback` for an uncached offline API failure, and network parsing exposes an `offline` availability state. The remaining Learning-card issue was the UI ignoring that field and rendering the ordinary empty vocabulary message. The #601 candidate addresses that presentation error and includes an offline → retry → confirmed-empty browser regression. It is not complete until that exact-head regression suite passes and the candidate is merged.
+
+### Public-beta acceptance tracker
+
+Issue [#603](https://github.com/ArdKam/kanji5/issues/603) now tracks the known production Auth configuration, missing HTTP response CSP header, account deletion and full local-data-erasure workflows, privacy-request channel, legal/terms/license decisions, independent educational review, placement validation, and physical-device checks. These are acceptance obligations, not items that can be closed by a code build alone.
+
+---
+
+## 2.0.7 Current candidate queue reconciliation — 2026-10-23
+
+This subsection supersedes earlier candidate-queue entries below where their PR status or head SHA differs.
+
+### Release integrity — verified for current code SHA
+
+- The PWA manifest path fix, PR #597, is merged as `544c7c096d4b3579d288c5a9a2beb2b672604d6a`.
+- React build, learning-engine validation, WebKit compatibility, and Pages deployment all passed on that SHA. Deployment run [#39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140) verified the public manifest and 12-asset dependency graph, exact staged/live hashes for selected shipped assets, and ended with `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
+- The previously failing manifest 404 is resolved for this SHA. The actual HTTP response CSP remains absent in the deployment log; that is a separate open security finding. Device/manual, privacy/legal, and educational-validity gates remain open.
+
+### Current candidate queue
+
+- **#599 — documentation reconciliation:** records the verified deployment and remaining gates. Latest updated head `0c3068294bc5d9f82a899046c434277d23e284e4`; the engine and WebKit checks passed, while the React build was still running at this checkpoint. Merge after the exact latest-head build finishes green.
+- **#600 — live security audit:** based on post-fix main. Its initial broad React gate timed out in `react-account-shell.spec.mjs` while waiting for a fresh browser context to show `#root .app-shell`; the failed build job was rerun and was still in progress at this checkpoint. Verify the rerun result before considering merge. A read-only Supabase Security Advisor check on 2026-10-23 also reports `auth_leaked_password_protection` disabled on the Kanji5 project; enable and verify this in production Auth settings. The successful Pages deployment separately lacks an HTTP response CSP header. After the audit harness merges, dispatch it against the verified deployed SHA; CI alone does not constitute a security pass.
+- **#601 — compact hybrid Learning card on current main:** replacement for the stale-base #595; head `1f69128f160c7c526e7f302f56c445dd9fb8f28b`, based on the verified manifest-fix SHA. Its exact-head build, engine, WebKit and visual checks were running at this checkpoint. Keep all 360×640, 390×844, 844×390, Persian/English, light/dark and 2,202 KB acceptance criteria.
+- **#595:** closed as superseded by #601. Do not reopen/merge the stale-base branch.
+- **#596 — onboarding answer review:** refreshed on current main at head `826ce0ab8e6b386e65d03c297764016f6e9aae3f`. Engine, WebKit, and browser visual diagnostics passed; the full React build was in progress. Recheck the latest-head build result before merge. #593 is closed as superseded.
+- **#592 — semantic design system:** keep draft/open, do not merge yet. Head `2c7a9854ba19422e292a5b6f4c337f6d887f5ab8` passed engine and visual diagnostics but failed the desktop and mobile performance budgets at `2204 KB > 2202 KB`. Optimize the changed asset graph until it is below budget; do not raise the threshold or change it into a warning.
+- **#598:** closed as superseded by the current-main security-audit candidate #600. Do not merge both audit branches.
+- Older #550, #548, #547, #545, #540, #537, #535, #533, #530 and #529 remain stale source candidates. Reconcile their unique diffs against current main and reproduce any behavior gaps before porting. Do not bulk-merge them.
+
+### Guardrail
+
+Statuses above are timestamped observations, not promises that a running workflow will finish green. Refresh exact-head check conclusions before merge. After any source merge, repeat mainline deployment/live smoke if it changes the release artifact, then re-read live evidence. The public-beta gate remains blocked until security, privacy/legal, independent educational acceptance, and device/accessibility evidence are complete.
+
+---
+
+## 2.0.6 Post-merge PWA release verification — 2026-10-23
+
+**Verified release SHA:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a` (PR #597).
+
+### Verified on the promoted main SHA
+
+- React presentation build completed successfully: all 54 build/E2E steps passed in [workflow run #39873770123](https://github.com/ArdKam/kanji5/actions/runs/39873770123).
+- Learning-engine validation passed in [run #39873770214](https://github.com/ArdKam/kanji5/actions/runs/39873770214); WebKit compatibility also passed in #39873770123.
+- GitHub Pages deployment passed in [run #39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140).
+- The live verifier found `react-dist/manifest.json`, parsed the manifest and confirmed all 12 graph assets were available: `LIVE_PWA_MANIFEST_AND_ASSET_GRAPH_VERIFIED assets=12`.
+- Staged/live artifact hashes matched for `index.html`, `react-entry.js`, `sw.js`, React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`.
+- The live core/offline browser smoke ended with `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`. This directly closes the previously observed hidden `.vite` manifest 404 for this SHA.
+
+### Remaining release limits
+
+- This is release-integrity evidence for SHA `544c7c0`; any later merged change requires its own post-merge deployment and smoke evidence.
+- HTTP response CSP was logged as absent; the meta CSP does not equal verified response-header protection. Keep this in the security findings.
+- Physical Android/iOS install, cold-start, update/reinstall, assistive-technology, and other manual device checks remain open.
+- Security acceptance, including production Supabase leaked-password protection, remains separate from the successful deployment.
+- Privacy/legal and independent educational-validity acceptance remain open. This pass does not by itself authorize a public beta.
+
+---
+## 2.0.5 Current-main release follow-up — 2026-10-23
+
+**Current main at this checkpoint:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a`, merge of [PR #597](https://github.com/ArdKam/kanji5/pull/597), which publishes the Vite manifest at `react-dist/manifest.json` rather than the hidden `.vite` path.
+
+### Verified evidence
+
+- Before #597 merged, mainline deployment run [#39871282639](https://github.com/ArdKam/kanji5/actions/runs/39871282639) failed at the live offline/core-product E2E stage with `LIVE_PWA_ASSET_UNAVAILABLE:react-dist/.vite/manifest.json:404`. Source build, artifact staging, deployment, and selected live asset hash checks had passed; the final live PWA manifest assertion did not.
+- The #597 exact-head checks observed before merge passed: `build`, `validate-learning-engine`, `webkit-compat`, and automated browser visual diagnostics. The candidate changes update the Vite output path and the service-worker, staged-site, live-site, and contract checks together.
+- After the merge, main at `544c7c096d4b3579d288c5a9a2beb2b672604d6a` reported `validate-learning-engine` and `webkit-compat` successful, while the React `build` was still in progress at this checkpoint.
+- **Post-merge Pages deployment and live/offline smoke are not yet verified in this record.** Do not infer success from the merge or pre-merge checks. R7 release acceptance stays PARTIAL until the promoted main SHA has successful deployment, live public-manifest/assets, hash equality, offline/core-product, and stale-client results.
+- The active ruleset `Protect main — PR and CI` (ID `25670314`) remains configured to require PRs, resolved conversations, up-to-date branches, `build`, `validate-learning-engine`, and `webkit-compat`.
+
+### Current candidate disposition at this checkpoint
+
+- **#597:** merged as `544c7c0`; closeout remains subject to the mainline build and deployed live verification above.
+- **#600:** current-main security-audit candidate, ported from the #598 implementation onto main at `544c7c0`. Its exact-head build, engine, WebKit, and browser diagnostics were still running when this entry was refreshed. Merge only after all required checks pass; dispatch the read-only audit against the actual deployed main SHA afterward.
+- **#598:** older stale-base source candidate for the same audit. Do not merge both implementations; once #600's checks pass, close #598 as superseded.
+- **#595:** compact Learning-card candidate has received further commits. Its latest observed exact head was `73afec487d465ca1626c0371d9dc24de6c1d12d9`; required checks were in progress. Recheck the latest SHA before review or merge.
+- **#596:** onboarding-answer-review candidate `6767959c695ab16b7944d7c3f62e3d6cc3db506f` had the engine and visual checks passed, while its React build was still in progress. Recheck the exact head before merge. Prefer #596 over the overlapping predecessor #593 only if all required checks and Persian/English mobile behavior pass.
+- **#592:** the fresh semantic-token candidate's exact-head React build failed at `1b33917168a0de4cd9a6c79d2221241d8ad9eb40`, while its engine and visual checks passed. Inspect the failing build log, fix the actual cause (including the existing 2,202 KB budget if that is the failure), and re-run all required checks. Do not merge with a failing build or raise the budget to hide an overage.
+- Older draft UX, card, design-system, menu, content, and sync PRs remain source candidates only. Reconcile their unique diffs against current main; do not bulk merge them.
+
+### Keep the public-beta gates open
+
+This release fix does not close the independent R12/R13/C4 acceptance gates:
+- Security: current deployed response-header/CSP and source-map evidence; Supabase leaked-password protection must be rechecked in production and resolved or formally dispositioned.
+- Privacy/governance: no end-user account deletion or full browser-data erasure is documented as implemented; retention, private privacy/account requests, final Privacy/Terms, target markets/age treatment, and project license still need approved outcomes.
+- Educational validity: independent review of production-provider content samples and empirical placement stability/bias remain outstanding.
+- Device/accessibility: real-device PWA install/update/offline checks, representative assistive-technology/zoom/keyboard checks, and performance evidence remain release acceptance work.
+
+**Instruction for the next review:** refresh the current main SHA, current PR heads, exact-head check conclusions, and post-merge Pages run before changing any of these statuses. Historical runs are not evidence for a newer SHA.
+
+---
+
+# Rinemi — Unified Product, Engineering & Public-Release Roadmap
+
+> **Brand naming rule (2026-10-09):** Rinemi is the canonical customer-facing name in the application, PWA metadata, brand assets, and public product copy. `kanji5` repository/deployment paths, `KANJI5_*` runtime contracts, stored data keys, backup-format identifiers and build asset names remain compatibility identifiers until a separate migration is designed and tested.
+
+> **Canonical roadmap:** this document is the forward-looking source of truth for Rinemi product, engineering, public-release readiness, and the staged expansion from Kanji → Vocabulary → Context/Reading → Grammar.
+>
+> **Implementation baseline reviewed:** `main` at the R13 merge baseline `c5997a432aa4b60bc2913cbaec277127b96935db` (2026-10-06). This baseline includes merged R4–R6 Data Trust (#467), C4 educational-validity work (#469), R11 observability hardening (#463), final Kanji public UX/accessibility work (#464), and the A1 account/Production Recall fixes (#471/#472). The release-candidate process itself has already been exercised repeatedly; it must not be re-added to the backlog merely because the documentation baseline advanced.
+
+> **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
+
+## 2.0.4 Previous release-integrity checkpoint — 2026-10-23 (superseded by §2.0.5)
+
+**Release SHA at that checkpoint:** `a7e0f602a6e8640cd46b56829915f3c92351e23c` (PR #586 merged). All exact-head checks on the pre-merge PR commit `a9070b56d7205561f14007692424f359d989955f` passed: `build`, `validate-learning-engine`, `webkit-compat`, and visual/browser diagnostics. The mainline React build and learning-engine workflow have been triggered against the merge commit; the first post-fix Pages deployment and live smoke must still be confirmed from their own run before calling the release healthy.
+
+### Completed on current main
+
+- **Dependency audit:** pinned frontend Vite is updated from vulnerable `8.1.5` to patched `8.1.6`; package lock integrity, `scripts/test-license-audit.mjs`, and `docs/THIRD-PARTY-LICENSES.md` agree. The exact-head frontend/root audit reported zero vulnerabilities.
+- **Production-smoke selector:** the current Learning Card rating accessible name includes the FSRS interval. The deployment smoke now uses an interval-compatible selector, rather than requiring exactly `Good`.
+- **Practice test synchronization:** `seedSeenCard()` in `e2e/react-review-practice.spec.mjs` now waits for the authoritative review record to persist before switching to Practice, avoiding a race where a visible card was mistaken for completed review state.
+- **Main ruleset:** GitHub read-back confirmed active repository ruleset [Protect main — PR and CI](https://github.com/ArdKam/kanji5/rules/25670314), ID `25670314`. It targets the default branch; requires PRs, conversation resolution, up-to-date branches, and `build`, `validate-learning-engine`, `webkit-compat`; blocks branch deletion and force-pushes; and has no bypass actors. Approval count is intentionally zero for the current single-maintainer workflow. [Issue #584](https://github.com/ArdKam/kanji5/issues/584) is complete. The active ruleset, not the legacy branch-protection endpoint, is the enforcement record.
+
+### Release verification — do not overstate
+
+- **Current main workflows:** React presentation build, `validate-learning-engine`, and `webkit-compat` all passed against merge SHA `a7e0f602a6e8640cd46b56829915f3c92351e23c`. The React build passed all 54 steps; the root suite reported all 167 `scripts/test-*.mjs` tests passed.
+- **Pages deployment:** [run #39857524248](https://github.com/ArdKam/kanji5/actions/runs/39857524248) completed successfully against the same SHA. Staged/live hashes matched for `index.html`, `react-entry.js`, `sw.js`, the React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`. The live offline/core-product browser smoke passed (2 tests). This verifies the deployment on that exact SHA; it does **not** close the PWA readiness PR/manual device checks or all security acceptance.
+- **Residual security acceptance:** the Vite dependency vulnerability is addressed, but this does not close all R12 security work. Deployment run #39857524248 explicitly logged `LIVE_CSP_HEADER=absent`; GitHub Pages is currently relying on the HTML meta CSP rather than a response CSP header. Run [#554](https://github.com/ArdKam/kanji5/pull/554) against the deployed SHA and report HTTP security headers and Supabase leaked-password protection as separate findings; do not claim authenticated security verification without evidence.
+
+### Candidate queue recorded at that checkpoint
+
+| PR | Current disposition | Required next action |
+|---|---|---|
+| [#589 PWA/offline](https://github.com/ArdKam/kanji5/pull/589) | Draft; refreshed from current main at the release-fix merge SHA | Pass exact-head `build`, `validate-learning-engine`, `webkit-compat`, and visual/browser checks. Merge only after the first post-fix Pages deployment/live smoke is green. Physical Android/iOS install, update, and cold-start checks remain manual gates. |
+| [#588 PWA/offline](https://github.com/ArdKam/kanji5/pull/588) | Closed, superseded by #589 | Do not reopen or merge the one-commit-behind stack. |
+| [#582 PWA/offline](https://github.com/ArdKam/kanji5/pull/582) | Closed, superseded by #589 | Its failed forced Production Recall startup test is retained as historical evidence only. |
+| [#580 design system](https://github.com/ArdKam/kanji5/pull/580) | Draft; broad integration candidate on stale base | Earlier exact-head build exceeded the transfer budget by 5 KB (2,207 KB vs 2,202 KB). Rebase/port to fresh main, bring transfer below budget rather than relaxing it, run current exact-head CI, and inspect rendered screenshots for the calm premium Japanese-editorial “Sumi Play” direction. |
+| [#579 compact hybrid Learning card](https://github.com/ArdKam/kanji5/pull/579) | Draft; preferred layout candidate, stale base | Refresh against current main; verify 360×640, 390×844, and 844×390 in Persian/English and light/dark. Preserve the four-page back sequence and engine authority. |
+| [#554 live security smoke](https://github.com/ArdKam/kanji5/pull/554) | Draft; verification harness | Re-run on the exact deployed SHA; separately report HTTP headers and Supabase leaked-password protection. |
+| [#550 first-render card flip](https://github.com/ArdKam/kanji5/pull/550) | Draft; CSS-readiness candidate | Refresh to current main and run the complete card/visual regression suite. |
+| [#548 Learning/Practice UX](https://github.com/ArdKam/kanji5/pull/548) | Source candidate | Port only interaction or recovery gaps still reproduced on current main. |
+| [#547 design-system/UX](https://github.com/ArdKam/kanji5/pull/547) and [#540 foundation](https://github.com/ArdKam/kanji5/pull/540) | Stale source candidates | Compare unique changes against #580/current main; do not merge wholesale or introduce parallel token systems. |
+| [#545 learner content/vocabulary](https://github.com/ArdKam/kanji5/pull/545) | Broad divergent source branch | Inventory content QA and offline stroke-order coverage; split only unique independently verified work. |
+| [#537 sync integrity](https://github.com/ArdKam/kanji5/pull/537) | Source candidate | Verify clocks, deletion tombstones, conflicts, and offline cache against current sync logic before porting any data behavior. |
+| [#535 UX audit](https://github.com/ArdKam/kanji5/pull/535), [#533 contrast](https://github.com/ArdKam/kanji5/pull/533), [#530 Reading Lab](https://github.com/ArdKam/kanji5/pull/530), [#529 account menu](https://github.com/ArdKam/kanji5/pull/529) | Stale source candidates | Test against fresh main, then port only current, demonstrable gaps; validate RTL/LTR, keyboard behavior and screenshots as relevant. |
+| [#522 Practice terminology](https://github.com/ArdKam/kanji5/pull/522) | Superseded by current-main UI plus this documentation update | Navigation labels are already Practice/تمرین on main; public product, migration, and E2E-guide terminology is updated in this PR. Do not reopen unless a learner-visible Active Recall navigation label regresses. |
+| [#585 smoke selector](https://github.com/ArdKam/kanji5/pull/585) | Closed, superseded by merged #586 | Do not reopen; the compatible selector is now on main. |
+| [#587 earlier roadmap update](https://github.com/ArdKam/kanji5/pull/587) | Closed, superseded by this current-main documentation PR | Do not reopen; its source branch was based on the vulnerable pre-fix main. |
+
+### Release-integrity exit criteria recorded at that checkpoint
+
+Step 1 remains **PARTIAL** until all three are proven against current SHA(s): (1) successful post-fix React build and learning-engine validation on `main`; (2) successful GitHub Pages deployment with staged/live artifact hashes and live/offline/core-product smoke on that same promoted SHA; and (3) #589 exact-head gates pass before PWA merge. Ruleset configuration is complete, but that does not substitute for a live release verification.
+
+Architecture constraints are unchanged: React is presentation/interaction only; FSRS scheduling, v1.9 Learner Model, Adaptive Planner, grading, recovery, and persistence remain engine-authoritative. No broad persistence migration or parallel scheduler.
+
+---
+
+## 2.0.2 Current product/engineering audit handoff — 2026-10-17
+
+**Dated evidence record:** [docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md). This audit is additive: it does not rewrite the historical C4/R12/R13 implementation records, and it does not treat an open PR as completion evidence.
+
+**Observed baseline:** main at 085524dc58547e33e42fcaff75784b0c6d3fe6b3; React presentation build passed in workflow run 38964130926; GitHub Pages deployment passed in run 38965141947. The deployment process rebuilt from the exact SHA, checked it was current main, validated the artifact, compared selected live asset hashes and ran live/offline smoke checks. Repository metadata reported main protection disabled. Re-verify all of this before a later release; this is a dated snapshot.
+
+**Open release blockers — keep acceptance OPEN until current evidence closes them:**
+- **Education/content:** independent human QA for meanings/readings/examples/context/curated mnemonics and empirical placement validation remain outstanding in docs/EDUCATIONAL-CONTENT-AUDIT.md and docs/C4-SAMPLE-CONTENT-QA.md.
+- **Security:** PR #554 documents a 2026-10-16 live smoke with positive CSP/XSS/RLS checks and gaps around HTTP security headers and Supabase leaked-password protection. Re-run on the exact current deployed SHA; exploitability and authenticated testing are not claimed complete.
+- **Privacy/governance:** docs/RELEASE-EVIDENCE.md and docs/LEGAL-REVIEW-CHECKLIST.md report no account-delete API, no complete local browser-data erasure path, incomplete private request/retention/Privacy/Terms evidence. A database cascade is not a user-facing deletion workflow.
+
+**Highest-priority current-main work:**
+1. Reconcile open PRs against current main and protect main. The checked queue had overlapping Learning-card candidates (#558/#550/#545/#538), UX/design-system candidates (#548/#547/#535/#540), menu candidates (#531/#529), and other stale-base work. Port unique value, retarget, supersede or close; do not merge the queue in bulk.
+2. Keep PR #558 unmerged until the exact updated head passes its Learning-card gate. Candidate 61e22b1 failed two compact/landscape bounds tests in run 38971761198; both reported top=-32px. This is a candidate-branch failure, not a failure of the already-deployed main build.
+3. Fix the current service-worker empty-result ambiguity in sw.js/VocabularyExamples.tsx: an uncached offline API failure may return [] with HTTP 200 plus X-Kanji5-Offline-Fallback, while the UI displays a normal empty state. Preserve old-client/offline compatibility and distinguish missing data from transport failure.
+4. Plan a reviewed Persian learner-meaning overlay without replacing the authoritative source glosses or migrating learner state. Existing kanji-data.json has 2,136 records but its source meanings are English; the 24-topic Dictionary taxonomy currently has 1,156 assignments across 849 unique kanji and explicitly documents partial coverage.
+5. Continue visual/theme/typography polish only after these gates: frontend/src/styles.css still sets --text-xs to 11px, although muted contrast and dark-mode contracts exist. Consolidate overlapping design-system changes rather than introducing a parallel system.
+
+**Architecture constraints remain unchanged:** FSRS scheduling authority; v1.9 Learner Model authority; Adaptive Planner selection authority; engine-owned grading/recovery/persistence; React presentation-only. No broad rewrite, duplicate scheduler, parallel learner state or broad persistence migration without a demonstrated defect.
+
+**Release order:** (0) protect main and reconcile PRs → (1) close educational, security and privacy/governance acceptance → (2) fix Learning-card and offline correctness → (3) stage Persian content and reviewed Dictionary improvements → (4) run measured retention/learning studies. Public-beta invitation remains blocked until the applicable P0 gates are proven against one frozen release candidate SHA.
+
+**Handoff rule:** Future audits must refresh current main, open PRs, exact-head workflows and deployed evidence. Once a finding is fixed, record the merge SHA, exact verification run(s), any remaining acceptance-only work, and a DO NOT REOPEN instruction unless a current-main regression is demonstrated.
+
+---
+
+## 0. Product direction
+
+Rinemi started as a personal PWA for learning essential Japanese kanji. The project is now being prepared for broader public distribution.
+
+The product must therefore satisfy two goals at the same time:
+
+1. Preserve the strengths of the original personal tool:
+   - local-first behavior
+   - deterministic learning behavior
+   - FSRS-based scheduling
+   - adaptive learning
+   - offline operation
+   - lightweight daily practice
+   - a calm, focused learning experience
+
+2. Become robust enough for users who have never seen Rinemi before:
+   - clear product positioning
+   - understandable onboarding
+   - trustworthy data persistence and recovery
+   - predictable account/sync behavior
+   - installable and reliable PWA behavior
+   - accessibility
+   - responsive/mobile quality
+   - performance
+   - security and privacy
+   - support and feedback paths
+   - observable production failures
+   - controlled release and migration processes
+
+The product should expand in layers rather than turning into an all-in-one Japanese-learning platform prematurely.
+
+### Product learning loop
+
+**Learn → Recall → Review → Recover → Improve**
+
+Vocabulary, Context/Reading, and Grammar must reinforce that loop rather than compete with it.
+
+### Product strategy and planning references
+
+- **Product positioning and competitive strategy:** [docs/PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md](docs/PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md) — target audience, competitor matrix, differentiated value proposition, ranked opportunities, and 6–12-month strategic direction. Treat recommendations as hypotheses until validated; this is not a completion ledger.
+- **Learning effectiveness and transfer:** [docs/LEARNING-EFFECTIVENESS-ROADMAP.md](docs/LEARNING-EFFECTIVENESS-ROADMAP.md) — educational sequence, learning-outcome evaluation, and implementation-level learning priorities.
+
+This `ROADMAP.md` remains the canonical source for current execution status, dependencies, release blockers, and sequencing. Keep detailed educational acceptance in the learning-effectiveness and educational-content documents; do not duplicate their backlogs here.
+
+---
+
+# 1. Architecture and product guardrails
+
+These rules remain authoritative throughout the roadmap.
+
+### 1.1 Learning-engine authority
+
+- FSRS remains the scheduling authority.
+- The v1.9 Learner Model remains the learner-state authority.
+- Adaptive Planner remains the content-selection/planning authority.
+- Recovery remains the recovery authority.
+- Evaluation/grading remains the learning-engine authority.
+- Persistence remains an engine concern, not a React concern.
+- React remains presentation-only.
+- Do not duplicate authoritative learner state inside React.
+- Do not introduce a second scheduler for Vocabulary, Context, or Grammar.
+- Domain-specific planning may influence practice selection but must feed through the existing scheduling/evidence seams.
+- Do not rewrite the learning engine merely to make a new UI possible.
+- Only verified defects justify reopening or rewriting authoritative engine behavior.
+
+### 1.2 Cross-domain identity
+
+Use stable domain-scoped Content IDs and separate Card IDs.
+
+Examples:
+
+- \`kanji:日\`
+- \`vocabulary:jmdict:12345\`
+- \`context:tatoeba:12345\`
+- \`grammar:pattern:te-form\`
+
+Card identity must remain separate from content identity and incorporate the learning skill/exercise identity where needed.
+
+Do not use display strings as long-term identity.
+
+### 1.3 Evidence
+
+All learning domains should eventually emit a shared evidence envelope preserving:
+
+- domain
+- contentId
+- mode/skill
+- exercise
+- outcome
+- attempt type
+- modality
+- independent/recovery semantics
+- grader/model/planner version metadata
+- provenance/source version where relevant
+
+Raw learner input should not be persisted unless the educational product explicitly requires it.
+
+### 1.4 Offline-first
+
+All core learning behavior must remain deterministic and usable offline.
+
+External APIs are content providers or optional fallbacks, never authorities for learner state or learning logic.
+
+### 1.5 Minimal-diff rule
+
+Prefer targeted seams and adapters over wholesale rewrites.
+
+Especially avoid:
+
+- replacing FSRS
+- replacing the Learner Model
+- replacing the planner because of presentation needs
+- large persistence migrations without measured need
+- broad file restructuring during active feature work
+
+---
+
+# 2. Status legend
+
+- **DONE** — verified as implemented on the current \`main\` baseline.
+- **PARTIAL** — meaningful implementation exists but the complete product behavior is not finished.
+- **PENDING** — required but not yet complete on current \`main\`.
+- **BLOCKER** — must be completed before the dependent phase can be considered production-ready.
+- **LATER** — intentionally deferred until evidence or scale justifies it.
+- **DO NOT REOPEN** — completed foundational behavior that should not be rewritten without a verified defect.
+
+## 2.0 Pre-Beta Hard Gate
+
+The following are release blockers, not merely roadmap work items. Public beta invitation requires evidence on one frozen/tagged candidate SHA for each applicable item:
+
+- **Release integrity:** green CI, successful Pages deployment, exact live artifact/hash equality, production smoke, cache/stale-client recovery, and offline smoke.
+- **Trust/data safety:** production auth lifecycle, RLS verification, canonical Supabase schema path, account/local deletion, export, and backup/restore including rollback/version-mismatch evidence.
+- **Security:** CSP, classified unsafe `innerHTML` sinks, reviewed/vendored security-sensitive runtime dependencies, dependency audit, secret/source-map review, and third-party runtime inventory.
+- **Failure containment:** global render/runtime recovery with actionable reload/backup/report behavior plus controlled diagnostics.
+- **Public UX:** onboarding/placement completion on representative mobile and desktop environments, with no blocking navigation/data-loss defects.
+- **Accessibility/device:** Tier 1/Tier 2 matrix evidence, manual VoiceOver/TalkBack/keyboard/zoom checks, and representative performance measurements.
+- **Content trust:** documented Kanji QA sampling, provenance labels, correction/reporting flow, and placement/content-match edge-case review.
+- **Governance/docs:** final Privacy/Terms, deletion/export semantics, third-party disclosure, LICENSE, release procedure, and reconciled product metadata.
+
+Configured workflows, open PRs, and prior-release evidence do not satisfy this gate by themselves.
+
+### 2.0.1 Educational Content & Assessment Hard Gate
+
+The 2026-10-06 educational/content audit is recorded in `docs/EDUCATIONAL-CONTENT-AUDIT.md`. C4 PR #469 is merged into current `main` at `81957a6065c7b271a3a697e0f41fd25f8bb048d8`. It is counted as implemented on `main`, but remains **PARTIAL for educational acceptance** until the remaining educational acceptance gates are independently satisfied. It identifies gaps between educational architecture, learner-facing content, assessment validity, and feature claims.
+
+Before Public Beta, the following educational gates are release blockers:
+
+- **Placement validity:** randomize answer position; use a documented item blueprint; remove level decisions based on tiny samples; define boundary/uncertainty handling; keep the diagnostic explicitly limited to Kanji starting-point knowledge rather than overall Japanese proficiency.
+- **Production fidelity:** make independent Kanji production the primary path; keep reveal/self-report and multiple choice as lower-evidence hint/recovery paths; preserve independent/assisted/revealed evidence semantics.
+- **Vocabulary/Context fidelity:** distinguish recognition/cued recall from independent production; provide an explicit progression toward typed/free recall where the feature name claims production or retrieval.
+- **Learner-content layer:** separate learner-priority meanings/readings/examples from raw dictionary/reference glosses without deleting source data; tier readings into core vs secondary/reference targets.
+- **Example/context quality:** validate not only structure and provenance but learner level, usefulness, naturalness, translation quality, and pedagogical value for sampled content.
+- **Mnemonic quality:** retain the curated/generated/personal distinction; treat 100% coverage as insufficient evidence of 100% quality; expand human-reviewed curated coverage over time.
+- **Learning-evidence validity:** do not present coverage, self-report, recognition, or geometric handwriting similarity as stronger evidence than the underlying modality supports.
+- **Educational efficacy:** distinguish implementation/test success from demonstrated learning benefit; use delayed/independent evidence before claiming adaptive superiority or tuning the planner from observational data.
+
+A feature may remain technically implemented while its educational validity remains PARTIAL. Such a feature is not considered fully public-beta-ready until the applicable educational acceptance criteria are met.
+
+---
+
+## 2.0.0 Agent-safe completion register — 2026-10-06
+
+This register is intentionally explicit so future contributors and agents do not restart completed work from historical roadmap text.
+
+### R12 — repository implementation COMPLETE; acceptance OPEN
+
+- **Implementation status:** **DONE / LANDED** on `main` through PR **#468**, merged at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`.
+- **Do not reimplement, re-audit from scratch, or reopen R12 repository hardening** unless a concrete regression or newly introduced security finding is demonstrated on current `main`.
+- R12 hardening already landed includes the audited unsafe-DOM/XSS cleanup, restrictive CSP/remote-runtime hardening, pinned/vendored Supabase client, backup integrity and payload bounds, dependency/source-map/security gates, and production RLS/non-owner denial verification.
+- **Acceptance status as of 2026-10-09:** current-main security/release checks and same-SHA GitHub Pages artifact/live-smoke verification passed on merge `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d` (see §2.1.1). R12 remains open for external clearance of the production `auth_leaked_password_protection` finding. The live Pages response did not expose an HTTP CSP header; the HTML meta CSP remains the source-level control.
+- The leaked-password-protection finding is an **external Supabase configuration/plan blocker**, not missing R12 repository implementation. Do not attempt to solve it by duplicating R12 code in the repository.
+- Historical R12 PR CI is evidence of the PR branch only; it must not be presented as current-main CI evidence.
+- If no R12 regression is demonstrated, **skip R12 implementation and proceed to the next roadmap item** while carrying these acceptance items as release evidence work.
+
+### Documentation rule for future work
+
+For every major task/stream, once implementation lands, record **(1) implementation status, (2) exact merge/commit evidence, (3) remaining acceptance-only items, (4) explicit blockers/ownership, and (5) a DO-NOT-REOPEN instruction** in the canonical roadmap and the relevant evidence document. Historical PR sections must never override the current-main status ledger.
+
+### 2.1 Verified current status ledger — 2026-10-09
+
+Only work present on current `main` counts as implemented. PRs that are open or stale are not completion evidence.
+
+### 2.1.1 Same-SHA UI release and live verification — 2026-10-09
+
+- **UI implementation:** PR **#499** merged at `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d` (tested head `e21b610afddee9290d45db6480b72fdd62739916`). It improves first-run onboarding progress and controls, keeps learning content first in DOM reading order, removes the duplicate Jōyō-coverage metric from Stats in favor of today's reviews, localizes Grammar lesson headings and semantics, progressively discloses advanced Dictionary filters with active-count/reset behavior, and balances Reading Lab analysis metrics.
+- **Current-main build:** [React presentation build run 37920914709](https://github.com/ArdKam/kanji5/actions/runs/37920914709) completed successfully: build job **50/50 steps**, WebKit compatibility **11/11**. The build, typecheck, dependency audits, presentation and secondary-experience E2E, performance artifact budget, accessibility, offline/stale-client, browser compatibility, PWA release matrix, onboarding, Stats, card flip, mnemonic, Review/Practice and Production Recall gates all passed.
+- **Deployment and live evidence:** [GitHub Pages deployment run 37921553667](https://github.com/ArdKam/kanji5/actions/runs/37921553667) completed successfully (**27/27 steps**) on the same SHA. Staged production verification and R12 source/artifact security checks passed; production resources returned HTTP 200; SHA-256 hashes of `index.html`, `react-entry.js`, `sw.js`, shipped React JS/CSS, and the pinned Supabase runtime matched the staged artifact; live offline/core-product E2E passed. The published site is [https://ardkam.github.io/kanji5/](https://ardkam.github.io/kanji5/).
+- **Performance artifact:** the shipped stylesheet was reported at 231.19 kB (36.78 kB gzip); the current-main performance/artifact budget gate passed. Keep CSS within this budget on subsequent work.
+- **Scope of evidence:** this proves the exact merge was built, deployed, hash-verified, and passed the configured live smoke checks. It is not a real-device/assistive-technology sign-off or a frozen public-beta promotion lock. R12 external acceptance remains open for the production Supabase leaked-password-protection finding; the response lacked an HTTP CSP header, with the deployed HTML meta CSP remaining in force.
+
+
+**DONE on current `main`:**
+- Bootstrap/runtime and React artifact hygiene.
+- Guest-first account safeguards and learner-state preservation/boot recovery.
+- Product positioning foundation, public Help/Browser/Privacy/Feedback surface.
+- R11 runtime failure diagnostics/observability implementation and React render-failure recovery are present on current `main` (merged #463 plus the earlier merged render-containment work); final production/release verification remains part of the release lock.
+- R2 onboarding implementation is present on current `main` (merged #451/#453/#454/#456); representative device/release evidence and educational validity evidence remain separate gates.
+- Final Kanji public UX/accessibility pass is present on current `main` via merged #464, covering concrete Learning, Active Recall, Stats, Settings, Dictionary, Reading Lab, Mnemonics, and Handwriting defects. Representative-device and assistive-technology evidence remains a release gate.
+- PR #499 is **DONE and live on current `main`**: onboarding/learning hierarchy, Stats metric semantics, Grammar localization/accessibility, progressive Dictionary filters, and Reading Lab metric-grid polish; exact-SHA build/deploy evidence is recorded in §2.1.1.
+- D1/D2/D3/D4/D5 cross-domain foundations.
+- Stats/Advanced Stats/learning-efficacy foundations.
+- Learning vs Active Recall, Learning Card pager/swipe/rating, keyboard/mobile contracts.
+- Reading Lab session/lookup/navigation/audio/speech/translation/annotation foundation.
+- Dictionary mobile/personal-mnemonic behavior.
+- Settings exercise toggles, Placement ownership, Data Backup/Restore foundation, reset separation.
+- Mnemonic information architecture, provenance, prepared coverage and current structural QA; educational-quality gaps remain tracked under C4.
+- PR #396 release-path hardening: explicit PWA install metadata/assets, public-doc staging, compatibility CI environment fixes, and support-link CSS budget fix.
+
+**PARTIAL / remaining before Public Product Readiness:**
+- A1 release integrity / RC execution: **DONE as a release-candidate process**. The project has already gone through repeated exact-SHA RC/CI/Pages verification cycles, including the A1 account-dialog and Production Recall keyboard fixes (#471/#472). Do **not** treat “run the release candidate again” as an implementation backlog item. A final release lock is a promotion/evidence action only when a new release candidate is intentionally frozen.
+- R2 onboarding redesign is **DONE on current `main`**: dedicated first-open value/setup/placement/account flow is implemented, guest-first, and covered by desktop/mobile E2E. Remaining work is release/real-device evidence plus the C4 educational validity gate for placement.
+- R4/R5/R6 implementation is **DONE on current `main`** via merged #467: domain-neutral storage adapter, bounded operational review history with cumulative aggregates, and versioned/integrity-checked backup with rollback journal. Remaining work is external acceptance evidence only: authenticated production sync/conflict verification and physical real-device Backup/Restore success/failure/rollback evidence.
+- R7 install/update/reinstall behavior needs Tier 1/Tier 2 device evidence.
+- R8/R9 offline and browser policy exist, but current-main/live/real-device evidence remains.
+- R10 full i18n audit remains.
+- R11 is **DONE as implementation on current `main`**: merged #463 closes runtime diagnostic gaps across service-worker, dynamic-import, network, migration, sync, and asset failure paths, while the previously merged React render-failure containment provides actionable recovery. Final production failure-injection/release evidence remains required.
+- R12 implementation is **DONE on current `main`** via merged #468 at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`. Production RLS/non-owner denial is verified and the repository security hardening is landed. R12 remains **OPEN for external acceptance only**: the production Supabase Security Advisor still reports `auth_leaked_password_protection`; exact post-merge CI/Pages artifact, hash, and live-smoke evidence is now recorded in §2.1.1. Do not claim external security sign-off until that Supabase finding is cleared.
+- R13 Terms, exact production-service disclosure, account/local deletion semantics, retention/export behavior, and target-market legal review remain.
+- R14 docs are now staged in the release path; production smoke verification remains.
+- R16 public Vocabulary/Context provenance rules remain to be finalized.
+- R17 complete new-user-to-recovery journey is not yet demonstrated on real target environments, including production account lifecycle, recovery UI, backup/restore, and failure containment.
+- **Educational validity audit:** placement, Production/Vocabulary/Context modality fidelity, learner-facing meaning/reading prioritization, example/context curation, mnemonic quality, and evidence-interpretation gaps are documented in docs/EDUCATIONAL-CONTENT-AUDIT.md. PR #469 is merged into current `main` at `81957a6065c7b271a3a697e0f41fd25f8bb048d8`. Its final pre-merge React presentation verification was green (40/40 gates). C4 remains PARTIAL only for the remaining educational acceptance gates: representative psychometric/placement validation and independent human/content QA against the final release candidate.
+
+**PENDING:**
+- R18 Public Beta.
+- R19 Public Release Gate.
+- E Vocabulary MVP.
+- F Context/Reading integration.
+- G Grammar foundation.
+
+**DO NOT REOPEN without a verified regression:**
+- A2, A3, A5, A6.
+
+**Implementation complete, educational-quality follow-up remains active:**
+- A7 mnemonic infrastructure/provenance/coverage.
+- D1, D2, D3, D4, D5.
+
+**Current release-critical open PRs not yet counted as complete:**
+- #468: R12 security hardening — **MERGED** into `main` at `fa37b536a50cf120b8f20062adcab57fc50d4bf2`; production acceptance remains open for the verified leaked-password-protection finding. Exact post-merge CI/Pages evidence is recorded in §2.1.1.
+- #465: R13 privacy/legal reconciliation (governance/legal work remains off `main` until reviewed/merged).
+
+**Recently merged and present on `main`:**
+- #467: R4–R6 Data Trust implementation.
+- #469: C4 educational content/assessment implementation; educational acceptance remains PARTIAL.
+- #471/#472: A1 account-dialog and Production Recall keyboard fixes.
+- #499: post-merge UI polish with exact-SHA live Pages verification; see §2.1.1.
+
+**Merged and now present on current `main`:**
+- #467: R4–R6 Data Trust implementation.
+- #469: C4 educational content and assessment validity; educational acceptance remains PARTIAL.
+- #471/#472: A1 release-gate fixes.
+- #499: onboarding, learning hierarchy, Stats, Grammar, Dictionary, and Reading Lab polish; merged and live at `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d`.
+
+**Documentation reconciliation:**
+- The current roadmap/release ledger has been updated to distinguish completed RC execution from the final promotion lock and to avoid counting merged R4–R6 as pending implementation.
+
+**Superseded/stale PRs that must not be treated as pending implementation:**
+- #392: superseded by merged R11 work in #463.
+- #398: superseded by current-main roadmap reconciliation.
+- #493: stale CSS artifact-budget PR, closed on 2026-10-09 after #499 removed the same unused CSS rule and current-main artifact/performance plus same-SHA Pages verification passed. Its remaining compatibility-server changes are superseded by the current HTTPS test server and passing separate WebKit job; its unrelated dictionary keyboard behavior should be reviewed separately if still wanted.
+---
+
+
+### 2.2 Canonical pre-Vocabulary execution sequence — 2026-10-03
+
+All work before Vocabulary must follow this order. Work may overlap only when it does not compete for the same authoritative boundary or shared files.
+
+**Stage 1 — Release Lock**
+- Establish one current-main release candidate.
+- Finish CI for that SHA.
+- Freeze one release-candidate SHA/tag.
+- Record green CI for that exact SHA.
+- Verify GitHub Pages deployment, exact live artifact/hash equality, live core smoke, cache invalidation, stale-client recovery, and offline smoke.
+- Record all release evidence against that exact SHA in `docs/RELEASE-EVIDENCE.md`.
+- No unrelated feature work should enter the release-critical path until the candidate is trustworthy.
+
+**Stage 2 — Trust Layer**
+- Complete account lifecycle: guest → account → sync → logout → return.
+- Verify Google, Email, Magic Link, and reset flows in production configuration.
+- Complete Supabase/RLS review against the production project and consolidate duplicate schemas into one canonical migration path.
+- Verify production auth flows (Google, email, magic link, reset) end-to-end.
+- Make backup/restore versioned, integrity-checked, migration-aware, corruption-resistant, and safe; prove real-device restore, version mismatch, rollback, and non-destructive/atomic behavior.
+- Define and implement account deletion, local-data deletion, export, retention, and third-party data semantics, then verify the deletion path in production.
+- Harden the security supply chain: CSP, `innerHTML`/unsafe-DOM audit, vendor/pin the Supabase client, and add dependency audit/maintenance controls.
+- Complete Privacy/Terms/legal review against actual production services and target markets.
+
+**Stage 3 — Public UX**
+- Finish onboarding redesign without making account creation mandatory.
+- Complete final UX passes for Learning, Active Recall, Stats, Settings, Dictionary, Reading Lab, Mnemonics, and Handwriting.
+- Close responsive, RTL/LTR, typography, loading/error/empty-state, keyboard, focus, touch-target, modal, safe-area, and mobile-keyboard defects.
+- Keep Learning and Stats information architecture separate.
+- Add only small high-value reliability UX that reduces user failure or confusion.
+
+**Stage 4 — Real Device / Accessibility / Performance**
+- Validate the Tier-1 and Tier-2 browser/device matrix.
+- Test installation, update, reinstall, offline/reconnect, persistence, sync, backup/restore, and accessibility on representative hardware.
+- Run manual VoiceOver, TalkBack, keyboard-only, focus, zoom, and mixed RTL/LTR checks.
+- Record LCP, INP, CLS, startup, long tasks, bundle/font cost, and slow-device behavior.
+- Optimize only where evidence identifies a meaningful product bottleneck.
+
+**Stage 5 — Content Quality**
+- Establish recurring QA for all 2,136 Kanji with a documented sampling protocol and recorded results.
+- Audit readings, meanings, examples, stroke data, radicals/components, pronunciation fallback, and mnemonic quality; explicitly recheck known grading/meaning-match edge cases.
+- Radical status: infrastructure/reference layer is established; the Dictionary now presents traditional radicals as optional visual learning cues. Do not create a radical deck, prerequisite, independent scheduler, or evidence stream before separate educational validation.
+- Treat coverage as necessary but not sufficient.
+- Add provenance labels and clear distinction between curated, generated/guided, and personal memory aids.
+- Establish context-aware content-report and correction workflow for readings, meanings, examples, strokes, radicals/components, and mnemonics.
+- Validate placement-test ambiguity/synonym handling before public beta.
+
+**Stage 6 — Reliability / Security / Governance**
+- Add production-grade error recovery and global failure containment.
+- Add global failure containment and actionable recovery for React/render failures, including reload, backup export, and reporting.
+- Finish observability for runtime, asset, sync, migration, service-worker, and dynamic-import failures.
+- Complete dependency/security/supply-chain review, CSP policy, secret/source-map checks, third-party runtime review, and dependency automation/audit.
+- Add/complete public repository governance: LICENSE, SECURITY, CONTRIBUTING, CODE_OF_CONDUCT where appropriate, issue/PR templates, stale-branch/PR cleanup, and release procedure.
+- Reconcile README, CHANGELOG, ROADMAP, product naming, manifest, title/metadata, and user documentation with actual behavior.
+
+**Stage 7 — Public Beta → Public Kanji Release**
+- Run a small real-user cohort across target devices.
+- Observe onboarding, first-session completion, placement quality, return behavior, offline use, sync, backup/restore, error recovery/reporting, content reports, and accessibility.
+- Fix high-frequency/high-severity issues and add regression tests for accepted defects.
+- Pass the final Public Release Gate before beginning Vocabulary implementation.
+
+**Only after Stage 7 is complete:** start the real Vocabulary runtime/content integration. Existing cross-domain foundations may be prepared in parallel when they do not change the public Kanji release surface.
+# 3. Current baseline and already-completed foundations
+
+The current \`main\` baseline is commit \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\`. Its implementation history immediately before the roadmap documentation includes:
+
+- \`0a0df45\` — D5 context migration and offline cross-domain dependency precaching.
+- \`75b9cb4\` — Stats learning-efficacy evidence surface.
+- \`6a21c08\` — D3 deterministic cross-domain relationships.
+- Earlier D1/D2 foundations remain on the same ancestry.
+
+For Kanji UX status, the current \`main\` also contains the equivalent of older open work represented by recent commits such as:
+
+- \`a2862e5\` — exposure-based Stats correction/hydration refresh.
+- \`75073f9\` — compact Learning session feedback.
+- \`be9a5d4\` — Reading Lab occurrence coverage/hardest-sentence focus.
+- \`547e4ad\` — narrow-mobile Dictionary section tabs.
+- \`5fe001bd\` — mnemonic generated-quality scaffolding/coverage work.
+
+These are not hypothetical contracts anymore; concrete source modules and behavioral tests exist on \`main\`.
+
+Current cross-domain files include:
+
+- \`v2-domain-core.js\`
+- \`v2-evidence-core.js\`
+- \`v2-relationship-core.js\`
+- \`v2-vocabulary-core.js\`
+- \`v2-vocabulary-learning-core.js\`
+- \`v2-vocabulary-view-core.js\`
+- \`v2-vocabulary-contract-core.js\`
+- \`v2-vocabulary-ui-adapter.js\`
+
+Vocabulary already has foundation tests covering:
+
+- identity
+- normalization
+- validation
+- evidence
+- recovery
+- view models
+- page contracts
+- UI adapter behavior
+- network normalization
+
+Therefore, the next task is **not** to invent the Vocabulary foundation from scratch. The next task is to connect the existing foundation to a real runtime, stable local content, and the public product surface.
+
+---
+
+# 4. Phase 0 — Release Integrity & Real Baseline
+
+## Goal
+
+Establish a trustworthy production baseline before product expansion.
+
+### 0.1 Runtime/bootstrap integrity — DONE / KEEP VERIFIED
+
+- Ensure \`app-bootstrap.js\` is present and loaded by the production entry path.
+- Preserve the correct runtime chain:
+  \`index.html → app-bootstrap.js → v1.9-v2-boundary.js → react-entry.js → React presentation\`.
+- Keep legacy runtime explicitly behind \`?legacy=1\`.
+- Do not allow accidental legacy/default presentation fallback.
+
+### 0.2 React artifact hygiene — DONE
+
+- Keep \`react-dist/\` out of git.
+- Generate shipped React artifacts during deployment.
+- Build from source during CI/deploy.
+- Verify the exact artifact that is shipped.
+
+### 0.3 Deployment gates — CONFIGURED; same-SHA release evidence still required
+
+Current deployment workflow contains gates for:
+
+- frontend typecheck
+- frontend build
+- shipped-artifact validation
+- performance/font-loading contract
+- service-worker shell contract
+- release-integrity contract
+- root contract/unit tests
+- Playwright engine↔React boundary gate
+- staged site verification
+- live GitHub Pages artifact verification
+
+PR #396 evidence: the complete React release matrix and engine build passed on head \`2bb01e010f791320eed0d80852b79234789a3330\`. After merge to \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\`, React push run **2488** is still in progress; engine push run **2324** has passed.
+
+A workflow definition is not evidence that a particular commit succeeded. Release records must distinguish:
+- workflow configured
+- workflow executed
+- workflow passed
+- live production verified
+- release candidate frozen/tagged
+- live artifact/hash equality recorded
+
+### 0.4 Cache and stale-client handling — current deployment green; candidate evidence must still be frozen and recorded
+
+- Verify cache invalidation across HTML, JS, CSS, service worker, and dynamically imported assets.
+- Verify stale-client recovery.
+- Verify no previous release can trap a user in a broken asset graph.
+- Treat dynamic-import failures as release blockers.
+- Keep service-worker shell and runtime asset lists synchronized.
+
+Evidence: PR #376 verified stale-release cache eviction and offline shell recovery; PR #396 re-verified the updated release path. **Latest same-SHA current-main verification (2026-10-09):** merged commit `a8f395c8c0071b92e0e6ad29e50c8ba9c163150d` passed React build and compatibility CI, was deployed to GitHub Pages, and passed live asset-hash/offline/core-product smoke checks (see §2.1.1). RC freeze/promotion lock and real-device acceptance remain separate release actions.
+
+### 0.5 Production smoke test
+
+For every release candidate:
+
+- cold load
+- repeat load
+- hard refresh
+- offline after first successful visit
+- offline cold start where supported
+- app restart
+- learning session start
+- card reveal
+- answer/rating
+- session completion
+- stats refresh
+- settings read/write
+- backup export
+- account state
+- PWA update path
+
+---
+
+# 5. Phase A — Finish the Kanji Foundation
+
+This phase makes the existing Kanji product trustworthy before new learning domains become first-class.
+
+---
+
+## A1. Release/runtime integrity
+
+### DONE — 2026-10-05
+
+The release/runtime integrity gate is verified through the exact promoted main candidate and production deployment.
+
+- React presentation workflow passed all 43 release steps on the candidate SHA.
+- GitHub Pages deployed the same candidate SHA and recorded the same `pages_build_version`.
+- Staged/live SHA-256 equality passed for `index.html`, `react-entry.js`, `sw.js`, React JS, and React CSS.
+- Live production smoke passed first open, React shell/bootstrap, Learning reveal/rating, review persistence across reload, Active Recall, Dictionary, Reading Lab persistence, Stats, Settings/backup, Account, cache checks, and uncaught-error detection.
+- Offline and stale-client PWA gates passed.
+- Firefox, WebKit, accessibility, final release matrix, onboarding, account, mnemonic, Learning/Review, and Production Recall release gates passed.
+- Startup performance budgets passed for desktop and the 390×844 mobile profile.
+- Release evidence is recorded in `docs/RELEASE-EVIDENCE.md`, bound to the exact immutable candidate commit.
+
+No Vocabulary, Grammar, R4 persistence migration, R11 observability, R12 security redesign, C4 educational-content work, or unrelated product changes are included in A1.
+
+## A2. Learning / Active Recall
+
+### DONE on current \`main\`; DO NOT REOPEN without a verified regression
+
+The current implementation and browser contracts cover the defined Learning/Active Recall separation, Learning Card hierarchy, pager/swipe/rating flow, compact session feedback, keyboard behavior, and exercise-toggle boundary.
+
+### Remaining verification only
+
+- Keep Learning and Active Recall conceptually separate.
+- Learning Card must remain focused on:
+  1. meaning/readings
+  2. examples
+  3. mnemonic
+  4. stroke order
+- Four card-page shortcuts must be real keyboard-accessible controls.
+- Correct left-to-right shortcut ordering for the reversed conceptual sequence already defined by the product.
+- Reliable next/previous navigation.
+- Reliable swipe behavior.
+- Rating/feedback stays in normal document flow above fixed-navigation clearance.
+- Prevent answer/reveal UI clipping on mobile and with keyboard open.
+- Preserve distinct Learning vs Active Recall information architecture.
+- Keep first exposure, recall, guided practice, and recovery behavior understandable.
+- Verify Production, Vocabulary, and Context exercise toggles reach the authoritative Active Recall engine.
+
+### Session Details
+
+The Learning page should **not** become a second Stats page.
+
+Keep session feedback compact.
+
+Do not restore analytics-heavy:
+- mastery distribution
+- seven-day analytics
+- detailed session breakdown
+- redundant skill analytics
+
+to the Learning page.
+
+Detailed analytics belong in Stats / Advanced Stats.
+
+---
+
+## A3. Stats correctness and information architecture
+
+### DONE on current \`main\`; DO NOT REOPEN without a verified regression
+
+Exposure-based studied/unseen/mastery corrections, first-read hydration, Advanced Stats, and deterministic learning-efficacy evidence are implemented on current \`main\`.
+
+### Source-of-truth rules
+
+- persisted learner exposure = source of truth for studied/seen/unseen
+- learner-model states = source of truth for mastery buckets
+- session aggregates = derived from authoritative session records
+- React must not recompute authoritative learning state
+
+### Fix and verify
+
+- studied count
+- unseen count
+- mastery distribution
+- skill percentages
+- recent activity
+- session aggregates
+- first-open hydration
+- refresh after underlying state mutation
+
+Specifically prevent false states such as:
+- previously studied users showing all skills at 0%
+- 2,136 unseen after exposure exists
+- mastery info not ready after normal startup
+
+### Stats IA
+
+Primary Stats should stay simple.
+
+Add an explicit **Advanced Stats** layer for:
+
+- attribute accuracy and attempt count
+- recent vs lifetime performance
+- recovery/repetition signal
+- repeated-failure signal
+- retention/progression when evidence exists
+- attribute coverage
+- mode distribution
+- session completion
+- average recalls
+- trend
+
+Do not create a dashboard maze.
+
+Show insufficient evidence instead of misleading percentages.
+
+---
+
+## A4. Reading Lab
+
+### Status — 2026-10-02
+
+**DONE for current public-readiness scope.** Core session/navigation/audio work plus lightweight translation/annotation and optional Japanese voice selection are implemented and covered by E2E. Reading Library remains a later post-foundation feature.
+
+### Core bug/UX requirements
+
+- Preserve entered text when scrolling.
+- Preserve selected words.
+- Preserve scroll position.
+- Preserve analysis state.
+- Dictionary lookup must be an in-place auxiliary action.
+- Do not destructively navigate away from Reading Lab.
+- Returning from lookup must preserve all progress.
+- Do not require the user to redo word-by-word inspection.
+
+### Navigation
+
+- Focus Next / Next Unknown
+- Next Unfamiliar
+- unique coverage
+- occurrence-weighted coverage
+- hardest / most attention-demanding sentence
+
+All must use authoritative mastery state where applicable.
+
+### Audio / context roadmap
+
+- sentence autoplay
+- repeat sentence
+- manual previous/next
+- SRT/VTT synchronization
+- clear active cue
+- optional voice selection where browser support exists
+
+### Support layer
+
+- lightweight sentence translation/annotation
+- contextual word support
+- compact mastery micro-popover
+
+### Boundaries
+
+Reading Lab must not:
+- become a scheduler
+- mutate SRS
+- mutate authoritative grading
+- maintain a competing mastery model
+- become a generic AI chat or all-in-one language tutor
+
+### Reading library
+
+Later:
+
+- saved readings
+- source/title metadata
+- resume state
+- sentence mining
+- Vocabulary/SRS integration only after Vocabulary identity/content/learning foundations are mature
+
+---
+
+## A5. Dictionary
+
+### DONE on current \`main\`; remaining work is release verification only
+
+Narrow-mobile tabs and dictionary personal-mnemonic draft preservation are implemented.
+
+### Requirements
+
+- Kanji tabs fit at 360/375/390px without overflow.
+- preserve personal-mnemonic drafts through remounts/async loads
+- predictable lookup/navigation state
+- factual dictionary content separate from learner-state indicators
+- readings, meaning, examples, stroke information prioritized
+- avoid excessive density
+- avoid navigation patterns that destroy Reading Lab state
+- keep dictionary browsing distinct from active learning
+
+---
+
+## A6. Settings
+
+### DONE on current \`main\`; remaining work is release verification only
+
+Exercise toggles, Placement/Test ownership, Data Backup/Restore, and reset separation are implemented and contract-tested.
+
+### Requirements
+
+- active-learning exercise toggles remain authoritative and test-backed
+- Production/Vocabulary/Context toggles reach the engine
+- stable Save Changes positioning
+- remove duplicate Placement Test entry points
+- document canonical Personal Mnemonics location
+- Data Backup / Restore
+- deterministic safe restore semantics
+- destructive/reset actions secondary and clearly separated
+- settings persist through reload/offline
+- settings do not accidentally reset navigation/session state
+
+---
+
+## A7. Mnemonics / memory aids
+
+### Status — 2026-10-03
+
+**PARTIAL for educational quality; infrastructure is implemented.** Prepared coverage remains 2,136/2,136 with 259 curated + 1,877 generated scaffolds. Provenance, persistence, structural checks, duplicate guards, and representative semantic sentinels are implemented. The audit now explicitly treats the large generated/scaffolded majority as a quality workstream rather than equating coverage with learner-tested quality.
+
+### Information architecture
+
+Clearly distinguish:
+
+- curated prepared mnemonics
+- generated/guided scaffolds
+- personal mnemonics
+
+### Requirements
+
+- explain what each type is for
+- ensure actual mnemonic content renders
+- show provenance/type labels where needed
+- do not imply generated material is curated
+- adaptive disclosure
+- preserve personal-mnemonic editing/persistence
+- audit quality, not only coverage
+
+Current milestone principle:
+
+**100% coverage ≠ 100% quality.**
+
+Continue auditing:
+- semantic usefulness
+- reading relevance
+- ambiguity
+- memorability
+- malformed/missing entries
+
+---
+
+## A8. Responsive/accessibility/performance polish — DONE for current Kanji UX implementation; release/device evidence pending
+
+### Responsive widths
+
+Explicitly audit:
+
+- 360px
+- 375px
+- 390px
+- tablet
+- desktop
+
+### Accessibility
+
+Target WCAG 2.2 AA-compatible behavior.
+
+Audit:
+
+- keyboard navigation
+- focus visibility
+- focus management
+- screen-reader semantics
+- live regions
+- touch targets
+- dialogs
+- fixed bottom navigation clearance
+- safe-area handling
+- reduced-motion
+- form/input semantics
+- Japanese language tagging
+- IME behavior
+- error announcements
+
+### Performance
+
+Track:
+
+- LCP
+- INP
+- CLS
+- first interaction
+- long tasks
+- JS cost
+- CSS cost
+- font loading
+- dynamic imports
+- repeat startup
+- offline startup
+
+The previously observed poor startup/LCP behavior must be treated as a product issue, not a cosmetic issue.
+
+Existing/open performance work must be rebased against current \`main\` before integration.
+
+---
+
+# 6. Phase B — Measurement and Learning Evidence
+
+## B1. Core metrics
+
+### Status — 2026-10-02
+
+**DONE on current `main`.** Stats distinguish exposure, attempts, cards, mastery, and completion and reconcile with authoritative learner data.
+
+Every metric must clearly distinguish:
+
+- exposure
+- attempt
+- card
+- mastery
+- completion
+
+Metrics must reconcile with authoritative data.
+
+## B2. Advanced Stats
+
+### Status — 2026-10-02
+
+**DONE on current `main`.** Advanced Stats is optional, evidence-aware, read-only, and separate from the primary Stats surface.
+
+Secondary and explicitly optional.
+
+Expose:
+
+- attribute accuracy
+- attempt count
+- recent vs lifetime
+- recovery
+- repeated failures
+- retention/progression where evidence exists
+- attribute coverage
+- mode distribution
+- session completion
+- average recalls
+- trend
+
+Keep sample-size/evidence thresholds visible where interpretation is unstable.
+
+Stats remain read-only.
+
+## B3. Learning efficacy
+
+### Status — 2026-10-02
+
+**DONE on current `main`.** Deterministic learning-efficacy evidence is implemented without automatically tuning the planner from observational metrics.
+
+Use deterministic evaluation to distinguish:
+
+- product/runtime failures
+- learner outcomes
+- planner/recovery behavior
+
+Do not automatically tune the planner from observational metrics.
+
+---
+
+# 7. Phase C — Content Quality
+
+## C1. Kanji and mnemonic QA
+
+### Status — 2026-10-03
+
+**PARTIAL for learner-facing quality.** Coverage/provenance/structural QA are implemented, but learner-priority meanings/readings, example usefulness, ambiguous answer handling, and mnemonic quality still require the acceptance work documented in C4.
+
+Audit:
+
+- missing content
+- malformed content
+- semantic usefulness
+- reading relevance
+- ambiguity
+- generated mnemonic quality
+- prepared-vs-generated provenance
+
+## C4. Educational content & assessment validity — BLOCKER for Public Beta
+
+### Status — 2026-10-05
+
+**PARTIAL — implementation gates materially advanced; Public Beta acceptance still blocked.** The C4 implementation now corrects the Production default, exposes conservative Vocabulary/Context modality labels, adds learner-priority meaning/reading projection, and surfaces placement uncertainty. The implementation-level placement position-bias screen now passes on the actual 2,136-item dataset; remaining Public Beta blockers are psychometric/representative response validation and independent human/content QA.
+
+See docs/EDUCATIONAL-CONTENT-AUDIT.md for the full evidence and rationale.
+
+### C4.1 Placement validity
+
+**PARTIAL — core implementation complete; broader validity evidence remains.**
+
+Implemented in the placement assessment v2 candidate:
+- 20-item N5–N2 blueprint with five items per band, stratified across each band's frequency-order range;
+- new Kanji samples as well as answer-position randomization on retake;
+- four unique options with one answer key, using learner-priority meaning projection;
+- 4/5 (80%) provisional band threshold and a contiguous recommendation that cannot skip a failed lower band;
+- persisted assessment seed so a resumed onboarding run reconstructs the same questionnaire;
+- per-band result profile with provisional, boundary, or limited confidence wording;
+- regression coverage against the actual Kanji catalog and same-seed reproducibility.
+
+Remaining before Public Beta:
+- representative-response validation of placement stability/bias beyond implementation-level sampling and answer-position screens;
+- independent production-item review for gloss correctness and distractor plausibility;
+- independent human/content QA recorded against the frozen release SHA;
+
+
+### C4.2 Exercise-modality fidelity
+
+**Updated on 2026-10-05.**
+
+- Production: typed independent Kanji production is now the default; reveal/self-report and choice-hint paths are lower-evidence alternatives.
+- Vocabulary: current UI is explicitly labeled cued Kanji completion.
+- Context: current UI is explicitly labeled cued sentence completion.
+- Evidence preserves modality, independence, recovery, and reveal metadata; hint-assisted production is recorded as `cued_production` rather than independent production.
+- Preserve modality, independence, recovery, and reveal metadata in evidence and Stats.
+- Ensure UI copy describes the modality actually being tested.
+
+### C4.3 Learner-facing Kanji content model
+
+**Implementation added on 2026-10-05; human QA still pending.**
+
+The learner-facing projection now defines:
+
+- primary meanings
+- secondary/common meanings
+- reference/dictionary meanings
+- core readings
+- vocabulary-supported readings
+- reference readings
+- learner-priority example words
+- provenance/source version
+
+Do not delete source meanings; reclassify their learner priority.
+
+### C4.4 Vocabulary and Context content QA
+
+**Implementation/fixture layer added on 2026-10-05; independent human QA remains required.**
+
+For sampled and high-priority content, review:
+
+- learner level
+- frequency/usefulness
+- naturalness
+- translation quality
+- target usage
+- grammar burden
+- unknown-vocabulary burden
+- duplicate/near-duplicate examples
+- rare/obsolete/unsuitable entries
+
+Structural validation alone is not sufficient for public-beta content acceptance.
+
+### C4.5 Mnemonic quality
+
+**Provenance checks retained and regression-covered on 2026-10-05; human review remains pending.**
+
+- Keep curated, generated/scaffolded, and personal mnemonics explicitly distinct.
+- Grow curated coverage for high-frequency, high-confusion, irregular-reading, and visually deceptive Kanji.
+- Add human review alongside structural/regex checks.
+- Track usefulness/memorability samples rather than only coverage.
+
+### C4.6 Learning-efficacy interpretation
+
+- Do not equate exposure with mastery.
+- Do not equate recognition with production.
+- Do not equate self-report after reveal with independent retrieval.
+- Do not equate Kanji coverage with reading comprehension.
+- Do not equate handwriting geometric similarity with overall handwriting proficiency.
+- Do not claim adaptive superiority until a baseline/delayed-evidence comparison exists.
+
+### C4.7 Acceptance evidence
+
+**Current status: PARTIAL.** C4 is not marked DONE. It is complete only when applicable:
+
+- the Educational Content Audit has no unresolved P0 issue;
+- placement bias/validity tests pass;
+- modality labels match actual interaction;
+- learner-facing meanings/readings have a documented prioritization model;
+- sampled examples/context pass human/content QA;
+- mnemonic provenance and quality reporting are current;
+- evidence semantics remain conservative and interpretable;
+- the release candidate records the educational QA result against the exact frozen SHA.
+
+### C4.8 Non-goals
+
+C4 does not authorize:
+
+- rewriting FSRS;
+- creating a second scheduler;
+- duplicating learner state in React;
+- turning Reading Lab into a grammar/AI tutor;
+- broad Vocabulary runtime integration before the Public Kanji Release gate.
+
+## C2. Vocabulary QA policy
+
+### Status — 2026-10-02
+
+**DONE as a foundation policy.** Current Vocabulary contracts define deterministic normalization/validation and provenance expectations; full dataset acceptance remains part of E2.
+
+Before public Vocabulary release, define deterministic validation for:
+
+- spelling
+- reading
+- glosses
+- duplicates
+- source/provenance
+- source version
+- linked Kanji
+- frequency
+- JLPT metadata where available
+- POS
+- rare/obsolete/unsuitable entries
+- empty examples
+- fallback selection
+
+## C3. Context QA policy
+
+### Status — 2026-10-02
+
+**DONE as a foundation policy.** Current context ingestion validates sentence/translation presence, target containment, provenance, and network fallback behavior; full content-source acceptance remains part of F.
+
+Validate:
+
+- Japanese sentence
+- translation
+- target-kanji placement
+- malformed/empty content
+- source provenance
+- offline cache/fallback
+
+---
+
+# 8. Phase R — Public Product Readiness
+
+This phase is the major addition caused by the transition from a personal project to a public product.
+
+It sits **before broad Vocabulary/Grammar expansion**.
+
+---
+
+## R1. Product positioning — DONE ON CURRENT MAIN
+
+Define and expose:
+
+- what Rinemi is
+- who it is for
+- what the daily learning loop is
+- what FSRS does
+- what Learning vs Active Recall means
+- expected daily commitment
+- what requires an account
+- what works offline
+
+The first-open experience must not assume personal knowledge of the project.
+
+---
+
+## R2. Onboarding — DONE on current `main`; release/device/C4 evidence pending
+
+### New user
+
+Target flow:
+
+**First Open → understand value → set daily goal → optionally create account → start first learning session**
+
+### Returning user
+
+Target flow:
+
+**Open → today's work → learn/review → finish**
+
+Onboarding must not repeatedly interrupt returning users.
+
+Placement-test acceptance:
+- validate ambiguous meanings and synonym-equivalent answers
+- document scoring/threshold behavior
+- verify that answer-key wording does not create obvious false confidence or obvious misplacement
+
+---
+
+## R3. Guest-first account model — DONE ON CURRENT MAIN
+
+Prefer:
+
+- local use without mandatory sign-up
+- optional account creation later
+- explicit explanation of account benefits
+
+Account benefits may include:
+
+- cross-device sync
+- recovery
+- persistence beyond a single installation
+- future cross-device features
+
+Do not make account creation an unnecessary barrier to first learning.
+
+---
+
+## R4. Data safety / persistence
+
+### Required public behavior
+
+Verify:
+
+- save
+- reload
+- browser restart
+- tab close/reopen
+- offline use
+- account login
+- account logout
+- account return
+- sync retry
+- conflict handling
+- backup restore
+- migration from existing user state
+- failure recovery
+
+### Storage strategy
+
+Do **not** start with a full IndexedDB rewrite just because public users are coming.
+
+Domain-neutral persistence is now implemented on current `main` via the Data Trust R4 stream (PR #467). R4 remains open only for final external evidence: live authenticated production sync/conflict verification and post-merge re-verification.
+
+Conceptually:
+
+- LearningStore
+  - Kanji cards
+  - Vocabulary cards
+  - Evidence
+  - Reviews
+  - Sessions
+  - settings
+
+Then measure actual user-state size and write frequency.
+
+Move to IndexedDB only when:
+- volume
+- browser quota
+- write performance
+- history retention
+- cross-domain scale
+
+justify it.
+
+---
+
+## R5. Review-history scalability
+
+Current state is bounded/compacted rather than an unlimited event store. R5 is implemented on current `main` with a 2,000-event operational cap, separate cumulative review aggregates, and a 90-day daily rollup; final completion still requires post-merge verification.
+
+Do not assume an obsolete numeric cap from older audits.
+
+Required work:
+
+- preserve a bounded operational review history
+- preserve long-term aggregates separately
+- prevent Stats degradation when raw history is compacted
+- ensure analytics remain explainable after compaction
+- later consider event/rollup storage in IndexedDB if usage warrants it
+
+---
+
+## R6. Backup / Restore
+
+Backup/Restore is implemented on current `main` as a versioned v2 envelope with v1 migration, integrity validation, and journaled rollback/startup recovery. R6 remains open only for physical real-device success/failure/rollback evidence and post-merge verification.
+
+Backup must be:
+
+- versioned
+- deterministic
+- integrity-checked
+- migration-aware
+- corruption-resistant
+- safe against accidental overwrite
+
+Restore must:
+- validate before applying
+- explain what will be changed
+- avoid silent destructive replacement
+- preserve compatibility with existing learner state
+- snapshot or otherwise protect the prior state before applying
+- behave atomically on failure and support rollback/version-mismatch handling
+
+Release evidence must include at least one representative real-device restore and failure/rollback case.
+
+---
+
+## R7. PWA installability
+
+Audit the PWA across major supported platforms.
+
+At minimum:
+
+- Chrome Android
+- Safari iOS
+- Chrome desktop
+- Edge desktop
+- Safari macOS
+- Firefox desktop
+
+Verify:
+
+- installability
+- icon
+- launch behavior
+- standalone mode
+- theme
+- splash/start experience
+- offline
+- update behavior
+- reinstall behavior
+
+Explicit install metadata/assets are now present on current `main`; remaining work is cross-platform install/update/reinstall evidence.
+
+---
+
+## R8. Offline reliability
+
+Define an explicit offline matrix.
+
+Offline should support the core learning loop:
+
+- learning
+- Active Recall
+- FSRS scheduling
+- learner state
+- prepared mnemonics
+- local content
+- essential dictionary/content already available locally
+
+Network-only operations should degrade gracefully:
+
+- account sync
+- remote content fetch
+- optional external APIs
+
+On reconnect:
+
+**local learning state → sync → conflict resolution → reconciled state**
+
+No reconnect action may silently reset navigation or learning progress.
+
+---
+
+## R9. Browser compatibility policy
+
+Define browser support tiers.
+
+### Tier 1
+
+- Chrome Android
+- Safari iOS
+- Chrome Windows/macOS
+- Edge Windows
+
+### Tier 2
+
+- Safari macOS
+- Firefox desktop
+- other modern evergreen browsers where practical
+
+Document:
+
+- supported
+- best effort
+- unsupported
+
+Do not promise unsupported platform behavior.
+
+---
+
+## R10. Internationalization
+
+Separate:
+
+**UI language** from **learning content language**.
+
+Japanese content remains Japanese.
+
+Internationalize:
+
+- UI labels
+- errors
+- empty states
+- dates
+- numbers
+- pluralization
+- settings
+- onboarding
+- accessibility labels
+- notifications
+
+Keep engine behavior independent from presentation language.
+
+---
+
+## R11. Error handling and observability — DONE on current `main`; final release verification pending
+
+Public users need actionable failure states.
+
+Capture/handle:
+
+- uncaught JS errors
+- unhandled promise rejections
+- sync failures
+- data migration failures
+- asset load failures
+- service worker failures
+- dynamic import failures
+
+At minimum retain enough diagnostics to answer:
+
+- what failed
+- where
+- which release/version
+- browser/platform
+- whether user data was affected
+
+Add a global React/render-failure containment boundary with an actionable recovery screen. Recovery should provide, as applicable:
+- reload/retry
+- export backup
+- report the problem
+
+Controlled-failure diagnostics may remain local/opt-in; do not introduce invasive analytics merely for observability.
+
+---
+
+## R12. Security
+
+Perform a dedicated public-release security review.
+
+Audit:
+
+- XSS
+- unsafe DOM injection
+- \`innerHTML\` boundaries
+- Content Security Policy
+- auth/session handling
+- Supabase RLS
+- unauthorized read/write paths
+- backup tampering
+- sync abuse
+- rate limiting where needed
+- dependency vulnerabilities
+- accidental secret exposure
+- production source-map/data exposure
+- third-party CDN dependencies
+- runtime loading of security-sensitive libraries
+- dependency audit/maintenance policy
+
+For security-sensitive browser dependencies such as the Supabase client:
+- pin a reviewed version
+- prefer a vendored/local build over runtime CDN loading
+- precache the shipped dependency for offline/auth resilience
+
+CSP must be an explicit release control, not merely a documentation item. Every legacy `innerHTML` sink must be classified, and provider/user-controlled content must not reach unsafe HTML sinks without an explicit trusted transformation.
+
+Any externally supplied text must be treated as untrusted content.
+
+In particular, existing runtime \`innerHTML\` paths must be reviewed before external Vocabulary/Context text enters them.
+
+---
+
+## R13. Privacy and legal surface — PARTIAL / release blocker
+
+- Product-accurate Privacy & Data draft reconciled with current runtime.
+- Terms remain a legal-review draft and do not claim unimplemented capabilities.
+- Account deletion: **NOT IMPLEMENTED** in the current browser account API/UI.
+- Local-data deletion: learning-progress reset exists, but complete browser-data erasure is **NOT IMPLEMENTED**.
+- Export/backup scope and exclusions are documented.
+- Retention periods are intentionally **UNDEFINED** until owner/counsel approval; no fixed period is invented.
+- Supabase/Auth, Google OAuth, KanjiAPI/EDRDG, Tatoeba, KanjiVG, GitHub Pages/Issues, and the vendored Supabase runtime are disclosed at repository level.
+- No application-level product analytics/advertising SDK or analytics-cookie implementation was found in the audited surface.
+- Security/public feedback channels are documented; a dedicated private privacy/account request channel is **NOT OPERATIONAL**.
+- Age/child-user treatment and final target markets are **UNDECIDED** and remain owner/legal decisions.
+- Project-level LICENSE is **NOT APPROVED**; the repository placeholder is not a license grant.
+- Final owner/counsel approval remains required before Public Beta.
+
+Legal requirements must be reviewed against actual production configuration, target markets, and business model. Do not infer legal rights, retention periods, deletion capabilities, age restrictions, or license grants from repository documentation alone.
+
+- **R13 repository-side status:** documentation/governance reconciliation complete on the R13 branch; non-engineering blockers remain explicit.
+
+---
+
+## R14. User help/documentation — IMPLEMENTED; PRODUCTION VERIFICATION REMAINS
+
+Provide user-facing documentation for:
+
+- How Rinemi works
+- How FSRS works at a user-appropriate level
+- Learning vs Active Recall
+- rating meanings
+- what happens to data
+- account/sync behavior
+- backup/restore
+- offline mode
+- PWA installation
+- common recovery steps
+
+Documentation should be separate from developer architecture documents.
+
+---
+
+## R15. Feedback and support — DONE ON CURRENT MAIN
+
+Provide simple paths for:
+
+- report a problem
+- send feedback
+- request a feature
+
+Do not build a full community/social system.
+
+Use feedback to identify:
+- onboarding confusion
+- recurring UX defects
+- device/browser-specific issues
+- content problems
+- learning-flow problems
+
+General feedback is not sufficient for content QA. Provide a context-aware content correction/report path so a user can identify a wrong reading, meaning, example, stroke/radical/component entry, or mnemonic.
+
+---
+
+## R16. Content/data provenance for public users
+
+Whenever relevant, expose provenance without overwhelming users.
+
+Examples:
+
+- source
+- source version
+- curated/generated status
+- dictionary/provider origin
+
+External providers must never silently become learning authorities.
+
+---
+
+## R17. Public product quality bar
+
+A new user should be able to:
+
+- open Rinemi
+- understand what it does
+- start without help
+- complete a session
+- understand the feedback
+- close/reopen the app
+- continue later
+- use core learning offline
+- recover from a failed sync
+- backup/restore their progress
+- install the PWA
+
+without developer intervention.
+
+---
+
+## R18. Public Beta
+
+Before broad release:
+
+- recruit a small real-user cohort
+- collect structured feedback with severity/category fields
+- test different device/browser combinations
+- use the beta to validate real-user onboarding and placement behavior, not merely automated flow completion
+- observe onboarding
+- observe first session completion
+- inspect sync/offline failures
+- inspect content reports
+- inspect performance
+- inspect accessibility problems
+- fix high-frequency/high-severity public issues
+
+Do not interpret automated test success as proof of public usability.
+
+---
+
+## R19. Public Release Gate
+
+Do not publicly promote Rinemi beyond beta until:
+
+- no known critical data-loss path
+- no known critical asset/deploy path
+- offline core learning works
+- account/sync behavior is explainable
+- backup/restore is reliable
+- security pass is complete, including production RLS, CSP, unsafe-DOM, and dependency/supply-chain checks
+- privacy/legal surface exists and matches implemented deletion/export/third-party behavior
+- accessibility baseline is met through both automated checks and manual representative assistive-technology testing
+- major target browsers/devices are validated
+- the candidate is frozen/tagged and release evidence is recorded against the exact promoted SHA
+- onboarding is understandable
+- public error reporting exists
+- user documentation exists
+- production smoke test passes
+- public failure recovery is available for render/runtime failures
+- content correction/reporting is available
+
+---
+
+## R20. Scale Gate — intentionally later
+
+Only after real usage justifies it:
+
+- IndexedDB migration
+- record/event-level sync
+- more advanced telemetry
+- backend scaling
+- sync conflict tooling
+- larger content indexes
+- deeper performance optimizations
+
+Scale work must be evidence-driven.
+
+---
+
+# 9. Phase D — Cross-domain Foundation
+
+D1–D3 are already implemented on current \`main\`.
+
+---
+
+## D1. Canonical identity — DONE
+
+Implemented:
+
+- domain validation
+- canonical Content IDs
+- separate Card IDs
+- identity schema version
+- compatibility with existing Kanji identities
+
+Covered domains:
+
+- kanji
+- vocabulary
+- context
+- grammar
+
+---
+
+## D2. Shared evidence envelope — DONE
+
+Implemented/shared:
+
+- cross-domain evidence shape
+- outcomes
+- content identity
+- provenance/version metadata where available
+
+---
+
+## D3. Relationships — DONE
+
+Implemented deterministic relationships.
+
+At minimum support:
+
+- vocabulary ↔ kanji
+- vocabulary ↔ context
+- room for grammar ↔ vocabulary/context
+
+Relationships must remain deterministic and versionable.
+
+---
+
+## D4. Scheduling boundary — DONE / BLOCKER FOR FULL VOCABULARY LEARNING
+
+This is the correct interpretation of the earlier SRS concern.
+
+Do not rewrite FSRS.
+
+Do not build separate Vocabulary/Grammar schedulers.
+
+Instead:
+
+- define how domain/skill planning selects content
+- create distinct card identities
+- feed cards into the same authoritative scheduling authority
+- allow planner priorities to influence selection
+- preserve existing review semantics
+- preserve daily-goal and session semantics
+- preserve recovery behavior
+- keep domain-specific evidence separate from scheduler mechanics
+
+Target architecture:
+
+**Domain content → skill/evidence → planner/session selection → Card identity → FSRS**
+
+not:
+
+**Kanji Scheduler + Vocabulary Scheduler + Grammar Scheduler**
+
+---
+
+## D5. Persistence/offline seam — DONE
+
+The initial D5 migration/offline seam is implemented on current \`main\` via the context identity migration and cross-domain dependency precaching. This is distinct from the still-pending Phase R storage abstraction.
+
+Completed minimum foundation:
+
+- cross-domain identity migration for persisted Context data
+- offline precaching of cross-domain identity dependencies
+- migration and dependency contract coverage
+- compatibility with existing Kanji state
+
+Remaining persistence scalability work belongs to Phase R (public data safety/review-history scalability) and the later scale gate. Do not restart D5 as a full storage-backend rewrite without measured need.
+
+---
+
+# 10. Phase E — Vocabulary MVP
+
+Vocabulary is the first major learning-domain expansion.
+
+The foundation is already substantially implemented.
+
+---
+
+## E1. Content model — FOUNDATION DONE / PIPELINE PENDING
+
+Current foundation supports:
+
+- domain
+- contentId
+- written form
+- reading
+- lemma
+- glosses
+- POS
+- linked Kanji
+- source/provenance
+- source version
+- normalization/validation
+
+### Remaining
+
+Build a public-quality local dataset pipeline.
+
+Requirements:
+
+- versioned source input
+- deterministic build script
+- deterministic normalization
+- deterministic deduplication
+- deterministic filtering
+- provenance retention
+- reproducible output
+- attribution/license compliance
+- sharded/local lazy-loadable content
+
+JMdict is an appropriate candidate source, subject to current licensing/attribution review.
+
+Do not make live \`kanjiapi.dev\` requests the core Vocabulary content authority.
+
+---
+
+## E2. Vocabulary content coverage
+
+Vocabulary must include more than “words attached to a Kanji”.
+
+Include:
+
+- common multi-Kanji words
+- kana-only words where pedagogically appropriate
+- words whose identity cannot be derived merely from a single character lookup
+- readings
+- glosses
+- POS
+- frequency where available
+- JLPT/level metadata where reliable
+- source/provenance
+
+The current per-Kanji API strategy is acceptable as a legacy/example fallback, not as the final Vocabulary database.
+
+---
+
+## E3. Vocabulary learning state — FOUNDATION DONE
+
+Existing Vocabulary evidence model supports:
+
+- unseen
+- introduced
+- retrievable
+- stable
+- exposure
+- practice
+- correct/wrong
+- independent practice
+- recovery
+- mistake selection
+- accuracy/error rate
+
+Do not replace this state model unnecessarily.
+
+---
+
+## E4. Vocabulary learning modes — PENDING
+
+Start with a small deterministic set.
+
+Recommended initial learning loop:
+
+1. introduction
+2. guided recognition
+3. reading/retrieval
+4. contextual/word-completion practice
+5. independent recall
+6. recovery when needed
+7. scheduled review
+
+Prioritize:
+
+- recognition
+- reading
+- word completion
+- contextual use
+
+Avoid over-relying on unrestricted English/Persian free-text meaning grading.
+
+Any free-text meaning grading must use explicit accepted-answer sets/rules rather than a fuzzy external authority.
+
+---
+
+## E5. Vocabulary scheduler integration — BLOCKER
+
+- reuse existing FSRS authority
+- reuse session planning seams
+- reuse recovery
+- reuse evidence
+- prevent a single global “Kanji new-card quota” from accidentally controlling the entire product
+- define deterministic domain-aware selection without creating a second scheduler
+- make user-visible daily counts understandable
+
+The important distinction is:
+
+**domain-aware card/content selection** versus **a new domain-specific scheduler**.
+
+Only the former is allowed.
+
+---
+
+## E6. Vocabulary React UX
+
+A React Vocabulary page shell already exists on an open branch, but the open PR is not current \`main\`.
+
+When integrating, build from the current main baseline.
+
+The final Vocabulary page should support:
+
+- search
+- status/stage filtering
+- vocabulary detail
+- linked Kanji
+- evidence summary
+- focused learning action
+- mobile-friendly layout
+- predictable navigation
+- clear distinction between browsing and learning
+
+Do not merge stale PR state without rebasing/rebuilding.
+
+---
+
+## E7. Vocabulary ↔ Dictionary relationship
+
+Dictionary browsing:
+
+**reference-first**
+
+Vocabulary learning:
+
+**learning-first**
+
+A dictionary lookup should not silently mutate Vocabulary SRS state.
+
+---
+
+## E8. Vocabulary ↔ Reading Lab
+
+Reading Lab should be able to provide a path:
+
+**sentence → word → vocabulary identity**
+
+but only after:
+
+- stable vocabulary identity
+- stable content metadata
+- stable learner state
+- reliable persistence
+
+Reading Lab remains a workbench, not a competing scheduler.
+
+---
+
+## E9. Vocabulary stats
+
+Add Vocabulary information into existing Stats architecture.
+
+Do not create a separate vocabulary dashboard.
+
+Only show detailed evidence when sample size is meaningful.
+
+---
+
+## E10. Vocabulary offline
+
+Vocabulary core content should be locally available in versioned/sharded assets.
+
+Offline learning must not depend on querying an external API.
+
+External providers can be optional update/build sources.
+
+---
+
+## E11. Vocabulary acceptance gate
+
+Complete only when all are true:
+
+- stable identity
+- validated dataset
+- provenance/versioning
+- deterministic grader
+- evidence integration
+- FSRS scheduling integration
+- recovery integration
+- session integration
+- persistence/migration
+- offline fallback
+- browser E2E
+- responsive/accessibility coverage
+- public-facing UX
+- content QA
+- no accidental Kanji-only assumptions remain
+
+---
+
+# 11. Phase F — Context and Reading Integration
+
+After Vocabulary is mature.
+
+## F1. Context model
+
+Define stable Context content identity.
+
+Example:
+
+\`context:tatoeba:12345\`
+
+Keep:
+
+- source
+- source version
+- Japanese sentence
+- translation
+- target placement
+- linked Vocabulary
+- linked Kanji
+
+---
+
+## F2. Context evidence
+
+Use context as evidence for:
+
+- comprehension
+- recognition
+- retrieval
+- reading
+- contextual use
+
+Do not make context another duplicate SRS system.
+
+---
+
+## F3. Reading Lab integration
+
+Target product chain:
+
+**Text → Sentence → Word → Kanji → Mastery → Audio → Next focus**
+
+Keep existing Reading Lab boundaries.
+
+Do not let sentence analysis silently alter authoritative learner state unless the learning flow explicitly records an educational outcome.
+
+---
+
+## F4. Sentence mining
+
+Add only after Vocabulary identity and persistence are stable.
+
+Support:
+
+- saved sentence
+- source/title
+- resume
+- selected word
+- linked vocabulary
+- optional learning action
+
+Maintain separation between:
+- Reading Lab workbench state
+- authoritative SRS learner state
+
+---
+
+# 12. Phase G — Grammar Foundation
+
+Grammar follows Vocabulary and Context foundations.
+
+---
+
+## G1. Grammar content model
+
+Replace hardcoded lesson content with versioned data.
+
+Minimum schema:
+
+- stable contentId
+- grammar pattern
+- explanation
+- level
+- prerequisites
+- examples
+- linked Vocabulary
+- linked Context
+- exercises
+- provenance/source
+- source version
+
+---
+
+## G2. GrammarGuide current state
+
+Current GrammarGuide is still primarily a hardcoded reference/learning demo with progress held in \`sessionStorage\`.
+
+This is acceptable as an interim reference surface.
+
+The progress model should not be treated as authoritative learning state.
+
+---
+
+## G3. Grammar learning model
+
+When learning flows are introduced:
+
+- deterministic grammar evidence
+- shared outcome/evidence contracts
+- shared recovery semantics
+- no independent scheduler
+- grammar-specific exercise types
+- explicit prerequisites
+- content versioning
+
+---
+
+## G4. Grammar UX
+
+Start with reference-first.
+
+Then incrementally introduce:
+
+- guided grammar understanding
+- controlled practice
+- contextual examples
+- retrieval
+- evidence-backed progression
+
+Do not mix Grammar into the core Kanji Learning Card.
+
+---
+
+# 13. Phase H — Public Product Maturity after Vocabulary/Grammar
+
+After public release foundations and initial domain expansion:
+
+## H1. Content operations
+
+- reproducible content builds
+- dataset diffs
+- content QA reports
+- provenance checks
+- license checks
+- regression detection
+
+## H2. Production quality
+
+- error monitoring
+- support triage
+- browser-specific regression tracking
+- sync reliability metrics
+- performance regression tracking
+
+## H3. Product iteration
+
+Use real-user evidence to determine whether to invest in:
+
+- deeper Vocabulary
+- richer Context
+- Grammar learning
+- better Reading Lab
+- better mnemonic quality
+- accessibility
+- mobile ergonomics
+
+Do not expand breadth automatically.
+
+---
+
+# 14. Repository / architecture cleanup
+
+These are important but should be scheduled carefully around active feature work.
+
+## 14.1 Versioned filename cleanup — PENDING / LATER
+
+There are many \`v1.x-*\` and \`v2-*\` files in the repository.
+
+Long-term direction:
+
+- engine/
+- domain/
+- learning/
+- persistence/
+- presentation/
+
+Prefer names based on responsibility rather than historical version.
+
+However:
+
+- do not perform a broad rename while many feature branches are active
+- do not invalidate current runtime contracts unnecessarily
+- clean legacy incrementally after stable public seams exist
+
+## 14.2 Global bridge cleanup — PENDING / LATER
+
+Current React↔engine integration still relies on numerous \`window.__KANJI5_*\` globals.
+
+Long-term:
+
+- one typed ESM-facing bridge
+- explicit API boundaries
+- domain-aware typed contracts
+
+But do not rewrite the boundary merely because it is aesthetically imperfect.
+
+The existing boundary is useful and protective during the migration.
+
+## 14.3 Test architecture — PENDING / LATER
+
+Current suite is large and includes both source/contract tests and presentation/browser tests.
+
+There are many source-text contract tests; they are useful historical guards but are more brittle than behavior-level module tests.
+
+Long-term:
+
+- Vitest or equivalent for reusable domain modules
+- behavioral tests instead of source-string assertions where possible
+- keep E2E for user-visible cross-layer behavior
+- keep release-integrity contracts
+- preserve historical migration tests only where they provide actual compatibility value
+
+Do not stop feature work to rewrite the whole test suite.
+
+## 14.4 Scripts organization — LATER
+
+Move toward:
+
+- scripts/ = build/release tooling
+- tests/ = tests
+
+Only perform this when it can be done without creating merge conflicts or losing historical verification.
+
+---
+
+# 15. Documentation cleanup
+
+## Current problem
+
+There are many historical roadmap/version documents.
+
+Long-term:
+
+- this \`ROADMAP.md\` is the canonical active roadmap
+- historical plans/status documents may remain for auditability
+- move obsolete historical docs to \`docs/archive/\` only when safe
+- do not delete historical engineering evidence
+
+## Version consistency
+
+Unify version source between:
+
+- package.json
+- frontend/package.json
+- release metadata
+- UI display where used
+
+Avoid manually synchronized version strings.
+
+## Changelog
+
+Move from an indefinitely empty “Unreleased” section to real release entries.
+
+---
+
+# 16. Competitive/product-quality guardrails
+
+Rinemi should remain differentiated through its actual learning behavior rather than feature count.
+
+Keep these product boundaries:
+
+- calm, focused Japanese-learning UX
+- adaptive learning
+- evidence-backed learner model
+- deterministic offline behavior
+- useful Kanji foundations
+- Vocabulary and Context added as learning layers, not as unrelated utilities
+- Grammar added after the earlier layers are trustworthy
+
+Do not optimize for parity by copying every feature from WaniKani, Renshuu, Duolingo, Skritter, Ringotan, Kanji Study, or Anki.
+
+Use other products as UX/content references, not as architecture authorities.
+
+---
+
+# 17. Current open work and merge hygiene
+
+As of this roadmap baseline, several relevant PRs remain open and are based on older commits.
+
+Examples include:
+
+- Reading Lab coverage/focus work
+- Vocabulary React page shell
+- Learning session analytics separation
+- startup/stroke-order performance work
+- Stats exposure corrections
+- Settings skill-toggle verification
+- several earlier responsive/dictionary/learning-card branches
+
+### Rule
+
+An open PR is **not complete**, and an open PR matching a roadmap bullet is **not evidence that the work is still pending on \`main\`**.
+
+Before integration:
+
+1. rebase or rebuild against current \`main\`
+2. re-run relevant tests
+3. resolve any architecture drift
+4. verify the implementation still matches the current roadmap
+5. merge only after current-main verification
+
+Do not merge merely because a PR title matches a roadmap bullet.
+
+---
+
+# 18. Detailed execution order
+
+The roadmap has one active pre-Vocabulary release sequence. Historical A/B/C/R/D sections remain as reference and acceptance criteria; they do not override this execution order.
+
+### Current execution order — 2026-10-03
+
+**1. Release Lock**
+→ current-main green CI → same-SHA Pages deploy → live artifact equality → live core smoke → cache/stale-client/offline verification
+
+**2. Trust Layer**
+→ account lifecycle and production OAuth verification → persistence seam → Supabase migration/RLS consolidation → backup/restore → deletion/export semantics → privacy/terms/legal
+
+**3. Public UX**
+→ onboarding R2 release evidence → final Learning/Active Recall/Stats/Settings/Dictionary/Reading Lab/Mnemonic/Handwriting polish → RTL/i18n → loading/error/empty states → small reliability UX
+
+**4. Real Device / Accessibility / Performance**
+→ Tier-1/Tier-2 device matrix → PWA install/update/reinstall → offline/reconnect → manual accessibility → representative performance evidence
+
+**5. Content Quality**
+→ Kanji/readings/examples/stroke/radical-component/mnemonic QA → provenance → content reporting/correction workflow
+
+**6. Reliability / Security / Governance**
+→ error containment → observability → security/CSP/dependency/third-party review → repository governance → documentation/branding/release-process reconciliation
+
+**7. Public Beta**
+→ real-user cohort → structured evidence → severity-based fixes → regression coverage
+
+**8. Public Kanji Release**
+→ final release gate passes
+
+**9. Vocabulary**
+→ only after the Public Kanji Release gate passes; then connect the existing domain foundations to local versioned content, learning state, scheduler, offline runtime, UX, and QA
+
+**10. Context/Reading expansion**
+
+**11. Grammar foundation**
+
+**12. Post-domain product maturity**
+
+### Parallelism rule
+
+Parallel work is allowed only inside the current stage when it does not bypass an authoritative seam or create conflicting edits.
+
+Safe examples:
+- content QA while accessibility work is underway
+- security review while onboarding polish is underway
+- device testing while documentation is being reconciled
+- Vocabulary content-policy preparation while public Kanji release work is underway
+
+Unsafe examples:
+- two branches changing the same engine boundary
+- feature work that changes production behavior while the release candidate is being verified
+- Vocabulary runtime integration before the public Kanji release gate is green
+
+### Explicitly complete and removed from the active queue
+
+Do not restart A2, A3, A5, A6, D1, D2, D3, or D5 unless a new current-main regression is demonstrated.
+
+An old/open PR that implements one of those areas should first be diffed against current `main`; the correct action may be to supersede or close it rather than merge it.
+
+# 19. What is explicitly NOT required before public release
+
+Do not block the public Kanji release on:
+
+- complete learning-engine rewrite
+- replacing FSRS
+- creating a second scheduler
+- full IndexedDB migration without measured need
+- complete ESM/runtime-file renaming project
+- full event-sourcing architecture
+- social/community/gamification systems
+- huge analytics dashboard
+- AI grading authority
+- Vocabulary runtime integration
+- complete Grammar learning system
+- Reading Library at full scale
+- broad repository renaming
+
+These are deliberately deferred because they add complexity without being required to make the current Kanji product trustworthy.
+
+Small improvements that directly reduce user failure remain in scope before release, including stronger error recovery, clearer offline/sync states, safer backup/restore, accessibility fixes, and targeted UI/UX corrections.
+# 20. Definition of Done
+
+A roadmap phase is complete only when applicable:
+
+1. implementation exists on current \`main\`
+2. contract/unit tests pass
+3. relevant browser E2E passes
+4. typecheck/build passes
+5. offline behavior is verified where relevant
+6. no authoritative engine contract is bypassed
+7. migration/persistence compatibility is verified
+8. documentation reflects actual behavior
+9. no stale PR is being treated as completed
+10. public-facing UX is usable without developer knowledge for public phases
+
+For public-release blockers, “implemented in code” is insufficient; the behavior must be exercised in the supported release environment.
+
+---
+
+# 21. Final release milestones
+
+## Milestone M0 — Engineering baseline
+**Result:** one current-main release candidate with green automated gates and a reproducible build/deploy chain.
+
+## Milestone M1 — Trust Layer
+**Result:** account, persistence, sync, backup/restore, deletion/export semantics, privacy/legal, and Supabase/RLS behavior are production-defined and verified.
+
+## Milestone M2 — Public Kanji UX
+**Result:** onboarding and the existing Kanji learning surfaces are coherent, accessible, responsive, recoverable, and understandable without developer knowledge.
+
+## Milestone M3 — Real Environment Validation
+**Result:** target devices/browsers, PWA install/update/reinstall, offline/reconnect, accessibility, and representative performance have real-environment evidence.
+
+## Milestone M4 — Content Quality
+**Result:** Kanji learning content has a repeatable QA/provenance/correction process and critical content defects are addressed.
+
+## Milestone M5 — Reliability & Governance
+**Result:** production error containment, observability, security/supply-chain controls, repository governance, branding, documentation, and release procedure are aligned.
+
+## Milestone M6 — Public Beta
+**Result:** a real-user cohort completes onboarding and learning, returns later, uses offline mode, can recover data, and can report problems; high-severity issues are fixed and regression-tested.
+
+## Milestone M7 — Public Kanji Release
+**Result:** the Public Release Gate in R19 passes and Rinemi can be promoted as a public Kanji-learning product.
+
+## Milestone M8 — Vocabulary MVP
+**Result:** Vocabulary becomes a real learning domain using the existing cross-domain identity/evidence/scheduling architecture, with local content, deterministic learning behavior, persistence, offline support, UX, and QA.
+
+## Milestone M9 — Context/Reading Integration
+**Result:** Reading Lab connects context, words, Kanji, evidence, and audio without creating a competing scheduler.
+
+## Milestone M10 — Grammar Foundation
+**Result:** Grammar becomes a structured, versioned, reference-first domain with incremental evidence-backed learning.
+
+# 22. Decision record from the pre-Vocabulary architecture review
+
+The earlier architecture review identified five broad concerns:
+
+1. SRS was still too Kanji-centric.
+2. Review history was bounded.
+3. Persistence remained localStorage/blob-oriented.
+4. Vocabulary content was too dependent on a live third-party API.
+5. Grammar content was still hardcoded.
+
+The unified roadmap retains all five findings, but changes their priority:
+
+### Finding 1 — retain as D4 Scheduling Boundary
+
+Fix through a domain-neutral scheduling seam without rewriting FSRS or creating per-domain schedulers.
+
+### Finding 2 — retain as persistence/analytics scalability
+
+Preserve bounded operational history while separating long-term aggregates.
+
+### Finding 3 — retain as D5 Persistence/Offline Seam
+
+Introduce an abstraction first; migrate to IndexedDB/record-level sync only when actual scale requires it.
+
+### Finding 4 — promote to Vocabulary content-pipeline blocker
+
+Build a local versioned dataset and deterministic build process before public Vocabulary learning.
+
+### Finding 5 — keep Grammar after Vocabulary/Context
+
+Grammar reference can remain interim, but its authoritative learning model should come after the earlier domain seams are proven.
+
+---
+
+# 23. Current strategic conclusion
+
+Rinemi must reach a trustworthy public Kanji release before major domain expansion.
+
+The canonical transition is:
+
+**Current Kanji main**
+→
+**Release Lock**
+→
+**Trust Layer**
+→
+**Public UX**
+→
+**Real Device / Accessibility / Performance**
+→
+**Content Quality**
+→
+**Reliability / Security / Governance**
+→
+**Public Beta**
+→
+**Public Kanji Release**
+→
+**Vocabulary**
+→
+**Context/Reading**
+→
+**Grammar**
+
+The architectural rule remains:
+
+**Do not rewrite the learning engine merely to enable presentation or new-domain work. Strengthen the current Kanji product first, prove the public operating model second, then expand through the existing cross-domain seams.**
+
+This ordering is the canonical pre-Vocabulary execution sequence.
+
+
+---
+
+# 24. Dictionary topic filters — 2026-10-09
+
+**Status:** MVP implementation merged to current `main` in [PR #501](https://github.com/ArdKam/kanji5/pull/501), merge commit `e56247730030916fd813ed3c4360b328fc4a2627`.
+
+## Shipped scope
+
+- Added a bilingual Persian/English, versioned topic taxonomy in `frontend/src/app/kanji-topics.json`.
+- Initial taxonomy: 16 topics, 495 topic assignments, and 422 unique tagged kanji out of 2,136 Jōyō kanji (19.8% unique coverage).
+- Added the topic selector to the existing progressive Dictionary advanced-filter panel; it combines by intersection with JLPT, grade, mastery, and text search.
+- Included topic in the active-filter count. Clearing advanced filters resets topic/grade/mastery while preserving text search and JLPT.
+- Bundled tags locally; topic filtering needs no network request and remains available offline.
+- Added taxonomy integrity tests, React browser regression coverage for category selection and filter composition/reset semantics, Persian RTL presentation, and `docs/KANJI-TOPIC-TAXONOMY.md`.
+
+## Evidence
+
+The feature branch was validated at PR head `22221cd27e1175b20c3e39ad78a30ed3c7f0cb5d`:
+- [React presentation build / full 50-step workflow](https://github.com/ArdKam/kanji5/actions/runs/37923425895) — success.
+- [v1.8/v1.9 learning-engine validation](https://github.com/ArdKam/kanji5/actions/runs/37923425986) — success.
+- WebKit compatibility — success within the React workflow.
+
+Post-merge evidence for exact current-main SHA `e56247730030916fd813ed3c4360b328fc4a2627`: [React presentation build](https://github.com/ArdKam/kanji5/actions/runs/37924302201) passed all 50 workflow steps; [v1.8/v1.9 engine validation](https://github.com/ArdKam/kanji5/actions/runs/37924302208) passed; [GitHub Pages deployment and live verification](https://github.com/ArdKam/kanji5/actions/runs/37925097594) succeeded. The live-verification step checked HTTP 200 and exact SHA-256 equality for the staged/live `index.html`, `react-entry.js`, `sw.js`, React JS/CSS bundles, and pinned Supabase runtime; it emitted `LIVE_PAGES_ARTIFACT_VERIFIED`. The live offline/core-product E2E also passed.
+
+## Scope and remaining content-quality work
+
+This taxonomy is an explicit curated navigation aid, not a complete curriculum, frequency list, JLPT syllabus, vocabulary database, or evidence of learner mastery. Untagged kanji remain visible/searchable when “All topics” is selected. Do not infer memberships from raw English gloss strings or silently treat lack of a tag as lack of relevance.
+
+**Next content-quality action:** expand/review topic membership only with sampled semantic QA and clear provenance. Do not extend topic-specific selection into Learning or Active Recall until the Dictionary taxonomy's coverage and usefulness are evaluated; FSRS, the Learner Model, and Adaptive Planner remain authoritative and unchanged.
+
+
+---
+
+# 25. Dictionary topic taxonomy expansion — 2026-10-09
+
+**Scope:** Curated navigation metadata for the existing Kanji catalog; no learning-engine or persistence changes.
+
+The expanded taxonomy defines 24 bilingual topics and 1,025 topic assignments across 741 unique kanji (34.7% of the 2,136-item catalog). Eight topic families were added: qualities/comparison, government/law, communication/media, money/finance, transport/travel, health/medicine, technology/industry, and arts/culture. Existing topic families were also expanded using explicit curated associations.
+
+Coverage remains deliberately partial; untagged characters are still available through “All topics” and text search. The next quality step is sampled semantic review of topic membership, then coverage expansion based on reviewed additions—not automatic gloss matching. Topic navigation must remain independent of FSRS, Learner Model, Adaptive Planner, and evidence authority.
+
+
+---
+
+# 26. Dictionary topic semantic QA — 2026-10-09
+
+**Status:** Merged in [PR #508](https://github.com/ArdKam/kanji5/pull/508) at commit `96ec5c37ae226866819dc933a832f5abde4975c9`. PR checks passed, and the post-merge [Pages deployment/live verification](https://github.com/ArdKam/kanji5/actions/runs/37950564253) emitted `LIVE_PAGES_ARTIFACT_VERIFIED` after HTTP 200 and matching staged/live SHA-256 checks for the release assets.
+
+The audit removes 13 overbroad memberships from the 24-topic Dictionary taxonomy. The curated set now has **1,012 assignments** across **737 unique kanji** (34.5% of the pinned 2,136-kanji catalog), down from 1,025 assignments / 741 unique kanji. This is an intentional precision correction, not a loss of catalog availability: untagged kanji remain searchable and visible under “All topics.”
+
+The review distinguishes direct semantic matches from high-frequency, transparent compound relationships. It does not change Dictionary filtering mechanics, kanji data, FSRS, Learner Model, Adaptive Planner, evidence, or persistence. The taxonomy integrity test now protects the reviewed exclusions and exact coverage counts. Broader semantic curation remains an ongoing content-quality task; no automatic gloss-keyword tagging is allowed.
+
+
+---
+
+# 27. Dictionary topic coverage expansion — round 2 — 2026-10-09
+
+**Status:** Merged in [PR #511](https://github.com/ArdKam/kanji5/pull/511) at commit `5ef5053213e67620257a88d1794dc29b7c67f4b7`. PR CI passed, and the post-merge [Pages deployment/live verification](https://github.com/ArdKam/kanji5/actions/runs/37956031568) completed successfully with `LIVE_PAGES_ARTIFACT_VERIFIED`, matching staged/live SHA-256 values, and passing live offline/core-product E2E.
+
+A reviewed expansion adds **144 topic assignments** across **112 previously untagged kanji**, increasing coverage from 737/2,136 (34.5%) to **849/2,136 (39.7%)**. The taxonomy remains at 24 categories and 1,156 assignments. The batch prioritizes direct catalog meanings and transparent topic associations among higher-frequency entries; `融` is the one compound-supported Money & finance assignment, explicitly grounded in `金融` / `融資` rather than automated gloss matching.
+
+The integrity test now enumerates all 144 new assignments, preserves the 13 negative semantic guardrails from the prior audit, and checks the exact post-expansion totals. No kanji source records, filter behavior, learning-engine decisions, evidence, or persistence changed. Remaining untagged entries: 1,287, available through “All topics” and Dictionary text search.
+
+
+---
+
+# 28. Learning-engine runtime initialization reliability — 2026-10-17
+
+**Supplemental evidence record:** [docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md](docs/audits/LEARNING-ENGINE-RUNTIME-INIT-2026-10-17.md). This entry is additive; it deliberately does not rewrite the concurrently maintained [Product & Engineering Audit](docs/audits/PRODUCT-ENGINEERING-AUDIT-2026-10-17.md).
+
+- **Confirmed RI-01:** the Adaptive Planner used zero-delay recursive polling while waiting for the authoritative v1.6 session API. Proposed fix: one-shot session-authority readiness event in [PR #559](https://github.com/ArdKam/kanji5/pull/559).
+- **Confirmed RI-02:** the learner runtime silently swallowed import failures for the planner, recovery, evaluation and v1.9 boundary. PR #559 reports these through observability with console fallback.
+- **Verification:** engine workflow [39014128916](https://github.com/ArdKam/kanji5/actions/runs/39014128916) and React presentation workflow [39014128937](https://github.com/ArdKam/kanji5/actions/runs/39014128937) passed on the PR head; the root suite reported 164 test scripts passed. These results are for an open, unmerged PR, not current-main/deployment evidence.
+- **Post-merge status (2026-10-17):** PR #559 was squash-merged to `main` as `3c50ea5edadfe2c660030646fca175a8f9657c82`. Main-branch engine validation [39015164322](https://github.com/ArdKam/kanji5/actions/runs/39015164322) passed; React workflow [39015164270](https://github.com/ArdKam/kanji5/actions/runs/39015164270) and latest current-main build [39015256428](https://github.com/ArdKam/kanji5/actions/runs/39015256428) were still running at this snapshot. Earlier deploy attempt [39015164086](https://github.com/ArdKam/kanji5/actions/runs/39015164086) was correctly refused by the stale-SHA guard. Status: **MERGED / DEPLOYMENT VERIFICATION PENDING** until current-main CI, artifact equality, and live/offline verification pass.
+- **Architecture guardrail:** no second scheduler, learner-state owner, grading/recovery implementation or persistence migration. Keep FSRS, v1.9 Learner Model, Adaptive Planner selection, engine-owned grading/recovery/persistence and presentation-only React boundaries intact.
+
+**Next action:** verify the latest current-main React/engine workflow results and the resulting Pages deployment for the exact current SHA. Record the final workflow IDs, deployed SHA, live artifact equality, and live/offline smoke in the supplemental audit. Do not call the fix deployed before those checks pass.
+
+
+---
+
+# 29. First-use activation and sustainable-study retention — 2026-10-17
+
+**Status:** **MERGED / DEPLOYED / VERIFIED** on 2026-10-17. The implementation was squash-merged in [PR #562](https://github.com/ArdKam/kanji5/pull/562) at `687c0a135ca89a2b5661d8ac01d4454157c3d358`; Pages deployment #1702 verified the production artifact for that exact implementation SHA. The documentation-only status synchronization preserves the implementation and release evidence. See the dated [first-use and retention audit](docs/audits/rinemi-first-use-retention-audit-2026-10-17.md). Existing R2 onboarding status is not reopened; this was a targeted usability refinement based on source review.
+
+- **Merged implementation scope:** the welcome screen offers a primary one-tap guest quick start using the existing engine path and five-new-Kanji/day default; guided setup with optional placement remains available; workload copy distinguishes new cards from scheduled reviews; guest continuation is primary over account creation; copy is localized in English/Persian; regression tests and bilingual guided-flow selectors are updated.
+- **Architecture/data boundary:** presentation/onboarding only. Do not introduce another scheduler, duplicate learner state, change FSRS/Learner Model/Adaptive Planner/grading/recovery/persistence authority, migrate storage, or add remote analytics as part of this task.
+- **Pre-merge checks:** exact PR head `729355d7e6987d746704d7c409b633ef4ddf3bdf` passed React presentation build/E2E, accessibility, PWA release gate, final release matrix, WebKit compatibility, and automated UI visual audit ([build #3846](https://github.com/ArdKam/kanji5/actions/runs/39015567626), [visual audit #676](https://github.com/ArdKam/kanji5/actions/runs/39015567621)). The earlier Persian selector failure was corrected before merge.
+- **Post-merge checks:** current main SHA `687c0a135ca89a2b5661d8ac01d4454157c3d358` passed React presentation build workflow [#3848](https://github.com/ArdKam/kanji5/actions/runs/39016377389), attempt 2 (54/54 steps; no failed steps). Attempt 1 had one Firefox reveal-button timeout; the same smoke passed on attempt 2, with no code change required. Pages deployment [#1702](https://github.com/ArdKam/kanji5/actions/runs/39017314976) succeeded on the exact same SHA. It emitted `LIVE_PAGES_ARTIFACT_VERIFIED`, confirmed staged/live hash equality for the entrypoint, service worker, React JS/CSS, and Supabase vendor runtime, and passed live offline/core-product E2E.
+- **Completion evidence:** the implementation is merged, current-main CI passed, and the exact merged SHA is deployed and live-verified. This closes the implementation/release handoff for the onboarding changes. Future learner research listed below remains open; it is not implied complete by CI or deployment.
+- **Remaining learner validation:** confirm the quick-start route lands on a usable first card and allows a rating without an account prompt; test return after 3/7/14 missed days; validate Again/Hard/Good/Easy explanations against the authoritative scheduler contract; test whether Dictionary, handwriting and Reading Lab are discovered naturally after a first successful task.
+- **Metrics/telemetry:** the audit defines activation within 24 hours, time to first meaningful result, due-review completion, W1 and W4 retention, feature task-completion rate, weekly consistency, and later delayed-recall evidence with exact denominators/data needs. These are definitions, not current measured results. No instrumentation has been added. Prefer existing/local aggregates; a future cohort design needs explicit purpose, consent, opt-out, retention/deletion, and exclusion of raw answers, drawing paths, personal mnemonics, pasted reading text, and exact search queries.
+
+**Next action:** no implementation or deployment blocker remains for this handoff. Future work should validate the first-card/rating flow with learners, test return after 3/7/14 missed days, validate rating explanations against the scheduler contract, and measure contextual feature discovery. Keep those as separate, evidence-led tasks; do not add cross-user telemetry without a documented purpose and consent/privacy review. Before further changes, inspect current main and preserve concurrent roadmap edits.

@@ -1,0 +1,76 @@
+test.use({ serviceWorkers: "allow" });
+
+import { test, expect } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
+    localStorage.setItem("kanji5-onboarding-complete", "complete");
+    localStorage.removeItem("kanji5-onboarding-progress-v2");
+  });
+});
+
+async function goToMnemonicSupportPage(card) {
+  const pages = card.locator(".learning-back-page");
+  const count = await pages.count();
+  for (let index = 0; index < count; index += 1) {
+    const page = pages.nth(index);
+    if (await page.locator(".mnemonic-support").count()) {
+      if (!(await page.evaluate(el => el.classList.contains("active")))) {
+        await card.locator(".learning-back-page-nav .learning-back-page-shortcut").nth(index).click();
+      }
+      await expect(page).toHaveClass(/active/);
+      return page;
+    }
+  }
+  throw new Error("Mnemonic support page not found");
+}
+
+test("learning card exposes reading and vocabulary memory bridges without altering grading", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.clear();
+    localStorage.setItem("kanji5-onboarding-v2", "complete");
+    localStorage.setItem("kanji5-public-onboarding-v1", "seen");
+    localStorage.setItem("kanji5-onboarding-complete", "complete");
+    localStorage.setItem("kanji5-ui-language", "en");
+  });
+  await page.goto("/");
+  const card = page.locator("#root .learning-card");
+  await expect(card).toBeVisible({ timeout: 20000 });
+
+  await card.getByRole("button", { name: "Reveal meaning & readings" }).click();
+  await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+
+  await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-meaning")).toBeVisible();
+  await expect(card.locator(".learning-back-page").nth(0).locator(".learning-back-readings").first()).toBeVisible();
+  const supportPage = await goToMnemonicSupportPage(card);
+  const support = supportPage.locator(".mnemonic-support");
+  await expect(support).toBeVisible();
+  await expect(support).toHaveAttribute("data-hint-stage", /^(new|recovery|early|stable)$/);
+  await expect(support.locator(".mnemonic-support-reading")).toHaveText(/\S+/);
+  await expect(support.locator(".mnemonic-support-item p")).not.toHaveCount(0);
+ 
+});
+
+
+test("canonical visual structure remains available from the offline service-worker cache", async ({ page, context }) => {
+  await page.goto("/");
+  await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
+  await expect.poll(async () => page.evaluate(() => Boolean(navigator.serviceWorker?.controller))).toBe(true);
+  await page.evaluate(() => navigator.serviceWorker.ready);
+
+  await context.setOffline(true);
+  const result = await page.evaluate(async () => {
+    const response = await fetch("./kanji-visual-structure.json");
+    const data = await response.json();
+    const lakeParts = data?.structures?.["湖"]?.components;
+    return {
+      ok: response.ok,
+      status: response.status,
+      complete: data?.coverage?.available === 2136 && Object.keys(data?.structures || {}).length === 2136,
+      hasLake: Array.isArray(lakeParts) && lakeParts.map(part => part.character).join(",") === "氵,胡",
+    };
+  });
+  expect(result).toEqual({ ok: true, status: 200, complete: true, hasLake: true });
+});

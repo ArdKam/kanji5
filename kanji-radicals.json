@@ -1,0 +1,2046 @@
+{
+  "version": 1,
+  "schema": "kanji-radicals/v1",
+  "semantics": "Kangxi (classical) radical classification; exactly one dictionary radical per kanji. Distinct from visual/component decomposition.",
+  "coverage": {
+    "kanji": 2136,
+    "joyo": 2136,
+    "fraction": 1
+  },
+  "source": {
+    "name": "KANJIDIC2 via jkindrix/japanese-language-data",
+    "upstreamVersion": "2026-96",
+    "upstreamSourceVersion": "3.6.2",
+    "generatedFrom": "data/core/kanji-joyo.json",
+    "license": "CC-BY-SA 4.0 (EDRDG License)",
+    "radicalDefinitions": "Wikipedia Kangxi radicals via jkindrix/japanese-language-data",
+    "radicalDefinitionsRevision": 1346511063
+  },
+  "radicals": [
+    {
+      "id": 1,
+      "glyph": "一",
+      "strokeCount": 1,
+      "meanings": [
+        "one"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 2,
+      "glyph": "丨",
+      "strokeCount": 1,
+      "meanings": [
+        "line"
+      ],
+      "sourceForms": [
+        "｜"
+      ]
+    },
+    {
+      "id": 3,
+      "glyph": "丶",
+      "strokeCount": 1,
+      "meanings": [
+        "dot"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 4,
+      "glyph": "丿",
+      "strokeCount": 1,
+      "meanings": [
+        "slash"
+      ],
+      "sourceForms": [
+        "ノ",
+        "乃",
+        "久"
+      ]
+    },
+    {
+      "id": 5,
+      "glyph": "乙",
+      "strokeCount": 1,
+      "meanings": [
+        "second"
+      ],
+      "sourceForms": [
+        "九",
+        "乞",
+        "也"
+      ]
+    },
+    {
+      "id": 6,
+      "glyph": "亅",
+      "strokeCount": 1,
+      "meanings": [
+        "hook"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 7,
+      "glyph": "二",
+      "strokeCount": 2,
+      "meanings": [
+        "two"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 8,
+      "glyph": "亠",
+      "strokeCount": 2,
+      "meanings": [
+        "lid"
+      ],
+      "sourceForms": [
+        "亡"
+      ]
+    },
+    {
+      "id": 9,
+      "glyph": "人",
+      "strokeCount": 2,
+      "meanings": [
+        "man"
+      ],
+      "sourceForms": [
+        "化",
+        "个"
+      ]
+    },
+    {
+      "id": 10,
+      "glyph": "儿",
+      "strokeCount": 2,
+      "meanings": [
+        "son",
+        "legs"
+      ],
+      "sourceForms": [
+        "元",
+        "免"
+      ]
+    },
+    {
+      "id": 11,
+      "glyph": "入",
+      "strokeCount": 2,
+      "meanings": [
+        "enter"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 12,
+      "glyph": "八",
+      "strokeCount": 2,
+      "meanings": [
+        "eight"
+      ],
+      "sourceForms": [
+        "ハ",
+        "并"
+      ]
+    },
+    {
+      "id": 13,
+      "glyph": "冂",
+      "strokeCount": 2,
+      "meanings": [
+        "wide"
+      ],
+      "sourceForms": [
+        "冊"
+      ]
+    },
+    {
+      "id": 14,
+      "glyph": "冖",
+      "strokeCount": 2,
+      "meanings": [
+        "cloth cover"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 15,
+      "glyph": "冫",
+      "strokeCount": 2,
+      "meanings": [
+        "ice"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 16,
+      "glyph": "几",
+      "strokeCount": 2,
+      "meanings": [
+        "table"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 17,
+      "glyph": "凵",
+      "strokeCount": 2,
+      "meanings": [
+        "receptacle"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 18,
+      "glyph": "刀",
+      "strokeCount": 2,
+      "meanings": [
+        "knife"
+      ],
+      "sourceForms": [
+        "刈",
+        "初"
+      ]
+    },
+    {
+      "id": 19,
+      "glyph": "力",
+      "strokeCount": 2,
+      "meanings": [
+        "power"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 20,
+      "glyph": "勹",
+      "strokeCount": 2,
+      "meanings": [
+        "wrap"
+      ],
+      "sourceForms": [
+        "勿"
+      ]
+    },
+    {
+      "id": 21,
+      "glyph": "匕",
+      "strokeCount": 2,
+      "meanings": [
+        "spoon"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 22,
+      "glyph": "匚",
+      "strokeCount": 2,
+      "meanings": [
+        "box"
+      ],
+      "sourceForms": [
+        "巨"
+      ]
+    },
+    {
+      "id": 23,
+      "glyph": "匸",
+      "strokeCount": 2,
+      "meanings": [
+        "hiding enclosure"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 24,
+      "glyph": "十",
+      "strokeCount": 2,
+      "meanings": [
+        "ten"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 25,
+      "glyph": "卜",
+      "strokeCount": 2,
+      "meanings": [
+        "divination"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 26,
+      "glyph": "卩",
+      "strokeCount": 2,
+      "meanings": [
+        "seal (device)"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 27,
+      "glyph": "厂",
+      "strokeCount": 2,
+      "meanings": [
+        "cliff"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 28,
+      "glyph": "厶",
+      "strokeCount": 2,
+      "meanings": [
+        "private"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 29,
+      "glyph": "又",
+      "strokeCount": 2,
+      "meanings": [
+        "again"
+      ],
+      "sourceForms": [
+        "及"
+      ]
+    },
+    {
+      "id": 30,
+      "glyph": "口",
+      "strokeCount": 3,
+      "meanings": [
+        "mouth"
+      ],
+      "sourceForms": [
+        "品"
+      ]
+    },
+    {
+      "id": 31,
+      "glyph": "囗",
+      "strokeCount": 3,
+      "meanings": [
+        "enclosure"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 32,
+      "glyph": "土",
+      "strokeCount": 3,
+      "meanings": [
+        "earth"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 33,
+      "glyph": "士",
+      "strokeCount": 3,
+      "meanings": [
+        "scholar"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 34,
+      "glyph": "夂",
+      "strokeCount": 3,
+      "meanings": [
+        "go"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 35,
+      "glyph": "夊",
+      "strokeCount": 3,
+      "meanings": [
+        "go slowly"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 36,
+      "glyph": "夕",
+      "strokeCount": 3,
+      "meanings": [
+        "evening"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 37,
+      "glyph": "大",
+      "strokeCount": 3,
+      "meanings": [
+        "big"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 38,
+      "glyph": "女",
+      "strokeCount": 3,
+      "meanings": [
+        "woman"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 39,
+      "glyph": "子",
+      "strokeCount": 3,
+      "meanings": [
+        "child"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 40,
+      "glyph": "宀",
+      "strokeCount": 3,
+      "meanings": [
+        "roof"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 41,
+      "glyph": "寸",
+      "strokeCount": 3,
+      "meanings": [
+        "inch"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 42,
+      "glyph": "小",
+      "strokeCount": 3,
+      "meanings": [
+        "small"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 43,
+      "glyph": "尢",
+      "strokeCount": 3,
+      "meanings": [
+        "lame"
+      ],
+      "sourceForms": [
+        "尤"
+      ]
+    },
+    {
+      "id": 44,
+      "glyph": "尸",
+      "strokeCount": 3,
+      "meanings": [
+        "corpse"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 45,
+      "glyph": "屮",
+      "strokeCount": 3,
+      "meanings": [
+        "sprout"
+      ],
+      "sourceForms": [
+        "屯"
+      ]
+    },
+    {
+      "id": 46,
+      "glyph": "山",
+      "strokeCount": 3,
+      "meanings": [
+        "mountain"
+      ],
+      "sourceForms": [
+        "岡"
+      ]
+    },
+    {
+      "id": 47,
+      "glyph": "巛",
+      "strokeCount": 3,
+      "meanings": [
+        "river"
+      ],
+      "sourceForms": [
+        "川"
+      ]
+    },
+    {
+      "id": 48,
+      "glyph": "工",
+      "strokeCount": 3,
+      "meanings": [
+        "work"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 49,
+      "glyph": "己",
+      "strokeCount": 3,
+      "meanings": [
+        "oneself"
+      ],
+      "sourceForms": [
+        "已"
+      ]
+    },
+    {
+      "id": 50,
+      "glyph": "巾",
+      "strokeCount": 3,
+      "meanings": [
+        "turban"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 51,
+      "glyph": "干",
+      "strokeCount": 3,
+      "meanings": [
+        "dry"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 52,
+      "glyph": "幺",
+      "strokeCount": 3,
+      "meanings": [
+        "short thread"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 53,
+      "glyph": "广",
+      "strokeCount": 3,
+      "meanings": [
+        "dotted cliff"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 54,
+      "glyph": "廴",
+      "strokeCount": 3,
+      "meanings": [
+        "long stride"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 55,
+      "glyph": "廾",
+      "strokeCount": 3,
+      "meanings": [
+        "arch"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 56,
+      "glyph": "弋",
+      "strokeCount": 3,
+      "meanings": [
+        "shoot"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 57,
+      "glyph": "弓",
+      "strokeCount": 3,
+      "meanings": [
+        "bow"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 58,
+      "glyph": "彐",
+      "strokeCount": 3,
+      "meanings": [
+        "snout"
+      ],
+      "sourceForms": [
+        "ヨ",
+        "彑"
+      ]
+    },
+    {
+      "id": 59,
+      "glyph": "彡",
+      "strokeCount": 3,
+      "meanings": [
+        "bristle"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 60,
+      "glyph": "彳",
+      "strokeCount": 3,
+      "meanings": [
+        "step"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 61,
+      "glyph": "心",
+      "strokeCount": 4,
+      "meanings": [
+        "heart"
+      ],
+      "sourceForms": [
+        "忙"
+      ]
+    },
+    {
+      "id": 62,
+      "glyph": "戈",
+      "strokeCount": 4,
+      "meanings": [
+        "halberd"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 63,
+      "glyph": "戶",
+      "strokeCount": 4,
+      "meanings": [
+        "door"
+      ],
+      "sourceForms": [
+        "戸"
+      ]
+    },
+    {
+      "id": 64,
+      "glyph": "手",
+      "strokeCount": 4,
+      "meanings": [
+        "hand"
+      ],
+      "sourceForms": [
+        "扎"
+      ]
+    },
+    {
+      "id": 65,
+      "glyph": "支",
+      "strokeCount": 4,
+      "meanings": [
+        "branch"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 66,
+      "glyph": "攴",
+      "strokeCount": 4,
+      "meanings": [
+        "rap",
+        "tap"
+      ],
+      "sourceForms": [
+        "攵"
+      ]
+    },
+    {
+      "id": 67,
+      "glyph": "文",
+      "strokeCount": 4,
+      "meanings": [
+        "script"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 68,
+      "glyph": "斗",
+      "strokeCount": 4,
+      "meanings": [
+        "dipper"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 69,
+      "glyph": "斤",
+      "strokeCount": 4,
+      "meanings": [
+        "axe"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 70,
+      "glyph": "方",
+      "strokeCount": 4,
+      "meanings": [
+        "square"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 71,
+      "glyph": "无",
+      "strokeCount": 4,
+      "meanings": [
+        "not"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 72,
+      "glyph": "日",
+      "strokeCount": 4,
+      "meanings": [
+        "sun"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 73,
+      "glyph": "曰",
+      "strokeCount": 4,
+      "meanings": [
+        "say"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 74,
+      "glyph": "月",
+      "strokeCount": 4,
+      "meanings": [
+        "moon"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 75,
+      "glyph": "木",
+      "strokeCount": 4,
+      "meanings": [
+        "tree"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 76,
+      "glyph": "欠",
+      "strokeCount": 4,
+      "meanings": [
+        "lack"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 77,
+      "glyph": "止",
+      "strokeCount": 4,
+      "meanings": [
+        "stop"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 78,
+      "glyph": "歹",
+      "strokeCount": 4,
+      "meanings": [
+        "death"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 79,
+      "glyph": "殳",
+      "strokeCount": 4,
+      "meanings": [
+        "weapon"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 80,
+      "glyph": "毋",
+      "strokeCount": 4,
+      "meanings": [
+        "do not"
+      ],
+      "sourceForms": [
+        "母"
+      ]
+    },
+    {
+      "id": 81,
+      "glyph": "比",
+      "strokeCount": 4,
+      "meanings": [
+        "compare"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 82,
+      "glyph": "毛",
+      "strokeCount": 4,
+      "meanings": [
+        "fur"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 83,
+      "glyph": "氏",
+      "strokeCount": 4,
+      "meanings": [
+        "clan"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 84,
+      "glyph": "气",
+      "strokeCount": 4,
+      "meanings": [
+        "steam"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 85,
+      "glyph": "水",
+      "strokeCount": 4,
+      "meanings": [
+        "water"
+      ],
+      "sourceForms": [
+        "汁",
+        "滴"
+      ]
+    },
+    {
+      "id": 86,
+      "glyph": "火",
+      "strokeCount": 4,
+      "meanings": [
+        "fire"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 87,
+      "glyph": "爪",
+      "strokeCount": 4,
+      "meanings": [
+        "claw"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 88,
+      "glyph": "父",
+      "strokeCount": 4,
+      "meanings": [
+        "father"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 89,
+      "glyph": "爻",
+      "strokeCount": 4,
+      "meanings": [
+        "trigrams"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 90,
+      "glyph": "爿",
+      "strokeCount": 4,
+      "meanings": [
+        "split wood"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 91,
+      "glyph": "片",
+      "strokeCount": 4,
+      "meanings": [
+        "slice"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 92,
+      "glyph": "牙",
+      "strokeCount": 5,
+      "meanings": [
+        "fang"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 93,
+      "glyph": "牛",
+      "strokeCount": 4,
+      "meanings": [
+        "cow"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 94,
+      "glyph": "犬",
+      "strokeCount": 4,
+      "meanings": [
+        "dog"
+      ],
+      "sourceForms": [
+        "犯"
+      ]
+    },
+    {
+      "id": 95,
+      "glyph": "玄",
+      "strokeCount": 5,
+      "meanings": [
+        "profound"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 96,
+      "glyph": "玉",
+      "strokeCount": 4,
+      "meanings": [
+        "jade"
+      ],
+      "sourceForms": [
+        "王"
+      ]
+    },
+    {
+      "id": 97,
+      "glyph": "瓜",
+      "strokeCount": 6,
+      "meanings": [
+        "melon"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 98,
+      "glyph": "瓦",
+      "strokeCount": 5,
+      "meanings": [
+        "tile"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 99,
+      "glyph": "甘",
+      "strokeCount": 5,
+      "meanings": [
+        "sweet"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 100,
+      "glyph": "生",
+      "strokeCount": 5,
+      "meanings": [
+        "life"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 101,
+      "glyph": "用",
+      "strokeCount": 5,
+      "meanings": [
+        "use"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 102,
+      "glyph": "田",
+      "strokeCount": 5,
+      "meanings": [
+        "field"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 103,
+      "glyph": "疋",
+      "strokeCount": 5,
+      "meanings": [
+        "bolt of cloth"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 104,
+      "glyph": "疒",
+      "strokeCount": 5,
+      "meanings": [
+        "sickness"
+      ],
+      "sourceForms": [
+        "疔"
+      ]
+    },
+    {
+      "id": 105,
+      "glyph": "癶",
+      "strokeCount": 5,
+      "meanings": [
+        "footsteps"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 106,
+      "glyph": "白",
+      "strokeCount": 5,
+      "meanings": [
+        "white"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 107,
+      "glyph": "皮",
+      "strokeCount": 5,
+      "meanings": [
+        "skin"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 108,
+      "glyph": "皿",
+      "strokeCount": 5,
+      "meanings": [
+        "dish"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 109,
+      "glyph": "目",
+      "strokeCount": 5,
+      "meanings": [
+        "eye"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 110,
+      "glyph": "矛",
+      "strokeCount": 5,
+      "meanings": [
+        "spear"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 111,
+      "glyph": "矢",
+      "strokeCount": 5,
+      "meanings": [
+        "arrow"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 112,
+      "glyph": "石",
+      "strokeCount": 5,
+      "meanings": [
+        "stone"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 113,
+      "glyph": "示",
+      "strokeCount": 5,
+      "meanings": [
+        "spirit"
+      ],
+      "sourceForms": [
+        "礼"
+      ]
+    },
+    {
+      "id": 114,
+      "glyph": "禸",
+      "strokeCount": 5,
+      "meanings": [
+        "track",
+        "footprint"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 115,
+      "glyph": "禾",
+      "strokeCount": 5,
+      "meanings": [
+        "grain"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 116,
+      "glyph": "穴",
+      "strokeCount": 5,
+      "meanings": [
+        "cave"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 117,
+      "glyph": "立",
+      "strokeCount": 5,
+      "meanings": [
+        "stand"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 118,
+      "glyph": "竹",
+      "strokeCount": 6,
+      "meanings": [
+        "bamboo"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 119,
+      "glyph": "米",
+      "strokeCount": 6,
+      "meanings": [
+        "rice"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 120,
+      "glyph": "糸",
+      "strokeCount": 6,
+      "meanings": [
+        "silk"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 121,
+      "glyph": "缶",
+      "strokeCount": 6,
+      "meanings": [
+        "jar"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 122,
+      "glyph": "网",
+      "strokeCount": 6,
+      "meanings": [
+        "net"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 123,
+      "glyph": "羊",
+      "strokeCount": 6,
+      "meanings": [
+        "sheep"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 124,
+      "glyph": "羽",
+      "strokeCount": 6,
+      "meanings": [
+        "feather"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 125,
+      "glyph": "老",
+      "strokeCount": 4,
+      "meanings": [
+        "old"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 126,
+      "glyph": "而",
+      "strokeCount": 6,
+      "meanings": [
+        "and"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 127,
+      "glyph": "耒",
+      "strokeCount": 6,
+      "meanings": [
+        "plough"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 128,
+      "glyph": "耳",
+      "strokeCount": 6,
+      "meanings": [
+        "ear"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 129,
+      "glyph": "聿",
+      "strokeCount": 6,
+      "meanings": [
+        "brush"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 130,
+      "glyph": "肉",
+      "strokeCount": 6,
+      "meanings": [
+        "meat"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 131,
+      "glyph": "臣",
+      "strokeCount": 7,
+      "meanings": [
+        "minister"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 132,
+      "glyph": "自",
+      "strokeCount": 6,
+      "meanings": [
+        "self"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 133,
+      "glyph": "至",
+      "strokeCount": 6,
+      "meanings": [
+        "arrive"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 134,
+      "glyph": "臼",
+      "strokeCount": 6,
+      "meanings": [
+        "mortar"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 135,
+      "glyph": "舌",
+      "strokeCount": 6,
+      "meanings": [
+        "tongue"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 136,
+      "glyph": "舛",
+      "strokeCount": 7,
+      "meanings": [
+        "oppose"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 137,
+      "glyph": "舟",
+      "strokeCount": 6,
+      "meanings": [
+        "boat"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 138,
+      "glyph": "艮",
+      "strokeCount": 6,
+      "meanings": [
+        "stopping"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 139,
+      "glyph": "色",
+      "strokeCount": 6,
+      "meanings": [
+        "color"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 140,
+      "glyph": "艸",
+      "strokeCount": 3,
+      "meanings": [
+        "grass"
+      ],
+      "sourceForms": [
+        "艾"
+      ]
+    },
+    {
+      "id": 141,
+      "glyph": "虍",
+      "strokeCount": 6,
+      "meanings": [
+        "tiger"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 142,
+      "glyph": "虫",
+      "strokeCount": 6,
+      "meanings": [
+        "insect"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 143,
+      "glyph": "血",
+      "strokeCount": 6,
+      "meanings": [
+        "blood"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 144,
+      "glyph": "行",
+      "strokeCount": 6,
+      "meanings": [
+        "walk enclosure"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 145,
+      "glyph": "衣",
+      "strokeCount": 6,
+      "meanings": [
+        "clothes"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 146,
+      "glyph": "襾",
+      "strokeCount": 6,
+      "meanings": [
+        "cover"
+      ],
+      "sourceForms": [
+        "西"
+      ]
+    },
+    {
+      "id": 147,
+      "glyph": "見",
+      "strokeCount": 7,
+      "meanings": [
+        "see"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 148,
+      "glyph": "角",
+      "strokeCount": 7,
+      "meanings": [
+        "horn"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 149,
+      "glyph": "言",
+      "strokeCount": 7,
+      "meanings": [
+        "speech"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 150,
+      "glyph": "谷",
+      "strokeCount": 7,
+      "meanings": [
+        "valley"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 151,
+      "glyph": "豆",
+      "strokeCount": 7,
+      "meanings": [
+        "bean"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 152,
+      "glyph": "豕",
+      "strokeCount": 7,
+      "meanings": [
+        "pig"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 153,
+      "glyph": "豸",
+      "strokeCount": 7,
+      "meanings": [
+        "badger"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 154,
+      "glyph": "貝",
+      "strokeCount": 7,
+      "meanings": [
+        "shell"
+      ],
+      "sourceForms": [
+        "買"
+      ]
+    },
+    {
+      "id": 155,
+      "glyph": "赤",
+      "strokeCount": 7,
+      "meanings": [
+        "red"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 156,
+      "glyph": "走",
+      "strokeCount": 7,
+      "meanings": [
+        "run"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 157,
+      "glyph": "足",
+      "strokeCount": 7,
+      "meanings": [
+        "foot"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 158,
+      "glyph": "身",
+      "strokeCount": 7,
+      "meanings": [
+        "body"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 159,
+      "glyph": "車",
+      "strokeCount": 7,
+      "meanings": [
+        "cart"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 160,
+      "glyph": "辛",
+      "strokeCount": 7,
+      "meanings": [
+        "bitter"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 161,
+      "glyph": "辰",
+      "strokeCount": 7,
+      "meanings": [
+        "morning"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 162,
+      "glyph": "辵",
+      "strokeCount": 3,
+      "meanings": [
+        "walk"
+      ],
+      "sourceForms": [
+        "込"
+      ]
+    },
+    {
+      "id": 163,
+      "glyph": "邑",
+      "strokeCount": 3,
+      "meanings": [
+        "city"
+      ],
+      "sourceForms": [
+        "邦"
+      ]
+    },
+    {
+      "id": 164,
+      "glyph": "酉",
+      "strokeCount": 7,
+      "meanings": [
+        "wine"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 165,
+      "glyph": "釆",
+      "strokeCount": 7,
+      "meanings": [
+        "distinguish"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 166,
+      "glyph": "里",
+      "strokeCount": 7,
+      "meanings": [
+        "village"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 167,
+      "glyph": "金",
+      "strokeCount": 8,
+      "meanings": [
+        "gold"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 168,
+      "glyph": "長",
+      "strokeCount": 8,
+      "meanings": [
+        "long"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 169,
+      "glyph": "門",
+      "strokeCount": 8,
+      "meanings": [
+        "gate"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 170,
+      "glyph": "阜",
+      "strokeCount": 3,
+      "meanings": [
+        "mound"
+      ],
+      "sourceForms": [
+        "阡"
+      ]
+    },
+    {
+      "id": 171,
+      "glyph": "隶",
+      "strokeCount": 8,
+      "meanings": [
+        "slave"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 172,
+      "glyph": "隹",
+      "strokeCount": 8,
+      "meanings": [
+        "short-tailed bird"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 173,
+      "glyph": "雨",
+      "strokeCount": 8,
+      "meanings": [
+        "rain"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 174,
+      "glyph": "靑",
+      "strokeCount": 8,
+      "meanings": [
+        "blue"
+      ],
+      "sourceForms": [
+        "青"
+      ]
+    },
+    {
+      "id": 175,
+      "glyph": "非",
+      "strokeCount": 8,
+      "meanings": [
+        "wrong"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 176,
+      "glyph": "面",
+      "strokeCount": 9,
+      "meanings": [
+        "face"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 177,
+      "glyph": "革",
+      "strokeCount": 9,
+      "meanings": [
+        "leather"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 178,
+      "glyph": "韋",
+      "strokeCount": 10,
+      "meanings": [
+        "tanned leather"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 179,
+      "glyph": "韭",
+      "strokeCount": 9,
+      "meanings": [
+        "leek"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 180,
+      "glyph": "音",
+      "strokeCount": 9,
+      "meanings": [
+        "sound"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 181,
+      "glyph": "頁",
+      "strokeCount": 9,
+      "meanings": [
+        "leaf"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 182,
+      "glyph": "風",
+      "strokeCount": 9,
+      "meanings": [
+        "wind"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 183,
+      "glyph": "飛",
+      "strokeCount": 9,
+      "meanings": [
+        "fly"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 184,
+      "glyph": "食",
+      "strokeCount": 9,
+      "meanings": [
+        "eat"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 185,
+      "glyph": "首",
+      "strokeCount": 9,
+      "meanings": [
+        "head"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 186,
+      "glyph": "香",
+      "strokeCount": 9,
+      "meanings": [
+        "fragrant"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 187,
+      "glyph": "馬",
+      "strokeCount": 10,
+      "meanings": [
+        "horse"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 188,
+      "glyph": "骨",
+      "strokeCount": 10,
+      "meanings": [
+        "bone"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 189,
+      "glyph": "高",
+      "strokeCount": 10,
+      "meanings": [
+        "tall"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 190,
+      "glyph": "髟",
+      "strokeCount": 10,
+      "meanings": [
+        "hair"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 191,
+      "glyph": "鬥",
+      "strokeCount": 10,
+      "meanings": [
+        "fight"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 192,
+      "glyph": "鬯",
+      "strokeCount": 10,
+      "meanings": [
+        "sacrificial wine"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 193,
+      "glyph": "鬲",
+      "strokeCount": 10,
+      "meanings": [
+        "cauldron"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 194,
+      "glyph": "鬼",
+      "strokeCount": 10,
+      "meanings": [
+        "ghost"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 195,
+      "glyph": "魚",
+      "strokeCount": 11,
+      "meanings": [
+        "fish"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 196,
+      "glyph": "鳥",
+      "strokeCount": 11,
+      "meanings": [
+        "bird"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 197,
+      "glyph": "鹵",
+      "strokeCount": 11,
+      "meanings": [
+        "salt"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 198,
+      "glyph": "鹿",
+      "strokeCount": 11,
+      "meanings": [
+        "deer"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 199,
+      "glyph": "麥",
+      "strokeCount": 7,
+      "meanings": [
+        "wheat"
+      ],
+      "sourceForms": [
+        "麦"
+      ]
+    },
+    {
+      "id": 200,
+      "glyph": "麻",
+      "strokeCount": 11,
+      "meanings": [
+        "hemp"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 201,
+      "glyph": "黃",
+      "strokeCount": 11,
+      "meanings": [
+        "yellow"
+      ],
+      "sourceForms": [
+        "黄"
+      ]
+    },
+    {
+      "id": 202,
+      "glyph": "黍",
+      "strokeCount": 12,
+      "meanings": [
+        "millet"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 203,
+      "glyph": "黑",
+      "strokeCount": 11,
+      "meanings": [
+        "black"
+      ],
+      "sourceForms": [
+        "黒"
+      ]
+    },
+    {
+      "id": 204,
+      "glyph": "黹",
+      "strokeCount": 12,
+      "meanings": [
+        "embroidery"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 205,
+      "glyph": "黽",
+      "strokeCount": 13,
+      "meanings": [
+        "frog"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 206,
+      "glyph": "鼎",
+      "strokeCount": 13,
+      "meanings": [
+        "tripod"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 207,
+      "glyph": "鼓",
+      "strokeCount": 13,
+      "meanings": [
+        "drum"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 208,
+      "glyph": "鼠",
+      "strokeCount": 13,
+      "meanings": [
+        "rat"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 209,
+      "glyph": "鼻",
+      "strokeCount": 14,
+      "meanings": [
+        "nose"
+      ],
+      "sourceForms": []
+    },
+    {
+      "id": 210,
+      "glyph": "齊",
+      "strokeCount": 14,
+      "meanings": [
+        "even"
+      ],
+      "sourceForms": [
+        "斉"
+      ]
+    },
+    {
+      "id": 211,
+      "glyph": "齒",
+      "strokeCount": 12,
+      "meanings": [
+        "tooth"
+      ],
+      "sourceForms": [
+        "歯"
+      ]
+    },
+    {
+      "id": 212,
+      "glyph": "龍",
+      "strokeCount": 10,
+      "meanings": [
+        "dragon"
+      ],
+      "sourceForms": [
+        "竜"
+      ]
+    },
+    {
+      "id": 213,
+      "glyph": "龜",
+      "strokeCount": 11,
+      "meanings": [
+        "turtle"
+      ],
+      "sourceForms": [
+        "亀"
+      ]
+    },
+    {
+      "id": 214,
+      "glyph": "龠",
+      "strokeCount": 17,
+      "meanings": [
+        "flute"
+      ],
+      "sourceForms": []
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+/* Practice Home: editorial hierarchy, topic navigation, responsive session controls. */
+.practice-home{display:grid;gap:20px;min-width:0}
+.practice-home :is(h2,h3,h4,p){margin:0}
+.practice-home-header{display:grid;gap:7px}
+.practice-home-header h2{font-size:var(--text-title)}
+.practice-home-hero{display:flex;align-items:end;justify-content:space-between;gap:18px}
+.practice-home-hero-copy{display:grid;gap:8px}
+.practice-home-hero h3{font-size:clamp(21px,3vw,28px);font-weight:760}
+.practice-topic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.practice-topic-card{display:grid;grid-template-columns:40px minmax(0,1fr) 12px;align-items:center;gap:8px;min-height:72px;padding:10px;text-align:start}
+.practice-topic-card.is-selected{border-color:var(--shu)}
+.practice-topic-glyph{display:grid;place-items:center;font:27px/1 var(--jp-font)}
+.practice-topic-copy{display:grid;gap:4px}
+.practice-all-topics>summary,.practice-advanced>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;font-size:var(--text-sm);font-weight:760;cursor:pointer}
+.practice-topic-selected{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px 18px}
+.practice-topic-selected-copy{display:grid;gap:5px}
+.practice-topic-status.is-error,.practice-topic-message,.practice-custom-message{color:var(--color-danger)}
+.practice-custom-panel{display:grid;gap:15px;padding:14px 0 20px}
+.practice-focus-fieldset{display:grid;gap:8px}
+.practice-focus-options{display:flex;flex-wrap:wrap;gap:7px}
+.practice-custom-secondary-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.practice-custom-field{display:grid;gap:7px;min-width:0}
+.practice-custom-field select{width:100%;min-height:44px}
+.practice-custom-footer{display:flex;justify-content:space-between;gap:12px}
+@media(max-width:720px){.practice-home-hero{align-items:stretch;flex-direction:column}.practice-topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.practice-topic-selected{grid-template-columns:1fr}.practice-custom-footer{align-items:stretch;flex-direction:column}.practice-custom-footer .button{width:100%}}
+@media(max-width:420px){.practice-topic-grid{gap:8px}.practice-topic-card{grid-template-columns:28px minmax(0,1fr)}.practice-custom-secondary-controls{grid-template-columns:1fr}.practice-advanced>summary{display:flex;flex-wrap:wrap}.practice-advanced>summary>span:first-child{flex:1 1 100%}}

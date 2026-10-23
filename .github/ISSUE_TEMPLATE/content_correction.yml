@@ -1,0 +1,40 @@
+name: Content correction
+description: Report a reading, meaning, example, stroke, radical/component, mnemonic, or provenance issue.
+title: "[Content] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include private learner history or personal mnemonics unless strictly necessary.
+  - type: input
+    id: kanji
+    attributes:
+      label: Kanji / content identifier
+      placeholder: 日 or another stable identifier
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Meaning
+        - Reading
+        - Example / vocabulary
+        - Context / sentence
+        - Stroke order
+        - Radical / component
+        - Mnemonic / provenance
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source / evidence
+      description: Link or citation for the correction, when available.

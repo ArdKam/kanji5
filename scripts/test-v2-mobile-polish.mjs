@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const css=fs.readFileSync('v2-presentation.css','utf8');
+assert.match(css,/safe-area-inset-bottom/);
+assert.match(css,/white-space:nowrap/);
+assert.match(css,/overflow-wrap:anywhere/);
+assert.match(css,/word-break:break-word/);
+assert.match(css,/min-height:48px/);
+assert.match(css,/summary:focus-visible/);
+assert.match(css,/max-width:600px/);
+console.log('Kanji 5 v2 mobile polish contract passed.');

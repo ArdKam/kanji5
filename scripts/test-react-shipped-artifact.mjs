@@ -1,0 +1,68 @@
+// Build-id cache provenance contract: generated artifact URLs must match the staged build metadata.
+import fs from "node:fs";
+import { execFileSync } from "node:child_process";
+
+const css=fs.readFileSync("react-dist/kanji5-react.css","utf8");
+const entry=fs.readFileSync("react-entry.js","utf8");
+if(!/\.experience-nav\{[^}]*position:fixed/.test(css)){
+  throw new Error("SHIPPED_REACT_CSS_MISSING_BOTTOM_EXPERIENCE_NAV");
+}
+if(!/\.experience-tab\.active/.test(css)){
+  throw new Error("SHIPPED_REACT_CSS_MISSING_EXPERIENCE_TAB_STATE");
+}
+const localCssAssets=[...css.matchAll(/url\(\s*["']?\.\/assets\/([^"')?#\s]+)["']?\s*\)/g)].map(match=>match[1]);
+for(const asset of localCssAssets){
+  if(!fs.existsSync("react-dist/assets/"+asset)){
+    throw new Error("SHIPPED_REACT_CSS_MISSING_LOCAL_ASSET: "+asset);
+  }
+}
+console.log("Shipped React CSS local assets resolved ("+localCssAssets.length+").");
+
+console.log("Shipped React artifact contains bottom experience navigation CSS.");
+
+if(!/assetVersion='\?v='\+encodeURIComponent\(buildId\)/.test(entry) || /react-dist\/kanji5-react\.js'\+assetVersion/.test(entry) || !/import\('\.\/react-dist\/kanji5-react\.js'\)/.test(entry) || !/react-dist\/kanji5-react\.css'\+assetVersion/.test(entry)){
+  throw new Error("REACT_ENTRY_MODULE_IDENTITY_OR_CSS_CACHE_BUST_INVALID");
+}
+console.log("React entry preserves one ESM identity for code-split JS and cache-busts the stylesheet.");
+const reactJsPath="react-dist/kanji5-react.js";
+const reactJs=fs.readFileSync(reactJsPath,"utf8");
+try{
+  execFileSync(process.execPath,["--check",reactJsPath],{stdio:"pipe"});
+}catch(error){
+  throw new Error("SHIPPED_REACT_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));
+}
+if(/getVocabulary\(t===`fa`\?character:character\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_UNDEFINED_VOCABULARY_CHARACTER_REFERENCE");
+const vocabularyBlock=reactJs.slice(reactJs.indexOf("function VocabularyExamples"),reactJs.indexOf("function je("));
+if(/let e=!0[\s\S]{0,300}getVocabulary\(e\)[\s\S]{0,300}\[character\]/.test(vocabularyBlock)) throw new Error("SHIPPED_REACT_JS_VOCABULARY_SCOPE_COLLISION");
+if(!/learning-back-identity-visual/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_MISSING_STABLE_IDENTITY_SLOT");
+if(!/requestAnimationFrame\(\(\)=>e\(\)\)|setTimeout\(e,0\)/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_MISSING_INTERACTION_YIELD");
+if(!/\.experience-tab\{[^}]*height:46px/.test(css)||!/\.experience-tab\{[^}]*box-sizing:border-box/.test(css)) throw new Error("SHIPPED_REACT_CSS_EXPERIENCE_TAB_GEOMETRY_NOT_STABLE");
+console.log("Shipped React artifact contains stable layout and interaction-yield guards.");
+console.log("Shipped React JS contains a valid VocabularyExamples character reference.");
+if(/data-kanji5-account-injected/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_CONTAINS_EMBEDDED_FALLBACK_PATCH");
+console.log("Shipped React JS parses as valid JavaScript.");
+
+if(!/learning-back-scroll/.test(reactJs)||!/scrollTo/.test(reactJs)||!/smooth/.test(reactJs)) throw new Error("SHIPPED_REACT_JS_MISSING_LEARNING_SCROLL_BEHAVIOR");
+console.log("Shipped React JS contains learning-card scroll behavior.");
+if(/\\.learning-card\\[data-card-density=dense\\] \\.learning-back-overview\\{[^}]*grid-template-columns:minmax\\(0,1fr\\) minmax\\(0,1fr\\)/.test(css)) throw new Error("SHIPPED_REACT_CSS_CONTAINS_DENSE_TWO_COLUMN_BACK_LAYOUT");
+if(!/\.learning-card-back \.learning-back-overview/.test(css)||!/\.learning-card-back \.learning-back-tools/.test(css)) throw new Error("SHIPPED_REACT_CSS_MISSING_ONE_COLUMN_BACK_LAYOUT_GUARD");
+console.log("Shipped React CSS contains the learning-card single-column guard.");
+const reactEntry=fs.readFileSync("react-entry.js","utf8");
+if(!/function showReactBootFailure/.test(reactEntry) || !/required application file could not be loaded/.test(reactEntry) || !/removeAttribute\('aria-hidden'\)/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACTIONABLE_BOOT_FAILURE");
+if(!/function scheduleAccountFallback/.test(reactEntry)) throw new Error("REACT_ENTRY_MISSING_ACCOUNT_FALLBACK");
+if(!/account\.button|account-button|data-kanji5-account-fallback/.test(reactEntry)) throw new Error("REACT_ENTRY_ACCOUNT_FALLBACK_GUARD_MISSING");
+console.log("React entry contains account visibility fallback.");
+if(!fs.existsSync("account-fallback.js")) throw new Error("ACCOUNT_FALLBACK_SCRIPT_MISSING");
+if(!/__KANJI5_ACCOUNT__|account-button/.test(fs.readFileSync("account-fallback.js","utf8"))) throw new Error("ACCOUNT_FALLBACK_SCRIPT_INCOMPLETE");
+console.log("Standalone account fallback is present.");
+
+const accountUi=/account-button|account-dialog|signInWithPassword|sendMagicLink/.test(reactJs);
+if(!accountUi) throw new Error("SHIPPED_REACT_JS_MISSING_ACCOUNT_UI");
+console.log("Shipped React JS contains Account UI.");
+
+const accountFallback=fs.readFileSync("account-fallback.js","utf8");
+try{new Function(accountFallback);}catch(error){throw new Error("ACCOUNT_FALLBACK_JS_INVALID_SYNTAX: "+(error instanceof Error?error.message:String(error)));}
+console.log("Account fallback parses as valid JavaScript.");
+
+const html=fs.readFileSync("index.html","utf8");
+if(!/react-dist\/kanji5-react\.js">/.test(html)||!/react-dist\/kanji5-react\.css\?v=dev/.test(html)) throw new Error("INDEX_HTML_REACT_HINTS_OR_MODULE_IDENTITY_INVALID");

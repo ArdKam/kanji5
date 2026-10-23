@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="180" viewBox="0 0 800 180" role="img" aria-labelledby="title desc">
+  <title id="title">Rinemi monochrome logo</title>
+  <desc id="desc">Single-color Rinemi wordmark and R brand mark.</desc>
+  <g transform="translate(7 -4) scale(.36)">
+    <path d="M176 366V157c0-16 13-29 29-29h34c53 0 86 29 86 76 0 45-31 73-82 73h-67m75 0 91 89" fill="none" stroke="#292B2D" stroke-width="29" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M349 111c-17-16-11-36 4-40 15-4 24 11 19 29 14-15 33-11 35 4 2 15-14 24-31 18 12 15 5 32-10 32-16 0-22-18-12-33-17 6-31-5-25-19 5-14 20-14 33-1-2-19 9-31 22-24 13 7 9 24-4 34z" fill="#292B2D"/>
+  </g>
+  <text x="190" y="122" fill="#292B2D" font-family="Plus Jakarta Sans, Avenir Next, Arial, sans-serif" font-size="105" font-weight="700" letter-spacing="-2.5">Rinemi</text>
+</svg>

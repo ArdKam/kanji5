@@ -1,0 +1,40 @@
+const IS_LEGACY = new URLSearchParams(location.search).get('legacy') === '1';
+(()=>{
+'use strict';
+if(window.__KANJI5_V16_SESSION_FEEDBACK__)return;
+window.__KANJI5_V16_SESSION_FEEDBACK__=true;
+const state=window.__KANJI5_STATE__;
+if(!state)throw new Error('KANJI5_STATE_REQUIRED');
+const KEY_SCHEMA=3,ACTIVE='active';
+const MODES=['meaning','reading','production','vocabulary','context'];
+const LABELS={meaning:'معنی',reading:'خوانش',production:'تولید',vocabulary:'واژگان',context:'بافت'};
+const faNumber=v=>Number(v||0).toLocaleString('fa-IR');
+const read=()=>state.readSessionHistory?.()||[];
+const active=()=>[...read()].reverse().find(x=>x?.status===ACTIVE&&Number(x.schemaVersion)>=2)||null;
+const completed=()=>[...read()].reverse().find(x=>!x?.status&&x?.modeResults)||null;
+const clone=v=>JSON.parse(JSON.stringify(v));
+function normalizeResults(value){const out={};for(const mode of MODES){const s=value?.[mode]||{};const attempts=Math.max(0,Number(s.attempts)||0);out[mode]={attempts,correct:Math.min(attempts,Math.max(0,Number(s.correct)||0)),lastAt:typeof s.lastAt==='string'?s.lastAt:'',lastCorrect:typeof s.lastCorrect==='boolean'?s.lastCorrect:null,lastOutcome:['correct','wrong','unknown','empty','invalid'].includes(s.lastOutcome)?s.lastOutcome:null,lastQuality:typeof s.lastQuality==='string'?s.lastQuality:'',lastScore:Number.isFinite(Number(s.lastScore))?Math.max(0,Math.min(1,Number(s.lastScore))):0,graderVersion:typeof s.graderVersion==='string'?s.graderVersion:'',outcomeSchemaVersion:Number(s.outcomeSchemaVersion)||0}}return out}
+function writeActive(next){const current=active();if(!current||next?.sessionId!==current.sessionId)return false;const history=read().filter(x=>x?.status!==ACTIVE);history.push(next);return Boolean(state.writeSessionHistory?.(history))}
+function record(mode,correct,outcome={}){if(!MODES.includes(mode)||outcome?.sessionEligible===false)return false;const current=active();if(!current)return false;const next=clone(current);next.modeResults=normalizeResults(current.modeResults);next.modeResults[mode].attempts+=1;if(correct)next.modeResults[mode].correct+=1;next.modeResults[mode].lastAt=new Date().toISOString();next.modeResults[mode].domain=typeof outcome?.domain==='string'&&outcome.domain.trim()?outcome.domain.trim().slice(0,40):'kanji';next.modeResults[mode].skill=typeof outcome?.skill==='string'&&outcome.skill.trim()?outcome.skill.trim().slice(0,80):mode;next.modeResults[mode].exercise=typeof outcome?.exercise==='string'&&outcome.exercise.trim()?outcome.exercise.trim().slice(0,80):'legacy';next.modeResults[mode].contentId=typeof outcome?.contentId==='string'?outcome.contentId.trim().slice(0,240):'';next.modeResults[mode].lastCorrect=Boolean(correct);next.modeResults[mode].lastOutcome=['correct','wrong','unknown','empty','invalid'].includes(outcome?.outcome)?outcome.outcome:(correct?'correct':'wrong');next.modeResults[mode].lastQuality=typeof outcome?.quality==='string'?outcome.quality:(correct?'exact':'wrong');next.modeResults[mode].lastScore=Number.isFinite(Number(outcome?.score))?Math.max(0,Math.min(1,Number(outcome.score))):0;next.modeResults[mode].graderVersion=typeof outcome?.graderVersion==='string'?outcome.graderVersion:'';next.modeResults[mode].outcomeSchemaVersion=Number(outcome?.schemaVersion)||0;next.modeResultsSchemaVersion=KEY_SCHEMA;return writeActive(next)}
+async function rebalance(){const current=active();if(!current?.plan)return false;const core=await import('./v1.6-session-core.js');const latest=active();if(!latest||latest.sessionId!==current.sessionId)return false;const result=core.rebalanceSessionPlan(latest.plan,latest.remainingModes,latest.modeResults,{now:Date.now()});const next=clone(latest);next.plan=result.plan;next.remainingModes=result.remaining;next.rebalanceCount=(Number(latest.rebalanceCount)||0)+1;next.planRevision=(Number(latest.planRevision)||0)+1;return writeActive(next)}
+function authoritativeNextMode(available){const current=active();if(!current?.plan)return null;const allowed=new Set(Array.isArray(available)&&available.length?available:MODES);const priority=Array.isArray(current.plan.priority)?current.plan.priority:current.plan.modes?.map(x=>x.mode)||[];return priority.find(mode=>allowed.has(mode)&&Number(current.remainingModes?.[mode]||0)>0)||null}
+function authoritativeConsumeMode(mode){if(!MODES.includes(mode))return false;const current=active();if(!current||Number(current.remainingModes?.[mode]||0)<=0)return false;const next=clone(current);next.remainingModes={...(current.remainingModes||{}),[mode]:Math.max(0,Number(current.remainingModes?.[mode]||0)-1)};next.planRevision=Number(current.planRevision)||0;return writeActive(next)}
+function exposeAuthoritativeApi(){if(window.__KANJI5_V16_SESSION_AUTH__)return true;window.__KANJI5_V16_SESSION_AUTH__=Object.freeze({nextMode:authoritativeNextMode,consumeMode:authoritativeConsumeMode});document.dispatchEvent(new CustomEvent('kanji5:v1.6-session-auth-ready'));return true}
+function migrateCompletedModeResults(sessionId,results){if(!sessionId||!results)return false;const h=read();let idx=[...h].map((x,i)=>({x,i})).reverse().find(({x})=>!x?.status&&x.sessionId===sessionId);if(!idx)idx=[...h].map((x,i)=>({x,i})).reverse().find(({x})=>!x?.status);if(!idx)return false;const next=clone(idx.x);next.modeResults=normalizeResults(results);next.modeResultsSchemaVersion=KEY_SCHEMA;const copy=h.slice();copy[idx.i]=next;return Boolean(state.writeSessionHistory?.(copy))}
+function maybeFinishV2(correct){
+  if(IS_LEGACY||!correct)return;
+  const latest=active();
+  if(!latest)return;
+  const remaining=Object.values(latest.remainingModes||{}).reduce((sum,value)=>sum+Math.max(0,Number(value)||0),0);
+  if(remaining===0)void window.__KANJI5_V16_SESSION_API__?.finish?.();
+}
+function render(){const host=document.getElementById('v16Session');if(!host)return;let box=document.getElementById('v16SessionModeStats');if(!box){box=document.createElement('div');box.id='v16SessionModeStats';box.style.cssText='margin-top:12px;padding:11px 12px;border:1px solid var(--line,#e5e7eb);border-radius:13px;background:#f9fafb;font-size:12px';const modes=document.getElementById('v16Modes');(modes?.parentElement||host).appendChild(box)}const a=active(),c=completed(),r=normalizeResults(a?.modeResults||c?.modeResults);box.replaceChildren();const title=document.createElement('strong');title.textContent='عملکرد همین جلسه';title.style.cssText='display:block;margin-bottom:6px';const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:5px';MODES.forEach(m=>{const stat=r[m],p=stat.attempts?Math.round(stat.correct/stat.attempts*100):0;const span=document.createElement('span');span.textContent=LABELS[m]+': '+(stat.attempts?faNumber(stat.correct)+'/'+faNumber(stat.attempts)+' · '+faNumber(p)+'٪':'—');grid.append(span)});box.append(title,grid)}
+
+let lastResults=null,lastSessionId=null,lastRebalanceToken='';
+function onResult(e){const d=e?.detail||{};const mode=String(d.mode||'');const correct=Boolean(d.correct);if(!MODES.includes(mode))return;if(d.sessionEligible===false){render();return}const recorded=record(mode,correct,d);if(!recorded){render();return}const latest=active();const r=normalizeResults(latest?.modeResults||{});lastResults=r;lastSessionId=latest?.sessionId||null;const token=`${lastSessionId||''}:${mode}:${r[mode].attempts}:${r[mode].correct}:${r[mode].lastOutcome}`;if(token!==lastRebalanceToken){lastRebalanceToken=token;void rebalance().then(()=>maybeFinishV2(correct)).catch(()=>{})}else maybeFinishV2(correct);render()}
+document.addEventListener('kanji5:v1.6-education-result',onResult);
+document.addEventListener('kanji5:v1.6-session-finished',()=>setTimeout(()=>{if(lastSessionId&&lastResults)migrateCompletedModeResults(lastSessionId,lastResults);window.__KANJI5_V16_SKILL_PROFILE__?.update?.();render()},0));
+exposeAuthoritativeApi();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{exposeAuthoritativeApi();render()},{once:true});else render();
+
+})();

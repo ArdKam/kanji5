@@ -1,0 +1,28 @@
+name: Data Trust production sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_test_account:
+        description: "Type I_UNDERSTAND_TEST_ACCOUNT to authorize a disposable test account"
+        required: true
+        type: string
+
+jobs:
+  production-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      KANJI5_LIVE_SYNC_EMAIL: ${{ secrets.KANJI5_LIVE_SYNC_EMAIL }}
+      KANJI5_LIVE_SYNC_PASSWORD: ${{ secrets.KANJI5_LIVE_SYNC_PASSWORD }}
+      KANJI5_LIVE_SYNC_CONFIRM: ${{ inputs.confirm_test_account }}
+      KANJI5_LIVE_URL: https://ardkam.github.io/kanji5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/verify-production-sync-e2e.mjs

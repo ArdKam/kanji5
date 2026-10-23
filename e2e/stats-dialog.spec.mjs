@@ -1,0 +1,139 @@
+import {test,expect} from '@playwright/test';
+
+async function clean(page){
+  page.on('pageerror',error=>console.error(`[E2E_PAGEERROR] ${error?.stack||error}`));
+  page.on('console',message=>{if(message.type()==='error')console.error(`[E2E_CONSOLE_ERROR] ${message.text()}`)});
+  await page.goto('/');
+  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);sessionStorage.clear();localStorage.setItem('kanji5-onboarding-v2','complete')});
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+}
+
+async function openStats(page,language='fa'){
+  await page.getByRole('button',{name:language==='fa'?'بیشتر':'More',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:language==='fa'?'آمار':'Stats',exact:true}).click();
+  return page.getByRole('dialog');
+}
+
+test('Statistics dialog exposes a focused progress dashboard',async({page})=>{
+  await clean(page);
+  const dialog=await openStats(page);
+  await expect(dialog).toHaveAttribute('aria-labelledby','stats-title');
+  await expect(dialog.locator('.stats-header')).toBeVisible();
+  await expect(dialog.locator('.stats-overview')).toBeVisible();
+  await expect(dialog.locator('.stats-overview-primary')).toBeVisible();
+  await expect(dialog.locator('.stats-overview .stats-metric')).toHaveCount(3);
+  await expect(dialog.locator('.stats-activity-section')).toBeVisible();
+  await expect(dialog.locator('.stats-activity-section .empty-text')).toBeVisible();
+  await expect(dialog.locator('.stats-activity-section .empty-text')).toContainText('در هفت روز اخیر هنوز مروری ثبت نشده است');
+  await expect(dialog.locator('.activity-chart')).toHaveCount(0);
+  await expect(dialog.locator('.stats-activity-footer')).toHaveCount(0);
+  const masterySummary = dialog.locator('.stats-section[aria-labelledby="stats-mastery-title"] .stats-section-summary');
+  await expect(masterySummary.locator('strong')).toHaveText('—');
+  await expect(masterySummary).toContainText('پس از اولین جلسه نمایش داده می‌شود');
+  await expect(dialog.locator('.stats-dashboard .dialog-grid')).toHaveCount(0);
+  await expect(dialog.locator('.stats-dashboard .stats-hero')).toHaveCount(0);
+  await expect(dialog.locator('.stats-advanced-trigger')).toBeVisible();
+  await expect(dialog.locator('.stats-advanced')).toHaveCount(0);
+});
+
+test('Statistics dashboard switches labels consistently to English',async({page})=>{
+  await clean(page);
+  const dialog=await openStats(page,'fa');
+  await expect(dialog).toBeVisible();
+  await dialog.locator('.dialog-close').click();
+  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('#header-tools-menu').getByRole('button',{name:'English',exact:true}).click();
+  await expect(page.locator('#header-tools-menu')).toHaveClass(/open/);
+  await page.locator('#header-tools-menu').getByRole('button',{name:'Stats',exact:true}).click();
+  const englishDialog=page.getByRole('dialog');
+  await expect(englishDialog.locator('.stats-header h2')).toHaveText('Your learning progress');
+  await expect(englishDialog.locator('.stats-activity')).toContainText('7-day review activity');
+  await expect(englishDialog.locator('.stats-overview')).toContainText("Today's reviews");
+});
+
+
+test('Learning profile reflects persisted skill data after a real app reload',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({学:{exposedAt:at,meaning:{attempts:1,correct:1,lastAt:at,lastCorrect:true}}}));
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.__KANJI5_V19_LEARNER_MODEL__)),{timeout:10000}).toBe(true);
+  await expect.poll(async()=>page.evaluate(()=>Number((window.__KANJI5_V19_LEARNER_MODEL__?.read?.()?.attributes?.meaning?.confidence)||0)),{timeout:10000}).toBeGreaterThan(0);
+  const dialog=await openStats(page);
+  await expect(dialog.locator('.stats-skill-row').first().locator('strong')).not.toHaveText('۰٪');
+});
+
+
+test('Advanced statistics stay collapsed until explicitly opened',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({
+      学:{exposedAt:at,meaning:{attempts:3,correct:2,lastAt:at,lastCorrect:true}}
+    }));
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  const dialog=await openStats(page);
+  const trigger=dialog.locator('.stats-advanced-trigger');
+  const advanced=dialog.locator('.stats-advanced');
+  await expect(trigger).toBeVisible();
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await expect(advanced).toHaveCount(0);
+  await trigger.click();
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
+  await expect(advanced).toBeVisible();
+  await expect(advanced.locator('.stats-advanced-metrics')).toBeVisible();
+  await expect(advanced.locator('.stats-advanced-skill-list .stats-skill-row')).toHaveCount(5);
+  await expect(advanced).toContainText('دقت');
+  await expect(advanced).toContainText('داده کافی نیست');
+  await expect(advanced.locator('.stats-advanced-skill-list .stats-skill-row').first()).toContainText('۶۷%');
+});
+
+
+test('Advanced statistics expose deterministic efficacy evidence without inventing a comparison',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at='2026-09-15T00:00:00.000Z';
+    localStorage.setItem('kanji5-v1.6-session-history',JSON.stringify([
+      {sessionId:'eff-1',endedAt:at,modeResults:{meaning:{attempts:3,correct:2,lastCorrect:true},reading:{attempts:2,correct:1,lastCorrect:false},production:{attempts:1,correct:1}}},
+      {sessionId:'eff-2',endedAt:at,modeResults:{meaning:{attempts:2,correct:2,lastCorrect:true},reading:{attempts:2,correct:2,lastCorrect:true},production:{attempts:1,correct:1,lastCorrect:true}}}
+    ]));
+    localStorage.setItem('kanji5-v1.5-components',JSON.stringify({v19LearnerEvidence:{
+      学:[
+        {at:'2026-09-14T00:00:00.000Z',mode:'reading',outcome:'wrong',taskId:'read-1'},
+        {at:'2026-09-15T00:00:00.000Z',mode:'reading',outcome:'correct',taskId:'read-1',retryOf:'read-1',recovery:true,recoveryAttempt:1}
+      ]
+    }}));
+  });
+  await page.reload();
+  const dialog=await openStats(page);
+  const trigger=dialog.locator('.stats-advanced-trigger');
+  await trigger.click();
+  const advanced=dialog.locator('.stats-advanced');
+  await expect(advanced).toBeVisible();
+  await expect(advanced).toContainText('نرخ بازیابی');
+  await expect(advanced).toContainText('پوشش مهارت‌ها');
+  await expect(advanced).toContainText('تکمیل جلسه');
+  await expect(advanced).toContainText('نرخ ناشناخته');
+  await expect(advanced).toContainText('تکرار خطای کل');
+  await expect(advanced).toContainText('شواهد محدود است');
+});
+
+test('Statistics uses persisted kanji exposure for studied coverage',async({page})=>{
+  await clean(page);
+  await page.evaluate(()=>{
+    const at=new Date().toISOString();
+    localStorage.setItem('kanji5-v1.2-knowledge',JSON.stringify({学:{exposedAt:at}}));
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  const dialog=await openStats(page);
+  await expect(dialog.locator('.stats-overview-primary')).toContainText('۱ / ۲۱۳۶');
+  await expect(dialog.locator('.stats-overview-track > span')).toHaveAttribute('style', /width:\s*0%/);
+});

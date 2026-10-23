@@ -1,0 +1,1250 @@
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ComponentProps, type PointerEvent } from "react";
+import { ensureLearningCardStyles, KanjiStructurePreview } from "./KanjiStructurePreview";
+import { useModalDialog } from "./useModalDialog";
+import { buildMnemonicSupport, getMnemonicHintFocus, getMnemonicHintPlan, getMnemonicHintStage } from "./mnemonic-support";
+import { MnemonicSupportPanel } from "./MnemonicSupport";
+import type { PreparedMnemonic } from "./mnemonic-library";
+import { StrokeOrderViewer } from "./StrokeOrderViewer";
+import { StatsDialog } from "./StatsDialog";
+import { SettingsDialog } from "./SettingsDialog";
+import { PracticeHome } from "./PracticeHome";
+import { GrammarDialog } from "./GrammarDialog";
+import { ReadingLabDialog } from "./ReadingLabDialog";
+import { MnemonicsDialog } from "./MnemonicsDialog";
+import { HandwritingPractice } from "./HandwritingPractice";
+import { AccountButton, AccountDialog } from "./AccountDialog";
+import { OnboardingEntry } from "./OnboardingEntry";
+import { getTopicLabel } from "./topic-taxonomy";
+const TopicLearningDialog = lazy(() => import("./TopicLearningDialog").then(module => ({ default: module.TopicLearningDialog })));
+const DictionaryPageRoute = lazy(async () => {
+  const [{ default: dictionaryStyles }, pageModule] = await Promise.all([
+    import("./dictionary-page.css?inline"),
+    import("./DictionaryPage"),
+  ]);
+  const Page = pageModule.DictionaryPage;
+  const WithDictionaryStyles = (props: ComponentProps<typeof Page>) => (
+    <>
+      <style data-dictionary-page-styles>{dictionaryStyles}</style>
+      <Page {...props} />
+    </>
+  );
+  return { default: WithDictionaryStyles };
+});
+const KanjiStructureDialog = lazy(() => import("./KanjiStructureDialog").then(module => ({ default: module.KanjiStructureDialog })));
+import { learningCopy } from "./learning-copy";
+import learningSurfaceStyles from "./learning-surface.css?inline";
+import { isOnboardingComplete } from "./onboarding";
+import { UiIcon } from "./UiIcon";
+import { applyLanguage, formatNumber, getLanguage, localizeDynamic, setLanguage as persistLanguage, t, type Language } from "./i18n";
+import { getThemePreference, setThemePreference as persistThemePreference, type ThemePreference } from "./ui-preferences";
+import {
+  clearCustomStudyFilter,
+  clearTransient,
+  dontKnow,
+  getVisualStructureInfo,
+  getVocabulary,
+  getMnemonic,
+  nextExercise,
+  rateLearning,
+  resetProgress,
+  snapshot as readSnapshot,
+  startupSnapshot as readStartupSnapshot,
+  revealLearning,
+  startExercise,
+  startPracticeExperience,
+  startLearningExperience,
+  startLearningSession,
+  startCustomStudy,
+  submitExercise,
+  saveMnemonic,
+  updateSettings,
+  type Rating,
+  type VisualStructureInfo,
+  type Settings,
+  type Snapshot,
+  type CustomStudyFilter,
+  type KanjiCatalogItem,
+  getHandwritingSkill,
+  recordHandwritingGrade,
+  type HandwritingSkill,
+  waitForEngine,
+  retryExercise,
+  selfReportProduction,
+  listKanji,
+  listPersonalMnemonics,
+} from "./engine";
+
+const fa=(v:number)=>formatNumber(v,getLanguage());
+const text=(v:unknown,fallback="—")=>String(v??"").trim()||fallback;
+const pct=(v:number|undefined)=>Math.round(Math.max(0,Math.min(1,Number(v)||0))*100);
+const toHiragana=(value:string)=>Array.from(value).map(ch=>{const code=ch.charCodeAt(0);return code>=0x30a1&&code<=0x30f6?String.fromCharCode(code-0x60):ch}).join("");
+const skillLabel=(key:string)=>({meaning:t("meaning"),reading:t("reading"),production:t("production"),vocabulary:t("vocabulary"),context:t("context")} as Record<string,string>)[key]??text(key);
+const preparedMnemonicSourceLabel=(source:PreparedMnemonic["source"])=>source==="curated"?t("preparedMnemonicCurated"):(getLanguage()==="fa"?"یادسپار تولیدشده":"Generated mnemonic");
+const modalityLabel=(modality:string,stage:string)=>{
+  if(stage==="introduction")return t("contentExposureModality");
+  if(modality==="revealed_self_report")return t("revealedSelfReportModality");
+  if(modality==="cued-kanji-choice")return t("productionCuedModality");
+  if(modality==="independent-typed-production")return t("productionModality");
+  if(modality==="cued-kanji-completion")return t("vocabularyModality");
+  if(modality==="cued-sentence-completion")return t("contextModality");
+  return t("freeRecallModality");
+};
+const languageSafeContentUnavailable=(mode:string)=>getLanguage()==="fa"?(mode==="context"?"برای این جمله گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن.":"برای این واژه گزینه‌های امن کافی نیست؛ تمرین بعدی را انتخاب کن."):(mode==="context"?"Not enough safe choices are available for this sentence. Continue to the next exercise.":"Not enough safe choices are available for this word. Continue to the next exercise.");
+
+function Progress({value,label}:{value:number;label:string}){return <div className="progress" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value)}><span style={{width:Math.max(0,Math.min(100,value))+"%"}}/></div>}
+function Audio({value,label}:{value:string;label:string}){const unsupported=typeof window.speechSynthesis?.speak!=="function"||typeof window.SpeechSynthesisUtterance!=="function";return <button className="audio-button" type="button" disabled={unsupported} aria-label={unsupported?t("audioUnavailable"):label} onClick={()=>{if(unsupported)return;const u=new SpeechSynthesisUtterance(value);u.lang="ja-JP";u.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u)}}><UiIcon name="audio" /></button>}
+
+const PAGER_AXIS_LOCK_DISTANCE=12;
+const PAGER_AXIS_RATIO=2;
+const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;
+
+const formatReviewInterval=(dueAt:string|null|undefined)=>{
+  if(!dueAt)return "—";
+  const due=Date.parse(dueAt);
+  if(!Number.isFinite(due))return "—";
+  const minutes=Math.max(0,Math.round((due-Date.now())/60000));
+  if(minutes<60){
+    const value=Math.max(1,minutes);
+    return getLanguage()==="fa"?`${fa(value)} دقیقه`:`${value}m`;
+  }
+  const hours=minutes/60;
+  if(hours<24){
+    const value=Math.max(1,Math.round(hours));
+    return getLanguage()==="fa"?`${fa(value)} ساعت`:`${value}h`;
+  }
+  const days=Math.max(1,Math.round(hours/24));
+  return getLanguage()==="fa"?`${fa(days)} روز`:`${days}d`;
+};
+
+function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;topicLabel?:string|null;onReveal:()=>void;onRate:(r:Rating)=>void}){
+  const revealed=Boolean(card.revealed);
+  const learnerMeaningModel=card.learnerMeanings??{};
+  const learnerReadingModel=card.learnerReadings??{};
+  const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
+  const secondaryMeanings=learnerMeaningModel.secondary??[];
+  const referenceMeanings=learnerMeaningModel.reference??[];
+  const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
+  const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
+  const [visualStructureReady,setVisualStructureReady]=useState(false);
+  const [hiraganaReadings,setHiraganaReadings]=useState(false);
+  const [referenceInfoOpen,setReferenceInfoOpen]=useState(false);
+  const [structureDialogOpen,setStructureDialogOpen]=useState(false);
+  const referenceInfoTriggerRef=useRef<HTMLButtonElement|null>(null);
+  const [personalMnemonic,setPersonalMnemonic]=useState("");
+  const [mnemonicDraft,setMnemonicDraft]=useState("");
+  const [preparedMnemonic,setPreparedMnemonic]=useState<PreparedMnemonic|null>(null);
+  const [mnemonicEditing,setMnemonicEditing]=useState(false);
+  const [mnemonicBusy,setMnemonicBusy]=useState(false);
+  const [mnemonicError,setMnemonicError]=useState("");
+  const closeReferenceInfo=useCallback(()=>setReferenceInfoOpen(false),[]);
+  const referenceInfoDialogRef=useModalDialog(referenceInfoOpen,closeReferenceInfo);
+  const closeMnemonicEditor=useCallback(()=>{
+    if(mnemonicBusy)return;
+    setMnemonicDraft(personalMnemonic);
+    setMnemonicEditing(false);
+    setMnemonicError("");
+  },[personalMnemonic,mnemonicBusy]);
+  const mnemonicDialogRef=useModalDialog(mnemonicEditing,closeMnemonicEditor);
+  const closeStructureDialog=useCallback(()=>setStructureDialogOpen(false),[]);
+  const frontFaceRef=useRef<HTMLDivElement|null>(null);
+  const backFaceFocusRef=useRef<HTMLSpanElement|null>(null);
+  const shouldFocusBackRef=useRef(false);
+  const [revealStylesPending,setRevealStylesPending]=useState(false);
+  const revealStylesPendingRef=useRef(false);
+  const handleReveal=useCallback(async()=>{
+    if(revealed || busy || revealStylesPendingRef.current)return;
+    revealStylesPendingRef.current=true;
+    setRevealStylesPending(true);
+    try {
+      await ensureLearningCardStyles();
+    } catch (error) {
+      console.error("Learning-card styles were unavailable before reveal.", error);
+      revealStylesPendingRef.current=false;
+      setRevealStylesPending(false);
+      return;
+    }
+    // Let the browser apply the card-only stylesheet before reveal. Avoid an unconditional
+    // scrollIntoView(): on short landscape screens the fixed navigation plus scroll-padding
+    // can make the browser scroll a card that is already inside the usable viewport off the top.
+    const cardElement = frontFaceRef.current?.closest(".learning-card");
+    if (cardElement instanceof HTMLElement) {
+      const bounds = cardElement.getBoundingClientRect();
+      const navigation = document.querySelector(".experience-nav");
+      const navigationTop = navigation instanceof HTMLElement
+        ? navigation.getBoundingClientRect().top
+        : window.innerHeight;
+      if (bounds.top < 0) {
+        cardElement.scrollIntoView({ block: "start", inline: "nearest" });
+      } else if (bounds.bottom > navigationTop - 1) {
+        window.scrollBy({ top: bounds.bottom - (navigationTop - 1), behavior: "instant" });
+      }
+    }
+    const active=document.activeElement;
+    if(active instanceof HTMLElement && frontFaceRef.current?.contains(active)){
+      active.blur();
+    }
+    shouldFocusBackRef.current=true;
+    onReveal();
+  },[onReveal,revealed,busy]);
+  useEffect(()=>{
+    if(revealed || !busy){
+      revealStylesPendingRef.current=false;
+      setRevealStylesPending(false);
+    }
+  },[revealed,busy]);
+  useEffect(()=>{
+    if(!revealed||!shouldFocusBackRef.current)return;
+    shouldFocusBackRef.current=false;
+    requestAnimationFrame(()=>{
+      backFaceFocusRef.current?.focus({preventScroll:true});
+    });
+  },[revealed]);
+  useEffect(()=>{
+    let active=true;
+    if(!card.character){
+      setVisualStructureInfo(null);
+      setVisualStructureReady(false);
+      setPreparedMnemonic(null);
+      return ()=>{active=false};
+    }
+    setVisualStructureInfo(null);
+    setVisualStructureReady(false);
+    setPreparedMnemonic(null);
+    void getVisualStructureInfo(card.character).then(info=>{
+      if(!active)return;
+      setVisualStructureInfo(info);
+      setVisualStructureReady(true);
+    }).catch(()=>{
+      if(!active)return;
+      setVisualStructureInfo(null);
+      setVisualStructureReady(true);
+    });
+    return ()=>{active=false};
+  },[card.character]);
+
+
+  useEffect(()=>{
+    setHiraganaReadings(false);
+    setReferenceInfoOpen(false);
+    setStructureDialogOpen(false);
+    setExamplesExpanded(false);
+  },[card.character]);
+
+  useEffect(()=>{
+    let active=true;
+    setPersonalMnemonic("");
+    setMnemonicDraft("");
+    setMnemonicEditing(false);
+    setMnemonicBusy(false);
+    setMnemonicError("");
+    if(!revealed||!card.character)return ()=>{active=false};
+    void getMnemonic(card.character).then(value=>{
+      if(!active)return;
+      const next=String(value?.text??"");
+      setPersonalMnemonic(next);
+      setMnemonicDraft(next);
+    }).catch(()=>{
+      if(active)setMnemonicError(t("mnemonicLoadError"));
+    });
+    return ()=>{active=false};
+  },[revealed,card.character]);
+  const handleSaveMnemonic=useCallback(async()=>{
+    if(!card.character||mnemonicBusy)return;
+    const next=mnemonicDraft.trim().slice(0,600);
+    setMnemonicBusy(true);
+    setMnemonicError("");
+    try{
+      const saved=await saveMnemonic(card.character,next);
+      setPersonalMnemonic(saved.text);
+      setMnemonicDraft(saved.text);
+      setMnemonicEditing(saved.text.trim().length === 0);
+    }catch(_){
+      setMnemonicError(t("mnemonicSaveError"));
+    }finally{
+      setMnemonicBusy(false);
+    }
+  },[card.character,mnemonicBusy,mnemonicDraft]);
+  const handleUsePreparedMnemonic=useCallback(async()=>{
+    if(!card.character||mnemonicBusy||!preparedMnemonic)return;
+    const next=(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en).trim().slice(0,600);
+    if(!next)return;
+    if(personalMnemonic&&personalMnemonic!==next&&!window.confirm(t("mnemonicOverwriteConfirm")))return;
+    setMnemonicBusy(true);
+    setMnemonicError("");
+    try{
+      const saved=await saveMnemonic(card.character,next);
+      setPersonalMnemonic(saved.text);
+      setMnemonicDraft(saved.text);
+      setMnemonicEditing(false);
+    }catch(_){
+      setMnemonicError(t("mnemonicSaveError"));
+    }finally{
+      setMnemonicBusy(false);
+    }
+  },[card.character,mnemonicBusy,personalMnemonic,preparedMnemonic]);
+  const displayedOn=(learnerReadingModel.coreOn?.length?learnerReadingModel.coreOn:(card.on??[])).map(v=>hiraganaReadings?toHiragana(v):v);
+  const displayedKun=(learnerReadingModel.coreKun?.length?learnerReadingModel.coreKun:(card.kun??[])).map(v=>hiraganaReadings?toHiragana(v):v);
+  const referenceOn=learnerReadingModel.referenceOn??[];
+  const referenceKun=learnerReadingModel.referenceKun??[];
+  const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
+  const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
+  const [examplesResolved,setExamplesResolved]=useState(false);
+  const [examplesError,setExamplesError]=useState(false);
+  const [examplesRetryKey,setExamplesRetryKey]=useState(0);
+  const [examplesExpanded,setExamplesExpanded]=useState(false);
+  const exampleCount=(vocabularyExamples.length>0?vocabularyExamples:(card.examples??[])).length;
+  useEffect(()=>{
+    let active=true;
+    const directExamples=Array.isArray(card.examples)?card.examples:[];
+    setExamplesError(false);
+    if(directExamples.length>0){
+      setVocabularyExamples(directExamples);
+      setExamplesResolved(true);
+      return ()=>{active=false};
+    }
+    setVocabularyExamples([]);
+    setExamplesResolved(false);
+    if(!card.character){setExamplesResolved(true);return ()=>{active=false};}
+    void getVocabulary(card.character).then(result=>{
+      if(!active)return;
+      const items=Array.isArray(result?.items)?result.items.slice(0,6):[];
+      // The engine exposes source availability separately from the item list.
+      // An offline/unavailable response with [] is not a confirmed empty vocabulary result.
+      setVocabularyExamples(items);
+      setExamplesError(result?.availability==="offline"||result?.availability==="unavailable");
+      setExamplesResolved(true);
+    }).catch(()=>{
+      if(active){
+        setExamplesResolved(true);
+        setExamplesError(true);
+      }
+    });
+    return ()=>{active=false};
+  },[card.character,card.examples?.length,examplesRetryKey]);
+  const displayExamples=vocabularyExamples.length>0?vocabularyExamples:(card.examples??[]);
+  const visibleExamples=examplesExpanded?displayExamples:displayExamples.slice(0,4);
+  const componentCount=visualStructureInfo?.available?visualStructureInfo.components.length:0;
+  const mnemonicSupport=buildMnemonicSupport({
+    character:card.character??"",
+    meanings:card.meanings??[],
+    on:displayedOn,
+    kun:displayedKun,
+    examples:displayExamples,
+    components:visualStructureInfo?.available?visualStructureInfo.components.map(component=>component.character):[]
+  });
+  const mnemonicHintContext={
+    character:card.character,
+    isNew:card.isNew,
+    recentOutcomes:snapshot.recentOutcomes,
+    learner:snapshot.learner?.attributes
+  };
+  const mnemonicHintStage=getMnemonicHintStage(mnemonicHintContext);
+  const mnemonicHintFocus=getMnemonicHintFocus(mnemonicHintContext);
+  const mnemonicHintPlan=getMnemonicHintPlan(mnemonicHintStage,mnemonicHintFocus);
+  const readingCount=displayedOn.length+displayedKun.length;
+  const densityScore=exampleCount*2+Math.min(readingCount,6)+Math.min(componentCount,4);
+  const density=densityScore>=10?"dense":densityScore>=6?"compact":"comfortable";
+  const examplesLoading=!examplesResolved;
+  const hasExamplesPage=true;
+  const backPageCount=4;
+  const [backPage,setBackPage]=useState(0);
+  const pagerTrackRef=useRef<HTMLDivElement|null>(null);
+  const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
+  useEffect(()=>setBackPage(0),[card.character]);
+  // The curated mnemonic corpus is large; defer its chunk until the learner opens
+  // the mnemonic page rather than fetching it as part of the initial Learning screen.
+  useEffect(()=>{
+    let active=true;
+    const mnemonicPage=hasExamplesPage?2:1;
+    if(!card.character||!revealed||backPage!==mnemonicPage){
+      return ()=>{active=false};
+    }
+    const character=card.character;
+    const meanings=[...primaryMeanings,...secondaryMeanings];
+    const components=visualStructureInfo?.available
+      ? visualStructureInfo.components.map(component=>component.character)
+      : [];
+    void import("./prepared-mnemonic-core").then(({buildPreparedMnemonic})=>{
+      if(!active)return;
+      setPreparedMnemonic(buildPreparedMnemonic({character,meanings},components));
+    }).catch(()=>{
+      if(active)setPreparedMnemonic(null);
+    });
+    return ()=>{active=false};
+  },[card.character,preparedMeaningKey,backPage,hasExamplesPage,revealed,visualStructureInfo]);
+  const clearLearningFocus=useCallback(()=>{
+    const active=document.activeElement;
+    if(!(active instanceof HTMLElement))return;
+    const learningCard=active.closest(".learning-card");
+    if(learningCard)active.blur();
+  },[]);
+  const changeBackPage=useCallback((delta:number)=>{
+    clearLearningFocus();
+    setBackPage(page=>Math.max(0,Math.min(backPageCount-1,page+delta)));
+  },[backPageCount,clearLearningFocus]);
+  const jumpToBackPage=useCallback((page:number)=>{
+    const next=Math.max(0,Math.min(backPageCount-1,page));
+    if(next!==backPage)clearLearningFocus();
+    setReferenceInfoOpen(false);
+    setBackPage(next);
+  },[backPage,backPageCount,clearLearningFocus]);
+  const handleRate=useCallback((rating:Rating)=>{
+    clearLearningFocus();
+    setReferenceInfoOpen(false);
+    onRate(rating);
+  },[clearLearningFocus,onRate]);
+  const snapPagerTrack=useCallback((page:number)=>{
+    const track=pagerTrackRef.current;
+    if(!track)return;
+    track.style.transition="";
+    requestAnimationFrame(()=>{track.style.transform="translate3d(-"+page*100+"%,0,0)";});
+  },[]);
+  useEffect(()=>{snapPagerTrack(backPage)},[backPage,snapPagerTrack]);
+  const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
+    if(backPageCount<2)return;
+    if((event.target as HTMLElement|null)?.closest?.("button,input,textarea,select,a"))return;
+    if(event.pointerType==="mouse"&&event.button!==0)return;
+    const now=performance.now();
+    swipeRef.current={startX:event.clientX,startY:event.clientY,lastX:event.clientX,lastTime:now,startTime:now,active:true,axis:null};
+  };
+  const handleBackPointerMove=(event:PointerEvent<HTMLDivElement>)=>{
+    const swipe=swipeRef.current;
+    if(backPageCount<2||!swipe.active)return;
+    const shell=event.currentTarget;
+    const dx=event.clientX-swipe.startX;
+    const dy=event.clientY-swipe.startY;
+    const absX=Math.abs(dx),absY=Math.abs(dy);
+    if(!swipe.axis&&Math.max(absX,absY)>=PAGER_AXIS_LOCK_DISTANCE){
+      if(absX>=PAGER_AXIS_LOCK_DISTANCE&&absX>absY*PAGER_AXIS_RATIO)swipe.axis="x";
+      else if(absY>=PAGER_AXIS_LOCK_DISTANCE&&absY>absX*PAGER_AXIS_RATIO)swipe.axis="y";
+    }
+    if(swipe.axis!=="x"){
+      swipe.lastX=event.clientX;
+      swipe.lastTime=performance.now();
+      return;
+    }
+    const width=Math.max(1,shell.getBoundingClientRect().width);
+    let delta=dx;
+    const track=pagerTrackRef.current;
+    if(track&&swipe.lastX===swipe.startX){
+      track.style.transition="none";
+      try{shell.setPointerCapture?.(event.pointerId)}catch(error){if(import.meta.env.DEV)console.debug('Rinemi pager pointer capture unavailable.',error);}
+    }
+    const atFirst=backPage===0&&delta>0;
+    const atLast=backPage===backPageCount-1&&delta<0;
+    if(atFirst||atLast)delta*=0.22;
+    delta=Math.max(-width*0.92,Math.min(width*0.92,delta));
+    if(track)track.style.transform="translate3d(calc(-"+backPage*100+"% + "+delta+"px),0,0)";
+    swipe.lastX=event.clientX;
+    swipe.lastTime=performance.now();
+  };
+  const finishBackSwipe=(event:PointerEvent<HTMLDivElement>,cancelled=false)=>{
+    const swipe=swipeRef.current;
+    if(backPageCount<2||!swipe.active)return;
+    swipe.active=false;
+    const totalDx=event.clientX-swipe.startX;
+    const totalDy=event.clientY-swipe.startY;
+    const totalAbsX=Math.abs(totalDx),totalAbsY=Math.abs(totalDy);
+    const axis=swipe.axis??(totalAbsX>=PAGER_AXIS_LOCK_DISTANCE&&totalAbsX>totalAbsY*PAGER_AXIS_RATIO?"x":null);
+    const delta=cancelled||axis!=="x"?0:totalDx;
+    const totalElapsed=Math.max(16,performance.now()-swipe.startTime);
+    const velocity=cancelled?0:delta/totalElapsed;
+    const width=Math.max(1,event.currentTarget.getBoundingClientRect().width);
+    const threshold=Math.max(24,Math.min(48,width*0.10));
+    const shouldAdvance=(!cancelled&&axis==="x"&&Math.abs(delta)>=threshold)||(!cancelled&&axis==="x"&&Math.abs(delta)>=12&&Math.abs(velocity)>=0.35);
+    const target=shouldAdvance?Math.max(0,Math.min(backPageCount-1,backPage+(delta<0?1:-1))):backPage;
+    const track=pagerTrackRef.current;
+    if(track){track.style.transition="";requestAnimationFrame(()=>{track.style.transform="translate3d(-"+target*100+"%,0,0)";});}
+    try{if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId)}catch(_){/* no active capture */}
+    if(target!==backPage){
+      clearLearningFocus();
+      setBackPage(target);
+    }
+  };
+  const handleBackPointerUp=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event);
+  const handleBackPointerCancel=(event:PointerEvent<HTMLDivElement>)=>finishBackSwipe(event,true);
+  return <section className={"surface card learning-card "+(revealed?"is-revealed":"")+(mnemonicEditing?" has-open-mnemonic":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
+    <div className="learning-card-flip" aria-live="polite">
+      <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
+        <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
+        <h2 className="sr-only">{t("learningCard")}</h2>
+        <div className="kanji-row"><span className="kanji-display" lang="ja" dir="ltr">{text(card.character)}</span>{card.character?<span className="kanji-audio-control"><Audio value={card.character} label={t("playKanjiPronunciation")}/></span>:null}</div>
+        <p id="learning-recall-cue" className="learning-recall-cue">{learningCopy("recallBeforeReveal",getLanguage())}</p>
+        <button className="button primary wide" type="button" aria-describedby="learning-recall-cue" onClick={handleReveal} disabled={revealed||Boolean(busy)||revealStylesPending}>{learningCopy("revealMeaningAndReadings",getLanguage())}</button>
+      </div>
+      <div className="learning-card-face learning-card-back" aria-hidden={!revealed} inert={!revealed}>
+        <span ref={backFaceFocusRef} className="sr-only" tabIndex={-1}>{t("meaningAndStructure")}</span>
+        <div className="learning-back-pager-shell" onPointerDown={handleBackPointerDown} onPointerMove={handleBackPointerMove} onPointerUp={handleBackPointerUp} onPointerCancel={handleBackPointerCancel} data-page-count={backPageCount}>
+          <div ref={pagerTrackRef} className="learning-back-pager-track" style={{transform:"translate3d(-"+backPage*100+"%,0,0)"}}>
+            <div className={"learning-back-page"+(backPage===0?" active":"")} aria-label={t("meaningAndStructure")} aria-hidden={backPage!==0} inert={backPage!==0}>
+              <div className="learning-back-scroll">
+                <div className="learning-back-overview">
+                  <div className="learning-back-identity">
+                    <div className="learning-back-identity-heading">
+                      <span className="learning-back-kanji" lang="ja" dir="ltr">{text(card.character??"")}</span>
+                      <div className="learning-back-meaning-group">
+                        <h3 className="learning-back-section-label">{t("meaning")}</h3>
+                        {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
+                        {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                        {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
+                      </div>
+                    </div>
+                    <div className="learning-back-readings-block">
+                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
+                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                    {!examplesLoading&&!examplesError&&displayExamples[0]?.word?(
+                      <div className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
+                        <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
+                        <span className="learning-back-quick-example-main" lang="ja" dir="ltr">{[displayExamples[0].word,displayExamples[0].reading].filter(Boolean).join(" · ")}</span>
+                        {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang="en" dir="ltr">{displayExamples[0].meaning}</small>:null}
+                      </div>
+                    ):null}
+                    </div>
+                    <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
+                      <KanjiStructurePreview
+                        character={card.character??""}
+                        info={visualStructureInfo}
+                        ready={visualStructureReady}
+                        language={getLanguage()}
+                        onOpen={()=>setStructureDialogOpen(true)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {hasExamplesPage?<div className={"learning-back-page"+(backPage===1?" active":"")} aria-label={t("vocabularyExamples")} aria-hidden={backPage!==1} inert={backPage!==1}>
+              <div className="learning-back-scroll">
+                <div className="examples compact-examples" aria-busy={examplesLoading}>
+                  <h3>{t("vocabularyExamples")}</h3>
+                  {examplesLoading ? <div className="learning-examples-status" role="status">{getLanguage()==="fa"?"در حال بارگذاری مثال‌های واژگانی…":"Loading vocabulary examples…"}</div> : null}
+                  {!examplesLoading && examplesError ? (
+                    <div className="learning-examples-error" role="alert">
+                      <span>{getLanguage()==="fa"?"بارگذاری مثال‌های واژگانی ناموفق بود.":"Vocabulary examples could not be loaded."}</span>
+                      <button className="button secondary" type="button" onClick={()=>setExamplesRetryKey(value=>value+1)}>{t("tryAgain")}</button>
+                    </div>
+                  ) : null}
+                  {!examplesLoading && !examplesError && !displayExamples.length ? <p className="learning-examples-empty">{getLanguage()==="fa"?"برای این کانجی مثال واژگانی در دسترس نیست.":"No vocabulary examples are available for this kanji."}</p> : null}
+                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main" lang="ja" dir="ltr">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning" lang="en" dir="ltr">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
+                  {!examplesLoading && !examplesError && displayExamples.length>4 ? <button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button> : null}
+                </div>
+              </div>
+            </div>:null}
+            <div className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)?" active":"")} aria-label={t("personalMnemonic")} aria-hidden={backPage!==(hasExamplesPage?2:1)} inert={backPage!==(hasExamplesPage?2:1)}>
+              <div className="learning-back-scroll">
+                <div className="mnemonic-page">
+                  <MnemonicSupportPanel support={mnemonicSupport} language={getLanguage()} character={card.character??""} isNew={Boolean(card.isNew)} hintStage={mnemonicHintStage} hintFocus={mnemonicHintFocus}/>
+                  <section className={"mnemonic-tool"+(personalMnemonic?" has-value":"")} aria-label={t("personalMnemonic")}>
+                      {!mnemonicEditing&&preparedMnemonic&&mnemonicHintPlan.preparedMode!=="hidden"?
+                        mnemonicHintPlan.preparedMode==="expanded"?
+                          <div className="mnemonic-prepared" data-mnemonic-source={preparedMnemonic.source}>
+                            <div className="mnemonic-prepared-copy">
+                              <strong>{preparedMnemonicSourceLabel(preparedMnemonic.source)}</strong>
+                              <p>{getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en}</p>
+                            </div>
+                            {personalMnemonic===(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en)
+                              ? null
+                              : preparedMnemonic.source==="curated"
+                                ? <button className="button secondary mnemonic-prepared-use" type="button" disabled={mnemonicBusy} onClick={()=>void handleUsePreparedMnemonic()}>
+                                    {mnemonicBusy?"…":t("useMnemonic")}
+                                  </button>
+                                : <button className="button secondary mnemonic-prepared-use" type="button" disabled={mnemonicBusy} onClick={()=>{
+                                    setMnemonicError("");
+                                    setMnemonicDraft(personalMnemonic);
+                                    setMnemonicEditing(true);
+                                    
+                                  }}>
+                                    {t("makeMnemonicYourOwn")}
+                                  </button>}
+                          </div>
+                        :
+                          <details className="mnemonic-prepared mnemonic-prepared-collapsed" data-mnemonic-source={preparedMnemonic.source}>
+                            <summary className="mnemonic-prepared-summary">
+                              <strong>{t("memoryAid")}</strong>
+                              <span>{preparedMnemonicSourceLabel(preparedMnemonic.source)}</span>
+                            </summary>
+                            <div className="mnemonic-prepared-details">
+                              <p>{getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en}</p>
+                              {personalMnemonic===(getLanguage()==="fa"?preparedMnemonic.fa:preparedMnemonic.en)
+                                ? null
+                                : preparedMnemonic.source==="curated"
+                                  ? <button className="button secondary mnemonic-prepared-use" type="button" disabled={mnemonicBusy} onClick={()=>void handleUsePreparedMnemonic()}>
+                                      {mnemonicBusy?"…":t("useMnemonic")}
+                                    </button>
+                                  : <button className="button secondary mnemonic-prepared-use" type="button" disabled={mnemonicBusy} onClick={()=>{
+                                      setMnemonicError("");
+                                      setMnemonicDraft(personalMnemonic);
+                                      setMnemonicEditing(true);
+                                      
+                                    }}>
+                                      {t("makeMnemonicYourOwn")}
+                                    </button>}
+                            </div>
+                          </details>
+                        :null}
+                      <button
+                        className="button secondary mnemonic-action"
+                        type="button"
+                        aria-label={personalMnemonic?t("editMnemonic"):t("personalMnemonic")}
+                        title={t("personalMnemonic")}
+                        aria-expanded={mnemonicEditing}
+                        aria-controls="personal-mnemonic-editor"
+                        onClick={()=>{
+                          setBackPage(hasExamplesPage?2:1);
+                          setMnemonicError("");
+                          setMnemonicDraft(personalMnemonic);
+                          setMnemonicEditing(value=>!value);
+                        }}
+                      >
+                        <UiIcon name="writing" size={16}/><span>{personalMnemonic?t("editMnemonic"):t("personalMnemonic")}</span>
+                      </button>
+                      {personalMnemonic&&!mnemonicEditing?<div className="mnemonic-saved"><UiIcon name="mnemonic" size={17}/><p id="personal-mnemonic-title">{personalMnemonic}</p></div>:null}
+
+                    </section>
+                </div>
+              </div>
+            </div>
+            <div className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)?" active":"")} aria-label={t("strokeOrder")} aria-hidden={backPage!==(hasExamplesPage?3:2)} inert={backPage!==(hasExamplesPage?3:2)}>
+              <div className="learning-back-scroll">
+                <div className="stroke-page">{card.character&&revealed&&backPage===(hasExamplesPage?3:2)?<StrokeOrderViewer character={card.character} language={getLanguage()}/>:null}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="learning-back-footer">
+          {backPageCount>1?<div className="learning-back-page-nav" role="group" aria-label={t("cardPage")}>
+            <button className={"learning-back-page-shortcut"+(backPage===0?" active":"")} type="button" aria-label={t("meaningAndStructure")} title={t("meaningAndStructure")} aria-current={backPage===0?"page":undefined} onClick={()=>jumpToBackPage(0)}>
+              <UiIcon name="learning" size={18}/>
+            </button>
+            {hasExamplesPage?<button className={"learning-back-page-shortcut"+(backPage===1?" active":"")} type="button" aria-label={t("vocabularyExamples")} title={t("vocabularyExamples")} aria-current={backPage===1?"page":undefined} onClick={()=>!examplesLoading&&jumpToBackPage(1)} disabled={examplesLoading}>
+              <UiIcon name="reading" size={18}/>
+            </button>:null}
+            <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?2:1)?" active":"")} type="button" aria-label={t("personalMnemonic")} title={t("personalMnemonic")} aria-current={backPage===(hasExamplesPage?2:1)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?2:1)}>
+              <UiIcon name="mnemonic" size={18}/>
+            </button>
+            <button className={"learning-back-page-shortcut"+(backPage===(hasExamplesPage?3:2)?" active":"")} type="button" aria-label={t("strokeOrder")} title={t("strokeOrder")} aria-current={backPage===(hasExamplesPage?3:2)?"page":undefined} onClick={()=>jumpToBackPage(hasExamplesPage?3:2)}>
+              <UiIcon name="writing" size={18}/>
+            </button>
+            <span className="pager-current" aria-live="polite">
+              {t("pageOf").replace("{page}",fa(backPage+1)).replace("{total}",fa(backPageCount))}
+            </span>
+          </div>:null}
+          <p className="rating-prompt">{learningCopy("rateRecall",getLanguage())}</p>
+          <div className="rating-grid">{ratingOptions().map(([r,l])=><button className={"button rating rating-"+r.toLowerCase()} key={r} type="button" dir={getLanguage()==="fa"?"rtl":"ltr"} disabled={Boolean(busy)} onClick={()=>handleRate(r)}><span className="rating-label">{l}</span><small className="rating-interval">{formatReviewInterval(card.ratingPreviews?.[r])}</small></button>)}</div>
+        </div>
+          <dialog hidden={!referenceInfoOpen} ref={referenceInfoDialogRef} id="learning-reference-info" className="dialog secondary-page-dialog learning-reference-dialog" aria-labelledby="learning-reference-info-title">
+          <div className="learning-reference-dialog-head">
+            <h2 id="learning-reference-info-title">{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</h2>
+            <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
+          </div>
+          <div className="dialog-grid learning-reference-info-grid">
+            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
+            {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
+            {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
+          </div>
+        </dialog>
+        {structureDialogOpen ? (
+          <Suspense fallback={null}>
+            <KanjiStructureDialog
+              open={structureDialogOpen}
+              onClose={closeStructureDialog}
+              character={card.character??""}
+              info={visualStructureInfo}
+              language={getLanguage()}
+            />
+          </Suspense>
+        ) : null}
+        <dialog hidden={!mnemonicEditing} ref={mnemonicDialogRef} id="personal-mnemonic-editor" className="dialog secondary-page-dialog mnemonic-edit-dialog" aria-labelledby="personal-mnemonic-editor-title">
+          <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} disabled={mnemonicBusy} onClick={closeMnemonicEditor}>×</button>
+          <h2 id="personal-mnemonic-editor-title">{getLanguage()==="fa"?"ویرایش یادسپار شخصی":"Edit personal mnemonic"}</h2>
+          <p className="secondary-surface-dialog-hint">{getLanguage()==="fa"?"یادسپار شخصی تا ۶۰۰ نویسه ذخیره می‌شود. لغو یا بستن پنجره تغییرات ذخیره‌نشده را کنار می‌گذارد.":"Personal mnemonics are limited to 600 characters. Cancel or close to discard unsaved changes."}</p>
+          <div className="mnemonic-editor">
+            <div className="mnemonic-editor-heading"><strong>{t("personalMnemonic")}</strong><span aria-live="polite">{fa(mnemonicDraft.length)}/{fa(600)}</span></div>
+            <textarea id="personal-mnemonic-textarea" autoFocus value={mnemonicDraft} rows={7} maxLength={600} onChange={e=>setMnemonicDraft(e.target.value)} placeholder={t("mnemonicPlaceholder")} aria-label={t("mnemonicPlaceholder")} />
+            <div className="mnemonic-editor-footer">
+              <span aria-hidden="true"></span>
+              <div className="actions">
+                <button className="button secondary" type="button" disabled={mnemonicBusy} onClick={closeMnemonicEditor}>{t("cancel")}</button>
+                <button className="button primary" type="button" disabled={mnemonicBusy||(!personalMnemonic&&mnemonicDraft.trim().length===0)} onClick={()=>void handleSaveMnemonic()}>{mnemonicBusy?t("saving"):t("saveMnemonic")}</button>
+              </div>
+            </div>
+            {mnemonicError?<p className="mnemonic-error" role="alert">{mnemonicError}</p>:null}
+          </div>
+        </dialog>
+      </div>
+    </div>
+  </section>
+}
+function Reading({title,values}:{title:string;values:string[]}){return <div className="reading"><span>{title}</span><strong><bdi lang="ja" dir="ltr">{values.length?values.join(" · "):"—"}</bdi></strong>{values[0]?<Audio value={values[0]} label={t("playReading")+" "+title}/>:null}</div>}
+function Stimulus({ex}:{ex:NonNullable<Snapshot["exercise"]>}){
+  const s=ex.stimulus??{};if(s.kind==="meaning")return <div className="stimulus meaning-stimulus"><small>{t("meaning")}</small><strong>{text(s.primary??ex.prompt)}</strong></div>;
+  if(s.kind==="masked-vocabulary")return <div className="stimulus text-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
+  if(s.kind==="masked-context")return <div className="stimulus context-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
+  if(s.kind==="vocabulary-intro")return <div className="stimulus text-stimulus content-intro-stimulus" lang="ja"><strong>{text(s.primary)}</strong>{s.secondary?<span>{s.secondary}</span>:null}{s.translation?<small>{s.translation}</small>:null}</div>;
+  if(s.kind==="context-intro")return <div className="stimulus context-stimulus content-intro-stimulus" lang="ja" dir="ltr"><strong>{text(s.primary)}</strong>{s.translation?<small>{s.translation}</small>:null}</div>;
+  return <div className="stimulus kanji-stimulus" lang="ja">{text(s.primary??ex.character)}</div>;
+}
+function Exercise({snapshot,busy,onSubmit,onDontKnow,onSelfReport,onNext,onRetry,onExit}:{snapshot:Snapshot;busy:boolean;onSubmit:(v:string,meta?:{hintUsed?:boolean})=>Promise<unknown>;onDontKnow:()=>Promise<unknown>;onSelfReport:(knewIt:boolean)=>Promise<unknown>;onNext:()=>Promise<unknown>;onRetry:()=>Promise<unknown>;onExit:()=>void}){
+  const ex=snapshot.exercise??{},
+    [answer,setAnswer]=useState(""),
+    [result,setResult]=useState<{correct:boolean;outcome:string;answerHint?:string;submittedAnswer?:string}|null>(null),
+    [productionRevealed,setProductionRevealed]=useState(false),
+    [showProductionOptions,setShowProductionOptions]=useState(false),
+    choices=(ex.choices??[]).slice(0,4),
+    production=ex.mode==="production";
+  const lockedRef=useRef(false);
+  const productionRevealKeyConsumedRef=useRef(false);
+  const exerciseKey=String(ex.contentId??"")+"|"+String(ex.mode??"")+"|"+String(ex.character??"");
+  const previousKeyRef=useRef(exerciseKey);
+
+  useEffect(()=>{
+    if(previousKeyRef.current!==exerciseKey){
+      previousKeyRef.current=exerciseKey;
+      lockedRef.current=false;
+      productionRevealKeyConsumedRef.current=false;
+      setAnswer("");
+      setResult(null);
+      setProductionRevealed(false);
+      setShowProductionOptions(false);
+    }
+  },[exerciseKey]);
+
+  useEffect(()=>{
+    if(!production||productionRevealed||busy||result)return;
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.defaultPrevented||(event.code!=="Space"&&event.key!==" "))return;
+      const active=document.activeElement;
+      if(active instanceof HTMLElement){
+        if(active.isContentEditable)return;
+        if(active.closest("input,textarea,select,button,a,summary,[role],[contenteditable='true']"))return;
+      }
+      if(productionRevealKeyConsumedRef.current)return;
+      productionRevealKeyConsumedRef.current=true;
+      event.preventDefault();
+      setProductionRevealed(true);
+    };
+    window.addEventListener("keydown",onKeyDown);
+    return()=>window.removeEventListener("keydown",onKeyDown);
+  },[busy,production,productionRevealed,result]);
+
+  const waitForFeedbackAnimation=useCallback(async(correct:boolean)=>{
+    const reduced=typeof window!=="undefined"&&window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches===true;
+    const delay=correct?700:900;
+    await new Promise(resolve=>window.setTimeout(resolve,reduced?80:delay));
+  },[]);
+
+  const finishCorrect=useCallback(async(feedback:{correct?:boolean;outcome?:string;answerHint?:string;submittedAnswer?:string}|null)=>{
+    if(!feedback||feedback.correct!==true)return;
+    setResult({correct:true,outcome:String(feedback.outcome??"correct"),answerHint:feedback.answerHint,submittedAnswer:feedback.submittedAnswer});
+    await waitForFeedbackAnimation(true);
+    await onNext();
+  },[onNext,waitForFeedbackAnimation]);
+
+  const handleSubmit=async(value:string)=>{
+    if(!value.trim()||busy||lockedRef.current)return;
+    lockedRef.current=true;
+    try{
+      const raw=await onSubmit(value,production&&showProductionOptions?{hintUsed:true}:undefined);
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
+      if(feedback&&typeof feedback.correct==="boolean"){
+        const nextResult={correct:Boolean(feedback.correct),outcome:String(feedback.outcome??(feedback.correct?"correct":"wrong")),answerHint:feedback.answerHint,submittedAnswer:value};
+        setResult(nextResult);
+        if(feedback.correct===true)await finishCorrect(nextResult);
+      }else{
+        const fallback={correct:value===ex.character,outcome:value===ex.character?"correct":"wrong",answerHint:value===ex.character?undefined:ex.character,submittedAnswer:value};
+        setResult(fallback);
+        if(fallback.correct)await finishCorrect(fallback);
+      }
+    }catch(_){
+      lockedRef.current=false;
+    }
+  };
+  const handleProductionGrade=async(knewIt:boolean)=>{
+    if(!production||!productionRevealed||busy||lockedRef.current||result||!ex.character)return;
+    lockedRef.current=true;
+    try{
+      const raw=await onSelfReport(knewIt);
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
+      setResult({correct:Boolean(feedback?.correct===true),outcome:String(feedback?.outcome??(knewIt?"correct":"unknown")),answerHint:feedback?.answerHint??ex.character});
+      await waitForFeedbackAnimation(knewIt);
+      await onNext();
+    }catch(_){
+      lockedRef.current=false;
+    }
+  };
+
+  const handleRetry=async()=>{
+    if(busy||!result||result.correct)return;
+    lockedRef.current=true;
+    try{
+      const retried=await onRetry();
+      if(retried===false){lockedRef.current=false;return;}
+      setResult(null);
+      setAnswer("");
+      setProductionRevealed(false);
+      setShowProductionOptions(false);
+      lockedRef.current=false;
+    }catch(_){
+      lockedRef.current=false;
+    }
+  };
+  const handleNextFromFeedback=async()=>{
+    if(busy)return;
+    lockedRef.current=true;
+    setResult(null);
+    setAnswer("");
+    setProductionRevealed(false);
+    setShowProductionOptions(false);
+    try{
+      await onNext();
+    }finally{
+      lockedRef.current=false;
+    }
+  };
+  const handleDontKnow=async()=>{
+    if(busy||lockedRef.current)return;
+    lockedRef.current=true;
+    try{
+      const raw=await onDontKnow();
+      const feedback=(raw&&typeof raw==="object"?raw:null) as {correct?:boolean;outcome?:string;answerHint?:string}|null;
+      setResult({correct:false,outcome:String(feedback?.outcome??"unknown"),answerHint:feedback?.answerHint??ex.answerHint});
+      await waitForFeedbackAnimation(false);
+      await onNext();
+    }catch(_){
+      lockedRef.current=false;
+    }
+  };
+
+  useEffect(()=>{
+    if(!production||!productionRevealed||busy||result)return;
+    const onGradeKeyDown=(event:KeyboardEvent)=>{
+      if(event.defaultPrevented||(event.key!=="1"&&event.key!=="2"))return;
+      const active=document.activeElement;
+      if(active instanceof HTMLElement && active.closest("input,textarea,select,button,a,summary,[role],[contenteditable='true']"))return;
+      event.preventDefault();
+      void handleProductionGrade(event.key==="1");
+    };
+    window.addEventListener("keydown",onGradeKeyDown);
+    return()=>window.removeEventListener("keydown",onGradeKeyDown);
+  },[busy,handleProductionGrade,production,productionRevealed,result]);
+
+  const resultClass=result?(result.correct?" is-correct exercise-result-correct":" is-wrong exercise-result-wrong"):"";
+  const resultLabel=result?(result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")):undefined;
+  const disabled=busy||lockedRef.current||Boolean(result);
+  const taskLabel=skillLabel(ex.mode??"");
+  const effectiveModality=production?(productionRevealed?"revealed_self_report":showProductionOptions?"cued-kanji-choice":(ex.modality??"independent-typed-production")):(ex.modality??"");
+  const taskModalityLabel=modalityLabel(effectiveModality,ex.contentStage??"retrieval");
+  const introduction=ex.contentStage==="introduction"&&(ex.mode==="vocabulary"||ex.mode==="context");
+  const taskDescription=introduction?t("contentIntroductionPrompt"):localizeDynamic(ex.prompt,getLanguage(),t("exerciseReady"));
+  const correctAnswerDisplay=ex.mode==="vocabulary"||ex.mode==="context"?text(ex.character):text(ex.answerHint||ex.character);
+  const correctedContent=ex.mode==="vocabulary"?String(ex.answerHint||"").split(" · ")[0].trim():ex.mode==="context"?String(ex.stimulus?.primary||"").replaceAll("＿",text(ex.character||ex.answerHint)):undefined;
+  const keyboardHint=production?(productionRevealed?null:"Space"):null;
+
+  return <section id="exercise" data-result={result?(result.correct?"correct":"wrong"):undefined} aria-label={resultLabel} className={"active-recall-shell exercise-card"+resultClass} tabIndex={-1}>
+    <div className="active-recall-session-head">
+      <div className="active-recall-session-meta">
+        <span className="active-recall-kicker">{t("activeRecallLabel")}</span>
+        <span className="active-recall-divider" aria-hidden="true">·</span>
+        <span className="active-recall-task">{taskLabel}</span>
+        <span className="active-recall-divider" aria-hidden="true">·</span>
+        <span className="active-recall-task-modality">{taskModalityLabel}</span>
+      </div>
+      <button className="button secondary" type="button" disabled={busy} onClick={onExit} aria-label={t("exitPractice")} title={t("exitPractice")}>
+        <UiIcon name="close" size={15}/><span>{t("exitPractice")}</span>
+      </button>
+    </div>
+
+    {!ex.mode?<div className="active-recall-empty">{t("exerciseReady")}</div>:<>
+      <div className="active-recall-task-header">
+        <p className="prompt">{taskDescription}</p>
+        {introduction?<span className="active-recall-intro-hint">{t("contentIntroductionHint")}</span>:null}
+      </div>
+
+      <div className="active-recall-stimulus-wrap">
+        <Stimulus ex={ex}/>
+      </div>
+
+      {introduction?
+        <div className="active-recall-flow active-recall-introduction">
+          <button className="active-recall-primary" type="button" disabled={disabled} onClick={()=>void onNext()}>
+            <span>{t("nextExercise")}</span><UiIcon name="next" size={17}/>
+          </button>
+        </div>
+      :result?
+        <div className="active-recall-feedback exercise-feedback" role="status" aria-live="polite">
+          <div className="active-recall-feedback-mark" aria-hidden="true">{result.correct?"✓":<UiIcon name="close" size={18}/>}</div>
+          <div className="active-recall-feedback-copy">
+            <strong>{result.correct?t("correct"):result.outcome==="unknown"?t("unknown"):t("wrong")}</strong>
+            {result.submittedAnswer&&!result.correct?<div className="active-recall-answer"><span>{t("yourChoice")}</span><b lang="ja">{text(result.submittedAnswer)}</b></div>:null}
+            {correctAnswerDisplay?<div className="active-recall-answer exercise-correct-answer"><span>{t("correctChoice")}</span><b lang="ja">{correctAnswerDisplay}</b></div>:null}
+            {(!result.correct&&correctedContent)?<div className="active-recall-correction-content" lang="ja"><strong>{correctedContent}</strong>{ex.mode==="vocabulary"&&ex.stimulus?.secondary?<span>{ex.stimulus.secondary}</span>:null}{ex.stimulus?.translation?<small>{ex.stimulus.translation}</small>:null}</div>:null}
+          </div>
+          {!result.correct&&result.outcome!=="unknown"?
+            <div className="active-recall-feedback-actions">
+              <button className="active-recall-primary" type="button" disabled={busy} onClick={()=>void handleRetry()}>{t("retrySkill")}</button>
+              <button className="active-recall-secondary" type="button" disabled={busy} onClick={()=>void handleNextFromFeedback()}>{t("nextExercise")}</button>
+            </div>
+          :null}
+        </div>
+      :production&&!showProductionOptions?
+        <div className="active-recall-flow production-recall">
+          <div className="active-recall-instruction">
+            <span>{t("productionRecallInstruction")}</span>
+            {keyboardHint?<kbd>{keyboardHint}</kbd>:null}
+          </div>
+          {!productionRevealed?
+            <>
+              <label className="active-recall-input-wrap">
+                <span>{t("answerYourself")}</span>
+                <input value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))} lang="ja" inputMode="text" autoComplete="off" spellCheck={false}/>
+              </label>
+              <div className="active-recall-actions">
+                <button className="active-recall-primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>
+                <button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button>
+                <button className="active-recall-secondary production-recall-reveal" type="button" disabled={disabled} onClick={()=>setProductionRevealed(true)}>{t("revealAnswer")}</button>
+                {choices.length>=4?<button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>setShowProductionOptions(true)}>{t("useOptionsHint")}</button>:null}
+              </div>
+            </>
+          :
+            <div className="active-recall-reveal production-recall-revealed" aria-live="polite">
+              <span className="active-recall-reveal-label">{t("revealedAnswer")}</span>
+              <strong className="active-recall-answer-kanji production-recall-kanji" lang="ja">{text(ex.character||"—")}</strong>
+              <div className="active-recall-grade production-recall-grade">
+                <button className="active-recall-grade-button known" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(true)}>
+                  <span>{t("iKnewIt")}</span><kbd>1</kbd>
+                </button>
+                <button className="active-recall-grade-button unknown" type="button" disabled={disabled||!ex.character} onClick={()=>void handleProductionGrade(false)}>
+                  <span>{t("iDidntKnow")}</span><kbd>2</kbd>
+                </button>
+              </div>
+            </div>}
+        </div>
+      :production?
+        <div className="active-recall-flow">
+          <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
+          <div className="active-recall-choice-grid production-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
+        </div>
+      :(ex.mode==="vocabulary"||ex.mode==="context")?
+        choices.length>=2?
+          <div className="active-recall-flow">
+            <div className="active-recall-instruction"><span>{t("answerYourself")}</span></div>
+            <div className="active-recall-choice-grid vocabulary-grid">{choices.map((choice,index)=><button className="active-recall-choice" type="button" key={choice} lang="ja" disabled={disabled} onClick={()=>void handleSubmit(choice)}><span>{choice}</span><kbd>{index+1}</kbd></button>)}</div>
+          </div>
+        :
+          <div className="active-recall-flow active-recall-content-unavailable">
+            <div className="active-recall-instruction"><span>{languageSafeContentUnavailable(ex.mode)}</span></div>
+            <button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>void handleNextFromFeedback()}>{t("nextExercise")}</button>
+          </div>
+      :        <div className="active-recall-flow">
+          <label className="active-recall-input-wrap">
+            <span>{t("answerYourself")}</span>
+            <input autoFocus value={answer} disabled={disabled} onChange={e=>setAnswer(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void handleSubmit(answer)}}} placeholder={localizeDynamic(ex.stimulus?.inputPlaceholder,getLanguage(),t("answerPlaceholder"))}/>
+          </label>
+          <div className="active-recall-actions">
+            <button className="active-recall-primary" type="button" disabled={disabled||!answer.trim()} onClick={()=>void handleSubmit(answer)}>{t("checkAnswer")}</button>
+            <button className="active-recall-secondary" type="button" disabled={disabled} onClick={()=>void handleDontKnow()}>{t("dontKnow")}</button>
+          </div>
+        </div>}
+    </>}
+  </section>
+}
+function PracticeHandwriting({character,language,exercise}:{character:string;language:Language;exercise?:NonNullable<Snapshot["exercise"]>}){
+  const [skill,setSkill]=useState<HandwritingSkill|null>(null);
+  useEffect(()=>{
+    let active=true;
+    setSkill(null);
+    void getHandwritingSkill(character).then(next=>{if(active)setSkill(next)}).catch(()=>{if(active)setSkill(null)});
+    return()=>{active=false};
+  },[character]);
+  if(!character.trim())return null;
+  return <div className="practice-handwriting" data-experience="practice" data-character={character}>
+    <HandwritingPractice
+      character={character}
+      language={language}
+      exercise={exercise}
+      learningSignal={skill?{state:skill.state,confidence:skill.confidence,score:skill.score}:undefined}
+      onGradeRecorded={(grade)=>recordHandwritingGrade(character,grade).then(async saved=>{
+        if(!saved)return false;
+        const next=await getHandwritingSkill(character);
+        setSkill(next);
+        return true;
+      })}
+    />
+  </div>;
+}
+function SessionFeedback({snapshot,visible}:{snapshot:Snapshot;visible:boolean}){
+  if(!visible)return null;
+  const summary=snapshot.sessionSummary??{};
+  const attempts=Math.max(0,Number(summary.attempts)||0);
+  const correct=Math.max(0,Number(summary.correct)||0);
+  const accuracy=pct(summary.accuracy);
+  const detail=attempts>0
+    ? `${fa(correct)}/${fa(attempts)} · ${fa(accuracy)}%`
+    : "";
+  return <section className="session-feedback" aria-label={t("sessionSummary",getLanguage())}>
+    <strong>{t("sessionSummary",getLanguage())}</strong>
+    <span>{detail}</span>
+  </section>;
+}
+
+function getInitialSnapshot():Snapshot|null{
+  if(typeof window==="undefined")return null;
+  const value=(window as Window & {__KANJI5_V19_V2_LAST_SNAPSHOT__?:Snapshot}).__KANJI5_V19_V2_LAST_SNAPSHOT__;
+  return value&&typeof value==="object"?value:null;
+}
+function LoadingSummary(){
+  return <section className="daily-summary loading-summary" aria-hidden="true">{[0,1,2,3].map(i=><div className="stat-card loading-stat-card" key={i}><span className="loading-block loading-stat-value"/><span className="loading-block loading-stat-label"/></div>)}</section>;
+}
+function LoadingGoal(){
+  return <section className="surface goal loading-goal" aria-hidden="true"><div className="goal-top"><span className="loading-block loading-goal-label"/><span className="loading-block loading-goal-label-short"/></div><div className="progress loading-progress" role="progressbar" aria-label={t("dailyGoal")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}><span/></div></section>;
+}
+function LoadingUpcoming(){
+  return <section className="surface upcoming loading-upcoming" aria-hidden="true"><div className="loading-upcoming-title"><span className="loading-block"/></div></section>;
+}
+function LoadingLearning(){
+  return <section className="surface card learning-card loading-learning" aria-hidden="true">
+    <div className="learning-card-flip">
+      <div className="learning-card-face learning-card-front">
+        <div className="card-topline"><span className="loading-block loading-pill"/><span className="loading-block loading-pill-short"/></div>
+        <h2>{t("learningCard")}</h2>
+        <div className="kanji-row"><span className="loading-kanji"/></div>
+        <span className="loading-block loading-reading"/>
+        <span className="loading-block loading-button"/>
+      </div>
+    </div>
+  </section>;
+}
+function App(){
+  const [onboardingComplete,setOnboardingComplete]=useState(()=>isOnboardingComplete());
+  const [snapshot,setSnapshot]=useState<Snapshot|null>(()=>getInitialSnapshot()),[snapshotHydrated,setSnapshotHydrated]=useState(()=>Boolean(getInitialSnapshot())),[busy,setBusy]=useState(false),[error,setError]=useState(""),[practiceRecoveryRequired,setPracticeRecoveryRequired]=useState(false),[experience,setExperience]=useState<"review"|"practice"|"dictionary">("review"),[practiceMode,setPracticeMode]=useState<"home"|"exercise">("home"),[statsOpen,setStatsOpen]=useState(false),[settingsOpen,setSettingsOpen]=useState(false),[grammarOpen,setGrammarOpen]=useState(false),[readingLabOpen,setReadingLabOpen]=useState(false),[mnemonicsOpen,setMnemonicsOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[secondaryPage,setSecondaryPage]=useState<"stats"|"grammar"|"readingLab"|"mnemonics"|"settings"|"account"|null>(null),[headerMenuOpen,setHeaderMenuOpen]=useState(false),[dictionaryLookupCharacter,setDictionaryLookupCharacter]=useState<string|null>(null),[mnemonicCatalog,setMnemonicCatalog]=useState<KanjiCatalogItem[]>([]),[mnemonicPersonalMnemonics,setMnemonicPersonalMnemonics]=useState<Record<string,string>>({}),[mnemonicCatalogState,setMnemonicCatalogState]=useState<"idle"|"loading"|"ready"|"error">("idle"),[mnemonicCatalogError,setMnemonicCatalogError]=useState(""),[mnemonicCatalogRetry,setMnemonicCatalogRetry]=useState(0),[language,setLanguageState]=useState<Language>(()=>getLanguage()),[themePreference,setThemePreference]=useState<ThemePreference>(()=>getThemePreference());
+  const [sessionFeedbackVisible,setSessionFeedbackVisible]=useState(false);
+  const [topicBrowserOpen,setTopicBrowserOpen]=useState(false);
+  const topicStudyId=snapshot?.customStudyTopicId??null;
+  const topicStudyLabel=topicStudyId?getTopicLabel(topicStudyId,language):null;
+  useEffect(()=>{
+    if(!sessionFeedbackVisible)return;
+    const timeout=window.setTimeout(()=>setSessionFeedbackVisible(false),4000);
+    return()=>window.clearTimeout(timeout);
+  },[sessionFeedbackVisible]);
+  useEffect(()=>applyLanguage(language),[language]);
+  useEffect(()=>{
+    if(!mnemonicsOpen)return;
+    let active=true;
+    setMnemonicCatalogState("loading");
+    setMnemonicCatalogError("");
+    void Promise.all([listKanji(),listPersonalMnemonics()]).then(([catalog,personal])=>{
+      if(!active)return;
+      setMnemonicCatalog(catalog.results);
+      setMnemonicPersonalMnemonics(personal.mnemonics);
+      setMnemonicCatalogState(catalog.results.length?"ready":"error");
+      if(!catalog.results.length)setMnemonicCatalogError(language==="fa"?"فهرست کانجی بارگذاری نشد. دوباره تلاش کنید.":"The kanji catalog did not load. Please try again.");
+    }).catch(error=>{
+      if(!active)return;
+      setMnemonicCatalogState("error");
+      const code=error instanceof Error?error.message:"";
+      setMnemonicCatalogError(code==="KANJI5_KANJI_CATALOG_UNAVAILABLE"
+        ? (language==="fa"?"دادهٔ کانجی هنوز آماده نشده است. دوباره تلاش کنید.":"The kanji data is not ready yet. Please try again.")
+        : (language==="fa"?"بارگذاری یادسپارها انجام نشد. دوباره تلاش کنید.":"The mnemonic library could not be loaded. Please try again."));
+    });
+    return()=>{active=false};
+  },[mnemonicsOpen,mnemonicCatalogRetry,language]);
+  useEffect(()=>{if(!headerMenuOpen)return;setThemePreference(getThemePreference());},[headerMenuOpen]);
+  useEffect(()=>{if(!headerMenuOpen||typeof document==="undefined")return;const onKey=(event:KeyboardEvent)=>{if(event.key!=="Escape")return;setHeaderMenuOpen(false);window.requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>(".header-menu-trigger")?.focus());};const onPointerDown=(event:globalThis.PointerEvent)=>{const target=event.target as Node|null;const menu=document.getElementById("header-tools-menu");const trigger=document.querySelector<HTMLButtonElement>(".header-menu-trigger");if(!target||!menu||!trigger)return;if(!menu.contains(target)&&!trigger.contains(target))setHeaderMenuOpen(false);};document.addEventListener("keydown",onKey);document.addEventListener("pointerdown",onPointerDown,true);return()=>{document.removeEventListener("keydown",onKey);document.removeEventListener("pointerdown",onPointerDown,true)}},[headerMenuOpen]);
+  const changeLanguage=(next:Language)=>{persistLanguage(next);setLanguageState(next)};
+  const changeTheme=(next:ThemePreference)=>{setThemePreference(next);persistThemePreference(next)};
+  const closeSecondaryPage=useCallback(()=>{
+    setSecondaryPage(null);
+    setStatsOpen(false);setSettingsOpen(false);setGrammarOpen(false);setReadingLabOpen(false);setMnemonicsOpen(false);setAccountOpen(false);
+  },[]);
+  const refresh=useCallback(async()=>{const s=await readSnapshot();setSnapshot(s);return s},[]);
+  const onboardingReturningUser = Boolean(
+    snapshotHydrated &&
+    (
+      Number(snapshot?.stats?.studiedCount ?? 0) > 0 ||
+      Number(snapshot?.dailySummary?.streak ?? 0) > 0 ||
+      Boolean(snapshot?.upcomingReviews?.length)
+    )
+  );
+  const showOnboarding = !onboardingComplete;
+  const experienceRef=useRef<"review"|"practice"|"dictionary">("review");
+  const changeExperience=useCallback((next:"review"|"practice"|"dictionary")=>{experienceRef.current=next;setExperience(next)},[]);
+  useEffect(()=>{
+    let mounted=true;
+    const listener=(e:Event)=>{const d=(e as CustomEvent<Snapshot>).detail;if(mounted&&d){setSnapshot(d);setSnapshotHydrated(true)}};
+    document.addEventListener("kanji5:v1.9-v2-view-models",listener);
+    if(!showOnboarding)void startLearningSession().catch(()=>{});
+    void readStartupSnapshot().then(s=>{
+      if(!mounted)return;
+      setSnapshot(s);
+      setSnapshotHydrated(false);
+      const schedule=()=>{
+        if(!mounted)return;
+        void refresh().then(full=>{
+          if(!mounted)return;
+          setSnapshot(full);
+          setSnapshotHydrated(true);
+        }).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});
+      };
+      const idleCallback=(window as Window & {requestIdleCallback?: (callback:()=>void,options?:{timeout?:number})=>number}).requestIdleCallback;
+      if(typeof idleCallback==="function")idleCallback(schedule,{timeout:1800});
+      else window.setTimeout(schedule,120);
+    }).catch(e=>{if(mounted)setError(e instanceof Error?e.message:t("learningCoreError"))});
+    return()=>{
+      mounted=false;
+      document.removeEventListener("kanji5:v1.9-v2-view-models",listener);
+    };
+  },[refresh,showOnboarding]);
+  const yieldToBrowser=useCallback(()=>new Promise<void>(resolve=>{if(typeof window==="undefined"){resolve();return}if(typeof window.requestAnimationFrame==="function"){window.requestAnimationFrame(()=>resolve());}else{window.setTimeout(resolve,0);}}),[]);
+  async function action<T>(task:()=>Promise<T>, refreshSnapshot=true):Promise<T|undefined>{setBusy(true);setError("");setPracticeRecoveryRequired(false);await yieldToBrowser();try{const result=await task();if(refreshSnapshot)setSnapshot(await readSnapshot());return result}catch(e){const code=e instanceof Error?e.message:"";const canRecoverToLearning=code==="KANJI5_NO_EXERCISE_AVAILABLE"||code==="KANJI5_EXERCISE_READY_TIMEOUT";setPracticeRecoveryRequired(canRecoverToLearning);const message=code==="KANJI5_NO_EXERCISE_AVAILABLE"?(language==="fa"?"فعلاً تمرین قابل انجامی در دسترس نیست. از یادگیری شروع کن و بعد دوباره تمرین را امتحان کن.":"No exercise is available yet. Start with Learning, then try Practice again."):code==="KANJI5_EXERCISE_READY_TIMEOUT"?(language==="fa"?"شروع تمرین طول کشید. می‌توانی به یادگیری برگردی و دوباره تلاش کنی.":"Practice took too long to start. You can return to Learning and try again."):code||(language==="fa"?"عملیات انجام نشد.":"The operation failed.");setError(message);return undefined}finally{setBusy(false)}}
+  const progress=pct(snapshot?.session?.completionFraction);const hasSessionProgress=snapshot?.session?.status==="active"&&Number(snapshot?.session?.plannedTotal||0)>0;const showExercise=experience==="practice";const showDictionary=experience==="dictionary";
+  useEffect(()=>{
+    if(!headerMenuOpen)return;
+    const opener=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const menu=document.getElementById("header-tools-menu");
+    const getFocusable=()=>Array.from(menu?.querySelectorAll<HTMLElement>('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')??[]);
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){event.preventDefault();setHeaderMenuOpen(false);return;}
+      if(event.key!=="Tab")return;
+      const items=getFocusable();
+      if(!items.length)return;
+      const first=items[0],last=items[items.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    };
+    document.addEventListener("keydown",onKeyDown);
+    const previousOverflow=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    requestAnimationFrame(()=>getFocusable()[0]?.focus());
+    return()=>{
+      document.removeEventListener("keydown",onKeyDown);
+      document.body.style.overflow=previousOverflow;
+      requestAnimationFrame(()=>opener?.focus());
+    };
+  },[headerMenuOpen]);
+  if(showOnboarding)return <OnboardingEntry language={language} snapshot={snapshot} busy={busy} onFinished={()=>setOnboardingComplete(true)} onLanguageChange={changeLanguage}/>;
+  if(error&&!snapshot)return <div className="app-shell centered"><section className="surface fatal"><span className="fatal-kanji" lang="ja">迷</span><h1>{t("learningCoreError")}</h1><p>{error}</p><button className="button primary" type="button" onClick={()=>location.reload()}>{t("tryAgain")}</button></section></div>;
+  return <div className="app-shell">
+    <style data-learning-surface>{learningSurfaceStyles}</style>
+    <a className="skip-link" href="#primary-content">{t("goToMain")}</a>
+    <header className={"header"+(headerMenuOpen?" menu-open":"")}><div className="header-brand"><p className="eyebrow red">{t("smartLearning")}</p><div className="header-brand-lockup"><img className="header-brand-mark" src="./icon.svg" alt="" aria-hidden="true" /><h1 dir="ltr">Rinemi</h1></div></div>
+      <div className="header-actions">{hasSessionProgress?<div className="session-progress"><Progress value={progress} label={t("sessionProgress")}/><span>{fa((snapshot?.session?.plannedTotal??0)-(snapshot?.session?.remainingTotal??0))} {t("of",language)} {fa(snapshot?.session?.plannedTotal??0)}</span></div>:null}<div className={"header-tools"+(headerMenuOpen?" menu-open":"")}><button className="button secondary header-menu-trigger" type="button" aria-expanded={headerMenuOpen} aria-controls="header-tools-menu" aria-label={t("more",language)} disabled={busy} onClick={()=>setHeaderMenuOpen(v=>!v)}><UiIcon name="menu" /></button>{headerMenuOpen?<><button className="header-menu-scrim" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}/><aside id="header-tools-menu" className="header-tools-menu open" role="dialog" aria-modal="true" aria-labelledby="header-tools-menu-title">
+  <div className="header-tools-menu-header"><div className="header-tools-menu-heading"><span className="header-tools-menu-kana" lang="ja" aria-hidden="true">道具</span><span aria-hidden="true">·</span><strong id="header-tools-menu-title">{t("moreMenuTitle",language)}</strong></div><button className="header-tools-menu-close" type="button" aria-label={t("closeMenu",language)} onClick={()=>setHeaderMenuOpen(false)}><UiIcon name="close" size={19}/></button></div>
+  <div className="header-tools-menu-scroll">
+    <section className="header-tools-menu-section" aria-labelledby="header-tools-learning-title">
+      <h2 id="header-tools-learning-title">{t("menuLearningTools",language)}</h2>
+      <div className="header-tools-menu-list">
+        <button className="menu-nav-item" type="button" aria-label={t("grammarGuide",language)} disabled={busy} onClick={()=>{setGrammarOpen(true);setSecondaryPage("grammar");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="grammar" size={19}/></span><span className="menu-nav-copy"><strong>{t("grammarGuide",language)}</strong></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
+        <button className="menu-nav-item" type="button" aria-label={t("readingLab",language)} disabled={busy} onClick={()=>{setReadingLabOpen(true);setSecondaryPage("readingLab");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="reading" size={19}/></span><span className="menu-nav-copy"><strong>{t("readingLab",language)}</strong></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
+        <button className="menu-nav-item" type="button" aria-label={t("preparedMnemonics",language)} disabled={busy} onClick={()=>{setMnemonicsOpen(true);setSecondaryPage("mnemonics");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="mnemonic" size={19}/></span><span className="menu-nav-copy"><strong>{t("preparedMnemonics",language)}</strong></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
+      </div>
+    </section>
+    <section className="header-tools-menu-section" aria-labelledby="header-tools-progress-title">
+      <h2 id="header-tools-progress-title">{t("menuProgress",language)}</h2>
+      <div className="header-tools-menu-list">
+        <button className="menu-nav-item" type="button" aria-label={t("stats",language)} disabled={busy} onClick={()=>{setStatsOpen(true);setSecondaryPage("stats");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="stats" size={19}/></span><span className="menu-nav-copy"><strong>{t("stats",language)}</strong></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
+      </div>
+    </section>
+    <section className="header-tools-menu-section header-tools-menu-preferences" aria-labelledby="header-tools-preferences-title">
+      <h2 id="header-tools-preferences-title">{t("menuPreferences",language)}</h2>
+      <div className="menu-preference-row"><span>{t("language",language)}</span><div className="menu-segmented" role="group" aria-label={t("language",language)}><button type="button" className={"menu-segment "+(language==="fa"?"active":"")} aria-pressed={language==="fa"} onClick={()=>changeLanguage("fa")}>{t("persian",language)}</button><button type="button" className={"menu-segment "+(language==="en"?"active":"")} aria-pressed={language==="en"} onClick={()=>changeLanguage("en")}>{t("english",language)}</button></div></div>
+      <div className="menu-preference-row"><span>{t("appearance",language)}</span><div className="menu-segmented menu-theme-segmented" role="group" aria-label={t("appearance",language)}><button type="button" className={"menu-segment menu-theme-button "+(themePreference==="light"?"active":"")} aria-pressed={themePreference==="light"} aria-label={t("themeLight",language)} onClick={()=>changeTheme("light")}><span aria-hidden="true">☀</span><span>{t("themeLight",language)}</span></button><button type="button" className={"menu-segment menu-theme-button "+(themePreference==="dark"?"active":"")} aria-pressed={themePreference==="dark"} aria-label={t("themeDark",language)} onClick={()=>changeTheme("dark")}><span aria-hidden="true">☾</span><span>{t("themeDark",language)}</span></button><button type="button" className={"menu-segment menu-theme-button "+(themePreference==="system"?"active":"")} aria-pressed={themePreference==="system"} aria-label={t("themeSystem",language)} onClick={()=>changeTheme("system")}><span aria-hidden="true">◐</span><span>{t("themeSystem",language)}</span></button></div></div>
+      <button className="menu-nav-item menu-settings-item" type="button" aria-label={t("settings",language)} disabled={busy} onClick={()=>{setSettingsOpen(true);setSecondaryPage("settings");setHeaderMenuOpen(false)}}><span className="menu-nav-icon"><UiIcon name="settings" size={19}/></span><span className="menu-nav-copy"><strong>{t("settings",language)}</strong></span><UiIcon className="menu-nav-chevron" name={language==="fa"?"previous":"next"} size={18}/></button>
+    </section>
+  </div>
+</aside></>:null}</div><AccountButton language={language} disabled={headerMenuOpen} onClick={()=>{setAccountOpen(true);setSecondaryPage(null)}}/></div>
+    </header>
+    <nav className={"experience-nav active-tab-"+experience} aria-label={t("learningPath",language)} inert={headerMenuOpen}><span className="experience-tab-indicator" aria-hidden="true"/><button className={"experience-tab "+(experience==="review"?"active":"")} type="button" aria-current={experience==="review"?"page":undefined} onClick={()=>{changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()})}}><UiIcon name="learning" /><span>{t("learning",language)}</span></button><button className={"experience-tab "+(experience==="practice"?"active":"")} type="button" aria-current={experience==="practice"?"page":undefined} onClick={()=>{changeExperience("practice");void action(async()=>{await clearCustomStudyFilter();await startPracticeExperience();setPracticeMode("home")})}}><UiIcon name="recall" /><span>{t("activeRecall",language)}</span></button><button className={"experience-tab "+(experience==="dictionary"?"active":"")} type="button" aria-current={experience==="dictionary"?"page":undefined} onClick={()=>{changeExperience("dictionary");void action(async()=>{await clearCustomStudyFilter();await clearTransient()})}}><UiIcon name="dictionary" /><span>{t("dictionary",language)}</span></button></nav><main id="primary-content" className="content mobile-study-flow" inert={headerMenuOpen}>      {error ? <section className="surface app-error-banner" role="alert" aria-live="assertive"><div><strong>{t("actionFailed",language)}</strong><p>{error}</p></div>{practiceRecoveryRequired&&showExercise?<button className="button primary" type="button" onClick={()=>{setError("");setPracticeRecoveryRequired(false);changeExperience("review");void action(async()=>{await startLearningExperience();await clearTransient()});}}>{t("learning",language)}</button>:null}<button className="button secondary" type="button" onClick={()=>{setError("");setPracticeRecoveryRequired(false);}}>{t("close",language)}</button></section> : null}
+      {secondaryPage ? <section className="secondary-page-host" aria-label={t("more",language)}>
+        {secondaryPage==="stats" ? <StatsDialog open={statsOpen} snapshot={snapshot??{}} language={language} onClose={closeSecondaryPage} onStudyWeak={async()=>{closeSecondaryPage();const result=await action(async()=>{await clearTransient();return await startCustomStudy({focus:"weak",limit:5});});if(result?.started)setExperience("review");}}/> : null}
+        {secondaryPage==="settings" ? <SettingsDialog
+          open={settingsOpen}
+          snapshot={snapshot??{}}
+          busy={busy}
+          language={language}
+          onClose={closeSecondaryPage}
+          onSave={async s=>{const result=await action(async()=>{await updateSettings(s);return true});if(result)closeSecondaryPage();return result}}
+          onReset={()=>void action(async()=>{resetProgress()})}
+        /> : null}
+        {secondaryPage==="mnemonics" ? <MnemonicsDialog
+          open={mnemonicsOpen}
+          language={language}
+          catalog={mnemonicCatalog}
+          personalMnemonics={mnemonicPersonalMnemonics}
+          loading={mnemonicCatalogState==="loading"}
+          error={mnemonicCatalogState==="error" ? mnemonicCatalogError : ""}
+          onRetry={()=>setMnemonicCatalogRetry(value=>value+1)}
+          onClose={closeSecondaryPage}
+          onSelectKanji={(item: KanjiCatalogItem)=>{setDictionaryLookupCharacter(item.character);setExperience("dictionary");closeSecondaryPage();}}
+        /> : null}
+        {secondaryPage==="grammar" ? <GrammarDialog open={grammarOpen} language={language} onClose={closeSecondaryPage}/> : null}
+        {secondaryPage==="readingLab" ? <ReadingLabDialog
+          open={readingLabOpen}
+          language={language}
+          onClose={closeSecondaryPage}
+        /> : null}
+        </section> : showDictionary?<Suspense fallback={<section className="surface loading" role="status" aria-live="polite">{t("loading",language)}</section>}><DictionaryPageRoute language={language} externalSelectedCharacter={dictionaryLookupCharacter} onExternalSelectionConsumed={()=>setDictionaryLookupCharacter(null)}/></Suspense>:<>
+              {!showExercise ? <div className="card-topline">
+                <div className="learning-session-context">
+                  <p className="eyebrow">{topicStudyLabel?learningCopy("topicSessionLabel",language):t("learning",language)}</p>
+                  <strong>{topicStudyLabel || learningCopy("recommendedLearning",language)}</strong>
+                </div>
+                <button className="button secondary learning-route-button" type="button" disabled={busy} onClick={()=>setTopicBrowserOpen(true)}>
+                  <UiIcon name="dictionary" size={17}/><span>{learningCopy("learnByTopic",language)}</span>
+                </button>
+              </div> : null}
+              {showExercise ? (
+  practiceMode==="exercise" && snapshot?.exercise?.mode ? (
+    <>
+      <Exercise snapshot={snapshot} busy={busy} onSubmit={(v,meta)=>action(()=>submitExercise(v,meta),false)} onDontKnow={()=>action(dontKnow,false)} onSelfReport={knewIt=>action(()=>selfReportProduction(knewIt),false)} onNext={()=>action(nextExercise)} onRetry={()=>action(retryExercise,false)} onExit={()=>setPracticeMode("home")}/>
+      {snapshot?.exercise?.character?<PracticeHandwriting character={snapshot.exercise.character} language={language} exercise={snapshot.exercise}/>:null}
+    </>
+  ) : (
+    <PracticeHome
+      language={language}
+      busy={busy}
+      onStartActiveRecall={async()=>{
+        await action(async()=>{
+          await startExercise();
+          setPracticeMode("exercise");
+        });
+      }}
+      onStartCustomStudy={async(filter: CustomStudyFilter)=>{
+        const result=await action(async()=>{
+          await clearTransient();
+          return await startCustomStudy(filter);
+        });
+        if(result?.started)setExperience("review");
+        return Boolean(result?.started);
+      }}
+    />
+    
+  )
+) : snapshot?.learning?.active ? <Learning card={snapshot.learning} snapshot={snapshot} busy={busy} topicLabel={topicStudyLabel} onReveal={()=>void action(revealLearning)} onRate={r=>void action(async()=>{const ok=await rateLearning(r);if(ok)setSessionFeedbackVisible(true);setExperience("review")})}/> : snapshot&&topicStudyLabel?<section className="surface empty-state topic-session-complete"><p className="eyebrow red">{learningCopy("topicSessionLabel",language)}</p><h2>{learningCopy("topicSessionComplete",language)}</h2><p>{learningCopy("topicSessionCompleteHint",language)}</p><button className="button primary" type="button" onClick={()=>{void action(async()=>{await startLearningExperience();await clearTransient()})}}>{learningCopy("backToRecommended",language)}</button></section>:snapshot?<section className="surface empty-state"><h2>{t("noSession")}</h2><p>{t("startExercise")}</p><button className="button primary" type="button" onClick={()=>{void action(startExercise)}}>{t("startExercise")}</button></section>:<LoadingLearning/>}
+              {!showExercise?(snapshot?<SessionFeedback snapshot={snapshot} visible={sessionFeedbackVisible}/>:null):null}        {!showExercise?(snapshotHydrated&&snapshot?<DailySummary snapshot={snapshot}/>:<LoadingSummary/>):null}
+              {!showExercise?(snapshotHydrated&&snapshot?.dailyGoal?<section className="surface goal"><div className="goal-top" data-celebrated={snapshot.dailyGoal.celebrated?"true":"false"}><strong>{t("dailyGoal")}: {fa(snapshot.dailyGoal.completed??0)}/{fa(snapshot.dailyGoal.target??0)}</strong><span>{snapshot.dailyGoal.celebrated?"🎉 "+t("completed"):""}</span></div><Progress value={pct(snapshot.dailyGoal.progress)} label={t("dailyGoal")}/></section>:<LoadingGoal/>):null}
+              {!showExercise?(snapshotHydrated&&snapshot?.upcomingReviews?.length?<details className="surface upcoming"><summary>{t("upcomingReviews")}</summary><div className="upcoming-body">{snapshot.upcomingReviews.map(r=><div className="upcoming-row" key={r.character+r.dueAt}><strong lang="ja">{r.character}</strong><span>{new Date(r.dueAt).toLocaleString(language==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"})}</span></div>)}</div></details>:snapshot?<></>:<LoadingUpcoming/>):null}
+
+      </>}
+    </main>
+    <Suspense fallback={null}>
+      {topicBrowserOpen ? <TopicLearningDialog
+        open={true}
+        language={language}
+        busy={busy}
+        onClose={()=>setTopicBrowserOpen(false)}
+        onStart={async(topic,filter)=>{
+          const result=await action(async()=>{await clearTransient();return await startCustomStudy(filter)});
+          return Boolean(result?.started);
+        }}
+      /> : null}
+    </Suspense>
+    <AccountDialog open={accountOpen} language={language} onClose={closeSecondaryPage}/>
+<footer className="footer">{t("footerTagline",language)}</footer>
+  </div>
+}
+function DailySummary({snapshot}:{snapshot:Snapshot}){const s=snapshot.dailySummary??{};return <section className="daily-summary" aria-label={t("dailySummary",getLanguage())}>{([[t("todayReviews"),s.dueCount],[t("todayNewKanji"),s.newCount],[t("masteryMastered"),s.masteredCount],[t("streak"),s.streak]] as const).map(([label,value])=><div className="stat-card" key={label}><strong>{fa(Number(value)||0)}</strong><span>{label}</span></div>)}</section>}
+export { App };
+// Production presentation: learning card reveal uses the flip interaction.
+
+// Pages deployment uses source-built React artifact.
+// Bilingual UI verified on dedicated release branch.

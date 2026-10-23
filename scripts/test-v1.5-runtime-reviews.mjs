@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+const runtime=fs.readFileSync('review-runtime.js','utf8');
+const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const appendPrefix='const reviewEvent={eventId:reviewEventId,deviceId:reviewDeviceId,parentEventId:previousEvent,baseRecord,id,';
+const cap='const reviewHistoryLimit=Number(state.REVIEW_HISTORY_LIMIT)||2000;if(state.reviews.length>reviewHistoryLimit)state.reviews.splice(0,state.reviews.length-reviewHistoryLimit);';
+assert(runtime.includes('const previousEvent=[...state.reviews].reverse().find(r=>r.id===id&&r.eventId)?.eventId||null'),'Review parent-event lookup missing');
+assert(runtime.includes('const reviewEventId=eventId();const reviewDeviceId=deviceId();const baseRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))});'),'FSRS review event metadata capture missing');
+assert(runtime.includes(appendPrefix),'Review event append path missing');
+assert(runtime.includes(cap),'Runtime review history is not bounded immediately after append');
+assert(runtime.indexOf(cap)>runtime.indexOf(appendPrefix),'Runtime review history cap must run after append');
+assert(runtime.includes('const total=state.reviews.length'),'Stats must consume the bounded runtime history');
+console.log('Kanji 5 v1.5 runtime review history and FSRS event test passed.');
