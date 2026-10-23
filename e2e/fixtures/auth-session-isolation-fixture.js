@@ -28,6 +28,15 @@ const harness = {
   writes: [],
   matchedUpdatedAt,
   authUser: accountA,
+  delayInitialSession: Boolean(window.__KANJI5_INITIAL_SESSION_DELAY__),
+  initialSessionPending: false,
+  resolveBootSession(user) {
+    if (typeof this.resolveBootSessionRequest !== "function") throw new Error("INITIAL_SESSION_NOT_PENDING");
+    const resolve = this.resolveBootSessionRequest;
+    this.resolveBootSessionRequest = null;
+    this.initialSessionPending = false;
+    resolve({ data: { session: { user } }, error: null });
+  },
   switchTo(user) {
     this.authUser = user;
     this.listener?.("SIGNED_IN", { user });
@@ -57,8 +66,12 @@ window.supabase = {
           harness.listener = callback;
           return { data: { subscription: { unsubscribe() {} } } };
         },
-        async getSession() {
-          return { data: { session: { user: harness.authUser } }, error: null };
+        getSession() {
+          if (harness.delayInitialSession) {
+            harness.initialSessionPending = true;
+            return new Promise(resolve => { harness.resolveBootSessionRequest = resolve; });
+          }
+          return Promise.resolve({ data: { session: { user: harness.authUser } }, error: null });
         },
         async signOut() { return { error: null }; }
       },

@@ -78,3 +78,37 @@ test('in-flight account A sync cannot write A-derived payload to account B or st
   expect(result.writes).toEqual([]);
   expect(result.localData).not.toContain('account-A-only-private-payload');
 });
+
+test('delayed initial getSession cannot overwrite a newer auth-state event', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__KANJI5_INITIAL_SESSION_DELAY__ = true;
+  });
+  await page.goto('/e2e/fixtures/auth-session-isolation.html');
+
+  await expect.poll(() => page.evaluate(() => {
+    return window.__KANJI5_AUTH_SESSION_HARNESS__?.initialSessionPending || false;
+  }), { timeout: 10000 }).toBe(true);
+
+  await page.evaluate(() => {
+    window.__KANJI5_AUTH_SESSION_HARNESS__.switchTo({
+      id: 'account-B',
+      email: 'account-b@example.invalid',
+      user_metadata: {}
+    });
+  });
+  await expect.poll(() => page.evaluate(() => {
+    return window.__KANJI5_ACCOUNT__?.getState?.().user?.id || null;
+  }), { timeout: 10000 }).toBe('account-B');
+
+  await page.evaluate(() => {
+    window.__KANJI5_AUTH_SESSION_HARNESS__.resolveBootSession({
+      id: 'account-A',
+      email: 'account-a@example.invalid',
+      user_metadata: {}
+    });
+  });
+
+  await expect.poll(() => page.evaluate(() => {
+    return window.__KANJI5_ACCOUNT__?.getState?.().user?.id || null;
+  }), { timeout: 10000 }).toBe('account-B');
+});
