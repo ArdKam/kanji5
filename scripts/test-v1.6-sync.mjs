@@ -61,7 +61,7 @@ const mergedBookmarkClocks = mergeV16SyncData({
   componentUpdatedAtByKey: { kanjiBookmarks: "2026-10-22T10:00:00.000Z" }
 }, {
   sessionHistory: [],
-  components: { kanjiBookmarks: { 日: { saved: false, updatedAt: "2026-10-23T10:00:00.000Z" }, 月: { saved: true, updatedAt: "2026-10-22T12:00:00.000Z" } },
+  components: { kanjiBookmarks: { 日: { saved: false, updatedAt: "2026-10-23T10:00:00.000Z" }, 月: { saved: true, updatedAt: "2026-10-22T12:00:00.000Z" } } },
   componentUpdatedAtByKey: { kanjiBookmarks: "2026-10-23T10:00:00.000Z" }
 });
 assert.deepEqual(mergedBookmarkClocks.components.kanjiBookmarks, {
