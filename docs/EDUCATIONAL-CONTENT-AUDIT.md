@@ -141,6 +141,14 @@ The [representative Learning Card content review](./audits/learning-card-content
 
 This document is an engineering evidence artifact only. It does not close the independent human-review, Persian localization/provenance, or placement-validity gates below.
 
+### Per-gloss provenance and review-state implementation candidate — 2026-10-23
+
+A current-main implementation candidate now carries each learner-facing gloss with explicit language, priority, source/provenance, review status and review metadata in the learner-content and Learning Card contracts. The current review runtime identifies its English source glosses as **KANJIDIC2 via jkindrix/japanese-language-data**, tied to the checked-in `kanji-data.json` source revision and per-Kanji entry. Existing source glosses default to `unreviewed`; a record cannot be marked `verified` unless the source and language are known, a reviewer is named, and a valid review timestamp is present. Missing Persian translations can be represented as unavailable rather than fabricated.
+
+The Learning Card now discloses the English gloss source and explicitly says Persian translation review is pending. This is provenance/UX transparency only—not a claim that the glosses have been independently reviewed or that Persian translations are complete. The new work remains a PR candidate until its current-head tests pass and it merges; independent Japanese/Persian review, placement validation and legal/content acceptance remain open.
+
+
+
 ### Remaining content-quality risk
 
 The deterministic layer does not replace human pedagogical review. The release gate still requires sampled human review of meaning priority, reading usefulness, example naturalness, and context burden.
