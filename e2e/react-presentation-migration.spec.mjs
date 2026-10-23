@@ -419,7 +419,7 @@ test('Dictionary vocabulary distinguishes offline failure from a genuine empty r
 });
 
 test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
-  await clean(page);
+  await clean(page, 'fa');
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
