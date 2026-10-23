@@ -4,90 +4,141 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
-const designSystem = await read("frontend/src/design-system.css");
 const app = await read("frontend/src/app/App.tsx");
 const onboarding = await read("frontend/src/app/onboarding/OnboardingFlow.tsx");
 const dictionary = await read("frontend/src/app/dictionary.css");
 const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
 
-function linearChannel(value) {
+const linearChannel = (value) => {
   const channel = Number.parseInt(value, 16) / 255;
+  return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+};
+const relativeLuminance = (hex) => {
+  const channels = hex.slice(1).match(/.{2}/g).map(linearChannel);
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+};
+const contrastRatio = (foreground, background) => {
+  const first = relativeLuminance(foreground);
+  const second = relativeLuminance(background);
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+};
+
+// Keep muted light-theme copy readable on the secondary paper surface.
+assert.ok(styles.includes("--mute:#62666A;"), "Light-theme muted text must use the verified contrast token");
+assert.ok(contrastRatio("#62666A", "#EEE9E0") >= 4.5, "Muted text must reach WCAG AA contrast on the secondary surface");
+assert.ok(onboarding.includes("--mute:#62666A;"), "The onboarding shell must use the same readable muted-text token");
+assert.ok(contrastRatio("#62666A", "#F7F4EE") >= 4.5, "Onboarding muted text must reach WCAG AA contrast on its paper surface");
+
+// The rating row has one stable physical order regardless of the app's RTL/LTR locale.
+assert.ok(styles.includes(".rating-grid{direction:ltr;display:grid;"), "Rating grid must keep a stable left-to-right physical order");
+assert.ok(app.includes('const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;'), "Rating choices must be ordered hardest-to-easiest in the DOM");
+assert.ok(app.includes('dir={getLanguage()==="fa"?"rtl":"ltr"}'), "Rating labels must retain their language direction");
+assert.ok(app.includes('<bdi lang="ja" dir="ltr">'), "Learning-card Japanese readings must be isolated from surrounding RTL text");
+
+const darkStart = styles.indexOf("@media(prefers-color-scheme:dark){");
+const contrastStart = styles.indexOf("@media(prefers-contrast:more){", darkStart);
+assert.ok(darkStart >= 0 && contrastStart > darkStart, "System dark media block should exist");
+const systemDark = styles.slice(darkStart, contrastStart);
+
+// These fixed-color overrides must only run for the explicit System preference.
+for (const selector of [
+  ':root[data-theme="system"] .rating-again',
+  ':root[data-theme="system"] .rating-hard',
+  ':root[data-theme="system"] .rating-good',
+  ':root[data-theme="system"] .rating-easy',
+]) {
+  assert.ok(systemDark.includes(selector), "Missing System-scoped selector: " + selector);
+}
+assert.ok(systemDark.includes("--surface-soft:#292724;--surface-panel:rgba(35,33,30,.78);--progress-track:#35312c"));
+assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|audio-button|button|pager-button|settings-language-button|progress|stimulus|example-row|reason|insights|header-tools-menu|rating-again|rating-hard|rating-good|rating-easy)(?:[,{])/.test(systemDark), false, "Unscoped dark overrides could leak into manual Light mode");
+
+// System onboarding overrides are cloned from manual Dark, but only under the OS dark query.
+assert.ok(themeBootstrap.includes('const systemRules=darkRules.replaceAll(\':root[data-theme="dark"]\', \':root[data-theme="system"]\');'));
+assert.ok(themeBootstrap.includes("style.textContent=darkRules+'@media(prefers-color-scheme:dark){'+systemRules+'}';"));
+assert.equal(themeBootstrap.includes(':root:is([data-theme="dark"],[data-theme="system"])'), false, "System onboarding selectors must not darken System-Light mode");
+
+// Surfaces use resolved palette tokens instead of hard-coded light backgrounds.
+assert.ok(styles.includes(".progress{height:9px;border-radius:var(--radius-xl);background:var(--progress-track);overflow:hidden}"));
+assert.ok(styles.includes(".reading{min-height:96px;padding:14px;border:1px solid var(--line-soft);border-radius:var(--radius-lg);background:var(--surface-soft);"));
+assert.ok(styles.includes(".reason{margin:7px 0 0;padding:8px 10px;border:1px solid var(--line-soft);border-radius:14px;background:var(--surface-soft);"));
+assert.ok(styles.includes(".insights{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-panel)}"));
+assert.ok(styles.includes(':root[data-theme="dark"]{color-scheme:dark;--washi:#171614;'));
+assert.ok(styles.includes("--progress-track:#35312c;"));
+assert.ok(styles.includes("background:radial-gradient(circle at 8% 6%,rgba(184,74,56,.05),transparent 24rem),var(--washi);color:var(--sumi)"));
+assert.equal(styles.includes(':root[data-theme="dark"] :root[data-theme="dark"] .progress'), false, "Broken double-root progress selector must not return");
+assert.equal(styles.includes("@media(prefers-color-scheme:dark){#kanji5-account-launcher"), false, "Account launcher OS-dark styling must not override a manually selected Light theme");
+assert.ok(styles.includes(':root[data-theme="system"] #kanji5-account-launcher'));
+
+// Theme-aware semantic colors are used for error text and destructive indicators.
+assert.ok(styles.includes("--color-danger:#a23a2a"));
+assert.ok(styles.includes("--color-danger:#ff9b91"));
+assert.ok(styles.includes(".account-error{margin:12px 0 0;color:var(--color-danger)"));
+assert.ok(styles.includes(".sync-error{color:var(--color-danger)"));
+assert.ok(styles.includes(".account-sync-badge.sync-error{color:var(--color-danger)"));
+assert.ok(styles.includes(".badge-red{border-color:color-mix(in srgb,var(--color-danger) 35%,var(--line));color:var(--color-danger)"));
+assert.ok(dictionary.includes(".placement-option.wrong{border-color:color-mix(in srgb,var(--color-danger) 42%,var(--line))"));
+assert.ok(dictionary.includes(":root[data-theme=\"dark\"] .dictionary-card-dialog .dialog-close"), "Dictionary close control needs a manual-Dark foreground override");
+assert.ok(dictionary.includes(":root[data-theme=\"system\"] .dictionary-card-dialog .dialog-close"), "Dictionary close control needs a System-Dark foreground override");
+assert.ok(dictionary.includes("color: var(--sumi);"), "Dictionary close control must use the resolved high-contrast ink token");
+assert.ok(dictionary.includes(".handwriting-result.retry{border-color:color-mix(in srgb,var(--color-danger) 42%,var(--line))"));
+
+function linear(value) {
+  const channel = value / 255;
   return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 }
 function luminance(hex) {
-  const channels = hex.slice(1).match(/.{2}/g).map(linearChannel);
+  const channels = hex.replace("#", "").match(/.{2}/g).map((part) => linear(parseInt(part, 16)));
   return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
 }
 function contrast(foreground, background) {
   const pair = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
   return (pair[0] + 0.05) / (pair[1] + 0.05);
 }
+assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
+assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#e06a5f") >= 4.5, "Dark brand-red primary button text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#e47c72") >= 4.5, "Dark brand-red primary hover/focus text must meet WCAG AA contrast");
+assert.ok(contrast("#e9948c", "#171614") >= 3, "Dark brand focus ring must meet the 3:1 non-text contrast target against the app canvas");
 
-// One semantic source owns theme-dependent colors; legacy aliases must delegate to it.
-for (const token of [
-  "--ds-color-canvas: light-dark(var(--ds-brand-rice-paper), #171614);",
-  "--ds-color-surface: light-dark(var(--ds-brand-surface), #23211E);",
-  "--ds-color-text-muted: light-dark(#62666A, #B8AFA2);",
-  "--ds-color-action-primary: light-dark(var(--ds-brand-indigo), #E06A5F);",
-  "--ds-color-action-primary-text: light-dark(#FDFBF7, #171614);",
-  "--ds-color-progress-track: light-dark(#E9E3D8, #35312C);",
-  "--ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);",
-  "--ds-color-skeleton-base: light-dark(#EEE7DA, #292724);",
-  "--ds-state-danger-text: light-dark(#8E3026, #FF9B91);",
-]) assert.ok(designSystem.includes(token), `semantic theme token missing: ${token}`);
 
-assert.ok(styles.includes("--washi:var(--ds-color-canvas);--paper:var(--ds-color-surface);--sumi:var(--ds-color-text-primary);--ink:var(--ds-color-text-secondary);--mute:var(--ds-color-text-muted);"), "global compatibility variables must alias shared semantic tokens");
-assert.ok(styles.includes("--color-danger:var(--ds-state-danger-text);"), "danger text must use the theme-aware semantic state role");
-assert.ok(styles.includes("--color-surface-elevated:var(--ds-color-surface-elevated)"), "elevated surfaces must use a shared theme-aware token");
-assert.ok(styles.includes("--skeleton-base:var(--ds-color-skeleton-base)"), "skeleton colors must use shared theme-aware tokens");
-assert.ok(onboarding.includes("--paper:var(--ds-color-canvas)") && onboarding.includes("--ink:var(--ds-color-text-primary)") && onboarding.includes("--mute:var(--ds-color-text-muted)"), "onboarding must use the same semantic canvas, ink and muted-text roles");
+assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
+const manualDarkStart = styles.indexOf(':root[data-theme="dark"]{');
+const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDarkStart);
+const manualDark = styles.slice(manualDarkStart, manualLightStart);
+assert.ok(manualDark.includes("--color-surface-elevated:#2b2824"), "Manual Dark must define its own elevated surface token");
+assert.ok(manualDark.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Manual Dark must define its own loading tokens");
+assert.ok(styles.includes(':root[data-theme="dark"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}'), "Manual Dark primary buttons must use the brand red with an explicit high-contrast foreground");
+assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}'), "System + OS Dark primary buttons must use the brand red with an explicit high-contrast foreground");
+assert.ok(styles.includes(':root[data-theme="dark"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--shu) 88%,#fff);border-color:var(--shu);color:#171614;box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 28%,transparent);}'), "Manual Dark primary hover/focus states must remain red and preserve contrast");
+assert.ok(styles.includes(':root[data-theme="dark"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:color-mix(in srgb,var(--shu) 72%,#fff);}'), "Manual Dark keyboard focus must use a high-contrast brand ring");
+assert.ok(systemDark.includes(':root[data-theme="system"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:color-mix(in srgb,var(--shu) 72%,#fff);}'), "System Dark keyboard focus must use a high-contrast brand ring");
 
-// Validate actual role colors; text roles target WCAG AA (4.5:1).
-assert.ok(contrast("#62666A", "#EEE9E0") >= 4.5, "Light muted text must meet WCAG AA on the secondary surface");
-assert.ok(contrast("#B8AFA2", "#23211E") >= 4.5, "Dark muted text must meet WCAG AA on the dark surface");
-assert.ok(contrast("#8E3026", "#FDFBF7") >= 4.5, "Light error text must meet WCAG AA contrast");
-assert.ok(contrast("#FF9B91", "#23211E") >= 4.5, "Dark error text must meet WCAG AA contrast");
-assert.ok(contrast("#FDFBF7", "#505F83") >= 4.5, "Light primary action text must meet WCAG AA contrast");
-assert.ok(contrast("#171614", "#E06A5F") >= 4.5, "Dark primary action text must meet WCAG AA contrast");
-
-// Rating options keep a stable physical order while every outcome uses semantic pairs.
-assert.ok(styles.includes(".rating-grid{direction:ltr;display:grid;"), "Rating grid must keep stable left-to-right physical order");
-assert.ok(app.includes('const ratingOptions=()=>[["Again",t("again")],["Hard",t("hard")],["Good",t("good")],["Easy",t("easy")]] as const;'), "Rating choices must be ordered hardest-to-easiest in the DOM");
-assert.ok(app.includes('dir={getLanguage()==="fa"?"rtl":"ltr"}'), "Rating labels must retain their language direction");
-assert.ok(app.includes('<bdi lang="ja" dir="ltr">'), "Learning-card Japanese readings must be isolated from surrounding RTL text");
-for (const [rating, role] of [["again", "danger"], ["hard", "warning"], ["good", "success"], ["easy", "info"]]) {
-  assert.ok(styles.includes(`.rating-${rating}{color:var(--ds-state-${role}-text);`), `${rating} rating must use its semantic foreground role`);
-  assert.ok(styles.includes(`border-color:var(--ds-state-${role}-border);`), `${rating} rating must use its semantic border role`);
-  assert.ok(styles.includes(`background:var(--ds-state-${role}-bg)}`), `${rating} rating must use its semantic background role`);
+assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--shu) 88%,#fff);border-color:var(--shu);color:#171614;box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 28%,transparent);}'), "System Dark primary hover/focus states must remain red and preserve contrast");
+assert.ok(styles.includes(':root[data-theme="dark"] .audio-button:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 72%,#fff);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "Manual Dark audio focus must use the theme-aware focus color");
+assert.ok(systemDark.includes(':root[data-theme="system"] .audio-button:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 72%,#fff);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "System Dark audio focus must use the theme-aware focus color");
+assert.equal(styles.includes(':root[data-theme="light"] .button.primary{background:var(--shu);'), false, "Dark brand-red primary rules must not leak into manual Light");
+assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-search:focus-within { outline-color: color-mix(in srgb, var(--shu) 72%, #fff); }'), "Manual Dark topic search must have a visible focus ring");
+assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-search:focus-within { outline-color: color-mix(in srgb, var(--shu) 72%, #fff); }'), "System Dark topic search must have a visible focus ring");
+assert.ok(styles.includes(".button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text without flattening rating colors");
+assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
+assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
+assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#332724;color:#e8b4ac;border-color:#8d625a;}'), "Dark Again feedback must use subdued semantic colors");
+for (const theme of ["dark", "system"]) {
+  const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);}`;
+  assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must not override semantic rating buttons`);
+  for (const [rating, background, foreground] of [
+    ["again", "#332724", "#e8b4ac"],
+    ["hard", "#332f27", "#d8c8a5"],
+    ["good", "#283128", "#bed0bd"],
+    ["easy", "#27303b", "#c1cee0"],
+  ]) {
+    assert.ok(styles.includes(`:root[data-theme="${theme}"] .rating-${rating}{background:${background};color:${foreground};`), `${theme} ${rating} rating must keep a semantic foreground/background pair`);
+  }
 }
-for (const [foreground, background] of [
-  ["#8E3026", "#F8ECE8"], ["#FF9B91", "#332724"],
-  ["#76510A", "#FAF0D9"], ["#E9C46A", "#332F27"],
-  ["#43582B", "#EDF2E7"], ["#B9D49A", "#283128"],
-  ["#314B6F", "#ECF1F8"], ["#A9C1ED", "#27303B"],
-]) assert.ok(contrast(foreground, background) >= 4.5, `Review outcome ${foreground} on ${background} must meet WCAG AA`);
+assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: var(--paper); }"), "Selected focus option needs a high-contrast Light-mode foreground");
+assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Manual Dark focus foreground must remain dark on the light indigo surface");
+assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; }'), "System Dark focus foreground must remain dark on the light indigo surface");
+assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
 
-// System-mode onboarding selectors are cloned from Dark, scoped to OS Dark only.
-assert.ok(themeBootstrap.includes('const systemRules=darkRules.replaceAll(\':root[data-theme="dark"]\', \':root[data-theme="system"]\');'), "System theme should clone the Dark onboarding rules");
-assert.ok(themeBootstrap.includes("style.textContent=darkRules+'@media(prefers-color-scheme:dark){'+systemRules+'}';"), "System onboarding overrides must only apply under the OS dark query");
-assert.equal(themeBootstrap.includes(':root:is([data-theme="dark"],[data-theme="system"])'), false, "System onboarding selectors must not darken System-Light mode");
-for (const selector of [
-  ':root[data-theme="dark"] .dictionary-card-dialog .dialog-close',
-  ':root[data-theme="system"] .dictionary-card-dialog .dialog-close',
-]) assert.ok(dictionary.includes(selector), "Dictionary close control must retain explicit theme coverage: " + selector);
-for (const selector of [
-  ':root[data-theme="dark"] .topic-learning-search:focus-within',
-  ':root[data-theme="system"] .topic-learning-search:focus-within',
-]) assert.ok(topic.includes(selector), "Topic search must retain explicit theme-aware focus coverage: " + selector);
-
-// Navigation, focus and reduced-motion behavior remain connected to the semantic layer.
-assert.ok(styles.includes("--nav-bar-height:var(--ds-layout-nav-height);"), "navigation height must use the shared layout token");
-assert.ok(designSystem.includes("--ds-layout-nav-height: 66px;"), "semantic navigation height must preserve the 66px interaction layout");
-assert.ok(styles.includes("outline:3px solid var(--ds-focus-ring)!important;"), "keyboard focus must use the semantic focus role");
-assert.ok(designSystem.includes("--ds-focus-ring: light-dark(#505F83, #FF9B91);"), "focus-ring colors must remain theme-aware");
-assert.ok(styles.includes("@media(prefers-reduced-motion:reduce)") && styles.includes("transition-duration:.001ms!important"), "the shared styles layer must disable motion for reduced-motion users");
-assert.ok(styles.includes("@media(prefers-reduced-motion:reduce)"), "legacy components must retain their reduced-motion fallback");
-assert.ok(!styles.includes("--washi:#171614") && !styles.includes("--color-danger:#a23a2a"), "duplicate hard-coded theme variables must not return");
-
-console.log("Dark-theme parity and semantic-token contract passed.");
+console.log("Dark-theme parity contract passed.");

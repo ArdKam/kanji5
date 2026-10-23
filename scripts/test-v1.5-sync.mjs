@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { hashPayload, mergeState, mergeSyncPayload, stablePayload, SYNC_SCHEMA_VERSION } from '../v1.5-sync-core.js';
+import { hashPayload, mergeState, mergeSyncPayload, stablePayload, payloadsEqual, SYNC_SCHEMA_VERSION } from '../v1.5-sync-core.js';
 
 const baseCard = { state: 0, due: new Date('2026-09-03T10:00:00Z'), last_review: null };
 const eventA = {
@@ -72,7 +72,59 @@ assert.equal(merged.current, null, 'Ephemeral current-card state must never ente
 assert.equal(merged.revealed, false, 'Ephemeral reveal state must never enter persisted sync payload');
 assert.deepEqual(merged.examples, {}, 'Fetched examples must never enter persisted sync payload');
 
+
+const settingsLocal = {
+  ...structuredClone(local),
+  settings: { dailyNew: 10, retention: .85, maxInterval: 36500 },
+  settingsUpdatedAtByKey: { dailyNew: '2026-10-02T10:00:00Z', retention: '2026-10-02T09:00:00Z' }
+};
+const settingsRemote = {
+  ...structuredClone(remote),
+  settings: { dailyNew: 5, retention: .9, maxInterval: 36500 },
+  settingsUpdatedAtByKey: { dailyNew: '2026-10-01T10:00:00Z', retention: '2026-10-03T09:00:00Z' }
+};
+const settingsMerged = mergeState(settingsLocal, settingsRemote, fixtureNow);
+assert.equal(settingsMerged.settings.dailyNew, 10, 'A newer local daily-new setting must not be reverted by stale cloud settings');
+assert.equal(settingsMerged.settings.retention, .9, 'A newer cloud setting must win on that setting key only');
+assert.equal(settingsMerged.settingsUpdatedAtByKey.dailyNew, '2026-10-02T10:00:00Z');
+assert.equal(settingsMerged.settingsUpdatedAtByKey.retention, '2026-10-03T09:00:00Z');
+
+const legacyLocalCustom = mergeState(
+  { ...local, settings: { dailyNew: 10, retention: .85 } },
+  { ...remote, settings: { dailyNew: 5, retention: .9 } },
+  fixtureNow
+);
+assert.equal(legacyLocalCustom.settings.dailyNew, 10, 'Legacy conflicting non-default local settings should be preserved when clocks do not exist');
+assert.ok(legacyLocalCustom.settingsUpdatedAtByKey.dailyNew, 'Resolved legacy setting conflicts must gain a clock to ensure cross-device convergence');
+const freshLocal = mergeState(
+  { ...local, settings: { dailyNew: 5, retention: .9 } },
+  { ...remote, settings: { dailyNew: 8, retention: .85 } },
+  fixtureNow
+);
+assert.equal(freshLocal.settings.dailyNew, 8, 'Fresh-install defaults should still adopt existing cloud settings');
+assert.equal(freshLocal.settings.retention, .85, 'Fresh-install defaults should still adopt existing cloud settings');
+
 const payload = mergeSyncPayload({ state: local, knowledge: { 学: { meaning: { attempts: 1, correct: 1 } } }, deckVersion: 'v1' }, { state: remote, knowledge: { 学: { meaning: { attempts: 2, correct: 1 } } }, deckVersion: 'v1', educationSchemaVersion: 2 }, fixtureNow);
+assert.equal(payloadsEqual(payload, stablePayload(payload)), true, 'Canonical payload comparison must be stable');
+assert.equal(
+  payloadsEqual(
+    { state: { settings: { dailyNew: 5, retention: 0.9 } } },
+    { state: { settings: { retention: 0.9, dailyNew: 5 } } }
+  ),
+  true,
+  'Object key insertion order must not cause a pointless sync'
+);
+assert.equal(payloadsEqual(payload, { ...payload, deckVersion: 'different' }), false, 'Exact sync comparisons must distinguish changed payloads');
+
+const identicalLegacyStats = { attempts: 4, correct: 2, lastAt: '2026-10-10T10:00:00Z' };
+const identicalLegacyKnowledge = mergeSyncPayload(
+  { state: local, knowledge: { 学: { reading: identicalLegacyStats } }, deckVersion: 'v1' },
+  { state: remote, knowledge: { 学: { reading: identicalLegacyStats } }, deckVersion: 'v1' },
+  fixtureNow
+);
+assert.equal(identicalLegacyKnowledge.knowledge.学.reading.attempts, 4, 'Identical legacy knowledge on both sides must not be double-counted');
+assert.equal(identicalLegacyKnowledge.knowledge.学.reading.correct, 2, 'Identical legacy knowledge must preserve correct counts');
+
 assert.equal(payload.syncSchemaVersion, SYNC_SCHEMA_VERSION);
 assert.equal(payload.deckVersion, 'v1');
 assert.equal(payload.state.todayNew, 4);
