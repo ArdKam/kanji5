@@ -1547,6 +1547,21 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
 .account-signout-button{justify-self:start;min-height:40px;padding:6px 0;border:0;background:transparent;color:var(--shu);font:inherit;font-size:var(--text-sm);font-weight:800;cursor:pointer;}
 .account-signout-button:hover{text-decoration:underline;}
 .account-message{margin:2px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--matcha) 28%,var(--line));border-radius:var(--radius-md);background:color-mix(in srgb,var(--matcha) 7%,var(--paper));color:var(--sumi);font-size:var(--text-xs);line-height:1.65;}
+
+.account-section-delete{margin-top:6px;padding:14px;border:1px solid color-mix(in srgb,var(--sakura) 48%,var(--line));border-radius:var(--radius-lg);background:color-mix(in srgb,var(--sakura) 5%,var(--paper));}
+.account-section-delete .account-section-heading{margin-bottom:10px;}
+.account-section-delete .account-section-heading h3{color:var(--sumi);}
+.account-section-delete .account-section-heading p,.account-delete-confirmation p{max-width:62ch;margin:6px 0 0;color:var(--mute);font-size:var(--text-sm);line-height:1.65;}
+.account-delete-confirmation{display:grid;gap:10px;padding-top:8px;border-top:1px solid var(--line-soft);}
+.account-delete-confirmation>strong{color:var(--sumi);font-size:var(--text-sm);}
+.account-delete-confirm-label{display:grid;gap:6px;max-width:360px;min-width:0;font-size:var(--text-sm);font-weight:750;}
+.account-delete-confirm-label input{width:100%;min-width:0;min-height:44px;padding:9px 12px;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--paper);color:var(--ink);font:inherit;direction:ltr;text-align:start;}
+.account-delete-confirm-label input:focus-visible{outline:2px solid var(--focus,var(--ai));outline-offset:2px;}
+.account-delete-trigger{min-height:44px;}
+.account-section-delete .account-inline-actions{display:flex;flex-wrap:wrap;gap:8px;}
+.account-section-delete .account-inline-actions .button{min-height:44px;}
+@media(max-width:760px){.account-section-delete{padding:12px}.account-delete-confirm-label{max-width:none}.account-section-delete .account-inline-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
+
 .account-footer{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);color:var(--mute);font-size:var(--text-xs);}
 
 @media(max-width:760px){
