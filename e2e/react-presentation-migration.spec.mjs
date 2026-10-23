@@ -717,8 +717,8 @@ test('Reading Lab starts compactly and keeps the Reader in a single-scroll flow 
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   const menu=page.locator('#header-tools-menu');
   await expect(menu).toHaveClass(/open/);
-  await menu.getByRole('button',{name:/Reading Lab|آزمایشگاه خواندن/}).click();
-  const dialog=page.getByRole('dialog',{name:/Reading Lab|آزمایشگاه خواندن/});
+  await menu.getByRole('button',{name:/Japanese text reader|خواندن متن ژاپنی/}).click();
+  const dialog=page.getByRole('dialog',{name:/Japanese text reader|خواندن متن ژاپنی/});
   await expect(dialog).toBeVisible({timeout:10000});
   expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
   await page.setViewportSize({width:390,height:844});
