@@ -730,7 +730,8 @@ test('Reading Lab starts compactly and keeps the Reader in a single-scroll flow 
   const headingBottom=await lab.locator('.reading-lab-section-heading').first().evaluate(el=>el.getBoundingClientRect().bottom);
   const inputTop=await input.evaluate(el=>el.getBoundingClientRect().top);
   expect(inputTop-headingBottom).toBeLessThanOrEqual(34);
-  await expect(lab.locator('.reading-lab-empty')).toBeHidden();
+  await expect(lab.locator('.reading-lab-empty')).toBeVisible();
+  await expect(lab.locator('.reading-lab-empty')).toContainText('reading');
   await expect(lab.locator('.reading-lab-listen')).toBeHidden();
   await input.fill('今日は学校に行きます。\n私は日本語を勉強します。');
   await expect(lab.locator('.reading-lab-reader')).toBeVisible();
