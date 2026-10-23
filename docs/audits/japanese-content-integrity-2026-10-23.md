@@ -40,7 +40,7 @@ Counts were calculated from the files on the observed baseline. Structural check
 
 **Correction in this branch:**
 - Require vocabulary `word`, `reading`, and `meaning` to be strings before normalizing them.
-- Require context `text` and `english` fields to be strings.
+- Require context `text` and `english` fields to be strings, and do not stringify array/object sentence values before validation.
 - At the KanjiAPI boundary, accept written forms and pronunciations only when the provider fields are strings, and discard non-string gloss items.
 - Add regression tests for array-valued written forms/readings/sentences and object-valued meanings/translations/glosses, while retaining the existing valid-entry fixtures.
 
