@@ -554,6 +554,10 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
         const active = el.querySelector(".learning-back-page.active");
         const scroller = active?.querySelector(".learning-back-scroll");
         const readings = active?.querySelector(".learning-back-readings-block");
+        const readingsGrid = active?.querySelector(".learning-back-readings");
+        const readingHeader = readings?.querySelector(".readings-header");
+        const readingToggle = readings?.querySelector(".reading-toggle");
+        const readingCards = [...(readingsGrid?.querySelectorAll(".reading") ?? [])];
         const quickExample = active?.querySelector(".learning-back-quick-example");
         const footer = el.querySelector(".learning-back-footer");
         const navigation = document.querySelector(".experience-nav");
@@ -585,6 +589,20 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
           scrollMetrics: { scrollTop: scroller.scrollTop, scrollHeight: scroller.scrollHeight, clientHeight: scroller.clientHeight },
           scrollBounds,
           readingBounds,
+          readingsGridBounds: readingsGrid instanceof HTMLElement ? bounds(readingsGrid) : null,
+          readingsGridColumns: readingsGrid instanceof HTMLElement ? getComputedStyle(readingsGrid).gridTemplateColumns : null,
+          readingCardDetails: readingCards.map((node) => ({
+            ...bounds(node),
+            display: getComputedStyle(node).display,
+            gridTemplateColumns: getComputedStyle(node).gridTemplateColumns,
+            minHeight: getComputedStyle(node).minHeight,
+            rowGap: getComputedStyle(node).rowGap,
+            columnGap: getComputedStyle(node).columnGap,
+            label: node.querySelector("span") instanceof HTMLElement ? bounds(node.querySelector("span")) : null,
+            reading: node.querySelector("strong") instanceof HTMLElement ? bounds(node.querySelector("strong")) : null,
+          })),
+          readingHeaderBounds: readingHeader instanceof HTMLElement ? bounds(readingHeader) : null,
+          readingToggleBounds: readingToggle instanceof HTMLElement ? bounds(readingToggle) : null,
           exampleBounds,
           footerBounds,
           readingsVisibleWithoutScrolling:
