@@ -378,6 +378,36 @@
     text-overflow: ellipsis;
   }
   .learning-card-back .learning-back-page:first-child .learning-back-quick-example-meaning { display: none; }
+
+  /* The shared .reading and .reading-toggle defaults are intentionally taller.
+     Override their intrinsic minimums only in this short-landscape card layout. */
+  .learning-card-back .learning-back-page.active .learning-back-readings-block .reading-toggle {
+    min-height: 28px;
+    height: 28px;
+    padding: 2px 5px;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page.active .learning-back-readings-block .learning-back-readings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 3px;
+    align-items: start;
+  }
+  .learning-card-back .learning-back-page.active .learning-back-readings-block .learning-back-readings .reading {
+    min-height: 28px;
+    height: 28px;
+    max-height: 28px;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .learning-card-back .learning-back-page.active .learning-back-readings-block .learning-back-quick-example {
+    box-sizing: border-box;
+    height: 18px;
+    max-height: 18px;
+    align-items: center;
+    padding-top: 2px;
+  }
+
   .learning-card-back .learning-back-page:first-child .kanji-structure-preview {
     min-height: 32px;
     padding: 2px 4px;
