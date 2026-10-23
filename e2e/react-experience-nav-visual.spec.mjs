@@ -332,3 +332,56 @@ test('Dictionary topic selector stays within short mobile viewports and keeps it
     await expect(picker).toBeHidden();
   }
 });
+
+
+test('Saved Kanji bookmarks persist, filter correctly, and remain separate from review state', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  const savedFilter = page.locator('.dictionary-saved-toggle');
+  await expect(savedFilter).toBeVisible();
+  await expect(savedFilter).toContainText('0');
+
+  await savedFilter.click();
+  await expect(page.locator('.dictionary-empty')).toContainText("You haven’t saved any Kanji yet.");
+  await savedFilter.click();
+
+  await page.getByRole('button', { name: 'Detailed view' }).click();
+  const firstTile = page.locator('.kanji-catalog-tile').first();
+  const character = (await firstTile.locator('.kanji-catalog-character').textContent())?.trim();
+  expect(character).toBeTruthy();
+  const saveButton = page.locator('.dictionary-bookmark-toggle').first();
+  await expect(saveButton).toHaveAttribute('aria-pressed', 'false');
+  await saveButton.click();
+  await expect(saveButton).toHaveAttribute('aria-pressed', 'true');
+  await expect(savedFilter).toContainText('1');
+
+  const backup = await page.evaluate(() => window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.());
+  expect(backup?.data?.components?.kanjiBookmarks?.[character]).toMatchObject({ saved: true });
+  expect(backup?.data?.core?.cards?.[character]).toBeUndefined();
+
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('.dictionary-saved-count')).toHaveText('1');
+  await page.locator('.dictionary-saved-toggle').click();
+  await expect(page.locator('.kanji-catalog-tile')).toHaveCount(1, { timeout: 10000 });
+  await expect(page.locator('.kanji-catalog-character')).toHaveText(character);
+
+  await page.locator('.kanji-catalog-tile').click();
+  const detail = page.locator('.dictionary-card-dialog');
+  await expect(detail).toBeVisible();
+  const detailBookmark = detail.locator('.dictionary-bookmark-action');
+  await expect(detailBookmark).toHaveAttribute('aria-pressed', 'true');
+  await detailBookmark.click();
+  await expect(detailBookmark).toHaveAttribute('aria-pressed', 'false');
+  await detail.locator('.dialog-close').click();
+  await expect(page.locator('.dictionary-empty')).toContainText("You haven’t saved any Kanji yet.");
+  await expect(page.locator('.dictionary-saved-count')).toHaveText('0');
+});
