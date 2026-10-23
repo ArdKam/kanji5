@@ -64,8 +64,8 @@ function isLowValueVocabularyExample(word){const value=String(word||'').trim();i
 async function filterVocabularyResponse(req,response){if(!req.url.startsWith(`${API_ORIGIN}/v1/words/`)||!response?.ok)return response;try{const payload=await response.clone().json();if(!Array.isArray(payload))return response;let changed=false;const filtered=payload.map(entry=>{const variants=Array.isArray(entry?.variants)?entry.variants.filter(variant=>!isLowValueVocabularyExample(variant?.written)):[];if(variants.length!==(entry?.variants||[]).length)changed=true;return {...entry,variants}}).filter(entry=>entry.variants.length);if(!changed)return response;return new Response(JSON.stringify(filtered),{status:response.status,statusText:response.statusText,headers:response.headers})}catch(_){return response}}
 async function apiCacheFirst(req){
   const c=await caches.open(API_CACHE);
-  // Keep stale entries until the network request succeeds. An expired response
-  // is still better than losing offline access when the network is unavailable.
+  // Keep expired entries until a successful replacement exists, so offline users
+  // retain usable data after a transient network/server failure.
   const hit=await c.match(req);
   if(hit){
     const stamp=Number(hit.headers.get('X-Kanji5-Cache-Time')||0);
@@ -83,13 +83,7 @@ async function apiCacheFirst(req){
       return response;
     }catch(_){
       if(hit)return hit;
-      const isWordsApi=req.url.startsWith(`${API_ORIGIN}/v1/words/`);
-      if(isWordsApi)return new Response('[]',{status:200,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'}});
-      return new Response('Offline: resource unavailable',{status:503,headers:{
-        'Content-Type':'text/plain; charset=utf-8',
-        'Cache-Control':'no-store',
-        'X-Kanji5-Offline-Fallback':'1'
-      }});
+      return new Response(JSON.stringify({error:'offline-content-unavailable'}),{status:503,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Kanji5-Offline-Fallback':'1'}});
     }
   })();
   API_INFLIGHT.set(key,request);
