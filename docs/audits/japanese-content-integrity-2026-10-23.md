@@ -104,6 +104,16 @@ Useful primary references:
 
 These checks did not identify a verified incorrect reading in these sampled words. They do record explicit word-sense distinctions (especially 学生 and 今日) that should be preserved when selecting examples and glosses. This is not a correction to the static catalog, and it does not validate every sense, etymology, learner-level suitability, provider result, or translation in the application. No corpus record was modified.
 
+## Source-backed proposed editorial actions — not applied
+
+These are candidate review rules derived from the small reference check above. They are **not** claims that a current stored or live record is wrong; the runtime provider results have not been frozen and tied to reviewed entry IDs.
+
+1. **学生:** for the ordinary modern sense “student,” select / display ガクセイ. Reserve ガクショウ for the historical or religious sense documented by 漢字ペディア. Review any future fixed sample using this pair before approving it. https://www.kanjipedia.jp/kotoba/0000924900
+2. **今日:** attach reading and meaning to the lexeme/sense—きょう “today” versus こんにち “these days / the present era”—rather than validating or teaching a reading in isolation. https://www.kanjipedia.jp/kotoba/0002418800
+3. **日本:** preserve ニホン and ニッポン as documented alternatives where the relevant UI supports alternate readings. Do not classify either as erroneous solely because the other is chosen as the display default. https://www.kanjipedia.jp/kotoba/0005439300
+4. **Official table readings:** if future pedagogy needs to distinguish readings listed in the Jōyō table from broader dictionary readings, add source-scoped fields backed by the official Agency for Cultural Affairs index or the Kanjipedia marker, instead of inferring that distinction from KANJIDIC2 on/kun arrays. https://www.bunka.go.jp/kokugo_nihongo/sisaku/joho/joho/kijun/naikaku/kanji/joyokanjisakuin/
+5. **Vocabulary source of record:** evaluate a pinned JMdict-derived source with stable lexeme / sense identifiers and explicit source/version metadata before relying on dynamic provider results for reviewed teaching examples. Confirm current terms, attribution, and compatible share-alike handling before bundling or redistributing any derived dataset. This is a future source evaluation, not a source replacement made in this PR. https://www.edrdg.org/wiki/JMdict-EDICT_Dictionary_Project.html and https://www.edrdg.org/edrdg/licence.html
+
 ## Unresolved review queue
 
 1. **Native Japanese / lexicographic review:** review on/kun entries that are prioritized for teaching, ambiguous readings, and a representative sample of high-frequency and assessment-target characters against Kanjipedia and the official Jōyō table. Record character, exact field, reference URL, reviewed value, reviewer, and date.
