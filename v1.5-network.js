@@ -54,8 +54,9 @@ export async function fetchWordsResult(character){
         .filter(gloss=>typeof gloss==='string')
         .slice(0,2)
         .join('; ');
-      if(!word.includes(character)||!reading||!meaning||seen.has(word))continue;
-      seen.add(word);
+      const variantKey=`${word}|${reading}`;
+      if(!word.includes(character)||!reading||!meaning||seen.has(variantKey))continue;
+      seen.add(variantKey);
       out.push(normalizeVocabularyItem({word,reading,meaning,source:'kanjiapi.dev'}));
       if(out.length>=24)break;
     }
