@@ -54,7 +54,7 @@ Counts were calculated from the files on the observed baseline. Structural check
 - Request only reusable source-sentence licenses explicitly (`CC BY 2.0 FR` and `CC0 1.0`).
 - Retain the source sentence URL, owner, and license with every returned context item.
 - Retain the chosen English translation's sentence ID, URL, owner, and license.
-- Do not select an English translation explicitly marked `PROBLEM`.
+- Do not select an English translation explicitly marked `PROBLEM`, missing a license, or carrying a license outside the text allowlist.
 - Add regression fixtures for source/translation attribution metadata, valid license filtering, and exclusion of problem-licensed translations.
 
 **Remaining acceptance requirement:** these fields are now preserved in the runtime context data, but this source-adapter PR does not alter the React presentation. Verify that the production Context experience actually presents appropriate attribution/links to users, and that it does not show material marked `PROBLEM`, before closing the licensing/release gate. Metadata preservation alone is not proof that the user-facing attribution requirement is satisfied.
@@ -97,7 +97,7 @@ The committed `on` / `kun` lists are derived from KANJIDIC2 via the pinned `jkin
 | JLPT metadata | `jlpt_waller` field in the pinned source projection | Treat as source metadata. Do not label a learner as JLPT-certified or imply that a null is N1. |
 | Topic taxonomy | Hand-curated `frontend/src/app/kanji-topics.json` | Partial editorial associations; source entries and membership are reviewable, but not licensed dictionary facts. |
 | Vocabulary examples | Runtime KanjiAPI response, adapted by `v1.5-network.js` and normalized by the vocabulary/content-quality layers | Not frozen in Git; source version and lexical item may not be reproducible after an upstream change. Confirm current provider and underlying EDRDG terms/attribution before redistributing cached/bundled examples. JMdict is a candidate for future controlled sourcing, not an adopted replacement in this change. |
-| Context sentences | Tatoeba API responses with direct English translations | Text licenses include CC BY 2.0 FR, CC0 1.0, and a PROBLEM marker. The adapter now preserves source and translation IDs, URLs, owners, and licenses and excludes source sentences or translations explicitly marked PROBLEM. Tatoeba sentence text and translations still need appropriate user-visible attribution; audio has separate, item-specific licensing. |
+| Context sentences | Tatoeba API responses with direct English translations | Text licenses include CC BY 2.0 FR, CC0 1.0, and a PROBLEM marker. The adapter now preserves source and translation IDs, URLs, owners, and licenses; it accepts only CC BY 2.0 FR / CC0 1.0 text licenses for both the source and selected translation, excluding PROBLEM, missing, or unrecognized licenses. Tatoeba sentence text and translations still need appropriate user-visible attribution; audio has separate, item-specific licensing. |
 | Visual structure / stroke-order sources | Pinned KanjiVG-derived files | Keep the recorded KanjiVG attribution and CC BY-SA 3.0 terms described in `docs/THIRD-PARTY-LICENSES.md`. |
 | Learning dependencies | Pinned TopoKanji dependency data | Learning-order aid only; retain the separate provenance and do not describe it as a canonical visual decomposition. |
 
