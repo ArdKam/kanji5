@@ -1,8 +1,7 @@
 import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
 
-const storage=window.__KANJI5_STORAGE__;
-if(!storage)throw new Error('KANJI5_STORAGE_NOT_LOADED');
+const storage=window.__KANJI5_STORAGE__||localStorage;
 
 const K=window.__KANJI5_STORAGE_KEYS__;
 if(!K)throw new Error("KANJI5_STORAGE_KEYS_NOT_LOADED");
@@ -544,8 +543,8 @@ const api = {
         const hostname = configuredUrl ? new URL(configuredUrl).hostname.toLowerCase() : '';
         const projectRef = hostname.endsWith('.supabase.co') ? hostname.slice(0, -'.supabase.co'.length) : '';
         if (projectRef && /^[a-z0-9-]+$/.test(projectRef)) {
-          window.localStorage.removeItem(`sb-${projectRef}-auth-token`);
-          window.localStorage.removeItem(`sb-${projectRef}-auth-token-code-verifier`);
+          storage.removeItem(`sb-${projectRef}-auth-token`);
+          storage.removeItem(`sb-${projectRef}-auth-token-code-verifier`);
         }
       } catch (cleanupError) {
         window.__KANJI5_OBSERVABILITY__?.capture?.('account-deletion-local-signout-failure', cleanupError, { dataAffected: 'not_applicable' });
