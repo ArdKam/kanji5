@@ -30,6 +30,8 @@ const sectionLabel = (key: SectionKey, language: Language) => {
 export function DictionaryKanjiCard({
   item,
   language,
+  bookmarked,
+  onToggleBookmark,
   onClose,
   catalog,
   onSelectKanji,
@@ -38,6 +40,8 @@ export function DictionaryKanjiCard({
 }: {
   item: KanjiCatalogItem;
   language: Language;
+  bookmarked: boolean;
+  onToggleBookmark: () => void;
   onClose: () => void;
   catalog: KanjiCatalogItem[];
   onSelectKanji: (item: KanjiCatalogItem) => void;
@@ -217,6 +221,17 @@ export function DictionaryKanjiCard({
           ) : null}
         </div>
       </div>
+      <button
+        className={"button secondary dictionary-bookmark-action" + (bookmarked ? " is-saved" : "")}
+        type="button"
+        aria-pressed={bookmarked}
+        onClick={onToggleBookmark}
+      >
+        <span aria-hidden="true">{bookmarked ? "★" : "☆"}</span>
+        <span>{bookmarked
+          ? (language === "fa" ? "حذف از کانجی‌های ذخیره‌شده" : "Remove from Saved Kanji")
+          : (language === "fa" ? "ذخیرهٔ کانجی" : "Save Kanji")}</span>
+      </button>
       <div className="dictionary-stroke-order-wrap" style={{ display: "grid", gap: 7 }}>
         <h3 className="dictionary-stroke-order-heading" style={{ margin: 0, paddingInline: 2, color: "var(--mute)", fontSize: 12, fontWeight: 800, lineHeight: 1.3 }}>{t("strokeOrder", language)}</h3>
         <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
