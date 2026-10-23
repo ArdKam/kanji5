@@ -51,7 +51,7 @@ try{
   assert.deepEqual(malformedResult.items,[],'array-valued written/reading fields and non-string glosses must not be coerced into vocabulary entries');
 
   globalThis.fetch=async()=>new Response(JSON.stringify([
-    {variants:[{written:'日本',pronounced:'にほん'},{written:'日本',pronounced:'にっぽん'}],meanings:[{glosses:['Japan']} ]}
+    {variants:[{written:'日本',pronounced:'にほん'},{written:'日本',pronounced:'にっぽん'},{written:'日本',pronounced:'にほん'}],meanings:[{glosses:['Japan']} ]}
   ]),{status:200,headers:{'content-type':'application/json'}});
   const alternateReadings=await network.fetchWordsResult('日');
   assert.deepEqual(alternateReadings.items.map(({word,reading})=>[word,reading]),[['日本','にほん'],['日本','にっぽん']],
