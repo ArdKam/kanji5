@@ -77,3 +77,5 @@ A read-only Supabase Security Advisor check against the project named `Kanji5` r
 
 This is operational security evidence, not a compliance certification. Repeat the check after configuration changes and on the final production candidate.
 
+The release acceptance tracker for these and the privacy, legal, educational, and device blockers is [issue #603](https://github.com/ArdKam/kanji5/issues/603).
+
