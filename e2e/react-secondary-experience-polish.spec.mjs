@@ -425,6 +425,12 @@ test("opening the More menu blocks account activation and restores the header on
   await expect(menu).toBeVisible();
   await expect(scrim).toBeVisible();
   await expect(account).toBeDisabled();
+  const bounds = await account.boundingBox();
+  expect(bounds).not.toBeNull();
+  const scrimIsHitTarget = await page.evaluate(({ x, y }) => {
+    return document.elementFromPoint(x, y)?.classList.contains("header-menu-scrim") ?? false;
+  }, { x: (bounds?.x ?? 0) + (bounds?.width ?? 0) / 2, y: (bounds?.y ?? 0) + (bounds?.height ?? 0) / 2 });
+  expect(scrimIsHitTarget).toBe(true);
   await expect(page.locator(".experience-nav")).toHaveAttribute("inert");
   await expect(page.locator("#primary-content")).toHaveAttribute("inert");
 
