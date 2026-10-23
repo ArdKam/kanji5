@@ -103,9 +103,10 @@ export function stablePayload(payload) {
     deckVersion: payload?.deckVersion || null,
     educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
     syncSchemaVersion: Number(payload?.syncSchemaVersion) || SYNC_SCHEMA_VERSION,
-    v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || 1,
+    v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || 2,
     sessionHistory: Array.isArray(payload?.sessionHistory) ? payload.sessionHistory : [],
     components: payload?.components && typeof payload.components === 'object' ? payload.components : {},
+    componentUpdatedAtByKey: payload?.componentUpdatedAtByKey && typeof payload.componentUpdatedAtByKey === 'object' ? payload.componentUpdatedAtByKey : {},
     skillProfile: payload?.skillProfile && typeof payload.skillProfile === 'object' ? payload.skillProfile : null
   };
 }
@@ -120,10 +121,69 @@ export function hashPayload(payload) {
   return (hash >>> 0).toString(16);
 }
 
+// Canonicalize object keys recursively so property insertion order does not cause
+// needless uploads. Arrays keep their order and Dates retain their JSON semantics.
+function canonicalize(value) {
+  if (value instanceof Date) return value.toJSON();
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonicalize(value[key])]));
+  }
+  return value;
+}
+
+// Exact canonical comparison is used for sync decisions. The 32-bit hash remains
+// useful as metadata, but must never be able to suppress a required upload.
+export function payloadsEqual(a, b) {
+  return JSON.stringify(canonicalize(stablePayload(a || {}))) === JSON.stringify(canonicalize(stablePayload(b || {})));
+}
+
+const LEGACY_DEFAULT_SETTINGS = Object.freeze({
+  dailyNew: 5, retention: 0.9, maxInterval: 36500, dailyGoal: 20, leechThreshold: 8
+});
+const owns = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
+const sameValue = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+function mergeSettings(local, remote, now = new Date()) {
+  const a = local?.settings && typeof local.settings === 'object' ? local.settings : {};
+  const b = remote?.settings && typeof remote.settings === 'object' ? remote.settings : {};
+  const at = local?.settingsUpdatedAtByKey && typeof local.settingsUpdatedAtByKey === 'object' ? local.settingsUpdatedAtByKey : {};
+  const bt = remote?.settingsUpdatedAtByKey && typeof remote.settingsUpdatedAtByKey === 'object' ? remote.settingsUpdatedAtByKey : {};
+  const settings = {}, updatedAtByKey = {};
+  for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    const hasLocal = owns(a, key), hasRemote = owns(b, key);
+    const localAt = String(at[key] || ''), remoteAt = String(bt[key] || '');
+    let useLocal;
+    if (!hasLocal) useLocal = false;
+    else if (!hasRemote) useLocal = true;
+    else if (localAt && remoteAt) useLocal = localAt > remoteAt || (localAt === remoteAt && JSON.stringify(canonicalize(a[key])) >= JSON.stringify(canonicalize(b[key])));
+    else if (localAt) useLocal = true;
+    else if (remoteAt) useLocal = false;
+    else {
+      // Legacy payloads have no per-key clocks. Prefer a non-default local value;
+      // a fresh install's untouched defaults should still adopt existing cloud settings.
+      const isLocalDefault = owns(LEGACY_DEFAULT_SETTINGS, key) && sameValue(a[key], LEGACY_DEFAULT_SETTINGS[key]);
+      const isRemoteDefault = owns(LEGACY_DEFAULT_SETTINGS, key) && sameValue(b[key], LEGACY_DEFAULT_SETTINGS[key]);
+      useLocal = !(isLocalDefault && !isRemoteDefault);
+    }
+    const chosen = useLocal ? a : b;
+    if (owns(chosen, key)) settings[key] = clone(chosen[key]);
+    const conflictStamp = !localAt && !remoteAt && hasLocal && hasRemote && !sameValue(a[key], b[key])
+      ? (now instanceof Date ? now : new Date(now)).toISOString()
+      : '';
+    const stamp = [localAt, remoteAt].sort().at(-1) || conflictStamp;
+    if (stamp) updatedAtByKey[key] = stamp;
+  }
+  return { settings, settingsUpdatedAtByKey: updatedAtByKey };
+}
+
 export function mergeState(local, remote, now = new Date()) {
   if (!local) return remote ? clone(remote) : null;
   if (!remote) return clone(local);
-  const merged = { ...clone(local), ...clone(remote), settings: { ...(local.settings || {}), ...(remote.settings || {}) } };
+  const merged = { ...clone(local), ...clone(remote) };
+  const settingsMerge = mergeSettings(local, remote, now);
+  merged.settings = settingsMerge.settings;
+  merged.settingsUpdatedAtByKey = settingsMerge.settingsUpdatedAtByKey;
   const ids = new Set([...Object.keys(local.cards || {}), ...Object.keys(remote.cards || {})]);
   merged.cards = {};
   for (const id of ids) {
@@ -164,6 +224,7 @@ export function mergeSyncPayload(localPayload, remotePayload, now = new Date()) 
     v16SyncSchemaVersion: Math.max(Number(local.v16SyncSchemaVersion) || 1, Number(remote.v16SyncSchemaVersion) || 1),
     sessionHistory: mergeV16History(local.sessionHistory, remote.sessionHistory),
     components: { ...local.components, ...remote.components },
+    componentUpdatedAtByKey: { ...(local.componentUpdatedAtByKey || {}), ...(remote.componentUpdatedAtByKey || {}) },
     skillProfile: newerProfile(local.skillProfile, remote.skillProfile)
   };
 }
