@@ -1345,6 +1345,24 @@ test("Learning-card vocabulary distinguishes offline failure from a valid empty 
 });
 
 
+test("Learning Card names the English gloss source and does not imply Persian review", async ({ page }) => {
+  await routeExamples(page, 1);
+
+  let card = await revealLearningCard(page, "fa");
+  let note = card.locator(".learning-meaning-provenance");
+  await expect(note).toBeVisible();
+  await expect(note).toContainText("منبع معنی انگلیسی:");
+  await expect(note).toContainText("KANJIDIC2 via jkindrix/japanese-language-data");
+  await expect(note).toContainText("بازبینی مستقل ترجمهٔ فارسی انجام نشده است");
+
+  card = await revealLearningCard(page, "en");
+  note = card.locator(".learning-meaning-provenance");
+  await expect(note).toBeVisible();
+  await expect(note).toContainText("English gloss source:");
+  await expect(note).toContainText("KANJIDIC2 via jkindrix/japanese-language-data");
+  await expect(note).toContainText("Persian translation review is pending.");
+});
+
 test("prepared mnemonic payload is deferred until the mnemonic page is opened", async ({ page }) => {
   const requests = [];
   page.on("request", request => {

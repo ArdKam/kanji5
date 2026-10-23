@@ -44,6 +44,16 @@ export type Snapshot = {
     kun?: string[];
     sourceMeanings?: string[];
     learnerMeanings?: { primary?: string[]; secondary?: string[]; reference?: string[] };
+    learnerMeaningRecords?: {
+      text: string | null;
+      language: "en" | "fa" | "ja" | "unknown";
+      priority: "primary" | "secondary" | "reference";
+      provenance: { source: string; version: string | null; entryId: string | null; url: string | null };
+      reviewStatus: "verified" | "unreviewed" | "rejected" | "unavailable";
+      reviewNotes: string;
+      reviewedBy: string | null;
+      reviewedAt: string | null;
+    }[];
     learnerReadings?: { coreOn?: string[]; coreKun?: string[]; vocabularySupported?: string[]; referenceOn?: string[]; referenceKun?: string[] };
     examples?: { word?: string; reading?: string; meaning?: string }[];
     hint?: string;
