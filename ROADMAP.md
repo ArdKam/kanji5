@@ -1,3 +1,21 @@
+## 2.1.0 Public-beta release checkpoint — 2026-10-23
+
+**Audit target at checkpoint:** `main` SHA `766f85c4633ee5d2699509c981bb4cfc456d26f9`. This section and [the dated release checklist](docs/PUBLIC-BETA-RELEASE-CHECKLIST-2026-10-23.md) supersede earlier “current main” claims below where SHAs or PR dispositions differ. Check the linked live GitHub Actions runs before changing any pending status.
+
+- **Current-main engine CI:** PASS on exact SHA `766f85c4633ee5d2699509c981bb4cfc456d26f9`: [Build Kanji 5 v1.8/v1.9 #3589](https://github.com/ArdKam/kanji5/actions/runs/40003155635).
+- **Current-main React CI:** first attempt FAILED at the Review/Practice browser gate: [React presentation build #4078](https://github.com/ArdKam/kanji5/actions/runs/40003155485), 13/14 browser tests passed. The failed typed-reading scenario timed out in shared setup because its Good-rating action did not result in a persisted `kanji5-v1-reviews` count increase; the assertion occurs before the specific Practice answer flow. The retry was started and is recorded as in-progress in the dated checklist at the moment of this snapshot. Do not infer app regression or test flake without reading rerun evidence; do not weaken or remove the assertion.
+- **Latest successful Pages deployment:** [run #1720](https://github.com/ArdKam/kanji5/actions/runs/39994041669) passed live artifact hash and offline/core-product E2E for older SHA `183888f31be316aaa1c60ce57e301d4f6b37e454`, not current main.
+- **Deployment safety:** [run #1722](https://github.com/ArdKam/kanji5/actions/runs/40005633824) refused a stale verified React SHA at its `Verify verified React commit is still current main` guard; deployment steps were skipped. Do not bypass this guard. Current main `766f85c4633ee5d2699509c981bb4cfc456d26f9` was not verified deployed at checkpoint.
+- **Merged but not yet release-verified on production:** Saved Kanji PR #616 is in current source. The compact-hybrid card change predates this checkpoint on current main. Both need a successful exact-SHA CI/deployment before current production behavior can be claimed.
+- **Active candidates, not completed:** #617 account deletion; #618 stale-cache behavior; #620 Light review-rating contrast; #622 Reading Lab compact-flow; #623 sync/data-integrity. Review each on its latest head and preserve ownership boundaries. No PR opening or merge alone closes a release gate.
+- **Public-beta gate remains BLOCKED:** issue [#603](https://github.com/ArdKam/kanji5/issues/603) records Supabase leaked-password protection disabled, missing HTTP response CSP header, live security audit pending, local-data erasure, private privacy/account channel, legal/license decisions, independent educational/placement review, and physical-device acceptance. Keep performance gate [#609](https://github.com/ArdKam/kanji5/issues/609) open and the 2,202 KB limit unchanged.
+- **Ruleset:** [Protect main — PR and CI](https://github.com/ArdKam/kanji5/rules/25670314) remains active with required PR, resolved threads, up-to-date branch, and `build`, `validate-learning-engine`, `webkit-compat` checks; no bypass is permitted.
+- **Independent direct site probe:** blocked in this audit executor by DNS/network resolution. This is not evidence the product is down; use the deployment job’s live probes for the exact final SHA and repeat physical-device checks separately.
+
+Release decision: **NO-GO until all required CI, current-SHA deployment, production security, privacy/legal, education, and real-device acceptance evidence is recorded in the linked checklist.**
+
+---
+
 ## 2.0.9 Current-main follow-up — 2026-10-23
 
 **Current main SHA at update:** `2fda3fbdb76c0931a09eb378e7e778aade24154d`. PR #604 (read-only live-security audit harness) was merged at `2fda3fbdb76c0931a09eb378e7e778aade24154d`; the audit itself still requires manual dispatch after the matching deployment.
