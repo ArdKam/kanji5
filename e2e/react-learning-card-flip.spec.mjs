@@ -573,7 +573,15 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
         const indicatorBounds = bounds(indicator);
         const ratingBounds = [...grid.querySelectorAll(".rating")].map(bounds);
         const columns = getComputedStyle(grid).gridTemplateColumns;
+        const cardBounds = bounds(el);
         return {
+          cardBounds,
+          viewport: { width: innerWidth, height: innerHeight },
+          scrollMetrics: { scrollTop: scroller.scrollTop, scrollHeight: scroller.scrollHeight, clientHeight: scroller.clientHeight },
+          scrollBounds,
+          readingBounds,
+          exampleBounds,
+          footerBounds,
           readingsVisibleWithoutScrolling:
             readingBounds.top >= scrollBounds.top - 1 &&
             readingBounds.bottom <= scrollBounds.bottom + 1 &&
@@ -593,7 +601,7 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
         };
       });
 
-      expect(metrics.readingsVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
+      expect(metrics.readingsVisibleWithoutScrolling, JSON.stringify({ ...scenario, metrics })).toBe(true);
       expect(metrics.readingsAboveFooter, JSON.stringify(scenario)).toBe(true);
       expect(metrics.exampleVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
       expect(metrics.indicatorVisible, JSON.stringify(scenario)).toBe(true);
