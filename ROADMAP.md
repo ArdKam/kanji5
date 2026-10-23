@@ -1,3 +1,109 @@
+## 2.0.8 Implementation follow-up — 2026-10-23
+
+**Current main at this snapshot:** `15883f263b256f3117ddda50ffb1313fc3122a14`, which includes merged PR #596 (onboarding answer review).
+
+### Work now merged or in a reviewable candidate
+
+- **#596 — onboarding answer review: MERGED** as `15883f263b256f3117ddda50ffb1313fc3122a14`. Exact-head React build, engine validation, and UI visual diagnostics passed before merge. The post-assessment review is optional and bilingual; answers are not revealed during the assessment.
+- **#601 — Learning card/offline vocabulary state:** latest candidate head `e15de2ad88ee8122e299321975215e06226c1d4e`. In addition to compact-card layout, it now honors the engine's `availability` state so an offline/unavailable vocabulary response is not displayed as a confirmed empty result. Its exact-head React, engine, and visual workflows were still running at this snapshot; do not merge until all required checks pass on the latest head.
+- **#602 — focused Reading Lab flow:** [PR #602](https://github.com/ArdKam/kanji5/pull/602), latest head `8eec736324dfdd80ea4b842547ccb3f4b803ffd6`. Ports compact editor, Reader-before-analysis DOM order, retained compact empty-state guidance, no nested sentence scrolling, and responsive browser/static contracts. An earlier run caught an empty-state guidance regression; the current candidate restored the guidance and adjusted its static contract. Exact-head CI is queued/pending and must be green before merge.
+- **#599 — release-evidence documentation:** latest head is recorded on the PR itself. Keep the Supabase leaked-password setting and response CSP header open until verified on production. The new acceptance tracker is [issue #603](https://github.com/ArdKam/kanji5/issues/603).
+- **#600 — live security audit harness:** merge only when exact-head CI passes; the live workflow remains a manual dispatch against an exact deployed SHA.
+- **#592 — semantic design-system integration:** remains draft/blocked by the existing 2,202 KB transfer budget; the observed exact-head artifact was 2,204 KB. Do not relax the budget.
+
+### Offline correctness status
+
+The old audit record below correctly documents the behavior observed on 2026-10-17, but the service-worker contract has since been hardened: current `sw.js` returns HTTP 503 plus `X-Kanji5-Offline-Fallback` for an uncached offline API failure, and network parsing exposes an `offline` availability state. The remaining Learning-card issue was the UI ignoring that field and rendering the ordinary empty vocabulary message. The #601 candidate addresses that presentation error and includes an offline → retry → confirmed-empty browser regression. It is not complete until that exact-head regression suite passes and the candidate is merged.
+
+### Public-beta acceptance tracker
+
+Issue [#603](https://github.com/ArdKam/kanji5/issues/603) now tracks the known production Auth configuration, missing HTTP response CSP header, account deletion and full local-data-erasure workflows, privacy-request channel, legal/terms/license decisions, independent educational review, placement validation, and physical-device checks. These are acceptance obligations, not items that can be closed by a code build alone.
+
+---
+
+## 2.0.7 Current candidate queue reconciliation — 2026-10-23
+
+This subsection supersedes earlier candidate-queue entries below where their PR status or head SHA differs.
+
+### Release integrity — verified for current code SHA
+
+- The PWA manifest path fix, PR #597, is merged as `544c7c096d4b3579d288c5a9a2beb2b672604d6a`.
+- React build, learning-engine validation, WebKit compatibility, and Pages deployment all passed on that SHA. Deployment run [#39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140) verified the public manifest and 12-asset dependency graph, exact staged/live hashes for selected shipped assets, and ended with `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
+- The previously failing manifest 404 is resolved for this SHA. The actual HTTP response CSP remains absent in the deployment log; that is a separate open security finding. Device/manual, privacy/legal, and educational-validity gates remain open.
+
+### Current candidate queue
+
+- **#599 — documentation reconciliation:** records the verified deployment and remaining gates. Latest updated head `0c3068294bc5d9f82a899046c434277d23e284e4`; the engine and WebKit checks passed, while the React build was still running at this checkpoint. Merge after the exact latest-head build finishes green.
+- **#600 — live security audit:** based on post-fix main. Its initial broad React gate timed out in `react-account-shell.spec.mjs` while waiting for a fresh browser context to show `#root .app-shell`; the failed build job was rerun and was still in progress at this checkpoint. Verify the rerun result before considering merge. A read-only Supabase Security Advisor check on 2026-10-23 also reports `auth_leaked_password_protection` disabled on the Kanji5 project; enable and verify this in production Auth settings. The successful Pages deployment separately lacks an HTTP response CSP header. After the audit harness merges, dispatch it against the verified deployed SHA; CI alone does not constitute a security pass.
+- **#601 — compact hybrid Learning card on current main:** replacement for the stale-base #595; head `1f69128f160c7c526e7f302f56c445dd9fb8f28b`, based on the verified manifest-fix SHA. Its exact-head build, engine, WebKit and visual checks were running at this checkpoint. Keep all 360×640, 390×844, 844×390, Persian/English, light/dark and 2,202 KB acceptance criteria.
+- **#595:** closed as superseded by #601. Do not reopen/merge the stale-base branch.
+- **#596 — onboarding answer review:** refreshed on current main at head `826ce0ab8e6b386e65d03c297764016f6e9aae3f`. Engine, WebKit, and browser visual diagnostics passed; the full React build was in progress. Recheck the latest-head build result before merge. #593 is closed as superseded.
+- **#592 — semantic design system:** keep draft/open, do not merge yet. Head `2c7a9854ba19422e292a5b6f4c337f6d887f5ab8` passed engine and visual diagnostics but failed the desktop and mobile performance budgets at `2204 KB > 2202 KB`. Optimize the changed asset graph until it is below budget; do not raise the threshold or change it into a warning.
+- **#598:** closed as superseded by the current-main security-audit candidate #600. Do not merge both audit branches.
+- Older #550, #548, #547, #545, #540, #537, #535, #533, #530 and #529 remain stale source candidates. Reconcile their unique diffs against current main and reproduce any behavior gaps before porting. Do not bulk-merge them.
+
+### Guardrail
+
+Statuses above are timestamped observations, not promises that a running workflow will finish green. Refresh exact-head check conclusions before merge. After any source merge, repeat mainline deployment/live smoke if it changes the release artifact, then re-read live evidence. The public-beta gate remains blocked until security, privacy/legal, independent educational acceptance, and device/accessibility evidence are complete.
+
+---
+
+## 2.0.6 Post-merge PWA release verification — 2026-10-23
+
+**Verified release SHA:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a` (PR #597).
+
+### Verified on the promoted main SHA
+
+- React presentation build completed successfully: all 54 build/E2E steps passed in [workflow run #39873770123](https://github.com/ArdKam/kanji5/actions/runs/39873770123).
+- Learning-engine validation passed in [run #39873770214](https://github.com/ArdKam/kanji5/actions/runs/39873770214); WebKit compatibility also passed in #39873770123.
+- GitHub Pages deployment passed in [run #39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140).
+- The live verifier found `react-dist/manifest.json`, parsed the manifest and confirmed all 12 graph assets were available: `LIVE_PWA_MANIFEST_AND_ASSET_GRAPH_VERIFIED assets=12`.
+- Staged/live artifact hashes matched for `index.html`, `react-entry.js`, `sw.js`, React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`.
+- The live core/offline browser smoke ended with `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`. This directly closes the previously observed hidden `.vite` manifest 404 for this SHA.
+
+### Remaining release limits
+
+- This is release-integrity evidence for SHA `544c7c0`; any later merged change requires its own post-merge deployment and smoke evidence.
+- HTTP response CSP was logged as absent; the meta CSP does not equal verified response-header protection. Keep this in the security findings.
+- Physical Android/iOS install, cold-start, update/reinstall, assistive-technology, and other manual device checks remain open.
+- Security acceptance, including production Supabase leaked-password protection, remains separate from the successful deployment.
+- Privacy/legal and independent educational-validity acceptance remain open. This pass does not by itself authorize a public beta.
+
+---
+## 2.0.5 Current-main release follow-up — 2026-10-23
+
+**Current main at this checkpoint:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a`, merge of [PR #597](https://github.com/ArdKam/kanji5/pull/597), which publishes the Vite manifest at `react-dist/manifest.json` rather than the hidden `.vite` path.
+
+### Verified evidence
+
+- Before #597 merged, mainline deployment run [#39871282639](https://github.com/ArdKam/kanji5/actions/runs/39871282639) failed at the live offline/core-product E2E stage with `LIVE_PWA_ASSET_UNAVAILABLE:react-dist/.vite/manifest.json:404`. Source build, artifact staging, deployment, and selected live asset hash checks had passed; the final live PWA manifest assertion did not.
+- The #597 exact-head checks observed before merge passed: `build`, `validate-learning-engine`, `webkit-compat`, and automated browser visual diagnostics. The candidate changes update the Vite output path and the service-worker, staged-site, live-site, and contract checks together.
+- After the merge, main at `544c7c096d4b3579d288c5a9a2beb2b672604d6a` reported `validate-learning-engine` and `webkit-compat` successful, while the React `build` was still in progress at this checkpoint.
+- **Post-merge Pages deployment and live/offline smoke are not yet verified in this record.** Do not infer success from the merge or pre-merge checks. R7 release acceptance stays PARTIAL until the promoted main SHA has successful deployment, live public-manifest/assets, hash equality, offline/core-product, and stale-client results.
+- The active ruleset `Protect main — PR and CI` (ID `25670314`) remains configured to require PRs, resolved conversations, up-to-date branches, `build`, `validate-learning-engine`, and `webkit-compat`.
+
+### Current candidate disposition at this checkpoint
+
+- **#597:** merged as `544c7c0`; closeout remains subject to the mainline build and deployed live verification above.
+- **#600:** current-main security-audit candidate, ported from the #598 implementation onto main at `544c7c0`. Its exact-head build, engine, WebKit, and browser diagnostics were still running when this entry was refreshed. Merge only after all required checks pass; dispatch the read-only audit against the actual deployed main SHA afterward.
+- **#598:** older stale-base source candidate for the same audit. Do not merge both implementations; once #600's checks pass, close #598 as superseded.
+- **#595:** compact Learning-card candidate has received further commits. Its latest observed exact head was `73afec487d465ca1626c0371d9dc24de6c1d12d9`; required checks were in progress. Recheck the latest SHA before review or merge.
+- **#596:** onboarding-answer-review candidate `6767959c695ab16b7944d7c3f62e3d6cc3db506f` had the engine and visual checks passed, while its React build was still in progress. Recheck the exact head before merge. Prefer #596 over the overlapping predecessor #593 only if all required checks and Persian/English mobile behavior pass.
+- **#592:** the fresh semantic-token candidate's exact-head React build failed at `1b33917168a0de4cd9a6c79d2221241d8ad9eb40`, while its engine and visual checks passed. Inspect the failing build log, fix the actual cause (including the existing 2,202 KB budget if that is the failure), and re-run all required checks. Do not merge with a failing build or raise the budget to hide an overage.
+- Older draft UX, card, design-system, menu, content, and sync PRs remain source candidates only. Reconcile their unique diffs against current main; do not bulk merge them.
+
+### Keep the public-beta gates open
+
+This release fix does not close the independent R12/R13/C4 acceptance gates:
+- Security: current deployed response-header/CSP and source-map evidence; Supabase leaked-password protection must be rechecked in production and resolved or formally dispositioned.
+- Privacy/governance: no end-user account deletion or full browser-data erasure is documented as implemented; retention, private privacy/account requests, final Privacy/Terms, target markets/age treatment, and project license still need approved outcomes.
+- Educational validity: independent review of production-provider content samples and empirical placement stability/bias remain outstanding.
+- Device/accessibility: real-device PWA install/update/offline checks, representative assistive-technology/zoom/keyboard checks, and performance evidence remain release acceptance work.
+
+**Instruction for the next review:** refresh the current main SHA, current PR heads, exact-head check conclusions, and post-merge Pages run before changing any of these statuses. Historical runs are not evidence for a newer SHA.
+
+---
+
 # Rinemi — Unified Product, Engineering & Public-Release Roadmap
 
 > **Brand naming rule (2026-10-09):** Rinemi is the canonical customer-facing name in the application, PWA metadata, brand assets, and public product copy. `kanji5` repository/deployment paths, `KANJI5_*` runtime contracts, stored data keys, backup-format identifiers and build asset names remain compatibility identifiers until a separate migration is designed and tested.
@@ -8,9 +114,9 @@
 
 > **Important status rule:** only work present on the current \`main\` baseline counts as complete. Open PRs and stale branches are never completion evidence by themselves; they must be compared with current \`main\` and either superseded, rebuilt, or explicitly closed. Never re-open a roadmap item marked DONE unless current-main evidence shows a regression or missing acceptance criterion.
 
-## 2.0.4 Current-main release integrity and PR reconciliation — 2026-10-23
+## 2.0.4 Previous release-integrity checkpoint — 2026-10-23 (superseded by §2.0.5)
 
-**Current release SHA:** `a7e0f602a6e8640cd46b56829915f3c92351e23c` (PR #586 merged). All exact-head checks on the pre-merge PR commit `a9070b56d7205561f14007692424f359d989955f` passed: `build`, `validate-learning-engine`, `webkit-compat`, and visual/browser diagnostics. The mainline React build and learning-engine workflow have been triggered against the merge commit; the first post-fix Pages deployment and live smoke must still be confirmed from their own run before calling the release healthy.
+**Release SHA at that checkpoint:** `a7e0f602a6e8640cd46b56829915f3c92351e23c` (PR #586 merged). All exact-head checks on the pre-merge PR commit `a9070b56d7205561f14007692424f359d989955f` passed: `build`, `validate-learning-engine`, `webkit-compat`, and visual/browser diagnostics. The mainline React build and learning-engine workflow have been triggered against the merge commit; the first post-fix Pages deployment and live smoke must still be confirmed from their own run before calling the release healthy.
 
 ### Completed on current main
 
@@ -25,7 +131,7 @@
 - **Pages deployment:** [run #39857524248](https://github.com/ArdKam/kanji5/actions/runs/39857524248) completed successfully against the same SHA. Staged/live hashes matched for `index.html`, `react-entry.js`, `sw.js`, the React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`. The live offline/core-product browser smoke passed (2 tests). This verifies the deployment on that exact SHA; it does **not** close the PWA readiness PR/manual device checks or all security acceptance.
 - **Residual security acceptance:** the Vite dependency vulnerability is addressed, but this does not close all R12 security work. Deployment run #39857524248 explicitly logged `LIVE_CSP_HEADER=absent`; GitHub Pages is currently relying on the HTML meta CSP rather than a response CSP header. Run [#554](https://github.com/ArdKam/kanji5/pull/554) against the deployed SHA and report HTTP security headers and Supabase leaked-password protection as separate findings; do not claim authenticated security verification without evidence.
 
-### Current candidate queue
+### Candidate queue recorded at that checkpoint
 
 | PR | Current disposition | Required next action |
 |---|---|---|
@@ -45,7 +151,7 @@
 | [#585 smoke selector](https://github.com/ArdKam/kanji5/pull/585) | Closed, superseded by merged #586 | Do not reopen; the compatible selector is now on main. |
 | [#587 earlier roadmap update](https://github.com/ArdKam/kanji5/pull/587) | Closed, superseded by this current-main documentation PR | Do not reopen; its source branch was based on the vulnerable pre-fix main. |
 
-### Remaining release-integrity exit criteria
+### Release-integrity exit criteria recorded at that checkpoint
 
 Step 1 remains **PARTIAL** until all three are proven against current SHA(s): (1) successful post-fix React build and learning-engine validation on `main`; (2) successful GitHub Pages deployment with staged/live artifact hashes and live/offline/core-product smoke on that same promoted SHA; and (3) #589 exact-head gates pass before PWA merge. Ruleset configuration is complete, but that does not substitute for a live release verification.
 
