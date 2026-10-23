@@ -404,3 +404,34 @@ test('Saved Kanji bookmarks persist, filter correctly, and remain separate from 
   await expect(page.locator('.dictionary-empty')).toContainText("You haven’t saved any Kanji yet.");
   await expect(page.locator('.dictionary-saved-count')).toHaveText('0');
 });
+
+
+test('Dictionary details expose a public, pre-targeted content-correction form', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  const tile = page.locator('.kanji-catalog-tile').first();
+  const character = (await tile.locator('.kanji-catalog-character').textContent())?.trim();
+  expect(character).toBeTruthy();
+  await tile.click();
+
+  const detail = page.locator('.dictionary-card-dialog');
+  await expect(detail).toBeVisible();
+  const link = detail.locator('.dictionary-content-correction-link');
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(link).toContainText('Report a content issue (public)');
+  await expect(detail).toContainText('This opens a public GitHub issue. Do not include personal information or private learner notes.');
+
+  const url = new URL((await link.getAttribute('href')) || 'https://invalid.example');
+  expect(url.origin).toBe('https://github.com');
+  expect(url.pathname).toBe('/ArdKam/kanji5/issues/new');
+  expect(url.searchParams.get('template')).toBe('content_correction.yml');
+  expect(url.searchParams.get('title')).toBe('[Content] ' + character);
+});
