@@ -141,4 +141,14 @@ assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.
 assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; }'), "System Dark focus foreground must remain dark on the light indigo surface");
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
 
+for (const [rating, foreground, borderColor, background] of [
+  ["again", "--color-danger", "--color-danger", "--color-danger"],
+  ["hard", "--color-warning", "--color-warning", "--color-warning"],
+  ["good", "--color-success", "--color-success", "--color-success"],
+  ["easy", "--ai", "--ai", "--ai"],
+]) {
+  const rule = new RegExp("\\.learning-card-back\\s+\\.rating-" + rating + "\\{[^}]*color:color-mix\\(in srgb,var\\(" + foreground + "\\)[^}]*border:1px solid color-mix\\(in srgb,var\\(" + borderColor + "\\)[^}]*background:color-mix\\(in srgb,var\\(" + background + "\\)");
+  assert.match(learningSurface, rule, "Light Learning Card " + rating + " must use its semantic foreground/background and restrained border");
+}
+
 console.log("Dark-theme parity contract passed.");
