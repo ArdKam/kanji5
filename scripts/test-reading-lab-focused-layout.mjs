@@ -30,7 +30,9 @@ assert.ok(!css.includes("max-height:42dvh"), "Sentence list must not reintroduce
 assert.ok(styles.includes(".dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto;min-height:0;max-height:min(520px,calc(100dvh - 32px));}"), "Empty dialog should use intrinsic height on desktop");
 assert.ok(styles.includes("@media(max-width:760px){.dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto!important;min-height:0!important;max-height:min(520px,calc(100dvh - 32px))!important;}}"), "Empty dialog should override the mobile minimum height");
 assert.ok(!reading.includes('className="reading-lab-step"'), "Redundant section numbers should be removed");
-assert.ok(reading.includes('{value.trim() ? ('), "Audio setup must only render when reading content exists");
+assert.ok(reading.includes('{value.trim() ? ('), "Reader content must be conditional on supplied text");
+assert.ok(reading.includes('t("readingLabEmptyHint", language)'), "Compact empty state must retain reading guidance");
+assert.ok(reading.includes('t("readingLabImportHint", language)') && reading.includes('t("readingLabSyncHint", language)'), "Import and sync guidance must remain available");
 for (const contract of ["READING_LAB_STORAGE_KEY","parseSubtitleCues","syncReady","speakCurrentSentence","findLongestVocabularyMatch"]) {
   assert.ok(reading.includes(contract), `Reading Lab behavior contract missing: ${contract}`);
 }
