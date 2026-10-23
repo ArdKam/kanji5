@@ -661,7 +661,7 @@ export function DictionaryPage({ language, externalSelectedCharacter, onExternal
             className="dictionary-clear-all-filters"
             style={{ flex: "0 0 auto", minHeight: 44, padding: "5px 4px", marginInlineStart: "auto", border: 0, background: "transparent", color: "var(--shu)", font: "inherit", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
             type="button"
-            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); setSavedOnly(false); }
+            onClick={() => { setQuery(""); setLevel("all"); setMasteryFilter("all"); setGrade("all"); setTopic("all"); setSavedOnly(false); }}
           >
             {language === "fa" ? "پاک کردن همه" : "Clear all"}
           </button>
