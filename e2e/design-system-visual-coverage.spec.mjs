@@ -858,3 +858,27 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
     await audit.persist();
   }
 });
+
+
+
+test("visual evidence: Learning Card front keeps session and card context distinct", async ({ page }, testInfo) => {
+  test.setTimeout(90000);
+  const audit = await createCapture(page, testInfo);
+  try {
+    await startApp(page, { language: "en", theme: "light" });
+    const card = page.locator("#root .learning-card");
+    await expect(card).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(".learning-session-context strong")).toHaveText("Recommended learning");
+    await expect(card.locator(".learning-context-label")).toHaveText("Active recall");
+    await expect(card.locator(".learning-card-front .kanji-display")).toBeVisible();
+    await expect(card.locator(".learning-card-front .button.primary.wide")).toBeVisible();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await audit.capture("learning-front-mobile-390x844-light-after");
+    await page.setViewportSize({ width: 1440, height: 960 });
+    await audit.capture("learning-front-desktop-1440x960-light-after");
+  } finally {
+    await audit.persist();
+  }
+  expect(audit.report.pageErrors, "Uncaught browser errors during Learning Card hierarchy capture").toEqual([]);
+});
