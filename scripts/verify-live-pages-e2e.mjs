@@ -52,7 +52,7 @@ try {
       fetchLiveAsset(new URL(icon.src, pwaBase).href, 'icon:' + icon.src)
     ));
 
-    const reactManifestResponse = await fetchLiveAsset(new URL('react-dist/.vite/manifest.json', pwaBase).href, 'react-dist/.vite/manifest.json');
+    const reactManifestResponse = await fetchLiveAsset(new URL('react-dist/manifest.json', pwaBase).href, 'react-dist/manifest.json');
     const reactManifest = await reactManifestResponse.json();
     if (!reactManifest || typeof reactManifest !== 'object' || Array.isArray(reactManifest) || !Object.keys(reactManifest).length) {
       throw new Error('LIVE_PWA_REACT_MANIFEST_INVALID');
