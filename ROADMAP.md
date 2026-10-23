@@ -1,3 +1,25 @@
+## 2.0.10 Current-main integration checkpoint — 2026-10-23
+
+**Snapshot SHA:** `6e0544954186f12b3b7755f7613cbdc6e782a98a` (main; parent `766f85c4633ee5d2699509c981bb4cfc456d26f9`). This checkpoint supersedes the earlier §2.0.9 “current main” snapshot at `2fda3fbdb76c0931a09eb378e7e778aade24154d`. The latest change is the documentation-only merge of PR #619; see [integration ledger](./docs/INTEGRATION-REPORT.md) for exact branch heads, check URLs, shared-file ownership, and merge dispositions.
+
+### Verified integration state
+- **PR #619 — scoped Learning Card content-review evidence: MERGED** as `6e0544954186f12b3b7755f7613cbdc6e782a98a`. Its prior exact-head React build and v1.8/v1.9 checks succeeded. This is provenance/documentation evidence, not independent pedagogical sign-off, Persian translation verification, or placement validation.
+- **PR #623 — sync/data integrity:** current base is this main SHA. Its preceding head `1bf9c0998ca6d3c879089f7230ef14ba7029ec0a` failed both aggregate test workflows because `scripts/test-v1.5-api-cache.mjs` still required a TTL sweep to delete expired entries, contradicting the new stale-offline-fallback contract. A focused test-only correction was pushed to the branch at `42d1b0eadfd7c98a9dfceaf24eef31d7a395d451`; checks on this new head are queued. Do not merge until its exact-head aggregate tests, React build, learning-engine validation, visual/browser gates and WebKit pass. Live multi-device sync and restore/rollback checks remain separate.
+- **PR #617 — account deletion:** exact-head visual audit passed on `09e8d8a63557a3fa2855fc8c02063e1eee703832`; React and v1.8/v1.9 checks remain in progress at this checkpoint. Production has an active `delete-account` Edge Function with JWT verification enabled and `user_learning_state.user_id → auth.users.id ON DELETE CASCADE`; this proves infrastructure presence, not end-to-end UI or user-data deletion acceptance.
+- **PR #622 — Reading Lab:** exact-head visual audit and v1.8/v1.9 checks passed on `e27f75c6090ca5070b6d2385d6efba64fc49d4ed`; the React presentation build remains in progress. Hold integration until every required exact-head check completes.
+
+### Release and overlap decisions
+- Issue [#603](https://github.com/ArdKam/kanji5/issues/603) remains a release blocker. Live Supabase Security Advisor still reports `auth_leaked_password_protection` disabled. Prior Pages evidence reported no HTTP response CSP header; rerun the live header/security checks after a successful deployment of this current source SHA.
+- Issue [#609](https://github.com/ArdKam/kanji5/issues/609) remains open. Keep the 2,202 KB startup transfer budget and all existing performance thresholds unchanged; re-verify exact-main performance gates after the current React build.
+- **#618 / #537:** do not merge either stale sync/offline candidate. #618 overlaps #623 in `sw.js` and two cache contracts; #537 has the same 12-file path set as #623. Port any unique words-API versus non-words-API fallback semantics to #623, test them, then close duplicates only when supersession is confirmed.
+- **#606:** retain only as a source candidate for #622; both change the same six Reading Lab/layout-test files. Close the stale candidate after the current-main replacement passes and preserves any unique behavior.
+- **#610 / #547 / #540 / #620 / #621 / #533:** keep out of integration until their overlapping design-token, theme, Dictionary and navigation changes have been diffed against current main. #610 is draft and must remain blocked by the fixed performance budget; #621 is titled as documentation work but its diff also changes UI, engine/boundary and sync files.
+- **#615:** documentation-only in intent but based on an older main snapshot; rebase or port onto current main and verify its claims before merging.
+- Do not bulk-merge the older learning-card/UX/design candidates (#550, #548, #545, #535 and the others). Compare unique fixes against current main and the merged #611 learning-card/performance work.
+
+### Current release evidence boundary
+The Pages workflow for an older verified build was rejected by its stale-SHA guard; the current main React build at `6e0544954186f12b3b7755f7613cbdc6e782a98a` is still in progress at this snapshot. Therefore **current-main deployment and live artifact/hash/offline smoke are not verified**. The branch-protection endpoint returned 403 through the available integration, so its current configuration could not be independently read. Neither limitation authorizes bypassing required PR/review checks.
+
 ## 2.0.9 Current-main follow-up — 2026-10-23
 
 **Current main SHA at update:** `2fda3fbdb76c0931a09eb378e7e778aade24154d`. PR #604 (read-only live-security audit harness) was merged at `2fda3fbdb76c0931a09eb378e7e778aade24154d`; the audit itself still requires manual dispatch after the matching deployment.
