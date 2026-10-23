@@ -257,4 +257,16 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await assertRatingPalette(); // Manually selected Dark
+
+  await chooseTheme("Light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  const lightRatingStyles = [];
+  for (const rating of await ratings.all()) {
+    const style = await controlStyle(rating);
+    const borderWidth = await rating.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopWidth));
+    expect(style.contrast, `Light ${style.background} feedback rating text must meet WCAG AA`).toBeGreaterThanOrEqual(4.5);
+    expect(borderWidth, "Learning feedback ratings should use restrained 1px borders").toBeLessThanOrEqual(1.5);
+    lightRatingStyles.push({ rating: [...await rating.evaluate(element => [...element.classList])].find(name => /^rating-(again|hard|good|easy)$/.test(name)), background: style.backgroundRGB.join(",") });
+  }
+  expect(new Set(lightRatingStyles.map(item => item.background)).size, "Light rating states must remain visually distinct").toBe(4);
 });
