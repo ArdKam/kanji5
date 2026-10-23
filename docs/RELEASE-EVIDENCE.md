@@ -64,3 +64,16 @@ Verified evidence:
 - Live manifest and shipped-artifact integrity passed; staged/live hashes matched for the root, entry, service worker, React JS/CSS, and pinned Supabase runtime. Final smoke reported `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
 
 This closes the specific hidden-path manifest 404 for SHA `544c7c0`. It does not close response-header CSP/security findings, production Supabase configuration, physical-device acceptance, privacy/legal gates, or independent educational-validity review. Do not carry these results forward to a different promoted SHA without rerunning verification.
+
+## Supabase production Auth finding — 2026-10-23
+
+A read-only Supabase Security Advisor check against the project named `Kanji5` returned warning `auth_leaked_password_protection`: **Leaked Password Protection Disabled**. Supabase Auth is not currently configured to reject passwords known to be compromised through HaveIBeenPwned.org.
+
+- **Severity/source:** Supabase Security Advisor, category SECURITY, level WARN; checked 2026-10-23.
+- **Required action:** enable leaked-password protection in the production Supabase Auth security settings, then re-check the advisor and record the verified setting against the frozen release SHA.
+- **Documentation:** [Supabase password strength and leaked-password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+- **Status:** OPEN. No configuration change is claimed here. Treat this as a distinct acceptance item from application build/tests, RLS checks, and the Pages deployment.
+- **Related outstanding control:** the successful Pages deployment logged no HTTP `Content-Security-Policy` response header. The HTML meta CSP is not equivalent to a response CSP header and cannot supply all response-header directives. Decide and verify the hosting/header mitigation before public beta.
+
+This is operational security evidence, not a compliance certification. Repeat the check after configuration changes and on the final production candidate.
+
