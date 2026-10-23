@@ -1,3 +1,30 @@
+## 2.0.7 Current candidate queue reconciliation — 2026-10-23
+
+This subsection supersedes earlier candidate-queue entries below where their PR status or head SHA differs.
+
+### Release integrity — verified for current code SHA
+
+- The PWA manifest path fix, PR #597, is merged as `544c7c096d4b3579d288c5a9a2beb2b672604d6a`.
+- React build, learning-engine validation, WebKit compatibility, and Pages deployment all passed on that SHA. Deployment run [#39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140) verified the public manifest and 12-asset dependency graph, exact staged/live hashes for selected shipped assets, and ended with `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
+- The previously failing manifest 404 is resolved for this SHA. The actual HTTP response CSP remains absent in the deployment log; that is a separate open security finding. Device/manual, privacy/legal, and educational-validity gates remain open.
+
+### Current candidate queue
+
+- **#599 — documentation reconciliation:** records the verified deployment and remaining gates. Latest updated head `0c3068294bc5d9f82a899046c434277d23e284e4`; the engine and WebKit checks passed, while the React build was still running at this checkpoint. Merge after the exact latest-head build finishes green.
+- **#600 — live security audit:** based on post-fix main. Its initial broad React gate timed out in `react-account-shell.spec.mjs` while waiting for a fresh browser context to show `#root .app-shell`; the failed build job was rerun and was still in progress at this checkpoint. Verify the rerun result before considering merge. After the harness merges, dispatch it against the verified deployed SHA; CI alone does not constitute a security pass.
+- **#601 — compact hybrid Learning card on current main:** replacement for the stale-base #595; head `1f69128f160c7c526e7f302f56c445dd9fb8f28b`, based on the verified manifest-fix SHA. Its exact-head build, engine, WebKit and visual checks were running at this checkpoint. Keep all 360×640, 390×844, 844×390, Persian/English, light/dark and 2,202 KB acceptance criteria.
+- **#595:** closed as superseded by #601. Do not reopen/merge the stale-base branch.
+- **#596 — onboarding answer review:** refreshed on current main at head `826ce0ab8e6b386e65d03c297764016f6e9aae3f`. Engine, WebKit, and browser visual diagnostics passed; the full React build was in progress. Recheck the latest-head build result before merge. #593 is closed as superseded.
+- **#592 — semantic design system:** keep draft/open, do not merge yet. Head `2c7a9854ba19422e292a5b6f4c337f6d887f5ab8` passed engine and visual diagnostics but failed the desktop and mobile performance budgets at `2204 KB > 2202 KB`. Optimize the changed asset graph until it is below budget; do not raise the threshold or change it into a warning.
+- **#598:** closed as superseded by the current-main security-audit candidate #600. Do not merge both audit branches.
+- Older #550, #548, #547, #545, #540, #537, #535, #533, #530 and #529 remain stale source candidates. Reconcile their unique diffs against current main and reproduce any behavior gaps before porting. Do not bulk-merge them.
+
+### Guardrail
+
+Statuses above are timestamped observations, not promises that a running workflow will finish green. Refresh exact-head check conclusions before merge. After any source merge, repeat mainline deployment/live smoke if it changes the release artifact, then re-read live evidence. The public-beta gate remains blocked until security, privacy/legal, independent educational acceptance, and device/accessibility evidence are complete.
+
+---
+
 ## 2.0.6 Post-merge PWA release verification — 2026-10-23
 
 **Verified release SHA:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a` (PR #597).
