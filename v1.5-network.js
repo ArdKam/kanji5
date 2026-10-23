@@ -91,7 +91,7 @@ export async function fetchContextSentences(character){
   const out=[],seen=new Set();
   for(const row of rows){
     const text=String(row?.text||'').trim();
-    if(!text||!text.includes(character)||seen.has(text))continue;
+    if(!text||!text.includes(character)||seen.has(text)||row?.license==='PROBLEM')continue;
     const translations=Array.isArray(row?.translations)?row.translations:[];
     const translation=translations.flatMap(x=>Array.isArray(x)?x:[x])
       .find(value=>typeof value?.text==='string'&&value.text.trim()&&value.license!=='PROBLEM');
