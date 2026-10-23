@@ -14,7 +14,7 @@ const required=[
   "react-entry.js",
   "react-dist/kanji5-react.js",
   "react-dist/kanji5-react.css",
-  "react-dist/.vite/manifest.json",
+  "react-dist/manifest.json",
   "manifest.webmanifest",
   "kanji-data.json",
   "kanji-components.json",
@@ -77,7 +77,7 @@ for(const item of shell){
 assert.ok(fs.existsSync(path.join(site,"react-dist/assets")),"PAGES_SITE_REACT_ASSETS_MISSING");
 // Validate the staged release artifact itself—not just source files or the Vite build.
 // This manifest is a required service-worker install dependency and enumerates lazy chunks.
-const reactManifestPath=path.join(site,"react-dist/.vite/manifest.json");
+const reactManifestPath=path.join(site,"react-dist/manifest.json");
 assert.ok(fs.existsSync(reactManifestPath),"PAGES_SITE_REACT_MANIFEST_MISSING");
 const reactManifest=JSON.parse(fs.readFileSync(reactManifestPath,"utf8"));
 assert.ok(reactManifest&&typeof reactManifest==="object"&&!Array.isArray(reactManifest)&&Object.keys(reactManifest).length,"PAGES_SITE_REACT_MANIFEST_INVALID");
