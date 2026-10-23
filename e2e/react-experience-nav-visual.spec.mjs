@@ -332,3 +332,106 @@ test('Dictionary topic selector stays within short mobile viewports and keeps it
     await expect(picker).toBeHidden();
   }
 });
+
+
+test('Saved Kanji bookmarks persist, filter correctly, and remain separate from review state', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  const savedFilter = page.locator('.dictionary-saved-toggle');
+  await expect(savedFilter).toBeVisible();
+  await expect(savedFilter).toContainText('0');
+
+  await savedFilter.click();
+  await expect(page.locator('.dictionary-empty')).toContainText("You haven’t saved any Kanji yet.");
+  await savedFilter.click();
+
+  await page.getByRole('button', { name: 'Detailed view' }).click();
+  const firstTile = page.locator('.kanji-catalog-tile').first();
+  const character = (await firstTile.locator('.kanji-catalog-character').textContent())?.trim();
+  expect(character).toBeTruthy();
+  const saveButton = page.locator('.dictionary-bookmark-toggle').first();
+  await expect(saveButton).toHaveAttribute('aria-pressed', 'false');
+  const reviewStateBefore = await page.evaluate(() => {
+    const backup = window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.();
+    return {
+      cards: backup?.data?.core?.cards,
+      reviews: backup?.data?.core?.reviews,
+      knowledge: backup?.data?.core?.knowledge,
+    };
+  });
+  await saveButton.click();
+  await expect(saveButton).toHaveAttribute('aria-pressed', 'true');
+  await expect(savedFilter).toContainText('1');
+
+  const backup = await page.evaluate(target => {
+    const record = window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.();
+    return { bookmark: record?.data?.components?.kanjiBookmarks?.[target] };
+  }, character);
+  expect(backup.bookmark).toMatchObject({ saved: true });
+  const reviewStateAfter = await page.evaluate(() => {
+    const next = window.__KANJI5_V19_V2_BOUNDARY__?.createBackup?.();
+    return {
+      cards: next?.data?.core?.cards,
+      reviews: next?.data?.core?.reviews,
+      knowledge: next?.data?.core?.knowledge,
+    };
+  });
+  expect(reviewStateAfter).toEqual(reviewStateBefore);
+
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('.dictionary-saved-count')).toHaveText('1');
+  await page.locator('.dictionary-saved-toggle').click();
+  await expect(page.locator('.kanji-catalog-tile')).toHaveCount(1, { timeout: 10000 });
+  await expect(page.locator('.kanji-catalog-character')).toHaveText(character);
+
+  await page.locator('.kanji-catalog-tile').click();
+  const detail = page.locator('.dictionary-card-dialog');
+  await expect(detail).toBeVisible();
+  const detailBookmark = detail.locator('.dictionary-bookmark-action');
+  await expect(detailBookmark).toHaveAttribute('aria-pressed', 'true');
+  await detailBookmark.click();
+  await expect(detailBookmark).toHaveAttribute('aria-pressed', 'false');
+  await detail.locator('.dialog-close').click();
+  await expect(page.locator('.dictionary-empty')).toContainText("You haven’t saved any Kanji yet.");
+  await expect(page.locator('.dictionary-saved-count')).toHaveText('0');
+});
+
+
+test('Dictionary details expose a public, pre-targeted content-correction form', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-ui-language', 'en');
+  });
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.experience-tab').nth(2).click();
+  await expect(page.locator('.dictionary-page')).toBeVisible({ timeout: 10000 });
+  const tile = page.locator('.kanji-catalog-tile').first();
+  const character = (await tile.locator('.kanji-catalog-character').textContent())?.trim();
+  expect(character).toBeTruthy();
+  await tile.click();
+
+  const detail = page.locator('.dictionary-card-dialog');
+  await expect(detail).toBeVisible();
+  const link = detail.locator('.dictionary-content-correction-link');
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(link).toContainText('Report a content issue (public)');
+  await expect(detail).toContainText('This opens a public GitHub issue. Do not include personal information or private learner notes.');
+
+  const url = new URL((await link.getAttribute('href')) || 'https://invalid.example');
+  expect(url.origin).toBe('https://github.com');
+  expect(url.pathname).toBe('/ArdKam/kanji5/issues/new');
+  expect(url.searchParams.get('template')).toBe('content_correction.yml');
+  expect(url.searchParams.get('title')).toBe('[Content] ' + character);
+});

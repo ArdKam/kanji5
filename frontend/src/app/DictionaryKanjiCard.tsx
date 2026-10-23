@@ -30,6 +30,8 @@ const sectionLabel = (key: SectionKey, language: Language) => {
 export function DictionaryKanjiCard({
   item,
   language,
+  bookmarked,
+  onToggleBookmark,
   onClose,
   catalog,
   onSelectKanji,
@@ -38,6 +40,8 @@ export function DictionaryKanjiCard({
 }: {
   item: KanjiCatalogItem;
   language: Language;
+  bookmarked: boolean;
+  onToggleBookmark: () => void;
   onClose: () => void;
   catalog: KanjiCatalogItem[];
   onSelectKanji: (item: KanjiCatalogItem) => void;
@@ -217,6 +221,17 @@ export function DictionaryKanjiCard({
           ) : null}
         </div>
       </div>
+      <button
+        className={"button secondary dictionary-bookmark-action" + (bookmarked ? " is-saved" : "")}
+        type="button"
+        aria-pressed={bookmarked}
+        onClick={onToggleBookmark}
+      >
+        <span aria-hidden="true">{bookmarked ? "★" : "☆"}</span>
+        <span>{bookmarked
+          ? (language === "fa" ? "حذف از کانجی‌های ذخیره‌شده" : "Remove from Saved Kanji")
+          : (language === "fa" ? "ذخیرهٔ کانجی" : "Save Kanji")}</span>
+      </button>
       <div className="dictionary-stroke-order-wrap" style={{ display: "grid", gap: 7 }}>
         <h3 className="dictionary-stroke-order-heading" style={{ margin: 0, paddingInline: 2, color: "var(--mute)", fontSize: 12, fontWeight: 800, lineHeight: 1.3 }}>{t("strokeOrder", language)}</h3>
         <StrokeOrderViewer character={item.character} language={language} mode="dictionary-loop" />
@@ -343,6 +358,9 @@ export function DictionaryKanjiCard({
 
   const masteryRingOffset = masteryRingCircumference * (1 - mastery / 100);
   const masteryRingStyle = { strokeDasharray: masteryRingCircumference.toFixed(2), strokeDashoffset: masteryRingOffset.toFixed(2) };
+  const contentCorrectionUrl = new URL("https://github.com/ArdKam/kanji5/issues/new");
+  contentCorrectionUrl.searchParams.set("template", "content_correction.yml");
+  contentCorrectionUrl.searchParams.set("title", "[Content] " + item.character);
 
   return (
     <dialog
@@ -383,6 +401,20 @@ export function DictionaryKanjiCard({
         </div>
         <div className="dictionary-card-content" key={activeSection} data-active-section={activeSection}>
           {renderActivePanel()}
+          <div className="dictionary-content-correction">
+            <a
+              className="dictionary-content-correction-link"
+              href={contentCorrectionUrl.toString()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={language === "fa" ? "گزارش عمومی ایراد محتوایی برای " + item.character : "Report a public content issue for " + item.character}
+            >
+              {language === "fa" ? "گزارش ایراد محتوایی (عمومی)" : "Report a content issue (public)"}
+            </a>
+            <p>{language === "fa"
+              ? "فرم گزارش در GitHub عمومی است؛ اطلاعات شخصی یا یادداشت‌های خصوصی را وارد نکن."
+              : "This opens a public GitHub issue. Do not include personal information or private learner notes."}</p>
+          </div>
         </div>
       </div>
     </dialog>
