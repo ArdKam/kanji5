@@ -654,3 +654,15 @@
 .learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
 .learning-card-back .learning-back-footer .rating-grid .rating{min-width:0;padding:5px 2px;font-size:var(--text-xs);line-height:1.15;overflow-wrap:anywhere}
 }
+
+
+.learning-card-back .learning-back-page:first-child .learning-meaning-provenance{
+  margin:4px 0 0;
+  color:var(--mute);
+  font-size:10px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.learning-card-back .learning-back-page:first-child .learning-meaning-provenance bdi{
+  unicode-bidi:isolate;
+}
