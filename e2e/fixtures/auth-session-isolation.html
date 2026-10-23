@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Auth session isolation fixture</title></head>
+<body>
+<script>
+  window.__KANJI5_STORAGE__ = localStorage;
+</script>
+<script src="../../v1.5-state.js"></script>
+<script>
+  const accountA = {
+    id: "account-A",
+    email: "account-a@example.invalid",
+    user_metadata: {}
+  };
+  const accountB = {
+    id: "account-B",
+    email: "account-b@example.invalid",
+    user_metadata: {}
+  };
+  const matchedUpdatedAt = "2026-10-23T19:00:00.000Z";
+  const harness = {
+    listener: null,
+    reads: [],
+    writes: [],
+    matchedUpdatedAt,
+    authUser: accountA,
+    switchTo(user) {
+      this.authUser = user;
+      this.listener?.("SIGNED_IN", { user });
+    },
+    resolveRead(index, response) {
+      this.reads[index].settled = true;
+      this.reads[index].resolve(response);
+    }
+  };
+  window.__KANJI5_SUPABASE = {
+    url: "https://auth-session-test.supabase.co",
+    anonKey: "sb_publishable_test_only"
+  };
+  window.__KANJI5_OBSERVABILITY__ = { capture() {} };
+  window.__KANJI5_AUTH_SESSION_HARNESS__ = harness;
+  window.supabase = {
+    createClient() {
+      return {
+        auth: {
+          onAuthStateChange(callback) {
+            harness.listener = callback;
+            return { data: { subscription: { unsubscribe() {} } } };
+          },
+          async getSession() {
+            return { data: { session: { user: harness.authUser } }, error: null };
+          },
+          async signOut() { return { error: null }; }
+        },
+        from(tableName) {
+          if (tableName !== "user_learning_state") throw new Error("Unexpected table");
+          const request = { operation: "select", userId: null, expectedUpdatedAt: null, payload: null };
+          return {
+            select() { return this; },
+            eq(column, value) {
+              if (column === "user_id") request.userId = value;
+              if (column === "updated_at") request.expectedUpdatedAt = value;
+              return this;
+            },
+            update(values) {
+              request.operation = "update";
+              request.payload = structuredClone(values.payload);
+              return this;
+            },
+            insert(values) {
+              request.operation = "insert";
+              request.userId = values.user_id;
+              request.payload = structuredClone(values.payload);
+              return this;
+            },
+            maybeSingle() {
+              if (request.operation === "select") {
+                return new Promise(resolve => {
+                  harness.reads.push({
+                    userId: request.userId,
+                    settled: false,
+                    resolve
+                  });
+                });
+              }
+              harness.writes.push({
+                operation: request.operation,
+                userId: request.userId,
+                expectedUpdatedAt: request.expectedUpdatedAt,
+                payload: structuredClone(request.payload)
+              });
+              // Model an existing B row with the same optimistic timestamp. This is a
+              // valid equality case for the conditional update and makes the identity
+              // race observable without any production network call or data mutation.
+              const updateMatches = request.operation !== "update"
+                || request.expectedUpdatedAt === matchedUpdatedAt;
+              return Promise.resolve({
+                data: updateMatches ? { updated_at: matchedUpdatedAt } : null,
+                error: null
+              });
+            }
+          };
+        }
+      };
+    }
+  };
+</script>
+<script type="module" src="../../supabase-sync.js"></script>
+</body>
+</html>
