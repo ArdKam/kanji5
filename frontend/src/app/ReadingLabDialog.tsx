@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { t, type Language } from "./i18n";
-import { listKanji, type KanjiCatalogItem } from "./engine";
+import { listKanji, listKanjiBookmarks, setKanjiBookmark, type KanjiCatalogItem } from "./engine";
 import { ReadingLab, type ReadingWordSelection } from "./ReadingLab";
 import { ReadingLabWordCard } from "./ReadingLabWordCard";
 import { DictionaryKanjiCard } from "./DictionaryKanjiCard";
@@ -17,6 +17,7 @@ export function ReadingLabDialog({ open, language, onClose }: {
   const [catalogError, setCatalogError] = useState(false);
   const [selectedKanji, setSelectedKanji] = useState<KanjiCatalogItem | null>(null);
   const [selectedWord, setSelectedWord] = useState<ReadingWordSelection | null>(null);
+  const [bookmarkedCharacters, setBookmarkedCharacters] = useState<string[]>([]);
 
   useEffect(() => {
     if (!open || catalog.length || loading || attempted) return;
@@ -37,6 +38,24 @@ export function ReadingLabDialog({ open, language, onClose }: {
     });
     return () => { active = false; };
   }, [open, catalog.length, loading, attempted]);
+
+  useEffect(() => {
+    let active = true;
+    void listKanjiBookmarks().then(result => {
+      if (active) setBookmarkedCharacters(result.characters);
+    }).catch(() => {
+      // The reader remains usable when bookmark storage is unavailable.
+    });
+    return () => { active = false; };
+  }, []);
+
+  const toggleBookmark = async (character: string) => {
+    const currentlySaved = bookmarkedCharacters.includes(character);
+    await setKanjiBookmark(character, !currentlySaved);
+    setBookmarkedCharacters(previous => currentlySaved
+      ? previous.filter(value => value !== character)
+      : [...new Set([...previous, character])].sort((a, b) => a.localeCompare(b, "ja")));
+  };
 
   const dialogRef = usePageDialog(open, onClose);
 
@@ -62,6 +81,8 @@ export function ReadingLabDialog({ open, language, onClose }: {
           item={selectedKanji}
           catalog={catalog}
           language={language}
+          bookmarked={bookmarkedCharacters.includes(selectedKanji.character)}
+          onToggleBookmark={() => { void toggleBookmark(selectedKanji.character).catch(() => undefined); }}
           onClose={() => setSelectedKanji(null)}
           onSelectKanji={setSelectedKanji}
         />

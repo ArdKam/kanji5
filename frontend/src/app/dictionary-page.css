@@ -388,3 +388,17 @@
 }
 /* The shared dialog keyframes translate from the desktop-centered position. Disable that transform animation for viewport-filling mobile sheets. */
 @media(max-width:720px),(max-height:520px){.dialog.dictionary-topic-dialog[open]{animation:none;}}
+
+/* Saved Kanji controls are separate from FSRS/review-state controls. */
+.dictionary-saved-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 12px;min-width:0}
+.dictionary-saved-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;max-width:100%;padding:8px 12px}
+.dictionary-saved-toggle.is-active{border-color:var(--shu);background:var(--surface-soft);color:var(--sumi)}
+.dictionary-saved-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;min-height:24px;padding:0 5px;border-radius:999px;background:var(--washi);font-size:var(--text-xs);font-weight:800}
+.dictionary-bookmark-status{margin:0;color:var(--danger,var(--shu));font-size:var(--text-sm)}
+.kanji-catalog-grid.is-detailed .kanji-catalog-cell{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;gap:6px}
+.dictionary-bookmark-toggle{display:inline-grid;place-items:center;align-self:stretch;min-width:44px;min-height:44px;padding:0;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--paper);color:var(--mute);font:inherit;font-size:24px;line-height:1;cursor:pointer}
+.dictionary-bookmark-toggle:hover,.dictionary-bookmark-toggle:focus-visible{border-color:var(--shu);color:var(--shu)}
+.dictionary-bookmark-toggle.is-saved,.dictionary-bookmark-action.is-saved{border-color:var(--shu);color:var(--shu)}
+.dictionary-bookmark-action{display:inline-flex;align-items:center;gap:8px;min-height:44px;align-self:start;max-width:100%;margin:0 0 12px}
+.dictionary-bookmark-action>span:first-child{font-size:21px;line-height:1}
+@media(max-width:420px){.dictionary-saved-controls{align-items:stretch}.dictionary-saved-toggle{width:100%;justify-content:flex-start}.kanji-catalog-grid.is-detailed .kanji-catalog-cell{grid-template-columns:minmax(0,1fr) 44px;gap:4px}.dictionary-bookmark-toggle{border-radius:10px}}

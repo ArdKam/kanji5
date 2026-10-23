@@ -10,4 +10,21 @@ const p2={schemaVersion:1,updatedAt:'2026-09-02T00:00:00Z',sessions:2,skills:{re
 const p=mergeSkillProfile(p1,p2);assert.equal(p.skills.reading.attempts,5);assert.equal(p.skills.reading.correct,4);assert.equal(p.sessions,2);assert.equal(p.skills.reading.recentAttempts,3);assert.equal(p.skills.reading.recentCorrect,3);assert.equal(p.skills.reading.recentAccuracy,100);assert.equal(p.skills.reading.momentum,0.4);
 const merged=mergeV16SyncData({sessionHistory:[a],components:{x:1},skillProfile:p1},{sessionHistory:[b],components:{y:2},skillProfile:p2});
 assert.equal(merged.v16SyncSchemaVersion,1);assert.deepEqual(merged.sessionHistory.map(x=>x.sessionId),['a','b']);assert.deepEqual(merged.components,{x:1,y:2});assert.equal(merged.skillProfile.skills.reading.attempts,5);assert.equal(merged.skillProfile.skills.reading.recentAccuracy,100);assert.equal(merged.skillProfile.skills.reading.momentum,0.4);
+
+const savedOlder={saved:true,updatedAt:'2026-10-20T10:00:00.000Z'};
+const savedNewer={saved:true,updatedAt:'2026-10-21T10:00:00.000Z'};
+const removedLater={saved:false,updatedAt:'2026-10-22T10:00:00.000Z'};
+const bookmarkMerge=mergeV16SyncData(
+  {components:{keepLocal:1,kanjiBookmarks:{'学':savedOlder,'日':removedLater}}},
+  {components:{keepRemote:2,kanjiBookmarks:{'学':savedNewer,'日':{saved:true,updatedAt:'2026-10-21T10:00:00.000Z'},'本':savedOlder}}}
+);
+assert.deepEqual(bookmarkMerge.components.kanjiBookmarks,{'学':savedNewer,'日':removedLater,'本':savedOlder},'newer updates must win and deletion tombstones must prevent stale resurrection');
+assert.equal(bookmarkMerge.components.keepLocal,1);
+assert.equal(bookmarkMerge.components.keepRemote,2);
+const equalTimeRemoval=mergeV16SyncData(
+  {components:{kanjiBookmarks:{'水':{saved:true,updatedAt:'2026-10-23T10:00:00.000Z'}}}},
+  {components:{kanjiBookmarks:{'水':{saved:false,updatedAt:'2026-10-23T10:00:00.000Z'}}}}
+);
+assert.deepEqual(equalTimeRemoval.components.kanjiBookmarks['水'],{saved:false,updatedAt:'2026-10-23T10:00:00.000Z'},'equal-time removals must win deterministically');
+
 console.log('v1.6 sync contract: OK');

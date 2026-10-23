@@ -1420,7 +1420,7 @@ html[dir="rtl"] .header-actions .account-button{left:0!important;right:auto!impo
   html[dir="rtl"] .header-tools-menu{
     animation-name:headerMenuPopoverIn!important;
   }
-  .header-menu-scrim{display:none;}
+  .header-menu-scrim{display:block;background:rgba(16,24,40,.22);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
 }
 @keyframes headerMenuPopoverIn{
   from{transform:translateY(-4px) scale(.985);opacity:0}
