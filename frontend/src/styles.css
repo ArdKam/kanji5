@@ -3707,3 +3707,8 @@ html[lang="fa"] .dialog.secondary-page-dialog.mnemonics-dialog .prepared-mnemoni
 
 /* Modal drawer state: avoid a visibly active bottom dock behind the exclusive More dialog. */
 .experience-nav[inert]{visibility:hidden;pointer-events:none;}
+
+
+/* Keep Reading Lab empty-state sizing intrinsic, then allow the populated Reader to grow. */
+.dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto;min-height:0;max-height:min(520px,calc(100dvh - 32px));}
+@media(max-width:760px){.dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader)){height:auto!important;min-height:0!important;max-height:min(520px,calc(100dvh - 32px))!important;}}
