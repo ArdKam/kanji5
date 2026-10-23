@@ -7,6 +7,7 @@ const styles = await read("frontend/src/styles.css");
 const app = await read("frontend/src/app/App.tsx");
 const onboarding = await read("frontend/src/app/onboarding/OnboardingFlow.tsx");
 const dictionary = await read("frontend/src/app/dictionary.css");
+const learningSurface = await read("frontend/src/app/learning-surface.css");
 const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
 
