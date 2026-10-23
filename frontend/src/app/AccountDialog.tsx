@@ -451,8 +451,8 @@ export function AccountDialog({ open, language, onClose, onAuthenticated, initia
             <div>
               <h3 id="account-delete-title">{language === "fa" ? "حذف حساب و داده‌های ابری" : "Delete account and cloud data"}</h3>
               <p>{language === "fa"
-                ? "این کار حساب و داده‌های همگام‌سازی‌شدهٔ ابری را برای همیشه حذف می‌کند. پیشرفت محلی این مرورگر پاک نمی‌شود؛ برای پاک‌کردن آن، جداگانه از تنظیمات داده‌های محلی را پاک کن."
-                : "Permanently deletes your account and synced cloud data. Learning data stored locally in this browser remains; use Settings → Clear data from this browser separately if you want to erase it too."}</p>
+                ? "حساب و داده‌های همگام‌سازی‌شدهٔ ابری برای همیشه حذف می‌شوند. داده‌های محلی این مرورگر و نسخه‌های پشتیبان دانلودشده جدا هستند و باقی می‌مانند؛ برای پاک‌کردن داده‌های همین مرورگر، از تنظیمات جداگانه اقدام کن."
+                : "Permanently deletes your account and synced cloud data. Local browser data and downloaded backups are separate and remain; clear this browser’s data separately in Settings if you also want to erase it."}</p>
             </div>
           </div>
           {!deleteConfirmationOpen ? (
