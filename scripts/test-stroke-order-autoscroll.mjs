@@ -11,6 +11,9 @@ assert.doesNotMatch(source, /closeLearningTool/);
 assert.match(source, /className="stroke-order-panel is-expanded"/);
 assert.match(source, /className="stroke-order-progress" role="status" aria-live="polite"/);
 assert.match(source, /data-stroke-order-open="true"/);
+assert.match(source, /pathsState\.character===activeCharacter/);
+assert.match(source, /requestCharacter===activeCharacter/);
+assert.match(source, /normalizeStrokeOrderCharacter\(character\)/);
 
 const app = await readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8");
 assert.match(app, /mnemonicDialogRef=useModalDialog\(mnemonicEditing,closeMnemonicEditor\)/);
