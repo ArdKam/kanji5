@@ -222,27 +222,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
     return ()=>{active=false};
   },[card.character]);
 
-  // The curated mnemonic corpus is large; defer its chunk until the learner opens
-  // the mnemonic page rather than fetching it as part of the initial Learning screen.
-  useEffect(()=>{
-    let active=true;
-    const mnemonicPage=hasExamplesPage?2:1;
-    if(!card.character||!revealed||backPage!==mnemonicPage){
-      return ()=>{active=false};
-    }
-    const character=card.character;
-    const meanings=[...primaryMeanings,...secondaryMeanings];
-    const components=visualStructureInfo?.available
-      ? visualStructureInfo.components.map(component=>component.character)
-      : [];
-    void import("./prepared-mnemonic-core").then(({buildPreparedMnemonic})=>{
-      if(!active)return;
-      setPreparedMnemonic(buildPreparedMnemonic({character,meanings},components));
-    }).catch(()=>{
-      if(active)setPreparedMnemonic(null);
-    });
-    return ()=>{active=false};
-  },[card.character,preparedMeaningKey,backPage,hasExamplesPage,revealed,visualStructureInfo]);
+
   useEffect(()=>{
     setHiraganaReadings(false);
     setReferenceInfoOpen(false);
@@ -371,6 +351,27 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
   useEffect(()=>setBackPage(0),[card.character]);
+  // The curated mnemonic corpus is large; defer its chunk until the learner opens
+  // the mnemonic page rather than fetching it as part of the initial Learning screen.
+  useEffect(()=>{
+    let active=true;
+    const mnemonicPage=hasExamplesPage?2:1;
+    if(!card.character||!revealed||backPage!==mnemonicPage){
+      return ()=>{active=false};
+    }
+    const character=card.character;
+    const meanings=[...primaryMeanings,...secondaryMeanings];
+    const components=visualStructureInfo?.available
+      ? visualStructureInfo.components.map(component=>component.character)
+      : [];
+    void import("./prepared-mnemonic-core").then(({buildPreparedMnemonic})=>{
+      if(!active)return;
+      setPreparedMnemonic(buildPreparedMnemonic({character,meanings},components));
+    }).catch(()=>{
+      if(active)setPreparedMnemonic(null);
+    });
+    return ()=>{active=false};
+  },[card.character,preparedMeaningKey,backPage,hasExamplesPage,revealed,visualStructureInfo]);
   const clearLearningFocus=useCallback(()=>{
     const active=document.activeElement;
     if(!(active instanceof HTMLElement))return;
