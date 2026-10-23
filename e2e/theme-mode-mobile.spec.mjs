@@ -257,4 +257,35 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   await chooseTheme("Dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await assertRatingPalette(); // Manually selected Dark
+
+  // Light-mode review ratings must preserve semantic distinction, WCAG AA text contrast,
+  // restrained borders, keyboard focus, and practical touch dimensions.
+  await chooseTheme("Light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  const lightRatingStyles = [];
+  for (const rating of await ratings.all()) {
+    const style = await controlStyle(rating);
+    const borderWidth = await rating.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopWidth));
+    const bounds = await rating.boundingBox();
+    expect(style.contrast, `Light ${style.background} feedback rating text must meet WCAG AA`).toBeGreaterThanOrEqual(4.5);
+    expect(borderWidth, "Light feedback rating borders should remain restrained").toBeLessThanOrEqual(1.5);
+    expect(bounds?.width ?? 0, "Review buttons should be at least 44px wide where practical").toBeGreaterThanOrEqual(44);
+    expect(bounds?.height ?? 0, "Review buttons should be at least 44px tall where practical").toBeGreaterThanOrEqual(44);
+    lightRatingStyles.push({
+      rating: [...await rating.evaluate(element => [...element.classList])].find(name => /^rating-(again|hard|good|easy)$/.test(name)),
+      background: style.backgroundRGB.join(","),
+    });
+  }
+  expect(new Set(lightRatingStyles.map(item => item.background)).size, "All four Light-mode rating states must remain visually distinct").toBe(4);
+
+  // Tab navigation must move between rating controls and expose a visible focus ring.
+  await ratings.nth(0).focus();
+  await page.keyboard.press("Tab");
+  await expect(ratings.nth(1)).toBeFocused();
+  const keyboardFocus = await ratings.nth(1).evaluate(element => {
+    const style = getComputedStyle(element);
+    return { outlineStyle: style.outlineStyle, outlineWidth: Number.parseFloat(style.outlineWidth) };
+  });
+  expect(keyboardFocus.outlineStyle).not.toBe("none");
+  expect(keyboardFocus.outlineWidth).toBeGreaterThanOrEqual(2);
 });
