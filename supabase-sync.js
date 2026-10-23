@@ -357,6 +357,7 @@ function stopSyncLifecycle() {
   window.removeEventListener('online', scheduleSync);
   window.removeEventListener('storage', onStorage);
   document.removeEventListener('visibilitychange', onVisibilityChange);
+  document.removeEventListener('kanji5:v2-bookmarks-changed', scheduleSync);
 }
 
 function startSyncLifecycle() {
@@ -368,6 +369,8 @@ function startSyncLifecycle() {
   window.addEventListener('storage', onStorage);
   document.removeEventListener('visibilitychange', onVisibilityChange);
   document.addEventListener('visibilitychange', onVisibilityChange);
+  document.removeEventListener('kanji5:v2-bookmarks-changed', scheduleSync);
+  document.addEventListener('kanji5:v2-bookmarks-changed', scheduleSync);
 }
 
 async function boot() {
