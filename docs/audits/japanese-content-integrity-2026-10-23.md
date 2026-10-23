@@ -1,6 +1,6 @@
 # Japanese-Language Learning Content Integrity Audit — 2026-10-23
 
-**Baseline:** `main` at `766f85c4633ee5d2699509c981bb4cfc456d26f9` (latest observed main before this audit branch).  
+**Content inventory snapshot:** `main` at `766f85c4633ee5d2699509c981bb4cfc456d26f9` (the catalog and topic files analyzed). The pull request is based on `main` at `6e0544954186f12b3b7755f7613cbdc6e782a98a`; intervening PR #619 changed audit documentation only, not the catalog or taxonomy.  
 **Scope:** committed kanji catalog, source provenance, topic taxonomy, content-validation paths, and onboarding placement feedback.  
 **Review type:** reproducible structural inventory plus code-path audit. This is **not** a corpus-wide linguistic verification or independent native-speaker sign-off.
 
