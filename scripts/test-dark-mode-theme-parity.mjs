@@ -7,6 +7,7 @@ const styles = await read("frontend/src/styles.css");
 const app = await read("frontend/src/app/App.tsx");
 const onboarding = await read("frontend/src/app/onboarding/OnboardingFlow.tsx");
 const dictionary = await read("frontend/src/app/dictionary.css");
+const learningSurface = await read("frontend/src/app/learning-surface.css");
 const topic = await read("frontend/src/app/topic-learning.css");
 const themeBootstrap = await read("theme-bootstrap.js");
 
@@ -140,5 +141,20 @@ assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: va
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Manual Dark focus foreground must remain dark on the light indigo surface");
 assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-focus-option.active { color: #171614; }'), "System Dark focus foreground must remain dark on the light indigo surface");
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
+
+// Learning-card review states must use the shared semantic palette rather than hard-coded colors.
+for (const [rating, foreground, border, background] of [
+  ["again", "--color-danger", "--color-danger", "--color-danger"],
+  ["hard", "--color-warning", "--color-warning", "--color-warning"],
+  ["good", "--color-success", "--color-success", "--color-success"],
+  ["easy", "--ai", "--ai", "--ai"],
+]) {
+  const rule = learningSurface.match(new RegExp("\\.learning-card-back \\.rating-" + rating + "\\{[^}]+\\}"))?.[0];
+  assert.ok(rule, "Missing Learning Card rating rule: " + rating);
+  assert.ok(rule.includes("color:color-mix(in srgb,var(" + foreground + ")"), rating + " foreground must use a semantic token");
+  assert.ok(rule.includes("border:1px solid color-mix(in srgb,var(" + border + ")"), rating + " border must use a semantic token and 1px weight");
+  assert.ok(rule.includes("background:color-mix(in srgb,var(" + background + ")"), rating + " surface must use a semantic token");
+  assert.equal(rule.includes("#"), false, rating + " rating rule must not reintroduce hard-coded hex colors");
+}
 
 console.log("Dark-theme parity contract passed.");
