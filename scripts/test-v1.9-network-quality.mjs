@@ -45,7 +45,7 @@ try{
   assert.equal(attributedSentence.translationUrl,'https://tatoeba.org/en/sentences/show/202');
   assert(!sentences.some(x=>x.id===6),'translation records marked PROBLEM must not be selected');
   const tatoebaCall=calls.find(url=>url.includes('api.tatoeba.org'));
-  assert.equal(new URL(tatoebaCall).searchParams.get('license'),'CC BY 2.0 FR,CC0 1.0','the request should explicitly select reusable sentence licenses');
+  assert.deepEqual(new URL(tatoebaCall).searchParams.getAll('license'),['CC BY 2.0 FR','CC0 1.0'],'the request should explicitly select reusable sentence licenses');
   const selectedWordA=network.selectWord(words);const selectedWordB=network.selectWord(words);
   assert.deepEqual(selectedWordA,selectedWordB);
   assert(words.some(x=>x.word===selectedWordA.word));
