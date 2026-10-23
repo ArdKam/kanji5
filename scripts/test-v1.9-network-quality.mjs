@@ -50,6 +50,13 @@ try{
   assert.equal(malformedResult.availability,'available');
   assert.deepEqual(malformedResult.items,[],'array-valued written/reading fields and non-string glosses must not be coerced into vocabulary entries');
 
+  globalThis.fetch=async()=>new Response(JSON.stringify([
+    {variants:[{written:'日本',pronounced:'にほん'},{written:'日本',pronounced:'にっぽん'}],meanings:[{glosses:['Japan']} ]}
+  ]),{status:200,headers:{'content-type':'application/json'}});
+  const alternateReadings=await network.fetchWordsResult('日');
+  assert.deepEqual(alternateReadings.items.map(({word,reading})=>[word,reading]),[['日本','にほん'],['日本','にっぽん']],
+    'the same written form with distinct lexical readings must not be collapsed by the provider adapter');
+
   globalThis.fetch=async()=>new Response(JSON.stringify({error:'offline-content-unavailable'}),{status:503,headers:{'content-type':'application/json','X-Kanji5-Offline-Fallback':'1'}});
   assert.deepEqual(await network.fetchWordsResult('学'),{availability:'offline',items:[]});
   assert.deepEqual(await network.fetchWords('学'),[]);
