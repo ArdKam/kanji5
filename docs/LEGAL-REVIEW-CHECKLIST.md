@@ -11,7 +11,8 @@ Last reconciled: 2026-10-06 against current `main` before R13 merge work.
 - [ ] Reading Lab local data is distinguished from synced learner state.
 - [ ] Backup/export scope and exclusions are documented.
 - [ ] Reset learning progress is not described as complete local erasure.
-- [ ] End-user account deletion is implemented and independently verified, or the final policy documents the approved alternative/request workflow.
+- [ ] Self-service account deletion is implemented and the authenticated production deletion, associated data handling, failure behavior and local/cloud separation are independently verified.
+- [ ] A private privacy/account request channel is operational for requests that cannot be handled through self-service.
 - [ ] Cloud/local retention semantics are approved before publication.
 - [ ] Retained backups, logs, auth metadata, and provider copies are covered.
 
