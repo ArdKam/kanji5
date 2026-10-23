@@ -81,4 +81,11 @@ assert.deepEqual(card.learnerMeaningRecords.map(record => record.text), ["day", 
 assert.ok(card.learnerMeaningRecords.every(record => record.reviewStatus === "unreviewed"));
 assert.deepEqual(card.learnerMeanings.primary, ["day", "sun"]);
 
+const app = await (await import("node:fs/promises")).readFile(new URL("../frontend/src/app/App.tsx", import.meta.url), "utf8");
+assert.match(app, /record\.reviewStatus==="verified"/);
+assert.match(app, /getLanguage\(\)==="fa"&&!useReviewedLocalizedMeanings/);
+assert.match(app, /reviewedPersianMeaningUnavailable/);
+assert.match(app, /className="example-source-label"/);
+assert.match(app, /lang=\{e\.meaningLanguage&&e\.meaningLanguage!==\"unknown\"\?e\.meaningLanguage:\"en\"\}/);
+
 console.log("Learner meaning provenance/review contract passed.");
