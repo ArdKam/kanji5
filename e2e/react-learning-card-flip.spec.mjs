@@ -548,7 +548,7 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
       const currentPageLabel = (await card.locator(".pager-current").innerText())
         .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
         .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
-      expect(currentPageLabel, JSON.stringify(scenario)).toMatch(/1\\D+4/);
+      expect(currentPageLabel, JSON.stringify(scenario)).toMatch(/1\D+4/);
 
       const metrics = await card.evaluate((el) => {
         const active = el.querySelector(".learning-back-page.active");
