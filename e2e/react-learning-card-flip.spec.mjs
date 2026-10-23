@@ -544,6 +544,11 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
       await expect(page.locator("html")).toHaveAttribute("lang", scenario.language);
       await expect(card.locator(".learning-back-quick-example")).toBeVisible();
       await expect(card.locator(".pager-current")).toBeVisible();
+      await expect(card).toHaveAttribute("data-back-page", "0");
+      const currentPageLabel = (await card.locator(".pager-current").innerText())
+        .replace(/[۰-۹]/g, digit => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+        .replace(/[٠-٩]/g, digit => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
+      expect(currentPageLabel, JSON.stringify(scenario)).toMatch(/1\\D+4/);
 
       const metrics = await card.evaluate((el) => {
         const active = el.querySelector(".learning-back-page.active");
