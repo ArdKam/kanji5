@@ -1,9 +1,15 @@
 # Rinemi Feature Roadmap — Kanji Bookmarks & Anki Deck Import
 
 **Decision date:** 2026-10-18  
-**Status:** Planned; not implemented, merged, deployed, or release-ready.  
+**Status:** Bookmark MVP is merged to `main` at `766f85c`; production deployment and release evidence are still pending. Anki remains research-gated and unimplemented.  
 **Parent strategy:** [Product Strategy & Competitive Positioning](PRODUCT-STRATEGY-AND-COMPETITIVE-POSITIONING-2026-10-17.md)  
 **Canonical execution/release authority:** [`ROADMAP.md`](../ROADMAP.md)
+
+## Execution update — 2026-10-23
+
+PR #616 currently implements the bookmark MVP through the existing persistence boundary and backup envelope, with timestamped per-Kanji records and removal tombstones for sync reconciliation. Its contract/E2E coverage targets save, reload, backup inclusion, filtering, unsave, and unchanged review/knowledge state. The same PR also connects Dictionary details to the existing public content-correction form; that public issue path is not a private privacy/account-request channel.
+
+Do not mark bookmarks complete until the exact-head CI suite passes, the PR merges on current `main`, and the intended deployment is verified. Multi-device authenticated sync and backup/restore acceptance still require explicit evidence; unit merge tests do not establish live cross-device behavior.
 
 ## Purpose
 
