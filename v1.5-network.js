@@ -15,6 +15,10 @@ function sentenceContentId(id,text,english){
   if(stableId)return canonicalContentId('context','tatoeba:'+stableId);
   return canonicalContentId('context','tatoeba:'+stableContentHash(String(text??'')+'|'+String(english??'')));
 }
+function tatoebaSentenceUrl(id){
+  const normalized=String(id??'').trim();
+  return /^\\d+$/.test(normalized)?`https://tatoeba.org/en/sentences/show/${normalized}`:null;
+}
 
 
 async function requestJSONResult(url){
@@ -77,6 +81,8 @@ export async function fetchContextSentences(character){
   url.searchParams.set('trans:is_direct','yes');
   url.searchParams.set('is_orphan','no');
   url.searchParams.set('is_unapproved','no');
+  // Keep only sentence records with explicitly reusable text licenses.
+  url.searchParams.set('license','CC BY 2.0 FR,CC0 1.0');
   url.searchParams.set('sort','relevance');
   url.searchParams.set('limit','24');
   const payload=await requestJSON(url.toString());
@@ -86,10 +92,25 @@ export async function fetchContextSentences(character){
     const text=String(row?.text||'').trim();
     if(!text||!text.includes(character)||seen.has(text))continue;
     const translations=Array.isArray(row?.translations)?row.translations:[];
-    const english=translations.flatMap(x=>Array.isArray(x)?x:[x]).map(x=>String(x?.text||'').trim()).find(Boolean)||'';
+    const translation=translations.flatMap(x=>Array.isArray(x)?x:[x])
+      .find(value=>typeof value?.text==='string'&&value.text.trim()&&value.license!=='PROBLEM');
+    const english=typeof translation?.text==='string'?translation.text.trim():'';
     if(!english)continue;
     seen.add(text);
-    out.push({id:row?.id||'',text,english,contentId:sentenceContentId(row?.id,text,english),source:'tatoeba'});
+    out.push({
+      id:row?.id||'',
+      text,
+      english,
+      contentId:sentenceContentId(row?.id,text,english),
+      source:'tatoeba',
+      sourceUrl:tatoebaSentenceUrl(row?.id),
+      sourceOwner:typeof row?.owner==='string'?row.owner:null,
+      sourceLicense:typeof row?.license==='string'?row.license:null,
+      translationId:translation?.id??null,
+      translationUrl:tatoebaSentenceUrl(translation?.id),
+      translationOwner:typeof translation?.owner==='string'?translation.owner:null,
+      translationLicense:typeof translation?.license==='string'?translation.license:null
+    });
     if(out.length>=16)break;
   }
   return validateContextList(out,character).items.slice(0,8);
