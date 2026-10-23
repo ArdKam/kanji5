@@ -51,10 +51,10 @@
 .learning-card-back .rating-grid .rating{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;padding-block:6px;line-height:1.2}
 .learning-card-back .rating-interval{font-size:var(--text-xs);font-weight:650;line-height:1.15;white-space:nowrap;opacity:.9}
 .learning-card-back .rating:hover:not(:disabled){transform:translateY(-1px)}
-.learning-card-back .rating-again{color:color-mix(in srgb,var(--color-danger) 75%,var(--sumi));border:1px solid color-mix(in srgb,var(--color-danger) 30%,var(--line));background:color-mix(in srgb,var(--color-danger) 7%,var(--paper))}
-.learning-card-back .rating-hard{color:color-mix(in srgb,var(--color-warning) 75%,var(--sumi));border:1px solid color-mix(in srgb,var(--color-warning) 34%,var(--line));background:color-mix(in srgb,var(--color-warning) 8%,var(--paper))}
-.learning-card-back .rating-good{color:color-mix(in srgb,var(--color-success) 76%,var(--sumi));border:1px solid color-mix(in srgb,var(--color-success) 35%,var(--line));background:color-mix(in srgb,var(--color-success) 8%,var(--paper))}
-.learning-card-back .rating-easy{color:color-mix(in srgb,var(--ai) 78%,var(--sumi));border:1px solid color-mix(in srgb,var(--ai) 34%,var(--line));background:color-mix(in srgb,var(--ai) 7%,var(--paper))}
+.learning-card-back .rating-again{color:#8e3026;border-color:color-mix(in srgb,var(--shu) 52%,var(--line));background:color-mix(in srgb,var(--shu) 7%,var(--paper))}
+.learning-card-back .rating-hard{color:#76510a;border-color:color-mix(in srgb,#9a6700 42%,var(--line));background:color-mix(in srgb,#d29c2e 9%,var(--paper))}
+.learning-card-back .rating-good{color:#43582b;border-color:color-mix(in srgb,var(--matcha) 62%,var(--line));background:color-mix(in srgb,var(--matcha) 11%,var(--paper))}
+.learning-card-back .rating-easy{color:#314b6f;border-color:color-mix(in srgb,var(--ai) 52%,var(--line));background:color-mix(in srgb,var(--ai) 7%,var(--paper))}
 .learning-card-back .component-breakdown{gap:8px;padding-block:8px;border-block:1px solid var(--line-soft)}
 .learning-card-back .component-breakdown-header{justify-content:flex-start}
 .learning-card-back .component-breakdown-title{color:var(--ink);font-size:var(--text-xs)}
