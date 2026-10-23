@@ -34,4 +34,4 @@ assert(engine.includes("getVisualStructureInfo: (character: string) => Promise<V
 
 console.log("Kanji visual-structure integration contract passed for the Learning Card and Dictionary.");
 
-assert.match(app, /const mnemonicPage=hasExamplesPage\?2:1;[\s\S]*?if\(!card\.character\|\|!revealed\|\|backPage!==mnemonicPage\)[\s\S]*?import\("\.\/prepared-mnemonic-core"\)/);
+assert(/const mnemonicPage=hasExamplesPage\?2:1;[\\s\\S]*?if\\(!card\\.character\\|\\|!revealed\\|\\|backPage!==mnemonicPage\\)[\\s\\S]*?import\\("\\.\\/prepared-mnemonic-core"\\)/.test(app), "Prepared mnemonic payload must be gated behind revealed state and the mnemonic page");
