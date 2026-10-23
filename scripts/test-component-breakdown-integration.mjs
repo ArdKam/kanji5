@@ -33,3 +33,5 @@ assert(dictionary.includes("components={componentInfo.components}"), "Legacy lea
 assert(engine.includes("getVisualStructureInfo: (character: string) => Promise<VisualStructureInfo>"), "Typed engine boundary must expose visual structure access");
 
 console.log("Kanji visual-structure integration contract passed for the Learning Card and Dictionary.");
+
+assert.match(app, /const mnemonicPage=hasExamplesPage\?2:1;[\s\S]*?if\(!card\.character\|\|!revealed\|\|backPage!==mnemonicPage\)[\s\S]*?import\("\.\/prepared-mnemonic-core"\)/);
