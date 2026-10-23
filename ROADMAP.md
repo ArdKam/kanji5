@@ -1,3 +1,25 @@
+## 2.0.6 Post-merge PWA release verification — 2026-10-23
+
+**Verified release SHA:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a` (PR #597).
+
+### Verified on the promoted main SHA
+
+- React presentation build completed successfully: all 54 build/E2E steps passed in [workflow run #39873770123](https://github.com/ArdKam/kanji5/actions/runs/39873770123).
+- Learning-engine validation passed in [run #39873770214](https://github.com/ArdKam/kanji5/actions/runs/39873770214); WebKit compatibility also passed in #39873770123.
+- GitHub Pages deployment passed in [run #39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140).
+- The live verifier found `react-dist/manifest.json`, parsed the manifest and confirmed all 12 graph assets were available: `LIVE_PWA_MANIFEST_AND_ASSET_GRAPH_VERIFIED assets=12`.
+- Staged/live artifact hashes matched for `index.html`, `react-entry.js`, `sw.js`, React JS/CSS, and the pinned Supabase runtime; the log ended with `LIVE_PAGES_ARTIFACT_VERIFIED`.
+- The live core/offline browser smoke ended with `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`. This directly closes the previously observed hidden `.vite` manifest 404 for this SHA.
+
+### Remaining release limits
+
+- This is release-integrity evidence for SHA `544c7c0`; any later merged change requires its own post-merge deployment and smoke evidence.
+- HTTP response CSP was logged as absent; the meta CSP does not equal verified response-header protection. Keep this in the security findings.
+- Physical Android/iOS install, cold-start, update/reinstall, assistive-technology, and other manual device checks remain open.
+- Security acceptance, including production Supabase leaked-password protection, remains separate from the successful deployment.
+- Privacy/legal and independent educational-validity acceptance remain open. This pass does not by itself authorize a public beta.
+
+---
 ## 2.0.5 Current-main release follow-up — 2026-10-23
 
 **Current main at this checkpoint:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a`, merge of [PR #597](https://github.com/ArdKam/kanji5/pull/597), which publishes the Vite manifest at `react-dist/manifest.json` rather than the hidden `.vite` path.
