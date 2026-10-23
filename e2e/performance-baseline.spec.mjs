@@ -98,9 +98,16 @@ for (const profile of profiles) {
 
       const fcp = paints.find((entry) => entry.name === "first-contentful-paint")?.startTime ?? 0;
       const perf = window.__KANJI5_PERF_BASELINE__ ?? { lcp: 0, cls: 0, longTasks: [], layoutShiftSources: [] };
-      const appResources = resources
-        .filter((entry) => /react-dist|react-entry|app-bootstrap|v1\.|vendor\//.test(entry.name))
+      const appResourceEntries = resources
+        .filter((entry) => /react-dist|react-entry|app-bootstrap|v1[.]|vendor[/]/.test(entry.name));
+      const appResources = appResourceEntries
         .reduce((sum, entry) => sum + Number(entry.transferSize || 0), 0);
+      const appResourceDetails = appResourceEntries.map((entry) => ({
+        url: new URL(entry.name).pathname,
+        transferSize: Number(entry.transferSize || 0),
+        encodedBodySize: Number(entry.encodedBodySize || 0),
+        decodedBodySize: Number(entry.decodedBodySize || 0),
+      }));
 
       return {
         navigationMs: Number(navigation?.duration || 0),
@@ -114,6 +121,7 @@ for (const profile of profiles) {
         longTaskMaxMs: perf.longTasks.reduce((max, duration) => Math.max(max, duration), 0),
         resourceCount: resources.length,
         appTransferKB: Math.round(appResources / 1024),
+        appResourceDetails,
         layoutShiftSources: Array.isArray(perf.layoutShiftSources) ? perf.layoutShiftSources.slice(-20) : [],
       };
     });
@@ -126,6 +134,9 @@ for (const profile of profiles) {
     expect(metrics.fcpMs, `FCP budget exceeded: ${metrics.fcpMs.toFixed(0)}ms > ${startupBudgets.fcpMs}ms`).toBeLessThanOrEqual(startupBudgets.fcpMs);
     expect(metrics.lcpMs, `LCP budget exceeded: ${metrics.lcpMs.toFixed(0)}ms > ${startupBudgets.lcpMs}ms`).toBeLessThanOrEqual(startupBudgets.lcpMs);
     if (metrics.cls > startupBudgets.cls) console.log("CLS_SOURCES", JSON.stringify(metrics.layoutShiftSources));
+    if (metrics.appTransferKB > startupBudgets.appTransferKB) {
+      console.log("APP_TRANSFER_RESOURCE_BREAKDOWN", JSON.stringify(metrics.appResourceDetails));
+    }
     expect(metrics.cls, `CLS budget exceeded: ${metrics.cls.toFixed(3)} > ${startupBudgets.cls}`).toBeLessThanOrEqual(startupBudgets.cls);
     expect(metrics.longTaskTotalMs, `long-task budget exceeded: ${metrics.longTaskTotalMs.toFixed(0)}ms > ${startupBudgets.longTaskTotalMs}ms`).toBeLessThanOrEqual(startupBudgets.longTaskTotalMs);
     expect(metrics.longTaskMaxMs, `max long-task budget exceeded: ${metrics.longTaskMaxMs.toFixed(0)}ms > ${startupBudgets.longTaskMaxMs}ms`).toBeLessThanOrEqual(startupBudgets.longTaskMaxMs);
