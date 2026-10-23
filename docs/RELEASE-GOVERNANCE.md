@@ -24,8 +24,8 @@ Verified repository-side reconciliation:
 
 ## Remaining release blockers
 
-1. **Account deletion:** no end-user account-deletion operation is implemented in the current browser runtime.
-2. **Local-data deletion:** Reset learning progress is not complete browser-data erasure.
+1. **Account deletion:** the candidate now exposes an authenticated, typed-confirmation client path calling the active JWT-verified `delete-account` function. The static contract and repository tests are added, but an authenticated production deletion smoke test and final evidence are still required. Local browser data is explicitly not removed by account deletion.
+2. **Local-data deletion:** a separate Settings action and browser regression test clear the defined app-owned local/session keys, Reading Lab text/notes, local auth tokens, and app API-cache entries while preserving the app shell/dataset caches and unrelated site data. Do not describe it as clearing unrelated origin data or downloaded backups; verify the complete supported local-data scope on real devices.
 3. **Project license:** no owner-approved project-level license exists.
 4. **Private privacy/account request channel:** no dedicated non-public channel is operational.
 5. **Legal review:** target markets, user-rights handling, age/child-user treatment, transfers, retention, user-content/IP, terms acceptance, licensing, and cookie/consent requirements remain owner/counsel decisions.
