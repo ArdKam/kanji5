@@ -466,7 +466,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   return <section className={"surface card learning-card "+(revealed?"is-revealed":"")+(mnemonicEditing?" has-open-mnemonic":"")} data-card-density={density} data-example-count={exampleCount} data-component-count={componentCount} data-reading-count={readingCount} data-back-page-count={backPageCount} data-back-page={backPage} aria-label={t("learningCard")}>
     <div className="learning-card-flip" aria-live="polite">
       <div ref={frontFaceRef} className="learning-card-face learning-card-front" aria-hidden={revealed} inert={revealed}>
-        <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{topicLabel || learningCopy("recommendedLearning",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
+        <div className="card-topline learning-card-topline"><span className="eyebrow learning-context-label">{t("activeRecallLabel",getLanguage())}</span><span className={card.isNew?"badge badge-red":"badge"}>{card.isNew?t("newKanji"):t("learningReview")}</span></div>
         <h2 className="sr-only">{t("learningCard")}</h2>
         <div className="kanji-row"><span className="kanji-display" lang="ja" dir="ltr">{text(card.character)}</span>{card.character?<span className="kanji-audio-control"><Audio value={card.character} label={t("playKanjiPronunciation")}/></span>:null}</div>
         <p id="learning-recall-cue" className="learning-recall-cue">{learningCopy("recallBeforeReveal",getLanguage())}</p>
