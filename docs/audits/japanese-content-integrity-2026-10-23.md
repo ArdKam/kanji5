@@ -7,8 +7,8 @@
 ## Executive result
 
 - The committed static catalog is structurally consistent on the measured checks: 2,136 unique Jōyō kanji, stable character-based IDs, 7,937 non-empty gloss values, 2,850 on-reading values, and 3,905 kun-reading values.
-- The audit confirmed **no incorrect static-corpus reading, word, or meaning** suitable for a verified data-value patch. It did identify a second adapter-level defect: alternatives sharing the same written word were deduplicated even when their readings differed. A regression fixture now protects separately sourced 日本 readings (にほん / にっぽん) without asserting the dynamic provider always supplies both.
-- Two reproducible content-integrity defects were found in the runtime adapter/validation path: non-string fields could be coerced into apparently valid text, and distinct readings for the same written vocabulary form could be collapsed. The patch adds strict field-type gates and uses written-form-plus-reading for adapter deduplication, with targeted regression fixtures.
+- The audit confirmed **no incorrect static-corpus reading, word, or meaning** suitable for a verified data-value patch. Three runtime-path defects are being addressed: malformed fields passed coercion-based checks, alternate readings for one written form were collapsed, and Tatoeba attribution/license metadata was discarded before the context item left the adapter.
+- The patch adds strict field-type gates, deduplicates vocabulary on written form plus reading, preserves Tatoeba sentence/translation owners, licenses, and source links, and filters out records explicitly marked with a problem license. Targeted regression fixtures cover each behavior.
 - Dynamic vocabulary and Tatoeba-derived sentences are not a pinned corpus. Their present structural gates cannot prove reading-to-word association, sense alignment, grammar, translation equivalence, naturalness, or learner-level suitability. Independent review remains a release acceptance requirement.
 - The onboarding placement answer review is already implemented: after completing the assessment, learners can optionally review each Kanji, their selected answer, the correct answer, and a correct/incorrect status in Persian or English. Correctness is not revealed mid-assessment, reducing the risk of cueing later answers. This is useful answer correction, not a semantic explanation or a validated proficiency diagnosis.
 
@@ -44,6 +44,19 @@ Counts were calculated from the files on the observed baseline. Structural check
 - Add regression tests for array-valued written forms/readings/sentences and object-valued meanings/translations/glosses, while retaining the existing valid-entry fixtures.
 
 **Affected corpus records:** none identified or edited. This is a validation-path defect, not a verified correction to any named vocabulary record. Runtime payload counts cannot be claimed because the provider corpus was not frozen or exhaustively sampled.
+
+### P1 — Tatoeba author/license metadata was discarded by the context adapter
+
+**Evidence:** the official Tatoeba API schema returns sentence `owner` and `license` fields; translation objects are sentence objects as well and carry their own IDs, owners, and licenses. Before this patch, the adapter retained only the Japanese sentence ID/text, English text, and a generic `source: 'tatoeba'` marker. That erased the information needed to produce specific sentence/translation attribution downstream. Tatoeba's reuse guidance says text attribution must identify Tatoeba and its license; its API distinguishes `CC BY 2.0 FR`, `CC0 1.0`, and `PROBLEM`. References: https://api.tatoeba.org/openapi.json and https://en.wiki.tatoeba.org/articles/show/faq
+
+**Correction in this branch:**
+- Request only reusable source-sentence licenses explicitly (`CC BY 2.0 FR` and `CC0 1.0`).
+- Retain the source sentence URL, owner, and license with every returned context item.
+- Retain the chosen English translation's sentence ID, URL, owner, and license.
+- Do not select an English translation explicitly marked `PROBLEM`.
+- Add regression fixtures for source/translation attribution metadata, valid license filtering, and exclusion of problem-licensed translations.
+
+**Remaining acceptance requirement:** these fields are now preserved in the runtime context data, but this source-adapter PR does not alter the React presentation. Verify that the production Context experience actually presents appropriate attribution/links to users, and that it does not show material marked `PROBLEM`, before closing the licensing/release gate. Metadata preservation alone is not proof that the user-facing attribution requirement is satisfied.
 
 ### P2 — adapter-level deduplication dropped alternate readings for one written form
 
@@ -83,7 +96,7 @@ The committed `on` / `kun` lists are derived from KANJIDIC2 via the pinned `jkin
 | JLPT metadata | `jlpt_waller` field in the pinned source projection | Treat as source metadata. Do not label a learner as JLPT-certified or imply that a null is N1. |
 | Topic taxonomy | Hand-curated `frontend/src/app/kanji-topics.json` | Partial editorial associations; source entries and membership are reviewable, but not licensed dictionary facts. |
 | Vocabulary examples | Runtime KanjiAPI response, adapted by `v1.5-network.js` and normalized by the vocabulary/content-quality layers | Not frozen in Git; source version and lexical item may not be reproducible after an upstream change. Confirm current provider and underlying EDRDG terms/attribution before redistributing cached/bundled examples. JMdict is a candidate for future controlled sourcing, not an adopted replacement in this change. |
-| Context sentences | Tatoeba API responses with direct English translations | Tatoeba's text data is published under CC BY 2.0 FR according to its reuse guidance. Attribute the source and retain item-level author/license information where required; audio has separate, item-specific licensing. |
+| Context sentences | Tatoeba API responses with direct English translations | Text licenses include CC BY 2.0 FR, CC0 1.0, and a PROBLEM marker. The adapter now preserves source and translation IDs, URLs, owners, and licenses and excludes explicit PROBLEM translations. Tatoeba sentence text and translations still need appropriate user-visible attribution; audio has separate, item-specific licensing. |
 | Visual structure / stroke-order sources | Pinned KanjiVG-derived files | Keep the recorded KanjiVG attribution and CC BY-SA 3.0 terms described in `docs/THIRD-PARTY-LICENSES.md`. |
 | Learning dependencies | Pinned TopoKanji dependency data | Learning-order aid only; retain the separate provenance and do not describe it as a canonical visual decomposition. |
 
@@ -136,5 +149,5 @@ These are candidate review rules derived from the small reference check above. T
 
 - Structural inventory was computed from the committed baseline files listed above.
 - The existing repository tests already check catalog counts, character-based IDs, reading-token shape, source-projection preservation, topic IDs/memberships, and duplicate entries.
-- This patch adds targeted regression coverage for strict field types and malformed provider payloads; it does not edit static corpus records.
+- This patch adds targeted regression coverage for strict field types, malformed provider payloads, alternative vocabulary readings, and Tatoeba attribution/license metadata; it does not edit static corpus records.
 - The aggregate `npm test` suite and required GitHub Actions checks must pass on the exact pull-request head before this change is considered verified. This audit does not claim that full local execution or comprehensive linguistic review has occurred.
