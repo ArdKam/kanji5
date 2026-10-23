@@ -873,6 +873,8 @@ test("visual evidence: Learning Card rating colors before and after semantic-tok
     await expect(reveal).toBeVisible();
     await reveal.click();
     await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+    await expect(page.locator(".learning-session-context strong")).toHaveText("Recommended learning");
+    await expect(card.locator(".learning-context-label")).toHaveText("Active recall");
     const ratings = card.locator(".learning-back-footer .rating-grid .rating");
     await expect(ratings).toHaveCount(4);
     await expect(ratings.first()).toBeVisible();
