@@ -184,6 +184,36 @@ async function saveMnemonic(character,value){
   document.dispatchEvent(new CustomEvent('kanji5:v2-mnemonic-changed',{detail:{character:key}}));
   return {contractVersion:'1.9.0-v2-boundary-contract',kind:'personal-mnemonic',character:key,text:textValue};
 }
+function normalizeBookmarkCharacter(value){return Array.from(String(value||'').trim()).slice(0,1).join('');}
+function readKanjiBookmarkRecords(){
+  const components=state.readComponents?.()||{};
+  const source=components.kanjiBookmarks&&typeof components.kanjiBookmarks==='object'&&!Array.isArray(components.kanjiBookmarks)?components.kanjiBookmarks:{};
+  const records={};
+  for(const [character,raw] of Object.entries(source)){
+    const key=normalizeBookmarkCharacter(character);
+    if(!key||key!==character||!raw||typeof raw!=='object'||typeof raw.saved!=='boolean')continue;
+    const updatedAt=typeof raw.updatedAt==='string'&&Number.isFinite(Date.parse(raw.updatedAt))?raw.updatedAt:'';
+    if(!updatedAt)continue;
+    records[key]={saved:raw.saved,updatedAt};
+  }
+  return records;
+}
+async function listKanjiBookmarks(){
+  const records=readKanjiBookmarkRecords();
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-bookmarks',records,characters:Object.entries(records).filter(([,record])=>record.saved).map(([character])=>character).sort((a,b)=>a.localeCompare(b,'ja'))};
+}
+async function setKanjiBookmark(character,saved){
+  const key=normalizeBookmarkCharacter(character);
+  if(!key)throw new Error('KANJI5_BOOKMARK_CHARACTER_REQUIRED');
+  const components=state.readComponents?.()||{};
+  const records=readKanjiBookmarkRecords();
+  const record={saved:Boolean(saved),updatedAt:new Date().toISOString()};
+  records[key]=record;
+  const next={...components,kanjiBookmarks:records};
+  if(!state.writeComponents?.(next))throw new Error('KANJI5_BOOKMARK_SAVE_FAILED');
+  document.dispatchEvent(new CustomEvent('kanji5:v2-bookmarks-changed',{detail:{character:key,saved:record.saved,updatedAt:record.updatedAt}}));
+  return {contractVersion:'1.9.0-v2-boundary-contract',kind:'kanji-bookmark',character:key,...record};
+}
 function kanjiMastery(character,knowledge,model){
   const attributes=model?.kanji?.[character]?.attributes||{};
   const modes=['meaning','reading','production','vocabulary','context'];
@@ -539,7 +569,7 @@ async function updateSettings(nextValue={}){
   return snapshot();
 }
 async function resetProgress(){const runtime=window.__KANJI5_REVIEW_RUNTIME__;const ok=runtime?.reset?runtime.reset():Boolean(state.reset?.(state.DEFAULTS||{dailyNew:5,retention:.9,maxInterval:36500,dailyGoal:20,leechThreshold:8},state.readDeck?.()||[]));try{sessionStorage.removeItem('v19RecoveryState')}catch(_){window.__KANJI5_V19_SESSION_STORAGE_DEGRADED__=true;}await clearTransient();document.dispatchEvent(new CustomEvent('kanji5:v1.9-progress-reset'));return Boolean(ok)}
-window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getStats,getVocabulary,snapshot,startupSnapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getVisualStructureInfo,getRadicalInfo,searchKanji,listKanji,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime,startLearningSession,startLearningExperience,startPracticeExperience,startExercise,submitExercise,dontKnowExercise,selfReportProduction,retryExercise,nextExercise,getHandwritingSkill,recordHandwritingGrade});
+window.__KANJI5_V19_V2_BOUNDARY__=Object.freeze({getStats,getVocabulary,snapshot,startupSnapshot,refreshLearning,revealLearning,rateLearning,setExercise,setFeedback,setAdaptiveReason,clearTransient,updateSettings,resetProgress,getComponentInfo,getVisualStructureInfo,getRadicalInfo,searchKanji,listKanji,listKanjiBookmarks,setKanjiBookmark,listPersonalMnemonics,getMnemonic,saveMnemonic,createBackup:()=>state.portableBackup?.(),restoreBackup:backup=>state.restorePortableBackup?.(backup),setCustomStudyFilter,clearCustomStudyFilter,startCustomStudy,ensureEducationRuntime,startLearningSession,startLearningExperience,startPracticeExperience,startExercise,submitExercise,dontKnowExercise,selfReportProduction,retryExercise,nextExercise,getHandwritingSkill,recordHandwritingGrade});
 window.__KANJI5_V19_V2_LAST_SNAPSHOT__=null;
 document.dispatchEvent(new CustomEvent('kanji5:v1.9-v2-boundary-ready'));
 if(window.__KANJI5_V19_REVIEW_BRIDGE__)void publishStartupSnapshot();else document.addEventListener('kanji5:v1.9-review-ready',()=>{void publishStartupSnapshot()},{once:true});
