@@ -50,3 +50,17 @@ Current checkpoint: `main` at `544c7c096d4b3579d288c5a9a2beb2b672604d6a` after P
 - Keep R7 acceptance PARTIAL until this post-merge evidence is complete. Keep security, privacy/legal, educational content validation, and physical-device accessibility/install testing open independently.
 
 This entry supplements rather than replaces the historical R13 evidence below. Evidence is SHA-specific and must not be carried forward to a different release candidate.
+
+
+## Post-merge PWA verification — 2026-10-23
+
+**Promoted SHA:** `544c7c096d4b3579d288c5a9a2beb2b672604d6a` (PR #597).
+
+Verified evidence:
+- React presentation build, all 54 steps: [run #39873770123](https://github.com/ArdKam/kanji5/actions/runs/39873770123) — success.
+- Learning-engine validation: [run #39873770214](https://github.com/ArdKam/kanji5/actions/runs/39873770214) — success.
+- Pages deployment and live/offline smoke: [run #39874874140](https://github.com/ArdKam/kanji5/actions/runs/39874874140) — success.
+- Public React manifest and all 12 referenced graph assets verified: `LIVE_PWA_MANIFEST_AND_ASSET_GRAPH_VERIFIED assets=12`.
+- Live manifest and shipped-artifact integrity passed; staged/live hashes matched for the root, entry, service worker, React JS/CSS, and pinned Supabase runtime. Final smoke reported `LIVE_PAGES_OFFLINE_AND_SMOKE_E2E_VERIFIED`.
+
+This closes the specific hidden-path manifest 404 for SHA `544c7c0`. It does not close response-header CSP/security findings, production Supabase configuration, physical-device acceptance, privacy/legal gates, or independent educational-validity review. Do not carry these results forward to a different promoted SHA without rerunning verification.
