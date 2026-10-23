@@ -516,6 +516,49 @@ const api = {
     const { error } = await c.auth.signOut();
     if (error) throw error;
   },
+  async deleteAccount() {
+    if (!user?.id) throw new Error('AUTH_USER_REQUIRED');
+    const c = await getClient();
+    let result;
+    try {
+      result = await c.functions.invoke('delete-account', { method: 'POST', body: {} });
+    } catch (error) {
+      window.__KANJI5_OBSERVABILITY__?.capture?.('account-deletion-request-failure', error, { dataAffected: 'unknown' });
+      throw new Error('AUTH_ACCOUNT_DELETE_FAILED');
+    }
+    if (result?.error || result?.data?.deleted !== true) {
+      window.__KANJI5_OBSERVABILITY__?.capture?.('account-deletion-request-failure', result?.error || new Error('ACCOUNT_DELETE_NOT_CONFIRMED'), { dataAffected: 'unknown' });
+      throw new Error('AUTH_ACCOUNT_DELETE_FAILED');
+    }
+
+    stopSyncLifecycle();
+    try {
+      const { error } = await c.auth.signOut({ scope: 'local' });
+      if (error) throw error;
+    } catch (error) {
+      // The server-side deletion succeeded. Clear this browser's Supabase storage
+      // directly as a fallback, without invalidating any other device session.
+      try {
+        const configuredUrl = window.KANJI5_SUPABASE?.url;
+        const hostname = configuredUrl ? new URL(configuredUrl).hostname.toLowerCase() : '';
+        const projectRef = hostname.endsWith('.supabase.co') ? hostname.slice(0, -'.supabase.co'.length) : '';
+        if (projectRef && /^[a-z0-9-]+$/.test(projectRef)) {
+          window.localStorage.removeItem(`sb-${projectRef}-auth-token`);
+          window.localStorage.removeItem(`sb-${projectRef}-auth-token-code-verifier`);
+        }
+      } catch (cleanupError) {
+        window.__KANJI5_OBSERVABILITY__?.capture?.('account-deletion-local-signout-failure', cleanupError, { dataAffected: 'not_applicable' });
+      }
+    }
+    user = null;
+    setState({
+      status: 'signed-out',
+      user: null,
+      syncStatus: 'idle',
+      recoveryPending: false,
+      error: null
+    });
+  },
   async signOutLocal() {
     const c = await getClient();
     const { error } = await c.auth.signOut({ scope: 'local' });
