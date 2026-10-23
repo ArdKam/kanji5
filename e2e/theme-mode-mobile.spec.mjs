@@ -278,6 +278,10 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   }
   expect(new Set(lightRatingStyles.map(item => item.background)).size, "All four Light-mode rating states must remain visually distinct").toBe(4);
 
+  // Theme controls leave the header menu open. Close it so its focus trap does not intercept Tab.
+  await menuClose.click();
+  await expect(page.locator("#header-tools-menu")).toHaveCount(0);
+
   // This test already activated the reveal control above; confirm the back is active before keyboard focus.
   await expect(page.locator("#root .learning-card")).toHaveClass(/is-revealed/);
   await expect(ratings.first()).toBeEnabled();
