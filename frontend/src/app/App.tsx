@@ -123,6 +123,9 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
   const secondaryMeanings=learnerMeaningModel.secondary??[];
   const referenceMeanings=learnerMeaningModel.reference??[];
+  const learnerMeaningRecords=card.learnerMeaningRecords??[];
+  const unreviewedEnglishMeanings=learnerMeaningRecords.filter(record=>record.language==="en"&&record.reviewStatus==="unreviewed"&&(record.priority==="primary"||record.priority==="secondary"));
+  const meaningSourceName=unreviewedEnglishMeanings.find(record=>record.provenance.source&&record.provenance.source!=="unknown")?.provenance.source??"";
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
   const [visualStructureReady,setVisualStructureReady]=useState(false);
@@ -486,6 +489,11 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                         <h3 className="learning-back-section-label">{t("meaning")}</h3>
                         {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
                         {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                        {unreviewedEnglishMeanings.length ? <p className="learning-meaning-provenance" role="note">
+                          {getLanguage()==="fa"
+                            ? <>منبع معنی انگلیسی: <bdi dir="ltr">{meaningSourceName||"ثبت‌نشده"}</bdi>؛ بازبینی مستقل ترجمهٔ فارسی انجام نشده است.</>
+                            : <>English gloss source: <bdi dir="ltr">{meaningSourceName||"not recorded"}</bdi>; Persian translation review is pending.</>}
+                        </p> : null}
                         {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                       </div>
                     </div>
