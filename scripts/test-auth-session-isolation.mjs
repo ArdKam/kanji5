@@ -44,6 +44,7 @@ assert.doesNotMatch(syncNow, /await syncOnce\(\)/, "Sync must not start without 
 const authHandler = block("c.auth.onAuthStateChange((event, session) =>", "const { data, error } = await c.auth.getSession()", "auth-state callback");
 assert.match(authHandler, /previousUserId !== nextUserId \|\| event === 'SIGNED_OUT' \|\| event === 'USER_DELETED'/, "Identity changes, sign-out, and deletion must invalidate prior work");
 assert.match(authHandler, /authGeneration \+= 1/, "Auth transitions must advance the session generation");
+assert.match(source, /const generationBeforeGetSession = authGeneration;[\s\S]*?if \(authGeneration === generationBeforeGetSession\) \{[\s\S]*?user = data\.session\?\.user \|\| null;/, "A late getSession response must not replace a newer auth-state event");
 
 for (const [name, end] of [
   ["async updateProfile(name)", "async updatePassword"],
