@@ -53,6 +53,39 @@ assert.equal(unsubstantiatedVerified.meaningRecords[0].reviewStatus, "unreviewed
 assert.equal(unsubstantiatedVerified.meaningRecords[0].reviewedBy, null);
 assert.equal(unsubstantiatedVerified.meaningRecords[0].reviewedAt, null);
 
+const invalidTimestampVerified = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningRecords: [{
+    text: "day",
+    language: "en",
+    priority: "primary",
+    provenance: { source: "human-review" },
+    reviewStatus: "verified",
+    reviewedBy: "reviewer-1",
+    reviewedAt: "not-a-date",
+  }],
+});
+assert.equal(invalidTimestampVerified.meaningRecords[0].reviewStatus, "unreviewed", "A non-date reviewer timestamp must not authorize verification");
+
+const validVerified = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningRecords: [{
+    text: "day",
+    language: "en",
+    priority: "primary",
+    provenance: { source: "human-review", entryId: "日" },
+    reviewStatus: "verified",
+    reviewedBy: "reviewer-1",
+    reviewedAt: "2026-10-23T10:00:00.000Z",
+  }],
+});
+assert.equal(validVerified.meaningRecords[0].reviewStatus, "verified");
+assert.equal(validVerified.meaningRecords[0].reviewedBy, "reviewer-1");
+
 // Missing Persian must be represented explicitly, not fabricated.
 const missingPersian = buildLearnerContent({
   character: "日",
