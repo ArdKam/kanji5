@@ -35,7 +35,7 @@ const originalFetch=globalThis.fetch;
 globalThis.fetch=async url=>{
   const value=String(url);
   if(value.includes('/v1/words/')){
-    return {ok:true,json:async()=>({data:[{variants:[{written:'学校',pronounced:'がっこう'}],meanings:[{glosses:['school','school building']}]}]})};
+    return {ok:true,json:async()=>[{variants:[{written:'学校',pronounced:'がっこう'}],meanings:[{glosses:['school','school building']}]}]};
   }
   if(value.includes('/v1/sentences')){
     return {ok:true,json:async()=>({data:[{id:123,text:'学校へ行く。',license:'CC BY 2.0 FR',translations:[[{id:456,text:'I go to school.',license:'CC BY 2.0 FR'}]]}]})};
