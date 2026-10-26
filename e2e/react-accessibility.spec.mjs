@@ -144,14 +144,27 @@ test('dictionary card uses stable tabs with one active content viewport', async 
 
 test('learning card reveal moves focus out of the aria-hidden face and emits no aria-hidden focus warning', async ({page})=>{
   const ariaWarnings=[];
+  const runtimeDiagnostics=[];
+  page.on('pageerror',error=>runtimeDiagnostics.push('PAGE_ERROR: '+String(error)));
   page.on('console',message=>{
     if(message.type()==='warning'&&message.text().includes('Blocked aria-hidden')) ariaWarnings.push(message.text());
+    if(message.type()==='error') runtimeDiagnostics.push('CONSOLE_ERROR: '+message.text());
   });
 
   await clean(page);
 
   const reveal=page.locator('#root .learning-card-front .button.primary.wide');
-  await expect(reveal).toBeVisible();
+  try {
+    await expect(reveal).toBeVisible({timeout:10000});
+  } catch(error) {
+    const state=await page.evaluate(()=>({
+      rootHtml:document.getElementById('root')?.innerHTML?.slice(0,2400)||'',
+      shell:!!document.querySelector('#root .app-shell'),
+      learningCard:!!document.querySelector('#root .learning-card'),
+      activeView:document.querySelector('#root [data-active-view]')?.getAttribute('data-active-view')||null
+    }));
+    throw new Error('Learning-card reveal control missing. diagnostics='+runtimeDiagnostics.join(' | ')+' state='+JSON.stringify(state)+' original='+String(error));
+  }
   await reveal.focus();
   await expect(reveal).toBeFocused();
 

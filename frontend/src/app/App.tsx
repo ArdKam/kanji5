@@ -59,6 +59,8 @@ import {
   saveMnemonic,
   updateSettings,
   type Rating,
+  type LearnerMeaningLanguage,
+  type LearnerMeaningReviewStatus,
   type VisualStructureInfo,
   type Settings,
   type Snapshot,
@@ -120,9 +122,16 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const revealed=Boolean(card.revealed);
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
-  const primaryMeanings=learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]);
-  const secondaryMeanings=learnerMeaningModel.secondary??[];
-  const referenceMeanings=learnerMeaningModel.reference??[];
+  const meaningRecords=Array.isArray(card.learnerMeaningRecords)?card.learnerMeaningRecords:[];
+  const verifiedLocalizedRecords=meaningRecords.filter(record=>record.language===getLanguage()&&record.reviewStatus==="verified"&&Boolean(record.text?.trim()));
+  const verifiedLocalizedPrimary=verifiedLocalizedRecords.filter(record=>record.priority==="primary");
+  const useReviewedLocalizedMeanings=verifiedLocalizedPrimary.length>0;
+  const localizedMeaningsFor=(priority:"primary"|"secondary"|"reference")=>verifiedLocalizedRecords.filter(record=>record.priority===priority).map(record=>record.text??"").filter(Boolean);
+  const primaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("primary"):(learnerMeaningModel.primary?.length?learnerMeaningModel.primary:(card.meanings??[]));
+  const secondaryMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("secondary"):(learnerMeaningModel.secondary??[]);
+  const referenceMeanings=useReviewedLocalizedMeanings?localizedMeaningsFor("reference"):(learnerMeaningModel.reference??[]);
+  const meaningLanguage=useReviewedLocalizedMeanings?getLanguage():"en";
+  const meaningFallbackLabel=getLanguage()==="fa"&&!useReviewedLocalizedMeanings?t("reviewedPersianMeaningUnavailable"):"";
   const preparedMeaningKey=[...primaryMeanings,...secondaryMeanings].join("\u0001");
   const [visualStructureInfo,setVisualStructureInfo]=useState<VisualStructureInfo|null>(null);
   const [visualStructureReady,setVisualStructureReady]=useState(false);
@@ -287,7 +296,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
   const referenceOn=learnerReadingModel.referenceOn??[];
   const referenceKun=learnerReadingModel.referenceKun??[];
   const hasReferenceInfo=referenceMeanings.length>0||referenceOn.length>0||referenceKun.length>0;
-  const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string}>>([]);
+  const [vocabularyExamples,setVocabularyExamples]=useState<Array<{word?:string;reading?:string;meaning?:string;meaningLanguage?:LearnerMeaningLanguage;source?:string;sourceVersion?:string|null;reviewStatus?:LearnerMeaningReviewStatus|"unknown"}>>([]);
   const [examplesResolved,setExamplesResolved]=useState(false);
   const [examplesError,setExamplesError]=useState(false);
   const [examplesRetryKey,setExamplesRetryKey]=useState(0);
@@ -484,8 +493,9 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                       <span className="learning-back-kanji" lang="ja" dir="ltr">{text(card.character??"")}</span>
                       <div className="learning-back-meaning-group">
                         <h3 className="learning-back-section-label">{t("meaning")}</h3>
-                        {primaryMeanings.length?<div className="meanings learning-back-meaning">{primaryMeanings.join(" · ")}</div>:null}
-                        {secondaryMeanings.length?<div className="learning-back-secondary-meaning">{secondaryMeanings.join(" · ")}</div>:null}
+                        {meaningFallbackLabel?<p className="learning-meaning-source-note" lang="fa">{meaningFallbackLabel}</p>:null}
+                        {primaryMeanings.length?<div className="meanings learning-back-meaning" lang={meaningLanguage}>{primaryMeanings.join(" · ")}</div>:null}
+                        {secondaryMeanings.length?<div className="learning-back-secondary-meaning" lang={meaningLanguage}>{secondaryMeanings.join(" · ")}</div>:null}
                         {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                       </div>
                     </div>
@@ -496,7 +506,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                       <div className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
                         <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
                         <span className="learning-back-quick-example-main" lang="ja" dir="ltr">{[displayExamples[0].word,displayExamples[0].reading].filter(Boolean).join(" · ")}</span>
-                        {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang="en" dir="ltr">{displayExamples[0].meaning}</small>:null}
+                        {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang={displayExamples[0].meaningLanguage&&displayExamples[0].meaningLanguage!=="unknown"?displayExamples[0].meaningLanguage:"en"} dir="auto">{displayExamples[0].meaning}</small>:null}
                       </div>
                     ):null}
                     </div>
@@ -525,7 +535,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
                     </div>
                   ) : null}
                   {!examplesLoading && !examplesError && !displayExamples.length ? <p className="learning-examples-empty">{getLanguage()==="fa"?"برای این کانجی مثال واژگانی در دسترس نیست.":"No vocabulary examples are available for this kanji."}</p> : null}
-                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i} lang="ja"><span className="example-content"><span className="example-main" lang="ja" dir="ltr">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning" lang="en" dir="ltr">{e.meaning}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
+                  {!examplesLoading && !examplesError ? visibleExamples.map((e,i)=><div className="example-row" key={(e.word??"")+"-"+i}><span className="example-content"><span className="example-main" lang="ja" dir="ltr">{[e.word,e.reading].filter(Boolean).join(" · ")}</span>{e.meaning?<small className="example-meaning" lang={e.meaningLanguage&&e.meaningLanguage!=="unknown"?e.meaningLanguage:"en"} dir={e.meaningLanguage==="fa"||e.meaningLanguage==="ja"?"auto":"ltr"}>{e.meaning}</small>:null}{e.meaning?<small className="example-source-label" lang={getLanguage()}>{e.reviewStatus==="verified"?t("verifiedSourceExample"):e.reviewStatus==="unreviewed"?t("unreviewedSourceExample"):t("sourceExampleReviewUnknown")}</small>:null}</span>{e.reading?<Audio value={e.reading} label={t("playWordPronunciation")}/>:null}</div>) : null}
                   {!examplesLoading && !examplesError && displayExamples.length>4 ? <button className="button secondary learning-example-expand" type="button" aria-expanded={examplesExpanded} onClick={()=>setExamplesExpanded(value=>!value)}>{examplesExpanded?learningCopy("showFewerExamples",getLanguage()):learningCopy("showMoreExamples",getLanguage())}</button> : null}
                 </div>
               </div>
@@ -638,7 +648,7 @@ function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNulla
             <button className="dialog-close" type="button" aria-label={t("close")} title={t("close")} onClick={closeReferenceInfo}>×</button>
           </div>
           <div className="dialog-grid learning-reference-info-grid">
-            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong>{referenceMeanings.join(" · ")}</strong></div>:null}
+            {referenceMeanings.length?<div className="stat-row"><span>{t("meaning")}</span><strong lang={meaningLanguage}>{referenceMeanings.join(" · ")}</strong></div>:null}
             {referenceOn.length?<div className="stat-row"><span>On’yomi</span><strong lang="ja">{referenceOn.join(" · ")}</strong></div>:null}
             {referenceKun.length?<div className="stat-row"><span>Kun’yomi</span><strong lang="ja">{referenceKun.join(" · ")}</strong></div>:null}
           </div>

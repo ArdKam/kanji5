@@ -654,3 +654,22 @@
 .learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
 .learning-card-back .learning-back-footer .rating-grid .rating{min-width:0;padding:5px 2px;font-size:var(--text-xs);line-height:1.15;overflow-wrap:anywhere}
 }
+
+/* Keep source-review cues legible without competing with the kanji or vocabulary content. */
+.learning-meaning-source-note {
+  margin: 0;
+  color: var(--mute);
+  font-size: 10px;
+  line-height: 1.2;
+}
+@media(max-width:420px){
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block { gap: 3px; }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings { gap: 3px; }
+}
+.example-source-label {
+  display: block;
+  margin-top: 2px;
+  color: var(--mute);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+}
