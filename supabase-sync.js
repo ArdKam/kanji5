@@ -562,11 +562,15 @@ const api = {
     const normalizedName = String(name || '').trim();
     if (!normalizedName) throw new Error('AUTH_PROFILE_NAME_REQUIRED');
     if (Array.from(normalizedName).length > 40) throw new Error('AUTH_PROFILE_NAME_TOO_LONG');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_REQUIRED');
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({
       data: { full_name: normalizedName }
     });
     if (error) throw error;
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), error: null });
   },
@@ -574,14 +578,20 @@ const api = {
     if (!currentPassword || !newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
     if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
     if (!user?.email) throw new Error('AUTH_EMAIL_REQUIRED');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_REQUIRED');
+    const email = user.email;
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { error: reauthError } = await c.auth.signInWithPassword({
-      email: user.email,
+      email,
       password: currentPassword
     });
     if (reauthError) throw new Error('AUTH_CURRENT_PASSWORD_INVALID');
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw error;
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), error: null });
   },
@@ -609,9 +619,13 @@ const api = {
   async setPassword(newPassword) {
     if (!newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
     if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_REQUIRED');
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw new Error('AUTH_SET_PASSWORD_FAILED');
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), recoveryPending: false, error: null });
   },
