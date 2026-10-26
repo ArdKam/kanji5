@@ -1,6 +1,6 @@
 # Japanese-Language Learning Content Integrity Audit — 2026-10-23
 
-**Repository baseline:** `main` at `a303071c5fe4457a98b921f26c2df3db741fdd99` (current-main replacement baseline for 2026-10-26).  
+**Repository baseline:** `main` at `cb7a8b0a4e037e6c405d0ee1bd69aa1df2f9e11d` (current-main replacement baseline for 2026-10-26).  
 **Static inventory:** `kanji-data.json` blob `6a35d02e4c1aab9974b83b253fe81a81644bbbf1` and `frontend/src/app/kanji-topics.json` blob `45036a2007c4cc5d1ff981219d1f04bf175d9f9a`; both match the files counted on the earlier `766f85c` snapshot. The intervening mainline change was documentation-only and did not alter either inventory file.  
 **Scope:** committed kanji catalog, source provenance, topic taxonomy, content-validation paths, and onboarding placement feedback.  
 **Review type:** reproducible structural inventory plus code-path audit. This is **not** a corpus-wide linguistic verification or independent native-speaker sign-off.
@@ -152,3 +152,8 @@ These are candidate review rules derived from the small reference check above. T
 - The existing repository tests already check catalog counts, character-based IDs, reading-token shape, source-projection preservation, topic IDs/memberships, and duplicate entries.
 - This patch adds targeted regression coverage for strict field types, malformed provider payloads, alternative vocabulary readings, and Tatoeba attribution/license metadata; it does not edit static corpus records.
 - The aggregate `npm test` suite and required GitHub Actions checks must pass on the exact pull-request head before this change is considered verified. This audit does not claim that full local execution or comprehensive linguistic review has occurred.
+
+
+## Integration refresh — 2026-10-27
+
+The session-isolation and deployed-SHA audit workflow change is now on main at `cb7a8b0a4e037e6c405d0ee1bd69aa1df2f9e11d`. This content-validation branch was rechecked against that baseline; it does not alter sync/session logic, account deletion, persistence schemas, FSRS, grading, or review history. Human Japanese/Persian review and live licensing/provenance acceptance remain required release gates.
