@@ -7,6 +7,12 @@ export default {
     if (req.method === "OPTIONS") {
       return new Response("ok", { headers: corsHeaders });
     }
+    if (req.method !== "POST") {
+      return Response.json(
+        { code: "METHOD_NOT_ALLOWED" },
+        { status: 405, headers: { ...corsHeaders, "Allow": "POST", "Content-Type": "application/json" } },
+      );
+    }
 
     const userId = ctx.userClaims?.id;
     if (!userId) {
