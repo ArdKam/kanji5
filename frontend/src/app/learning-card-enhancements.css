@@ -657,10 +657,10 @@
 
 /* Keep source-review cues legible without competing with the kanji or vocabulary content. */
 .learning-meaning-source-note {
-  margin: 0 0 2px;
+  margin: 0;
   color: var(--mute);
-  font-size: 10px;
-  line-height: 1.2;
+  font-size: 9px;
+  line-height: 1.1;
 }
 .example-source-label {
   display: block;
