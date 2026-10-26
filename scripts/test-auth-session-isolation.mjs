@@ -34,7 +34,7 @@ assert.match(syncOnce, /assertCurrentAuthSession\(session\);[\s\S]*?writeLocal\(
 const lock = block("async function withSyncLock(task, generation)", "function setSyncStatus", "withSyncLock");
 assert.match(lock, /activeSyncGeneration !== generation/, "A different account must not silently reuse the current sync task");
 assert.match(lock, /pendingAuthSyncGeneration = generation/, "A new account must queue a follow-up sync behind the old task");
-assert.match(lock, /authGeneration === nextGeneration\) scheduleSync\(\)/, "Only the still-current account may receive the queued sync");
+assert.match(lock, /authGeneration === nextGeneration[\\s\\S]*?scheduleSync\\(\\)/, "Only the still-current account may receive the queued sync");
 
 const syncNow = block("async function syncNow()", "function scheduleSync()", "syncNow");
 assert.match(syncNow, /const session = captureAuthSession\(\)/, "Sync must take a session snapshot");
