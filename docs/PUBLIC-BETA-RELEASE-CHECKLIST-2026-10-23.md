@@ -96,3 +96,17 @@ These are the repository workflow commands; outcomes below are taken from linked
 ## Release recommendation
 
 **NO-GO for public beta.** Reopen the decision only after one frozen exact SHA has: all required PR/main CI checks green; a matching Pages deployment and current-SHA live artifact/offline/core-flow evidence; closed production security controls and a completed live security audit; accepted account/local deletion and privacy/legal governance; independent educational/placement sign-off; and dated Android/iOS plus accessibility/device evidence. A green build, earlier successful deployment, open implementation PR, or offline shell alone is insufficient.
+
+## Current-main addendum — 2026-10-27
+
+**Current-main integration baseline:** `cb7a8b0a4e037e6c405d0ee1bd69aa1df2f9e11d` (session-isolation safeguards and deployed-SHA security-audit workflow merged). **Release status remains NO-GO.** This is repository-side status only; the exact live Pages SHA has not been verified in this addendum.
+
+- **Session isolation:** merged to main; exact-head root and React/auth-race browser checks passed before merge. Still require a post-deploy live security audit and real authenticated multi-device acceptance.
+- **Japanese content integrity:** current-main PR #647 is awaiting React build re-run after a prior account-shell test encountered HTTP 503 while loading the app; the engine validation passed. Do not count it as merged or accepted until the rerun completes successfully.
+- **Meaning provenance and review status:** PR #644 is under current CI, including responsive Learning Card tests and rendered visual audit. The compact Persian card must pass its 360×640 reading/example visibility gate before merge.
+- **Account deletion:** PR #617 is under a fresh CI run against the session-isolation integration baseline. It is not yet merged. A disposable-account production test must verify deletion, cascade, post-deletion existing-JWT access denial, and separation from browser-local learning-data erasure.
+- **HTTP CSP response header:** remains a release blocker until verified on the actual deployed response. GitHub Pages does not consume Netlify/Cloudflare `_headers` files; a meta CSP is not a substitute for an HTTP header. Select a header-capable hosting/CDN path or explicitly revise the security acceptance requirement before public beta.
+- **Supabase leaked-password protection:** remains blocked pending owner decision/plan capability and verification; repository code cannot enable a project-level paid feature on the owner's behalf.
+- **Still outstanding:** production exact-SHA audit, deletion/JWT probes, privacy/legal approval, independent Japanese/Persian content and placement review, physical Android/iOS and browser/accessibility matrix, backup/restore rollback, artifact hashes, offline smoke, and beta cohort sign-off.
+
+Do not promote this checklist to PASS on the basis of merged PRs alone. Each item requires evidence tied to the exact source SHA or deployed artifact.
