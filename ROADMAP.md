@@ -1,3 +1,19 @@
+## 2.1.0 Public-beta release checkpoint — 2026-10-23
+
+**Current-main SHA at checkpoint:** `f06396e0f0d353b097072a28d541bc4db290cdb6` ([commit](https://github.com/ArdKam/kanji5/commit/f06396e0f0d353b097072a28d541bc4db290cdb6)), a documentation-only merge of [PR #621](https://github.com/ArdKam/kanji5/pull/621) capturing Kanji Flow UX lessons. The new commit does not itself change app code; all release statements still require exact-SHA evidence.
+
+- **Prior app-code checkpoint `766f85c`:** engine validation passed; React presentation CI's first attempt failed one Review/Practice setup case (13/14) because a Good-rating click was not observed as persisted within 10 seconds. The rerun on the same code SHA passed with no source change: [React run #4078](https://github.com/ArdKam/kanji5/actions/runs/40003155485). This is a recovered CI result; its original cause has not been conclusively established as a product regression or test flake.
+- **Current-main React CI:** [run #4130](https://github.com/ArdKam/kanji5/actions/runs/40009475936) is still running at this checkpoint; its WebKit compatibility job is green while its main build job is running. Do not mark current-main CI complete until the build and engine checks for `f06396e0f0d353b097072a28d541bc4db290cdb6` finish successfully.
+- **Source-to-production drift:** comparing last verified deployed SHA `183888f31be316aaa1c60ce57e301d4f6b37e454` with current `main` `f06396e0f0d353b097072a28d541bc4db290cdb6` returns `ahead_by=8` and 21 changed paths. The delta includes the Learning Card CSS/browser-test changes and Saved Kanji Dictionary/sync implementation. These changes are merged to source but are **not verified live** until a matching build, deployment, artifact-hash check and live smoke succeed.
+- **Current-main production deployment:** not verified. The last successful Pages deployment is [run #1720](https://github.com/ArdKam/kanji5/actions/runs/39994041669) for older application SHA `183888f31be316aaa1c60ce57e301d4f6b37e454`. Later deployment attempts [#1722](https://github.com/ArdKam/kanji5/actions/runs/40005633824) and [#1724](https://github.com/ArdKam/kanji5/actions/runs/40009002010) correctly refused stale verified SHAs because `main` advanced; their build/deploy/live steps were skipped. Do not disable the stale-SHA guard.
+- **Main protection:** [Protect main — PR and CI](https://github.com/ArdKam/kanji5/rules/25670314) remains active. No branch protection, required status, security, or deployment check was bypassed.
+- **Security/privacy/education/device gates:** unchanged and still blocking: production leaked-password protection remains disabled per the 2026-10-23 Supabase Security Advisor evidence; deployed HTTP response CSP header was absent in run #1720; live security audit, complete local-data erasure, private privacy/account channel, legal/license decisions, independent educational/placement approval, and physical Android/iOS/device-accessibility tests remain open under [issue #603](https://github.com/ArdKam/kanji5/issues/603).
+- **Implementation PRs:** #617 (account deletion), #618 (offline cache), #620 (rating contrast), #622 (Reading Lab) and #623 (sync integrity) remain candidates unless latest PR/CI state shows otherwise. A branch based before current main must be refreshed and pass required checks; merged code or a successful PR workflow is not current deployment evidence. Keep the fixed 2,202 KB startup-transfer threshold under [issue #609](https://github.com/ArdKam/kanji5/issues/609).
+
+Release decision remains **NO-GO** until one frozen exact SHA has green required CI, a matching successful Pages deployment and live/offline/core-flow checks, production security evidence, privacy/legal decisions, independent educational approval, and dated real-device/accessibility evidence.
+
+---
+
 ## 2.0.9 Current-main follow-up — 2026-10-23
 
 **Current main SHA at update:** `2fda3fbdb76c0931a09eb378e7e778aade24154d`. PR #604 (read-only live-security audit harness) was merged at `2fda3fbdb76c0931a09eb378e7e778aade24154d`; the audit itself still requires manual dispatch after the matching deployment.
@@ -2615,3 +2631,11 @@ The integrity test now enumerates all 144 new assignments, preserves the 13 nega
 - **Metrics/telemetry:** the audit defines activation within 24 hours, time to first meaningful result, due-review completion, W1 and W4 retention, feature task-completion rate, weekly consistency, and later delayed-recall evidence with exact denominators/data needs. These are definitions, not current measured results. No instrumentation has been added. Prefer existing/local aggregates; a future cohort design needs explicit purpose, consent, opt-out, retention/deletion, and exclusion of raw answers, drawing paths, personal mnemonics, pasted reading text, and exact search queries.
 
 **Next action:** no implementation or deployment blocker remains for this handoff. Future work should validate the first-card/rating flow with learners, test return after 3/7/14 missed days, validate rating explanations against the scheduler contract, and measure contextual feature discovery. Keep those as separate, evidence-led tasks; do not add cross-user telemetry without a documented purpose and consent/privacy review. Before further changes, inspect current main and preserve concurrent roadmap edits.
+
+## 2.1.1 Current-main release checkpoint — 2026-10-27
+
+**Main SHA:** `cb7a8b0a4e037e6c405d0ee1bd69aa1df2f9e11d` (auth-session isolation and deployed-SHA audit workflow merged). **Public beta remains NO-GO.** The production Pages SHA is not yet independently verified.
+
+- Current work in flight: #617 account deletion; #644 learner-meaning provenance/review status and compact-card acceptance; #647 Japanese content validation/provenance. These PRs remain unmerged until exact-head checks pass.
+- Security gate: live HTTP CSP header and audit must be verified against the exact deployed SHA. A future workflow is not itself a security pass. Supabase leaked-password protection, deletion/JWT probes, legal/privacy approval, and owner-controlled hosting/plan decisions remain external gates.
+- Do not start Vocabulary & Grammar expansion until Stage 0 Release Integrity and Stage 1 Public Readiness gates are closed with recorded evidence.
