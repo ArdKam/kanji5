@@ -2631,3 +2631,11 @@ The integrity test now enumerates all 144 new assignments, preserves the 13 nega
 - **Metrics/telemetry:** the audit defines activation within 24 hours, time to first meaningful result, due-review completion, W1 and W4 retention, feature task-completion rate, weekly consistency, and later delayed-recall evidence with exact denominators/data needs. These are definitions, not current measured results. No instrumentation has been added. Prefer existing/local aggregates; a future cohort design needs explicit purpose, consent, opt-out, retention/deletion, and exclusion of raw answers, drawing paths, personal mnemonics, pasted reading text, and exact search queries.
 
 **Next action:** no implementation or deployment blocker remains for this handoff. Future work should validate the first-card/rating flow with learners, test return after 3/7/14 missed days, validate rating explanations against the scheduler contract, and measure contextual feature discovery. Keep those as separate, evidence-led tasks; do not add cross-user telemetry without a documented purpose and consent/privacy review. Before further changes, inspect current main and preserve concurrent roadmap edits.
+
+## 2.1.1 Current-main release checkpoint — 2026-10-27
+
+**Main SHA:** `cb7a8b0a4e037e6c405d0ee1bd69aa1df2f9e11d` (auth-session isolation and deployed-SHA audit workflow merged). **Public beta remains NO-GO.** The production Pages SHA is not yet independently verified.
+
+- Current work in flight: #617 account deletion; #644 learner-meaning provenance/review status and compact-card acceptance; #647 Japanese content validation/provenance. These PRs remain unmerged until exact-head checks pass.
+- Security gate: live HTTP CSP header and audit must be verified against the exact deployed SHA. A future workflow is not itself a security pass. Supabase leaked-password protection, deletion/JWT probes, legal/privacy approval, and owner-controlled hosting/plan decisions remain external gates.
+- Do not start Vocabulary & Grammar expansion until Stage 0 Release Integrity and Stage 1 Public Readiness gates are closed with recorded evidence.
