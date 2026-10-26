@@ -397,7 +397,7 @@ async function syncOnce(session) {
   return { retry: false };
 }
 
-function syncNow() {
+async function syncNow() {
   const session = captureAuthSession();
   if (!session) return;
   return withSyncLock(async () => {
