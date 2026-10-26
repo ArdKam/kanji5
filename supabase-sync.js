@@ -315,9 +315,7 @@ async function withSyncLock(task, generation) {
       if (syncRerunRequested) {
         syncRerunRequested = false;
         scheduleSync();
-      } else if (nextGeneration !== null && user?.id && authGeneration === nextGeneration) {
-        scheduleSync();
-      }
+      } else if (nextGeneration !== null && user?.id && authGeneration === nextGeneration) scheduleSync();
     }
   })();
   return syncPromise;
