@@ -71,7 +71,7 @@ export function VocabularyExamples({ character: kanjiCharacter, language, catalo
                 <div className="dictionary-vocabulary-main">
                   <strong>{renderWord(item.word, item.reading, kanjiCharacter)}</strong>
                 </div>
-                <bdi className="dictionary-vocabulary-meaning" dir="auto">{item.meaning}</bdi>
+                <bdi className="dictionary-vocabulary-meaning" dir="auto" lang={item.meaningLanguage&&item.meaningLanguage!=="unknown"?item.meaningLanguage:undefined}>{item.meaning}</bdi>
                 <DictionaryAudio value={item.reading} label={t("playWordPronunciation", language) + " " + item.word} />
               </div>
             ))}
