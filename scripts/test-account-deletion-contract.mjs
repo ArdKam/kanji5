@@ -23,6 +23,7 @@ assert.match(erasure, /Clears this browser's learning progress/i, "local erasure
 assert.match(erasure, /does not delete your account or synced cloud data/i, "local erasure must not imply cloud deletion");
 assert.match(deployedFunction, /withSupabase\(\{\s*auth:\s*"user"\s*\}/, "function auth must require a verified user");
 assert.match(deployedFunction, /const userId = ctx\.userClaims\?\.id/, "the target identity must come from verified claims");
+assert.match(deployedFunction, /req\.method !== "POST"[\s\S]*?status: 405[\s\S]*?Allow: "POST"/, "account deletion must reject non-POST methods before deleting");
 assert.doesNotMatch(deployedFunction, /req\.json\(\)[\s\S]{0,500}userId/, "the function must not trust a request-body user ID");
 assert.match(deployedFunction, /deleteUser\(userId,\s*false\)/, "account deletion must be hard deletion, not soft deletion");
 assert.match(deployedFunction, /\{ deleted: true \}/, "success must be explicit");
