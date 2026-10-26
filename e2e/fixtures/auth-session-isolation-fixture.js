@@ -47,7 +47,7 @@ const harness = {
   }
 };
 
-window.__KANJI5_SUPABASE = {
+window.KANJI5_SUPABASE = {
   url: "https://auth-session-test.supabase.co",
   anonKey: "sb_publishable_test_only"
 };
