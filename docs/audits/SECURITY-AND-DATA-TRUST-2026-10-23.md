@@ -2,7 +2,7 @@
 
 ## Scope and evidence
 
-- Current-main port baseline: `main` at `0d0c1d86cf0f8a87f5a4c78f3ad205a4f0ae5d2f`. The initial session-isolation port was reviewed against the current-main sync implementation, preserving the later concurrent-write and tombstone safeguards from PR #623 (`10a9d79d26b75c594c91a6b97482ed36f0ca3281`); the focused fix was ported onto this current-main commit rather than carrying the older branch base.
+- Current-main port baseline: `main` at `88c184113ebf267695e80670b1e0d7cf3581dc58`. The initial session-isolation port was reviewed against the current-main sync implementation, preserving the later concurrent-write and tombstone safeguards from PR #623 (`10a9d79d26b75c594c91a6b97482ed36f0ca3281`); the focused fix was ported onto this current-main commit rather than carrying the older branch base.
 - Production Supabase project metadata: project named Kanji5, ref `vbrtzkejodkddfdbolbo`, organization tier `free`. The repository's `supabase-config.js` targets this project's hostname and contains a public browser key; no service-role/secret-key marker was found. The public key value is intentionally not copied into this report.
 - Production Pages URL: `https://ardkam.github.io/kanji5`; `.github/workflows/pages-deploy.yml` builds and stages the exact React-verified commit before deployment.
 - Production database checks were read-only metadata queries. No user rows or tokens were printed, and no destructive operation was run.
