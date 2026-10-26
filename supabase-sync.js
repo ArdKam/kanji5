@@ -312,9 +312,10 @@ async function withSyncLock(task, generation) {
       activeSyncGeneration = null;
       const nextGeneration = pendingAuthSyncGeneration;
       pendingAuthSyncGeneration = null;
-      const rerunForCurrentSession = nextGeneration !== null && user?.id && authGeneration === nextGeneration;
-      if (syncRerunRequested || rerunForCurrentSession) {
+      if (syncRerunRequested) {
         syncRerunRequested = false;
+        scheduleSync();
+      } else if (nextGeneration !== null && user?.id && authGeneration === nextGeneration) {
         scheduleSync();
       }
     }
