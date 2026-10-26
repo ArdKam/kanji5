@@ -80,3 +80,9 @@ This is operational security evidence, not a compliance certification. Repeat th
 The release acceptance tracker for these and the privacy, legal, educational, and device blockers is [issue #603](https://github.com/ArdKam/kanji5/issues/603).
 
 The current-main follow-up dated 2026-10-23 links the public-beta acceptance tracker at https://github.com/ArdKam/kanji5/issues/603 and the startup-transfer blocker at https://github.com/ArdKam/kanji5/issues/609. The read-only live-security audit harness was merged by PR #604 at 2fda3fbdb76c0931a09eb378e7e778aade24154d; do not mark live audit complete until manually dispatched against the deployed SHA.
+
+## Current-main integration refresh — 2026-10-27
+
+- Session-isolation safeguards were merged to `main` at `cb7a8b0a4e037e6c405d0ee1bd69aa1df2f9e11d` after the original account-deletion candidate checks. The PR must be revalidated against this integration baseline before merge.
+- The browser deletion action is intended to delete the authenticated account and server-side account data only. Local learning data remains separate and requires the explicit local-data erasure action.
+- **Production acceptance remains unverified:** do not treat repository tests or the function's previously observed active/JWT-verified configuration as proof that deletion works on the current live deployment. A controlled disposable-account test must verify successful deletion, cloud-row cascade, no re-registration/read/write with an existing pre-deletion JWT, and the expected local-data behavior.
