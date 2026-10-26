@@ -18,9 +18,10 @@ jobs:
       run:
         working-directory: frontend
     steps:
+      # For pull_request events, the default github.sha is the synthetic
+      # PR merge commit. Testing it catches integration regressions against
+      # the current base branch instead of testing the head branch in isolation.
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
