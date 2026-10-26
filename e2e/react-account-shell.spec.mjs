@@ -196,7 +196,7 @@ test('signed-in account hub renders one identity surface, sync metrics, and sepa
   await expect(page.locator('.account-identity-card')).toHaveCount(1);
   await expect(page.locator('.account-identity-card')).toContainText('Ardin');
   await expect(page.locator('.account-identity-card')).toContainText('arden@example.com');
-  await expect(page.locator('.account-section')).toHaveCount(4);
+  await expect(page.locator('.account-section')).toHaveCount(5);
   await expect(page.locator('.account-section-tabs')).toHaveCount(0);
   await expect(page.locator('.account-sync-snapshot')).toContainText('24');
   await expect(page.locator('.account-sync-snapshot')).toContainText('120');

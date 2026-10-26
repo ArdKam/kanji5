@@ -37,6 +37,8 @@ export type AccountApi = {
   sendPasswordReset: (email: string) => Promise<void>;
   setPassword: (newPassword: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Permanently deletes the authenticated account and server-side account data; local browser learning data is preserved. */
+  deleteAccount: () => Promise<void>;
   /** Clears only the persisted session for this browser, never other device sessions. */
   signOutLocal?: () => Promise<void>;
   syncNow: () => Promise<void>;
