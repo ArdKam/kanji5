@@ -288,7 +288,7 @@ test("Persian onboarding localizes the daily workload and avoids uppercase eyebr
   await expect(onboarding.getByRole("heading", { name: "هر کانجی را چطور یاد می‌گیری؟" })).toBeVisible();
   await onboarding.getByRole("button", { name: "ادامه", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "از کجا شروع کنیم؟" })).toBeVisible();
-  await onboarding.getByRole("button", { name: "از ابتدا", exact: true }).click();
+  await onboarding.getByRole("button", { name: /از ابتدا/ }).click();
   await onboarding.getByRole("button", { name: "ادامه", exact: true }).click();
   await expect(onboarding.getByRole("heading", { name: "روزانه چند کانجی جدید؟" })).toBeVisible();
 
