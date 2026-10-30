@@ -54,7 +54,8 @@ for (const selector of [
   assert.ok(styles.includes(selector), "Ratings must use shared semantic state tokens: " + selector);
 }
 assert.ok(styles.includes("--surface-soft:var(--ds-color-surface-subtle);--surface-panel:var(--ds-color-surface-panel);--progress-track:var(--ds-color-progress-track);"), "Legacy surface aliases must resolve through semantic tokens");
-assert.ok(designSystem.includes("--ds-color-surface-subtle: light-dark(#F1EDE6, #292724);--ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);"), "Dark surfaces must be defined by shared light-dark semantic tokens");
+assert.ok(designSystem.includes("--ds-color-surface-subtle: light-dark(#F1EDE6, #292724);"), "Subtle surface must resolve through a shared light-dark semantic token");
+assert.ok(designSystem.includes("--ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);"), "Elevated surface must resolve through a shared light-dark semantic token");
 assert.ok(designSystem.includes("--ds-color-progress-track: light-dark(#E9E3D8, #35312C);"), "Progress track must resolve from the semantic token in both themes");
 assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|audio-button|button|pager-button|settings-language-button|progress|stimulus|example-row|reason|insights|header-tools-menu|rating-again|rating-hard|rating-good|rating-easy)(?:[,{])/.test(systemDark), false, "Unscoped dark overrides could leak into manual Light mode");
 
