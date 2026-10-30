@@ -160,14 +160,17 @@ assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-focus-optio
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-focus-option.active { color: #171614; }'), "Dark selected focus option foreground must be explicit");
 
 
-for (const [rating, foreground, borderColor, background] of [
-  ["again", "--color-danger", "--color-danger", "--color-danger"],
-  ["hard", "--color-warning", "--color-warning", "--color-warning"],
-  ["good", "--color-success", "--color-success", "--color-success"],
-  ["easy", "--ai", "--ai", "--ai"],
+// Learning Card rating controls must consume the same theme-aware semantic
+// state roles as the rest of the application; legacy color-mix aliases would
+// override the shared palette because this stylesheet is injected after styles.css.
+for (const [rating, state] of [
+  ["again", "danger"],
+  ["hard", "warning"],
+  ["good", "success"],
+  ["easy", "info"],
 ]) {
-  const rule = new RegExp("\\.learning-card-back\\s+\\.rating-" + rating + "\\{[^}]*color:color-mix\\(in srgb,var\\(" + foreground + "\\)[^}]*border:1px solid color-mix\\(in srgb,var\\(" + borderColor + "\\)[^}]*background:color-mix\\(in srgb,var\\(" + background + "\\)");
-  assert.match(learningSurface, rule, "Light Learning Card " + rating + " must use its semantic foreground/background and restrained border");
+  const rule = `.learning-card-back .rating-${rating}{color:var(--ds-state-${state}-text);border:1px solid var(--ds-state-${state}-border);background:var(--ds-state-${state}-bg)}`;
+  assert.ok(learningSurface.includes(rule), "Learning Card " + rating + " must use the shared theme-aware semantic state tokens");
 }
 
 console.log("Dark-theme parity contract passed.");
