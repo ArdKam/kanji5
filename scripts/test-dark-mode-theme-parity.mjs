@@ -68,16 +68,17 @@ assert.ok(styles.includes(".progress{height:9px;border-radius:var(--radius-xl);b
 assert.ok(styles.includes(".reading{min-height:96px;padding:14px;border:1px solid var(--line-soft);border-radius:var(--radius-lg);background:var(--surface-soft);"));
 assert.ok(styles.includes(".reason{margin:7px 0 0;padding:8px 10px;border:1px solid var(--line-soft);border-radius:14px;background:var(--surface-soft);"));
 assert.ok(styles.includes(".insights{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface-panel)}"));
-assert.ok(styles.includes(':root[data-theme="dark"]{color-scheme:dark;--washi:#171614;'));
-assert.ok(styles.includes("--progress-track:#35312c;"));
+assert.ok(styles.includes(':root[data-theme="dark"]{color-scheme:dark;}'), "Manual Dark must explicitly resolve the dark color scheme");
+assert.ok(designSystem.includes("--ds-color-canvas: light-dark(var(--ds-brand-rice-paper), #171614);"), "Canvas must resolve from semantic light/dark tokens");
+assert.ok(designSystem.includes("--ds-color-progress-track: light-dark(#E9E3D8, #35312C);"));
 assert.ok(styles.includes("background:radial-gradient(circle at 8% 6%,rgba(184,74,56,.05),transparent 24rem),var(--washi);color:var(--sumi)"));
 assert.equal(styles.includes(':root[data-theme="dark"] :root[data-theme="dark"] .progress'), false, "Broken double-root progress selector must not return");
 assert.equal(styles.includes("@media(prefers-color-scheme:dark){#kanji5-account-launcher"), false, "Account launcher OS-dark styling must not override a manually selected Light theme");
 assert.ok(styles.includes(':root[data-theme="system"] #kanji5-account-launcher'));
 
 // Theme-aware semantic colors are used for error text and destructive indicators.
-assert.ok(styles.includes("--color-danger:#a23a2a"));
-assert.ok(styles.includes("--color-danger:#ff9b91"));
+assert.ok(designSystem.includes("--ds-state-danger-text: light-dark(#8E3026, #FF9B91);"));
+assert.ok(designSystem.includes("--ds-state-danger-bg: light-dark(#F8ECE8, #332724);"));
 assert.ok(styles.includes(".account-error{margin:12px 0 0;color:var(--color-danger)"));
 assert.ok(styles.includes(".sync-error{color:var(--color-danger)"));
 assert.ok(styles.includes(".account-sync-badge.sync-error{color:var(--color-danger)"));
@@ -100,35 +101,35 @@ function contrast(foreground, background) {
   const pair = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
   return (pair[0] + 0.05) / (pair[1] + 0.05);
 }
-assert.ok(contrast("#a23a2a", "#fdfbf7") >= 4.5, "Light error text must meet WCAG AA contrast");
-assert.ok(contrast("#ff9b91", "#23211e") >= 4.5, "Dark error text must meet WCAG AA contrast");
-assert.ok(contrast("#171614", "#e06a5f") >= 4.5, "Dark brand-red primary button text must meet WCAG AA contrast");
-assert.ok(contrast("#171614", "#e47c72") >= 4.5, "Dark brand-red primary hover/focus text must meet WCAG AA contrast");
-assert.ok(contrast("#e9948c", "#171614") >= 3, "Dark brand focus ring must meet the 3:1 non-text contrast target against the app canvas");
+assert.ok(contrast("#8E3026", "#FDFBF7") >= 4.5, "Light semantic danger text must meet WCAG AA contrast");
+assert.ok(contrast("#FF9B91", "#23211E") >= 4.5, "Dark semantic danger text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#E06A5F") >= 4.5, "Dark primary action text must meet WCAG AA contrast");
+assert.ok(contrast("#171614", "#E47C72") >= 4.5, "Dark primary hover text must meet WCAG AA contrast");
+assert.ok(contrast("#FF9B91", "#171614") >= 3, "Dark semantic focus ring must meet the 3:1 non-text contrast target against the app canvas");
 
 
-assert.ok(styles.includes("--color-surface-elevated:#2b2824"), "Dark elevated surfaces must not remain near-white");
+assert.ok(designSystem.includes("--ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);"), "Elevated surfaces must resolve to a dark semantic surface in Dark mode");
 const manualDarkStart = styles.indexOf(':root[data-theme="dark"]{');
 const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDarkStart);
 const manualDark = styles.slice(manualDarkStart, manualLightStart);
-assert.ok(manualDark.includes("--color-surface-elevated:#2b2824"), "Manual Dark must define its own elevated surface token");
-assert.ok(manualDark.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Manual Dark must define its own loading tokens");
-assert.ok(styles.includes(':root[data-theme="dark"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}'), "Manual Dark primary buttons must use the brand red with an explicit high-contrast foreground");
-assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary{background:var(--shu);border-color:var(--shu);color:#171614;}'), "System + OS Dark primary buttons must use the brand red with an explicit high-contrast foreground");
-assert.ok(styles.includes(':root[data-theme="dark"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--shu) 88%,#fff);border-color:var(--shu);color:#171614;box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 28%,transparent);}'), "Manual Dark primary hover/focus states must remain red and preserve contrast");
-assert.ok(styles.includes(':root[data-theme="dark"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:color-mix(in srgb,var(--shu) 72%,#fff);}'), "Manual Dark keyboard focus must use a high-contrast brand ring");
-assert.ok(systemDark.includes(':root[data-theme="system"] :is(button,summary,a,input,select,textarea):focus-visible{outline-color:color-mix(in srgb,var(--shu) 72%,#fff);}'), "System Dark keyboard focus must use a high-contrast brand ring");
+assert.ok(manualDark.includes("--color-surface-elevated:var(--ds-color-surface-elevated);"), "Manual Dark must consume the shared elevated surface token");
+assert.ok(manualDark.includes("--skeleton-base:var(--ds-color-skeleton-base);"), "Manual Dark must consume shared loading tokens");
+assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:var(--ds-color-action-primary-text)}"), "Primary buttons must consume semantic action and foreground tokens");
+assert.ok(designSystem.includes("--ds-color-action-primary-text: light-dark(#FDFBF7, #171614);"), "Primary action foreground must meet contrast in both themes");
+assert.ok(styles.includes(".button.primary:hover:not(:disabled){background:var(--ds-color-action-primary-hover);border-color:var(--ds-color-action-primary-hover)}"), "Primary hover state must use the semantic action-hover token");
+assert.ok(designSystem.includes("--ds-focus-ring: light-dark(#505F83, #FF9B91);"), "Keyboard focus must use the shared theme-aware focus token");
+assert.ok(designSystem.includes("--ds-focus-offset: 3px;"), "Keyboard focus offset must be defined centrally");
 
-assert.ok(systemDark.includes(':root[data-theme="system"] .button.primary:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--shu) 88%,#fff);border-color:var(--shu);color:#171614;box-shadow:0 0 0 2px color-mix(in srgb,var(--shu) 28%,transparent);}'), "System Dark primary hover/focus states must remain red and preserve contrast");
-assert.ok(styles.includes(':root[data-theme="dark"] .audio-button:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 72%,#fff);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "Manual Dark audio focus must use the theme-aware focus color");
-assert.ok(systemDark.includes(':root[data-theme="system"] .audio-button:focus-visible{outline:3px solid color-mix(in srgb,var(--shu) 72%,#fff);outline-offset:3px;background:var(--washi);border-color:var(--line-interactive);color:var(--sumi);}'), "System Dark audio focus must use the theme-aware focus color");
+assert.ok(designSystem.includes("--ds-color-action-primary-hover: light-dark(#424F70, #E47C72);"), "Primary hover color must be theme-aware");
+assert.ok(designSystem.includes("--ds-focus-ring: light-dark(#505F83, #FF9B91);"), "Audio focus must share the theme-aware focus color");
+assert.ok(designSystem.includes("--ds-focus-offset: 3px;"), "System Dark audio focus must retain the shared offset");
 assert.equal(styles.includes(':root[data-theme="light"] .button.primary{background:var(--shu);'), false, "Dark brand-red primary rules must not leak into manual Light");
 assert.ok(topic.includes(':root[data-theme="dark"] .topic-learning-search:focus-within { outline-color: color-mix(in srgb, var(--shu) 72%, #fff); }'), "Manual Dark topic search must have a visible focus ring");
 assert.ok(topic.includes(':root[data-theme="system"] .topic-learning-search:focus-within { outline-color: color-mix(in srgb, var(--shu) 72%, #fff); }'), "System Dark topic search must have a visible focus ring");
-assert.ok(styles.includes(".button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);"), "Dark neutral controls must explicitly retain readable text without flattening rating colors");
-assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;--skeleton-track:#35312c;--skeleton-fill:#4b463f;"), "Dark loading placeholders must use dark tokens");
+assert.ok(styles.includes(':root[data-theme="dark"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);}'), "Manual Dark neutral controls must use semantic surface and text tokens");
+assert.ok(designSystem.includes("--ds-color-skeleton-base: light-dark(#EEE7DA, #292724);"), "Dark loading placeholders must use semantic tokens");
 assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
-assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#332724;color:#e8b4ac;border-color:#8d625a;}'), "Dark Again feedback must use subdued semantic colors");
+assert.ok(styles.includes(".app-shell .rating-again{color:var(--ds-state-danger-text);border-color:var(--ds-state-danger-border);background:var(--ds-state-danger-bg)}"), "Again feedback must use semantic danger tokens");
 for (const theme of ["dark", "system"]) {
   const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);}`;
   assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must use shared surface/text tokens without overriding semantic rating buttons`);
