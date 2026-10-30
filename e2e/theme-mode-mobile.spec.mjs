@@ -243,6 +243,23 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
       const rating = [...element.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name));
       return { rating, background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
     }));
+    const tokenDiagnostics = await ratings.first().evaluate((element) => {
+      const names = ["--ds-state-danger-bg", "--ds-state-warning-bg", "--ds-state-success-bg", "--ds-state-info-bg"];
+      const root = getComputedStyle(document.documentElement);
+      const card = getComputedStyle(element.closest(".learning-card"));
+      return {
+        theme: document.documentElement.dataset.theme,
+        colorScheme: getComputedStyle(document.documentElement).colorScheme,
+        tokens: Object.fromEntries(names.map((name) => [name, { root: root.getPropertyValue(name).trim(), card: card.getPropertyValue(name).trim() }])),
+        buttons: [...element.closest(".rating-grid").querySelectorAll(".rating")].map((button) => ({
+          className: button.className,
+          matches: button.matches(".app-shell .rating-again, .app-shell .rating-hard, .app-shell .rating-good, .app-shell .rating-easy"),
+          background: getComputedStyle(button).backgroundColor,
+          inline: button.getAttribute("style")
+        }))
+      };
+    });
+    console.log("RATING_TOKEN_DIAGNOSTICS", JSON.stringify(tokenDiagnostics));
     const backgrounds = Object.fromEntries(palette.map((item) => [item.rating, item.background]));
     expect(backgrounds, "Each rating must retain its own semantic dark-mode color regardless of DOM order").toEqual({
       "rating-again": "rgb(51, 39, 36)",
