@@ -135,13 +135,12 @@ for (const theme of ["dark", "system"]) {
   const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);}`;
   assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must use shared surface/text tokens without overriding semantic rating buttons`);
   if (theme === "dark") {
-    for (const [rating, background, foreground] of [
-      ["again", "#332724", "#e8b4ac"],
-      ["hard", "#332f27", "#d8c8a5"],
-      ["good", "#283128", "#bed0bd"],
-      ["easy", "#27303b", "#c1cee0"],
-    ]) {
-      assert.ok(styles.includes(`:root[data-theme="dark"] .rating-${rating}{background:${background};color:${foreground};`), `Manual Dark ${rating} rating must keep a semantic foreground/background pair`);
+    for (const rating of ["again", "hard", "good", "easy"]) {
+      assert.equal(
+        styles.includes(`:root[data-theme="dark"] .rating-${rating}{background:#`),
+        false,
+        `Manual Dark ${rating} rating must not bypass shared semantic state tokens with fixed colors`
+      );
     }
   } else {
     assert.ok(systemDark.includes(':root[data-theme="system"]{color-scheme:dark;}'), "System + OS Dark must resolve the semantic color-scheme");
