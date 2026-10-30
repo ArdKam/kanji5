@@ -128,8 +128,8 @@ assert.ok(styles.includes("--skeleton-base:#292724;--skeleton-highlight:#35312c;
 assert.ok(styles.includes("background:linear-gradient(90deg,var(--skeleton-base) 20%,var(--skeleton-highlight) 40%,var(--skeleton-base) 60%)"), "Loading shimmer must use theme-aware tokens");
 assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#332724;color:#e8b4ac;border-color:#8d625a;}'), "Dark Again feedback must use subdued semantic colors");
 for (const theme of ["dark", "system"]) {
-  const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);}`;
-  assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must not override semantic rating buttons`);
+  const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:var(--ds-color-surface-subtle);color:var(--ds-color-text-primary);}`;
+  assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must use shared surface/text tokens without overriding semantic rating buttons`);
   if (theme === "dark") {
     for (const [rating, background, foreground] of [
       ["again", "#332724", "#e8b4ac"],
