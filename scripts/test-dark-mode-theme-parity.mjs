@@ -6,6 +6,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 const styles = await read("frontend/src/styles.css");
 const app = await read("frontend/src/app/App.tsx");
 const onboarding = await read("frontend/src/app/onboarding/OnboardingFlow.tsx");
+const designSystem = await read("frontend/src/design-system.css");
 const dictionary = await read("frontend/src/app/dictionary.css");
 const learningSurface = await read("frontend/src/app/learning-surface.css");
 const topic = await read("frontend/src/app/topic-learning.css");
@@ -26,9 +27,9 @@ const contrastRatio = (foreground, background) => {
 };
 
 // Keep muted light-theme copy readable on the secondary paper surface.
-assert.ok(styles.includes("--mute:#62666A;"), "Light-theme muted text must use the verified contrast token");
+assert.ok(designSystem.includes("--ds-color-text-muted: light-dark(#62666A, #B8AFA2);"), "Semantic muted text must use the verified light-theme contrast token");
 assert.ok(contrastRatio("#62666A", "#EEE9E0") >= 4.5, "Muted text must reach WCAG AA contrast on the secondary surface");
-assert.ok(onboarding.includes("--mute:#62666A;"), "The onboarding shell must use the same readable muted-text token");
+assert.ok(onboarding.includes("--mute:var(--ds-color-text-muted);"), "The onboarding shell must consume the shared semantic muted-text token");
 assert.ok(contrastRatio("#62666A", "#F7F4EE") >= 4.5, "Onboarding muted text must reach WCAG AA contrast on its paper surface");
 
 // The rating row has one stable physical order regardless of the app's RTL/LTR locale.
