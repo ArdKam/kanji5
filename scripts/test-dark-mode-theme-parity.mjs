@@ -129,13 +129,25 @@ assert.ok(styles.includes(':root[data-theme="dark"] .rating-again{background:#33
 for (const theme of ["dark", "system"]) {
   const neutralRule = `:root[data-theme="${theme}"] :is(.badge,.audio-button,.button:not(.primary):not(.rating),.pager-button,.settings-language-button){background:#35312c;color:var(--sumi);}`;
   assert.ok(styles.includes(neutralRule), `${theme} neutral button rule must not override semantic rating buttons`);
-  for (const [rating, background, foreground] of [
-    ["again", "#332724", "#e8b4ac"],
-    ["hard", "#332f27", "#d8c8a5"],
-    ["good", "#283128", "#bed0bd"],
-    ["easy", "#27303b", "#c1cee0"],
-  ]) {
-    assert.ok(styles.includes(`:root[data-theme="${theme}"] .rating-${rating}{background:${background};color:${foreground};`), `${theme} ${rating} rating must keep a semantic foreground/background pair`);
+  if (theme === "dark") {
+    for (const [rating, background, foreground] of [
+      ["again", "#332724", "#e8b4ac"],
+      ["hard", "#332f27", "#d8c8a5"],
+      ["good", "#283128", "#bed0bd"],
+      ["easy", "#27303b", "#c1cee0"],
+    ]) {
+      assert.ok(styles.includes(`:root[data-theme="dark"] .rating-${rating}{background:${background};color:${foreground};`), `Manual Dark ${rating} rating must keep a semantic foreground/background pair`);
+    }
+  } else {
+    assert.ok(systemDark.includes(':root[data-theme="system"]{color-scheme:dark;}'), "System + OS Dark must resolve the semantic color-scheme");
+    assert.ok(styles.includes(".app-shell .rating-again{color:var(--ds-state-danger-text);border-color:var(--ds-state-danger-border);background:var(--ds-state-danger-bg)}"), "System Dark Again rating must use shared semantic state tokens");
+    assert.ok(styles.includes(".app-shell .rating-hard{color:var(--ds-state-warning-text);border-color:var(--ds-state-warning-border);background:var(--ds-state-warning-bg)}"), "System Dark Hard rating must use shared semantic state tokens");
+    assert.ok(styles.includes(".app-shell .rating-good{color:var(--ds-state-success-text);border-color:var(--ds-state-success-border);background:var(--ds-state-success-bg)}"), "System Dark Good rating must use shared semantic state tokens");
+    assert.ok(styles.includes(".app-shell .rating-easy{color:var(--ds-state-info-text);border-color:var(--ds-state-info-border);background:var(--ds-state-info-bg)}"), "System Dark Easy rating must use shared semantic state tokens");
+    assert.ok(designSystem.includes("--ds-state-danger-text: light-dark(#8E3026, #FF9B91);"), "System Dark Again text must resolve through the dark semantic token");
+    assert.ok(designSystem.includes("--ds-state-warning-text: light-dark(#76510A, #E9C46A);"), "System Dark Hard text must resolve through the dark semantic token");
+    assert.ok(designSystem.includes("--ds-state-success-text: light-dark(#43582B, #B9D49A);"), "System Dark Good text must resolve through the dark semantic token");
+    assert.ok(designSystem.includes("--ds-state-info-text: light-dark(#314B6F, #A9C1ED);"), "System Dark Easy text must resolve through the dark semantic token");
   }
 }
 assert.ok(topic.includes(".topic-learning-focus-option.active { border-color: var(--ai); background: var(--ai); color: var(--paper); }"), "Selected focus option needs a high-contrast Light-mode foreground");
