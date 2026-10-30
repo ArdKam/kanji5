@@ -240,9 +240,9 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
     };
     const readPalette = () => ratings.evaluateAll((elements) => elements.map((element) => {
       const channels = (value) => {
-        const srgb = value.match(/^color\\(srgb\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)\\)$/);
+        const srgb = value.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\)$/);
         if (srgb) return srgb.slice(1).map((channel) => Math.round(Number(channel) * 255));
-        const rgb = value.match(/^rgba?\\((\\d+)\\D+(\\d+)\\D+(\\d+)/);
+        const rgb = value.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/);
         if (rgb) return rgb.slice(1).map(Number);
         return null;
       };
