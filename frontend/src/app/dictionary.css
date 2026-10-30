@@ -34,7 +34,7 @@
   border:0;
   border-radius:0;
   background:transparent;
-  color:rgb(80 74 68 / .62);
+  color:var(--sumi);
   font:600 27px/1 Inter,system-ui,sans-serif;
   cursor:pointer;
   box-shadow:none;
