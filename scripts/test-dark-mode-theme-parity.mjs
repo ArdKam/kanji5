@@ -43,14 +43,15 @@ const contrastStart = styles.indexOf("@media(prefers-contrast:more){", darkStart
 assert.ok(darkStart >= 0 && contrastStart > darkStart, "System dark media block should exist");
 const systemDark = styles.slice(darkStart, contrastStart);
 
-// These fixed-color overrides must only run for the explicit System preference.
+// Ratings inherit the shared light-dark semantic state tokens; they must not need
+// duplicated fixed-color overrides scoped to the System theme.
 for (const selector of [
-  ':root[data-theme="system"] .rating-again',
-  ':root[data-theme="system"] .rating-hard',
-  ':root[data-theme="system"] .rating-good',
-  ':root[data-theme="system"] .rating-easy',
+  ".app-shell .rating-again{color:var(--ds-state-danger-text);border-color:var(--ds-state-danger-border);background:var(--ds-state-danger-bg)}",
+  ".app-shell .rating-hard{color:var(--ds-state-warning-text);border-color:var(--ds-state-warning-border);background:var(--ds-state-warning-bg)}",
+  ".app-shell .rating-good{color:var(--ds-state-success-text);border-color:var(--ds-state-success-border);background:var(--ds-state-success-bg)}",
+  ".app-shell .rating-easy{color:var(--ds-state-info-text);border-color:var(--ds-state-info-border);background:var(--ds-state-info-bg)}",
 ]) {
-  assert.ok(systemDark.includes(selector), "Missing System-scoped selector: " + selector);
+  assert.ok(styles.includes(selector), "Ratings must use shared semantic state tokens: " + selector);
 }
 assert.ok(systemDark.includes("--surface-soft:#292724;--surface-panel:rgba(35,33,30,.78);--progress-track:#35312c"));
 assert.equal(/\n\s{2}\.(?:surface|stat-card|dialog|experience-nav|badge|reading|audio-button|button|pager-button|settings-language-button|progress|stimulus|example-row|reason|insights|header-tools-menu|rating-again|rating-hard|rating-good|rating-easy)(?:[,{])/.test(systemDark), false, "Unscoped dark overrides could leak into manual Light mode");
