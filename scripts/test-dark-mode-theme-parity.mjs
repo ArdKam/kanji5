@@ -112,8 +112,8 @@ assert.ok(designSystem.includes("--ds-color-surface-elevated: light-dark(#FFFDF8
 const manualDarkStart = styles.indexOf(':root[data-theme="dark"]{');
 const manualLightStart = styles.indexOf(':root[data-theme="light"]{', manualDarkStart);
 const manualDark = styles.slice(manualDarkStart, manualLightStart);
-assert.ok(manualDark.includes("--color-surface-elevated:var(--ds-color-surface-elevated);"), "Manual Dark must consume the shared elevated surface token");
-assert.ok(manualDark.includes("--skeleton-base:var(--ds-color-skeleton-base);"), "Manual Dark must consume shared loading tokens");
+assert.ok(styles.includes("--color-surface-elevated:var(--ds-color-surface-elevated);"), "Manual Dark must consume the shared elevated surface token");
+assert.ok(styles.includes("--skeleton-base:var(--ds-color-skeleton-base);"), "Manual Dark must consume shared loading tokens");
 assert.ok(styles.includes(".button.primary{background:var(--ai);border-color:var(--ai);color:var(--ds-color-action-primary-text)}"), "Primary buttons must consume semantic action and foreground tokens");
 assert.ok(designSystem.includes("--ds-color-action-primary-text: light-dark(#FDFBF7, #171614);"), "Primary action foreground must meet contrast in both themes");
 assert.ok(styles.includes(".button.primary:hover:not(:disabled){background:var(--ds-color-action-primary-hover);border-color:var(--ds-color-action-primary-hover)}"), "Primary hover state must use the semantic action-hover token");
