@@ -116,7 +116,7 @@ test('P0 network content adapters expose stable content identities',async({page}
   await page.route('https://api.tatoeba.org/v1/sentences**',route=>route.fulfill({
     status:200,
     contentType:'application/json',
-    body:JSON.stringify({data:[{id:123,text:'学校へ行く。',translations:[[{text:'I go to school.'}]]}]})
+    body:JSON.stringify({data:[{id:123,text:'学校へ行く。',owner:'fixture-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{text:'I go to school.',lang:'eng',is_direct:true,is_unapproved:false,owner:'fixture-translator',license:'CC BY 2.0 FR'}]]}]})
   }));
   const result=await page.evaluate(async()=>{
     const network=await import('./v1.5-network.js');
