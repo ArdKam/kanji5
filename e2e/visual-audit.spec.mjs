@@ -210,11 +210,23 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await expect(page.locator('#root .learning-card')).toBeVisible({ timeout: 15_000 });
     await capture('05-learning-desktop');
     await captureScrolled('05-learning-desktop', { scope: 'page', ratio: 1 });
+
+    // Capture the actual answer side as well as the recall prompt. The generic
+    // product-surface audit previously left the Learning Card on its front face.
+    const learningCard = page.locator('#root .learning-card');
+    await learningCard.locator('.learning-card-front .button.primary.wide').click();
+    await expect(learningCard).toHaveClass(/is-revealed/);
+    await expect(learningCard.locator('.learning-back-kanji')).toBeVisible();
+    await page.evaluate(async () => { await document.fonts.ready; });
+    await capture('05-learning-back-desktop');
+
     await page.setViewportSize({ width: 390, height: 844 });
-    await capture('06-learning-mobile');
+    await capture('06-learning-back-mobile');
+    await captureScrolled('06-learning-back-mobile', { scope: 'element', ratio: 1 });
+    await page.setViewportSize({ width: 320, height: 844 });
+    await capture('06-learning-back-narrow-mobile');
     const navBackground = await page.locator('.experience-nav').evaluate(element => getComputedStyle(element).backgroundColor);
     expect(navBackground).toBe('rgb(253, 251, 247)');
-    await captureScrolled('06-learning-mobile', { scope: 'page', ratio: 1 });
     await page.setViewportSize({ width: 1440, height: 960 });
 
     const tabs = page.locator('.experience-nav .experience-tab');
@@ -353,6 +365,11 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
     await page.setViewportSize({ width: 390, height: 844 });
     await capture('19-learning-persian-mobile');
     await captureScrolled('19-learning-persian-mobile', { scope: 'page', ratio: 1 });
+    await page.locator('#root .learning-card .learning-card-front .button.primary.wide').click();
+    await expect(page.locator('#root .learning-card')).toHaveClass(/is-revealed/);
+    await expect(page.locator('#root .learning-card .learning-back-kanji')).toBeVisible();
+    await page.evaluate(async () => { await document.fonts.ready; });
+    await capture('19-learning-persian-back-mobile');
 
     await page.locator('.experience-nav .experience-tab').nth(1).click();
     await expect(page.locator('#root .practice-home')).toBeVisible({ timeout: 15_000 });
