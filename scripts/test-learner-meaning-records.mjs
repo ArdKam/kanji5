@@ -73,6 +73,25 @@ assert.equal(malformedReviewerRecord?.reviewStatus, "unreviewed");
 assert.equal(malformedReviewerRecord?.reviewedBy, null);
 assert.equal(malformedReviewerRecord?.reviewedAt, null);
 
+// Non-empty but non-date reviewer metadata cannot claim verified content.
+const invalidReviewTimestamp = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningRecords: [{
+    text: "review candidate",
+    language: "en",
+    priority: "primary",
+    provenance: { source: "fixture-source" },
+    reviewStatus: "verified",
+    reviewedBy: "reviewer",
+    reviewedAt: "yesterday",
+  }],
+});
+const invalidTimestampRecord = invalidReviewTimestamp.meaningRecords.find(record => record.text === "review candidate");
+assert.equal(invalidTimestampRecord?.reviewStatus, "unreviewed");
+assert.equal(invalidTimestampRecord?.reviewedAt, null);
+
 // Non-string meaning content cannot be coerced into a seemingly verified translation.
 const malformedMeaningText = buildLearnerContent({
   character: "日",
@@ -85,7 +104,7 @@ const malformedMeaningText = buildLearnerContent({
     provenance: { source: "fixture-source" },
     reviewStatus: "verified",
     reviewedBy: "reviewer",
-    reviewedAt: "2026-11-04",
+    reviewedAt: "2026-11-04T12:00:00.000Z",
   }],
 });
 assert.equal(malformedMeaningText.meaningRecords.some(record => record.text === "[object Object]"), false);
