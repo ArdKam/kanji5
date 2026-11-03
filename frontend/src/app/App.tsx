@@ -494,30 +494,40 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
                       <div className="learning-back-meaning-group">
                         <h3 className="learning-back-section-label">{t("meaning")}</h3>
                         {meaningFallbackLabel?<p className="learning-meaning-source-note" lang="fa">{meaningFallbackLabel}</p>:null}
-                        {primaryMeanings.length?<div className="meanings learning-back-meaning" lang={meaningLanguage}>{primaryMeanings.join(" · ")}</div>:null}
-                        {secondaryMeanings.length?<div className="learning-back-secondary-meaning" lang={meaningLanguage}>{secondaryMeanings.join(" · ")}</div>:null}
+                        {primaryMeanings.length?<div className="meanings learning-back-meaning" lang={meaningLanguage} dir="auto">{primaryMeanings.join(" · ")}</div>:null}
+                        {secondaryMeanings.length?<div className="learning-back-secondary-meaning" lang={meaningLanguage} dir="auto">{secondaryMeanings.join(" · ")}</div>:null}
                         {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                       </div>
                     </div>
-                    <div className="learning-back-readings-block">
-                      <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
-                      <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
-                    {!examplesLoading&&!examplesError&&displayExamples[0]?.word?(
-                      <div className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
-                        <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
-                        <span className="learning-back-quick-example-main" lang="ja" dir="ltr">{[displayExamples[0].word,displayExamples[0].reading].filter(Boolean).join(" · ")}</span>
-                        {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang={displayExamples[0].meaningLanguage&&displayExamples[0].meaningLanguage!=="unknown"?displayExamples[0].meaningLanguage:"en"} dir="auto">{displayExamples[0].meaning}</small>:null}
+                    <div className="learning-back-detail-grid">
+                      <section className="learning-back-readings-block" aria-label={t("readings")}>
+                        <div className="readings-header"><span>{t("readings")}</span><button className="reading-toggle" type="button" aria-pressed={hiraganaReadings} onClick={()=>setHiraganaReadings(v=>!v)}>{hiraganaReadings?t("showKatakana"):t("showHiragana")}</button></div>
+                        <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
+                      </section>
+                      <div className="learning-back-support-column">
+                        {!examplesLoading&&!examplesError&&displayExamples[0]?.word?(
+                          <section className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
+                            <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
+                            <div className="learning-back-quick-example-row">
+                              <div className="learning-back-quick-example-copy">
+                                <span className="learning-back-quick-example-main" lang="ja" dir="ltr">{[displayExamples[0].word,displayExamples[0].reading].filter(Boolean).join(" · ")}</span>
+                                {displayExamples[0].meaning?<small className="learning-back-quick-example-meaning" lang={displayExamples[0].meaningLanguage&&displayExamples[0].meaningLanguage!=="unknown"?displayExamples[0].meaningLanguage:"en"} dir="auto">{displayExamples[0].meaning}</small>:null}
+                                {displayExamples[0].meaning?<small className="example-source-label" lang={getLanguage()}>{displayExamples[0].reviewStatus==="verified"?t("verifiedSourceExample"):displayExamples[0].reviewStatus==="unreviewed"?t("unreviewedSourceExample"):t("sourceExampleReviewUnknown")}</small>:null}
+                              </div>
+                              {displayExamples[0].reading?<Audio value={displayExamples[0].reading} label={t("playWordPronunciation")}/>:null}
+                            </div>
+                          </section>
+                        ):null}
+                        <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
+                          <KanjiStructurePreview
+                            character={card.character??""}
+                            info={visualStructureInfo}
+                            ready={visualStructureReady}
+                            language={getLanguage()}
+                            onOpen={()=>setStructureDialogOpen(true)}
+                          />
+                        </div>
                       </div>
-                    ):null}
-                    </div>
-                    <div className="learning-back-identity-visual" aria-busy={!visualStructureReady}>
-                      <KanjiStructurePreview
-                        character={card.character??""}
-                        info={visualStructureInfo}
-                        ready={visualStructureReady}
-                        language={getLanguage()}
-                        onOpen={()=>setStructureDialogOpen(true)}
-                      />
                     </div>
                   </div>
                 </div>

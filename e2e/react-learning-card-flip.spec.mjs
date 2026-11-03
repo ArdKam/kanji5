@@ -209,6 +209,8 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
       const meaningLabel = identityHeading.getByRole("heading", { level: 3 });
       const primaryMeaning = identityHeading.locator(".learning-back-meaning");
       const readings = overview.locator(".learning-back-readings-block");
+      const detailGrid = overview.locator(".learning-back-detail-grid");
+      const quickExample = overview.locator(".learning-back-quick-example");
       const structure = overview.locator(".learning-back-identity-visual");
 
       await expect(glyph).toBeVisible();
@@ -217,7 +219,12 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
       expect((await glyph.innerText()).trim()).not.toBe("");
       await expect(meaningLabel).toBeVisible();
       await expect(primaryMeaning).toBeVisible();
+      await expect(primaryMeaning).toHaveAttribute("dir", "auto");
       await expect(readings).toBeVisible();
+      await expect(detailGrid).toBeVisible();
+      await expect(quickExample).toBeVisible();
+      await expect(quickExample.locator(".example-source-label")).toBeVisible();
+      await expect(quickExample.locator(".audio-button")).toBeVisible();
       await expect(structure).toBeVisible();
 
       for (const viewport of [
@@ -244,8 +251,12 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
             heading: rect(".learning-back-identity-heading"),
             label: rect(".learning-back-section-label"),
             meaning: rect(".learning-back-meaning"),
+            detail: rect(".learning-back-detail-grid"),
             readings: rect(".learning-back-readings-block"),
+            quickExample: rect(".learning-back-quick-example"),
             structure: rect(".learning-back-identity-visual"),
+            detailColumns: getComputedStyle(pageEl.querySelector(".learning-back-detail-grid")).gridTemplateColumns.split(" ").length,
+            exampleAudio: rect(".learning-back-quick-example .audio-button"),
             scroll: { left: scrollRect.left, right: scrollRect.right, top: scrollRect.top, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth, scrollHeight: scroll.scrollHeight, scrollTop: scroll.scrollTop },
           };
         });
@@ -253,8 +264,16 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
         expect(geometry.glyph.height).toBeGreaterThanOrEqual(44);
         expect(geometry.heading.right).toBeLessThanOrEqual(geometry.scroll.right + 1);
         expect(geometry.label.top).toBeLessThanOrEqual(geometry.meaning.top + 1);
-        expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.readings.top + 2);
-        expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.structure.top + 2);
+        expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.detail.top + 2);
+        expect(geometry.readings.top).toBeGreaterThanOrEqual(geometry.detail.top - 1);
+        expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.detail.bottom + 1);
+        expect(geometry.quickExample.left).toBeGreaterThanOrEqual(geometry.detail.left - 1);
+        expect(geometry.quickExample.right).toBeLessThanOrEqual(geometry.detail.right + 1);
+        expect(geometry.structure.top).toBeGreaterThanOrEqual(geometry.detail.top - 1);
+        expect(geometry.structure.bottom).toBeLessThanOrEqual(geometry.detail.bottom + 1);
+        expect(geometry.exampleAudio.width).toBeGreaterThanOrEqual(44);
+        expect(geometry.exampleAudio.height).toBeGreaterThanOrEqual(44);
+        expect(geometry.detailColumns).toBe(viewport.width >= 620 ? 2 : 1);
         expect(geometry.structure.bottom - geometry.scroll.top + geometry.scroll.scrollTop).toBeLessThanOrEqual(geometry.scroll.scrollHeight + 1);
         expect(geometry.scroll.scrollWidth).toBeLessThanOrEqual(geometry.scroll.clientWidth + 1);
       }

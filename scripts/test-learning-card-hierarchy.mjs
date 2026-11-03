@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [app, copy, styles, engine, runtime, boundary, contract] = await Promise.all([
+const [app, copy, styles, enhancements, engine, runtime, boundary, contract] = await Promise.all([
   read("../frontend/src/app/App.tsx"),
   read("../frontend/src/app/learning-copy.ts"),
   read("../frontend/src/app/learning-surface.css"),
+  read("../frontend/src/app/learning-card-enhancements.css"),
   read("../frontend/src/app/engine.ts"),
   read("../review-runtime.js"),
   read("../v1.9-v2-boundary.js"),
@@ -42,6 +43,15 @@ const pageOrder = [
 ];
 assert(pageOrder.every((position) => position > pageStart), "All four learning pages must remain present");
 assert(pageOrder.every((position, index) => index === 0 || position > pageOrder[index - 1]), "Back-card order must stay meaning/structure → vocabulary → mnemonic → stroke order");
+
+const overviewMarkup = app.slice(pageOrder[0], pageOrder[1]);
+assert(overviewMarkup.includes('className="learning-back-detail-grid"'), "The answer view must separate its reading panel from supporting example and structure content");
+assert(overviewMarkup.includes('className="learning-back-support-column"'), "Vocabulary example and structure need a dedicated support column");
+assert(overviewMarkup.includes('lang={meaningLanguage} dir="auto"'), "Localized and fallback meanings must use direction-aware rendering");
+assert(overviewMarkup.includes('<Audio value={displayExamples[0].reading} label={t("playWordPronunciation")}/>'), "The quick vocabulary example must expose its reading audio control");
+assert(overviewMarkup.includes('className="example-source-label"'), "The quick vocabulary example must retain its source-review status");
+assert(!/learning-back-page:first-child[^}]*!important/.test(enhancements), "The answer-page layout must not rely on important overrides");
+
 
 assert(app.includes('learningCopy("rateRecall",getLanguage())'), "The rating choices need a localized decision prompt");
 assert(app.includes('className="rating-interval">{formatReviewInterval(card.ratingPreviews?.[r])}'), "Each rating choice must show its own review interval");
