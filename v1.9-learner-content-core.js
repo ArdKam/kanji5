@@ -66,7 +66,9 @@ function normalizeMeaningRecord(record){
   const url=typeof rawUrl==='string'?text(rawUrl,500)||null:null;
   const requestedReview=MEANING_REVIEW_STATES.has(value.reviewStatus)?value.reviewStatus:'unreviewed';
   const reviewedBy=typeof value.reviewedBy==='string'?text(value.reviewedBy,120)||null:null;
-  const reviewedAt=typeof value.reviewedAt==='string'?text(value.reviewedAt,80)||null:null;
+  const rawReviewedAt=typeof value.reviewedAt==='string'?text(value.reviewedAt,80):'';
+  const isIsoTimestamp=/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,3})?(?:Z|[+-]\\d{2}:\\d{2})$/.test(rawReviewedAt);
+  const reviewedAt=isIsoTimestamp&&Number.isFinite(Date.parse(rawReviewedAt))?rawReviewedAt:null;
   const canVerify=Boolean(sourceText&&language!=='unknown'&&source!=='unknown'&&reviewedBy&&reviewedAt);
   const reviewStatus=requestedReview==='verified'&&!canVerify?'unreviewed':requestedReview;
   const reviewNotes=(typeof value.reviewNotes==='string'?text(value.reviewNotes,600):'')||(
