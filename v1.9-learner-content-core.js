@@ -94,8 +94,10 @@ function meaningRecordProjection(value,sourceMeanings,primary,secondary,referenc
   const explicit=(Array.isArray(value.meaningRecords)?value.meaningRecords:[]).map(normalizeMeaningRecord).filter(Boolean);
   const keys=new Set(explicit.filter(record=>record.text).map(record=>record.text+'|'+record.language));
   const provenance=value.meaningProvenance&&typeof value.meaningProvenance==='object'?value.meaningProvenance:{};
-  const source=text(provenance.source||value.meaningSource||'unknown',180)||'unknown';
-  const version=text(provenance.version||value.meaningSourceVersion,100)||null;
+  const rawSource=provenance.source??value.meaningSource??'unknown';
+  const rawVersion=provenance.version??value.meaningSourceVersion;
+  const source=typeof rawSource==='string'?text(rawSource,180)||'unknown':'unknown';
+  const version=typeof rawVersion==='string'?text(rawVersion,100)||null:null;
   const records=[...explicit];
   for(const meaning of sourceMeanings){
     const language=MEANING_LANGUAGES.has(value.meaningLanguage)?value.meaningLanguage:'unknown';
@@ -106,7 +108,11 @@ function meaningRecordProjection(value,sourceMeanings,primary,secondary,referenc
       text:meaning,
       language,
       priority:meaningPriority(meaning,primary,secondary,reference),
-      provenance:{source,version,entryId:text(provenance.entryId,160)||null,url:text(provenance.url,500)||null},
+      provenance:{
+        source,version,
+        entryId:typeof provenance.entryId==='string'?text(provenance.entryId,160)||null:null,
+        url:typeof provenance.url==='string'?text(provenance.url,500)||null:null
+      },
       reviewStatus:'unreviewed',
       reviewNotes:'Legacy source gloss; translation and learner-facing priority have not been independently reviewed.'
     }));
