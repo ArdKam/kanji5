@@ -191,6 +191,114 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* Compact portrait card: pair readings with one example instead of stacking two tall panels. */
+@container learning-back (min-width: 260px) and (max-width: 619px) {
+  .learning-card-back .learning-back-page:first-child .learning-back-detail-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity {
+    gap: 10px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-kanji {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    font-size: 44px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-meaning {
+    font-size: clamp(19px, 5vw, 22px);
+    line-height: 1.14;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block {
+    gap: 6px;
+    padding: 8px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block .readings-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block .reading-toggle {
+    width: 100%;
+    min-height: 46px;
+    padding-inline: 5px;
+    font-size: 10px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+  .learning-card-back .learning-back-page:first-child .reading {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 46px;
+    grid-template-rows: minmax(46px, auto);
+    align-items: center;
+    gap: 3px 4px;
+    min-height: 46px;
+    padding: 0 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .reading > span {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+  .learning-card-back .learning-back-page:first-child .reading > strong {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    font-size: var(--text-xs);
+    overflow-wrap: anywhere;
+  }
+  .learning-card-back .learning-back-page:first-child .reading > .audio-button {
+    grid-column: 3;
+    grid-row: 1;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-support-column {
+    gap: 6px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example {
+    gap: 5px;
+    padding: 8px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-label {
+    font-size: 10px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-main {
+    font-size: var(--text-sm);
+    line-height: 1.2;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-meaning {
+    font-size: var(--text-xs);
+    line-height: 1.25;
+  }
+  .learning-card-back .learning-back-page:first-child .example-source-label {
+    font-size: 10px;
+    line-height: 1.15;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-row {
+    grid-template-columns: minmax(0, 1fr) 46px;
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-visual {
+    min-height: 40px;
+    padding: 4px 6px;
+  }
+  .learning-card-back .learning-back-page:first-child .kanji-structure-preview {
+    min-height: 34px;
+  }
+}
 @container learning-back (min-width: 620px) {
   .learning-card-back .learning-back-page:first-child .learning-back-overview {
     align-content: center;
@@ -204,10 +312,10 @@
 .learning-card-back .learning-back-page:first-child .learning-back-readings-block {
   display: grid;
   align-content: start;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
   margin: 0;
-  padding: 12px;
+  padding: 10px 12px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--washi) 54%, var(--paper));

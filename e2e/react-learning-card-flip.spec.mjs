@@ -212,10 +212,18 @@ test("learning-card page navigation restores the active page to its top", async 
   await expect.poll(() => firstScroll.evaluate(el => el.scrollTop)).toBe(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
+  await card.scrollIntoViewIfNeeded();
   await card.locator(".learning-back-page-shortcut").nth(1).click();
   await card.locator(".learning-back-page-shortcut").nth(0).click();
   await expect.poll(() => firstScroll.evaluate(el => el.scrollTop)).toBe(0);
-  await expect(card.locator(".learning-back-kanji")).toBeInViewport();
+  const visibleIdentity = await firstScroll.evaluate(scroller => {
+    const glyph = scroller.querySelector(".learning-back-kanji");
+    if (!(glyph instanceof HTMLElement)) return false;
+    const viewport = scroller.getBoundingClientRect();
+    const target = glyph.getBoundingClientRect();
+    return target.top >= viewport.top - 1 && target.bottom <= viewport.bottom + 1;
+  });
+  expect(visibleIdentity).toBe(true);
 });
 
 test("learning-card answer presents kanji, meaning, readings and structure in a stable hierarchy", async ({ browser }) => {
