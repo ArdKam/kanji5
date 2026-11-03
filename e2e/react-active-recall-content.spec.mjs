@@ -14,7 +14,7 @@ async function installContentFixtures(page){
         const match=/[?&]q=([^&]+)/.exec(url);
         const character=match?decodeURIComponent(match[1]).trim():'学';
         const sentence='私は'+character+'を知っています。';
-        return new Response(JSON.stringify({data:[{id:123456,text:sentence,translations:[[{text:'I know this character.'}]]}]}),{status:200,headers:{'content-type':'application/json'}});
+        return new Response(JSON.stringify({data:[{id:123456,text:sentence,owner:'fixture-author',license:'CC BY 2.0 FR',translations:[[{id:123457,text:'I know this character.',owner:'fixture-translator',license:'CC BY 2.0 FR'}]]}]}),{status:200,headers:{'content-type':'application/json'}});
       }
       return originalFetch(input,init);
     };
