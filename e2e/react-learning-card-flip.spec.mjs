@@ -1383,6 +1383,14 @@ test("Learning Card review buttons remain tappable and keyboard reachable in com
       await expect(card).toBeVisible({ timeout: 10000 });
       await card.locator(".learning-card-front .button.primary.wide").click();
       await expect(card).toHaveClass(/is-revealed/, { timeout: 10000 });
+      // Measure touch targets after the 3D flip has settled, not while perspective rotation
+      // temporarily narrows their rendered bounding boxes.
+      await page.waitForFunction(() => {
+        const flip = document.querySelector(".learning-card-flip");
+        if (!flip) return false;
+        const transform = new DOMMatrixReadOnly(getComputedStyle(flip).transform);
+        return Math.abs(transform.m11 + 1) < 0.001;
+      });
 
       const ratings = card.locator(".learning-back-footer .rating-grid .rating");
       await expect(ratings).toHaveCount(4);
