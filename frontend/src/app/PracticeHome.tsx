@@ -141,63 +141,64 @@ export function PracticeHome({
         </button>
       </section>
 
-      <section className="practice-topic-section" aria-labelledby="practice-topics-title">
-        <div className="practice-section-heading">
-          <div>
-            <h3 id="practice-topics-title">{t("practiceTopicsTitle", language)}</h3>
-          </div>
-        </div>
+      <details className="practice-topic-section">
+        <summary>
+          <span>{t("practiceTopicsTitle", language)}</span>
+          <span className="practice-topic-section-count">{formatNumber(topics.length, language)}</span>
+        </summary>
+        <div className="practice-topic-section-content">
+          {catalogLoading && !catalog.length ? (
+            <div className="surface card practice-topic-status" role="status">{t("practiceTopicsLoading", language)}</div>
+          ) : null}
 
-        {catalogLoading && !catalog.length ? (
-          <div className="surface card practice-topic-status" role="status">{t("practiceTopicsLoading", language)}</div>
-        ) : null}
+          {catalogError && !catalog.length ? (
+            <div className="surface card practice-topic-status is-error" role="alert">
+              <span>{t("practiceTopicsLoadError", language)}</span>
+              <button className="button secondary" type="button" onClick={() => setCatalogAttempt(value => value + 1)}>
+                {t("practiceTopicsRetry", language)}
+              </button>
+            </div>
+          ) : null}
 
-        {catalogError && !catalog.length ? (
-          <div className="surface card practice-topic-status is-error" role="alert">
-            <span>{t("practiceTopicsLoadError", language)}</span>
-            <button className="button secondary" type="button" onClick={() => setCatalogAttempt(value => value + 1)}>
-              {t("practiceTopicsRetry", language)}
-            </button>
-          </div>
-        ) : null}
+          {catalog.length ? (
+            <>
+              <div className="practice-topic-grid">{featuredTopics.map(renderTopicCard)}</div>
+              <details className="practice-all-topics">
+                <summary>
+                  <span>{t("practiceTopicsShowAll", language)}</span>
+                  <span className="practice-all-topics-count">{formatNumber(otherTopics.length, language)}</span>
+                </summary>
+                <div className="practice-topic-grid practice-topic-grid-secondary">{otherTopics.map(renderTopicCard)}</div>
+                <p className="subtitle practice-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
+              </details>
+            </>
+          ) : null}
 
-        {catalog.length ? (
-          <>
-            <div className="practice-topic-grid">{featuredTopics.map(renderTopicCard)}</div>
-            <details className="practice-all-topics">
-              <summary>
-                <span>{t("practiceTopicsShowAll", language)}</span>
-                <span className="practice-all-topics-count">{formatNumber(otherTopics.length, language)}</span>
-              </summary>
-              <div className="practice-topic-grid practice-topic-grid-secondary">{otherTopics.map(renderTopicCard)}</div>
-              <p className="subtitle practice-topic-coverage-note">{t("practiceTopicCoverageNote", language)}</p>
-            </details>
-          </>
-        ) : null}
-
-        {selectedTopic ? (
-          <section className="surface card practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
-            <div className="practice-topic-selected-copy">
-              <p className="eyebrow red practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
-              <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
+          {selectedTopic ? (
+            <section className="surface card practice-topic-selected" aria-live="polite" aria-labelledby="practice-topic-selected-title">
+              <div className="practice-topic-selected-copy">
+                <p className="eyebrow red practice-home-kicker">{formatNumber(selectedTopic.count, language)} {t("practiceTopicCount", language)}</p>
+                <h4 id="practice-topic-selected-title">{language === "fa" ? selectedTopic.label.fa : selectedTopic.label.en}</h4>
               </div>
-            <button className="button primary practice-topic-start" type="button" disabled={busy || topicBusy || selectedTopic.count === 0} onClick={() => void startTopicStudy()}>
-              {topicBusy ? t("practiceTopicStarting", language) : t("practiceTopicStart", language)}
-            </button>
-            {topicMessage ? <p className="practice-topic-message" role="status">{topicMessage}</p> : null}
-          </section>
-        ) : null}
-      </section>
+              <button className="button primary practice-topic-start" type="button" disabled={busy || topicBusy || selectedTopic.count === 0} onClick={() => void startTopicStudy()}>
+                {topicBusy ? t("practiceTopicStarting", language) : t("practiceTopicStart", language)}
+              </button>
+              {topicMessage ? <p className="practice-topic-message" role="status">{topicMessage}</p> : null}
+            </section>
+          ) : null}
+        </div>
+      </details>
 
       <details className="practice-advanced">
         <summary>
           <span>{t("practiceAdvancedTitle", language)}</span>
           <span className="practice-summary-hint">{t("practiceAdvancedHint", language)}</span>
         </summary>
-        <CustomStudyPanel language={language} selectedTopic={selectedTopicScope} onStartCustomStudy={onStartCustomStudy} />
+        <div className="practice-advanced-content">
+          <CustomStudyPanel language={language} selectedTopic={selectedTopicScope} onStartCustomStudy={onStartCustomStudy} />
+          <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
+        </div>
       </details>
-
-      <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
     </section>
   );
 }
