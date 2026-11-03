@@ -116,7 +116,7 @@ const formatReviewInterval=(dueAt:string|null|undefined)=>{
   return getLanguage()==="fa"?`${fa(days)} روز`:`${days}d`;
 };
 
-function Learning({card,snapshot,busy,topicLabel,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;onReveal:()=>void;onRate:(r:Rating)=>void}){
+function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapshot["learning"]>;snapshot:Snapshot;busy?:boolean;onReveal:()=>void;onRate:(r:Rating)=>void}){
   const revealed=Boolean(card.revealed);
   const learnerMeaningModel=card.learnerMeanings??{};
   const learnerReadingModel=card.learnerReadings??{};
