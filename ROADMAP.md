@@ -523,6 +523,153 @@ All work before Vocabulary must follow this order. Work may overlap only when it
 - Pass the final Public Release Gate before beginning Vocabulary implementation.
 
 **Only after Stage 7 is complete:** start the real Vocabulary runtime/content integration. Existing cross-domain foundations may be prepared in parallel when they do not change the public Kanji release surface.
+
+## 2.3 Personal-use priority overlay — Local Resource Manager & Instant Startup (2026-11-04)
+
+**Priority: P1 — high-value infrastructure for personal daily use.** Implement after immediate Learning Card and Japanese/Persian content-quality work. This is not gated on Public Beta, Vocabulary expansion, or mandatory account creation.
+
+### Objective
+
+Make Rinemi behave like a prepared, locally installed learning environment: the first installation provisions the resources needed for daily study; verified resources remain on the device; returning visits initialize from local data without waiting for network responses; and content updates are downloaded incrementally in the background.
+
+The Resource Manager owns **resource delivery and availability**, not learner state or learning decisions.
+
+### Target user experience
+
+- **First installation:** load the application shell, inspect local resource state, then show a dedicated preparation experience only when required resources are missing. Download and verify the core learning library; show truthful per-pack progress, failure/retry state, and clear offline guidance.
+- **Ready-to-study threshold:** allow the user to start as soon as the minimum core learning pack is verified. Supplementary or larger packs may continue downloading in the background; do not block the first useful study session for optional resources.
+- **Stroke-order availability:** make the complete 2,136-kanji stroke-order library available offline after provisioning. Measure its real compressed size first. If it is too large for a sensible blocking first-launch download, provision it as a clearly reported background pack while retaining on-demand retrieval and local caching until complete.
+- **Returning visits:** initialize from the local application shell and verified local resources. Do not repeat onboarding/preparation screens or wait for a server before showing the learner's due work.
+- **Updates:** check the resource manifest when online and fetch only changed packs. Updates must not interrupt a review session or make the previous valid library unavailable.
+
+### Milestones
+
+**LRM-01 — Resource inventory and size baseline**
+- Inventory the actual startup dependency graph and every resource used by Learning, Dictionary, vocabulary/examples, topics, mnemonics, and Stroke Order.
+- Identify existing service-worker precaching, browser caches, network fallbacks, storage adapters, and local data ownership; reuse suitable existing mechanisms rather than creating parallel caches.
+- Measure compressed transfer size and estimated local storage for each resource family, including all 2,136 stroke-order assets.
+- Classify each resource as core-before-first-study, full-offline-library, or optional/on-demand; record source, format, versioning constraints, and applicable provenance/licensing.
+- Record first-install download size separately from the existing application startup artifact budget. **Do not raise or weaken the existing 2,202 KB performance gate** to accommodate resource packs.
+
+**LRM-02 — Versioned manifest and first-use provisioning**
+- Define a versioned manifest with stable resource IDs, pack/schema version, byte size, integrity hash, and required/optional classification.
+- Implement resumable downloads, bounded retries, truthful progress, cancellation/retry behavior, and integrity verification.
+- Persist structured reference content in IndexedDB and static/binary assets in Cache Storage where appropriate, using existing abstractions when they are sufficient.
+- Activate a new pack atomically only after verification; never replace the last known-good pack with a partial or corrupt download.
+- Request persistent browser storage where supported and handle quota denial/eviction without deleting or corrupting learner data.
+
+**LRM-03 — Local-first startup and offline readiness**
+- Make the app shell and core learning resources available for offline startup after successful provisioning.
+- Hydrate the initial learning experience from local resources; no blocking network request should be required to open a card, show due reviews, or use an already-provisioned stroke order.
+- Show the preparation experience only while required resources are genuinely unavailable. On later visits, proceed directly to the application.
+- Detect missing/evicted assets and provide targeted repair rather than forcing a full reinstall or discarding valid local data.
+
+**LRM-04 — Incremental content updates**
+- Compare the installed manifest with the published manifest and download only changed packs/assets.
+- Preserve compatibility between app and resource versions; reject incompatible packs safely.
+- Stage, verify, and atomically activate updates while retaining the previous valid version until activation succeeds.
+- Defer updates while offline and avoid interrupting active learning.
+
+**LRM-05 — Performance, reliability, and device verification**
+- Measure first-install transfer size/time, time to first usable study action, returning cold-start time, resource lookup latency, and local storage footprint.
+- Establish numeric performance targets from the measured baseline rather than guessing; keep the existing startup artifact budgets and regression gates intact.
+- Test fresh install, repeat launch, refresh/restart during download, interrupted/resumed download, failed hash, failed update, offline startup, missing asset repair, storage quota/eviction, and app/resource-version mismatch.
+- Verify the real laptop and phone browsers used for daily study, including the relevant PWA install/update paths; keep Playwright coverage and add real-device evidence for browser storage and offline behavior.
+
+### Definition of done
+
+- A fresh online installation provisions the verified core learning library and exposes accurate progress and recovery controls.
+- A user can begin studying as soon as core resources are ready, without waiting for optional packs.
+- The full 2,136-kanji stroke-order library becomes available offline once its pack is provisioned.
+- A returning installation opens from local resources without a blocking preparation screen or network dependency.
+- Resource updates are incremental, integrity-checked, version-compatible, and atomic; failed updates leave the previous working resources intact.
+- Interrupted downloads resume, and missing/evicted resources can be repaired without resetting learner progress.
+- Existing kanji identity, review history, FSRS scheduling, v1.9 Learner Model, Adaptive Planner, grading, recovery, and persistence authority remain unchanged.
+- Automated tests and rendered browser checks cover first-run and returning-run behavior, offline use, download failures, and update recovery.
+
+### Architectural boundaries and exclusions
+
+- Keep the app **local-first and fully usable offline after provisioning**; online access is for delivery, updates, and optional services, not a prerequisite for daily reviews.
+- The Resource Manager must not become a second learning engine or own learner state, grading, recovery, scheduling, or evidence.
+- Do not couple this epic to account creation, cloud synchronization, AI features, Vocabulary expansion, or a broad persistence migration. Cloud backup and cross-device sync remain separate workstreams.
+- Do not preload every optional resource blindly. Use the measured inventory to choose a small core-ready threshold and progressively provision larger supplementary packs.
+- Do not trade away startup performance, data integrity, or existing offline guarantees to make the initial download appear complete.
+
+---
+
+## 2.4 Personal-use priority overlay — Cohesive daily learning experience (2026-11-04)
+
+**Priority: P0 for personal daily use.** Address the experience-flow gaps after protecting the current Learning Card and Japanese/Persian content-quality work. This track is independent of Public Beta readiness and should improve how existing capabilities work together rather than add another learning subsystem.
+
+### Objective
+
+Turn Rinemi from a collection of capable learning destinations into a guided daily study journey:
+
+**Open → understand today's work → start the recommended activity → learn and retrieve → receive useful feedback → finish with a clear next step.**
+
+Keep the current Learning, Active Recall, and Dictionary destinations unless usability evidence demonstrates a specific navigation problem. Do not add a dashboard or navigation layer merely to make the product look more complete.
+
+### UXF-01 — Daily orientation and recommended starting action — P0
+
+- Evaluate a compact **Today** orientation as the first post-onboarding/returning-user landing experience. Prototype it against the current direct-to-card entry before deciding whether it should replace or complement that entry.
+- Make today's workload legible using authoritative engine-derived state: due reviews, available new kanji, completed work, daily-goal progress, and an appropriate resume/recommended action.
+- Distinguish **new learning** from **scheduled review**. Explain that new-kanji targets and FSRS reviews are different workloads; do not imply that the daily-new setting caps due reviews.
+- Make the primary action unambiguous and immediately useful: start/resume the recommended Learning or Practice activity with one clear action.
+- Provide meaningful empty, loading, unavailable, and error states. Do not show misleading zeros or fabricate a recommendation while the required snapshot is still hydrating.
+- Keep secondary tools and statistics subordinate to the next study action. Avoid duplicating the existing Stats experience or creating a second source of learning progress.
+
+### UXF-02 — Intentional session completion and next step — P0
+
+- Design a proper completion state for a Learning session and a Practice session, using the authoritative session state rather than presentation-only guesses.
+- Summarize only defensible outcomes, such as completed cards/exercises, remaining due/new work when known, and relevant session feedback.
+- Offer one recommended next action, with a clear option to stop. Possible next actions include continuing due reviews, starting Active Recall, returning to Learning, or exploring a topic; choose from actual learner/session state.
+- Handle exhausted queues and the no-session state as intentional product states. Fix the current fallback path so an empty Learning queue cannot expose an exercise while the user is still on the Learning destination.
+- Preserve unfinished-session continuity across navigation and reload; do not mark a session complete merely because a component was unmounted or the learner changed destinations.
+- Avoid gamified pressure, fabricated mastery claims, or forced continuation.
+
+### UXF-03 — Focused Active Recall entry — P1
+
+- Keep the recommended adaptive exercise as the dominant action on the Practice home.
+- Make topic exploration, custom filters, and placement diagnostics discoverable but visually and cognitively secondary.
+- Detect when there is no eligible exercise before presenting a start action. Explain the actual reason and provide a direct route to the appropriate first step, usually Learning.
+- Preserve the ability to exit an exercise without submitting an answer and return to Practice home without losing authoritative session state.
+- Keep the five skills (Meaning, Reading, Production, Vocabulary, Context) available to the existing adaptive planner; do not turn the Practice home into a manual mode-selection dashboard.
+
+### UXF-04 — Clear task context across Learning and navigation — P1
+
+- Make the current task explicit: new kanji, scheduled review, topic-based learning, or active recall.
+- Reconcile terminology between the educational model (Learn → Recall → Review → Recover) and the visible destinations (Learning, Active Recall, Dictionary) without adding a fourth primary tab by default.
+- Preserve the three-destination navigation unless task-based testing demonstrates that a change is necessary.
+- Keep topic sessions, normal Learning sessions, and Practice sessions visibly distinguishable, while retaining predictable return paths.
+
+### UXF-05 — Understandable feedback pacing — P2
+
+- Revisit automatic advancement after correct, incorrect, and unknown exercise outcomes.
+- Ensure learners have enough time to understand the answer and correction before the next exercise appears.
+- Prefer a clear, accessible **Continue** action when immediate advancement would interrupt comprehension; assess whether a configurable pacing preference is genuinely needed before adding another setting.
+- Respect reduced-motion preferences, keyboard interaction, focus management, and Persian/English copy parity.
+- Keep feedback and advancement semantics owned by the existing learning-engine outcome contract.
+
+### UXF verification and definition of done
+
+- Validate the complete journeys: first use, returning use, new-kanji learning, due review, Active Recall, topic study, exhausted queues, unfinished-session return, and session completion.
+- Use current engine snapshots and session boundaries as the only source for counts, progress, eligibility, completion, and recommendations.
+- Add Playwright coverage for transitions and failure/empty states, not only component visibility. Include reload/navigation continuity and the empty-Learning-queue regression.
+- Review rendered screens at compact mobile sizes (including 320/360/390 px widths), short-height and landscape layouts, and desktop.
+- Verify Persian RTL and English LTR independently, in light and dark themes, including number formatting, mixed Japanese text, focus order, keyboard use, reduced motion, and touch targets.
+- Confirm that a user can understand what to do next at every transition without needing to discover the correct tab or infer hidden session state.
+- Record before/after screenshots and the exact tested commit; do not call a visual change complete based on source inspection or CI pass alone.
+
+### Architecture and scope guardrails
+
+- React remains presentation and interaction only. FSRS, the v1.9 Learner Model, Adaptive Planner, grading, recovery, evidence, session lifecycle, and persistence remain authoritative in their existing runtime boundaries.
+- Do not add a second scheduler, duplicate progress store, parallel session state, or broad persistence migration to support the new flow.
+- Do not make account creation, cloud sync, Public Beta readiness, or Vocabulary expansion prerequisites for personal daily use.
+- Prefer a small number of coherent transitions over additional dashboards, menus, badges, and isolated feature surfaces.
+- Do not reopen completed onboarding, Learning Card, or design-system work unless a reproducible flow regression is found.
+
+---
+
 # 3. Current baseline and already-completed foundations
 
 The current \`main\` baseline is commit \`c8ad297efc7718f6da55dc94b847b53b12f28fc7\`. Its implementation history immediately before the roadmap documentation includes:
