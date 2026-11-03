@@ -53,6 +53,44 @@ assert.equal(unsubstantiatedVerified.meaningRecords[0].reviewStatus, "unreviewed
 assert.equal(unsubstantiatedVerified.meaningRecords[0].reviewedBy, null);
 assert.equal(unsubstantiatedVerified.meaningRecords[0].reviewedAt, null);
 
+// Non-string reviewer metadata must not satisfy the verification gate through coercion.
+const malformedReviewerMetadata = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningRecords: [{
+    text: "localized day meaning",
+    language: "en",
+    priority: "primary",
+    provenance: { source: "fixture-source" },
+    reviewStatus: "verified",
+    reviewedBy: { name: "not a string" },
+    reviewedAt: { iso: "not a timestamp string" },
+  }],
+});
+const malformedReviewerRecord = malformedReviewerMetadata.meaningRecords.find(record => record.text === "localized day meaning");
+assert.equal(malformedReviewerRecord?.reviewStatus, "unreviewed");
+assert.equal(malformedReviewerRecord?.reviewedBy, null);
+assert.equal(malformedReviewerRecord?.reviewedAt, null);
+
+// Non-string meaning content cannot be coerced into a seemingly verified translation.
+const malformedMeaningText = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningRecords: [{
+    text: { value: "untrusted object" },
+    language: "fa",
+    priority: "primary",
+    provenance: { source: "fixture-source" },
+    reviewStatus: "verified",
+    reviewedBy: "reviewer",
+    reviewedAt: "2026-11-04",
+  }],
+});
+assert.equal(malformedMeaningText.meaningRecords.some(record => record.text === "[object Object]"), false);
+assert.ok(malformedMeaningText.meaningRecords.every(record => record.reviewStatus === "unreviewed"));
+
 // Missing Persian must be represented explicitly, not fabricated.
 const missingPersian = buildLearnerContent({
   character: "日",
