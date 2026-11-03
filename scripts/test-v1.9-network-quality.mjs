@@ -49,7 +49,11 @@ try{
   assert(!sentences.some(x=>x.id===4||x.id===5),'source sentences or translations with missing license metadata must not be selected');
   assert(!sentences.some(x=>x.id===8),'array-valued Japanese sentence text must not be coerced into a valid sentence');
   const tatoebaCall=calls.find(url=>url.includes('api.tatoeba.org'));
-  assert.deepEqual(new URL(tatoebaCall).searchParams.getAll('license'),['CC BY 2.0 FR','CC0 1.0'],'the request should explicitly select reusable sentence licenses');
+  const licenseParams=new URL(tatoebaCall).searchParams;
+  assert.equal(licenseParams.get('license'),'CC BY 2.0 FR,CC0 1.0',
+    'the request should express reusable sentence licenses as a comma-separated OR list');
+  assert.equal(licenseParams.getAll('license').length,1,
+    'repeating the license filter would combine values with AND');
   const selectedWordA=network.selectWord(words);const selectedWordB=network.selectWord(words);
   assert.deepEqual(selectedWordA,selectedWordB);
   assert(words.some(x=>x.word===selectedWordA.word));
