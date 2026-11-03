@@ -900,8 +900,6 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
         </section>
       )}
 
-      </section>
-      ) : null}
     </section>
   );
 }

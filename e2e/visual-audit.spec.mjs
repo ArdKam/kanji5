@@ -399,18 +399,18 @@ test('capture Reading Lab empty and active reading layouts',async({page})=>{
   const dialog=page.locator('.reading-lab-dialog');
   const lab=dialog.locator('.reading-lab');
   await expect(dialog).toBeVisible({timeout:10000});
-  await page.evaluate(()=>document.fonts.ready);
+  await page.evaluate(async()=>{await document.fonts.ready;});
   await page.screenshot({path:path.join(outputDir,'reading-lab-empty-mobile-390x844.png'),fullPage:false,animations:'disabled'});
 
-  await lab.locator('.reading-lab-input').fill('今日は学校に行きます。\\n私は日本語を勉強します。');
+  await lab.locator('.reading-lab-input').fill('今日は学校に行きます。\n私は日本語を勉強します。');
   await expect(lab.locator('.reading-lab-reader')).toBeVisible();
   await expect(lab.locator('.reading-lab-listen')).toBeVisible();
   await expect(lab.locator('.reading-lab-sentence-list')).toHaveCSS('overflow-y','visible');
-  await page.evaluate(()=>document.fonts.ready);
+  await page.evaluate(async()=>{await document.fonts.ready;});
   await page.screenshot({path:path.join(outputDir,'reading-lab-active-mobile-390x844.png'),fullPage:false,animations:'disabled'});
 
   await page.setViewportSize({width:1280,height:900});
   await expect(lab.locator('.reading-lab-reader')).toBeVisible();
-  await page.evaluate(()=>document.fonts.ready);
+  await page.evaluate(async()=>{await document.fonts.ready;});
   await page.screenshot({path:path.join(outputDir,'reading-lab-active-desktop-1280x900.png'),fullPage:false,animations:'disabled'});
 });

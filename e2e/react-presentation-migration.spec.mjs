@@ -733,7 +733,7 @@ test('Reading Lab keeps a compact empty state and one continuous reader scroll s
   await page.setViewportSize({width:390,height:844});
   expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
   expect(await input.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThanOrEqual(155);
-  await input.fill('今日は学校に行きます。\\n私は日本語を勉強します。');
+  await input.fill('今日は学校に行きます。\n私は日本語を勉強します。');
   await expect(lab.locator('.reading-lab-reader')).toBeVisible();
   await expect(lab.locator('.reading-lab-listen')).toBeVisible();
   await expect(lab.locator('.reading-lab-action-audio')).toBeVisible();

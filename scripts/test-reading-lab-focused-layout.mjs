@@ -8,7 +8,7 @@ const reading = fs.readFileSync("frontend/src/app/ReadingLab.tsx", "utf8");
 
 assert.ok(!dialog.includes("reading-lab-polish.css"), "Do not add a separate Reading Lab CSS bundle");
 const order = [
-  reading.indexOf('className="reading-lab-source"'),
+  reading.indexOf('className="reading-lab-section reading-lab-source"'),
   reading.indexOf('className="reading-lab-reader"'),
   reading.indexOf('className="reading-lab-analysis"'),
   reading.indexOf('className="reading-lab-attention"'),
@@ -26,8 +26,8 @@ assert.ok(css.includes('.reading-lab{display:grid;align-content:start;'), "Readi
 assert.ok(css.includes('.reading-lab-section{display:grid;align-content:start;'), "Reading sections must not stretch vertically");
 assert.ok(css.includes('.reading-lab-input{display:block;width:100%;height:132px;min-height:132px;'), "Source editor must use the compact height");
 assert.ok(css.includes('.reading-lab-reader-text{padding:2px 0;border:0;border-radius:0;background:transparent;'), "Reader text should use the focused editorial surface");
-const sentenceList = css.match(/\\.reading-lab-sentence-list\\s*\\{([^}]*)\\}/);
-assert.ok(sentenceList && /max-height\\s*:\\s*none/.test(sentenceList[1]) && /overflow\\s*:\\s*visible/.test(sentenceList[1]), "Sentence list must not become a nested scroll container");
+const sentenceList = css.match(/\.reading-lab-sentence-list\s*\{([^}]*)\}/);
+assert.ok(sentenceList && /max-height\s*:\s*none/.test(sentenceList[1]) && /overflow\s*:\s*visible/.test(sentenceList[1]), "Sentence list must not become a nested scroll container");
 assert.ok(css.includes('.dialog.secondary-page-dialog .reading-lab{') && css.includes('overflow-y:auto;'), "The Reading Lab itself must remain the single scroll container");
 assert.ok(css.includes('.dialog.secondary-page-dialog.reading-lab-dialog:not(:has(.reading-lab-reader))'), "Empty dialog must size intrinsically");
 assert.ok(!focus.includes('!important') && focus.includes('.reading-lab-focus-button{min-height:44px;'), "Focus controls must retain accessible touch targets without overrides");
