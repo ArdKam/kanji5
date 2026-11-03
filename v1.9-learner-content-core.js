@@ -51,20 +51,25 @@ const MEANING_PRIORITIES=new Set(['primary','secondary','reference']);
 const MEANING_REVIEW_STATES=new Set(['verified','unreviewed','rejected','unavailable']);
 function normalizeMeaningRecord(record){
   const value=record&&typeof record==='object'?record:{};
-  const sourceText=text(value.text??value.translation,240);
+  const rawText=value.text??value.translation;
+  const sourceText=typeof rawText==='string'?text(rawText,240):'';
   const language=MEANING_LANGUAGES.has(value.language)?value.language:'unknown';
   const priority=MEANING_PRIORITIES.has(value.priority)?value.priority:'secondary';
   const provenance=value.provenance&&typeof value.provenance==='object'?value.provenance:{};
-  const source=text(provenance.source||value.source||'unknown',180)||'unknown';
-  const version=text(provenance.version||value.sourceVersion,100)||null;
-  const entryId=text(provenance.entryId||value.sourceEntryId,160)||null;
-  const url=text(provenance.url||value.sourceUrl,500)||null;
+  const rawSource=provenance.source??value.source??'unknown';
+  const rawVersion=provenance.version??value.sourceVersion;
+  const rawEntryId=provenance.entryId??value.sourceEntryId;
+  const rawUrl=provenance.url??value.sourceUrl;
+  const source=typeof rawSource==='string'?text(rawSource,180)||'unknown':'unknown';
+  const version=typeof rawVersion==='string'?text(rawVersion,100)||null:null;
+  const entryId=typeof rawEntryId==='string'?text(rawEntryId,160)||null:null;
+  const url=typeof rawUrl==='string'?text(rawUrl,500)||null:null;
   const requestedReview=MEANING_REVIEW_STATES.has(value.reviewStatus)?value.reviewStatus:'unreviewed';
-  const reviewedBy=text(value.reviewedBy,120)||null;
-  const reviewedAt=text(value.reviewedAt,80)||null;
+  const reviewedBy=typeof value.reviewedBy==='string'?text(value.reviewedBy,120)||null:null;
+  const reviewedAt=typeof value.reviewedAt==='string'?text(value.reviewedAt,80)||null:null;
   const canVerify=Boolean(sourceText&&language!=='unknown'&&source!=='unknown'&&reviewedBy&&reviewedAt);
   const reviewStatus=requestedReview==='verified'&&!canVerify?'unreviewed':requestedReview;
-  const reviewNotes=text(value.reviewNotes,600)||(
+  const reviewNotes=(typeof value.reviewNotes==='string'?text(value.reviewNotes,600):'')||(
     reviewStatus==='unreviewed'?'Translation and learner-facing priority have not been independently reviewed.':''
   );
   if(!sourceText&&reviewStatus!=='unavailable')return null;
