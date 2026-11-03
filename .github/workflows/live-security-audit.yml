@@ -2,6 +2,13 @@ name: Rinemi live security audit
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Deploy Rinemi to GitHub Pages"
+    types:
+      - completed
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -9,13 +16,16 @@ permissions:
 jobs:
   live-production-security:
     name: Read-only live security smoke
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - name: Check out current audit harness
+      - name: Check out the deployed revision
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,13 +40,14 @@ jobs:
         run: node scripts/run-live-security-smoke.mjs
 
   zap-passive-baseline:
-    name: OWASP ZAP passive baseline (advisory)
+    name: OWASP ZAP passive baseline (manual advisory)
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - name: Check out current audit harness
+      - name: Check out audit harness
         uses: actions/checkout@v4
       - name: Run OWASP ZAP baseline (passive only)
         continue-on-error: true

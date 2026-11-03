@@ -859,8 +859,6 @@ test("visual coverage: Dictionary control bar topic browsing across breakpoints,
   }
 });
 
-
-
 test("visual evidence: Learning Card front keeps session and card context distinct", async ({ page }, testInfo) => {
   test.setTimeout(90000);
   const audit = await createCapture(page, testInfo);

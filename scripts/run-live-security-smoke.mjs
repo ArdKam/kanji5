@@ -93,8 +93,13 @@ async function auditHttpSurface() {
   const cspHeader = headers.get("content-security-policy") || "";
   const cspMeta = parseCspMeta(html);
   record("CSP_POLICY_PRESENT", Boolean(cspHeader || cspMeta), "HIGH", cspHeader ? "HTTP response header present" : "Enforced CSP meta policy found in index.html", "No HTTP CSP header or CSP meta policy was found.");
-  if (!cspHeader && cspMeta) warn("CSP_HTTP_HEADER", "The page has a meta CSP, but no HTTP CSP header. Meta CSP cannot enforce frame-ancestors and has fewer available directives.");
-  else if (cspHeader) pass("CSP_HTTP_HEADER", "HTTP response header is present");
+  if (!cspHeader) {
+    fail("CSP_HTTP_HEADER", "MEDIUM", cspMeta
+      ? "The page has a meta CSP, but the required HTTP Content-Security-Policy response header is absent. Meta CSP cannot enforce frame-ancestors and has fewer available directives."
+      : "The HTTP Content-Security-Policy response header is absent.");
+  } else {
+    pass("CSP_HTTP_HEADER", "HTTP response header is present");
+  }
 
   const xfo = (headers.get("x-frame-options") || "").trim().toLowerCase();
   const frameAncestorPolicy = policyHasFrameAncestors(cspHeader);

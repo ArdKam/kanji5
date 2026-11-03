@@ -272,3 +272,30 @@ test("Skip setup clearly starts learning without completing the optional setup c
   await expect(page.locator("#root .app-shell")).toBeVisible({ timeout: 20000 });
   await expect.poll(() => page.evaluate(() => localStorage.getItem("kanji5-onboarding-v2"))).toBe("complete");
 });
+
+test("Persian onboarding localizes the daily workload and avoids uppercase eyebrow styling", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.clear();
+    localStorage.setItem("kanji5-ui-language", "fa");
+  });
+  await page.goto("/");
+  const onboarding = page.locator('[data-testid="onboarding-flow"]');
+  await expect(onboarding).toBeVisible({ timeout: 20000 });
+  await expect(page.locator("html")).toHaveAttribute("lang", "fa");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+
+  await onboarding.getByRole("button", { name: "تنظیم جلسهٔ اول", exact: true }).click();
+  await expect(onboarding.getByRole("heading", { name: "هر کانجی را چطور یاد می‌گیری؟" })).toBeVisible();
+  await onboarding.getByRole("button", { name: "ادامه", exact: true }).click();
+  await expect(onboarding.getByRole("heading", { name: "از کجا شروع کنیم؟" })).toBeVisible();
+  await onboarding.getByRole("button", { name: /از ابتدا/ }).click();
+  await onboarding.getByRole("button", { name: "ادامه", exact: true }).click();
+  await expect(onboarding.getByRole("heading", { name: "روزانه چند کانجی جدید؟" })).toBeVisible();
+
+  await expect(onboarding.locator(".kanji5-onboarding-range-option strong")).toHaveText(["۵", "۱۰", "۱۵"]);
+  const eyebrow = onboarding.locator(".kanji5-onboarding-eyebrow").first();
+  await expect(eyebrow).toHaveCSS("font-size", "12px");
+  await expect(eyebrow).toHaveCSS("font-weight", "650");
+  await expect(eyebrow).toHaveCSS("text-transform", "none");
+  await expect(eyebrow).toHaveCSS("letter-spacing", "normal");
+});

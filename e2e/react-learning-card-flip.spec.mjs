@@ -1389,7 +1389,7 @@ test("Learning Card review buttons remain tappable and keyboard reachable in com
       for (const rating of await ratings.all()) {
         const bounds = await rating.boundingBox();
         expect(bounds, "Each review button must have measurable rendered bounds").not.toBeNull();
-        expect(bounds.width, "Review buttons should be at least 44px wide where practical").toBeGreaterThanOrEqual(44);
+        expect(bounds.width, `Review button ${await rating.innerText()} at ${scenario.viewport.width}x${scenario.viewport.height} (${scenario.language}, ${scenario.theme}) must be at least 44px wide; got ${bounds.width.toFixed(2)}px`).toBeGreaterThanOrEqual(44);
         expect(bounds.height, "Review buttons should be at least 44px tall where practical").toBeGreaterThanOrEqual(44);
         await expect(rating).toBeEnabled();
       }

@@ -1,4 +1,4 @@
-import { mergeSyncPayload, stablePayload, hashPayload } from './v1.5-sync-core.js';
+import { mergeSyncPayload, stablePayload, hashPayload, payloadsEqual } from './v1.5-sync-core.js';
 import { mergeV16SyncData, V16_SYNC_SCHEMA_VERSION } from './v1.6-sync-core.js';
 
 const storage=window.__KANJI5_STORAGE__||localStorage;
@@ -11,6 +11,7 @@ const REVIEWS_STORAGE_KEY=K.reviews;
 const REVIEW_SUMMARY_KEY=K.reviewSummary;
 const KNOWLEDGE_KEY=K.knowledge;
 const COMPONENT_KEY=K.components;
+const COMPONENT_SYNC_META_KEY=K.componentSyncMeta;
 const SESSION_HISTORY_KEY=K.sessionHistory;
 const SYNC_META_KEY = 'kanji5-v1.2-sync-meta';
 const POLL_MS = 60000;
@@ -31,7 +32,11 @@ const emptyState = {
 let state = { ...emptyState };
 let client = null;
 let user = null;
+let authGeneration = 0;
 let syncPromise = null;
+let syncRerunRequested = false;
+let activeSyncGeneration = null;
+let pendingAuthSyncGeneration = null;
 let pollTimer = null;
 let syncDebounce = null;
 const listeners = new Set();
@@ -63,15 +68,54 @@ function mapUser(value) {
   };
 }
 
+function captureAuthSession() {
+  if (!user?.id) return null;
+  return Object.freeze({ userId: String(user.id), generation: authGeneration });
+}
+
+function isCurrentAuthSession(session) {
+  return Boolean(
+    session
+    && user?.id
+    && String(user.id) === session.userId
+    && authGeneration === session.generation
+  );
+}
+
+function assertCurrentAuthSession(session) {
+  if (isCurrentAuthSession(session)) return;
+  const error = new Error('AUTH_SESSION_CHANGED');
+  error.code = 'AUTH_SESSION_CHANGED';
+  throw error;
+}
+
 function localPayload() {
   const persisted = safeJSON(storage.getItem(STORAGE_KEY), null);
+  const syncMeta = safeJSON(storage.getItem(SYNC_META_KEY), {});
   const cards = safeJSON(storage.getItem(CARDS_STORAGE_KEY), persisted?.cards || {});
   const reviews = safeJSON(storage.getItem(REVIEWS_STORAGE_KEY), persisted?.reviews || []);
   const reviewSummary = safeJSON(storage.getItem(REVIEW_SUMMARY_KEY), persisted?.reviewSummary || null);
   const components = safeJSON(storage.getItem(COMPONENT_KEY), {});
   const history = safeJSON(storage.getItem(SESSION_HISTORY_KEY), []);
+  const statePayload = persisted ? { ...persisted, cards, reviews, reviewSummary, queue: [], current: null, revealed: false, examples: {} } : null;
+  // A legacy caller may have persisted a setting without the new per-key clock.
+  // Compare against this account's last successful sync to detect such local edits.
+  if (statePayload && syncMeta?.userId === user?.id && syncMeta?.lastSyncedSettings && typeof syncMeta.lastSyncedSettings === 'object') {
+    const clocks = { ...(statePayload.settingsUpdatedAtByKey || {}) };
+    let changed = false;
+    for (const key of new Set([...Object.keys(statePayload.settings || {}), ...Object.keys(syncMeta.lastSyncedSettings)])) {
+      if (JSON.stringify(statePayload.settings?.[key]) !== JSON.stringify(syncMeta.lastSyncedSettings[key]) && !clocks[key]) {
+        clocks[key] = new Date().toISOString();
+        changed = true;
+      }
+    }
+    if (changed) {
+      statePayload.settingsUpdatedAtByKey = clocks;
+      storage.setItem(STORAGE_KEY, JSON.stringify({ ...persisted, settingsUpdatedAtByKey: clocks }));
+    }
+  }
   return {
-    state: persisted ? { ...persisted, cards, reviews, reviewSummary, queue: [], current: null, revealed: false, examples: {} } : null,
+    state: statePayload,
     knowledge: safeJSON(storage.getItem(KNOWLEDGE_KEY), {}),
     deckVersion: storage.getItem('kanji5-deck-version') || null,
     educationSchemaVersion: 2,
@@ -79,6 +123,7 @@ function localPayload() {
     v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
     sessionHistory: Array.isArray(history) ? history : [],
     components: components && typeof components === 'object' ? components : {},
+    componentUpdatedAtByKey: safeJSON(storage.getItem(COMPONENT_SYNC_META_KEY), {}),
     skillProfile: components?.v16SkillProfile && typeof components.v16SkillProfile === 'object' ? components.v16SkillProfile : null
   };
 }
@@ -112,10 +157,18 @@ function readSyncSummary() {
 }
 
 function writeLocal(payload, remoteUpdatedAt = null) {
+  const incomingPayload = payload || {};
+  // A review/settings write may happen while the network request is in flight.
+  // Merge against the latest persisted local state before applying the sync result.
+  const freshLocal = localPayload();
+  const resolvedPayload = mergedPayload(freshLocal, incomingPayload);
+  const localAdvanced = !payloadsEqual(resolvedPayload, incomingPayload);
+  payload = resolvedPayload;
   if (payload?.state) {
     const s = payload.state;
     storage.setItem(STORAGE_KEY, JSON.stringify({
       settings: s.settings,
+      settingsUpdatedAtByKey: s.settingsUpdatedAtByKey || {},
       today: s.today,
       todayNew: s.todayNew,
       todayReviewCount: s.todayReviewCount,
@@ -129,21 +182,23 @@ function writeLocal(payload, remoteUpdatedAt = null) {
   storage.setItem(KNOWLEDGE_KEY, JSON.stringify(payload?.knowledge || {}));
   if (payload?.deckVersion) storage.setItem('kanji5-deck-version', payload.deckVersion);
   const v16 = mergeV16SyncData(payload, payload);
-  const currentComponents = safeJSON(storage.getItem(COMPONENT_KEY), {}) || {};
   storage.setItem(SESSION_HISTORY_KEY, JSON.stringify(v16.sessionHistory || payload?.sessionHistory || []));
   storage.setItem(COMPONENT_KEY, JSON.stringify({
-    ...currentComponents,
     ...(v16.components || payload?.components || {}),
     ...(v16.skillProfile || payload?.skillProfile ? { v16SkillProfile: v16.skillProfile || payload.skillProfile } : {})
   }));
+  storage.setItem(COMPONENT_SYNC_META_KEY, JSON.stringify(v16.componentUpdatedAtByKey || payload?.componentUpdatedAtByKey || {}));
   storage.setItem(SYNC_META_KEY, JSON.stringify({
     educationSchemaVersion: Number(payload?.educationSchemaVersion) || 2,
     syncSchemaVersion: Number(payload?.syncSchemaVersion) || 1,
     v16SyncSchemaVersion: Number(payload?.v16SyncSchemaVersion) || V16_SYNC_SCHEMA_VERSION,
     syncedAt: new Date().toISOString(),
     remoteUpdatedAt: remoteUpdatedAt || null,
-    payloadHash: hashPayload(payload)
+    payloadHash: hashPayload(payload),
+    userId: user?.id || null,
+    lastSyncedSettings: payload?.state?.settings || {}
   }));
+  if (localAdvanced && user) syncRerunRequested = true;
 }
 
 function mergedPayload(local, remote) {
@@ -154,6 +209,7 @@ function mergedPayload(local, remote) {
     v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
     sessionHistory: v16.sessionHistory || base.sessionHistory || [],
     components: v16.components || base.components || {},
+    componentUpdatedAtByKey: v16.componentUpdatedAtByKey || base.componentUpdatedAtByKey || {},
     skillProfile: v16.skillProfile || base.skillProfile || null
   };
 }
@@ -203,49 +259,73 @@ async function getClient() {
   return client;
 }
 
-async function readRemote() {
+async function readRemote(session) {
+  assertCurrentAuthSession(session);
   const c = await getClient();
+  assertCurrentAuthSession(session);
   const { data, error } = await c.from('user_learning_state')
     .select('payload,updated_at')
-    .eq('user_id', user.id)
+    .eq('user_id', session.userId)
     .maybeSingle();
   if (error) throw error;
+  assertCurrentAuthSession(session);
   if (data?.payload) assertSyncPayloadWithinLimit(data.payload);
   return data ? { payload: data.payload || null, updatedAt: data.updated_at || null } : null;
 }
 
-async function replaceRemote(payload, expectedUpdatedAt = null) {
+async function replaceRemote(payload, session, expectedUpdatedAt = null) {
+  assertCurrentAuthSession(session);
   const c = await getClient();
+  assertCurrentAuthSession(session);
   const now = new Date().toISOString();
   assertSyncPayloadWithinLimit(payload);
   const rowPayload = stablePayload({ ...payload });
   if (expectedUpdatedAt) {
     const { data, error } = await c.from('user_learning_state')
       .update({ payload: rowPayload, updated_at: now })
-      .eq('user_id', user.id)
+      .eq('user_id', session.userId)
       .eq('updated_at', expectedUpdatedAt)
       .select('updated_at')
       .maybeSingle();
     if (error) throw error;
+    assertCurrentAuthSession(session);
     if (!data) return { conflict: true, updatedAt: expectedUpdatedAt };
     return { conflict: false, updatedAt: data.updated_at || now };
   }
   const { data, error } = await c.from('user_learning_state')
-    .insert({ user_id: user.id, payload: rowPayload, updated_at: now })
+    .insert({ user_id: session.userId, payload: rowPayload, updated_at: now })
     .select('updated_at')
     .maybeSingle();
   if (error) {
     if (String(error.code || '') === '23505') return { conflict: true, updatedAt: null };
     throw error;
   }
+  assertCurrentAuthSession(session);
   return { conflict: false, updatedAt: data?.updated_at || now };
 }
 
-async function withSyncLock(task) {
-  if (syncPromise) return syncPromise;
+async function withSyncLock(task, generation) {
+  if (syncPromise) {
+    if (activeSyncGeneration !== generation) pendingAuthSyncGeneration = generation;
+    else syncRerunRequested = true;
+    return syncPromise;
+  }
+  activeSyncGeneration = generation;
   syncPromise = (async () => {
     try { return await task(); }
-    finally { syncPromise = null; }
+    finally {
+      syncPromise = null;
+      activeSyncGeneration = null;
+      const nextGeneration = pendingAuthSyncGeneration;
+      pendingAuthSyncGeneration = null;
+      if (nextGeneration !== null && user?.id && authGeneration === nextGeneration) {
+        syncRerunRequested = false;
+        scheduleSync();
+      } else if (syncRerunRequested) {
+        syncRerunRequested = false;
+        if (user?.id) scheduleSync();
+      }
+    }
   })();
   return syncPromise;
 }
@@ -267,11 +347,14 @@ async function refreshPresentationAfterSync() {
   }
 }
 
-async function syncOnce() {
+async function syncOnce(session) {
+  assertCurrentAuthSession(session);
   const local = assertSyncPayloadWithinLimit(localPayload());
-  const remoteRow = await readRemote();
+  const remoteRow = await readRemote(session);
+  assertCurrentAuthSession(session);
   if (!remoteRow?.payload) {
-    const result = await replaceRemote(local);
+    const result = await replaceRemote(local, session);
+    assertCurrentAuthSession(session);
     if (result.conflict) return { retry: true };
     writeLocal(local, result.updatedAt);
     setSyncStatus('synced');
@@ -279,47 +362,54 @@ async function syncOnce() {
   }
 
   const merged = assertSyncPayloadWithinLimit(mergedPayload(local, remoteRow.payload));
-  const localHash = hashPayload(local);
-  const mergedHash = hashPayload(merged);
   const remotePayload = assertSyncPayloadWithinLimit(remoteRow.payload);
-  const remoteHash = hashPayload(remotePayload);
 
-  if (mergedHash === localHash && mergedHash === remoteHash) {
+  // Preserve #623's exact canonical payload comparison; hashes are metadata only.
+  if (payloadsEqual(merged, local) && payloadsEqual(merged, remotePayload)) {
+    assertCurrentAuthSession(session);
     storage.setItem(SYNC_META_KEY, JSON.stringify({
       educationSchemaVersion: 2,
       syncSchemaVersion: 1,
       v16SyncSchemaVersion: V16_SYNC_SCHEMA_VERSION,
       syncedAt: new Date().toISOString(),
       remoteUpdatedAt: remoteRow.updatedAt,
-      payloadHash: mergedHash
+      payloadHash: hashPayload(merged),
+      userId: session.userId,
+      lastSyncedSettings: merged?.state?.settings || {}
     }));
     setSyncStatus('synced');
     return { retry: false };
   }
-  if (mergedHash === remoteHash) {
+  if (payloadsEqual(merged, remotePayload)) {
+    assertCurrentAuthSession(session);
     writeLocal(merged, remoteRow.updatedAt);
     setSyncStatus('synced');
     await refreshPresentationAfterSync();
     return { retry: false };
   }
 
-  const result = await replaceRemote(merged, remoteRow.updatedAt);
+  const result = await replaceRemote(merged, session, remoteRow.updatedAt);
+  assertCurrentAuthSession(session);
   if (result.conflict) return { retry: true };
   writeLocal(merged, result.updatedAt);
   setSyncStatus('synced');
-  if (mergedHash !== localHash) await refreshPresentationAfterSync();
+  if (!payloadsEqual(merged, local)) await refreshPresentationAfterSync();
   return { retry: false };
 }
 
 async function syncNow() {
-  if (!user) return;
+  const session = captureAuthSession();
+  if (!session) return;
   return withSyncLock(async () => {
+    if (!isCurrentAuthSession(session)) return;
     setSyncStatus('syncing');
     for (let attempt = 1; attempt <= MAX_SYNC_ATTEMPTS; attempt += 1) {
       try {
-        const result = await syncOnce();
+        const result = await syncOnce(session);
+        assertCurrentAuthSession(session);
         if (!result.retry) return;
       } catch (error) {
+        if (error?.code === 'AUTH_SESSION_CHANGED' || !isCurrentAuthSession(session)) return;
         console.warn('Kanji 5 sync attempt failed', error);
         if (attempt === MAX_SYNC_ATTEMPTS) {
           window.__KANJI5_OBSERVABILITY__?.capture?.('sync-failure',error,{attempts:MAX_SYNC_ATTEMPTS,code:String(error?.code||'')});
@@ -328,9 +418,10 @@ async function syncNow() {
         }
       }
     }
+    if (!isCurrentAuthSession(session)) return;
     window.__KANJI5_OBSERVABILITY__?.capture?.('sync-conflict',{message:'SYNC_CONFLICT'},{attempts:MAX_SYNC_ATTEMPTS});
     setSyncStatus('error', 'SYNC_CONFLICT');
-  });
+  }, session.generation);
 }
 
 function scheduleSync() {
@@ -381,7 +472,13 @@ async function boot() {
   try {
     const c = await getClient();
     c.auth.onAuthStateChange((event, session) => {
-      user = session?.user || null;
+      const nextUser = session?.user || null;
+      const previousUserId = user?.id ? String(user.id) : null;
+      const nextUserId = nextUser?.id ? String(nextUser.id) : null;
+      if (previousUserId !== nextUserId || event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        authGeneration += 1;
+      }
+      user = nextUser;
       const recoveryPending = event === 'PASSWORD_RECOVERY' ? true : state.recoveryPending;
       setState({
         status: user ? 'signed-in' : 'signed-out',
@@ -398,19 +495,23 @@ async function boot() {
         setState({ recoveryPending: false });
       }
     });
+    const generationBeforeGetSession = authGeneration;
     const { data, error } = await c.auth.getSession();
     if (error) throw error;
-    user = data.session?.user || null;
-    setState({
-      status: user ? 'signed-in' : 'signed-out',
-      user: mapUser(user),
-      syncStatus: user ? 'syncing' : 'idle',
-      recoveryPending: state.recoveryPending,
-      error: null
-    });
-    if (user) {
-      await syncNow();
-      startSyncLifecycle();
+    // Do not let a delayed initial session read overwrite a newer auth event.
+    if (authGeneration === generationBeforeGetSession) {
+      user = data.session?.user || null;
+      setState({
+        status: user ? 'signed-in' : 'signed-out',
+        user: mapUser(user),
+        syncStatus: user ? 'syncing' : 'idle',
+        recoveryPending: state.recoveryPending,
+        error: null
+      });
+      if (user) {
+        await syncNow();
+        startSyncLifecycle();
+      }
     }
   } catch (error) {
     console.warn('Kanji 5 account unavailable', error);
@@ -461,11 +562,15 @@ const api = {
     const normalizedName = String(name || '').trim();
     if (!normalizedName) throw new Error('AUTH_PROFILE_NAME_REQUIRED');
     if (Array.from(normalizedName).length > 40) throw new Error('AUTH_PROFILE_NAME_TOO_LONG');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_REQUIRED');
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({
       data: { full_name: normalizedName }
     });
     if (error) throw error;
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), error: null });
   },
@@ -473,14 +578,20 @@ const api = {
     if (!currentPassword || !newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
     if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
     if (!user?.email) throw new Error('AUTH_EMAIL_REQUIRED');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_REQUIRED');
+    const email = user.email;
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { error: reauthError } = await c.auth.signInWithPassword({
-      email: user.email,
+      email,
       password: currentPassword
     });
     if (reauthError) throw new Error('AUTH_CURRENT_PASSWORD_INVALID');
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw error;
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), error: null });
   },
@@ -508,9 +619,13 @@ const api = {
   async setPassword(newPassword) {
     if (!newPassword) throw new Error('AUTH_PASSWORD_REQUIRED');
     if (newPassword.length < 6) throw new Error('AUTH_PASSWORD_TOO_SHORT');
+    const session = captureAuthSession();
+    if (!session) throw new Error('AUTH_REQUIRED');
     const c = await getClient();
+    assertCurrentAuthSession(session);
     const { data, error } = await c.auth.updateUser({ password: newPassword });
     if (error) throw new Error('AUTH_SET_PASSWORD_FAILED');
+    assertCurrentAuthSession(session);
     user = data.user || user;
     setState({ status: 'signed-in', user: mapUser(user), recoveryPending: false, error: null });
   },
