@@ -80,6 +80,8 @@ export async function fetchContextSentences(character){
   url.searchParams.set('q',character);
   url.searchParams.set('trans:lang','eng');
   url.searchParams.set('trans:is_direct','yes');
+  url.searchParams.set('trans:is_orphan','no');
+  url.searchParams.set('trans:is_unapproved','no');
   url.searchParams.set('is_orphan','no');
   url.searchParams.set('is_unapproved','no');
   // The OpenAPI schema defines license as SentenceLicenseList (an array).
@@ -93,10 +95,12 @@ export async function fetchContextSentences(character){
   const out=[],seen=new Set();
   for(const row of rows){
     const text=typeof row?.text==='string'?row.text.trim():'';
-    if(!text||!text.includes(character)||seen.has(text)||!TATOEBA_REUSABLE_TEXT_LICENSES.has(row?.license))continue;
+    const sourceLicenseIsReusable=TATOEBA_REUSABLE_TEXT_LICENSES.has(row?.license);
+    const sourceHasRequiredAttribution=row?.license==='CC0 1.0'||(typeof row?.owner==='string'&&Boolean(row.owner.trim()));
+    if(!text||!text.includes(character)||seen.has(text)||row?.is_unapproved!==false||!sourceLicenseIsReusable||!sourceHasRequiredAttribution)continue;
     const translations=Array.isArray(row?.translations)?row.translations:[];
     const translation=translations.flatMap(x=>Array.isArray(x)?x:[x])
-      .find(value=>typeof value?.text==='string'&&value.text.trim()&&TATOEBA_REUSABLE_TEXT_LICENSES.has(value.license));
+      .find(value=>typeof value?.text==='string'&&value.text.trim()&&value.lang==='eng'&&value.is_direct===true&&value.is_unapproved===false&&TATOEBA_REUSABLE_TEXT_LICENSES.has(value.license)&&(value.license==='CC0 1.0'||(typeof value.owner==='string'&&Boolean(value.owner.trim()))));
     const english=typeof translation?.text==='string'?translation.text.trim():'';
     if(!english)continue;
     seen.add(text);
