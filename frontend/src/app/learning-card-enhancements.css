@@ -163,6 +163,7 @@
   font-size: clamp(22px, 2.6vw, 30px);
   font-weight: 760;
   line-height: 1.18;
+  text-align: start;
   overflow-wrap: anywhere;
   text-wrap: pretty;
 }
@@ -305,6 +306,15 @@
   font-size: var(--text-sm);
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+.learning-card-back .learning-back-page:first-child .learning-back-quick-example.is-loading {
+  min-height: 88px;
+  align-content: center;
+}
+.learning-back-example-status {
+  color: var(--mute);
+  font-size: var(--text-sm);
+  line-height: 1.45;
 }
 .learning-card-back .learning-back-page:first-child .learning-back-quick-example-row > .audio-button {
   width: 44px;

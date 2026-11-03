@@ -196,6 +196,27 @@ test("front-side recall cue remains legible and correctly ordered across theme a
   }
 });
 
+test("learning-card page navigation restores the active page to its top", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const card = await revealLearningCard(page, "en");
+  const firstScroll = card.locator(".learning-back-page").nth(0).locator(".learning-back-scroll");
+  await firstScroll.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  expect(await firstScroll.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+
+  await card.locator(".learning-back-page-shortcut").nth(1).click();
+  await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
+  await card.locator(".learning-back-page-shortcut").nth(0).click();
+  await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+  await expect.poll(() => firstScroll.evaluate(el => el.scrollTop)).toBe(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await card.locator(".learning-back-page-shortcut").nth(1).click();
+  await card.locator(".learning-back-page-shortcut").nth(0).click();
+  await expect.poll(() => firstScroll.evaluate(el => el.scrollTop)).toBe(0);
+  await expect(card.locator(".learning-back-kanji")).toBeInViewport();
+});
+
 test("learning-card answer presents kanji, meaning, readings and structure in a stable hierarchy", async ({ browser }) => {
   await Promise.all(["en", "fa"].map(async (language) => {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });

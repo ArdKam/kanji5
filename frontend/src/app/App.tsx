@@ -359,7 +359,14 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
   const [backPage,setBackPage]=useState(0);
   const pagerTrackRef=useRef<HTMLDivElement|null>(null);
   const swipeRef=useRef<{startX:number;startY:number;lastX:number;lastTime:number;startTime:number;active:boolean;axis:"x"|"y"|null}>({startX:0,startY:0,lastX:0,lastTime:0,startTime:0,active:false,axis:null});
-  useEffect(()=>setBackPage(0),[card.character]);
+  useEffect(()=>{
+    setBackPage(0);
+    requestAnimationFrame(()=>{
+      const firstPage=pagerTrackRef.current?.children.item(0);
+      const scroll=firstPage?.querySelector<HTMLElement>(".learning-back-scroll");
+      if(scroll)scroll.scrollTop=0;
+    });
+  },[card.character]);
   // The curated mnemonic corpus is large; defer its chunk until the learner opens
   // the mnemonic page rather than fetching it as part of the initial Learning screen.
   useEffect(()=>{
@@ -408,7 +415,12 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
     track.style.transition="";
     requestAnimationFrame(()=>{track.style.transform="translate3d(-"+page*100+"%,0,0)";});
   },[]);
-  useEffect(()=>{snapPagerTrack(backPage)},[backPage,snapPagerTrack]);
+  useEffect(()=>{
+    const activePage=pagerTrackRef.current?.children.item(backPage);
+    const scroll=activePage?.querySelector<HTMLElement>(".learning-back-scroll");
+    if(scroll)scroll.scrollTop=0;
+    snapPagerTrack(backPage);
+  },[backPage,snapPagerTrack]);
   const handleBackPointerDown=(event:PointerEvent<HTMLDivElement>)=>{
     if(backPageCount<2)return;
     if((event.target as HTMLElement|null)?.closest?.("button,input,textarea,select,a"))return;
@@ -505,7 +517,12 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
                         <div className="readings learning-back-readings"><Reading title="On’yomi" values={displayedOn}/><Reading title="Kun’yomi" values={displayedKun}/></div>
                       </section>
                       <div className="learning-back-support-column">
-                        {!examplesLoading&&!examplesError&&displayExamples[0]?.word?(
+                        {examplesLoading?(
+                          <section className="learning-back-quick-example is-loading" aria-label={t("vocabularyExamples")} aria-busy="true" role="status">
+                            <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
+                            <small className="learning-back-example-status">{getLanguage()==="fa"?"در حال بارگذاری مثال‌های واژگانی…":"Loading vocabulary examples…"}</small>
+                          </section>
+                        ):!examplesError&&displayExamples[0]?.word?(
                           <section className="learning-back-quick-example" aria-label={t("vocabularyExamples")}>
                             <span className="learning-back-quick-example-label">{t("vocabularyExamples")}</span>
                             <div className="learning-back-quick-example-row">
