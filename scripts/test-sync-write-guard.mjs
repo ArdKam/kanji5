@@ -11,7 +11,7 @@ assert.match(writeLocal, /const resolvedPayload = mergedPayload\(freshLocal, inc
 assert.match(writeLocal, /const localAdvanced = !payloadsEqual\(resolvedPayload, incomingPayload\);/, 'Concurrent local changes must be detected before overwriting storage');
 assert.match(writeLocal, /if \(localAdvanced && user\) syncRerunRequested = true;/, 'Changes made during the upload must queue a follow-up sync');
 
-const lockStart = source.indexOf('async function withSyncLock(task) {');
+const lockStart = source.indexOf('async function withSyncLock(task, generation) {');
 const lockEnd = source.indexOf('\nfunction setSyncStatus', lockStart);
 assert.ok(lockStart >= 0 && lockEnd > lockStart, 'Sync lock implementation must exist');
 const lock = source.slice(lockStart, lockEnd);

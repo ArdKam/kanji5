@@ -232,24 +232,38 @@ test("mobile Light/System selection does not leave OS dark surfaces behind", asy
   const ratings = page.locator("#root .learning-card .rating-grid .rating");
   await expect(ratings).toHaveCount(4, { timeout: 10_000 });
   const assertRatingPalette = async () => {
-    const palette = await ratings.evaluateAll((elements) => elements.map((element) => {
-      const rgb = (value) => value.match(/\d+/g).slice(0, 3).map(Number);
-      const luminance = (value) => value.map((channel) => {
-        const normalized = channel / 255;
-        return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-      }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const expected = {
+      "rating-again": [51, 39, 36],
+      "rating-hard": [51, 47, 39],
+      "rating-good": [40, 49, 40],
+      "rating-easy": [39, 48, 59],
+    };
+    const readPalette = () => ratings.evaluateAll((elements) => elements.map((element) => {
+      const channels = (value) => {
+        const srgb = value.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\)$/);
+        if (srgb) return srgb.slice(1).map((channel) => Math.round(Number(channel) * 255));
+        const rgb = value.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/);
+        if (rgb) return rgb.slice(1).map(Number);
+        return null;
+      };
+      const luminance = (value) => {
+        const rgb = channels(value);
+        if (!rgb) return null;
+        return rgb.map((channel) => {
+          const normalized = channel / 255;
+          return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+        }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+      };
       const style = getComputedStyle(element);
-      const pair = [luminance(rgb(style.color)), luminance(rgb(style.backgroundColor))].sort((a, b) => b - a);
+      const pair = [luminance(style.color), luminance(style.backgroundColor)];
       const rating = [...element.classList].find((name) => /^rating-(again|hard|good|easy)$/.test(name));
-      return { rating, background: style.backgroundColor, contrast: (pair[0] + 0.05) / (pair[1] + 0.05) };
+      return { rating, background: channels(style.backgroundColor), contrast: pair.every(Number.isFinite) ? (Math.max(...pair) + 0.05) / (Math.min(...pair) + 0.05) : 0 };
     }));
-    const backgrounds = Object.fromEntries(palette.map((item) => [item.rating, item.background]));
-    expect(backgrounds, "Each rating must retain its own semantic dark-mode color regardless of DOM order").toEqual({
-      "rating-again": "rgb(51, 39, 36)",
-      "rating-hard": "rgb(51, 47, 39)",
-      "rating-good": "rgb(40, 49, 40)",
-      "rating-easy": "rgb(39, 48, 59)",
-    });
+    await expect.poll(async () => {
+      const palette = await readPalette();
+      return Object.fromEntries(palette.map((item) => [item.rating, item.background]));
+    }, { message: "Review rating backgrounds must settle on their distinct semantic dark-mode tokens", timeout: 3000 }).toEqual(expected);
+    const palette = await readPalette();
     expect(palette.every((item) => item.contrast >= 4.5), "Every feedback rating label must meet WCAG AA contrast").toBe(true);
   };
 

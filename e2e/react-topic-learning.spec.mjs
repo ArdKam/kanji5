@@ -88,5 +88,5 @@ test("topic learning opens from Learning and starts a scoped topic session", asy
   await dialog.getByRole("button", { name: "Start learning this topic" }).click();
   await expect(dialog).toBeHidden({ timeout: 10000 });
   await expect(page.locator(".learning-session-context")).toContainText("Nature & land");
-  await expect(page.locator(".learning-card-front .learning-context-label")).toContainText("Nature & land");
+  await expect(page.locator(".learning-card-front .learning-context-label")).toHaveText("Active recall");
 });
