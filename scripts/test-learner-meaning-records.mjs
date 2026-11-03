@@ -92,6 +92,26 @@ const invalidTimestampRecord = invalidReviewTimestamp.meaningRecords.find(record
 assert.equal(invalidTimestampRecord?.reviewStatus, "unreviewed");
 assert.equal(invalidTimestampRecord?.reviewedAt, null);
 
+// A well-formed ISO timestamp and attributable localized record may remain verified.
+const validVerifiedMeaning = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningRecords: [{
+    text: "روز",
+    language: "fa",
+    priority: "primary",
+    provenance: { source: "human-review" },
+    reviewStatus: "verified",
+    reviewedBy: "Persian reviewer",
+    reviewedAt: "2026-11-04T12:00:00.000Z",
+  }],
+});
+const validVerifiedRecord = validVerifiedMeaning.meaningRecords.find(record => record.text === "روز");
+assert.equal(validVerifiedRecord?.reviewStatus, "verified");
+assert.equal(validVerifiedRecord?.reviewedBy, "Persian reviewer");
+assert.equal(validVerifiedRecord?.reviewedAt, "2026-11-04T12:00:00.000Z");
+
 // Non-string meaning content cannot be coerced into a seemingly verified translation.
 const malformedMeaningText = buildLearnerContent({
   character: "日",
