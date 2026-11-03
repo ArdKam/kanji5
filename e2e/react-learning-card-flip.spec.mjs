@@ -198,9 +198,10 @@ test("front-side recall cue remains legible and correctly ordered across theme a
 
 test("learning-card page navigation restores the active page to its top", async ({ page }) => {
   await routeExamples(page, 2);
-  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.setViewportSize({ width: 844, height: 390 });
   const card = await revealLearningCard(page, "en");
   const firstScroll = card.locator(".learning-back-page").nth(0).locator(".learning-back-scroll");
+  await expect.poll(() => firstScroll.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
   await firstScroll.evaluate(el => { el.scrollTop = el.scrollHeight; });
   expect(await firstScroll.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
 
