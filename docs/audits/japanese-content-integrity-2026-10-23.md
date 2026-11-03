@@ -51,11 +51,11 @@ Counts were calculated from the files on the observed baseline. Structural check
 **Evidence:** the official Tatoeba API schema returns sentence `owner` and `license` fields; translation objects are sentence objects as well and carry their own IDs, owners, and licenses. Before this patch, the adapter retained only the Japanese sentence ID/text, English text, and a generic `source: 'tatoeba'` marker. That erased the information needed to produce specific sentence/translation attribution downstream. Tatoeba's reuse guidance says text attribution must identify Tatoeba and its license; its API distinguishes `CC BY 2.0 FR`, `CC0 1.0`, and `PROBLEM`. References: https://api.tatoeba.org/openapi.json and https://en.wiki.tatoeba.org/articles/show/faq
 
 **Correction in this branch:**
-- Request only reusable source-sentence licenses explicitly (`CC BY 2.0 FR` and `CC0 1.0`) using repeated query parameters.
+- Request only reusable source-sentence licenses explicitly (`CC BY 2.0 FR` or `CC0 1.0`) as one comma-separated OR list. Tatoeba combines separate filters with AND; repeating the `license` parameter would incorrectly require both licenses.
 - Retain the source sentence URL, owner, and license with every returned context item.
 - Retain the chosen English translation's sentence ID, URL, owner, and license.
 - Do not select an English translation explicitly marked `PROBLEM`, missing a license, or carrying a license outside the text allowlist.
-- Add regression fixtures for source/translation attribution metadata, repeated license parameter serialization, and rejection of PROBLEM, missing, or unrecognized licenses.
+- Add regression fixtures for source/translation attribution metadata, comma-separated license OR-list serialization, and rejection of PROBLEM, missing, or unrecognized licenses.
 
 **Remaining acceptance requirement:** these fields are now preserved in the runtime context data, but this source-adapter PR does not alter the React presentation. Verify that the production Context experience actually presents appropriate attribution/links to users, and that it does not show material marked `PROBLEM`, before closing the licensing/release gate. Metadata preservation alone is not proof that the user-facing attribution requirement is satisfied.
 
