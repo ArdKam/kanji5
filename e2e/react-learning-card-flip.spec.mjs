@@ -1394,29 +1394,6 @@ test("Learning Card review buttons remain tappable and keyboard reachable in com
 
       const ratings = card.locator(".learning-back-footer .rating-grid .rating");
       await expect(ratings).toHaveCount(4);
-      const targetLayout = await ratings.nth(0).evaluate(element => {
-        const result = [];
-        for (let node = element; node instanceof HTMLElement; node = node.parentElement) {
-          const style = getComputedStyle(node);
-          const rect = node.getBoundingClientRect();
-          result.push({
-            tag: node.tagName,
-            className: typeof node.className === "string" ? node.className : "",
-            rectWidth: Number(rect.width.toFixed(2)),
-            offsetWidth: node.offsetWidth,
-            cssWidth: style.width,
-            minWidth: style.minWidth,
-            display: style.display,
-            flex: style.flex,
-            alignItems: style.alignItems,
-            gridTemplateColumns: style.gridTemplateColumns,
-            transform: style.transform,
-          });
-          if (node.classList.contains("learning-card")) break;
-        }
-        return result;
-      });
-      console.log("LEARNING_CARD_TARGET_LAYOUT " + JSON.stringify(targetLayout));
       for (const rating of await ratings.all()) {
         const bounds = await rating.boundingBox();
         expect(bounds, "Each review button must have measurable rendered bounds").not.toBeNull();
