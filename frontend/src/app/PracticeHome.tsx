@@ -196,9 +196,9 @@ export function PracticeHome({
         </summary>
         <div className="practice-advanced-content">
           <CustomStudyPanel language={language} selectedTopic={selectedTopicScope} onStartCustomStudy={onStartCustomStudy} />
-          <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
         </div>
       </details>
+      <PlacementDiagnostic catalog={catalog} language={language} onStartCustomStudy={onStartCustomStudy} />
     </section>
   );
 }
