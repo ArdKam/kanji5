@@ -226,7 +226,7 @@
 }
 .learning-card-back .learning-back-page:first-child .learning-back-readings-block .reading-toggle {
   flex: 0 0 auto;
-  min-height: 44px;
+  min-height: 46px;
   padding-inline: 10px;
   font-size: var(--text-xs);
 }
@@ -253,10 +253,10 @@
   font-size: var(--text-sm);
 }
 .learning-card-back .learning-back-page:first-child .reading > .audio-button {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
 }
 .learning-back-support-column {
   display: grid;
@@ -317,10 +317,10 @@
   line-height: 1.45;
 }
 .learning-card-back .learning-back-page:first-child .learning-back-quick-example-row > .audio-button {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
 }
 .learning-card-back .learning-back-page:first-child .learning-back-identity-visual {
   min-width: 0;
