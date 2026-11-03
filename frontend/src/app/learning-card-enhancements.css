@@ -738,17 +738,6 @@
   .learning-card-back .learning-back-footer .rating-grid .rating { box-sizing: border-box; min-width: 44px; min-height: 44px; padding: 2px; font-size: var(--text-xs); line-height: 1.05; overflow-wrap: anywhere; }
 }
 
-/* Keep source-review cues legible without competing with the kanji or vocabulary content. */
-.learning-meaning-source-note {
-  margin: 0;
-  color: var(--mute);
-  font-size: 10px;
-  line-height: 1.2;
-}
-@media(max-width:420px){
-  .learning-card-back .learning-back-page:first-child .learning-back-readings-block { gap: 3px; }
-  .learning-card-back .learning-back-page:first-child .learning-back-readings { gap: 3px; }
-}
 .example-source-label {
   display: block;
   margin-top: 2px;

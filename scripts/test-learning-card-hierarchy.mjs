@@ -36,13 +36,21 @@ const backHeader = app.slice(backStart, pagerStart);
 assert(!backHeader.includes('className="card-topline"'), "The back face must not repeat a generic card title");
 const pageStart = app.indexOf('<div className={"learning-back-page"', pagerStart);
 const pageOrder = [
-  app.indexOf('aria-label={t("meaningAndStructure")}', pageStart),
-  app.indexOf('aria-label={t("vocabularyExamples")}', pageStart),
-  app.indexOf('aria-label={t("personalMnemonic")}', pageStart),
-  app.indexOf('aria-label={t("strokeOrder")}', pageStart),
+  app.indexOf('className={"learning-back-page"+(backPage===0', pageStart),
+  app.indexOf('className={"learning-back-page"+(backPage===1', pageStart),
+  app.indexOf('className={"learning-back-page"+(backPage===(hasExamplesPage?2:1)', pageStart),
+  app.indexOf('className={"learning-back-page"+(backPage===(hasExamplesPage?3:2)', pageStart),
 ];
 assert(pageOrder.every((position) => position > pageStart), "All four learning pages must remain present");
-assert(pageOrder.every((position, index) => index === 0 || position > pageOrder[index - 1]), "Back-card order must stay meaning/structure → vocabulary → mnemonic → stroke order");
+assert(pageOrder.every((position, index) => index === 0 || position > pageOrder[index - 1]), "Back-card order must stay meaning/structure → vocabulary → mnemonic → stroke order"); 
+
+const pageLabels = [
+  'aria-label={t("meaningAndStructure")}',
+  'aria-label={t("vocabularyExamples")}',
+  'aria-label={t("personalMnemonic")}',
+  'aria-label={t("strokeOrder")}',
+];
+assert(pageOrder.every((position, index) => app.indexOf(pageLabels[index], position) > position), "Each page must retain its matching accessible label");
 
 const overviewMarkup = app.slice(pageOrder[0], pageOrder[1]);
 assert(overviewMarkup.includes('className="learning-back-detail-grid"'), "The answer view must separate its reading panel from supporting example and structure content");
