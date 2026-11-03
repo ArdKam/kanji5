@@ -91,6 +91,23 @@ const malformedMeaningText = buildLearnerContent({
 assert.equal(malformedMeaningText.meaningRecords.some(record => record.text === "[object Object]"), false);
 assert.ok(malformedMeaningText.meaningRecords.every(record => record.reviewStatus === "unreviewed"));
 
+// Malformed provenance fields remain unknown instead of becoming the string "[object Object]".
+const malformedProvenance = buildLearnerContent({
+  character: "日",
+  meanings: ["day"],
+  meaningLanguage: "en",
+  meaningProvenance: {
+    source: { label: "unknown source" },
+    version: { value: "v1" },
+    entryId: { value: "日" },
+    url: { href: "https://example.invalid" },
+  },
+});
+assert.equal(malformedProvenance.meaningRecords[0].provenance.source, "unknown");
+assert.equal(malformedProvenance.meaningRecords[0].provenance.version, null);
+assert.equal(malformedProvenance.meaningRecords[0].provenance.entryId, null);
+assert.equal(malformedProvenance.meaningRecords[0].provenance.url, null);
+
 // Missing Persian must be represented explicitly, not fabricated.
 const missingPersian = buildLearnerContent({
   character: "日",
