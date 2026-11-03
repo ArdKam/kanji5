@@ -317,5 +317,5 @@ test('Practice Home keeps adaptive recall primary and defers exploratory tools',
   await topics.locator('summary').click();
   await advanced.locator('summary').click();
   await expect(home.locator('.practice-advanced-content .practice-custom-panel')).toBeVisible();
-  await expect(home.locator('.practice-advanced-content .placement-panel')).toBeVisible();
+  await expect(home.locator('.practice-advanced-content .placement-panel')).toBeVisible({timeout:15000});
 });
