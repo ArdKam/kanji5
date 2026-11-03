@@ -651,6 +651,6 @@
 .learning-card-back .learning-back-footer{padding:5px 0 calc(3px + env(safe-area-inset-bottom))}
 .learning-card-back .learning-back-page-nav{justify-content:space-between;min-height:44px}
 .learning-card-back .learning-back-page-shortcut{flex:0 0 44px;min-height:44px}
-.learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.learning-card-back .learning-back-footer .rating-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
 .learning-card-back .learning-back-footer .rating-grid .rating{min-width:0;padding:5px 2px;font-size:var(--text-xs);line-height:1.15;overflow-wrap:anywhere}
 }
