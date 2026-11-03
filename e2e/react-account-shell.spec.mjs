@@ -136,7 +136,7 @@ test('account signup preserves entered credentials after switching auth intent',
 });
 
 test('forgot password sends a recovery request and keeps the user in the recovery state', async ({ page }) => {
-  await page.route('https://vbrtzkejodkddfdbolbo.supabase.co/auth/v1/recover', async route => {
+  await page.route('**/auth/v1/recover**', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
