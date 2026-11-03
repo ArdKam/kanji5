@@ -11,7 +11,13 @@
 .practice-topic-card.is-selected{border-color:var(--shu)}
 .practice-topic-glyph{display:grid;place-items:center;font:27px/1 var(--jp-font)}
 .practice-topic-copy{display:grid;gap:4px}
-.practice-all-topics>summary,.practice-advanced>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;font-size:var(--text-sm);font-weight:760;cursor:pointer}
+.practice-topic-section>summary,.practice-all-topics>summary,.practice-advanced>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;font-size:var(--text-sm);font-weight:760;cursor:pointer}
+.practice-topic-section>summary{border-bottom:1px solid var(--line-soft)}
+.practice-topic-section[open]>summary{margin-bottom:4px}
+.practice-topic-section-count{color:var(--mute);font-size:var(--text-xs);font-weight:650}
+.practice-topic-section-content{display:grid;gap:12px;padding-top:10px}
+.practice-advanced-content{display:grid;gap:18px;padding-top:8px}
+.practice-advanced-content>.placement-panel{margin-top:2px}
 .practice-topic-selected{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px 18px}
 .practice-topic-selected-copy{display:grid;gap:5px}
 .practice-topic-status.is-error,.practice-topic-message,.practice-custom-message{color:var(--color-danger)}
