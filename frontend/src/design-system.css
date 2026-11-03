@@ -1,0 +1,139 @@
+/*
+ * Rinemi Design System foundation.
+ *
+ * This file is the semantic token source of truth. Legacy names remain as aliases
+ * while the existing presentation is migrated incrementally; new UI should use
+ * the --ds-* roles directly.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Brand palette: identity only, not semantic feedback colors. */
+  --ds-brand-rice-paper: #F7F4EE;
+  --ds-brand-surface: #FDFBF7;
+  --ds-brand-sumi: #292B2D;
+  --ds-brand-indigo: #505F83;
+  --ds-brand-sakura: #D6A1AA;
+  --ds-brand-moss: #8C9B87;
+  --ds-color-progress-accent: light-dark(var(--ds-brand-moss), #A9B77C);
+  --ds-brand-border: #DED8CE;
+
+  /* Semantic surfaces. */
+  --ds-color-canvas: light-dark(var(--ds-brand-rice-paper), #171614);
+  --ds-color-surface: light-dark(var(--ds-brand-surface), #23211E);
+  --ds-color-surface-subtle: light-dark(#F1EDE6, #292724);
+  --ds-color-surface-elevated: light-dark(#FFFDF8, #2B2824);
+  --ds-color-surface-panel: light-dark(rgba(251, 248, 240, .7), rgba(35, 33, 30, .78));
+  --ds-color-surface-onboarding-choice: light-dark(rgba(253, 251, 247, .58), rgba(35, 33, 30, .82));
+
+  /* Semantic text and interactive controls. */
+  --ds-color-text-primary: light-dark(var(--ds-brand-sumi), #F4EFE3);
+  --ds-color-text-secondary: light-dark(#53545A, #DDD5C8);
+  --ds-color-text-muted: light-dark(#62666A, #B8AFA2);
+  --ds-color-action-primary: light-dark(var(--ds-brand-indigo), #E06A5F);
+  --ds-color-action-primary-text: light-dark(#FDFBF7, #171614);
+  --ds-color-action-primary-hover: light-dark(#424F70, #E47C72);
+  --ds-color-action-primary-pressed: light-dark(#36425F, #E06A5F);
+  --ds-color-border: light-dark(var(--ds-brand-border), #746B60);
+  --ds-color-border-subtle: light-dark(#E9E3DA, #4B463F);
+  --ds-color-border-strong: light-dark(#ABA398, #A99E8D);
+  --ds-color-border-interactive: light-dark(#8B93A5, #A99E8D);
+  --ds-focus-ring: light-dark(#505F83, #FF9B91);
+  --ds-focus-offset: 3px;
+
+  /* State roles are independent from the brand palette. */
+  --ds-state-success-text: light-dark(#43582B, #B9D49A);
+  --ds-state-success-bg: light-dark(#EDF2E7, #283128);
+  --ds-state-success-border: light-dark(#A9BA97, #5D7650);
+  --ds-state-warning-text: light-dark(#76510A, #E9C46A);
+  --ds-state-warning-bg: light-dark(#FAF0D9, #332F27);
+  --ds-state-warning-border: light-dark(#D9C17B, #8F7745);
+  --ds-state-danger-text: light-dark(#8E3026, #FF9B91);
+  --ds-state-danger-bg: light-dark(#F8ECE8, #332724);
+  --ds-state-danger-border: light-dark(#D8A39A, #8D4F49);
+  --ds-state-info-text: light-dark(#314B6F, #A9C1ED);
+  --ds-state-info-bg: light-dark(#ECF1F8, #27303B);
+  --ds-state-info-border: light-dark(#A6B8D3, #536988);
+
+  /* Learning review outcomes: same semantic order and readable text in both themes. */
+
+  --ds-color-progress-track: light-dark(#E9E3D8, #35312C);
+  --ds-color-skeleton-base: light-dark(#EEE7DA, #292724);
+  --ds-color-skeleton-highlight: light-dark(#F8F3E9, #35312C);
+  --ds-color-skeleton-track: light-dark(#E9E3D8, #35312C);
+  --ds-color-skeleton-fill: light-dark(#DED6C8, #4B463F);
+
+  /* Typography roles. Font faces are loaded by main.tsx; Japanese display usage is selective. */
+  --ds-font-persian: "Vazirmatn", "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ds-font-latin: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ds-font-japanese: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+  --ds-type-caption: 12px;
+  --ds-type-small: 13px;
+  --ds-type-body: 15px;
+  --ds-type-body-emphasis: 17px;
+  --ds-type-subtitle: 19px;
+  --ds-type-heading-sm: 22px;
+  --ds-type-heading-md: 28px;
+  --ds-type-heading-lg: 34px;
+  --ds-type-display-md: 44px;
+  --ds-type-display-xl: 80px;
+  --ds-type-display-sm: clamp(25px, 4vw, 34px);
+  --ds-type-display-kanji: clamp(90px, 18vw, 150px);
+  --ds-type-stimulus-kanji: clamp(78px, 14vw, 110px);
+  --ds-type-display-compact: clamp(38px, 7vw, 62px);
+  --ds-type-display-wide: clamp(64px, 16vw, 92px);
+  --ds-type-display-tall: clamp(72px, 14vw, 108px);
+
+  /* Consistent scales. Existing screen-specific layout values remain intentional exceptions. */
+  --ds-space-1: 4px;
+  --ds-space-2: 8px;
+  --ds-space-3: 12px;
+  --ds-space-4: 16px;
+  --ds-space-5: 20px;
+  --ds-space-6: 24px;
+  --ds-space-8: 32px;
+  --ds-radius-sm: 10px;
+  --ds-radius-md: 14px;
+  --ds-radius-lg: 20px;
+  --ds-radius-xl: 28px;
+  --ds-radius-full: 999px;
+  --ds-motion-fast: 120ms;
+  --ds-motion-hover: 180ms;
+  --ds-motion-flip: 480ms;
+  --ds-motion-feedback: 480ms;
+  --ds-motion-interaction: 160ms;
+  --ds-motion-tab: 280ms;
+  --ds-motion-pager: 420ms;
+  --ds-motion-feedback-in: 200ms;
+  --ds-motion-stroke: 720ms;
+  --ds-motion-progress: 250ms;
+  --ds-motion-menu: 280ms;
+  --ds-motion-scrim: 200ms;
+  --ds-motion-popover: var(--ds-motion-hover);
+  --ds-z-nav: 40;
+  --ds-z-modal: 200;
+  --ds-layout-nav-height: 66px;
+
+  /* Legacy compatibility names are declared once in styles.css and reference semantic tokens above. */
+}
+
+
+
+/* Shared presentation states. Page-level composition remains owned by each screen. */
+:where(button, input, select, textarea) {
+  font-family: var(--ui-font);
+}
+
+:where(input, select, textarea, button) {
+  accent-color: var(--ds-color-action-primary);
+}
+
+:disabled, [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+@media (forced-colors: active) {
+  :where(button, a[href], input, select, textarea, summary, [role="button"], [role="tab"]):focus-visible {
+    outline-color: Highlight;
+  }
+}

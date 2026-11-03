@@ -380,3 +380,37 @@ test('capture a reviewable visual audit across core product surfaces and breakpo
   expect(report.failedResponses, 'First-party HTTP errors; see visual-audit report and screenshots').toEqual([]);
   expect(report.failedRequests, 'First-party failed requests; see visual-audit report and screenshots').toEqual([]);
 });
+
+test('capture Reading Lab empty and active reading layouts',async({page})=>{
+  test.setTimeout(90000);
+  await fs.mkdir(outputDir,{recursive:true});
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/');
+  await page.evaluate(()=>{
+    for(const key of Object.keys(localStorage))if(key.startsWith('kanji5-'))localStorage.removeItem(key);
+    sessionStorage.clear();
+    localStorage.setItem('kanji5-onboarding-v2','complete');
+  });
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  await page.locator('.header-menu-trigger').click();
+  const menu=page.locator('#header-tools-menu');
+  await menu.getByRole('button',{name:/Japanese text reader|خواندن متن ژاپنی/}).click();
+  const dialog=page.locator('.reading-lab-dialog');
+  const lab=dialog.locator('.reading-lab');
+  await expect(dialog).toBeVisible({timeout:10000});
+  await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:path.join(outputDir,'reading-lab-empty-mobile-390x844.png'),fullPage:false,animations:'disabled'});
+
+  await lab.locator('.reading-lab-input').fill('今日は学校に行きます。\\n私は日本語を勉強します。');
+  await expect(lab.locator('.reading-lab-reader')).toBeVisible();
+  await expect(lab.locator('.reading-lab-listen')).toBeVisible();
+  await expect(lab.locator('.reading-lab-sentence-list')).toHaveCSS('overflow-y','visible');
+  await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:path.join(outputDir,'reading-lab-active-mobile-390x844.png'),fullPage:false,animations:'disabled'});
+
+  await page.setViewportSize({width:1280,height:900});
+  await expect(lab.locator('.reading-lab-reader')).toBeVisible();
+  await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:path.join(outputDir,'reading-lab-active-desktop-1280x900.png'),fullPage:false,animations:'disabled'});
+});

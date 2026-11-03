@@ -21,12 +21,12 @@
 }
 .handwriting-practice .handwriting-hint-segment:hover{background:var(--washi);color:var(--ink);}
 .handwriting-practice .handwriting-hint-segment.is-active{
-  border-color:color-mix(in srgb,var(--shu) 30%,var(--line));
-  background:color-mix(in srgb,var(--shu) 8%,var(--paper));
+  border-color:color-mix(in srgb,var(--ai) 30%,var(--line));
+  background:color-mix(in srgb,var(--ai) 8%,var(--paper));
   color:var(--ink);
 }
 .handwriting-practice .handwriting-hint-segment:focus-visible{
-  outline:2px solid color-mix(in srgb,var(--shu) 45%,transparent);
+  outline:2px solid color-mix(in srgb,var(--ai) 45%,transparent);
   outline-offset:1px;
 }
 .handwriting-grade-seal{
@@ -40,13 +40,13 @@
   place-items:center;
   width:40px;
   height:40px;
-  border:1px solid color-mix(in srgb,var(--shu) 36%,var(--line));
+  border:1px solid color-mix(in srgb,var(--ai) 36%,var(--line));
   border-radius:50%;
-  color:var(--shu);
+  color:var(--ai);
   font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;
   font-size:24px;
   line-height:1;
-  background:color-mix(in srgb,var(--shu) 5%,var(--paper));
+  background:color-mix(in srgb,var(--ai) 5%,var(--paper));
 }
 .handwriting-grade-seal small{
   color:var(--mute);

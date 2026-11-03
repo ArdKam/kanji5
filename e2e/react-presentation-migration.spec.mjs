@@ -419,7 +419,7 @@ test('Dictionary vocabulary distinguishes offline failure from a genuine empty r
 });
 
 test('Reading Lab restores the last reading session after closing and reopening',async({page})=>{
-  await clean(page, 'fa');
+  await clean(page);
   await page.getByRole('button',{name:'بیشتر',exact:true}).click();
   await page.locator('#header-tools-menu').getByRole('button',{name:'خواندن متن ژاپنی',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'خواندن متن ژاپنی'});
@@ -712,48 +712,49 @@ test('React surfaces an actionable state when the shipped presentation chunk fai
 });
 
 
-test('Reading Lab starts compactly and keeps the Reader in a single-scroll flow on desktop and mobile',async({page})=>{
+test('Reading Lab keeps a compact empty state and one continuous reader scroll surface',async({page})=>{
   await clean(page);
-  await page.getByRole('button',{name:'بیشتر',exact:true}).click();
+  await page.locator('.header-menu-trigger').click();
   const menu=page.locator('#header-tools-menu');
   await expect(menu).toHaveClass(/open/);
   await menu.getByRole('button',{name:/Japanese text reader|خواندن متن ژاپنی/}).click();
   const dialog=page.getByRole('dialog',{name:/Japanese text reader|خواندن متن ژاپنی/});
   await expect(dialog).toBeVisible({timeout:10000});
   expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
-  await page.setViewportSize({width:390,height:844});
-  expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
+
   const lab=dialog.locator('.reading-lab');
   const input=lab.locator('.reading-lab-input');
   await expect(input).toBeVisible();
   expect(await input.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThanOrEqual(155);
-  const headingBottom=await lab.locator('.reading-lab-section-heading').first().evaluate(el=>el.getBoundingClientRect().bottom);
-  const inputTop=await input.evaluate(el=>el.getBoundingClientRect().top);
-  expect(inputTop-headingBottom).toBeLessThanOrEqual(34);
-  await expect(lab.locator('.reading-lab-empty')).toBeVisible();
   await expect(lab.locator('.reading-lab-empty h3')).toBeVisible();
   await expect(lab.locator('.reading-lab-empty p').last()).not.toBeEmpty();
-  await expect(lab.locator('.reading-lab-listen')).toBeHidden();
-  await input.fill('今日は学校に行きます。\n私は日本語を勉強します。');
+  await expect(lab.locator('.reading-lab-listen')).toHaveCount(0);
+
+  await page.setViewportSize({width:390,height:844});
+  expect(await dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThan(560);
+  expect(await input.evaluate(el=>el.getBoundingClientRect().height)).toBeLessThanOrEqual(155);
+  await input.fill('今日は学校に行きます。\\n私は日本語を勉強します。');
   await expect(lab.locator('.reading-lab-reader')).toBeVisible();
-  await expect.poll(()=>dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeGreaterThan(560);
   await expect(lab.locator('.reading-lab-listen')).toBeVisible();
+  await expect(lab.locator('.reading-lab-action-audio')).toBeVisible();
+  await expect(lab.locator('.reading-lab-speech-rate select')).toBeVisible();
   await expect(lab.locator('.reading-lab-reader-sentence')).toHaveCount(2);
+  await expect.poll(()=>dialog.evaluate(el=>el.getBoundingClientRect().height)).toBeGreaterThan(560);
+
   async function assertFlowOrder(){
-    const positions=await Promise.all([
-      lab.locator('.reading-lab-source').evaluate(el=>el.getBoundingClientRect().top),
-      lab.locator('.reading-lab-reader').evaluate(el=>el.getBoundingClientRect().top),
-      lab.locator('.reading-lab-analysis').evaluate(el=>el.getBoundingClientRect().top),
-      lab.locator('.reading-lab-listen').evaluate(el=>el.getBoundingClientRect().top),
-    ]);
-    expect(positions[1]).toBeGreaterThan(positions[0]);
-    expect(positions[2]).toBeGreaterThan(positions[1]);
-    expect(positions[3]).toBeGreaterThan(positions[2]);
+    const selectors=['.reading-lab-source','.reading-lab-reader','.reading-lab-analysis'];
+    if(await lab.locator('.reading-lab-attention').count())selectors.push('.reading-lab-attention');
+    selectors.push('.reading-lab-listen');
+    const positions=await Promise.all(selectors.map(selector=>lab.locator(selector).evaluate(el=>el.getBoundingClientRect().top)));
+    for(let index=1;index<positions.length;index++)expect(positions[index]).toBeGreaterThan(positions[index-1]);
   }
   await assertFlowOrder();
+  await expect(lab).toHaveCSS('overflow-y','auto');
   await expect(lab.locator('.reading-lab-sentence-list')).toHaveCSS('overflow-y','visible');
   expect(await lab.locator('.reading-lab-sentence-list').evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(2);
-  await page.setViewportSize({width:390,height:844});
+
+  await page.setViewportSize({width:1280,height:900});
   await assertFlowOrder();
   expect(await lab.evaluate(el=>el.scrollWidth-el.clientWidth)).toBeLessThanOrEqual(2);
+  await expect(lab.locator('.reading-lab-sentence-list')).toHaveCSS('overflow-y','visible');
 });

@@ -788,7 +788,9 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
                 </div>
               ))}
             </div>
-          </section>          <section className="reading-lab-analysis" aria-live="polite" aria-labelledby="reading-lab-analysis-title">
+          </section>
+
+          <section className="reading-lab-analysis" aria-live="polite" aria-labelledby="reading-lab-analysis-title">
             <div className="reading-lab-analysis-primary">
               <p className="eyebrow">{t("readingLabAnalysis", language)}</p>
               <div className="reading-lab-coverage-row">
@@ -827,6 +829,65 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
           ) : null}
 
 
+          <section className="reading-lab-section reading-lab-listen" aria-labelledby="reading-lab-listen-title">
+            <div className="reading-lab-section-heading reading-lab-section-heading-compact">
+              <div>
+                <p className="eyebrow">{t("readingLabListen", language)}</p>
+                <h3 id="reading-lab-listen-title">{t("readingLabListenTitle", language)}</h3>
+              </div>
+            </div>
+            <div className="reading-lab-listen-controls" aria-label={t("readingSpeechControls", language)}>
+              <div className="reading-lab-listen-primary reading-lab-speech-row">
+                <button className="button secondary" type="button" disabled={!speechSupported || !value.trim()} onClick={speakText}>
+                  {isSpeaking ? t("readingSpeaking", language) : t("readingSpeakText", language)}
+                </button>
+                <button className="button secondary" type="button" disabled={!speechSupported || !isSpeaking} onClick={stopSpeech}>
+                  {t("readingStopSpeech", language)}
+                </button>
+              </div>
+              <label className="reading-lab-speech-voice">
+                <span>{t("readingSpeechVoice", language)}</span>
+                <select value={speechVoiceName} onChange={event => {
+                  const next = event.target.value;
+                  speechVoiceNameRef.current = next;
+                  setSpeechVoiceName(next);
+                }}>
+                  <option value="">{t("readingSpeechVoiceDefault", language)}</option>
+                  {japaneseSpeechVoices.map(voice => <option key={voice.name + voice.lang} value={voice.name}>{voice.name} · {voice.lang}</option>)}
+                </select>
+              </label>
+              <label className="reading-lab-speech-rate">
+                <span>{t("readingSpeechRate", language)}</span>
+                <select value={speechRate} onChange={event => setSpeechRate(Number(event.target.value))}>
+                  <option value={0.7}>0.7×</option>
+                  <option value={0.85}>0.85×</option>
+                  <option value={1}>1×</option>
+                  <option value={1.15}>1.15×</option>
+                </select>
+              </label>
+              <label className="reading-lab-action reading-lab-action-audio">
+                <span>{t("importAudio", language)}</span>
+                <input ref={audioInputRef} type="file" accept="audio/*" onChange={event => {
+                  const file = event.currentTarget.files?.[0];
+                  if (file) importAudioFile(file);
+                }} />
+              </label>
+            </div>
+            {!speechSupported ? <p className="reading-lab-speech-status">{t("readingSpeechUnsupported", language)}</p> : null}
+            {audioName && !audioUrl && subtitleCues.length ? <p className="reading-lab-speech-status">{t("readingLabSyncNeedsAudio", language)}</p> : null}
+            {audioName ? <p className="reading-lab-audio-name" title={audioName}>{audioName}</p> : null}
+            {audioUrl ? (
+              <>
+                <audio ref={audioRef} className="reading-lab-audio" controls preload="metadata" src={audioUrl} aria-label={t("readingAudio", language)}
+                  onTimeUpdate={handleAudioTimeUpdate}
+                  onPlay={() => setIsAudioPlaying(true)}
+                  onPause={() => setIsAudioPlaying(false)}
+                  onEnded={() => { setIsAudioPlaying(false); sentenceAutoplayRef.current = false; setSentenceAutoplay(false); }}
+                />
+                {syncReady ? <p className="reading-lab-sync-status" data-reading-lab-sync-ready="true">{t("readingLabSyncReady", language)} · {t("readingLabSyncHint", language)}</p> : null}
+              </>
+            ) : null}
+          </section>
         </>
       ) : (
         <section className="reading-lab-empty" aria-labelledby="reading-lab-empty-title">
@@ -839,65 +900,6 @@ export function ReadingLab({ catalog, language, onSelectKanji, onSelectWord }: {
         </section>
       )}
 
-      {value.trim() ? (
-<section className="reading-lab-section reading-lab-listen" aria-labelledby="reading-lab-listen-title">
-        <div className="reading-lab-section-heading reading-lab-section-heading-compact">
-          <div>
-            <p className="eyebrow">{t("readingLabListen", language)}</p>
-            <h3 id="reading-lab-listen-title">{t("readingLabListenTitle", language)}</h3>
-          </div>
-        </div>
-        <div className="reading-lab-listen-controls" aria-label={t("readingSpeechControls", language)}>
-          <div className="reading-lab-listen-primary reading-lab-speech-row">
-            <button className="button secondary" type="button" disabled={!speechSupported || !value.trim()} onClick={speakText}>
-              {isSpeaking ? t("readingSpeaking", language) : t("readingSpeakText", language)}
-            </button>
-            <button className="button secondary" type="button" disabled={!speechSupported || !isSpeaking} onClick={stopSpeech}>
-              {t("readingStopSpeech", language)}
-            </button>
-          </div>
-          <label className="reading-lab-speech-voice">
-            <span>{t("readingSpeechVoice", language)}</span>
-            <select value={speechVoiceName} onChange={event => {
-              const next = event.target.value;
-              speechVoiceNameRef.current = next;
-              setSpeechVoiceName(next);
-            }}>
-              <option value="">{t("readingSpeechVoiceDefault", language)}</option>
-              {japaneseSpeechVoices.map(voice => <option key={voice.name + voice.lang} value={voice.name}>{voice.name} · {voice.lang}</option>)}
-            </select>
-          </label>
-          <label className="reading-lab-speech-rate">
-            <span>{t("readingSpeechRate", language)}</span>
-            <select value={speechRate} onChange={event => setSpeechRate(Number(event.target.value))}>
-              <option value={0.7}>0.7×</option>
-              <option value={0.85}>0.85×</option>
-              <option value={1}>1×</option>
-              <option value={1.15}>1.15×</option>
-            </select>
-          </label>
-          <label className="reading-lab-action reading-lab-action-audio">
-            <span>{t("importAudio", language)}</span>
-            <input ref={audioInputRef} type="file" accept="audio/*" onChange={event => {
-              const file = event.currentTarget.files?.[0];
-              if (file) importAudioFile(file);
-            }} />
-          </label>
-        </div>
-        {!speechSupported ? <p className="reading-lab-speech-status">{t("readingSpeechUnsupported", language)}</p> : null}
-        {audioName && !audioUrl && subtitleCues.length ? <p className="reading-lab-speech-status">{t("readingLabSyncNeedsAudio", language)}</p> : null}
-        {audioName ? <p className="reading-lab-audio-name" title={audioName}>{audioName}</p> : null}
-        {audioUrl ? (
-          <>
-            <audio ref={audioRef} className="reading-lab-audio" controls preload="metadata" src={audioUrl} aria-label={t("readingAudio", language)}
-              onTimeUpdate={handleAudioTimeUpdate}
-              onPlay={() => setIsAudioPlaying(true)}
-              onPause={() => setIsAudioPlaying(false)}
-              onEnded={() => { setIsAudioPlaying(false); sentenceAutoplayRef.current = false; setSentenceAutoplay(false); }}
-            />
-            {syncReady ? <p className="reading-lab-sync-status" data-reading-lab-sync-ready="true">{t("readingLabSyncReady", language)} · {t("readingLabSyncHint", language)}</p> : null}
-          </>
-        ) : null}
       </section>
       ) : null}
     </section>
