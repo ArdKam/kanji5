@@ -59,6 +59,8 @@ assert(overviewMarkup.includes('lang={meaningLanguage} dir="auto"'), "Localized 
 assert(overviewMarkup.includes('<Audio value={displayExamples[0].reading} label={t("playWordPronunciation")}/>'), "The quick vocabulary example must expose its reading audio control");
 assert(overviewMarkup.includes('className="example-source-label"'), "The quick vocabulary example must retain its source-review status");
 assert(overviewMarkup.includes('className="learning-back-quick-example is-loading"'), "The quick example slot must have an explicit loading state");
+assert(/\.learning-card-back \.learning-back-page:first-child \.learning-back-overview \{[^}]*align-content: start;/.test(enhancements), "Narrow answer pages must keep the kanji and meaning at the top when content exceeds the viewport");
+assert(/@container learning-back \(min-width: 620px\)[\s\S]*?\.learning-back-overview \{[^}]*align-content: center;/.test(enhancements), "Wide answer pages may center the complete overview composition");
 assert(enhancements.includes('text-align: start;'), "The primary meaning must align with its label");
 assert(app.includes('if(scroll)scroll.scrollTop=0;'), "Changing learning-card pages must reset the active page scroll position");
 assert(!/learning-back-page:first-child[^}]*!important/.test(enhancements), "The answer-page layout must not rely on important overrides");

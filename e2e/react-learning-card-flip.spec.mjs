@@ -255,7 +255,13 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
         { width: 320, height: 844 },
       ]) {
         await page.setViewportSize(viewport);
+        await card.scrollIntoViewIfNeeded();
+        const overviewScroll = overview.locator(".learning-back-scroll");
+        await overviewScroll.evaluate(el => { el.scrollTop = 0; });
         await expect(glyph).toBeVisible();
+        await expect(glyph).toBeInViewport();
+        await expect(meaningLabel).toBeInViewport();
+        await expect(primaryMeaning).toBeInViewport();
         // The overview can be slightly taller after readable 12px microtype; ensure its structure remains reachable by scrolling rather than clipping it.
         await structure.scrollIntoViewIfNeeded();
         const geometry = await overview.evaluate((pageEl) => {

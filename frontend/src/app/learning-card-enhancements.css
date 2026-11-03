@@ -105,7 +105,7 @@
   width: min(100%, 780px);
   min-height: 100%;
   margin-inline: auto;
-  align-content: center;
+  align-content: start;
   gap: clamp(12px, 2vh, 18px);
 }
 .learning-card-back .learning-back-page:first-child .learning-back-identity {
@@ -192,6 +192,9 @@
   }
 }
 @container learning-back (min-width: 620px) {
+  .learning-card-back .learning-back-page:first-child .learning-back-overview {
+    align-content: center;
+  }
   .learning-card-back .learning-back-page:first-child .learning-back-detail-grid {
     grid-template-columns: minmax(0, 1.06fr) minmax(260px, .94fr);
     align-items: stretch;
