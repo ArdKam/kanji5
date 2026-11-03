@@ -13,9 +13,13 @@ globalThis.fetch=async url=>{
   }
   if(String(url).includes('api.tatoeba.org')){
     return new Response(JSON.stringify({data:[
-      {id:2,text:'私は学校へ行きます。',owner:'jp-author',license:'CC BY 2.0 FR',translations:[[{id:202,text:'I go to school.',owner:'en-translator',license:'CC BY 2.0 FR'}]]},
-      {id:1,text:'私は学校へ行きます。',owner:'jp-author',license:'CC BY 2.0 FR',translations:[[{id:201,text:'I go to school.',owner:'en-translator',license:'CC BY 2.0 FR'}]]},
-      {id:3,text:'学ぶ。',owner:'jp-author',license:'CC0 1.0',translations:[[{id:203,text:'Learn.',owner:'en-translator',license:'CC BY 2.0 FR'}]]},
+      {id:2,text:'私は学校へ行きます。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:202,text:'I go to school.',lang:'eng',is_direct:true,is_unapproved:false,owner:'en-translator',license:'CC BY 2.0 FR'}]]},
+      {id:1,text:'私は学校へ行きます。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:201,text:'I go to school.',lang:'eng',is_direct:true,is_unapproved:false,owner:'en-translator',license:'CC BY 2.0 FR'}]]},
+      {id:3,text:'学ぶ。',owner:'jp-author',license:'CC0 1.0',is_unapproved:false,translations:[[{id:203,text:'Learn.',lang:'eng',is_direct:true,is_unapproved:false,owner:'en-translator',license:'CC BY 2.0 FR'}]]},
+      {id:9,text:'学ぶ場所がある。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:209,text:'Unapproved translation.',lang:'eng',is_direct:true,is_unapproved:true,owner:'en-translator',license:'CC BY 2.0 FR'}]]},
+      {id:10,text:'学ぶ理由がある。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:210,text:'Orphan translation.',lang:'eng',is_direct:true,is_unapproved:false,owner:null,license:'CC BY 2.0 FR'}]]},
+      {id:11,text:'学ぶ時間がある。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:211,text:'Wrong language.',lang:'fra',is_direct:true,is_unapproved:false,owner:'fr-author',license:'CC BY 2.0 FR'}]]},
+      {id:12,text:'学ぶ方法がある。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:212,text:'Indirect translation.',lang:'eng',is_direct:false,is_unapproved:false,owner:'en-translator',license:'CC BY 2.0 FR'}]]},
       {id:6,text:'学ぶ必要がある。',owner:'jp-author',license:'CC BY 2.0 FR',translations:[[{id:206,text:'This translation is not reusable.',owner:'blocked-translator',license:'PROBLEM'}]]},
       {id:7,text:'学ぶ理由がある。',owner:'blocked-author',license:'PROBLEM',translations:[[{id:207,text:'There is a reason to learn.',owner:'en-translator',license:'CC BY 2.0 FR'}]]},
       {id:8,text:['学ぶ','必要がある。'],owner:'jp-author',license:'CC BY 2.0 FR',translations:[[{id:208,text:'It is necessary to learn.',owner:'en-translator',license:'CC BY 2.0 FR'}]]},
@@ -45,12 +49,14 @@ try{
   assert.equal(attributedSentence.translationOwner,'en-translator');
   assert.equal(attributedSentence.translationLicense,'CC BY 2.0 FR');
   assert.equal(attributedSentence.translationUrl,'https://tatoeba.org/en/sentences/show/202');
-  assert(!sentences.some(x=>x.id===6||x.id===7),'source sentences or translations marked PROBLEM must not be selected');
+  assert(!sentences.some(x=>[6,7,9,10,11,12].includes(x.id)),'unlicensed, unapproved, unattributed, orphaned, indirect or wrong-language content must not be selected');
   assert(!sentences.some(x=>x.id===4||x.id===5),'source sentences or translations with missing license metadata must not be selected');
   assert(!sentences.some(x=>x.id===8),'array-valued Japanese sentence text must not be coerced into a valid sentence');
   const tatoebaCall=calls.find(url=>url.includes('api.tatoeba.org'));
   assert.deepEqual(new URL(tatoebaCall).searchParams.getAll('license'),['CC BY 2.0 FR','CC0 1.0'],
     'the request should serialize the schema-defined SentenceLicenseList array');
+  assert.equal(new URL(tatoebaCall).searchParams.get('trans:is_unapproved'),'no');
+  assert.equal(new URL(tatoebaCall).searchParams.get('trans:is_orphan'),'no');
   const selectedWordA=network.selectWord(words);const selectedWordB=network.selectWord(words);
   assert.deepEqual(selectedWordA,selectedWordB);
   assert(words.some(x=>x.word===selectedWordA.word));
