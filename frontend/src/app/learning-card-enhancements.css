@@ -495,14 +495,17 @@
 }
 @media (max-width: 380px) {
   .learning-card-back .learning-back-page:first-child .learning-back-identity-heading {
-    grid-template-columns: 58px minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: 54px minmax(0, 1fr) 44px;
+    gap: 8px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading:not(:has(.learning-reference-trigger)) {
+    grid-template-columns: 54px minmax(0, 1fr);
   }
   .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-kanji {
-    width: 58px;
-    height: 58px;
-    min-width: 58px;
-    font-size: 44px;
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    font-size: 40px;
   }
   .learning-card-back .learning-back-page:first-child .learning-back-readings-block { padding: 3px 8px; }
   .learning-card-back .learning-back-page:first-child .learning-back-quick-example { padding: 6px 8px; }
