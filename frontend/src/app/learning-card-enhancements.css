@@ -949,3 +949,126 @@
 .learning-card-back .learning-back-page:first-child .reading {
   direction: ltr;
 }
+
+/* Short landscape overview: keep the answer hierarchy visible without scrolling at 844×390. */
+@media (min-width: 761px) and (max-height: 460px) {
+  #root .learning-card[data-card-density] {
+    height: calc(100dvh - 80px) !important;
+    min-height: 0 !important;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-overview {
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity {
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-kanji {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 34px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-meaning-group {
+    gap: 2px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-section-label {
+    font-size: 10px;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-meaning {
+    font-size: clamp(18px, 2.4vh, 22px);
+    line-height: 1.08;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-secondary-meaning {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-detail-grid {
+    gap: 8px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block {
+    gap: 3px;
+    padding: 4px 6px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block .readings-header {
+    min-height: 44px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings-block .reading-toggle {
+    min-height: 44px;
+    padding-block: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-readings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .reading {
+    direction: ltr;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    grid-template-rows: 11px minmax(0, 1fr);
+    gap: 0 4px;
+    min-height: 44px;
+    padding: 2px 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .reading > span {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 9px;
+    line-height: 1;
+  }
+  .learning-card-back .learning-back-page:first-child .reading > strong {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 12px;
+    line-height: 1.05;
+  }
+  .learning-card-back .learning-back-page:first-child .reading > .audio-button {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-support-column {
+    gap: 4px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example {
+    gap: 4px;
+    padding: 6px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-label {
+    font-size: 10px;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-main {
+    font-size: 14px;
+    line-height: 1.05;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-meaning {
+    font-size: 11px;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page:first-child .example-source-label {
+    font-size: 9px;
+    line-height: 1.1;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-quick-example-row > .audio-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .learning-card-back .learning-back-page:first-child .learning-back-identity-visual {
+    min-height: 42px;
+    padding: 3px 6px;
+  }
+}
