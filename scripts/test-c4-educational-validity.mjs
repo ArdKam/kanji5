@@ -98,7 +98,7 @@ assert.equal(row.recoveryCount,1);
 assert.match(education,/const independent=!isRecoveryAttempt&&!productionSelfReport/);
 assert.match(education,/attemptType=isRecoveryAttempt\\?'guided_recovery':productionSelfReport\\?'revealed_self_report':hintUsed\\?'hint_assisted':edu\\.mode==='meaning'\\|\\|edu\\.mode==='reading'\\?'free_recall':edu\\.mode==='production'\\?'independent_typed_production':'cued_recognition'/);
 assert.match(education,/const independent=!isRecoveryAttempt&&!productionSelfReport&&!hintUsed/);
-assert.match(education,/submitValue\\(value,meta=\\{\\}\\)/);
+assert.ok(education.includes("async function submitValue(value,meta={})"));
 assert.match(education,/const primaryMeanings=learnerContent\.meanings\.primary\.length\?learnerContent\.meanings\.primary:\(edu\.item\.meaning\|\|\[\]\)/);
 assert.match(education,/primary:primaryMeanings\.join\(' · '\)/);
 
