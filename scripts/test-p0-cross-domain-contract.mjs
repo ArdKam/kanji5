@@ -38,7 +38,7 @@ globalThis.fetch=async url=>{
     return {ok:true,json:async()=>[{variants:[{written:'学校',pronounced:'がっこう'}],meanings:[{glosses:['school','school building']}]}]};
   }
   if(value.includes('/v1/sentences')){
-    return {ok:true,json:async()=>({data:[{id:123,text:'学校へ行く。',translations:[[{text:'I go to school.'}]]}]})};
+    return {ok:true,json:async()=>({data:[{id:123,text:'学校へ行く。',owner:'jp-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{id:456,text:'I go to school.',lang:'eng',is_direct:true,is_unapproved:false,owner:'en-translator',license:'CC BY 2.0 FR'}]]}]})};
   }
   throw new Error('unexpected URL '+value);
 };

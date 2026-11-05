@@ -18,32 +18,41 @@ export function normalizeContentKey(value){
 
 export function validateVocabularyEntry(entry,character=''){
   const target=normalizeContentText(character);
-  const word=normalizeContentText(entry?.word);
-  const reading=normalizeContentText(entry?.reading);
-  const meaning=normalizeContentText(entry?.meaning);
+  const wordIsString=typeof entry?.word==='string';
+  const readingIsString=typeof entry?.reading==='string';
+  const meaningIsString=typeof entry?.meaning==='string';
+  const word=normalizeContentText(wordIsString?entry.word:'');
+  const reading=normalizeContentText(readingIsString?entry.reading:'');
+  const meaning=normalizeContentText(meaningIsString?entry.meaning:'');
   const reasons=[];
-  if(!word) reasons.push('empty_word');
-  if(target&&!word.includes(target)) reasons.push('missing_target');
-  if(!reading) reasons.push('empty_reading');
-  if(reading&&!KANA_ONLY_RE.test(reading)) reasons.push('malformed_reading');
-  if(!meaning) reasons.push('empty_meaning');
-  if(word&&[...word].length<2) reasons.push('too_short');
+  if(!wordIsString) reasons.push('invalid_word_type');
+  else if(!word) reasons.push('empty_word');
+  if(wordIsString&&word&&target&&!word.includes(target)) reasons.push('missing_target');
+  if(!readingIsString) reasons.push('invalid_reading_type');
+  else if(!reading) reasons.push('empty_reading');
+  else if(!KANA_ONLY_RE.test(reading)) reasons.push('malformed_reading');
+  if(!meaningIsString) reasons.push('invalid_meaning_type');
+  else if(!meaning) reasons.push('empty_meaning');
+  if(wordIsString&&word&&[...word].length<2) reasons.push('too_short');
   return {valid:reasons.length===0,reasons,entry:{...entry,word,reading,meaning}};
 }
 
 export function validateContextSentence(entry,character=''){
   const target=normalizeContentText(character);
-  const text=normalizeContentText(entry?.text);
-  const english=normalizeContentText(entry?.english);
+  const textIsString=typeof entry?.text==='string';
+  const englishIsString=typeof entry?.english==='string';
+  const text=normalizeContentText(textIsString?entry.text:'');
+  const english=normalizeContentText(englishIsString?entry.english:'');
   const reasons=[];
-  if(!text) reasons.push('empty_sentence');
-  if(target&&!text.includes(target)) reasons.push('missing_target');
-  if(text&&!JAPANESE_RE.test(text)) reasons.push('malformed_japanese');
-  if(!english) reasons.push('empty_translation');
-  if(english&&!LATIN_RE.test(english)) reasons.push('malformed_translation');
+  if(!textIsString) reasons.push('invalid_text_type');
+  else if(!text) reasons.push('empty_sentence');
+  if(textIsString&&text&&target&&!text.includes(target)) reasons.push('missing_target');
+  if(textIsString&&text&&!JAPANESE_RE.test(text)) reasons.push('malformed_japanese');
+  if(!englishIsString) reasons.push('invalid_translation_type');
+  else if(!english) reasons.push('empty_translation');
+  if(englishIsString&&english&&!LATIN_RE.test(english)) reasons.push('malformed_translation');
   return {valid:reasons.length===0,reasons,entry:{...entry,text,english}};
 }
-
 export function dedupeStable(items,keyFn=value=>value){
   const seen=new Set();
   const out=[];

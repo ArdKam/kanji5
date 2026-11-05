@@ -65,6 +65,8 @@ export function vocabularyContentId(entry,options={}){
 
 export function normalizeVocabularyItem(entry,options={}){
   const source=text(options.source||entry?.source||'kanjiapi.dev',64).toLowerCase()||'unknown';
+  const requestedMeaningLanguage=String(options.meaningLanguage||entry?.meaningLanguage||'').trim().toLowerCase();
+  const meaningLanguage=['en','fa','ja','unknown'].includes(requestedMeaningLanguage)?requestedMeaningLanguage:(source==='kanjiapi.dev'||source==='jmdict'?'en':'unknown');
   const written=text(entry?.written||entry?.word);
   const reading=text(entry?.reading);
   const glosses=normalizedGlosses(entry);
@@ -91,6 +93,7 @@ export function normalizeVocabularyItem(entry,options={}){
     linkedKanji:linkedKanji.map(character=>canonicalContentId('kanji',character)),
     provenance,
     source,
+    meaningLanguage,
     word:written,
     meaning:glosses.join('; ')
   };

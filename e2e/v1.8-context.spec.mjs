@@ -43,7 +43,7 @@ async function forceContextMode(page){
 
 async function mockContextApi(page,target){
   await page.route('https://api.tatoeba.org/v1/sentences**',async route=>{
-    const payload={data:[{id:1,text:`これは${target}です。`,translations:[[{text:'This is a test sentence.'}]]}]};
+    const payload={data:[{id:1,text:`これは${target}です。`,owner:'fixture-author',license:'CC BY 2.0 FR',is_unapproved:false,translations:[[{text:'This is a test sentence.',lang:'eng',is_direct:true,is_unapproved:false,owner:'fixture-translator',license:'CC BY 2.0 FR'}]]}]};
     await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});
   });
 }

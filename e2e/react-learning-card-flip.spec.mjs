@@ -196,6 +196,36 @@ test("front-side recall cue remains legible and correctly ordered across theme a
   }
 });
 
+test("learning-card page navigation restores the active page to its top", async ({ page }) => {
+  await routeExamples(page, 2);
+  await page.setViewportSize({ width: 844, height: 390 });
+  const card = await revealLearningCard(page, "en");
+  const firstScroll = card.locator(".learning-back-page").nth(0).locator(".learning-back-scroll");
+  await expect.poll(() => firstScroll.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
+  await firstScroll.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  expect(await firstScroll.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+
+  await card.locator(".learning-back-page-shortcut").nth(1).click();
+  await expect(card.locator(".learning-back-page").nth(1)).toHaveClass(/active/);
+  await card.locator(".learning-back-page-shortcut").nth(0).click();
+  await expect(card.locator(".learning-back-page").nth(0)).toHaveClass(/active/);
+  await expect.poll(() => firstScroll.evaluate(el => el.scrollTop)).toBe(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await card.scrollIntoViewIfNeeded();
+  await card.locator(".learning-back-page-shortcut").nth(1).click();
+  await card.locator(".learning-back-page-shortcut").nth(0).click();
+  await expect.poll(() => firstScroll.evaluate(el => el.scrollTop)).toBe(0);
+  const visibleIdentity = await firstScroll.evaluate(scroller => {
+    const glyph = scroller.querySelector(".learning-back-kanji");
+    if (!(glyph instanceof HTMLElement)) return false;
+    const viewport = scroller.getBoundingClientRect();
+    const target = glyph.getBoundingClientRect();
+    return target.top >= viewport.top - 1 && target.bottom <= viewport.bottom + 1;
+  });
+  expect(visibleIdentity).toBe(true);
+});
+
 test("learning-card answer presents kanji, meaning, readings and structure in a stable hierarchy", async ({ browser }) => {
   await Promise.all(["en", "fa"].map(async (language) => {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
@@ -209,6 +239,8 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
       const meaningLabel = identityHeading.getByRole("heading", { level: 3 });
       const primaryMeaning = identityHeading.locator(".learning-back-meaning");
       const readings = overview.locator(".learning-back-readings-block");
+      const detailGrid = overview.locator(".learning-back-detail-grid");
+      const quickExample = overview.locator(".learning-back-quick-example");
       const structure = overview.locator(".learning-back-identity-visual");
 
       await expect(glyph).toBeVisible();
@@ -217,7 +249,12 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
       expect((await glyph.innerText()).trim()).not.toBe("");
       await expect(meaningLabel).toBeVisible();
       await expect(primaryMeaning).toBeVisible();
+      await expect(primaryMeaning).toHaveAttribute("dir", "auto");
       await expect(readings).toBeVisible();
+      await expect(detailGrid).toBeVisible();
+      await expect(quickExample).toBeVisible();
+      await expect(quickExample.locator(".example-source-label")).toBeVisible();
+      await expect(quickExample.locator(".audio-button")).toBeVisible();
       await expect(structure).toBeVisible();
 
       for (const viewport of [
@@ -226,7 +263,13 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
         { width: 320, height: 844 },
       ]) {
         await page.setViewportSize(viewport);
+        await card.scrollIntoViewIfNeeded();
+        const overviewScroll = overview.locator(".learning-back-scroll");
+        await overviewScroll.evaluate(el => { el.scrollTop = 0; });
         await expect(glyph).toBeVisible();
+        await expect(glyph).toBeInViewport();
+        await expect(meaningLabel).toBeInViewport();
+        await expect(primaryMeaning).toBeInViewport();
         // The overview can be slightly taller after readable 12px microtype; ensure its structure remains reachable by scrolling rather than clipping it.
         await structure.scrollIntoViewIfNeeded();
         const geometry = await overview.evaluate((pageEl) => {
@@ -244,8 +287,12 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
             heading: rect(".learning-back-identity-heading"),
             label: rect(".learning-back-section-label"),
             meaning: rect(".learning-back-meaning"),
+            detail: rect(".learning-back-detail-grid"),
             readings: rect(".learning-back-readings-block"),
+            quickExample: rect(".learning-back-quick-example"),
             structure: rect(".learning-back-identity-visual"),
+            detailColumns: getComputedStyle(pageEl.querySelector(".learning-back-detail-grid")).gridTemplateColumns.split(" ").length,
+            exampleAudio: rect(".learning-back-quick-example .audio-button"),
             scroll: { left: scrollRect.left, right: scrollRect.right, top: scrollRect.top, bottom: scrollRect.bottom, clientWidth: scroll.clientWidth, scrollWidth: scroll.scrollWidth, scrollHeight: scroll.scrollHeight, scrollTop: scroll.scrollTop },
           };
         });
@@ -253,8 +300,16 @@ test("learning-card answer presents kanji, meaning, readings and structure in a 
         expect(geometry.glyph.height).toBeGreaterThanOrEqual(44);
         expect(geometry.heading.right).toBeLessThanOrEqual(geometry.scroll.right + 1);
         expect(geometry.label.top).toBeLessThanOrEqual(geometry.meaning.top + 1);
-        expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.readings.top + 2);
-        expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.structure.top + 2);
+        expect(geometry.heading.bottom).toBeLessThanOrEqual(geometry.detail.top + 2);
+        expect(geometry.readings.top).toBeGreaterThanOrEqual(geometry.detail.top - 1);
+        expect(geometry.readings.bottom).toBeLessThanOrEqual(geometry.detail.bottom + 1);
+        expect(geometry.quickExample.left).toBeGreaterThanOrEqual(geometry.detail.left - 1);
+        expect(geometry.quickExample.right).toBeLessThanOrEqual(geometry.detail.right + 1);
+        expect(geometry.structure.top).toBeGreaterThanOrEqual(geometry.detail.top - 1);
+        expect(geometry.structure.bottom).toBeLessThanOrEqual(geometry.detail.bottom + 1);
+        expect(geometry.exampleAudio.width).toBeGreaterThanOrEqual(44);
+        expect(geometry.exampleAudio.height).toBeGreaterThanOrEqual(44);
+        expect(geometry.detailColumns).toBe(viewport.width >= 620 ? 2 : 1);
         expect(geometry.structure.bottom - geometry.scroll.top + geometry.scroll.scrollTop).toBeLessThanOrEqual(geometry.scroll.scrollHeight + 1);
         expect(geometry.scroll.scrollWidth).toBeLessThanOrEqual(geometry.scroll.clientWidth + 1);
       }
@@ -600,6 +655,7 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
             columnGap: getComputedStyle(node).columnGap,
             label: node.querySelector("span") instanceof HTMLElement ? bounds(node.querySelector("span")) : null,
             reading: node.querySelector("strong") instanceof HTMLElement ? bounds(node.querySelector("strong")) : null,
+            audio: node.querySelector(".audio-button") instanceof HTMLElement ? bounds(node.querySelector(".audio-button")) : null,
           })),
           readingHeaderBounds: readingHeader instanceof HTMLElement ? bounds(readingHeader) : null,
           readingToggleBounds: readingToggle instanceof HTMLElement ? bounds(readingToggle) : null,
@@ -615,6 +671,16 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
             exampleBounds.bottom <= scrollBounds.bottom + 1 &&
             scroller.scrollTop <= 1,
           indicatorVisible: indicatorBounds.width > 0 && indicatorBounds.height > 0,
+          readingValuesReadable: readingCards.length === 2 &&
+            readingCards.every((item) => {
+              const value = item.querySelector("strong");
+              const audio = item.querySelector(".audio-button");
+              if (!(value instanceof HTMLElement) || !(audio instanceof HTMLElement)) return false;
+              const valueBounds = value.getBoundingClientRect();
+              const audioBounds = audio.getBoundingClientRect();
+              return valueBounds.width >= 48 && valueBounds.right <= audioBounds.left + 1 &&
+                audioBounds.width >= 44 && audioBounds.height >= 44;
+            }),
           ratingColumns: columns.split(" ").length,
           ratingTargetsValid: ratingBounds.length === 4 &&
             ratingBounds.every((bounds) => bounds.width >= 44 && bounds.height >= 44),
@@ -625,6 +691,7 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
       });
 
       expect(metrics.readingsVisibleWithoutScrolling, JSON.stringify({ ...scenario, metrics })).toBe(true);
+      expect(metrics.readingValuesReadable, JSON.stringify({ ...scenario, metrics })).toBe(true);
       expect(metrics.readingsAboveFooter, JSON.stringify(scenario)).toBe(true);
       expect(metrics.exampleVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
       expect(metrics.indicatorVisible, JSON.stringify(scenario)).toBe(true);
