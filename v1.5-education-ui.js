@@ -178,7 +178,7 @@ async function recordOutcome(correct,wrong='',outcome=null,submitMeta={}){
   const selectedAnswer=String(wrong||'').trim(),metadata=submitMeta&&typeof submitMeta==='object'?submitMeta:{};
   const recoveryState=window.__KANJI5_V19_RECOVERY__?.read?.()||null,isRecoveryAttempt=recoveryState?.state==='retrying'&&recoveryState?.taskId===edu.taskId;
   const productionSelfReport=edu.mode==='production'&&edu.revealed===true&&normalized.quality==='self_report',hintUsed=metadata.hintUsed===true;
-  const independent=!isRecoveryAttempt&&!productionSelfReport&&!hintUsed;
+  const independent=!isRecoveryAttempt&&!productionSelfReport&&!hintUsed&&(edu.mode==='meaning'||edu.mode==='reading'||edu.mode==='production');
   const attemptType=isRecoveryAttempt?'guided_recovery':productionSelfReport?'revealed_self_report':hintUsed?'hint_assisted':edu.mode==='meaning'||edu.mode==='reading'?'free_recall':edu.mode==='production'?'independent_typed_production':'cued_recognition';
   const modality=productionSelfReport?'revealed_self_report':hintUsed?'cued_recognition':edu.mode==='meaning'||edu.mode==='reading'?'free_recall':edu.mode==='production'?'production':'cued_recognition';
   const startedMs=edu.startedAt?Date.parse(edu.startedAt):NaN,responseTimeMs=Number.isFinite(startedMs)?Math.max(0,Date.now()-startedMs):null;

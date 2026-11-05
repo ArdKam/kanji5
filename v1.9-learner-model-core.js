@@ -16,7 +16,7 @@ function normalizeEvidence(source){
     const recovery=x.recovery===true||nested.recovery===true||attemptType==='guided_recovery';
     const revealed=x.revealed===true||nested.revealed===true||attemptType==='revealed_self_report';
     const hintUsed=x.hintUsed===true||nested.hintUsed===true||attemptType==='hint_assisted';
-    const cued=hintUsed||attemptType==='cued_recognition'||modalityValue==='cued_recognition'||modalityValue==='recognition';
+    const cued=hintUsed||attemptType==='cued_recognition'||modalityValue==='cued_recall'||modalityValue==='cued_recognition'||modalityValue==='recognition';
     const independent=explicitIndependent===null?!recovery&&!revealed&&!cued:explicitIndependent===true&&!recovery&&!revealed&&!cued;
     const modality=['free_recall','cued_recall','cued_recognition','recognition','production','handwriting','revealed_self_report'].includes(modalityValue)?modalityValue:'unknown';
     const number=(value,min=0,max=Number.MAX_SAFE_INTEGER)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):null;
