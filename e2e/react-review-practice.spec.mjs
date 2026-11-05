@@ -271,7 +271,11 @@ test('Practice Home exposes topic learning and keeps the session in the Learning
   const practice=page.getByRole('button',{name:'تمرین',exact:true});
   await practice.click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
-  await expect(page.getByRole('heading',{name:'یادگیری بر اساس موضوع'})).toBeVisible();
+  const topicDisclosure=page.locator('#root .practice-topic-section');
+  await expect(topicDisclosure.locator(':scope > summary')).toContainText('یادگیری بر اساس موضوع');
+  await expect(topicDisclosure).not.toHaveAttribute('open');
+  await topicDisclosure.locator(':scope > summary').click();
+  await expect(page.getByRole('button',{name:'اعداد و کمیت',exact:true})).toBeVisible();
   const numbers=page.getByRole('button',{name:'اعداد و کمیت',exact:true});
   await expect(numbers).toBeVisible();
   await numbers.click();
@@ -286,9 +290,34 @@ test('advanced practice filters can be scoped to a selected topic',async({page})
   await clean(page);
   await page.getByRole('button',{name:'تمرین',exact:true}).click();
   await expect(page.locator('#root .practice-home')).toBeVisible({timeout:5000});
+  await page.locator('#root .practice-topic-section > summary').click();
   await page.getByRole('button',{name:'طبیعت و زمین',exact:true}).click();
   await page.locator('#root .practice-advanced > summary').click();
   await expect(page.locator('#root .practice-custom-panel h3')).toHaveText('طبیعت و زمین');
   await expect(page.getByRole('group',{name:'تمرکز مطالعه'})).toBeVisible();
   await expect(page.getByRole('button',{name:'قابل مطالعه',exact:true})).toHaveAttribute('aria-pressed','true');
+});
+
+test('Practice Home keeps adaptive recall primary and defers exploratory tools',async({page})=>{
+  await clean(page);
+  await page.getByRole('button',{name:'تمرین',exact:true}).click();
+  const home=page.locator('#root .practice-home');
+  await expect(home).toBeVisible({timeout:5000});
+  await expect(home.getByRole('button',{name:'شروع تمرین',exact:true})).toBeVisible();
+
+  const topics=home.locator('.practice-topic-section');
+  const advanced=home.locator('.practice-advanced');
+  await expect(topics).not.toHaveAttribute('open');
+  await expect(advanced).not.toHaveAttribute('open');
+  await expect(home.locator('.practice-topic-section-content')).toBeHidden();
+  await expect(home.locator('.practice-advanced-content')).toBeHidden();
+  await expect(home.locator('.placement-panel')).toBeVisible({timeout:15000});
+
+  await topics.locator(':scope > summary').click();
+  await expect(home.locator('.practice-topic-grid').first()).toBeVisible();
+  await topics.locator(':scope > summary').click();
+  await advanced.locator(':scope > summary').click();
+  await expect(home.locator('.practice-advanced-content .practice-custom-panel')).toBeVisible();
+  await expect(home.locator('.practice-advanced-content .placement-panel')).toHaveCount(0);
+  await expect(home.locator('.placement-panel')).toBeVisible();
 });
