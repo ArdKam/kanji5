@@ -64,7 +64,7 @@ assert(/@container learning-back \(min-width: 620px\)[\s\S]*?\.learning-back-ove
 assert(enhancements.includes('text-align: start;'), "The primary meaning must align with its label");
 assert(/@container learning-back \(min-width: 260px\) and \(max-width: 619px\)[\s\S]*?\.learning-back-detail-grid \{\s*grid-template-columns: minmax\(0, 1fr\);/.test(enhancements), "Compact answer pages must preserve a single-column outer detail hierarchy");
 assert(/\.learning-card-back \.learning-back-page:first-child \.reading \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) 46px;[\s\S]*?grid-template-rows: 11px minmax\(0, 1fr\);[\s\S]*?min-height: 46px;/.test(enhancements), "Compact reading cards must reserve readable kana space beside a full-size audio target");
-assert(/\.learning-card-back \.learning-back-page:first-child \.learning-reference-trigger \{[\s\S]*?width: 44px;[\s\S]*?min-height: 44px;/.test(enhancements), "The compact reference-info action must remain a visible 44px control");
+assert(/\.learning-card-back \.learning-back-page:first-child \.learning-reference-trigger \{[\s\S]*?width: 48px;[\s\S]*?min-height: 48px;/.test(enhancements), "The compact reference-info action must remain comfortably above the 44px touch-target minimum");
 assert(app.includes('if(scroll)scroll.scrollTop=0;'), "Changing learning-card pages must reset the active page scroll position");
 assert(!/learning-back-page:first-child[^}]*!important/.test(enhancements), "The answer-page layout must not rely on important overrides");
 
