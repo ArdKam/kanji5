@@ -12,6 +12,7 @@
 This document preserves the product strategy, target audience, competitive assessment, differentiated value proposition, feature-scope decisions, and business/product-level 6–12-month direction.
 
 - `ROADMAP.md` remains the canonical execution/status and release-sequencing source.
+- [Product Priorities & Audit Handoff (2026-10-23)](PRODUCT-PRIORITIES-AND-AUDIT-HANDOFF-2026-10-23.md) consolidates the current top-ten priorities, maps them to their authoritative documents, and records open-vs-planned distinctions. It is an index/handoff, not a replacement backlog; refresh current-main evidence before relying on its dated status.
 - [Learning Effectiveness & Transfer Roadmap](LEARNING-EFFECTIVENESS-ROADMAP.md) owns the more detailed educational sequence, instructional design, and learner-outcome evaluation work. Use it rather than duplicating its implementation backlog here.
 - [Educational Content Audit](EDUCATIONAL-CONTENT-AUDIT.md) and existing content-quality documents retain their authority for educational acceptance and data validity.
 - This document does **not** claim that an item is implemented, merged, deployed, effective, or released. Re-check current `main`, active PRs, workflows, and deployment evidence before acting.
