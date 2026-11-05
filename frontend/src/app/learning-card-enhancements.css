@@ -116,7 +116,7 @@
 }
 .learning-card-back .learning-back-page:first-child .learning-back-identity-heading {
   display: grid;
-  grid-template-columns: 68px minmax(0, 1fr);
+  grid-template-columns: 68px minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
   min-width: 0;
@@ -693,7 +693,7 @@
   }
   .learning-card-back .learning-back-page:first-child .learning-back-identity { gap: 8px; }
   .learning-card-back .learning-back-page:first-child .learning-back-identity-heading {
-    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-columns: 52px minmax(0, 1fr) auto;
     gap: 10px;
   }
   .learning-card-back .learning-back-page:first-child .learning-back-identity-heading .learning-back-kanji {
