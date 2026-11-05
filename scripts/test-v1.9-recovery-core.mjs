@@ -11,3 +11,15 @@ const exhausted=consumeRetry(retrying,'2026-09-15T00:02:00.000Z');assert.equal(e
 const terminal=applyRecoveryOutcome(retrying,{mode:'reading',outcome:'wrong',correct:false});assert.equal(terminal.state,'failed');assert.equal(terminal.recoveryEligible,false);
 const correct=applyRecoveryOutcome(createRecoveryState('meaning'),{mode:'meaning',outcome:'correct',correct:true});assert.equal(correct.state,'idle');
 console.log('Kanji 5 v1.9 recovery core state machine passed.');
+
+const failedFirstRetry=applyRecoveryOutcome(retrying,{mode:'reading',taskId:retrying.taskId,character:retrying.character,contentId:retrying.contentId,outcome:'wrong',correct:false,retryable:true});
+assert.equal(failedFirstRetry.state,'failed','A failed retry must terminate at the configured retry limit');
+assert.equal(failedFirstRetry.retryCount,1,'A failed retry must preserve the consumed retry count');
+assert.equal(canRetry(failedFirstRetry),false);
+const zeroRetry=createRecoveryState('reading',{maxRetries:0});
+assert.equal(zeroRetry.maxRetries,0);
+assert.equal(canRetry(applyRecoveryOutcome(zeroRetry,wrong)),false,'Explicit zero retry limit must not fall back to the default');
+assert.equal(consumeRetry(applyRecoveryOutcome(zeroRetry,wrong)).state,'failed');
+const mismatch=applyRecoveryOutcome(retrying,{mode:'meaning',taskId:retrying.taskId,character:'学',contentId:'other',outcome:'correct',retryable:false});
+assert.notEqual(mismatch.state,'recovered','Mode/content mismatch must not complete a recovery');
+console.log('Kanji 5 failed-retry counter preservation and explicit retry-limit tests passed.');

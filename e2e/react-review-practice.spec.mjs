@@ -193,6 +193,58 @@ test('Production Recall unknown self-grade records unknown and advances once',as
   await expect(page.locator('#root #exercise .prompt')).toBeVisible();
 });
 
+
+test('Production hint-assisted answer remains assisted in persisted learner evidence after reload',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'production');
+  const before=await page.evaluate(async()=>{
+    const snapshot=await window.__KANJI5_V19_V2_BOUNDARY__.snapshot(),character=String(snapshot.exercise?.character||''),knowledge=window.__KANJI5_STATE__.readKnowledge();
+    return {character,attempts:Number(knowledge?.[character]?.production?.attempts||0)};
+  });
+  await page.getByRole('button',{name:'کمک: نمایش گزینه‌ها'}).click();
+  await expect(page.locator('#root #exercise .production-grid')).toBeVisible();
+  await page.locator('#root #exercise .production-grid button').filter({hasText:before.character}).click();
+  await expect.poll(async()=>page.evaluate(character=>{
+    const rows=window.__KANJI5_STATE__.readComponents()?.v19LearnerEvidence?.[character]||[];
+    const last=rows.filter(row=>row.mode==='production').at(-1);
+    return last?{attemptType:last.attemptType,independent:last.independent,hintUsed:last.hintUsed,modality:last.modality}:null;
+  },before.character),{timeout:10000}).toMatchObject({attemptType:'hint_assisted',independent:false,hintUsed:true,modality:'cued_recognition'});
+  const after=await page.evaluate(character=>Number(window.__KANJI5_STATE__.readKnowledge()?.[character]?.production?.attempts||0),before.character);
+  expect(after).toBe(before.attempts);
+  await page.reload();
+  await expect(page.locator('#root .app-shell')).toBeVisible({timeout:20000});
+  const persisted=await page.evaluate(character=>{
+    const rows=window.__KANJI5_STATE__.readComponents()?.v19LearnerEvidence?.[character]||[],last=rows.filter(row=>row.mode==='production').at(-1);
+    return last?{attemptType:last.attemptType,independent:last.independent,hintUsed:last.hintUsed,taskId:last.taskId}:null;
+  },before.character);
+  expect(persisted).toMatchObject({attemptType:'hint_assisted',independent:false,hintUsed:true});
+  const projected=await page.evaluate(async character=>(await window.__KANJI5_V19_LEARNER_MODEL__.project(character)).attributes.production.attempts,before.character);
+  expect(projected).toBe(before.attempts);
+});
+
+test('a failed recovery retry consumes the retry limit instead of resetting it',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  await startForcedExercise(page,'reading');
+  const firstInput=page.locator('#root #exercise input').first();
+  await firstInput.fill('zzzzzz');
+  await page.getByRole('button',{name:'بررسی پاسخ'}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
+  await expect.poll(async()=>page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null')?.state)).toBe('pending_retry');
+  const beforeRetry=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null'));
+  await page.getByRole('button',{name:'تکرار همین مهارت',exact:true}).click();
+  await expect(page.locator('#root #exercise input')).toBeVisible({timeout:10000});
+  const afterRetryStart=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null'));
+  expect(afterRetryStart).toMatchObject({state:'retrying',retryCount:1,taskId:beforeRetry.taskId});
+  await page.locator('#root #exercise input').first().fill('zzzzzz');
+  await page.getByRole('button',{name:'بررسی پاسخ'}).click();
+  await expect(page.locator('#root #exercise')).toHaveClass(/exercise-result-wrong/);
+  await expect.poll(async()=>page.evaluate(()=>JSON.parse(sessionStorage.getItem('v19RecoveryState')||'null'))).toMatchObject({state:'failed',retryCount:1,maxRetries:1,taskId:beforeRetry.taskId});
+  const canRetry=await page.evaluate(async()=>await window.__KANJI5_V19_RECOVERY__?.retry?.());
+  expect(canRetry).toBe(false);
+});
+
 test('typed reading answer submits through the grading path and shows feedback',async({page})=>{
   await clean(page);
   await seedSeenCard(page);

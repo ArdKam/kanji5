@@ -16,15 +16,18 @@ const lastReviewAt = (state, id) => {
   return latest;
 };
 const schedulerFactory = settings => {
-  const scheduler = fsrs({
-    request_retention: Number(settings?.retention) || 0.9,
-    maximum_interval: Number(settings?.maxInterval) || 36500,
-    enable_fuzz: true,
-    enable_short_term: true,
-    learning_steps: ['1m', '10m'],
-    relearning_steps: ['10m']
+  const config=settings&&typeof settings==='object'?settings:{};
+  const retention=Number(config.retention),maxInterval=Number(config.maxInterval);
+  const validSteps=value=>Array.isArray(value)&&value.length>0&&value.length<=10&&value.every(step=>typeof step==='string'&&/^\d+(m|h|d)$/.test(step));
+  const scheduler=fsrs({
+    request_retention:Number.isFinite(retention)&&retention>0&&retention<1?retention:0.9,
+    maximum_interval:Number.isFinite(maxInterval)&&maxInterval>=1?maxInterval:36500,
+    enable_fuzz:typeof config.enableFuzz==='boolean'?config.enableFuzz:true,
+    enable_short_term:typeof config.enableShortTerm==='boolean'?config.enableShortTerm:true,
+    learning_steps:validSteps(config.learningSteps)?config.learningSteps:['1m','10m'],
+    relearning_steps:validSteps(config.relearningSteps)?config.relearningSteps:['10m']
   });
-  return { next: scheduler.next.bind(scheduler), Rating: { Again: 1, Hard: 2, Good: 3, Easy: 4 } };
+  return {next:scheduler.next.bind(scheduler),Rating:{Again:1,Hard:2,Good:3,Easy:4}};
 };
 
 function reviewSummaryFromReviews(reviews) {
@@ -195,7 +198,7 @@ export function mergeState(local, remote, now = new Date()) {
   merged.reviews = mergeReviewEvents(reviewsFor(local), reviewsFor(remote), REVIEW_HISTORY_LIMIT);
   merged.reviewSummary = mergeReviewSummary(local.reviewSummary, remote.reviewSummary, reviewsFor(local), reviewsFor(remote));
   if (merged.reviews.some(event => event?.eventId && event?.baseRecord)) {
-    merged.cards = replayCards(merged.cards, merged.reviews, () => schedulerFactory(merged.settings), Number(merged.settings?.leechThreshold) || 8);
+    merged.cards = replayCards(merged.cards, merged.reviews, eventConfig => schedulerFactory(eventConfig || merged.settings), Number(merged.settings?.leechThreshold) || 8);
   }
   const today = todayKey(now);
   const localToday = String(local.today || ''), remoteToday = String(remote.today || '');
