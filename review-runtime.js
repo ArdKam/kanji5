@@ -29,7 +29,11 @@ function metaChips(k){const chips=[];if(state.cards[k.id]?.leech)chips.push({t:'
 
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
 function speak(text){if(!text)return;if(!("speechSynthesis"in window)){toast("مرورگر شما از خواندن صدا پشتیبانی نمی‌کند.");return}try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(_){toast("پخش صدا ممکن نشد.")}}
-function initScheduler(){scheduler=fsrs({request_retention:state.settings.retention,maximum_interval:state.settings.maxInterval,enable_fuzz:true,enable_short_term:true,learning_steps:["1m","10m"],relearning_steps:["10m"]})}
+// One delayed retrieval keeps a newly introduced kanji in FSRS Learning through the first day.
+const FSRS_LEARNING_STEPS=Object.freeze(["1m","10m","23h"]);
+const FSRS_RELEARNING_STEPS=Object.freeze(["10m"]);
+function activeSchedulingConfig(){return{retention:Number(state.settings.retention)||.9,maxInterval:Number(state.settings.maxInterval)||36500,learningSteps:[...FSRS_LEARNING_STEPS],relearningSteps:[...FSRS_RELEARNING_STEPS],enableFuzz:true,enableShortTerm:true,leechThreshold:Number(state.settings.leechThreshold)||8}}
+function initScheduler(){const config=activeSchedulingConfig();scheduler=fsrs({request_retention:config.retention,maximum_interval:config.maxInterval,enable_fuzz:config.enableFuzz,enable_short_term:config.enableShortTerm,learning_steps:config.learningSteps,relearning_steps:config.relearningSteps})}
 async function loadDeck(){if(IS_LEGACY&&$("loadStatus"))$("loadStatus").textContent="در حال دریافت فهرست Jōyō...";const prefetched=window.__KANJI5_P0_DATA_PROMISE;if(prefetched){const all=await prefetched;if(Array.isArray(all)&&all.length===2136){state.deck=canonicalizeDeckReadings(all);storage.setItem("kanji5-deck",JSON.stringify(state.deck));storage.setItem("kanji5-deck-version",DATA_VERSION);return}}const res=await fetch(DATA_URL,{cache:"force-cache"});if(!res.ok)throw new Error("Could not load local kanji dataset");const data=await res.json();const all=Array.isArray(data)?data:(data.kanji||[]);if(all.length!==2136)throw new Error(`Runtime kanji dataset must contain 2136 entries, got ${all.length}`);state.deck=canonicalizeDeckReadings(all);storage.setItem("kanji5-deck",JSON.stringify(state.deck));storage.setItem("kanji5-deck-version",DATA_VERSION)}
 function canonicalizeDeckReadings(deck){const core=window.__KANJI5_EDU_CORE__;if(!core?.canonicalizeItemReadings||!Array.isArray(deck))return deck;return deck.map(item=>core.canonicalizeItemReadings(item))}
 function loadDeckFromCache(){try{const cachedVersion=storage.getItem("kanji5-deck-version");if(cachedVersion!==DATA_VERSION)return false;const x=JSON.parse(storage.getItem("kanji5-deck")||"null");if(Array.isArray(x)&&x.length===2136){state.deck=canonicalizeDeckReadings(x);return true}}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}return false}
@@ -45,10 +49,13 @@ function buildDefaultQueue(){
   const dueItems=state.deck.filter(item=>state.cards[item.id]?.card&&dueNow(state.cards[item.id].card)).map(item=>({item,card:reviveCard(state.cards[item.id].card)}));
   dueItems.sort((a,b)=>{
     const aLate=Math.max(0,(now-new Date(a.card.due).getTime())/86400000),bLate=Math.max(0,(now-new Date(b.card.due).getTime())/86400000);
-    const aScore=aLate*.6+educationQueuePriority(a.item,knowledge,now)*.4,bScore=bLate*.6+educationQueuePriority(b.item,knowledge,now)*.4;
-    return bScore-aScore||new Date(a.card.due)-new Date(b.card.due)
+    const urgency=Math.floor(bLate)-Math.floor(aLate);
+    if(urgency)return urgency;
+    const priority=educationQueuePriority(b.item,knowledge,now)-educationQueuePriority(a.item,knowledge,now);
+    return Math.abs(priority)>.0001?priority:new Date(a.card.due)-new Date(b.card.due)
   });
   const due=dueItems.map(x=>x.item.id);
+  const futureLearning=state.deck.filter(item=>{const card=state.cards[item.id]?.card;return card&&(card.state===1||card.state===3)&&card.due&&!dueNow(card)}).sort((a,b)=>new Date(state.cards[a.id].card.due)-new Date(state.cards[b.id].card.due)).map(item=>item.id);
   const remaining=Math.max(0,state.settings.dailyNew-state.todayNew);
   const newCards=state.deck.filter(item=>!state.cards[item.id]).sort((a,b)=>{
     const level=jlptRank(a)-jlptRank(b);if(level)return level;
@@ -56,7 +63,7 @@ function buildDefaultQueue(){
     const af=Number.isFinite(Number(a.frequency))?Number(a.frequency):Infinity,bf=Number.isFinite(Number(b.frequency))?Number(b.frequency):Infinity;
     return af-bf||String(a.character).localeCompare(String(b.character))
   }).slice(0,remaining).map(item=>item.id);
-  state.queue=[...due,...newCards];
+  state.queue=[...new Set([...due,...futureLearning,...newCards])];
   return state.queue;
 }
 function buildQueue(){
@@ -295,7 +302,23 @@ function renderExamples(){
   el.append(words);
   el.querySelectorAll("[data-speak]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.speak)));
 }
-function next(){if(state.queue.length===0){state.current=null;state.revealed=false;if(IS_LEGACY){renderEmpty();updateStats();}notifyV2Learning();return}state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats();}notifyV2Learning()}
+let learningDueTimer=null;
+function clearLearningDueTimer(){if(learningDueTimer!==null){window.clearTimeout(learningDueTimer);learningDueTimer=null}}
+function pendingLearningDueAt(){
+  let earliest=Infinity;
+  for(const id of state.queue){const card=state.cards[id]?.card;if(!card||(card.state!==1&&card.state!==3)||!card.due)continue;const due=new Date(card.due).getTime();if(Number.isFinite(due)&&due>Date.now())earliest=Math.min(earliest,due)}
+  return Number.isFinite(earliest)?earliest:null
+}
+function scheduleLearningDue(){clearLearningDueTimer();const dueAt=pendingLearningDueAt();if(dueAt===null)return null;learningDueTimer=window.setTimeout(()=>{learningDueTimer=null;if(!state.current)next()},Math.max(25,dueAt-Date.now()+25));return dueAt}
+function renderLearningWait(dueAt){const study=$("study");if(!study)return;const wait=Math.max(1,Math.ceil((dueAt-Date.now())/60000)),empty=dom('div','empty');empty.append(dom('div','','⏳'),dom('h2','','مرحلهٔ بعدی یادگیری در راه است'),dom('p','', 'مرور کوتاه‌مدت بعدی حدود '+wait+' دقیقهٔ دیگر آماده می‌شود.'));study.replaceChildren(empty)}
+function next(){
+  state.queue=[...new Set((Array.isArray(state.queue)?state.queue:[]).filter(id=>state.deck.some(item=>item.id===id)))];
+  const now=Date.now(),index=state.queue.findIndex(id=>{const card=state.cards[id]?.card;if(!card)return true;const due=new Date(card.due).getTime();return Number.isFinite(due)&&due<=now});
+  if(index<0){state.current=null;state.revealed=false;const dueAt=scheduleLearningDue();if(IS_LEGACY){if(dueAt!==null)renderLearningWait(dueAt);else renderEmpty();updateStats()}notifyV2Learning();return}
+  clearLearningDueTimer();if(index>0){const [eligible]=state.queue.splice(index,1);state.queue.unshift(eligible)}
+  state.current=state.queue[0];state.revealed=false;if(IS_LEGACY){renderCard();updateStats()}notifyV2Learning()
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!state.current)next()});
 function learningBridgeSnapshot(){return reviewSnapshot();}
 
 function resetRuntime(){customStudyFilter=null;ratingTransitionLocked=false;try{sessionStorage.removeItem(CUSTOM_STUDY_STORAGE)}catch(_){window.__KANJI5_REVIEW_STORAGE_DEGRADED__=true;}state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);if(fsrs)initScheduler();buildQueue();next();if(IS_LEGACY)updateStats();notifyV2Learning();return true}
@@ -303,7 +326,34 @@ window.__KANJI5_REVIEW_RUNTIME__=Object.freeze({snapshot:reviewSnapshot,reveal:d
 window.__KANJI5_V19_REVIEW_BRIDGE__=Object.freeze({snapshot:reviewSnapshot,previewLearningRatings,setCustomStudyFilter,clearCustomStudyFilter,getCustomStudyTopicId:()=>typeof customStudyFilter?.topicId==="string"?customStudyFilter.topicId:null,reveal:(direct=false)=>{if(!IS_LEGACY||direct)return directReveal();const button=document.getElementById('revealBtn');if(!button)return false;window.__KANJI5_CANONICAL_REVEAL__=true;button.click();setTimeout(()=>{delete window.__KANJI5_CANONICAL_REVEAL__},0);setTimeout(notifyV2Learning,0);return true;},rate:(rating)=>{if(!IS_LEGACY)return directRate(rating);const button=document.querySelector(`.rate[data-r="${String(rating||'')}"]`);if(!button)return false;button.click();setTimeout(notifyV2Learning,0);return true;}});
 
 function updateStreak(){const t=todayKey(),s=state.streak;if(s.lastActiveDate===t)return;const y=new Date();y.setDate(y.getDate()-1);const yesterday=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(y);s.current=s.lastActiveDate===yesterday?(s.current||0)+1:1;s.longest=Math.max(s.longest||0,s.current);s.lastActiveDate=t}
-function review(which){if(ratingTransitionLocked)return false;const id=state.current;if(!id)return false;ratingTransitionLocked=true;try{const item=state.deck.find(x=>x.id===id);if(!item)return false;const wasNew=!state.cards[id],rec=ensureCard(item),now=new Date(),rating=Rating[which];const scheduling=buildSchedulingRequest({domain:'kanji',contentId:item.id,skill:'integrated',exercise:'scheduled-review',plannerVersion:'v1.9-adaptive-planner'});Object.assign(rec,scheduling.identity);const result=scheduleWithAuthority({scheduler,card:rec.card,now,rating}),beforeState=rec.card.state;rec.card=result.card;rec.reviews=(rec.reviews||0)+1;if(which==="Again")rec.lapses=(rec.lapses||0)+1;if(beforeState===0&&rec.learnedAt===null)rec.learnedAt=now.toISOString();if(rec.lapses>=state.settings.leechThreshold)rec.leech=true;const previousEvent=[...state.reviews].reverse().find(r=>r.id===id&&r.eventId)?.eventId||null;const reviewEventId=eventId();const reviewDeviceId=deviceId();const baseRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))});const reviewEvent={eventId:reviewEventId,deviceId:reviewDeviceId,parentEventId:previousEvent,baseRecord,id,contentId:scheduling.identity.contentId,cardId:scheduling.identity.cardId,domain:scheduling.identity.domain,skill:scheduling.identity.skill,exercise:scheduling.identity.exercise,schedulingSchemaVersion:scheduling.schemaVersion,at:now.toISOString(),rating:which,due:rec.card.due,scheduledDays:rec.card.scheduled_days||0};state.reviews.push(reviewEvent);state.reviewSummary=window.__KANJI5_STATE__.updateReviewSummary([reviewEvent],state.reviewSummary);const reviewHistoryLimit=Number(state.REVIEW_HISTORY_LIMIT)||2000;if(state.reviews.length>reviewHistoryLimit)state.reviews.splice(0,state.reviews.length-reviewHistoryLimit);if(wasNew)state.todayNew++;state.todayReviewCount=(state.todayReviewCount||0)+1;updateStreak();state.queue.shift();save();const hitGoal=!state.goalCelebrated&&state.todayReviewCount>=state.settings.dailyGoal;if(hitGoal){state.goalCelebrated=true;toast("🎉 هدف روزانه تکمیل شد!")}else if(IS_LEGACY) toast(which==="Again"?"برمی‌گردد برای مرور نزدیک.":"ثبت شد.");next();return true}finally{window.setTimeout(()=>{ratingTransitionLocked=false},0)}}
+function review(which){
+ if(ratingTransitionLocked)return false;
+ const id=state.current;if(!id)return false;ratingTransitionLocked=true;
+ try{
+  const item=state.deck.find(x=>x.id===id);if(!item)return false;
+  const wasNew=!state.cards[id],rec=ensureCard(item),now=new Date(),rating=Rating[which];
+  const scheduling=buildSchedulingRequest({domain:'kanji',contentId:item.id,skill:'integrated',exercise:'scheduled-review',plannerVersion:'v1.9-adaptive-planner'});
+  Object.assign(rec,scheduling.identity);
+  const beforeState=rec.card.state,preReviewRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))}),schedulingConfig=activeSchedulingConfig();
+  const result=scheduleWithAuthority({scheduler,card:rec.card,now,rating});
+  rec.card=result.card;rec.reviews=(rec.reviews||0)+1;rec.lapses=Math.max(0,Number(result.card?.lapses)||0);
+  if(beforeState===0&&rec.learnedAt===null)rec.learnedAt=now.toISOString();
+  rec.leech=rec.leech===true||rec.lapses>=Number(state.settings.leechThreshold||8);
+  const previousEvent=[...state.reviews].reverse().find(r=>r.id===id&&r.eventId)?.eventId||null;
+  const reviewEventId=eventId(),reviewDeviceId=deviceId(),resultRecord=structuredClone({...rec,card:reviveCard(structuredClone(rec.card))});
+  const reviewEvent={eventSchemaVersion:2,eventId:reviewEventId,deviceId:reviewDeviceId,parentEventId:previousEvent,baseRecord:preReviewRecord,resultRecord,schedulingConfig,id,contentId:scheduling.identity.contentId,cardId:scheduling.identity.cardId,domain:scheduling.identity.domain,skill:scheduling.identity.skill,exercise:scheduling.identity.exercise,schedulingSchemaVersion:scheduling.schemaVersion,at:now.toISOString(),rating:which,due:rec.card.due,scheduledDays:rec.card.scheduled_days||0};
+  state.reviews.push(reviewEvent);state.reviewSummary=window.__KANJI5_STATE__.updateReviewSummary([reviewEvent],state.reviewSummary);
+  const reviewHistoryLimit=Number(state.REVIEW_HISTORY_LIMIT)||2000;if(state.reviews.length>reviewHistoryLimit)state.reviews.splice(0,state.reviews.length-reviewHistoryLimit);
+  if(wasNew)state.todayNew++;state.todayReviewCount=(state.todayReviewCount||0)+1;updateStreak();
+  state.queue=state.queue.filter((queued,index,list)=>list.indexOf(queued)===index);
+  if(state.queue[0]===id)state.queue.shift();else state.queue=state.queue.filter(queued=>queued!==id);
+  if((rec.card.state===1||rec.card.state===3)&&!state.queue.includes(id))state.queue.push(id);
+  save();
+  const hitGoal=!state.goalCelebrated&&state.todayReviewCount>=state.settings.dailyGoal;
+  if(hitGoal){state.goalCelebrated=true;toast("🎉 هدف روزانه تکمیل شد!")}else if(IS_LEGACY)toast(which==="Again"?"برمی‌گردد برای مرور نزدیک.":"ثبت شد.");
+  next();return true
+ }finally{window.setTimeout(()=>{ratingTransitionLocked=false},0)}
+}
 function updateStats(){const due=state.deck.filter(k=>state.cards[k.id]?.card&&dueNow(reviveCard(state.cards[k.id].card))).length,mastered=state.deck.filter(k=>{const c=state.cards[k.id]?.card;return c&&c.state===2&&(c.scheduled_days||0)>=21}).length,studied=state.deck.filter(k=>state.cards[k.id]).length;$("dueCount").textContent=due;$("newCount").textContent=Math.min(state.todayNew,state.settings.dailyNew);$("masteredCount").textContent=mastered;$("bar").style.width=`${state.deck.length?Math.round(studied/state.deck.length*100):0}%`;$("streakCount").textContent=`${state.streak.current||0}🔥`;const goalDone=Math.min(state.todayReviewCount||0,state.settings.dailyGoal);$("goalLabel").textContent=`هدف روزانه: ${state.todayReviewCount||0}/${state.settings.dailyGoal}`;$("goalBar").style.width=`${Math.round(goalDone/state.settings.dailyGoal*100)}%`;$("goalDone").style.display=(state.todayReviewCount||0)>=state.settings.dailyGoal?"inline":"none"}
 function resetAll(){if(!confirm("تمام پیشرفت‌ها پاک شود؟"))return;storage.removeItem(STORAGE);storage.removeItem(CARDS_STORAGE);storage.removeItem(REVIEWS_STORAGE);state=window.__KANJI5_STATE__.reset(DEFAULTS,state.deck);initScheduler();buildQueue();next();updateStats();toast("پیشرفت پاک شد.")}
 if(IS_LEGACY){
@@ -312,8 +362,9 @@ $("closeSettings").addEventListener("click",()=>$("settingsDialog").close());
 $("saveSettings").addEventListener("click",()=>{state.settings.dailyNew=Math.min(30,Math.max(1,Number($("dailyNew").value)||5));state.settings.dailyGoal=Math.min(500,Math.max(1,Number($("dailyGoal").value)||20));state.settings.leechThreshold=Math.min(30,Math.max(2,Number($("leechThreshold").value)||8));initScheduler();save();$("settingsDialog").close();buildQueue();next();updateStats()});
 $("resetBtn").addEventListener("click",resetAll);
 function renderStats(){
-  const total=state.reviews.length;
-  const correct=state.reviews.filter(r=>r.rating!=="Again").length;
+  const summary=state.reviewSummary&&typeof state.reviewSummary==='object'?state.reviewSummary:{};
+  const total=Math.max(0,Number(summary.totalReviews)||state.reviews.length);
+  const correct=Math.min(total,Math.max(0,Number(summary.nonAgainReviews)||state.reviews.filter(r=>r.rating!=="Again").length));
   const accuracy=total?Math.round(correct/total*100):0;
   const leechCount=Object.values(state.cards).filter(c=>c.leech).length;
   const studied=state.deck.filter(k=>state.cards[k.id]).length;
@@ -324,7 +375,7 @@ function renderStats(){
     const d=new Date();d.setDate(d.getDate()-i);
     const key=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(d);
     const label=new Intl.DateTimeFormat("fa-IR",{weekday:"short"}).format(d);
-    const count=state.reviews.filter(r=>r.at.slice(0,10)===key).length;
+    const summaryDay=(Array.isArray(summary.daily)?summary.daily:[]).find(row=>row.date===key);const count=summaryDay?Math.max(0,Number(summaryDay.count)||0):state.reviews.filter(r=>r.at.slice(0,10)===key).length;
     days.push({label,count})
   }
   const maxDay=Math.max(1,...days.map(d=>d.count));
