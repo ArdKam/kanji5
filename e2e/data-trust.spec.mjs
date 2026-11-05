@@ -209,3 +209,104 @@ test('data trust: local-data erasure clears this browser only and preserves unre
   expect(remaining.caches).toContain('other-app-cache');
   expect(cloudRequests).toBe(0);
 });
+
+
+test('data trust: account deletion requires exact confirmation and leaves local learning data separate', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    localStorage.setItem('kanji5-local-learning-sentinel', 'keep-local-until-separate-erasure');
+    const state = {
+      status: 'signed-in',
+      user: { id: 'mock-account-user', email: 'learner@example.invalid', name: 'Test learner', avatarUrl: null },
+      syncStatus: 'synced',
+      error: null,
+      recoveryPending: false,
+      syncSummary: { activeCards: 4, reviews: 12, personalMnemonics: 1, lastSyncedAt: null },
+    };
+    const api = {
+      getState: () => state,
+      subscribe(listener) { listener(state); return () => {}; },
+      signOut: async () => {},
+      syncNow: async () => {},
+      deleteAccount: async () => {
+        sessionStorage.setItem('mock-account-deletion-called', 'true');
+      },
+    };
+    Object.defineProperty(window, '__KANJI5_ACCOUNT__', {
+      configurable: true,
+      get: () => api,
+      set: () => {},
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.account-button').click();
+  const dialog = page.locator('.account-dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Local browser data and downloaded backups are separate and remain');
+
+  await dialog.getByRole('button', { name: 'Delete account', exact: true }).click();
+  const confirmation = dialog.locator('.account-delete-confirmation');
+  await expect(confirmation).toContainText('Local browser data and downloaded backups are separate and remain');
+  const phrase = confirmation.getByRole('textbox', { name: 'Confirmation phrase', exact: true });
+  const confirm = confirmation.getByRole('button', { name: 'Confirm account deletion', exact: true });
+  await expect(confirmation).toBeVisible();
+  await expect(confirm).toBeDisabled();
+
+  await phrase.fill('DELETE ');
+  await expect(confirm).toBeDisabled();
+  await phrase.fill('DELETE');
+  await expect(confirm).toBeEnabled();
+  await confirm.click();
+
+  await expect(dialog).toHaveCount(0);
+  const result = await page.evaluate(() => ({
+    deletedCall: sessionStorage.getItem('mock-account-deletion-called'),
+    localLearningData: localStorage.getItem('kanji5-local-learning-sentinel'),
+  }));
+  expect(result).toEqual({
+    deletedCall: 'true',
+    localLearningData: 'keep-local-until-separate-erasure',
+  });
+});
+
+test('data trust: account deletion failure is not reported as success', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('kanji5-ui-language', 'en');
+    localStorage.setItem('kanji5-onboarding-v2', 'complete');
+    const state = {
+      status: 'signed-in',
+      user: { id: 'mock-account-user', email: 'learner@example.invalid', name: 'Test learner', avatarUrl: null },
+      syncStatus: 'synced',
+      error: null,
+      recoveryPending: false,
+      syncSummary: { activeCards: 0, reviews: 0, personalMnemonics: 0, lastSyncedAt: null },
+    };
+    const api = {
+      getState: () => state,
+      subscribe(listener) { listener(state); return () => {}; },
+      signOut: async () => {},
+      syncNow: async () => {},
+      deleteAccount: async () => { throw new Error('AUTH_ACCOUNT_DELETE_FAILED'); },
+    };
+    Object.defineProperty(window, '__KANJI5_ACCOUNT__', {
+      configurable: true,
+      get: () => api,
+      set: () => {},
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.locator('#root .app-shell')).toBeVisible({ timeout: 20000 });
+  await page.locator('.account-button').click();
+  const dialog = page.locator('.account-dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Delete account', exact: true }).click();
+  const confirmation = dialog.locator('.account-delete-confirmation');
+  await confirmation.getByRole('textbox', { name: 'Confirmation phrase', exact: true }).fill('DELETE');
+  await confirmation.getByRole('button', { name: 'Confirm account deletion', exact: true }).click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('status')).toContainText('Account deletion could not be confirmed');
+});

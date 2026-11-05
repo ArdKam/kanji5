@@ -53,21 +53,23 @@ Personal mnemonic backup/import has a separate supported path.
 
 ### Account deletion
 
-The current browser runtime **does not expose an end-user account-deletion operation or UI**. The account API exposes sign-in/sign-up, profile/password management, password reset, sign-out, and sync, but no account-delete method.
+The account UI now includes a typed-confirmation deletion action that calls the authenticated Supabase Edge Function `delete-account`. The function derives the target user from verified auth claims and calls the Supabase Admin API; it does not accept a target user ID from the browser request body. The production function was observed as active and JWT-verified during the 2026-10-23 implementation review.
 
-The Supabase schema uses a foreign-key relationship with `ON DELETE CASCADE` for `user_learning_state`; that database relationship is not an end-user deletion workflow.
+The production schema inspection found `public.user_learning_state.user_id` referencing `auth.users.id`. Account deletion relies on the existing foreign-key deletion behavior for this table. The client requires an explicit `{ deleted: true }` response before clearing this browser's auth session. If deletion fails or success is ambiguous, the UI displays an error rather than reporting success.
 
-The project therefore must not claim that users can currently delete their account from the product. A verified production deletion route and an appropriate private request workflow remain release blockers.
+Account deletion removes the account and associated server-side account data covered by the production deletion behavior. **It does not erase this browser's local learning state, local Reading Lab text/notes, or downloaded backups.** The user is told to use the separate local-data clearing action if they also want this browser's local state removed. The function/client implementation and its security contract are covered by repository tests, but a controlled authenticated production deletion smoke test and final live evidence are still required before public beta. Do not test this by deleting an actual learner's account.
+
+A dedicated private privacy/account request channel remains a release blocker; the self-service action does not replace a way to contact the operator about requests that cannot be completed through the UI.
 
 ### Local-data deletion
 
-Settings currently exposes **Reset learning progress**. That action resets learning state/history within its defined scope; it is not a promise to erase every browser-held value.
+Settings exposes two distinct controls: **Reset learning progress** and **Clear data from this browser**. Reset affects the learning state/history covered by that action. Clear data removes the app-owned local/session storage keys, Reading Lab content/notes, the local Supabase auth session, and the app's API cache entries. It preserves the public app shell and Kanji dataset caches intentionally so guest learning can remain available offline, and preserves unrelated site storage/caches. If browser storage or cache deletion fails, the user is told to finish through browser site-data settings.
 
-It does not constitute complete deletion of onboarding/presentation preferences, Reading Lab session data, service-worker/browser caches, or the Supabase authentication session.
+The local-erasure behavior has a browser regression test for the known app-owned keys, API-cache removal, auth-token cleanup, and preservation of unrelated site data. This is not a claim that the product can clear browser data outside its origin or remove downloaded backups. Keep cloud account deletion, local browser-data clearing, and reset progress as separate operations.
 
 ### Cloud/local separation
 
-A future account-deletion implementation must explicitly define whether and how local data is affected. Until that is implemented and verified, documentation must not infer cloud deletion from the local reset action or vice versa.
+The account-deletion action explicitly states that local data remains. Local-data clearing is a separate, user-confirmed operation. Production end-to-end deletion and the combined account/local-data user journey must be verified before the public release gate is closed.
 
 ## Retention
 
