@@ -131,6 +131,27 @@ test('unseen vocabulary is introduced before recall and wrong answers support re
   await expect(page.locator('#root .active-recall-choice-grid')).toBeVisible({timeout:10000});
 });
 
+
+test('recovery never substitutes a different vocabulary item when the original target is unavailable',async({page})=>{
+  await clean(page);
+  await seedSeenCard(page);
+  const target=await page.evaluate(()=>{
+    const snapshot=window.__KANJI5_V19_V2_LAST_SNAPSHOT__||{};
+    const character=String(snapshot.learning?.character||document.querySelector('#root .learning-card .kanji-display')?.textContent||'').trim();
+    const contentId=character+':__missing_recovery_target__';
+    return {character,mode:'vocabulary',contentId,taskId:character+':vocabulary:'+contentId};
+  });
+  await expect.poll(async()=>target.character).not.toBe('');
+  const result=await page.evaluate(async target=>{
+    let unavailable=null;
+    document.addEventListener('kanji5:v1.9-recovery-target-unavailable',event=>{unavailable=event.detail},{once:true});
+    const started=await window.__KANJI5_EDU_BRIDGE__.start(target);
+    return {started,unavailable};
+  },target);
+  expect(result.started).toMatchObject({started:false,reason:'recovery-target-unavailable',cause:'vocabulary-target-unavailable'});
+  expect(result.unavailable).toMatchObject({reason:'recovery-target-unavailable',cause:'vocabulary-target-unavailable',taskId:target.taskId,contentId:target.contentId});
+});
+
 test('unseen context is introduced as content exposure, not a recall failure',async({page})=>{
   await clean(page);
   await seedSeenCard(page);

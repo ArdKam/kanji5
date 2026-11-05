@@ -9,3 +9,20 @@ const sparse=projectKanjiAttributes({日:{exposedAt:at(1),reading:{attempts:1,co
 const repeat=projectKanjiAttributes({月:{exposedAt:at(1),reading:{attempts:3,correct:0,lastAt:at(4),lastOutcome:'wrong',lastCorrect:false}}},'月',{evidenceByMode:{reading:[{at:at(2),outcome:'wrong'},{at:at(3),outcome:'wrong'},{at:at(4),outcome:'wrong'}]},now:Date.parse(at(5))});assert.equal(repeat.attributes.reading.state,'weak');assert.equal(repeat.attributes.reading.errorStreak,3);assert.equal(repeat.attributes.reading.repeatedFailure,true);const nearMiss=projectKanjiAttributes({語:{exposedAt:at(1),reading:{attempts:0}}},'語',{evidenceByMode:{reading:[{at:at(2),outcome:'near_miss',mode:'reading',taskId:'nm1'}]},now:Date.parse(at(3))});assert.equal(nearMiss.attributes.reading.attempts,1);assert.equal(nearMiss.attributes.reading.correct,0);assert.equal(nearMiss.attributes.reading.recentAttempts,1);
 const original=[{sessionId:'legacy',endedAt:at(2),modeResults:{meaning:{attempts:1,correct:1,lastAt:at(2),lastCorrect:true}}}];const cloned=JSON.stringify(original);const projectedModel=buildLearnerModel(original);assert.equal(JSON.stringify(original),cloned);assert.equal(projectedModel.attributes.meaning.attempts,1);
 console.log('Kanji 5 v1.9 learner evidence and migration safety fixtures passed.');
+
+const interleavedRecovery=projectKanjiAttributes({学:{exposedAt:at(1)}},'学',{evidenceByMode:{meaning:[
+ {at:at(2),outcome:'wrong',mode:'meaning',taskId:'linked'},
+ {at:at(3),outcome:'wrong',mode:'meaning',taskId:'other'},
+ {at:at(4),outcome:'correct',mode:'meaning',taskId:'linked',retryOf:'linked',recovery:true,independent:false},
+ {at:at(5),outcome:'correct',mode:'meaning',taskId:'later'}
+]},now:Date.parse(at(6))});
+assert.equal(interleavedRecovery.attributes.meaning.recoveryCount,1,'Recovery linkage must survive unrelated intervening evidence');
+const hinted=projectKanjiAttributes({学:{exposedAt:at(1)}},'学',{evidenceByMode:{production:[
+ {at:at(2),mode:'production',outcome:'correct',correct:true,attemptType:'hint_assisted',hintUsed:true,modality:'cued_recognition',independent:false,taskId:'hint-1'},
+ {at:at(3),mode:'production',outcome:'correct',correct:true,attemptType:'independent_typed_production',modality:'production',independent:true,taskId:'free-1'}
+]},now:Date.parse(at(4))});
+assert.equal(hinted.attributes.production.attempts,1,'Hint-assisted correct answers must not increase independent attempts');
+assert.equal(hinted.attributes.production.correct,1,'Only genuinely independent responses contribute mastery evidence');
+assert.equal(hinted.attributes.production.modalityStats.cued_recognition.observedAttempts,1);
+assert.equal(hinted.attributes.production.modalityStats.production.attempts,1);
+console.log('Kanji 5 hint attribution and evidence relationship regressions passed.');
