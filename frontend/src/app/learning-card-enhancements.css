@@ -939,11 +939,13 @@
   .learning-card-back .learning-back-page:first-child .learning-back-readings {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .learning-card-back .learning-back-page:first-child .reading {
-    direction: ltr;
-  }
   #root .learning-card[data-card-density] {
     height: calc(100dvh - 183px) !important;
     min-height: 0 !important;
   }
+}
+
+/* Keep each reading value before its pronunciation control in both LTR and RTL interfaces. */
+.learning-card-back .learning-back-page:first-child .reading {
+  direction: ltr;
 }
