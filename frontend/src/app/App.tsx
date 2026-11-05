@@ -508,8 +508,9 @@ function Learning({card,snapshot,busy,onReveal,onRate}:{card:NonNullable<Snapsho
                         {meaningFallbackLabel?<p className="learning-meaning-source-note" lang="fa">{meaningFallbackLabel}</p>:null}
                         {primaryMeanings.length?<div className="meanings learning-back-meaning" lang={meaningLanguage} dir="auto">{primaryMeanings.join(" · ")}</div>:null}
                         {secondaryMeanings.length?<div className="learning-back-secondary-meaning" lang={meaningLanguage} dir="auto">{secondaryMeanings.join(" · ")}</div>:null}
-                        {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
+                        
                       </div>
+                      {hasReferenceInfo?<button ref={referenceInfoTriggerRef} className={"learning-reference-trigger"+(referenceInfoOpen?" active":"")} type="button" aria-label={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} title={getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"} aria-haspopup="dialog" aria-expanded={referenceInfoOpen} aria-controls="learning-reference-info" onClick={()=>setReferenceInfoOpen(value=>!value)}><UiIcon name="info" size={16}/><span>{getLanguage()==="fa"?"معنی‌ها و خوانش‌های بیشتر":"More meanings & readings"}</span></button>:null}
                     </div>
                     <div className="learning-back-detail-grid">
                       <section className="learning-back-readings-block" aria-label={t("readings")}>

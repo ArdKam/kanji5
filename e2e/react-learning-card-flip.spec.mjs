@@ -655,6 +655,7 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
             columnGap: getComputedStyle(node).columnGap,
             label: node.querySelector("span") instanceof HTMLElement ? bounds(node.querySelector("span")) : null,
             reading: node.querySelector("strong") instanceof HTMLElement ? bounds(node.querySelector("strong")) : null,
+            audio: node.querySelector(".audio-button") instanceof HTMLElement ? bounds(node.querySelector(".audio-button")) : null,
           })),
           readingHeaderBounds: readingHeader instanceof HTMLElement ? bounds(readingHeader) : null,
           readingToggleBounds: readingToggle instanceof HTMLElement ? bounds(readingToggle) : null,
@@ -670,6 +671,16 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
             exampleBounds.bottom <= scrollBounds.bottom + 1 &&
             scroller.scrollTop <= 1,
           indicatorVisible: indicatorBounds.width > 0 && indicatorBounds.height > 0,
+          readingValuesReadable: readingCards.length === 2 &&
+            readingCards.every((item) => {
+              const value = item.querySelector("strong");
+              const audio = item.querySelector(".audio-button");
+              if (!(value instanceof HTMLElement) || !(audio instanceof HTMLElement)) return false;
+              const valueBounds = value.getBoundingClientRect();
+              const audioBounds = audio.getBoundingClientRect();
+              return valueBounds.width >= 48 && valueBounds.right <= audioBounds.left + 1 &&
+                audioBounds.width >= 44 && audioBounds.height >= 44;
+            }),
           ratingColumns: columns.split(" ").length,
           ratingTargetsValid: ratingBounds.length === 4 &&
             ratingBounds.every((bounds) => bounds.width >= 44 && bounds.height >= 44),
@@ -680,6 +691,7 @@ test("compact hybrid keeps readings, one vocabulary example, and ratings visible
       });
 
       expect(metrics.readingsVisibleWithoutScrolling, JSON.stringify({ ...scenario, metrics })).toBe(true);
+      expect(metrics.readingValuesReadable, JSON.stringify({ ...scenario, metrics })).toBe(true);
       expect(metrics.readingsAboveFooter, JSON.stringify(scenario)).toBe(true);
       expect(metrics.exampleVisibleWithoutScrolling, JSON.stringify(scenario)).toBe(true);
       expect(metrics.indicatorVisible, JSON.stringify(scenario)).toBe(true);
